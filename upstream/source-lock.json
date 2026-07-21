@@ -1,6 +1,6 @@
 {
   "schema_version": "inputcodex.source-lock.v1",
-  "generated_at": "2026-07-21",
+  "generated_at": "2026-07-21T17:57:36Z",
   "snapshot": {
     "path": "upstream/CodexPlusPlus",
     "repository": "BigPizzaV3/CodexPlusPlus",
@@ -50,8 +50,45 @@
     "preserved_files": [
       {
         "path": "LICENSE",
+        "kind": "repository-license",
         "size": 34523,
         "sha256": "8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef"
+      },
+      {
+        "path": "THIRD_PARTY_NOTICES.md",
+        "kind": "third-party-notice",
+        "size": 1561,
+        "sha256": "81aa00d95515d75e3afc8236247f9459958008be937a88187f6bbd27cf0bef27"
+      },
+      {
+        "path": "assets/inject/upstream/cidala-tiger/LICENSE",
+        "kind": "embedded-third-party-license",
+        "size": 1121,
+        "sha256": "7b0f1855e7e716bdb2069b9c8b834f8d07430e748a4abec9534b6bec48e61a98"
+      },
+      {
+        "path": "assets/inject/upstream/dream-skin/LICENSE",
+        "kind": "embedded-third-party-license",
+        "size": 1093,
+        "sha256": "18f8478d0f9efd45307e5f17790194593b116658145c758ced3166398eb05b21"
+      },
+      {
+        "path": "assets/inject/upstream/glass-vision/LICENSE",
+        "kind": "embedded-third-party-license",
+        "size": 1246,
+        "sha256": "26595abd1084ebbd7173a93998b5293bcf3647a22ccc1ac424c54be5d260ff57"
+      },
+      {
+        "path": "assets/inject/upstream/skin-packs/LICENSE",
+        "kind": "embedded-third-party-license",
+        "size": 1067,
+        "sha256": "98ce01db7e64d41dd7e70ddc83bdaf0114c5839da3f3479b52d9ccd33412210b"
+      },
+      {
+        "path": "assets/inject/upstream/snow-skin/LICENSE",
+        "kind": "embedded-third-party-license",
+        "size": 1141,
+        "sha256": "714d6a902a51867b0706f62ed2467d4332f787891c04a6bdfe660b1221643b86"
       }
     ]
   },
@@ -2014,5 +2051,28 @@
       "git_blob_sha1": "d18a8c68defc8b1b42849e21dd7d833d9f148594",
       "sha256": "c0da4c8402e40e235d3336cc6c976b1aa32d12ebb4b6c4ec6b84f0406b701c26"
     }
-  ]
+  ],
+  "generator": {
+    "name": "inputcodex-upstream-snapshot-lock",
+    "version": "1",
+    "method": "GitHub Release tar.gz + Git Trees API + Git blob SHA-1 + SHA-256 manifest",
+    "host": {
+      "os": "Microsoft Windows NT 10.0.26200.0",
+      "powershell": "7.6.3"
+    },
+    "tools": {
+      "python": {
+        "version": "3.13.12",
+        "purpose": "安全解压 UTF-8 路径、逐文件哈希与 JSON 生成"
+      },
+      "git": {
+        "version": "2.53.0.windows.1",
+        "purpose": "提交、tree、blob 与文件 mode 对账"
+      },
+      "github_cli": {
+        "version": "2.87.0",
+        "purpose": "查询 Release、提交、递归 tree 与仓库许可证元数据"
+      }
+    }
+  }
 }
