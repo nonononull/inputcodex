@@ -1,0 +1,64 @@
+name: 上游正式版本同步
+description: 为已确认的上游正式 Release 创建只读完整快照同步任务。
+title: "[Upstream Sync] "
+labels:
+  - "type:upstream-sync"
+  - "gate:2"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        同步 PR 只能更新 `upstream/`、来源锁定文件和同步报告；功能重构必须使用独立 Issue/PR。
+  - type: input
+    id: release_tag
+    attributes:
+      label: 上游正式 Release
+      placeholder: "v1.2.41"
+    validations:
+      required: true
+  - type: input
+    id: source_commit
+    attributes:
+      label: 锁定提交
+      placeholder: "40 位提交 SHA"
+    validations:
+      required: true
+  - type: input
+    id: release_url
+    attributes:
+      label: Release 证据
+      placeholder: "上游 Release URL"
+    validations:
+      required: true
+  - type: textarea
+    id: license
+    attributes:
+      label: 许可证与来源声明
+      description: 记录许可证、来源仓库、提交和需要保留的声明。
+    validations:
+      required: true
+  - type: textarea
+    id: snapshot_scope
+    attributes:
+      label: 快照范围与排除项
+      description: 说明完整快照路径、生成文件处理和不会进入最终运行面的内容。
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: 纯净性验证
+      description: 列出 source-lock、文件清单、哈希和禁止参与构建的验证命令。
+    validations:
+      required: true
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: 同步边界
+      options:
+        - label: 本任务不实现、重构或修复上游功能。
+          required: true
+        - label: Tauri/React UI、注入脚本和远程推荐列表只进入快照审计，不进入最终运行面。
+          required: true
+        - label: 同步 PR 不修改产品代码、CI、Release 或 Ruleset。
+          required: true

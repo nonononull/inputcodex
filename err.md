@@ -143,6 +143,24 @@
 - 验证：首次远端分支、本地 HEAD 与 `origin/*` 对齐到 `f78d6ead6da39579d38ce49a9edd552ba1af844b`；后续 closeout 元数据使用 `force:false` 正常 fast-forward。当前工作树干净，PR `#5` 为 `OPEN`、非 Draft、`CLEAN`，PR Head 与本地/远端跟踪分支一致，Checks 与 Review 对话均为 `0`。
 - 关联：GitHub Issue `#4`、PR `#5`。本地预推送提交 `316d4afec8b67b857b6f217847cd3f0cf8ed0d58` 和诊断对象 `e6780bc2ccc22192e3f23c7868c56ba5f683af97` 已无 ref；错误 CRLF tree `811b432374ad56430645ec2215f6475b93c0520e` 未被任何远端 ref 使用，不执行激进清理。
 
+### 2026-07-21：过期状态扫描把验证器中的正则字面量识别为命中
+
+- 环境：Issue `#6` Gate 1 本地 Fresh 验证，PowerShell `Select-String` 扫描当前控制文档。
+- 现象：验证报告 `发现过期状态：PR `#5`.*OPEN`，但实际命中位于 `build.md` 的 `$stalePatterns` 定义本身，而不是 README、Master Plan 或架构状态。
+- 根因：验证器把包含待搜索正则字面量的自身文件加入了扫描集合，形成确定性的自匹配假阳性。
+- 处理：从过期状态内容扫描集合中移除 `build.md`；`build.md` 继续通过正向硬约束、Git diff 和实际命令执行验证，不用自身正则扫描自身。
+- 验证：重新执行同一 Fresh 验证，要求过期状态扫描、Issue Forms YAML 解析和 `git diff --check` 全部通过。
+- 关联：GitHub Issue `#6`、`build.md` 的 Gate 1 本地 Fresh 验证。
+
+### 2026-07-21：PR 模板空列表占位产生尾随空格
+
+- 环境：Issue `#6` 文件已精确暂存，执行 `git diff --cached --check`。
+- 现象：Git 报告 `.github/pull_request_template.md:12: trailing whitespace`。
+- 根因：变更摘要使用仅包含 `- ` 的 Markdown 空列表占位，连字符后的单个空格被 Git 判定为尾随空白。
+- 处理：把空占位改为 `- 待补充`，保留模板引导语义并消除尾随空格。
+- 验证：重新暂存 PR 模板与 `err.md`，执行 `git diff --cached --check`，要求退出码为 `0`。
+- 关联：GitHub Issue `#6`、`.github/pull_request_template.md`。
+
 ## 记录模板
 
 ```text

@@ -1,0 +1,66 @@
+name: 功能一致性实现
+description: 针对上游正式 Release 中的单个有效功能建立行为一致性任务。
+title: "[Feature Parity] "
+labels:
+  - "type:feature-parity"
+body:
+  - type: input
+    id: upstream_release
+    attributes:
+      label: 功能真源 Release
+      placeholder: "v1.2.41"
+    validations:
+      required: true
+  - type: input
+    id: upstream_feature_ref
+    attributes:
+      label: 上游功能证据
+      description: 填写快照路径、提交、文档或可复现入口。
+    validations:
+      required: true
+  - type: textarea
+    id: behavior_contract
+    attributes:
+      label: 行为合同
+      description: 明确输入、输出、持久化、副作用、错误语义和边界条件。
+    validations:
+      required: true
+  - type: textarea
+    id: platform_parity
+    attributes:
+      label: Windows 与 macOS 一致性
+      description: 说明双平台预期及平台差异如何被隔离。
+    validations:
+      required: true
+  - type: textarea
+    id: architecture_slice
+    attributes:
+      label: 分层归属
+      description: 说明 domain、application、infrastructure、platform、presentation、parity 的职责和依赖方向。
+    validations:
+      required: true
+  - type: textarea
+    id: performance_budget
+    attributes:
+      label: 性能与加载预算
+      description: 填写超时、取消、有界并发、错误隔离和可观测证据要求。
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: 验证方案
+      description: 列出合同测试、双平台验证、基准和回归命令。
+    validations:
+      required: true
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: 实现边界
+      options:
+        - label: 功能有效性已确认；如存在无效、副作用或错误语义争议，将改建 parity-exception Issue。
+          required: true
+        - label: 实现不引入广告、推广、隐蔽遥测、TypeScript、JavaScript 业务代码或 WebView。
+          required: true
+        - label: Iced 只存在于展示层。
+          required: true
