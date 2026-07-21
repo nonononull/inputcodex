@@ -161,6 +161,15 @@
 - 验证：重新暂存 PR 模板与 `err.md`，执行 `git diff --cached --check`，要求退出码为 `0`。
 - 关联：GitHub Issue `#6`、`.github/pull_request_template.md`。
 
+### 2026-07-21：PowerShell `-join` 结果与比较运算必须显式分组
+
+- 环境：PR `#7` 合并前 Fresh 验证，PowerShell 同一 `if` 条件中检查 Ruleset 的 `allowed_merge_methods`。
+- 现象：表达式 `(@(...)-join ',' -ne 'squash')` 在解析阶段报 `Unexpected token '{'`，验证命令尚未执行任何 GitHub 读取或写入。
+- 根因：`-join` 是运算符，不能把右侧分隔符和后续 `-ne` 比较混写在同一未分组表达式中；解析器无法确定比较边界。
+- 处理：先计算 `$allowedMethods = (@(...) -join ',')`，再独立执行 `$allowedMethods -ne 'squash'`。
+- 验证：修正后的同一 Fresh 验证输出 `PR7_PREMERGE_FRESH_VERIFY_OK`，PR `#7` 随后按授权 Squash Merge。
+- 关联：GitHub PR `#7`、Issue `#8` Gate 1→2 过渡。
+
 ## 记录模板
 
 ```text

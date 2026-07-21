@@ -369,6 +369,8 @@ Release Notes 必须列出上游版本和提交、功能一致范围、自有修
 - 最终 Review、CI 边界、Squash tree 一致和分支清理证据见 `docs/reports/issue-2-architecture-governance-closeout.md`。
 - Issue `#4` 对应 PR `#5` 已于 `2026-07-21T15:21:58Z` Squash Merge，合并提交为 `b7404b0c63f2d2ba65474c077182c42a01cc9a64`；Issue 已关闭。
 - PR `#5` 合并提交与最终 PR Head 的 tree 均为 `af186e05673b441a936199e55c7d632cd06ea929`；Review 对话与 Checks 数量均为 `0`，详细证据见 `docs/reports/issue-4-gate-1-closeout.md`。
+- Issue `#6` 对应 PR `#7` 已于 `2026-07-21T16:21:01Z` Squash Merge，合并提交为 `c74b66422ba47f96bd3eb2b2385cdfb90541808e`；Issue `#6` 与筹备 Issue `#1` 均已关闭。
+- PR `#7` merge tree 与最终 PR Head tree 均为 `00f0f7fe0e408a1e6f218ee8e1be0d8442ed1e65`；Review 对话与 Checks 数量均为 `0`，详细证据见 `docs/reports/issue-6-gate-1-finalization-closeout.md`。
 
 ## 十一、分阶段实施
 
@@ -376,7 +378,7 @@ Release Notes 必须列出上游版本和提交、功能一致范围、自有修
 
 - 本总方案、术语表、ADR、Ruleset 与 Rust CI 云端卸载计划已通过 Issue `#2` / PR `#3` Squash Merge。
 - 已通过 Issue `#4` / PR `#5` 合并 closeout 证据与最新 Master Plan。
-- `main` 分支保护已建立；Issue `#6` 负责补齐 Issue Forms、PR 模板和项目标签，并完成 Gate 1 最终收口。
+- 已通过 Issue `#6` / PR `#7` 合并 Issue Forms、PR 模板和项目标签，Gate 1 完成最终收口。
 - 建立新的 `build.md` 和 `err.md` 执行入口。
 
 ### Gate 2：导入上游基线
@@ -384,6 +386,7 @@ Release Notes 必须列出上游版本和提交、功能一致范围、自有修
 - 通过独立 Issue 和 PR 导入 `v1.2.41` 完整快照。
 - 创建 `source-lock.json` 和快照纯净性校验。
 - 按 `docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md` 建立每 6 小时、只管理 Issue 且不编译 Rust 的上游监控工作流。
+- Issue `#9` 是当前 Gate 2 活动任务；在新的 Session Plan 与允许写入范围获批前，只进行来源锁定、许可证和快照验证方案，不导入源码。
 
 ### Gate 3：纯 Rust 工作区骨架
 
