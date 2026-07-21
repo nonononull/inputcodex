@@ -4,12 +4,13 @@ schema_version: inputcodex.master-plan.v1
 active_task: 2026-07-21-issue-2-architecture-governance
 active_gate: Gate 1：方案与治理冻结
 last_verified_gate: Gate 0：仓库准备
-next_legal_gate: 完成 Issue #2 的本地验证、关联 PR、项目所有者 Review 与合并；随后以新 Issue 补齐 Gate 1 的 GitHub 模板、标签和分支保护，Gate 1 完成前不得进入 Gate 2。
+next_legal_gate: 项目所有者审阅并合并 PR #3；随后以新 Issue 补齐 Gate 1 的 GitHub 模板、标签和分支保护，Gate 1 完成前不得进入 Gate 2。
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/2
 active_branch_ref: docs/issue-2-architecture-governance
 active_plan_ref: docs/plans/2026-07-21-architecture-governance.md
 active_session_plan_ref: docs/plans/sessions/2026-07-21-issue-2-architecture-governance.md
 active_runtime_workflow_ref: docs/workflows/2026-07-21-issue-2-architecture-governance-runtime.md
+active_pr_ref: https://github.com/nonononull/inputcodex/pull/3
 decision_status: approved
 
 ## 当前状态
@@ -18,7 +19,7 @@ decision_status: approved
 - `BigPizzaV3/CodexPlusPlus` 最新正式 Release 是功能真源；当前冻结基线为 `v1.2.41`，提交 `3dafffcafb2566a1e8bce4b35671656d6adb3eda`。
 - `zsr131550/CodexPlusPlus` 仅作半成品参考，不作为代码底座或功能真源。
 - 本任务交付链为 `Issue #2 → 当前分支 → Fresh 验证 → 关联 PR → 项目所有者 Review → Merge`。
-- 当前 PR 尚未创建，Gate 1 尚未完成，任何完成声明都必须等待验证和合并证据。
+- PR `#3` 已创建，状态为 `OPEN`、非 Draft、`mergeStateStatus=CLEAN`；仓库当前没有 PR 状态检查，项目所有者 Review 与合并仍未完成。
 
 ## 项目不变量
 
@@ -45,8 +46,8 @@ decision_status: approved
 
 - [x] 用户逐项批准纯 Rust/Iced、功能一致、完整上游快照、每 6 小时监控、自主版本和 Issue/PR 治理。
 - [x] 起草单一真源、项目语境、两份 ADR、Major Session Plan 和 Runtime Workflow。
-- [ ] 完成 Fresh 文档、Git、GitHub 元数据和快照治理验证。
-- [ ] 提交并推送当前分支，创建包含 `Closes #2` 的 PR。
+- [x] 完成 Fresh 文档、Git、GitHub 元数据和快照治理验证。
+- [x] 提交并推送当前分支，创建包含 `Closes #2` 的 PR `#3`。
 - [ ] 项目所有者 Review 并合并 Issue #2 PR。
 - [ ] 通过后续独立 Issue/PR 建立 Issue/PR 模板、标签和 `main` 分支保护。
 

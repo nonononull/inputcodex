@@ -12,10 +12,10 @@ static_workflow_refs:
   - D:/Android_source/ai-growth-os/components/rules/rules/workflows/git-snapshot-governance.md
 dynamic_workflow_gap_summary: AGOS 全局 registry 尚无 inputcodex 专属 task 与 architecture-governance business path；当前以项目原生控制面和 GitHub Issue #2 在外部项目 warning mode 执行。
 task_scope_boundary: 仅修改文档与 Git 元数据；不导入源码、不创建应用或 Actions、不发布、不合并。
-task_current_state: Session Plan 已落盘，正在补齐 Runtime Workflow、Master Plan、build.md 与 err.md。
+task_current_state: 文档与治理方案已通过 Fresh 本地验证，提交 4acb76a 已推送，PR #3 为 OPEN、非 Draft、mergeStateStatus=CLEAN，等待项目所有者 Review。
 task_owner: nonononull
 task_follow_up_required: 项目所有者在 PR 中审阅硬约束、范围和上游基线，批准后才能合并。
-task_validation_attribution: 本地 Fresh 命令输出、GitHub Issue/PR 元数据和项目所有者 Review。
+task_validation_attribution: 本地 Fresh 命令输出、提交 4acb76a、GitHub PR #3 元数据和待补项目所有者 Review。
 task_closeout_ref: pending:docs/reports/issue-2-architecture-governance-closeout.md
 
 allowed_operations:
@@ -209,6 +209,6 @@ rollout_draft:
   reusable_path: GitHub Issue 驱动的外部项目架构治理文档冻结
   record_at_closeout: true
   closeout_boundary: PR 合并并补齐 review_ref、ci_ref、merge_ref 后
-  current_status: deferred-until-merge-closeout
+  current_status: deferred-until-pr-3-merge-closeout
   candidate_rule: 单次 rollout 不能生成 workflow candidate
 ```
