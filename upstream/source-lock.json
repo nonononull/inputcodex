@@ -1,0 +1,2078 @@
+{
+  "schema_version": "inputcodex.source-lock.v1",
+  "generated_at": "2026-07-21T17:57:36Z",
+  "snapshot": {
+    "path": "upstream/CodexPlusPlus",
+    "repository": "BigPizzaV3/CodexPlusPlus",
+    "repository_url": "https://github.com/BigPizzaV3/CodexPlusPlus",
+    "release_tag": "v1.2.41",
+    "release_url": "https://github.com/BigPizzaV3/CodexPlusPlus/releases/tag/v1.2.41",
+    "release_published_at": "2026-07-20T01:48:40Z",
+    "commit": "3dafffcafb2566a1e8bce4b35671656d6adb3eda",
+    "commit_message": "release: v1.2.41",
+    "commit_tree": "22e3a9c8ad15e18b972eae44a892b7980dca5ec2",
+    "commit_verification": {
+      "verified": false,
+      "reason": "unsigned"
+    }
+  },
+  "archive": {
+    "format": "tar.gz",
+    "url": "https://api.github.com/repos/BigPizzaV3/CodexPlusPlus/tarball/v1.2.41",
+    "sha256": "831326ed17dbfd9f97c0f04a0a5494f4b7b619d09b97483fca41b3754f938141",
+    "bytes": 18855802
+  },
+  "tree": {
+    "sha": "22e3a9c8ad15e18b972eae44a892b7980dca5ec2",
+    "entry_count": 347,
+    "directory_count": 70,
+    "file_count": 277,
+    "submodule_count": 0
+  },
+  "manifest": {
+    "algorithm": "sha256",
+    "format": "<sha256><two spaces><posix path><newline>",
+    "sha256": "3c9b16802f49a1bcb56fda9630d97edc52c918c30d1924145244d9239801d3d4",
+    "file_count": 277,
+    "total_bytes": 24175877,
+    "largest_file": {
+      "path": "assets/plugin-marketplaces/openai-curated-remote.zip",
+      "mode": "100644",
+      "size": 6977880,
+      "git_blob_sha1": "40218810304aee09f634c397d74d38288d1dc42b",
+      "sha256": "7211ea4b6d6921ed45fc7fec557906c0633f4f46359ce76d11961f1f3e88a666"
+    }
+  },
+  "license": {
+    "repository_license_key": "agpl-3.0",
+    "repository_license_name": "GNU Affero General Public License v3.0",
+    "repository_license_spdx_id": "AGPL-3.0",
+    "preserved_files": [
+      {
+        "path": "LICENSE",
+        "kind": "repository-license",
+        "size": 34523,
+        "sha256": "8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef"
+      },
+      {
+        "path": "THIRD_PARTY_NOTICES.md",
+        "kind": "third-party-notice",
+        "size": 1561,
+        "sha256": "81aa00d95515d75e3afc8236247f9459958008be937a88187f6bbd27cf0bef27"
+      },
+      {
+        "path": "assets/inject/upstream/cidala-tiger/LICENSE",
+        "kind": "embedded-third-party-license",
+        "size": 1121,
+        "sha256": "7b0f1855e7e716bdb2069b9c8b834f8d07430e748a4abec9534b6bec48e61a98"
+      },
+      {
+        "path": "assets/inject/upstream/dream-skin/LICENSE",
+        "kind": "embedded-third-party-license",
+        "size": 1093,
+        "sha256": "18f8478d0f9efd45307e5f17790194593b116658145c758ced3166398eb05b21"
+      },
+      {
+        "path": "assets/inject/upstream/glass-vision/LICENSE",
+        "kind": "embedded-third-party-license",
+        "size": 1246,
+        "sha256": "26595abd1084ebbd7173a93998b5293bcf3647a22ccc1ac424c54be5d260ff57"
+      },
+      {
+        "path": "assets/inject/upstream/skin-packs/LICENSE",
+        "kind": "embedded-third-party-license",
+        "size": 1067,
+        "sha256": "98ce01db7e64d41dd7e70ddc83bdaf0114c5839da3f3479b52d9ccd33412210b"
+      },
+      {
+        "path": "assets/inject/upstream/snow-skin/LICENSE",
+        "kind": "embedded-third-party-license",
+        "size": 1141,
+        "sha256": "714d6a902a51867b0706f62ed2467d4332f787891c04a6bdfe660b1221643b86"
+      }
+    ]
+  },
+  "scope": {
+    "audit_only": true,
+    "participates_in_product_build": false,
+    "imports_git_history": false,
+    "excluded_runtime_material": [
+      "Tauri/React 管理界面",
+      "注入脚本",
+      "远程推荐列表",
+      "广告、推广和遥测实现"
+    ],
+    "source_lock_is_not_part_of_snapshot_manifest": true
+  },
+  "verification": {
+    "archive_path_safety": "passed",
+    "archive_utf8_filename_handling": "python-tarfile",
+    "git_blob_sha1_per_file": "passed",
+    "tree_completeness": "passed",
+    "staging_and_workspace_copy": "passed"
+  },
+  "files": [
+    {
+      "path": ".cargo/config.toml",
+      "mode": "100644",
+      "size": 92,
+      "git_blob_sha1": "636dd163ad49a06d261dbd566ad4fbab10d873e4",
+      "sha256": "3895c2d6df19af4c603bbad680ef7fcf34eadb8f33b00616c8075b4f6e227003"
+    },
+    {
+      "path": ".gitattributes",
+      "mode": "100644",
+      "size": 411,
+      "git_blob_sha1": "e4e53a00a5ed82d7310e474ed22ad1a3168e51d0",
+      "sha256": "a77d65677ae08ab6909ccd2467409695077493ad8aa01e34a1079c7aac06cc6b"
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/bug_report.yml",
+      "mode": "100644",
+      "size": 2207,
+      "git_blob_sha1": "cf0405187f638f63ac2934478f7a014f5c135cef",
+      "sha256": "1814afee7a9efea11eb3be74aaae7289fb48d9145fddc1ec54ab538c33a7af1b"
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/config.yml",
+      "mode": "100644",
+      "size": 206,
+      "git_blob_sha1": "85e6b7e3f3596033b522d75c113ec6b9e5682bd6",
+      "sha256": "c20aefffb6e7ec9b87c06d26792ce95aeedce9ea6600d3a6e048ee2986ad1971"
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/feature_request.yml",
+      "mode": "100644",
+      "size": 1180,
+      "git_blob_sha1": "14562678078320ae7d2c6ce303802238982ed377",
+      "sha256": "9a988a2be1936cd74a8d6e0d5c3fbfb6e97a2283e128eeae4f667c0b58fe27bd"
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/provider_config.yml",
+      "mode": "100644",
+      "size": 1713,
+      "git_blob_sha1": "9a76ae1ca0d21b40cba4cba729f2f5d69ee9b8bf",
+      "sha256": "b49237cbe52b94a97ef01ae2c02499f361eb5329d0e9c84ec3c7ad5017b83970"
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/question.yml",
+      "mode": "100644",
+      "size": 734,
+      "git_blob_sha1": "8b28a11d5a5f78f0d734e7e24f1ffabccbb79787",
+      "sha256": "0af4620f79a7967755f08535b32622b6eb05f764e27c87fdc614eb6ac1dd831a"
+    },
+    {
+      "path": ".github/workflows/issue-triage.yml",
+      "mode": "100644",
+      "size": 1245,
+      "git_blob_sha1": "deb1ec39154a0dec2f60625c63f6d1d6a48eae49",
+      "sha256": "80cc60e24cb44ad79e138d7eaf1445b02530d9a65687cbeda4eec2b8d9db3e8a"
+    },
+    {
+      "path": ".github/workflows/pr-build.yml",
+      "mode": "100644",
+      "size": 4817,
+      "git_blob_sha1": "ed9ad4ee7eb926918152cec078653785383f7d8a",
+      "sha256": "144b1b9c1c7709f3366ff91b76a06d50947d53082ed32ba1247fb280e01e09e2"
+    },
+    {
+      "path": ".github/workflows/release-assets.yml",
+      "mode": "100644",
+      "size": 6712,
+      "git_blob_sha1": "3fc0ad6a5af756ed9043873c3b2eb1b6da29b129",
+      "sha256": "c7c544903c350b2f9534a0d516ca0510f9f30ed9ce4c0414ec8c6a7370e00cc7"
+    },
+    {
+      "path": ".gitignore",
+      "mode": "100644",
+      "size": 403,
+      "git_blob_sha1": "65156b4b189bdbe8128819274a5e60042fb1c6a8",
+      "sha256": "8a9280c6f3cbe05722fd2b8dc1376e4f9bf4672aa39ae872cb0108770e8edb8d"
+    },
+    {
+      "path": "AGENTS.md",
+      "mode": "100644",
+      "size": 2666,
+      "git_blob_sha1": "9adfb9f3bc45b180152d245973b7d951f98f043a",
+      "sha256": "8000dd0ac3555a70eb0a94dafb984dcc3edb254516aff7b8a63e598eab7feea4"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "mode": "100644",
+      "size": 5278,
+      "git_blob_sha1": "ec597abbc46c594374b35d2c8d7f15fdc3c622a1",
+      "sha256": "8b4114fd8a40c356466b89b0fc0e7cfeac289ebec91fa1dfea1c881185e01479"
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "mode": "100644",
+      "size": 2062,
+      "git_blob_sha1": "6d71d368c462e4ead7197a4cc599cb1570fe73b8",
+      "sha256": "117c75991058ff31c4aed8db32287c2ae3afc900babd58d4ff94b149f6f1a55d"
+    },
+    {
+      "path": "Cargo.lock",
+      "mode": "100644",
+      "size": 139709,
+      "git_blob_sha1": "cfa11378a3ddb8a5f9e03e7926cf7754967e8d80",
+      "sha256": "6135a183a25d4b86a08e7f40e1efdc073f1a7c4f1be1c57f84710dcef83eb309"
+    },
+    {
+      "path": "Cargo.toml",
+      "mode": "100644",
+      "size": 1064,
+      "git_blob_sha1": "b58eea13643cebaf0a18e4d66527c7ce274e4b8f",
+      "sha256": "ccb178ed0e51340a564b15dc4e46131fea91bd26660a29bcacc0e07c81224c64"
+    },
+    {
+      "path": "HANDOVER.md",
+      "mode": "100644",
+      "size": 2017,
+      "git_blob_sha1": "c5e4383cc0d6e6a9b21d44eceb93f9b7053ee784",
+      "sha256": "baa148854874e92db92cca9337b6f059d9d0bf46d024445861aac8c74a55a1ca"
+    },
+    {
+      "path": "LICENSE",
+      "mode": "100644",
+      "size": 34523,
+      "git_blob_sha1": "0ad25db4bd1d86c452db3f9602ccdbe172438f52",
+      "sha256": "8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef"
+    },
+    {
+      "path": "README.md",
+      "mode": "100644",
+      "size": 20045,
+      "git_blob_sha1": "f6bcd6dc5903a784e2ec6d45b5dbc8d341e98c2f",
+      "sha256": "c9d1ff64bed51599f2cb1cde8b6c7157f8a38ac191447115772d926d4924b3a2"
+    },
+    {
+      "path": "README_EN.md",
+      "mode": "100644",
+      "size": 18615,
+      "git_blob_sha1": "aadaeb4961d226b88344edc6283995a7e3629fa7",
+      "sha256": "6a50ad1f8c0f4377ced5613db39a1d38a242be92f3318bdfa747620dc9586fb5"
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES.md",
+      "mode": "100644",
+      "size": 1561,
+      "git_blob_sha1": "e2cb7a0f3ae4a28910dede1f2e98d222f9d11aff",
+      "sha256": "81aa00d95515d75e3afc8236247f9459958008be937a88187f6bbd27cf0bef27"
+    },
+    {
+      "path": "apps/codex-plus-launcher/Cargo.toml",
+      "mode": "100644",
+      "size": 508,
+      "git_blob_sha1": "e973a91426165f4ceb23ea8faada6df0a68c0033",
+      "sha256": "c88ba132987b117c32fbf2f41cca437c1c1224d9d2bce9b02feb255337c8c909"
+    },
+    {
+      "path": "apps/codex-plus-launcher/build.rs",
+      "mode": "100644",
+      "size": 383,
+      "git_blob_sha1": "afe8ff0ec06881f450481f56b8bc708ff023930e",
+      "sha256": "db3da0010b2f9e64d2722afca4249a5334c12c29af55fdcf7aacb8be34bf93da"
+    },
+    {
+      "path": "apps/codex-plus-launcher/src/main.rs",
+      "mode": "100644",
+      "size": 28277,
+      "git_blob_sha1": "81b9bb134a2924c6e23cbaed5f1de3cb51383fa3",
+      "sha256": "fb41e14813e2b9d7742a39430ad5f2c2773e1a47fe41be79fcd7ab5589533fd6"
+    },
+    {
+      "path": "apps/codex-plus-manager/components.json",
+      "mode": "100644",
+      "size": 409,
+      "git_blob_sha1": "5bb01ed0929279266c67edd2a30ff65e28a6cc7d",
+      "sha256": "cf591303ed0e7427b89eed2c53cca8a2bfdbe185b80f79629cf9bfef9e70c7bf"
+    },
+    {
+      "path": "apps/codex-plus-manager/index.html",
+      "mode": "100644",
+      "size": 309,
+      "git_blob_sha1": "0bfda571030caf67f5336bb0cd9653a6109f6711",
+      "sha256": "5e14302640f983fb643a5752fcf820e63cdff8b8ac75e91b5b82d8618506683a"
+    },
+    {
+      "path": "apps/codex-plus-manager/package-lock.json",
+      "mode": "100644",
+      "size": 95442,
+      "git_blob_sha1": "57113686dff94285a131da4d3c980152ab380dd0",
+      "sha256": "f16a1cf26f74331c2fac8485819ff0abf47d9d585242fb72bebfc550b926fac4"
+    },
+    {
+      "path": "apps/codex-plus-manager/package.json",
+      "mode": "100644",
+      "size": 1231,
+      "git_blob_sha1": "0ce3d9cfbc304285355abdd1aea0111ae16eaf1e",
+      "sha256": "e4130ae2382b16bd662e3f1349bdd59ffb7962d8b059768230385ac5506daacb"
+    },
+    {
+      "path": "apps/codex-plus-manager/src-tauri/Cargo.toml",
+      "mode": "100644",
+      "size": 810,
+      "git_blob_sha1": "df31990d592236a75dcd30e02677d48011463bce",
+      "sha256": "fb360e6a331858c5654aa8e8e0f29726215e7f39390e15dde864a525ee5d1386"
+    },
+    {
+      "path": "apps/codex-plus-manager/src-tauri/build.rs",
+      "mode": "100644",
+      "size": 289,
+      "git_blob_sha1": "77bb70a01fa7ad106af2e25c50e79b6a63053036",
+      "sha256": "517edb478cf03d425998b335072ceda81fa97036bbad85b90731f0192562191c"
+    },
+    {
+      "path": "apps/codex-plus-manager/src-tauri/capabilities/default.json",
+      "mode": "100644",
+      "size": 313,
+      "git_blob_sha1": "ff2a71ea31cbb464b9954e1d82805c7d10aa2199",
+      "sha256": "413d75d1073fb107785e8a3ea66ddb7b06c64c0d4839b3c9aa58f43ff2e53ae9"
+    },
+    {
+      "path": "apps/codex-plus-manager/src-tauri/icons/icon.ico",
+      "mode": "100644",
+      "size": 142431,
+      "git_blob_sha1": "8433b68787c4926670bf9361cc05fb3803d4b908",
+      "sha256": "d2d80bb01bd5fa6f26529884f614a402933d59219d0991141bfe04e861b485e0"
+    },
+    {
+      "path": "apps/codex-plus-manager/src-tauri/icons/icon.png",
+      "mode": "100644",
+      "size": 51224,
+      "git_blob_sha1": "91bc9f530095295f60a57afea16cac76b1aa5f05",
+      "sha256": "76bdb06a3fb0fd157326d5c7f0fc6e6f4d4901d47aed47db6cd53109f361a428"
+    },
+    {
+      "path": "apps/codex-plus-manager/src-tauri/src/commands.rs",
+      "mode": "100644",
+      "size": 184104,
+      "git_blob_sha1": "ea3129b0bb8a84dd1570550119d156f28e99cd39",
+      "sha256": "c5ce9a741ab98ebef9e7717e3a6db4f22ad1b4c7e1dd05bf37415f83b98f5894"
+    },
+    {
+      "path": "apps/codex-plus-manager/src-tauri/src/install.rs",
+      "mode": "100644",
+      "size": 859,
+      "git_blob_sha1": "e524db7775ec61f3ad815bebe00edf07f47f190a",
+      "sha256": "10646f5233631c4a596703917fa842fdaee9be31970ff2d9af44613a7321ffb8"
+    },
+    {
+      "path": "apps/codex-plus-manager/src-tauri/src/lib.rs",
+      "mode": "100644",
+      "size": 15758,
+      "git_blob_sha1": "60a385b3a3dbe9c9e4b801a18bf465c616ce5d47",
+      "sha256": "00a6f3f831192a78034c4da4c6aa0c419457882e757461140e66259ce0ed477e"
+    },
+    {
+      "path": "apps/codex-plus-manager/src-tauri/src/main.rs",
+      "mode": "100644",
+      "size": 1291,
+      "git_blob_sha1": "4e36ee455efae841eadb2fb2d0205a402b13f2f8",
+      "sha256": "f668fd27c572a0b7b784ed6730e362e32f8d430c6e3508efa6e48a865819c51e"
+    },
+    {
+      "path": "apps/codex-plus-manager/src-tauri/tauri.conf.json",
+      "mode": "100644",
+      "size": 878,
+      "git_blob_sha1": "dab29850cfc7a79fd9c63860858598163e226137",
+      "sha256": "afe40ae074d876c8aa7b6b51fc7dfa273952d07af43966e9189b48d8ddb55820"
+    },
+    {
+      "path": "apps/codex-plus-manager/src-tauri/tests/windows_subsystem.rs",
+      "mode": "100644",
+      "size": 16813,
+      "git_blob_sha1": "51fe563a7f1b6b17dfc2c4f56803bd928c1233fb",
+      "sha256": "90a9791423808d089037348aa629642f72bb30034ca71efc03452f84488d5a9e"
+    },
+    {
+      "path": "apps/codex-plus-manager/src-tauri/windows-app-manifest.xml",
+      "mode": "100644",
+      "size": 688,
+      "git_blob_sha1": "3e50be5a66b26684c01baca9da8ded8f5034eff7",
+      "sha256": "2ae3bbcc8289ab9652ae8ad859d531100b9b3bc5c892726e8a702ef3c92994f5"
+    },
+    {
+      "path": "apps/codex-plus-manager/src/App.tsx",
+      "mode": "100644",
+      "size": 339930,
+      "git_blob_sha1": "9eb21a965cdc58346eac878beffdf815a73cc38b",
+      "sha256": "a30744517bcd18174f03d4a1c061dd3fc5757b08c49da56d60817d60593c963e"
+    },
+    {
+      "path": "apps/codex-plus-manager/src/components/ProviderPresetSelector.tsx",
+      "mode": "100644",
+      "size": 5040,
+      "git_blob_sha1": "bc86b7463bdfd32a5f17b0316abba1bd3a67f783",
+      "sha256": "5555dcde4e8b6f395e9c33cbd3dc0506ea2357bff05339359ae74c26f004a902"
+    },
+    {
+      "path": "apps/codex-plus-manager/src/components/ui/badge.tsx",
+      "mode": "100644",
+      "size": 871,
+      "git_blob_sha1": "920768b8a2dac9abe6ff197b8be4a8238eb95a2c",
+      "sha256": "0aaab70d7f7b91c4f384da1a019bdfa22a4f246737eef761130d7d48f5984b8e"
+    },
+    {
+      "path": "apps/codex-plus-manager/src/components/ui/button.tsx",
+      "mode": "100644",
+      "size": 1591,
+      "git_blob_sha1": "6393a0a1fde506d58ff03719beaafa3372f11ba4",
+      "sha256": "85040ac7a3356a49f7325d9572fda60b020f5900e59a4b49362132d93d29e104"
+    },
+    {
+      "path": "apps/codex-plus-manager/src/components/ui/card.tsx",
+      "mode": "100644",
+      "size": 1508,
+      "git_blob_sha1": "b1a90aa0eef523812d7f2dd7cd39c37d9f5c2643",
+      "sha256": "f6936410bf1b8af8a9dae51e6bd16164250b092c5159680277ab6ddd76c3ea55"
+    },
+    {
+      "path": "apps/codex-plus-manager/src/components/ui/input.tsx",
+      "mode": "100644",
+      "size": 737,
+      "git_blob_sha1": "3a45c6f1bb232a0439f765a9d1370c7a388919fe",
+      "sha256": "6176e8b547104fd15076af7c3744a7c932056d579318a21b545702f31ca6814e"
+    },
+    {
+      "path": "apps/codex-plus-manager/src/components/ui/label.tsx",
+      "mode": "100644",
+      "size": 354,
+      "git_blob_sha1": "4310631adacde31a4e576fc5e18200e101b7c240",
+      "sha256": "4dfc1dfac936331bda5f0caddc02e4facd6fa6334417006ec406a50c1fffd936"
+    },
+    {
+      "path": "apps/codex-plus-manager/src/components/ui/textarea.tsx",
+      "mode": "100644",
+      "size": 674,
+      "git_blob_sha1": "e482749769b20be6c79fc9f461439234a88f8100",
+      "sha256": "f5ec9c537912a5dc58a5e1c81bdd6f5f280433263df1a0bc34d643a3b3d09abb"
+    },
+    {
+      "path": "apps/codex-plus-manager/src/dream-skin.test.ts",
+      "mode": "100644",
+      "size": 10803,
+      "git_blob_sha1": "1c5e99754f05b84b9e97e91477f412cd1e318997",
+      "sha256": "c1f2c12f90981238dc89d15e8cc3d4373f8268a928d0895b9665ced94a85f9b2"
+    },
+    {
+      "path": "apps/codex-plus-manager/src/dream-skin.ts",
+      "mode": "100644",
+      "size": 8957,
+      "git_blob_sha1": "f5a97227a3c90f81dc7d68bff640ae3ecff6b9ac",
+      "sha256": "2a20659cf30b134353dd27a6ba86e41a51b0a36d85aef2840977c5beda436597"
+    },
+    {
+      "path": "apps/codex-plus-manager/src/github-repository.test.ts",
+      "mode": "100644",
+      "size": 1715,
+      "git_blob_sha1": "cdacbf5c8f68af418106e0dc02bc2889d0bf3b58",
+      "sha256": "e3b997ce67d66e037c298a59c267c86f212d9fd31f6f3570e227e71d06a20de9"
+    },
+    {
+      "path": "apps/codex-plus-manager/src/github-repository.ts",
+      "mode": "100644",
+      "size": 1622,
+      "git_blob_sha1": "2402265ec258644ffce795253e7a3e7646c1c4f3",
+      "sha256": "a6577f4ed7d561241baee07de109e92a630413606ec32e7fa493b9c48daa4438"
+    },
+    {
+      "path": "apps/codex-plus-manager/src/i18n-en.ts",
+      "mode": "100644",
+      "size": 73348,
+      "git_blob_sha1": "b1d813def9d4e9375416488147396769eba0f03d",
+      "sha256": "041db74c3d29bbc313e30f25755600a76d010512e32de3aa2d45e22cc1518bef"
+    },
+    {
+      "path": "apps/codex-plus-manager/src/i18n.ts",
+      "mode": "100644",
+      "size": 2926,
+      "git_blob_sha1": "b9efa2d76e64cf94502a89c0b2622d0a28941969",
+      "sha256": "81264d944d3c27ea4ad40b3778fd3643dd6524c67e763ef0d620fbdf41631761"
+    },
+    {
+      "path": "apps/codex-plus-manager/src/lib/utils.ts",
+      "mode": "100644",
+      "size": 169,
+      "git_blob_sha1": "a5ef193506d07d0459fec4f187af08283094d7c8",
+      "sha256": "d1f1e0d62cb8d8d1e04c26e14de842d8a151f75812d81b046c65b5d1fe8e4b27"
+    },
+    {
+      "path": "apps/codex-plus-manager/src/main.tsx",
+      "mode": "100644",
+      "size": 469,
+      "git_blob_sha1": "15219d833adf187aa0c874dd204aedd3c755a6d4",
+      "sha256": "8f234bd384ec22e49d6f21316e899d11e0a29370c0dbf6e67fdc395ff42c91d9"
+    },
+    {
+      "path": "apps/codex-plus-manager/src/model-windows.test.ts",
+      "mode": "100644",
+      "size": 4420,
+      "git_blob_sha1": "d716498369201a4e290011a98b7ff86d0dfc7382",
+      "sha256": "8583759d539101beb17892c256a9ac66ebbd9a4a783d0d06c5211c1c250b7551"
+    },
+    {
+      "path": "apps/codex-plus-manager/src/model-windows.ts",
+      "mode": "100644",
+      "size": 4282,
+      "git_blob_sha1": "ed430984f9a50526db328198fcb3497bfc31e173",
+      "sha256": "b3053a669871b5ab7897a5771fbe70085cb58d41b8bc52f8dabf5fe40d60fae0"
+    },
+    {
+      "path": "apps/codex-plus-manager/src/presets.ts",
+      "mode": "100644",
+      "size": 8296,
+      "git_blob_sha1": "07b40e0504eb0823843a556b1b6111bd4236d381",
+      "sha256": "b4fc23f50130f7f85930ae3ae5a86ade66ab2f132c5fb32b774eeb6eef0ec9b6"
+    },
+    {
+      "path": "apps/codex-plus-manager/src/provider-sync-flow.test.ts",
+      "mode": "100644",
+      "size": 1295,
+      "git_blob_sha1": "8f9dd1df8212e34c6b3bae946d0ba930e327cfa4",
+      "sha256": "11f7510b791c2a039d6d680030f310ae8379180c084e81819e81a173be1061bb"
+    },
+    {
+      "path": "apps/codex-plus-manager/src/provider-sync-flow.ts",
+      "mode": "100644",
+      "size": 593,
+      "git_blob_sha1": "949ebcf3e64124e6b76cae19ad2fd9bedd6dc385",
+      "sha256": "0a85f445e2138d017873074192b2206408d8164347c062c521af07618e81a32a"
+    },
+    {
+      "path": "apps/codex-plus-manager/src/styles.css",
+      "mode": "100644",
+      "size": 99190,
+      "git_blob_sha1": "6a3aafa3a4ee899d4d1157befc1fa8b9b294fd22",
+      "sha256": "317a110f46f1f0f67dd3aef4a9ae7a7222fc5f73954da4e704b74ea5539b8eae"
+    },
+    {
+      "path": "apps/codex-plus-manager/tsconfig.json",
+      "mode": "100644",
+      "size": 634,
+      "git_blob_sha1": "3534b7809b8e1f9fba35ed59133956d72f1308cc",
+      "sha256": "fba0bbf9736315a14ff4c6c3940d240e75b0e68631045df7548a0d29f9ed9891"
+    },
+    {
+      "path": "apps/codex-plus-manager/vite.config.ts",
+      "mode": "100644",
+      "size": 387,
+      "git_blob_sha1": "84579497803a934f9365b96614018746857a782d",
+      "sha256": "ff63791d8c9a38b5169eb2324f591645a12fb33f73f8ddddf75c0ac04cf3597c"
+    },
+    {
+      "path": "apps/codex-plus-mobile-relay/Cargo.toml",
+      "mode": "100644",
+      "size": 459,
+      "git_blob_sha1": "998b3a5848a2091113c037e6691bf99d3d5b1976",
+      "sha256": "e8d0eb539e3b2f5743f56aff6f8648878582430ea9f7b57759b7d7168f59fbe1"
+    },
+    {
+      "path": "apps/codex-plus-mobile-relay/src/main.rs",
+      "mode": "100644",
+      "size": 52219,
+      "git_blob_sha1": "73972c987df9aaf7e7d5c00017e1b054b24437ed",
+      "sha256": "70ac495f8615c31f4cd5833dc23f0515a8e3737a16dc491cd42dc100cbd566c3"
+    },
+    {
+      "path": "assets/codex-models.json",
+      "mode": "100644",
+      "size": 196734,
+      "git_blob_sha1": "23b56fc9dd0e976ed787a3ba3f487029ebafad7b",
+      "sha256": "8b3f16dfcbd34e6df9328c01a93aa71808eba9427d90718ddfc84eeb9628f5a0"
+    },
+    {
+      "path": "assets/gpt56-model-metadata-compat.json",
+      "mode": "100644",
+      "size": 4117,
+      "git_blob_sha1": "3bac1120df100249b8e99c8c37b86275192d6d67",
+      "sha256": "5eb860988b3c6e57a65320be51b469d010411721eb7b4e5eea705c3faae1935f"
+    },
+    {
+      "path": "assets/images/codex-plus-plus.ico",
+      "mode": "100644",
+      "size": 142431,
+      "git_blob_sha1": "8433b68787c4926670bf9361cc05fb3803d4b908",
+      "sha256": "d2d80bb01bd5fa6f26529884f614a402933d59219d0991141bfe04e861b485e0"
+    },
+    {
+      "path": "assets/images/codex-plus-plus.png",
+      "mode": "100644",
+      "size": 51224,
+      "git_blob_sha1": "91bc9f530095295f60a57afea16cac76b1aa5f05",
+      "sha256": "76bdb06a3fb0fd157326d5c7f0fc6e6f4d4901d47aed47db6cd53109f361a428"
+    },
+    {
+      "path": "assets/images/rawchat-sponsor.jpg",
+      "mode": "100644",
+      "size": 1570384,
+      "git_blob_sha1": "8385edb89c432166c063ab0c5d94383ae416de41",
+      "sha256": "b187015b73063c3facabfb4b58ebdde6a66dd2c645957e8c804b23c7c2e708c8"
+    },
+    {
+      "path": "assets/images/sponsor-alipay.jpg",
+      "mode": "100644",
+      "size": 169955,
+      "git_blob_sha1": "cf2049b2728a4458f7a2c282391de6c9171495dd",
+      "sha256": "a1b1e2c294447eb3983c6677a552a51db94fea7f216280bed15d1ed70a01b47d"
+    },
+    {
+      "path": "assets/images/sponsor-wechat.jpg",
+      "mode": "100644",
+      "size": 110986,
+      "git_blob_sha1": "d3c051a53753d40f642f2e4b19e2cc7bc11d0217",
+      "sha256": "f27be38116e7a65fd043bdcc5dc5ef4b3bff1f717c69490edeee80f1d9918429"
+    },
+    {
+      "path": "assets/inject/dream-skin-default.png",
+      "mode": "100644",
+      "size": 1664709,
+      "git_blob_sha1": "1fddbe7198aab611227ce958707b7055a47dd9c8",
+      "sha256": "31bde93bb02d6723e0b6aa0ead675577604120acb0a6799163dd37f5cdd0a08e"
+    },
+    {
+      "path": "assets/inject/pet-real-mouse-inject.js",
+      "mode": "100644",
+      "size": 7910,
+      "git_blob_sha1": "c2041e956a8aecbfcaf9301c3a4500a47ad21906",
+      "sha256": "56bc3ac2f4b449958b2e97a0dc888d2f66f63e6849e0bd836ae6440813bcb1e1"
+    },
+    {
+      "path": "assets/inject/renderer-inject.js",
+      "mode": "100644",
+      "size": 465860,
+      "git_blob_sha1": "6083212affcbff56d5fe0bf9c7193f990bf4d9aa",
+      "sha256": "d1c3a9fb8750ec788b44a9bbadc5abe34af98de25a545678ff25b7b4bb2412b9"
+    },
+    {
+      "path": "assets/inject/stepwise-inject.js",
+      "mode": "100644",
+      "size": 74354,
+      "git_blob_sha1": "dda71b68bef2a380fdb10f5b55b590f8b6d45ffc",
+      "sha256": "5ac90df1aff1329caad74b932bdb7d6ed736d2a705d8b2898ea7f4a53cf0a522"
+    },
+    {
+      "path": "assets/inject/upstream/cidala-tiger/LICENSE",
+      "mode": "100644",
+      "size": 1121,
+      "git_blob_sha1": "fc8e7a15fd36697ae95f0f600ceacb4935351896",
+      "sha256": "7b0f1855e7e716bdb2069b9c8b834f8d07430e748a4abec9534b6bec48e61a98"
+    },
+    {
+      "path": "assets/inject/upstream/cidala-tiger/macos/dream-skin.css",
+      "mode": "100644",
+      "size": 46684,
+      "git_blob_sha1": "51eabd8029e217b61a1c56698c87db16d2a27d24",
+      "sha256": "5e149e9a13985961c5f3125296178acb2abf0b528974f1e616aa625970430562"
+    },
+    {
+      "path": "assets/inject/upstream/cidala-tiger/macos/renderer-inject.js",
+      "mode": "100644",
+      "size": 39691,
+      "git_blob_sha1": "98328b7b2b891f7c707439a47e6d93f63b99cd63",
+      "sha256": "4e2a74a337b4ab5ee12fe307565c1e6a309fda8911dfa75c4b9be8849c7bff3c"
+    },
+    {
+      "path": "assets/inject/upstream/cidala-tiger/macos/theme.json",
+      "mode": "100644",
+      "size": 791,
+      "git_blob_sha1": "ac060508243091dbbab7876498bfcecdb6a6a64d",
+      "sha256": "fcce3f314500be1a58381ffe7f9a6b212912d54ff9a0e7d17b6664c1516f750e"
+    },
+    {
+      "path": "assets/inject/upstream/cidala-tiger/windows/dream-skin.css",
+      "mode": "100644",
+      "size": 24757,
+      "git_blob_sha1": "b8e094ca5edaf58fe81da8112a2f66435b898d09",
+      "sha256": "482a60af98dd6b460bf624c56918c5b57f9ccd5b55e52fa46d486f7d65259d9a"
+    },
+    {
+      "path": "assets/inject/upstream/cidala-tiger/windows/renderer-inject.js",
+      "mode": "100644",
+      "size": 17313,
+      "git_blob_sha1": "f82da7752d031931ec1b70f003704c2211573c3e",
+      "sha256": "0bfb5f66a0323bf1392b42033e66904de3ec4bfc8a5ba297f2bb92a4a6740a34"
+    },
+    {
+      "path": "assets/inject/upstream/cidala-tiger/windows/theme.json",
+      "mode": "100644",
+      "size": 502,
+      "git_blob_sha1": "1e9f72a5c0eccb3e44002c1eadddef1583cb13a6",
+      "sha256": "5209589c642804534f886c62202c35a46099d9558907dc965f510bc644d01d8c"
+    },
+    {
+      "path": "assets/inject/upstream/dream-skin/LICENSE",
+      "mode": "100644",
+      "size": 1093,
+      "git_blob_sha1": "40f7a9ac3e4a0cc1321409feea8c8dd4257b99c2",
+      "sha256": "18f8478d0f9efd45307e5f17790194593b116658145c758ced3166398eb05b21"
+    },
+    {
+      "path": "assets/inject/upstream/dream-skin/macos/dream-skin.css",
+      "mode": "100644",
+      "size": 39912,
+      "git_blob_sha1": "07976b19641cc19114174ed6186a0a9d09b69aeb",
+      "sha256": "ec3c3bc5f6e10e20a3f2307796bd1e1350e80e5d23d37318ee5468833c95a6df"
+    },
+    {
+      "path": "assets/inject/upstream/dream-skin/macos/portal-hero.png",
+      "mode": "100644",
+      "size": 1664709,
+      "git_blob_sha1": "1fddbe7198aab611227ce958707b7055a47dd9c8",
+      "sha256": "31bde93bb02d6723e0b6aa0ead675577604120acb0a6799163dd37f5cdd0a08e"
+    },
+    {
+      "path": "assets/inject/upstream/dream-skin/macos/renderer-inject.js",
+      "mode": "100644",
+      "size": 34379,
+      "git_blob_sha1": "fe427679c758c88e54c053f86c39c4b35036a08c",
+      "sha256": "9adab4655c54740c2fcbbd5b2555aacdb659982b855706399b0f5367914511b3"
+    },
+    {
+      "path": "assets/inject/upstream/dream-skin/macos/theme.json",
+      "mode": "100644",
+      "size": 791,
+      "git_blob_sha1": "ac060508243091dbbab7876498bfcecdb6a6a64d",
+      "sha256": "fcce3f314500be1a58381ffe7f9a6b212912d54ff9a0e7d17b6664c1516f750e"
+    },
+    {
+      "path": "assets/inject/upstream/dream-skin/windows/dream-reference.jpg",
+      "mode": "100644",
+      "size": 688079,
+      "git_blob_sha1": "009e06103edf7ae5dd14e3a8e69b5319a2f410eb",
+      "sha256": "ada9d14333d0b8a08ce59d64bed1ffc33e6503ed3b141ab4dc9d1721c47af192"
+    },
+    {
+      "path": "assets/inject/upstream/dream-skin/windows/dream-skin.css",
+      "mode": "100644",
+      "size": 25677,
+      "git_blob_sha1": "ea88f5a8f0b1aa4ce218d877a4b267baa25f0926",
+      "sha256": "926ada0a750a0ec3be68b4b8f1e5dcef5d58a85f3619b2b033856d4df216ef7b"
+    },
+    {
+      "path": "assets/inject/upstream/dream-skin/windows/renderer-inject.js",
+      "mode": "100644",
+      "size": 17313,
+      "git_blob_sha1": "f82da7752d031931ec1b70f003704c2211573c3e",
+      "sha256": "0bfb5f66a0323bf1392b42033e66904de3ec4bfc8a5ba297f2bb92a4a6740a34"
+    },
+    {
+      "path": "assets/inject/upstream/dream-skin/windows/theme.json",
+      "mode": "100644",
+      "size": 504,
+      "git_blob_sha1": "12f8a4bf46d60c9088852c8bb74624afc971f403",
+      "sha256": "9068f781f190d213fe5be180a12ab1ed534fafdd0bfba00276c951a178dfe72a"
+    },
+    {
+      "path": "assets/inject/upstream/glass-vision/LICENSE",
+      "mode": "100644",
+      "size": 1246,
+      "git_blob_sha1": "ebf6870df41ef1dc88a56efba47aa764207adb1c",
+      "sha256": "26595abd1084ebbd7173a93998b5293bcf3647a22ccc1ac424c54be5d260ff57"
+    },
+    {
+      "path": "assets/inject/upstream/glass-vision/glass-vision.css",
+      "mode": "100644",
+      "size": 28152,
+      "git_blob_sha1": "fda7c9e6dee7a7e31b4c90d248d6e0a2db32554e",
+      "sha256": "4c37c53544ee4f1cd93ba5d0dc3e174b05d4cb84ec9a436295d11d19f0bb04f1"
+    },
+    {
+      "path": "assets/inject/upstream/glass-vision/renderer-inject.js",
+      "mode": "100644",
+      "size": 5701,
+      "git_blob_sha1": "eabab2e5e459202e88bfccef027d8a4c8ff4b494",
+      "sha256": "d14943e95db62db81bf29d9cf14fcaf1dd1ea9a9625245c020865127eea295a2"
+    },
+    {
+      "path": "assets/inject/upstream/skin-packs/LICENSE",
+      "mode": "100644",
+      "size": 1067,
+      "git_blob_sha1": "fe194b046d7cabd7647b514ff39cd3ee14ae4e82",
+      "sha256": "98ce01db7e64d41dd7e70ddc83bdaf0114c5839da3f3479b52d9ccd33412210b"
+    },
+    {
+      "path": "assets/inject/upstream/skin-packs/packs/caishen-lite/theme.json",
+      "mode": "100644",
+      "size": 854,
+      "git_blob_sha1": "4fd725ea8ae41b4e68aff0c19a67457fe2ad887d",
+      "sha256": "379cb601522e7a5c2fc906e3d8bd5c7c64385fbd2a428798f8d169deb7026f2e"
+    },
+    {
+      "path": "assets/inject/upstream/skin-packs/packs/caishen-max/theme.json",
+      "mode": "100644",
+      "size": 849,
+      "git_blob_sha1": "cf86fc501579d5d97f9a34192f407e6fb9f30a2a",
+      "sha256": "0cff815ec9582b88ecf4ad9e7562d7dff32904fa8f09338811397960d62fd7d4"
+    },
+    {
+      "path": "assets/inject/upstream/skin-packs/packs/caishen-readable/theme.json",
+      "mode": "100644",
+      "size": 871,
+      "git_blob_sha1": "b3c1c9d040398a1044c33c8f338e423b043176a4",
+      "sha256": "eb1ffd4f2f49137b4aeddbed435513d42685c8ed9e97df644c693fd7859cc62d"
+    },
+    {
+      "path": "assets/inject/upstream/skin-packs/packs/export-night/theme.json",
+      "mode": "100644",
+      "size": 859,
+      "git_blob_sha1": "fbaa0d36c06cf4750a2d4629faf58a4e03c92e63",
+      "sha256": "c312329aabee84b9a8443b08d4db64863ec49deea3c7f7c942b57e4391b87b59"
+    },
+    {
+      "path": "assets/inject/upstream/skin-packs/packs/global-founder-bright/theme.json",
+      "mode": "100644",
+      "size": 890,
+      "git_blob_sha1": "fe5c7be903433b505cbb68d634643646c27c8ef7",
+      "sha256": "eafb018494225ababd83ae0e7b940e3f565232cf8f30c53aafa63e7652178810"
+    },
+    {
+      "path": "assets/inject/upstream/skin-packs/packs/mythic-guardian-noir/theme.json",
+      "mode": "100644",
+      "size": 880,
+      "git_blob_sha1": "0431df56511eb0be6a39e1c8d6cd72b7af879cc5",
+      "sha256": "2a57716d0161f7405d713912bcd0cd329038657518537f3efdb5f7ee53dbae3d"
+    },
+    {
+      "path": "assets/inject/upstream/snow-skin/LICENSE",
+      "mode": "100644",
+      "size": 1141,
+      "git_blob_sha1": "5bfdc18ac9669c221bedc67b07e8c07cbf4e5649",
+      "sha256": "714d6a902a51867b0706f62ed2467d4332f787891c04a6bdfe660b1221643b86"
+    },
+    {
+      "path": "assets/inject/upstream/snow-skin/dream-skin.css",
+      "mode": "100644",
+      "size": 15578,
+      "git_blob_sha1": "e0f60c99e7a5d1120442513f0c734d5027f919e7",
+      "sha256": "0af2d20fbe3e3dd13f0be7f1e5a90366e1501084827b22c1d4815a421bfce823"
+    },
+    {
+      "path": "assets/inject/upstream/snow-skin/renderer-inject.js",
+      "mode": "100644",
+      "size": 4875,
+      "git_blob_sha1": "783c41db599cd9d6001905852192ef90d17e8597",
+      "sha256": "0fcdff4aecd03eab2ca4ee923ccd20cb97eb5460f7c9f07351a2003ffa76e6fa"
+    },
+    {
+      "path": "assets/inject/upstream/snow-skin/theme.json",
+      "mode": "100644",
+      "size": 61,
+      "git_blob_sha1": "4f5ee875d9aec74c5c2ac5cb5f6aa98473c6322e",
+      "sha256": "7b232c41fac85bccedcf2e7df64e578e43c575244059caaedc72ada3b1ab7842"
+    },
+    {
+      "path": "assets/plugin-marketplaces/openai-curated-remote.zip",
+      "mode": "100644",
+      "size": 6977880,
+      "git_blob_sha1": "40218810304aee09f634c397d74d38288d1dc42b",
+      "sha256": "7211ea4b6d6921ed45fc7fec557906c0633f4f46359ce76d11961f1f3e88a666"
+    },
+    {
+      "path": "crates/codex-plus-core/Cargo.toml",
+      "mode": "100644",
+      "size": 1208,
+      "git_blob_sha1": "63dfa5dacd0af53dc17e83245abf9e4d300a3098",
+      "sha256": "01efdcadf3491aba9a7e378e5bf020728760539f3b9e5bb3015a25d9c54160f1"
+    },
+    {
+      "path": "crates/codex-plus-core/assets/codex-models.json",
+      "mode": "100644",
+      "size": 203322,
+      "git_blob_sha1": "213fdcf6c42fe180e52ecf4a62fd1d94becfda44",
+      "sha256": "b21200fd39c430f750cf10030c13bb19a91fdbc07792abdbda09e0ce6479161a"
+    },
+    {
+      "path": "crates/codex-plus-core/examples/generate_model_catalog.rs",
+      "mode": "100644",
+      "size": 688,
+      "git_blob_sha1": "a4796b309b26b515d3ffe665616b58201f9add88",
+      "sha256": "bc0ec0d845df0be7ba8ab6fd46c05fc0e0b8f8937846d28295b2ea448d325c49"
+    },
+    {
+      "path": "crates/codex-plus-core/src/ads.rs",
+      "mode": "100644",
+      "size": 8140,
+      "git_blob_sha1": "c655db80529689a79edf5b8d4500f63a59cb39cf",
+      "sha256": "836e1492dd31556915456dea2beadc36a1a45dea2f7b0888a9d994553fae6c5d"
+    },
+    {
+      "path": "crates/codex-plus-core/src/app_paths.rs",
+      "mode": "100644",
+      "size": 21103,
+      "git_blob_sha1": "3d571a1e9144500a5cc48af03f285005768d6aed",
+      "sha256": "5168cf621369c7058142f2dba22adc83b601e97d18e26c3d93fc4dfe7cafce33"
+    },
+    {
+      "path": "crates/codex-plus-core/src/assets.rs",
+      "mode": "100644",
+      "size": 29630,
+      "git_blob_sha1": "5cc930c62ca8c14fcfd391faf9ebe231b6da64ea",
+      "sha256": "b044583d0a788d6b5aa923b01bcb8a042f2be8c269350c7267220c75b76596c8"
+    },
+    {
+      "path": "crates/codex-plus-core/src/bridge.rs",
+      "mode": "100644",
+      "size": 20007,
+      "git_blob_sha1": "29991523cbf9083a2c677f651d76cbb09c766e81",
+      "sha256": "1a956ddc6b6475bb8719f461d1f54edcd00bb0c43035cfd5e6977de26e1a43ad"
+    },
+    {
+      "path": "crates/codex-plus-core/src/ccs_import.rs",
+      "mode": "100644",
+      "size": 13355,
+      "git_blob_sha1": "d56a19e5e76b1be065c45cce829edbbf1936b230",
+      "sha256": "155e9ea81ccbbe3107e7cd53a25427fc38695d58ad3c80c461a7dc491e9caab0"
+    },
+    {
+      "path": "crates/codex-plus-core/src/cdp.rs",
+      "mode": "100644",
+      "size": 7510,
+      "git_blob_sha1": "86bdfe7343db133fe82d43127b1442c9b1d352f7",
+      "sha256": "ee859c1763f71fbaec0da69cd3baddde852ca09930b9da5cfd92b8b90280f62e"
+    },
+    {
+      "path": "crates/codex-plus-core/src/codex_app_state.rs",
+      "mode": "100644",
+      "size": 22971,
+      "git_blob_sha1": "0ab3a0f7de93c9d72cdd69a62a25b014e78a6b5e",
+      "sha256": "10929b44bcf40c50bfa0fd4100161fd0ebca93c61331a7147f90c75a050a97f6"
+    },
+    {
+      "path": "crates/codex-plus-core/src/codex_home.rs",
+      "mode": "100644",
+      "size": 3164,
+      "git_blob_sha1": "d3b758bc453b92fbcd5a7ce6f4f04a2c55b8014b",
+      "sha256": "4466229d87556b37c3adee586a736716390eafdb0aa8c6493b0cf784409726db"
+    },
+    {
+      "path": "crates/codex-plus-core/src/codex_local_storage.rs",
+      "mode": "100644",
+      "size": 4059,
+      "git_blob_sha1": "bb59930962851954c86bb7a8ce8ca2107a3def0f",
+      "sha256": "a9747db45627b47e592f9127db7510dad15a332925ede10d3156fdc6eb56bf2b"
+    },
+    {
+      "path": "crates/codex-plus-core/src/codex_sqlite.rs",
+      "mode": "100644",
+      "size": 11546,
+      "git_blob_sha1": "6fff4ad41ce224372fb24ae2b9c7a7b50c05f869",
+      "sha256": "57f79f98bc9900dd20ee3285c163d96bd35f04b39e6b470b127120409cb2d6b3"
+    },
+    {
+      "path": "crates/codex-plus-core/src/computer_use_guard.rs",
+      "mode": "100644",
+      "size": 38916,
+      "git_blob_sha1": "122b514ce911f1ae0ed2efb75f6bea0de17633e8",
+      "sha256": "202f2167929181ac4ede6aeda9f988db6b8517d2f0ae4327e5b678b74b84c187"
+    },
+    {
+      "path": "crates/codex-plus-core/src/diagnostic_log.rs",
+      "mode": "100644",
+      "size": 4422,
+      "git_blob_sha1": "a57112e5c2288f60e1ca307ef16ecf400292da19",
+      "sha256": "be5428367f3fdc17348a01df1a70d7376840ec91de55bda9dca15c7029c4d6ee"
+    },
+    {
+      "path": "crates/codex-plus-core/src/dream_skin.rs",
+      "mode": "100644",
+      "size": 18394,
+      "git_blob_sha1": "887c5361b75f52588657d876aa9609cd89430eb6",
+      "sha256": "1eca80cff6122b1aaed1710515208e116035fcfa05604c907573c4138971ea1c"
+    },
+    {
+      "path": "crates/codex-plus-core/src/dream_skin_library.rs",
+      "mode": "100644",
+      "size": 19028,
+      "git_blob_sha1": "1fb7eb79c76c820259abc234414d6c71db1b8d90",
+      "sha256": "3711c663b6657611f25225f95b8321b489ffe18b03cf9a24664102e7c8b39234"
+    },
+    {
+      "path": "crates/codex-plus-core/src/dream_skin_market.rs",
+      "mode": "100644",
+      "size": 15498,
+      "git_blob_sha1": "d34c7407f709a698f4904ee659b2506f7892504e",
+      "sha256": "2063174dba436084d3b8a1825b0377fbc0ee6a6104ac38007fe39886a58b7626"
+    },
+    {
+      "path": "crates/codex-plus-core/src/dream_skin_runtime.rs",
+      "mode": "100644",
+      "size": 20825,
+      "git_blob_sha1": "ebada7887f827cf2116f91392324ba0826acaf32",
+      "sha256": "74ca236a916dce889b35ba7e812a82f4f8a13e20c7acf43b87d854bf354c3417"
+    },
+    {
+      "path": "crates/codex-plus-core/src/env_conflicts.rs",
+      "mode": "100644",
+      "size": 6569,
+      "git_blob_sha1": "537ec971c9ad0f114e114a94f2fc3975915a1ba6",
+      "sha256": "2a89e7c03c1eae8f9b650036dd72c31a4d355b13d6319378151a1bd4e9207d5e"
+    },
+    {
+      "path": "crates/codex-plus-core/src/http_client.rs",
+      "mode": "100644",
+      "size": 980,
+      "git_blob_sha1": "4bee2400419c2c1eedce92cb0a6cc2b53d575ba8",
+      "sha256": "70c4535261fafdce623e22c3556511d0be6bca37d7b060868dd0227b5f6fc3d4"
+    },
+    {
+      "path": "crates/codex-plus-core/src/install/macos.rs",
+      "mode": "100644",
+      "size": 6162,
+      "git_blob_sha1": "65dff410088f6ec061adce9a78ea2e994f4de55b",
+      "sha256": "4a43cec506996013bc38e6aeb7754502ff2f1c9cd8b736bc56547122c5acd4b8"
+    },
+    {
+      "path": "crates/codex-plus-core/src/install/mod.rs",
+      "mode": "100644",
+      "size": 13059,
+      "git_blob_sha1": "40cc46c95c879e32c7b2c8ee5cc0ea247fa8a816",
+      "sha256": "8eadf40871e0baccb85df447fe34a52cd94f7378f358a7b674d7ac9be8cb0f11"
+    },
+    {
+      "path": "crates/codex-plus-core/src/install/windows.rs",
+      "mode": "100644",
+      "size": 7168,
+      "git_blob_sha1": "3824d007b48b60401146868f47b5eccd1ea887fd",
+      "sha256": "d173e2178a01bfa1d2e560b02db7f11d9b0413608ddec083562e4b0e07927b44"
+    },
+    {
+      "path": "crates/codex-plus-core/src/launcher.rs",
+      "mode": "100644",
+      "size": 114733,
+      "git_blob_sha1": "c1256532e2366c8bd532f3bb252685815e62de50",
+      "sha256": "e5f1318c96fd723f01df920ea65c465fa4c861b0ab29d916cbe6d1edf4d2f8fb"
+    },
+    {
+      "path": "crates/codex-plus-core/src/lib.rs",
+      "mode": "100644",
+      "size": 1764,
+      "git_blob_sha1": "203b41176ae1e3f77289aeed384587f6c2adc5fa",
+      "sha256": "0fc7466d2a7cc5802885031692d5674b310e2a967e7f505862ecd15b187e3820"
+    },
+    {
+      "path": "crates/codex-plus-core/src/model_catalog.rs",
+      "mode": "100644",
+      "size": 25766,
+      "git_blob_sha1": "10e8f9e60024ead9f778ca8c6c5390ec73441bd2",
+      "sha256": "8661671938b3f475350eb14d0bf9005e16429e5385813519f48e3a85bf73c0f7"
+    },
+    {
+      "path": "crates/codex-plus-core/src/model_suffix.rs",
+      "mode": "100644",
+      "size": 11090,
+      "git_blob_sha1": "31e955f94020b057335a5191c209e2dd74c09152",
+      "sha256": "08b83e19ae2366db6d54430500e108d6c97f170efc0830685e2a806adb7262ec"
+    },
+    {
+      "path": "crates/codex-plus-core/src/models.rs",
+      "mode": "100644",
+      "size": 4905,
+      "git_blob_sha1": "dc54e070bbb1f4f9462c1ff6394f6277373b4b35",
+      "sha256": "e21d69e90265e07ccf51dbab93c13075f779dbb2a196758dd569da3d70caa56b"
+    },
+    {
+      "path": "crates/codex-plus-core/src/native_menu.rs",
+      "mode": "100644",
+      "size": 8071,
+      "git_blob_sha1": "582a5fe4a86a11b1a5971365d7870d7aa97395d7",
+      "sha256": "5ec9bf6f88cffb96f23b79227609ca104676137cdb3a239f0d9f0f7d2e1fc96c"
+    },
+    {
+      "path": "crates/codex-plus-core/src/paths.rs",
+      "mode": "100644",
+      "size": 2844,
+      "git_blob_sha1": "36cc88e2ee24dab22e387ead9c9e20d959205fb1",
+      "sha256": "92c18ddf93478611dd239cde7ead4033a001b34cd8b95b5b8aae396e1719db87"
+    },
+    {
+      "path": "crates/codex-plus-core/src/plugin_marketplace.rs",
+      "mode": "100644",
+      "size": 39389,
+      "git_blob_sha1": "0840a73881d27375e24c2fe5d2e311459fa2f824",
+      "sha256": "6f9e56e672228eaeab0f71b71fb0e56e0c53eade034d7e0651be0cb1c2ed90ba"
+    },
+    {
+      "path": "crates/codex-plus-core/src/ports.rs",
+      "mode": "100644",
+      "size": 12580,
+      "git_blob_sha1": "2263b21fa031b1aa02f5473ab89f401ca79e163d",
+      "sha256": "36d92721a480775f5c6ee6ac18417fc4300edea735540d8daa6b86a2b5daf25c"
+    },
+    {
+      "path": "crates/codex-plus-core/src/protocol_proxy.rs",
+      "mode": "100644",
+      "size": 141309,
+      "git_blob_sha1": "ada6885c7eae9bd054a0a580a9f666b3e96aba5f",
+      "sha256": "ec91cd701f7400c455313572fb649c199ef38ebdecd8406eaa8715d18aa2b6d8"
+    },
+    {
+      "path": "crates/codex-plus-core/src/provider_import.rs",
+      "mode": "100644",
+      "size": 16944,
+      "git_blob_sha1": "0127007fad7e56ed5fcb62c7a2f4ee07223bb630",
+      "sha256": "47e9afde5226e0225cb63731f6ce6067bf14233fa148b4b6d1b110399360388e"
+    },
+    {
+      "path": "crates/codex-plus-core/src/proxy.rs",
+      "mode": "100644",
+      "size": 6495,
+      "git_blob_sha1": "e5d0e2afa2573ee2085dbf3ba31cedcee4fedb15",
+      "sha256": "eb11e36d6572164e624a06c478f44c6cb58a8836ec497d442d31261305ed85e5"
+    },
+    {
+      "path": "crates/codex-plus-core/src/relay_config.rs",
+      "mode": "100644",
+      "size": 94010,
+      "git_blob_sha1": "2463a6d9cadc7d33bd0d29b069c2fde40bad343e",
+      "sha256": "a36d34ea8c13645000e7c96a8b19198f5692287a90fd18c2de233ba07860cf86"
+    },
+    {
+      "path": "crates/codex-plus-core/src/relay_environment.rs",
+      "mode": "100644",
+      "size": 8764,
+      "git_blob_sha1": "902a656fe821ee3f3a11bd331729dc681c436a11",
+      "sha256": "5002be257379e13c33a47c7cca2edaf3c215d13a3a29db52a266202fd5e5b517"
+    },
+    {
+      "path": "crates/codex-plus-core/src/relay_rotation.rs",
+      "mode": "100644",
+      "size": 11566,
+      "git_blob_sha1": "3dbc98d4c13e48951ce9dff2ac718756d00a63c1",
+      "sha256": "52f773a2f394dc4f4099b2d40b0736b0cb17b41cc82964dc90e6161481bef4dc"
+    },
+    {
+      "path": "crates/codex-plus-core/src/relay_switch.rs",
+      "mode": "100644",
+      "size": 7558,
+      "git_blob_sha1": "e366bf2b677ddf07584e72ef6b661dab612551e9",
+      "sha256": "d58a152b6ecdc125fbfa5bfb9b1355185809f48d9de2605f6d340871ce1b132e"
+    },
+    {
+      "path": "crates/codex-plus-core/src/routes.rs",
+      "mode": "100644",
+      "size": 25933,
+      "git_blob_sha1": "d2ab9a3152008dbf96c3d087b23404f0a90e8505",
+      "sha256": "3a7bdb8ef85bdd3f2b9953aef4f2099c243c82f1663b8a0e91518bdc392eb44b"
+    },
+    {
+      "path": "crates/codex-plus-core/src/script_market.rs",
+      "mode": "100644",
+      "size": 4678,
+      "git_blob_sha1": "35f51db508beba595d37fa34489fc586fb218020",
+      "sha256": "580ca44605b0b905e7869335a596bef079cc4f2ee6ec7b9fb8468e7c93abc838"
+    },
+    {
+      "path": "crates/codex-plus-core/src/settings.rs",
+      "mode": "100644",
+      "size": 94314,
+      "git_blob_sha1": "bb322b1c5d5b278e1539da1301ae2fa29914ca68",
+      "sha256": "c2c40a2139bc36438d14a4297f4d76e8cd7aa1b93ef41b35fad4c3b6b0bd1983"
+    },
+    {
+      "path": "crates/codex-plus-core/src/status.rs",
+      "mode": "100644",
+      "size": 2981,
+      "git_blob_sha1": "455bcb6464b249eca59e504728e9cb196c5a1ef8",
+      "sha256": "72281f53af35831104198d35e50620c4ba32b627394bdee1dbffd7da7bc700e5"
+    },
+    {
+      "path": "crates/codex-plus-core/src/stepwise.rs",
+      "mode": "100644",
+      "size": 17912,
+      "git_blob_sha1": "b56e3e88fc3720e643083400ab80ec2d9b00b356",
+      "sha256": "7dcab39845f1aaadd60c7b4a841f8200346585eb648b3423a54976217c34fcb2"
+    },
+    {
+      "path": "crates/codex-plus-core/src/update.rs",
+      "mode": "100644",
+      "size": 10816,
+      "git_blob_sha1": "2f9fb00c72688b150e867732d456f6e8ff905b8e",
+      "sha256": "078bf7086bccc0be9a4984368be1c8b3ae5af5db70e2127b4821a6d4348d127b"
+    },
+    {
+      "path": "crates/codex-plus-core/src/upstream_worktree.rs",
+      "mode": "100644",
+      "size": 524,
+      "git_blob_sha1": "491f489adae83b4be6f5bfe224f032a945b855a7",
+      "sha256": "cc2dd5353daf1b8a7c908ff6ffd28c57b6806bf66fc615277ae115f85423a7a2"
+    },
+    {
+      "path": "crates/codex-plus-core/src/upstream_worktree/create.rs",
+      "mode": "100644",
+      "size": 7023,
+      "git_blob_sha1": "7c4cc46b8508682f4f43d6c9736bae10e80e4670",
+      "sha256": "0ec609d0584453167526c7b69173d1dcc2d7162728783b1293afcbb08b8160b8"
+    },
+    {
+      "path": "crates/codex-plus-core/src/upstream_worktree/defaults.rs",
+      "mode": "100644",
+      "size": 5619,
+      "git_blob_sha1": "367eefa35df2df2bd65c5439c056550e4106ec30",
+      "sha256": "51f145552d274dd28c3edab00b4aa1f2083bd50847468352f23a106687b5a5a9"
+    },
+    {
+      "path": "crates/codex-plus-core/src/upstream_worktree/git.rs",
+      "mode": "100644",
+      "size": 7257,
+      "git_blob_sha1": "9bc2cf179a6c10e97b6a1bcad8f9eeb949d3d704",
+      "sha256": "b9f9305dc7089c2f980a35e1241fa0ebaabf3ed85499310ee129ed246685c141"
+    },
+    {
+      "path": "crates/codex-plus-core/src/upstream_worktree/remote.rs",
+      "mode": "100644",
+      "size": 15658,
+      "git_blob_sha1": "63b704834e398018a953254b50bbfdaffb8255f1",
+      "sha256": "ce39a75bd35101cb373f990fa12007710c620e8f52648d92be84ca7f1b9d5533"
+    },
+    {
+      "path": "crates/codex-plus-core/src/upstream_worktree/remote/tests.rs",
+      "mode": "100644",
+      "size": 3046,
+      "git_blob_sha1": "238cbd0fdfbaf04cb2c0794bf3481c2b125e56eb",
+      "sha256": "f459d8ab9195186798022ad3e6fbb1ed8b9ca038bdeb28bd87e45397b11b3404"
+    },
+    {
+      "path": "crates/codex-plus-core/src/upstream_worktree/types.rs",
+      "mode": "100644",
+      "size": 2538,
+      "git_blob_sha1": "2c2b4eb686e402baf10e4259d2e55dd4379703b7",
+      "sha256": "c089ec168b390d57c4b71e2e21f3bf1e5e1d0663b78ee262eb108dbf81957da1"
+    },
+    {
+      "path": "crates/codex-plus-core/src/user_scripts.rs",
+      "mode": "100644",
+      "size": 13404,
+      "git_blob_sha1": "2be3db4ed833af9955df4d7b10d470ab27225e63",
+      "sha256": "a65f6d951e0d1d3793d3c39bb83b4772076280271a0e06d58108a943ddd6066f"
+    },
+    {
+      "path": "crates/codex-plus-core/src/version.rs",
+      "mode": "100644",
+      "size": 217,
+      "git_blob_sha1": "876bb736d1053d2d8b106180cfd7a757292b8e9c",
+      "sha256": "36ef93c8a395e214b99fecb11bf179f149076f09183536504ca92a5c5987315c"
+    },
+    {
+      "path": "crates/codex-plus-core/src/vision.rs",
+      "mode": "100644",
+      "size": 74077,
+      "git_blob_sha1": "6bdafaee664d5960ba77f1835f6dc4153956d4ce",
+      "sha256": "a3feeaa367f42949835980fd438ec5b678076540578e2b5282d1966eb8d60619"
+    },
+    {
+      "path": "crates/codex-plus-core/src/watcher.rs",
+      "mode": "100644",
+      "size": 14339,
+      "git_blob_sha1": "f11acc1554cb5aba0a91a68fbc3fabe1f0f4831b",
+      "sha256": "ef67e97b448849ca284c852781dff96e4e3080dc1555edb7fc256e8b290f531e"
+    },
+    {
+      "path": "crates/codex-plus-core/src/windows_integration.rs",
+      "mode": "100644",
+      "size": 20311,
+      "git_blob_sha1": "f5d3cdd4b4aae24dd764e924da0e8d7cfc9e9af3",
+      "sha256": "3da6386e01260a656ed47aa88ba5565c181745686bab4d4dc8fc3c45a013724d"
+    },
+    {
+      "path": "crates/codex-plus-core/src/zed_remote.rs",
+      "mode": "100644",
+      "size": 15992,
+      "git_blob_sha1": "041c1e4b2587c8fb9484a3e8c2bf160ef970555b",
+      "sha256": "5bb946374b1d443e5c1b86d43594f28d0f8364ed504675ef644d4a85a1670cc1"
+    },
+    {
+      "path": "crates/codex-plus-core/src/zed_remote/fallback.rs",
+      "mode": "100644",
+      "size": 10238,
+      "git_blob_sha1": "0673a5bdef52113599a1fe56fe66aed7583fcd2b",
+      "sha256": "bfed14c215538807de603b9ecb401d9ab46ad5eb5e0ba3c63b73172356ff5bcf"
+    },
+    {
+      "path": "crates/codex-plus-core/src/zed_remote/platform.rs",
+      "mode": "100644",
+      "size": 2867,
+      "git_blob_sha1": "a9a178e899acb873287e9c298b565a25daa827ea",
+      "sha256": "cc3163e568eb193318f5d45790c63a25b28384a58c3d00bfe74228d6d3157a18"
+    },
+    {
+      "path": "crates/codex-plus-core/src/zed_remote/registry.rs",
+      "mode": "100644",
+      "size": 19771,
+      "git_blob_sha1": "93898eb6351a82b4bfd00fe81ad7c96c8438d414",
+      "sha256": "406953c30eb43f4a52d26fb65648527e93873d87928f7ca8be6465a75ef22b1c"
+    },
+    {
+      "path": "crates/codex-plus-core/tests/ads.rs",
+      "mode": "100644",
+      "size": 9992,
+      "git_blob_sha1": "36b0ad74c823cef082215c2d2e2320f46b83d5b3",
+      "sha256": "09bce2ead8cc10a0690adcf5d8e23d1160ec9db3aa38c25e5ac554c050b97b94"
+    },
+    {
+      "path": "crates/codex-plus-core/tests/bridge_routes.rs",
+      "mode": "100644",
+      "size": 48652,
+      "git_blob_sha1": "619002ce370a6805340553ffdb40231883aba642",
+      "sha256": "638645fdd1fc0314193aa13851fec54ea7b3fa87e7a82386d748aad42829a1c8"
+    },
+    {
+      "path": "crates/codex-plus-core/tests/cdp_bridge.rs",
+      "mode": "100644",
+      "size": 103904,
+      "git_blob_sha1": "11746bb4e3f0875a037a205d63418948c60e07f3",
+      "sha256": "8b502d7c21c7d1fdca142083a85d53a05331e4c346acbb20496d4daf1fce078d"
+    },
+    {
+      "path": "crates/codex-plus-core/tests/codex_app_state.rs",
+      "mode": "100644",
+      "size": 10328,
+      "git_blob_sha1": "5f09fae5366f60edee42e3ffe4f2d5612c3f57ac",
+      "sha256": "6cca1b1e3ab006e928a24edc0f3c1919329325079dfc9b0e88ecef3a35ff1469"
+    },
+    {
+      "path": "crates/codex-plus-core/tests/codex_sqlite.rs",
+      "mode": "100644",
+      "size": 5026,
+      "git_blob_sha1": "d7640abdb19359aee8d9047413e301025fe78704",
+      "sha256": "774a3c730bd166eba601a7e3ada9670a87df4951cea00ad314b39c220c3823e5"
+    },
+    {
+      "path": "crates/codex-plus-core/tests/dream_skin.rs",
+      "mode": "100644",
+      "size": 17107,
+      "git_blob_sha1": "0356d1c63f559b0141ce75642973b40eb8b49759",
+      "sha256": "8371c83f715380b5c722857e1666011d8ed27498f115ad3e17fcef901d60f4e7"
+    },
+    {
+      "path": "crates/codex-plus-core/tests/dream_skin_library.rs",
+      "mode": "100644",
+      "size": 9952,
+      "git_blob_sha1": "033c8f90f85b8e4cb1b5d7c654b967a4bdcc3419",
+      "sha256": "c5002a48b251327beef330410af7c2aa5ae1c57c0699efd7935cb136335968b6"
+    },
+    {
+      "path": "crates/codex-plus-core/tests/dream_skin_market.rs",
+      "mode": "100644",
+      "size": 4674,
+      "git_blob_sha1": "5536ba12eb77ebc433ecc4ee3364035bbce171ed",
+      "sha256": "a0b2374e83656142f4a389e90e428bce5ba10f112adafebc257b9a6ae9a2c2d6"
+    },
+    {
+      "path": "crates/codex-plus-core/tests/dream_skin_runtime.rs",
+      "mode": "100644",
+      "size": 5770,
+      "git_blob_sha1": "3e871e187666c84c2914a262d0c97f7ffdb95f0b",
+      "sha256": "0593449b8f06fa21273dd202423045152e416b7600911915a2a2b1ce6d090fc7"
+    },
+    {
+      "path": "crates/codex-plus-core/tests/force_chinese_locale_settings.rs",
+      "mode": "100644",
+      "size": 3770,
+      "git_blob_sha1": "08ba6339c0556e9868a5ea18fe626cefea49205f",
+      "sha256": "bbc9b3c37ead1c108ae678699768a3f41dac2496ddf7a72c6ff3a0ec73853f59"
+    },
+    {
+      "path": "crates/codex-plus-core/tests/installers.rs",
+      "mode": "100644",
+      "size": 7532,
+      "git_blob_sha1": "7edf81f5fa94892726d24bf8ffc5f94bdd3a5665",
+      "sha256": "7dbf8bb7aac37234f0fa3c68f1347ee5797fbce71d36190b0b5be42049387dd0"
+    },
+    {
+      "path": "crates/codex-plus-core/tests/launcher.rs",
+      "mode": "100644",
+      "size": 59519,
+      "git_blob_sha1": "b7d06dc58684ea21c157458dd4c36afd4cbbc614",
+      "sha256": "e58f4b7991a4401d876cf6050228c67311bf51932445761114da25822e9f9edf"
+    },
+    {
+      "path": "crates/codex-plus-core/tests/model_catalog.rs",
+      "mode": "100644",
+      "size": 13925,
+      "git_blob_sha1": "52a14d579737d453b10b358f916f58f2d6f8b31c",
+      "sha256": "5ae45909c513a82e19f27ef9c1baa4449700591e166a3704456497f64d6ba179"
+    },
+    {
+      "path": "crates/codex-plus-core/tests/model_suffix.rs",
+      "mode": "100644",
+      "size": 7855,
+      "git_blob_sha1": "d8850a72babc790f078b5115ab95103929bc23c6",
+      "sha256": "3b2bfdf76397954cbf7e193538e58acd35f65716b30db5ffa8ddc5da15e7e406"
+    },
+    {
+      "path": "crates/codex-plus-core/tests/paste_fix_settings.rs",
+      "mode": "100644",
+      "size": 2549,
+      "git_blob_sha1": "e8037469ef670348ba7a2bfcf851cf7635cd85af",
+      "sha256": "b729978e470eb35837705a533f0f1e3a0f3131d35c3c250d5b7c16269ee7c28d"
+    },
+    {
+      "path": "crates/codex-plus-core/tests/protocol_proxy.rs",
+      "mode": "100644",
+      "size": 60532,
+      "git_blob_sha1": "852dee997706c01660b5c538967d6485f661e668",
+      "sha256": "98341e2320a194f7780e763854d273acdabdbe6be3f7b1cf55797e4892625abf"
+    },
+    {
+      "path": "crates/codex-plus-core/tests/relay_config.rs",
+      "mode": "100644",
+      "size": 112888,
+      "git_blob_sha1": "845d6f5054548cac39decc20817b8e45cdda1351",
+      "sha256": "6878cecc425cad547f817805441c2fd4722088cebde314be1893f8df011757c8"
+    },
+    {
+      "path": "crates/codex-plus-core/tests/relay_rotation.rs",
+      "mode": "100644",
+      "size": 13668,
+      "git_blob_sha1": "1c3904db259e1ba7e009a83fb49e9a67b19f5a48",
+      "sha256": "35f792ab0035ce472dca3e30b007d764d4ee86134775b62d3901a05e9a977250"
+    },
+    {
+      "path": "crates/codex-plus-core/tests/relay_switch.rs",
+      "mode": "100644",
+      "size": 12553,
+      "git_blob_sha1": "d9170ae6a01beac183bac9a27b5c4c44f691269c",
+      "sha256": "02f6b2bf63e24897bc35a0aab1cbf9b9daa11260c7130e0b8e658c4eff27f7dd"
+    },
+    {
+      "path": "crates/codex-plus-core/tests/updater.rs",
+      "mode": "100644",
+      "size": 6182,
+      "git_blob_sha1": "f6f4b1980bef0b732d58b363514fe8123e0b9a7c",
+      "sha256": "00ee004d27562a5473619422213e74b326b8438eed4231ce58a3d05310977e97"
+    },
+    {
+      "path": "crates/codex-plus-core/tests/upstream_theme_assets.rs",
+      "mode": "100644",
+      "size": 3778,
+      "git_blob_sha1": "fc4063070c9b387debc644e56ff04e8cccbcb42e",
+      "sha256": "151ec5a04a36539e6f4b47fc0949b6c1fe25d4fc7ea9f8df77e0db1349e928af"
+    },
+    {
+      "path": "crates/codex-plus-core/tests/upstream_worktree.rs",
+      "mode": "100644",
+      "size": 13676,
+      "git_blob_sha1": "721313b408bc97c2e1ceafd368b81436c2e84f31",
+      "sha256": "185e116f18a34653f1024265a8c59c3b4c9d47104cce4033c03600b9d63e5740"
+    },
+    {
+      "path": "crates/codex-plus-core/tests/watcher.rs",
+      "mode": "100644",
+      "size": 9353,
+      "git_blob_sha1": "03feecd24d4f49bea0e6a794dc2aa89f1928e559",
+      "sha256": "0c8d59e22d1cfe3773bf35e4dd02c5cf33e21aef9028593580c74389e0403678"
+    },
+    {
+      "path": "crates/codex-plus-core/tests/zed_remote.rs",
+      "mode": "100644",
+      "size": 19842,
+      "git_blob_sha1": "97e1d69509de2edb3668f0d8468e3b12987ed57b",
+      "sha256": "9cf47695be8c889340c03d692f258641bc47ea8d1e52dfb2fc83e0178b83d802"
+    },
+    {
+      "path": "crates/codex-plus-data/Cargo.toml",
+      "mode": "100644",
+      "size": 560,
+      "git_blob_sha1": "c0abc389b51c1278db99143e848469b2ea0909e9",
+      "sha256": "ae3d941539f1fcbff5e413b45742316f6c114d33a8f55d77acb7ee13912d3b63"
+    },
+    {
+      "path": "crates/codex-plus-data/src/backup.rs",
+      "mode": "100644",
+      "size": 1792,
+      "git_blob_sha1": "da39093ebd95ac2c84ad10245eb663ddd93bfe6a",
+      "sha256": "53d4ed92d6aa9d6b49f1d99437f7252cdecbf44506d2f406e4069b0c7aee7dfa"
+    },
+    {
+      "path": "crates/codex-plus-data/src/lib.rs",
+      "mode": "100644",
+      "size": 724,
+      "git_blob_sha1": "9f712768d7d700d02d20889951612d24567751f3",
+      "sha256": "d27758d892dbcbcf10e42e7ef01d713b6bc5cb8de3b9631a5b77bdc24850cc74"
+    },
+    {
+      "path": "crates/codex-plus-data/src/markdown.rs",
+      "mode": "100644",
+      "size": 14399,
+      "git_blob_sha1": "de8a41a487865fd8b02d57d55a373feb8d9269fc",
+      "sha256": "b6caacec68f3fdac7c07d2d1d747347cec5a4db5d96bcdf416a3bb0405538ddc"
+    },
+    {
+      "path": "crates/codex-plus-data/src/provider_sync.rs",
+      "mode": "100644",
+      "size": 50659,
+      "git_blob_sha1": "6cf59162be8ec112ed458cf3d4732c2c26d2977d",
+      "sha256": "32caf6a36d106410d4a5a66cf857a29a82d57c0d9ca75df2720430f1e96441a5"
+    },
+    {
+      "path": "crates/codex-plus-data/src/storage.rs",
+      "mode": "100644",
+      "size": 48201,
+      "git_blob_sha1": "41e3cc4727adb8714c9ca9489b77494d43e83939",
+      "sha256": "b37d545cfbe0c47cd24143d59bc876fed36d0cd3d68d69021985b58fe5ef3537"
+    },
+    {
+      "path": "crates/codex-plus-data/tests/markdown.rs",
+      "mode": "100644",
+      "size": 8073,
+      "git_blob_sha1": "5ac66b3166113e2754ceec6628594d0b1bdf5338",
+      "sha256": "b2a32525b6d1c1bf6db6dec8cfb72a052e8434a9d7aa038a91e8d1ed7ca7c83c"
+    },
+    {
+      "path": "crates/codex-plus-data/tests/provider_sync.rs",
+      "mode": "100644",
+      "size": 36058,
+      "git_blob_sha1": "cbcea2f06e434a444bc27ccacb08ffa7d6d8e2eb",
+      "sha256": "8d736d35081b6ad9cf22f58d9ab445fcec53aee3cd614bc014ccbdd1110b5a42"
+    },
+    {
+      "path": "crates/codex-plus-data/tests/storage_adapter.rs",
+      "mode": "100644",
+      "size": 31246,
+      "git_blob_sha1": "28b64a15217839ae694f9f3c3337bff980a6a116",
+      "sha256": "ff9d0cf79a9861f89407c46330ca2b7ab763a9e9a356ea85f783f0e0b811f2b7"
+    },
+    {
+      "path": "docs/images/backend-status-indicator.png",
+      "mode": "100644",
+      "size": 5082,
+      "git_blob_sha1": "0f35604316f6c5cbdd23fd3316f328a374680a9a",
+      "sha256": "cb37f94e3f14d3a68219a740178a30fbcd7aeefd4a59ade7355e5d3ac31cda20"
+    },
+    {
+      "path": "docs/images/codex-plus-plus.ico",
+      "mode": "100644",
+      "size": 142431,
+      "git_blob_sha1": "8433b68787c4926670bf9361cc05fb3803d4b908",
+      "sha256": "d2d80bb01bd5fa6f26529884f614a402933d59219d0991141bfe04e861b485e0"
+    },
+    {
+      "path": "docs/images/codex-plus-plus.png",
+      "mode": "100644",
+      "size": 51224,
+      "git_blob_sha1": "91bc9f530095295f60a57afea16cac76b1aa5f05",
+      "sha256": "76bdb06a3fb0fd157326d5c7f0fc6e6f4d4901d47aed47db6cd53109f361a428"
+    },
+    {
+      "path": "docs/images/discussion-group-qr.jpg",
+      "mode": "100644",
+      "size": 186614,
+      "git_blob_sha1": "f34d11ada9908cc470e4f56a72b72dda8995c981",
+      "sha256": "c962d929656d77e2dc5c5475427cffff527a40eb455c824550b947c0458b2e4e"
+    },
+    {
+      "path": "docs/images/issue-1312-product-design-working.png",
+      "mode": "100644",
+      "size": 101586,
+      "git_blob_sha1": "80e846002aee84e880ac960db45a2ee17043b745",
+      "sha256": "2c4ed304687bd5d791f541882916a9e1db3f6e33d799c8c9d324ea7fe709063e"
+    },
+    {
+      "path": "docs/images/macos-damaged-warning.png",
+      "mode": "100644",
+      "size": 29766,
+      "git_blob_sha1": "62d025ad8c23e19805df4bfd904c5ee6f7fb7eaa",
+      "sha256": "4cdf9bd72868c6afa737b1212ac4ba2023a2856e0f554090c3180678d1b3a5fb"
+    },
+    {
+      "path": "docs/images/model-suffix-flow.png",
+      "mode": "100644",
+      "size": 307639,
+      "git_blob_sha1": "23f85a0892163edd1a1e23b0f09ed05237a31a19",
+      "sha256": "f161ac39d321b7f07afea18c687980e32df5143623d676cdbe69e0e32e1c7e40"
+    },
+    {
+      "path": "docs/images/pain-no-delete-button.png",
+      "mode": "100644",
+      "size": 8287,
+      "git_blob_sha1": "93ec0dcbe9d227e0b547af07b321b13e34a6d1a9",
+      "sha256": "42e5e89c488500b430438409a573c983c340fefa52245e390bb243f939362e22"
+    },
+    {
+      "path": "docs/images/pain-plugin-disabled.png",
+      "mode": "100644",
+      "size": 29735,
+      "git_blob_sha1": "4c01097a926daf9b09d18c99ff9534950f7d15ed",
+      "sha256": "9f8bee6825519fdc8f29abaf46e55ccd672ac2102056729cebddba93c2d91e48"
+    },
+    {
+      "path": "docs/images/service-tier-composer-badge.png",
+      "mode": "100644",
+      "size": 45757,
+      "git_blob_sha1": "8b91df6cf09d6833860f8bd411552e57c42244d0",
+      "sha256": "52d1018798b0e65653ed19f551a513821445b98e5c6d772ad7b235b24df2f58d"
+    },
+    {
+      "path": "docs/images/service-tier-settings.png",
+      "mode": "100644",
+      "size": 19912,
+      "git_blob_sha1": "81d3c4260c0441011d4bb8495c31e2845775afbf",
+      "sha256": "af301f9a6cf5a2f0a650128f79996be37cd06feca1e7e0c6f21f52b35ec66736"
+    },
+    {
+      "path": "docs/images/settings-panel.png",
+      "mode": "100644",
+      "size": 125679,
+      "git_blob_sha1": "afab6c310942961877735d15f96560c0afecca55",
+      "sha256": "dff5ca40ee35cafa9cef385c5b0543424a6bbde15cdb39082d9c972dbe4b1dd1"
+    },
+    {
+      "path": "docs/images/solution-plugin-and-delete.png",
+      "mode": "100644",
+      "size": 280860,
+      "git_blob_sha1": "f16827e72ef330bd820037722b5490049ac10fe9",
+      "sha256": "dc46b126e3379c29f295823c95eb407e01165f11a85a96bce17de83019d7d0a1"
+    },
+    {
+      "path": "docs/images/sponsor-0029.svg",
+      "mode": "100644",
+      "size": 929,
+      "git_blob_sha1": "367fac7588fe617c888cd2027aa93e27736db383",
+      "sha256": "06241b9f8b184d72f62b0a12f9c3040c671c2d91007107fb7506149f40f58808"
+    },
+    {
+      "path": "docs/images/sponsor-aigocode.png",
+      "mode": "100644",
+      "size": 276392,
+      "git_blob_sha1": "5c6ca8058a0e7504ea757d2629c9a186063eaa6a",
+      "sha256": "56fbe204025ce10720ea33901881e5d195c417f3a119c04357e85b50796ddc26"
+    },
+    {
+      "path": "docs/images/sponsor-aihub.jpg",
+      "mode": "100644",
+      "size": 78198,
+      "git_blob_sha1": "53c0539ba4b4685f4f781118f670dd602d6b93a0",
+      "sha256": "1039c47b2ff698bfdb409df1a0d128c0bba45c70b52551f9ccb789ab79e12cde"
+    },
+    {
+      "path": "docs/images/sponsor-aihub2api.png",
+      "mode": "100644",
+      "size": 315369,
+      "git_blob_sha1": "9b6fecd53653dac377bc8ff18b961f8de4b219fa",
+      "sha256": "439c7cad9bffad11e6fa0f1913735e5d163ac1a7a02a3afba3c9df199db2d5e7"
+    },
+    {
+      "path": "docs/images/sponsor-alipay.jpg",
+      "mode": "100644",
+      "size": 169955,
+      "git_blob_sha1": "cf2049b2728a4458f7a2c282391de6c9171495dd",
+      "sha256": "a1b1e2c294447eb3983c6677a552a51db94fea7f216280bed15d1ed70a01b47d"
+    },
+    {
+      "path": "docs/images/sponsor-apikey-fun.png",
+      "mode": "100644",
+      "size": 16523,
+      "git_blob_sha1": "afd8df6547179fb1a37f9eebacd046f3ae784705",
+      "sha256": "88b2b2dd3886609f171135fe916f8ba267e3327a7d6b3ee3390c4ff443bc49b8"
+    },
+    {
+      "path": "docs/images/sponsor-baikewei-ai.jpg",
+      "mode": "100644",
+      "size": 36968,
+      "git_blob_sha1": "a13cbe2f0733829ba97d458bbe6ab29730f83aab",
+      "sha256": "35829fc50a7157208243f63d307d3fa69c8d408a81f31e55537cf742e40c4cb4"
+    },
+    {
+      "path": "docs/images/sponsor-byteplus.png",
+      "mode": "100644",
+      "size": 86515,
+      "git_blob_sha1": "723cca359c39fb3fa1c6a2d10ce1bb53bf9b7621",
+      "sha256": "f9f166dd9bf3d64e24c7048b33f91a2ea31918157c5ef9fd88314dd824ef9db7"
+    },
+    {
+      "path": "docs/images/sponsor-cubence.png",
+      "mode": "100644",
+      "size": 101814,
+      "git_blob_sha1": "30ba163ab05afd4f2c810eabd74a8c7d2ea09ac1",
+      "sha256": "f1250a4b7138cb1ef3659032c0ae380ca0de5b06ea6ae5a97ebce22d2b1a0d41"
+    },
+    {
+      "path": "docs/images/sponsor-ergou-api.png",
+      "mode": "100644",
+      "size": 87892,
+      "git_blob_sha1": "b96a11152d11262e2eaba0f759b2ce1115856133",
+      "sha256": "a20ccd94d0cb73fe33ae9fb1b63b4b530294be6f0393ca7b67734537ef117e18"
+    },
+    {
+      "path": "docs/images/sponsor-jojocode.png",
+      "mode": "100644",
+      "size": 42454,
+      "git_blob_sha1": "f7f3c6e983cd71e4f967dbd07dc4279e5a4d8304",
+      "sha256": "c39f3eb844a0dec452fa0e0dd40d2912979dac687b0106715b7051d1b7f908da"
+    },
+    {
+      "path": "docs/images/sponsor-jojocode.svg",
+      "mode": "100644",
+      "size": 809,
+      "git_blob_sha1": "b92d11bb3aa6750699fcab2d6d5256b6447198f1",
+      "sha256": "f58b5e837d2dd68c0bb79bde5123cafa93d7e0bd290f36befbacf644d000dcce"
+    },
+    {
+      "path": "docs/images/sponsor-maolao-api.jpg",
+      "mode": "100644",
+      "size": 15372,
+      "git_blob_sha1": "3abb2578f05b0219dc2be3d6f0b4ab0e31d29228",
+      "sha256": "a54e95101268ba5324a6163add638c3074cbb484b8244c81af332b925ca4f628"
+    },
+    {
+      "path": "docs/images/sponsor-packycode.png",
+      "mode": "100644",
+      "size": 165940,
+      "git_blob_sha1": "0a1c21f8928a7d8eb6555905a981fb31fc2f8648",
+      "sha256": "b272985037f2899a4a6d0ee54bc36fa695e55ef0eec23ba19cd982312be2400a"
+    },
+    {
+      "path": "docs/images/sponsor-rawchat.svg",
+      "mode": "100644",
+      "size": 908,
+      "git_blob_sha1": "4d71b29d9dd800a3b9f6132455cdea4526b4e100",
+      "sha256": "f33bd700d6a8a32d0c4c6bdc18937ccd9fe59d2c248133e593f01e5030a85784"
+    },
+    {
+      "path": "docs/images/sponsor-runapi.png",
+      "mode": "100644",
+      "size": 7032,
+      "git_blob_sha1": "ee76d8363f84df343bcf0a2702b8049fd1119079",
+      "sha256": "29ff5c0766bf650a99ccef32170abc45f4e519070da5f5f19633acac290433b8"
+    },
+    {
+      "path": "docs/images/sponsor-smallice.png",
+      "mode": "100644",
+      "size": 2012807,
+      "git_blob_sha1": "2063c60a59aa41d36ce4dbd2c1853edad016e315",
+      "sha256": "c6c2a869e4aae485cec9586e2fd773e15cc4fb45ae41b5874450f081b33fc629"
+    },
+    {
+      "path": "docs/images/sponsor-sublyx.png",
+      "mode": "100644",
+      "size": 64475,
+      "git_blob_sha1": "f9e3d308cbc05172df4bf2a735640a7af49c007f",
+      "sha256": "a9a654034cfdc984de91d840027b116dd7fdae0d01719a8b390cd94455d0556f"
+    },
+    {
+      "path": "docs/images/sponsor-sui-xiang-ai-gateway.jpg",
+      "mode": "100644",
+      "size": 43529,
+      "git_blob_sha1": "62730b05a240318e2237c0ec7e506afad7126a0d",
+      "sha256": "4832ef502b3c1f0a561721d12a6cb2a551e20420a6f8d71958eb03520cf261c7"
+    },
+    {
+      "path": "docs/images/sponsor-ucloud-compshare.png",
+      "mode": "100644",
+      "size": 41207,
+      "git_blob_sha1": "7c1e0ffdb436f731945c917c815fa57255bb190a",
+      "sha256": "e02c1f5711e41afadb4f17eb3d58084134910cc90f74feeed0c31d31de383fa3"
+    },
+    {
+      "path": "docs/images/sponsor-unity2.png",
+      "mode": "100644",
+      "size": 761902,
+      "git_blob_sha1": "f1da2ed1b7b42c84f1c3940f39b18c8d37b4caca",
+      "sha256": "d294eaec1d0d2a36fc42851d1f8c0f2c12e9ce27eee72080999820801763d2fa"
+    },
+    {
+      "path": "docs/images/sponsor-volcengine.png",
+      "mode": "100644",
+      "size": 107106,
+      "git_blob_sha1": "cf4c22f236420e1d5ace94f39dc312783cf560c4",
+      "sha256": "8efefca080cff4a7e337d7b608da2ace9fe6cd1c371a6b1829904fe8a7b3a706"
+    },
+    {
+      "path": "docs/images/sponsor-wechat.jpg",
+      "mode": "100644",
+      "size": 110986,
+      "git_blob_sha1": "d3c051a53753d40f642f2e4b19e2cc7bc11d0217",
+      "sha256": "f27be38116e7a65fd043bdcc5dc5ef4b3bff1f717c69490edeee80f1d9918429"
+    },
+    {
+      "path": "docs/images/sponsor-yiyun-tech.jpg",
+      "mode": "100644",
+      "size": 184145,
+      "git_blob_sha1": "9aae8c19e7ae6ce2627f207a8d557bf6caf659e4",
+      "sha256": "165836728c949950cb48840e913b018dac26b600fd57a24f42fae376ab66e26a"
+    },
+    {
+      "path": "docs/plan/20260527160751519_聚合API供应商轮转实施计划.md",
+      "mode": "100644",
+      "size": 8424,
+      "git_blob_sha1": "60389e237f8ea59a9fcc15ee9f7fac2ec7456cc5",
+      "sha256": "291bbc2cce059988928c1ffea1666c90dc5b4e0cd7f5a958e9a4022c3ef98187"
+    },
+    {
+      "path": "docs/plans/2026-06-23-阶段一-model-catalog-原型.md",
+      "mode": "100644",
+      "size": 31559,
+      "git_blob_sha1": "5386780685ccff770c77ed2c65c8b10515bef676",
+      "sha256": "0dc55070d6a4c7bf3d87ddb09717151c91c53d54946ebd2f56a2e49409c98892"
+    },
+    {
+      "path": "docs/plans/2026-06-24-前端模型后缀提示.md",
+      "mode": "100644",
+      "size": 12271,
+      "git_blob_sha1": "695866ccf2aaf12d5eb7c14f57e26bf5318a83e7",
+      "sha256": "e83ba1ae06872b6efac3c3d249c39dc9d48b665d335270fcca72ae00b92f0a6e"
+    },
+    {
+      "path": "docs/plans/2026-06-25-model-list-window-split-plan.md",
+      "mode": "100644",
+      "size": 26330,
+      "git_blob_sha1": "21895567d7efbf62e12ab3755ab61fe2c497f512",
+      "sha256": "7148a81546fe3d8bed75e4af9b5ca5aabd6634430d5728fee32e5c5b190b133c"
+    },
+    {
+      "path": "docs/plans/三阶段计划.md",
+      "mode": "100644",
+      "size": 4033,
+      "git_blob_sha1": "85aa869d28c214ff0524f7eb563865c35c343160",
+      "sha256": "047e9289c0333b3bbe0a18c60970563f8362861ffe3619b491d496a3adfa34ad"
+    },
+    {
+      "path": "docs/release/20260602191421483_token统计历史恢复bridge发布说明.md",
+      "mode": "100644",
+      "size": 1447,
+      "git_blob_sha1": "061e0d8fdc6ace4db9d33314ed12f4a885fef8c1",
+      "sha256": "bcf4622f7d61be5bfa823b54ef41ce820266836eafeb487e35a67c83d36a3ea4"
+    },
+    {
+      "path": "docs/reports/2026-06-24-阶段一-model-catalog-完成报告.md",
+      "mode": "100644",
+      "size": 8264,
+      "git_blob_sha1": "13f29dc9ea7261064adaa15f4f1c014bcaa17479",
+      "sha256": "05e325c154d977953f430a6bafdbdf14c923d9aa08cb0fc7560fd94a41210045"
+    },
+    {
+      "path": "docs/research/01-调研结果.md",
+      "mode": "100644",
+      "size": 11690,
+      "git_blob_sha1": "b69a25b4e1ba66af406a9f997ca8f7f1351f2968",
+      "sha256": "9e76a340187916760f3dc9a1acdddf6b23eec8a72131daf8545882d029309896"
+    },
+    {
+      "path": "docs/specs/2026-06-23-model-catalog-prototype-design.md",
+      "mode": "100644",
+      "size": 6310,
+      "git_blob_sha1": "698b0859ea4ea5b2af6ff256090be239facfbec2",
+      "sha256": "3bd9ed48e35d6d712aeda12dfe01b5111a90fd68636f6f258e08e4fd08af07a9"
+    },
+    {
+      "path": "docs/specs/2026-06-24-前端模型后缀提示-design.md",
+      "mode": "100644",
+      "size": 11756,
+      "git_blob_sha1": "a160be68a2960a05b645321285ba5f40f91b702c",
+      "sha256": "c7e8ce7bde403ff6a0d850e779186999d46cdd578ba51533f301e89eabde7617"
+    },
+    {
+      "path": "docs/specs/2026-06-25-model-list-window-split-design.md",
+      "mode": "100644",
+      "size": 8257,
+      "git_blob_sha1": "edaf322cc781d552d2c90e9716c4ade348e806ca",
+      "sha256": "5294b813af141584f0b21da445a0a061139473df593cfa0f2da5fc5ec686a2ff"
+    },
+    {
+      "path": "docs/superpowers/plans/2026-05-13-provider-sync.md",
+      "mode": "100644",
+      "size": 31139,
+      "git_blob_sha1": "a012d34ba223cec4f84810ef479e71c4127a51ea",
+      "sha256": "198ca7127f65f4065193cd06183a674fed023c9966766ca458c312d7eb8dd98b"
+    },
+    {
+      "path": "docs/superpowers/plans/2026-05-16-rust-tauri-migration.md",
+      "mode": "100644",
+      "size": 28049,
+      "git_blob_sha1": "cd51ced72c03fb75c279a0e3e06bc2d7a8fcb560",
+      "sha256": "b69a2aeca4f2ef034f0c8418e8e245e3bc93066b736cfb21185edd5c01de16d5"
+    },
+    {
+      "path": "docs/superpowers/plans/2026-05-22-upstream-branch-dropdown.md",
+      "mode": "100644",
+      "size": 15306,
+      "git_blob_sha1": "916a20752d5cae50830753b637e0fb2f50d7d8bb",
+      "sha256": "319e5fdeb82db5a1b21a005966e52eb42d6dffe5f9ce82c845e440db4f8c8390"
+    },
+    {
+      "path": "docs/superpowers/plans/2026-05-22-upstream-worktree.md",
+      "mode": "100644",
+      "size": 49207,
+      "git_blob_sha1": "5dd3a70a539d9278843d1fcf30814e6219dacc3c",
+      "sha256": "621fe0c918540782980665621a869a6814a9faea060375561d16d2b48762f146"
+    },
+    {
+      "path": "docs/superpowers/plans/2026-05-25-codex-context-management.md",
+      "mode": "100644",
+      "size": 42234,
+      "git_blob_sha1": "08d4b7d59c2c5c8169adfb728810cfdc675a43d0",
+      "sha256": "0a50e3c65f61d7ff88a7c99c5f12d192d0009b39a22507caef26a1f432382b2e"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-05-11-user-scripts-design.md",
+      "mode": "100644",
+      "size": 3615,
+      "git_blob_sha1": "f73856f16ce4a0ca18f72ba0d8913fc8555a702e",
+      "sha256": "0f2315c6c927c57467835faabe87920171a93e451821e5e187e4654c46b71281"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-05-12-conversation-timeline-design.md",
+      "mode": "100644",
+      "size": 3847,
+      "git_blob_sha1": "4cf7d17542ed8aaeda700febc24098484d51ed30",
+      "sha256": "290326ced5323d1c31e306405d85a43401e49d7b55d5b1892a62c29820336a0f"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-05-13-provider-sync-design.md",
+      "mode": "100644",
+      "size": 5657,
+      "git_blob_sha1": "75e714ea51550dd793e839691af599056ba1d3a2",
+      "sha256": "3afeac9909b77ec3ef8c38aa11eb6d5ad0cc7ed70e628fea7b04e750660e7542"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-05-16-rust-tauri-migration-design.md",
+      "mode": "100644",
+      "size": 10615,
+      "git_blob_sha1": "030f91b6fcc34996c2193b89bdef8384db6e9c30",
+      "sha256": "2318afe794ddad6715b9171c809536fabf7d30896b40bc986f20b4864fedc472"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-05-21-script-market-design.md",
+      "mode": "100644",
+      "size": 4759,
+      "git_blob_sha1": "e1357749c0d1d96767ad8d5190fb3760dd237d10",
+      "sha256": "1bd14983ec9f48d82021976d8623a5d34aa603b5b9f6254d676d7813e2f16ab2"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-05-22-upstream-branch-dropdown-design.md",
+      "mode": "100644",
+      "size": 4391,
+      "git_blob_sha1": "a2e9491eca378bc4d44cafa77ec3306eda851048",
+      "sha256": "de8ccfca42f53af82f17e7fc18ae7baa5fdb2291d3dd22958ad0b643781aedc0"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-05-22-upstream-worktree-design.md",
+      "mode": "100644",
+      "size": 9336,
+      "git_blob_sha1": "e19b60d3ced7f1a76247441b06b93b2d814104d2",
+      "sha256": "e9c94f1c7e33809d3efed62ec1aa91e844d292780701f592b7400d1daf744bfc"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-05-25-codex-context-management-design.md",
+      "mode": "100644",
+      "size": 5993,
+      "git_blob_sha1": "35228c6d6b8d8ed3fe00ee547e2b69eb774eea4a",
+      "sha256": "0d6239c065ed265308358379f8b3563c7d87ffb1f7ab6670b2bcfb18d27b3738"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-05-27-provider-configuration-redesign-design.md",
+      "mode": "100644",
+      "size": 13205,
+      "git_blob_sha1": "43f0710af82ada10393f8d907863e607ff74776c",
+      "sha256": "6e3cc8c28878f8d6e54d4867ea97029b8c13baedf68014ebbf7b8ce37aff3e04"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-06-02-pr-build-actions-design.md",
+      "mode": "100644",
+      "size": 4633,
+      "git_blob_sha1": "468eafef1968bc6043e0328443e32c63744274a6",
+      "sha256": "98b1636075ecdc49d52ce14e121f74296c9a3e0b0b060fdf546e2f622cfcd851"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-06-04-plugin-entry-unlock-design.md",
+      "mode": "100644",
+      "size": 7490,
+      "git_blob_sha1": "7ab7209f3194f1aa286d3e21fd629f8511ca0c86",
+      "sha256": "6082448681e94d4b026fb91eb8c9a14b66ff59a840328f6d755f9aa2c34cb238"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-06-04-provider-sync-target-selection-design.md",
+      "mode": "100644",
+      "size": 15218,
+      "git_blob_sha1": "e6dbcdbb0976332a33bb04eba855d413c02679ba",
+      "sha256": "0d88703de3975b931e4b13d2e63a21149c9fa57238d006562005d4bc9884bad6"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-06-05-version-gated-plugin-unlock-design.md",
+      "mode": "100644",
+      "size": 6701,
+      "git_blob_sha1": "161170691a94a8e6f94fbf00d97bbdfce1c63db3",
+      "sha256": "e07cb7ecd0a66b3c2ef74f215632e603b48a41e63566847a0b51ee6c6e7a87b6"
+    },
+    {
+      "path": "scripts/installer/macos/package-dmg.sh",
+      "mode": "100755",
+      "size": 4402,
+      "git_blob_sha1": "287778ee2d16ac56ed6bf02b54283df5ab03c347",
+      "sha256": "c1321b1e33484cf5f9765a62d1133a068a7ed3c2608359fe975f17e28820ebc6"
+    },
+    {
+      "path": "scripts/installer/windows/CodexPlusPlus.nsi",
+      "mode": "100644",
+      "size": 3476,
+      "git_blob_sha1": "59506bdd45264cdc572863a372b088fd56a7e7b0",
+      "sha256": "30960a596c2ea0eaa62c827815bc8d33d7509f85370bd43dda6df188200887ed"
+    },
+    {
+      "path": "tools/codex-wechat/README.md",
+      "mode": "100644",
+      "size": 2632,
+      "git_blob_sha1": "9b657a1729f1a9b85c6691f0eff9d29c2a8159b8",
+      "sha256": "1454c0eb536888945531e08ebb505cb8ff6d69ae6c30c23c58d9ac65c6ba25e9"
+    },
+    {
+      "path": "tools/codex-wechat/codex_wechat.py",
+      "mode": "100644",
+      "size": 30521,
+      "git_blob_sha1": "8c9cef9b4670647bbcd3c84d40d93403ca71aa17",
+      "sha256": "9a988e9afccee0db90945378b7d6b66fb1ea54f52f6da7469660119c7321352f"
+    },
+    {
+      "path": "tools/codex-wechat/config.example.json",
+      "mode": "100644",
+      "size": 666,
+      "git_blob_sha1": "a1307a34622141975f06b210516914e1bc63acba",
+      "sha256": "1d0719393f80ee15b7d85986c6fb27bfd33650b83ad5b338b914437fbdb21df1"
+    },
+    {
+      "path": "tools/i18n-codemod.mjs",
+      "mode": "100644",
+      "size": 6891,
+      "git_blob_sha1": "1a10cffd8044247f766908b6435d730eb4a607e4",
+      "sha256": "e37c194f78e8b4995f7f96e21fd5dd90b4e0a484cac5bc2585b4013e6ac70569"
+    },
+    {
+      "path": "tools/i18n-keys.json",
+      "mode": "100644",
+      "size": 23293,
+      "git_blob_sha1": "e5f5a1d6f6e575f6eacbc450ee3bfb54c7e632a0",
+      "sha256": "7a40b0bf023cc592e5c3e87d2c7efa060157c689be6f4bf2f22a56f65537d687"
+    },
+    {
+      "path": "tools/i18n-verify.mjs",
+      "mode": "100644",
+      "size": 4045,
+      "git_blob_sha1": "d18a8c68defc8b1b42849e21dd7d833d9f148594",
+      "sha256": "c0da4c8402e40e235d3336cc6c976b1aa32d12ebb4b6c4ec6b84f0406b701c26"
+    }
+  ],
+  "generator": {
+    "name": "inputcodex-upstream-snapshot-lock",
+    "version": "1",
+    "method": "GitHub Release tar.gz + Git Trees API + Git blob SHA-1 + SHA-256 manifest",
+    "host": {
+      "os": "Microsoft Windows NT 10.0.26200.0",
+      "powershell": "7.6.3"
+    },
+    "tools": {
+      "python": {
+        "version": "3.13.12",
+        "purpose": "安全解压 UTF-8 路径、逐文件哈希与 JSON 生成"
+      },
+      "git": {
+        "version": "2.53.0.windows.1",
+        "purpose": "提交、tree、blob 与文件 mode 对账"
+      },
+      "github_cli": {
+        "version": "2.87.0",
+        "purpose": "查询 Release、提交、递归 tree 与仓库许可证元数据"
+      }
+    }
+  }
+}
