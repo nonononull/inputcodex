@@ -364,13 +364,17 @@ Release Notes 必须列出上游版本和提交、功能一致范围、自有修
 - `pull_request` 规则当前 required approvals 为 `0`，要求解决全部 Review 对话，且只允许 Squash Merge。
 - 当前仓库尚无 required status checks；加入 CI 后必须通过独立 Issue/PR 把稳定检查加入 Ruleset，不能伪造不存在的检查。
 - 落地与验证证据见 `docs/reports/2026-07-21-main-protection-rollout.md`。
+- Issue `#2` 对应 PR `#3` 已于 `2026-07-21T13:15:51Z` Squash Merge，合并提交为 `0e11375997ff10fdc0c233b31c8468af2d9a4f44`；Issue 已关闭，旧分支已删除。
+- 合并后 Ruleset 仍为 `active`、只命中 `main`、无 bypass actor；Review 对话总数与未解决数均为 `0`，Checks 数量为 `0`。
+- 最终 Review、CI 边界、Squash tree 一致和分支清理证据见 `docs/reports/issue-2-architecture-governance-closeout.md`。
 
 ## 十一、分阶段实施
 
 ### Gate 1：方案与治理冻结
 
-- 合并本总方案、术语表和 ADR。
-- 建立 Issue/PR 模板、标签和分支保护。
+- 本总方案、术语表、ADR、Ruleset 与 Rust CI 云端卸载计划已通过 Issue `#2` / PR `#3` Squash Merge。
+- 通过 Issue `#4` 的独立 PR 合并 closeout 证据与最新 Master Plan。
+- `main` 分支保护已建立；Issue/PR 模板与标签仍需后续独立 Issue/PR。
 - 建立新的 `build.md` 和 `err.md` 执行入口。
 
 ### Gate 2：导入上游基线

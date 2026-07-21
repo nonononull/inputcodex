@@ -98,6 +98,33 @@
 - 验证：Ruleset `19395456` 为 `active`，只包含 `refs/heads/main`，无 bypass actor，`allowed_merge_methods` 仅为 `squash`；PR `#3` 目标为 `main` 且合并命令显式使用 `--squash`。
 - 关联：GitHub Issue `#2`、PR `#3`。
 
+### 2026-07-21：Git HTTPS 失败后通过 GitHub API 精确恢复签名合并提交
+
+- 环境：PR `#3` 已在 GitHub Squash Merge，但本地 `git fetch` 与直接 HTTPS 请求连续出现 timeout/reset；认证后的 `gh api` 仍可稳定读取 Git Database API。
+- 现象：本地 `main` 和 `origin/main` 无法通过正常 Git transport 前进到远端合并提交 `0e11375997ff10fdc0c233b31c8468af2d9a4f44`，closeout 又必须在准确的新基线上继续。
+- 根因：故障位于 Git smart HTTP/直接 HTTPS 传输路径，不是远端仓库、提交对象或 GitHub API 不可用；GitHub 生成的合并提交还包含有效 PGP 签名，普通 `git commit-tree` 无法自动复现相同对象 ID。
+- 处理：使用 GitHub Git Database API 读取目标 commit、tree、parent、`verification.payload` 与 PGP signature；按 Git commit 对象格式重建 `gpgsig` 多行头，并完整保留签名结束行后的单空格 continuation，再写入对象数据库并把本地 `main`、`origin/main` 更新到已验证 SHA。失败尝试产生的两个 dangling commit 不挂任何 ref，不执行激进 `git gc` 或 `prune`。
+- 验证：重建 SHA 精确等于 `0e11375997ff10fdc0c233b31c8468af2d9a4f44`；`git fsck --connectivity-only` 通过；本地 `main`、`origin/main` 与 closeout 分支基线一致；提交只有父节点 `09564740b8d00a4b09630c024607cc5292d0381f`，tree 为 `0730422eb3fa738fe2d05a51e5191832fbfec0fe`。
+- 关联：GitHub Issue `#4`、PR `#3`、dangling commits `74a193e9382e2e849d21d34a2f40f6d1c3b264f3` 与 `c19930a7e3ba1074e66a834306bc402bfddab615`。
+
+### 2026-07-21：quiet 原生命令不能只凭空输出判断成功
+
+- 环境：PowerShell 中执行 `gh api --silent`、`git for-each-ref` 等可能成功但没有 stdout 的原生命令。
+- 现象：若脚本只判断输出是否为空，会把“成功且无结果”“目标不存在”“命令执行失败”混成同一状态；远端分支删除与 Git ref 查询因此可能产生假结论。
+- 根因：原生命令的 stdout 内容和进程退出状态是两条不同证据；`--silent` 会主动抑制成功输出，PowerShell 也不会自动把非零退出码转换为可捕获异常。
+- 处理：原生 `git`、`gh` 命令执行后立即保存并检查 `$LASTEXITCODE`，再解释 stdout；PowerShell 脚本仍使用 `$ErrorActionPreference = 'Stop'`、`try/catch` 或 `$?`，不能反过来只用 `$LASTEXITCODE` 判断脚本参数绑定错误。
+- 验证：远端旧分支查询明确得到 `gh` 退出码 `1`，本地 ref 查询退出码为 `0` 且输出为空；两条证据共同证明旧分支已删除，并能区分网络或命令异常。
+- 关联：GitHub Issue `#4`、`build.md` 的 Squash 与分支清理核验。
+
+### 2026-07-21：PowerShell 把 GitHub 时间字符串自动解析为 DateTime
+
+- 环境：PowerShell 7 使用 `gh ... --json ... | ConvertFrom-Json` 读取 `closedAt` 与 `mergedAt`。
+- 现象：对象显示正确时间，但直接与 `2026-07-21T13:15:52Z` 等 RFC3339 字符串比较返回 `False`，会使正确的 closeout 证据验证假失败。
+- 根因：`ConvertFrom-Json` 将 ISO 8601 字段转换成 `System.DateTime`，直接字符串比较不会先按目标 RFC3339 形式格式化。
+- 处理：先调用 `ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')`，再与权威 UTC 时间比较。
+- 验证：Issue `#2` 关闭时间格式化为 `2026-07-21T13:15:52Z`，PR `#3` 合并时间格式化为 `2026-07-21T13:15:51Z`，closeout 检查通过。
+- 关联：GitHub Issue `#4`、`build.md` 的 GitHub 与上游基线核验。
+
 ## 记录模板
 
 ```text

@@ -12,11 +12,11 @@ static_workflow_refs:
   - D:/Android_source/ai-growth-os/components/rules/rules/workflows/git-snapshot-governance.md
 dynamic_workflow_gap_summary: AGOS 全局 registry 尚无 inputcodex 专属 task 与 architecture-governance business path；当前以项目原生控制面和 GitHub Issue #2 在外部项目 warning mode 执行。
 task_scope_boundary: 修改项目治理文档与仅作用于 main 的 GitHub Ruleset；不导入源码、不创建应用或 Actions、不发布、不合并、不修改其他分支规则。
-task_current_state: Ruleset main-protection（ID 19395456）已 active 且只命中 main；Rust CI 云端编译卸载策略及四阶段实施计划已获项目所有者确认并完成文档化，当前仍禁止创建 Workflow 或 Rust 源码；PR #3 保持 OPEN 并等待项目所有者正式 Review。
+task_current_state: Ruleset main-protection（ID 19395456）保持 active 且只命中 main；Rust CI 云端编译卸载策略及四阶段实施计划已完成文档化；PR #3 已于 2026-07-21T13:15:51Z Squash Merge，Issue #2 已关闭，旧分支已删除。
 task_owner: nonononull
-task_follow_up_required: 项目所有者在 PR 中审阅硬约束、范围、上游基线、平台规则、CI 策略和实施计划；所有 Review 对话完成根因闭环且验证通过后才能合并。
+task_follow_up_required: 通过 Issue #4 的独立 PR 合并最终 closeout 证据与最新 Master Plan；随后另建 Issue/PR 补齐 Gate 1 模板与标签，Gate 2 继续锁定。
 task_validation_attribution: 本地 Fresh 命令输出、GitHub Ruleset 19395456 详情、main 有效规则接口、Rust CI 云端编译策略与实施计划、PR #3 元数据及项目所有者决策评论。
-task_closeout_ref: pending:docs/reports/issue-2-architecture-governance-closeout.md
+task_closeout_ref: docs/reports/issue-2-architecture-governance-closeout.md
 
 allowed_operations:
   - docs-write
@@ -57,7 +57,7 @@ node_order:
   - 暂存并运行 cached diff 验证
   - 提交并推送当前分支
   - 创建包含 Closes #2 的待审 PR
-  - 等待项目所有者 Review，不自动合并
+  - 等待项目所有者 Review；取得明确授权并完成 Fresh 合并门后以 Squash Merge 合并 PR #3
 
 subagent_roles:
   - none-owner-did-not-request-subagents
@@ -142,7 +142,7 @@ git_commit_discipline_gate:
 project_git_foundation_gate:
   - verify-project-git-foundation.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -RequireGit -ReportOnly
 project_git_foundation_status: ready
-project_git_foundation_next_action: 保持当前 Issue #2 分支与证据同步，等待项目所有者 Review；禁止自动合并或进入 Gate 2。
+project_git_foundation_next_action: Issue #2 分支已在 Squash Merge 后删除；当前由 codex/issue-4-gate-1-closeout 通过独立 PR 回写证据，禁止直接进入 Gate 2。
 project_git_foundation_forbidden_ops: direct-main-write,force-push,delete-main,merge-without-review,merge-with-unresolved-review
 project_entry_doc_foundation_gate:
   - verify-project-entry-doc-foundation.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -ReportOnly
@@ -152,7 +152,7 @@ project_entry_doc_foundation_forbidden_ops: claim-entry-docs-ready-without-fresh
 
 post_implementation_review_gate:
   - verify-post-implementation-review.ps1 -Path docs/plans/sessions/2026-07-21-issue-2-architecture-governance.md -ReportOnly
-  - 当前 docs-only 任务由主线程自审并在 GitHub PR 等待项目所有者 Review
+  - docs-only 任务已由主线程自审并取得项目所有者 Review/合并授权，最终证据由 Issue #4 closeout 回写
   - 每条 Review 对话必须记录 root cause、resolution 和 verification evidence；仅标记 resolved 不构成解决
   - 若反馈不成立，必须回写可复核证据并取得 reviewer 或项目所有者确认
   - 存在未解决对话或缺少根因解决证据时禁止合并
@@ -191,9 +191,11 @@ project_state_gates:
 long_task_states:
   - discovery-complete
   - plan-approved
-  - docs-execution-active
-  - verification-pending
-  - pr-review-pending
+  - docs-execution-complete
+  - verification-passed
+  - pr-merged
+  - issue-closed
+  - closeout-recorded
 execution_windows:
   - window-1: 已批准方案、CONTEXT.md 与 ADR
   - window-2: Session Plan、Runtime Workflow、Master Plan、build.md、err.md
@@ -201,6 +203,7 @@ execution_windows:
   - window-4: 审计 GitHub 配置、创建 main-protection Ruleset、验证有效规则并回写证据
   - window-5: 批准本地轻量与云端全量 Rust CI 策略，只写设计和控制面，不创建 Workflow
   - window-6: 使用 writing-plans 拆分上游监控、Workspace+三平台 CI、Cache 调优与 required check，只写实施计划
+  - window-7: 项目所有者授权 Squash Merge，核验 Review/Ruleset 后合并 PR #3，并由 Issue #4 独立回写 closeout
 execution_ownership_contract:
   - 主线程独占本任务全部写入文件
   - 不启动未经用户要求的写入型子 agent
@@ -227,6 +230,22 @@ verification_gates:
   - gh api repos/BigPizzaV3/CodexPlusPlus/releases/latest
   - gh api repos/BigPizzaV3/CodexPlusPlus/git/ref/tags/v1.2.41
 
+delivery_closeout:
+  delivery_status: merged-and-closed
+  tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/2
+  review_ref: https://github.com/nonononull/inputcodex/pull/3#issuecomment-5034419368
+  pr_ref: https://github.com/nonononull/inputcodex/pull/3
+  ci_ref: not-configured:checks-0-at-merge-2026-07-21T13:15:51Z
+  merge_ref: https://github.com/nonononull/inputcodex/commit/0e11375997ff10fdc0c233b31c8468af2d9a4f44
+  closeout_ref: docs/reports/issue-2-architecture-governance-closeout.md
+  issue_closed_at: 2026-07-21T13:15:52Z
+  review_threads_total: 0
+  review_threads_unresolved: 0
+  remote_branch_deleted: true
+  local_branch_deleted: true
+  squash_parent_count: 1
+  merge_tree_equals_pr_head_tree: true
+
 strict_runtime_validator_status: blocked-by-unregistered-external-task-and-business-path
 strict_runtime_validator_claimed: false
 strict_runtime_validator_recovery: 若未来将 inputcodex 纳入 AGOS 全局 registry，先创建独立跨仓治理 Issue/PR，再映射 task 与 business path 并运行 verify-runtime-workflow.ps1。
@@ -235,6 +254,9 @@ rollout_draft:
   reusable_path: GitHub Issue 驱动的外部项目架构治理、main Ruleset、Rust CI 云端卸载策略与分阶段实施计划冻结
   record_at_closeout: true
   closeout_boundary: PR 合并并补齐 review_ref、ci_ref、merge_ref 后
-  current_status: deferred-until-pr-3-merge-closeout
+  current_status: local-closeout-recorded;formal-recorder-blocked-unregistered-source-task
+  recorder_result: WORKFLOW_ROLLOUT_REPAIR_REQUIRED
+  suggested_task_id: agos-p2-2026-07-21-issue-2-architecture-governance
+  cross_repo_write_performed: false
   candidate_rule: 单次 rollout 不能生成 workflow candidate
 ```

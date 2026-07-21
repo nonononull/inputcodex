@@ -4,7 +4,7 @@ schema_version: agos.session-plan.v1
 architecture_contract_version: agos.brainstorming-gate.v1
 task_id: 2026-07-21-issue-2-architecture-governance
 work_class: major
-task_status: review-pending
+task_status: merged-closeout-recorded
 task_summary: 将 inputcodex 重构、上游同步、版本发布、GitHub 治理与 Rust CI 云端卸载实施顺序固化为项目单一真源，落地仅作用于 main 的保护 Ruleset，并通过 Issue #2 关联 PR 交付。
 project_root: C:/Users/dashuai/Documents/inputcodex
 trigger_source: 用户批准架构方案、main 保护规则、实际 GitHub 配置与 Rust CI 云端卸载方案，并以“方案确认”批准只写实施计划、不提前创建 Workflow
@@ -28,7 +28,7 @@ tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/2
 review_strategy: 本地结构与语义自审、Fresh 验证证据、GitHub PR 由项目所有者审阅；所有 Review 对话必须完成根因、处理和验证闭环
 ci_expectation: 当前执行文档与 GitHub Ruleset 验证；仓库尚无 Actions，后续稳定 CI 建立后再通过独立 Issue/PR 升级为 required checks
 merge_policy: 项目所有者审阅通过、检查成功且所有 Review 对话完成根因解决与验证闭环后只允许 Squash Merge；禁止 Merge Commit 和 Rebase Merge
-closeout_ref: pending:merge-and-closeout-after-https://github.com/nonononull/inputcodex/pull/3
+closeout_ref: docs/reports/issue-2-architecture-governance-closeout.md
 
 ## Approved Decision
 
@@ -227,8 +227,8 @@ change_contract:
       command_or_evidence_ref: verify-master-plan-index.ps1
       expected_result: MASTER_PLAN_INDEX_VERIFY_OK
     - surface: GitHub 任务关联
-      command_or_evidence_ref: gh issue view 2 --repo nonononull/inputcodex
-      expected_result: Issue #2 为 OPEN 且内容覆盖本任务边界
+      command_or_evidence_ref: gh issue view 2 --repo nonononull/inputcodex; gh pr view 3 --repo nonononull/inputcodex
+      expected_result: Issue #2 为 CLOSED、PR #3 为 MERGED，且最终 closeout 由 Issue #4 独立追踪
     - surface: 上游正式基线
       command_or_evidence_ref: gh api repos/BigPizzaV3/CodexPlusPlus/releases/latest
       expected_result: 最新正式 Release 为 v1.2.41
@@ -407,14 +407,39 @@ verification_commands:
 delivery_contract: agos.issue-pr-merge.v1
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/2
 branch_ref: docs/issue-2-architecture-governance
-review_ref: pending:project-owner-review
+review_ref: https://github.com/nonononull/inputcodex/pull/3#issuecomment-5034419368
 pr_ref: https://github.com/nonononull/inputcodex/pull/3
 ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
-ci_ref: not-configured:statusCheckRollup-empty-2026-07-21
-merge_ref: pending:owner-approved-merge
+ci_ref: not-configured:checks-0-at-merge-2026-07-21T13:15:51Z
+merge_ref: https://github.com/nonononull/inputcodex/commit/0e11375997ff10fdc0c233b31c8468af2d9a4f44
 review_strategy: Fresh 本地验证后创建非 Draft PR，由项目所有者逐项核对硬约束、范围和上游基线；每条 Review 对话必须记录根因、处理与验证证据。
 ci_expectation: 文档校验必须通过；若仓库尚无 Actions，则 PR 明确记录本地命令和结果，不伪造 CI。
 merge_policy: PR 正文必须包含 Closes #2；单人阶段 required approvals 为 0 但必须有项目所有者决策证据，多人阶段 required approvals 为 1；所有 Review 对话完成根因解决和验证闭环后只允许 Squash Merge，禁止 Merge Commit 和 Rebase Merge。
+```
+
+## Closeout Evidence
+
+```yaml
+delivery_status: merged-and-closed
+review_ref: https://github.com/nonononull/inputcodex/pull/3#issuecomment-5034419368
+review_evidence_refs:
+  - https://github.com/nonononull/inputcodex/pull/3#issuecomment-5033315525
+  - https://github.com/nonononull/inputcodex/pull/3#issuecomment-5033444325
+  - https://github.com/nonononull/inputcodex/pull/3#issuecomment-5034505181
+pr_ref: https://github.com/nonononull/inputcodex/pull/3
+ci_ref: not-configured:checks-0-at-merge-2026-07-21T13:15:51Z
+merge_ref: https://github.com/nonononull/inputcodex/commit/0e11375997ff10fdc0c233b31c8468af2d9a4f44
+merged_at: 2026-07-21T13:15:51Z
+issue_closed_at: 2026-07-21T13:15:52Z
+review_threads_total: 0
+review_threads_unresolved: 0
+remote_branch_deleted: true
+local_branch_deleted: true
+squash_parent_count: 1
+merge_tree: 0730422eb3fa738fe2d05a51e5191832fbfec0fe
+pr_head_tree: 0730422eb3fa738fe2d05a51e5191832fbfec0fe
+closeout_ref: docs/reports/issue-2-architecture-governance-closeout.md
+closeout_tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/4
 ```
 
 ## Completion Criteria
@@ -425,5 +450,5 @@ merge_policy: PR 正文必须包含 Closes #2；单人阶段 required approvals 
 - `docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md` 明确四个独立 Issue/PR、精确未来文件、Job 分层、权限、触发、Cache、Artifact、失败语义和回滚方式，且当前不创建 Workflow 或 Rust 源码。
 - GitHub Ruleset `main-protection` 处于 active，只命中 `main`，且删除、Force Push、PR、Review 对话和 Squash-only 参数与批准决策一致。
 - `build.md` 给出当前文档任务可重复执行的验证命令，`err.md` 记录本次 AGOS 与补丁工具异常。
-- 每次新增提交都必须在 Fresh 验证通过后正常推送到 `docs/issue-2-architecture-governance`；提交证据以 PR `#3` 的 commit 列表和验证评论为准，不在本文件固化会因后续提交失效的自引用 HEAD。
-- 已创建包含 `Closes #2` 的 PR `#3`，当前状态为 `OPEN`、非 Draft、`mergeStateStatus=CLEAN`，等待项目所有者 Review；本会话不自动合并。
+- 历史分支 `docs/issue-2-architecture-governance` 的全部提交均在 Fresh 验证后正常推送，并已由 PR `#3` Squash Merge；分支现已删除，提交与验证证据以 PR 记录和最终 closeout 报告为准。
+- 包含 `Closes #2` 的 PR `#3` 已由项目所有者完成 Review 并于 `2026-07-21T13:15:51Z` Squash Merge；Issue `#2` 已关闭，旧分支已删除，最终证据见 `docs/reports/issue-2-architecture-governance-closeout.md`。

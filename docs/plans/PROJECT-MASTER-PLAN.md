@@ -1,16 +1,18 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: 2026-07-21-issue-2-architecture-governance
-active_gate: Gate 1：方案与治理冻结
-last_verified_gate: Gate 0：仓库准备
-next_legal_gate: 项目所有者审阅并合并 PR #3；随后以新 Issue 补齐 Gate 1 的 GitHub 模板与标签，Gate 1 完成前不得进入 Gate 2。
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/2
-active_branch_ref: docs/issue-2-architecture-governance
-active_plan_ref: docs/plans/2026-07-21-architecture-governance.md
-active_session_plan_ref: docs/plans/sessions/2026-07-21-issue-2-architecture-governance.md
-active_runtime_workflow_ref: docs/workflows/2026-07-21-issue-2-architecture-governance-runtime.md
-active_pr_ref: https://github.com/nonononull/inputcodex/pull/3
+active_task: 2026-07-21-issue-4-gate-1-closeout
+active_gate: Gate 1：合并证据 closeout
+last_verified_gate: Gate 1 子里程碑：Issue #2 / PR #3 已 Squash Merge
+next_legal_gate: 完成 Issue #4 closeout PR 的项目所有者 Review 与 Squash Merge；随后以独立 Issue/PR 补齐 GitHub 模板与标签，Gate 1 完成前不得进入 Gate 2。
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/4
+active_branch_ref: codex/issue-4-gate-1-closeout
+active_plan_ref: docs/plans/2026-07-21-issue-4-gate-1-closeout.md
+active_session_plan_ref: docs/plans/sessions/2026-07-21-issue-4-gate-1-closeout.md
+active_runtime_workflow_ref: docs/workflows/2026-07-21-issue-4-gate-1-closeout-runtime.md
+active_pr_ref: pending:issue-4-closeout-pr
+closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3
+closeout_report_ref: docs/reports/issue-2-architecture-governance-closeout.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
@@ -21,10 +23,12 @@ decision_status: approved
 - 当前只执行文档、治理冻结与 `main` Ruleset 落地，不导入上游源码，不创建 Rust/Iced 工程，不实现 GitHub Actions，不发布资产。
 - `BigPizzaV3/CodexPlusPlus` 最新正式 Release 是功能真源；当前冻结基线为 `v1.2.41`，提交 `3dafffcafb2566a1e8bce4b35671656d6adb3eda`。
 - `zsr131550/CodexPlusPlus` 仅作半成品参考，不作为代码底座或功能真源。
-- 本任务交付链为 `Issue #2 → 当前分支 → Fresh 验证 → 关联 PR → 项目所有者 Review → Merge`。
-- PR `#3` 已创建，状态为 `OPEN`、非 Draft、`mergeStateStatus=CLEAN`；仓库当前没有 PR 状态检查，项目所有者 Review 与合并仍未完成。
+- Issue `#2` / PR `#3` 交付链已完成：PR 于 `2026-07-21T13:15:51Z` Squash Merge，Issue 于 `2026-07-21T13:15:52Z` 关闭，旧功能分支已删除。
+- PR `#3` 合并提交为 `0e11375997ff10fdc0c233b31c8468af2d9a4f44`；只有一个父提交，且 merge tree 与最终 PR Head tree 完全一致。
+- 合并时 Review 对话总数与未解决数均为 `0`；Checks 数量为 `0`，语义是当前未配置 Actions/required checks，不是伪造的 CI 通过。
 - GitHub Ruleset `main-protection`（ID `19395456`）已激活且只命中 `main`；禁止删除、禁止 Force Push、要求 PR、要求解决 Review 对话并只允许 Squash Merge，当前单人阶段 required approvals 为 `0`。
 - 已批准 Rust CI 云端卸载策略与实施计划：本地只做轻量定向验证，全量 Workspace、Windows/macOS 和发布构建交给标准 GitHub-hosted runners；未来按上游监控、Workspace+三平台 CI、Cache 调优、Ruleset 升级四个独立 Issue/PR 推进，当前只落盘计划，不创建 Workflow。
+- 当前 Issue `#4` 只负责通过独立分支和 PR 回写上述 closeout 证据与最新 Master Plan；不进入源码、Actions、Ruleset 或发布范围。
 
 ## 项目不变量
 
@@ -62,7 +66,8 @@ decision_status: approved
 - [x] 创建并验证仅作用于 `main` 的 GitHub Ruleset；证据见 `docs/reports/2026-07-21-main-protection-rollout.md`。
 - [x] 批准并落盘 Rust CI 云端编译卸载策略；当前不创建 Workflow。
 - [x] 批准并落盘 Rust CI 云端卸载实施计划；Gate 2/3、Cache 调优和 required check 均保持锁定并要求独立 Issue/PR。
-- [ ] 项目所有者 Review 并合并 Issue #2 PR。
+- [x] 项目所有者完成 Review 并以 Squash Merge 合并 PR `#3`；Issue `#2` 已关闭，旧分支已删除。
+- [ ] 通过 Issue `#4` 的独立 PR 合并 closeout 报告和最新控制面；未经再次授权不得自动合并。
 - [ ] 通过后续独立 Issue/PR 建立 Issue/PR 模板与标签。
 
 ### Gate 2：导入上游基线（锁定）
@@ -98,12 +103,14 @@ decision_status: approved
 - 构建与文档验证：`build.md`。
 - 排错与已知限制：`err.md`。
 - 单一架构真源：`docs/plans/2026-07-21-architecture-governance.md`。
-- 当前任务计划：`docs/plans/sessions/2026-07-21-issue-2-architecture-governance.md`。
-- 当前运行图：`docs/workflows/2026-07-21-issue-2-architecture-governance-runtime.md`。
+- Issue `#2` closeout 报告：`docs/reports/issue-2-architecture-governance-closeout.md`。
+- 当前任务计划：`docs/plans/2026-07-21-issue-4-gate-1-closeout.md`。
+- 当前 Session Plan：`docs/plans/sessions/2026-07-21-issue-4-gate-1-closeout.md`。
+- 当前运行图：`docs/workflows/2026-07-21-issue-4-gate-1-closeout-runtime.md`。
 
 ## 停止条件
 
 - 用户改变已批准硬约束或当前 docs-only 范围。
 - 上游最新正式 Release 或 `v1.2.41` 标签提交发生变化。
 - 需要导入源码、实现 UI、创建 Actions、发布资产或跨仓修改 AI Growth OS 控制面。
-- Fresh 验证失败、分支不正确、PR 无法关联 Issue #2，或出现未批准的一致性差异。
+- Fresh 验证失败、分支不正确、PR 无法关联 Issue #4、GitHub closeout 事实发生变化，或出现未批准的一致性差异。
