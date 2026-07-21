@@ -29,7 +29,7 @@ decision_status: approved
 - GitHub Ruleset `main-protection`（ID `19395456`）已激活且只命中 `main`；禁止删除、禁止 Force Push、要求 PR、要求解决 Review 对话并只允许 Squash Merge，当前单人阶段 required approvals 为 `0`。
 - 已批准 Rust CI 云端卸载策略与实施计划：本地只做轻量定向验证，全量 Workspace、Windows/macOS 和发布构建交给标准 GitHub-hosted runners；未来按上游监控、Workspace+三平台 CI、Cache 调优、Ruleset 升级四个独立 Issue/PR 推进，当前只落盘计划，不创建 Workflow。
 - 当前 Issue `#4` 只负责通过独立分支和 PR 回写上述 closeout 证据与最新 Master Plan；不进入源码、Actions、Ruleset 或发布范围。
-- Issue `#4` 对应 PR `#5` 已创建，当前为 `OPEN`、非 Draft、`mergeStateStatus=CLEAN`，Head 为 `f78d6ead6da39579d38ce49a9edd552ba1af844b`，Checks 与未解决 Review 对话均为 `0`；未经项目所有者再次授权不得合并。
+- Issue `#4` 对应 PR `#5` 已创建，当前为 `OPEN`、非 Draft、`mergeStateStatus=CLEAN`，PR Head 与本地/远端跟踪分支一致，Checks 与未解决 Review 对话均为 `0`；未经项目所有者再次授权不得合并。
 
 ## 项目不变量
 
