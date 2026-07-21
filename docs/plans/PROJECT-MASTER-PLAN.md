@@ -37,6 +37,7 @@ decision_status: approved
 - 所有 PR 合并到 `main` 只允许 Squash Merge；禁止 Merge Commit 和 Rebase Merge。
 - `main` 永久禁止 `--force` 和 `--force-with-lease`；错误历史与紧急修复只能通过 `revert` 和关联 Issue/PR 处理。
 - `main` 永久禁止删除；项目所有者与管理员无例外，误删后只能从最后一个权威提交恢复并建立事故 Issue。
+- 所有 Review 对话必须在确定根因、完成处理并回写验证证据后才能解决和合并；不成立的反馈也必须有可复核证据与 reviewer 或所有者确认。
 - 单人维护阶段 required approvals 为 `0` 且必须保留所有者决策证据；第二名具备合并权限的人类维护者加入后，在下一次合并前提升为 `1`。
 
 ## 阶段索引

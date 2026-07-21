@@ -94,6 +94,7 @@ model_drift_guards:
   - 所有 PR 合并到 main 只允许 Squash Merge，禁止 Merge Commit 和 Rebase Merge
   - main 永久禁止 --force 和 --force-with-lease；错误历史与紧急修复只能通过 revert 和关联 Issue/PR 处理
   - main 永久禁止删除；所有者与管理员无例外，误删后只能从最后一个权威提交恢复并建立事故 Issue
+  - 所有 Review 对话必须完成根因、处理和验证闭环；禁止空点 Resolve 或带未解决对话合并
   - 单人维护阶段 required approvals 为 0 但必须有项目所有者决策证据；第二名具备合并权限的人类维护者加入后在下一次合并前提升为 1
   - 客户端更新和资产只指向 nonononull/inputcodex
   - 争议功能必须走 parity-exception Issue
@@ -128,12 +129,13 @@ git_commit_discipline_gate:
   - 当前分支必须为 docs/issue-2-architecture-governance
   - 提交主题使用 docs: 固化重构与发布治理方案
   - PR 最终只能 Squash Merge，使一个 Issue 在 main 上对应一条可回滚提交
+  - 所有 Review 对话必须写明根因、处理方式与验证证据后才能解决；反馈不成立时必须有证据和 reviewer 或所有者确认
   - 不允许对 main 使用 force push 或删除 main；不允许绕过 PR 直接修改 main
 project_git_foundation_gate:
   - verify-project-git-foundation.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -RequireGit -ReportOnly
 project_git_foundation_status: ready
 project_git_foundation_next_action: 在现有 Issue #2 文档分支完成验证、提交与 PR。
-project_git_foundation_forbidden_ops: direct-main-write,force-push,delete-main,merge-without-review
+project_git_foundation_forbidden_ops: direct-main-write,force-push,delete-main,merge-without-review,merge-with-unresolved-review
 project_entry_doc_foundation_gate:
   - verify-project-entry-doc-foundation.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -ReportOnly
 project_entry_doc_foundation_status: ready
@@ -143,6 +145,9 @@ project_entry_doc_foundation_forbidden_ops: claim-entry-docs-ready-without-fresh
 post_implementation_review_gate:
   - verify-post-implementation-review.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -ReportOnly
   - 当前 docs-only 任务由主线程自审并在 GitHub PR 等待项目所有者 Review
+  - 每条 Review 对话必须记录 root cause、resolution 和 verification evidence；仅标记 resolved 不构成解决
+  - 若反馈不成立，必须回写可复核证据并取得 reviewer 或项目所有者确认
+  - 存在未解决对话或缺少根因解决证据时禁止合并
   - 未取得 owner review_ref 前禁止合并或宣称治理闭环完成
 protected_feature_replay_gate:
   - verify-protected-feature-replay.ps1 -SessionPlanPath docs/plans/sessions/2026-07-21-issue-2-architecture-governance.md -ReportOnly
