@@ -35,7 +35,7 @@
 - 筹备 Issue `#1` 已回写 Gate 1 完成证据并以 `completed` 关闭。
 - 通过 PR `#10` Squash Merge Gate 1→2 控制面过渡；合并提交为 `216d400006ad3f1dd2587ca367abb19d0191949f`，Issue `#8` 已关闭。
 - 通过 PR `#11` Squash Merge 上游 `v1.2.41` 完整只读审计快照、`source-lock.json` 与同步报告；合并提交为 `dde08b725eb2bf4add7fbcfa955f3eaf4eb1bbc6`，Issue `#9` 已关闭。
-- 已建立 Issue `#12`，使用独立 closeout PR 回写 PR `#11` 合并证据、`build.md`、`err.md` 和最新 Master Plan。
+- 已建立 Issue `#12` / PR `#13`，使用独立 closeout PR 回写 PR `#11` 合并证据、`build.md`、`err.md` 和最新 Master Plan。
 
 当前明确不做：
 

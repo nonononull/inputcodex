@@ -40,7 +40,7 @@ external_agos_execution: skipped-not-a-project-gate-no-cross-repo-mutation
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/12
 source_pr_ref: https://github.com/nonononull/inputcodex/pull/11
 source_merge_ref: dde08b725eb2bf4add7fbcfa955f3eaf4eb1bbc6
-review_ref: pending:issue-12-owner-review
-pr_ref: pending:issue-12-closeout-pr
+review_ref: pending:issue-12-owner-review-pr13
+pr_ref: https://github.com/nonononull/inputcodex/pull/13
 ci_ref: not-configured:gate-2-workflows-0
 merge_ref: none:closeout-pr-not-authorized
