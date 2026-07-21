@@ -7,7 +7,10 @@
 - 软件名称统一为 `inputcodex`。
 - 产品与代码中不引入广告、推广位或广告 SDK。
 - 优先解决卡顿、功能加载异常和模块职责混乱问题。
-- 在证据充分后重新确定架构，不默认照搬现有实现。
+- 已批准采用纯 Rust、Iced 展示层和分层核心重新实现，不照搬上游或半成品架构。
+- Windows 与 macOS 从首版起保持功能一致。
+- 使用纯 Rust 与 Iced 构建桌面产品，不使用 TypeScript、JavaScript 业务代码或 WebView。
+- 上游 Tauri/React 管理界面、现有注入脚本和远程推荐列表只进入快照审计，不直接进入新架构或最终运行面。
 
 ## 参考项目
 
@@ -23,23 +26,22 @@
 - 建立本地 Git 仓库与 GitHub 公开仓库。
 - 固定项目名称、无广告原则和性能优先目标。
 - 建立项目级构建、排错、计划与执行约束文档。
-- 建立筹备 Issue，承载后续架构讨论与决策证据。
+- 通过 Issue `#2` 批准纯 Rust/Iced、完整上游快照、自主发布线和 Issue/PR 治理方案。
+- 起草重构与发布治理单一真源、项目语境、ADR、Major Session Plan 和 Runtime Workflow。
 
 当前明确不做：
 
 - 不导入上游或半成品源码。
-- 不提前选择最终技术栈或架构。
-- 不在缺少测量证据时直接开展大规模重写。
+- 不创建 Rust/Iced 工程或 GitHub Actions。
+- 不执行功能迁移、安装包构建、发布或 PR 合并。
+- 不让上游 Tauri/React UI、现有注入脚本和远程推荐列表进入最终运行面。
 
 ## 下一步
 
-下一轮先审计两个参考仓库，再讨论并选择以下路线之一：
-
-1. 从零重写，只复用经审计确认的行为与协议。
-2. 以半成品为基础做渐进式重构。
-3. 建立新壳与稳定核心，按模块择优迁移。
-
-架构方案、性能基线、模块边界和首个可验收版本将在讨论通过后写入项目计划。
+1. 完成 Issue `#2` 文档验证、关联 PR 和项目所有者 Review。
+2. 通过独立 Issue/PR 补齐 Issue/PR 模板、标签和 `main` 分支保护，完成 Gate 1。
+3. Gate 1 完成后，新建 `upstream-sync` Issue 导入 `v1.2.41` 完整快照并建立每 6 小时上游监控。
+4. 后续再分别建立 Rust/Iced 骨架、功能矩阵和性能基线 Issue；任何源码实现都需要新的 Session Plan 与批准。
 
 ## 项目文档
 
@@ -47,8 +49,13 @@
 - 排错记录：`err.md`
 - 项目总计划：`docs/plans/PROJECT-MASTER-PLAN.md`
 - 本次筹备计划：`docs/plans/2026-07-21-bootstrap.md`
-- 本次会话计划：`docs/plans/sessions/2026-07-21-inputcodex-bootstrap.md`
-- 本次运行工作流：`docs/workflows/2026-07-21-inputcodex-bootstrap-runtime.md`
+- 筹备会话计划：`docs/plans/sessions/2026-07-21-inputcodex-bootstrap.md`
+- 筹备运行工作流：`docs/workflows/2026-07-21-inputcodex-bootstrap-runtime.md`
+- 项目术语：`CONTEXT.md`
+- 重构与发布治理总方案：`docs/plans/2026-07-21-architecture-governance.md`
+- 当前会话计划：`docs/plans/sessions/2026-07-21-issue-2-architecture-governance.md`
+- 当前运行工作流：`docs/workflows/2026-07-21-issue-2-architecture-governance-runtime.md`
+- 架构决策：`docs/adr/`
 
 ## 许可证
 

@@ -9,8 +9,14 @@
 
 - 禁止加入广告、推广位、广告 SDK、付费导流或隐蔽遥测。
 - 性能、稳定性和可诊断性优先于功能数量。
+- Windows 与 macOS 从首版起保持功能一致。
+- 禁止 TypeScript、JavaScript 业务代码和 WebView；桌面产品使用 Rust 与 Iced。
+- Iced 只能存在于展示层，领域、应用、存储、网络和平台层不得依赖 Iced 类型。
 - 功能加载必须具备明确状态、超时、取消、错误隔离和可观测证据。
 - 未经方案评审，不照搬 `BigPizzaV3/CodexPlusPlus` 或 `zsr131550/CodexPlusPlus` 的架构。
+- `BigPizzaV3/CodexPlusPlus` 最新正式 Release 是唯一功能真源，`main` 仅作为变化预警源。
+- 无效功能、有害副作用或错误语义争议必须建立一致性例外 Issue，由项目所有者决定后才能实现差异。
+- 上游 Tauri/React 管理界面、现有注入脚本和远程推荐列表只能作为完整快照中的审计输入，不得直接进入新架构或最终运行面；需要保留其背后的有效能力时，必须建立独立功能或一致性例外 Issue。
 
 ## 开发约束
 
@@ -20,6 +26,18 @@
 - 改动保持小而可验证；禁止顺手重构无关代码。
 - 导入第三方或参考项目代码前，必须确认许可证、来源、提交和保留声明要求。
 - 架构与功能实现使用测试或可重复测量证据驱动，完成前运行项目定义的验证命令。
+- Rust 开发默认采用“本地轻量验证 + GitHub Actions 全量验证”：本地只执行 `build.md` 定义的快速、定向命令，Workspace 全量检查、Windows/macOS 编译测试和发布构建交给公开仓库的标准 GitHub-hosted runners。
+- 禁止默认使用 Larger Runner 或项目所有者本地机器作为 self-hosted runner；任何收费 Runner、self-hosted runner 或新的付费 CI 资源必须先建立独立 Issue 并获得项目所有者批准。
+- CI 必须限制重复运行、超时、Cache 和 Artifact；禁止上传整个 `target/`，非 Release Artifact 最长保留 7 天。CI 尚未稳定前不得把检查加入 `main` Ruleset。
+- 所有正式工作必须执行 `Issue → 分支 → 验证证据 → 关联 PR → Review/CI → Merge`，禁止直接向 `main` 写功能。
+- 所有 PR 合并到 `main` 必须使用 Squash Merge；禁止 Merge Commit 和 Rebase Merge，确保每个 Issue 在 `main` 上形成一条可独立追踪和回滚的提交。
+- 永久禁止对 `main` 使用 `git push --force` 或 `git push --force-with-lease`，项目所有者和管理员也不例外；历史错误必须通过 `revert` 提交和关联 Issue/PR 修正，紧急情况不能绕过该规则。
+- 永久禁止删除 `main`，项目所有者和管理员也不例外；若发生误删，必须从删除前最后一个权威提交恢复同名分支并建立事故 Issue，不得借恢复改写历史。
+- 所有 Review 对话必须在合并 PR 前解决；每条解决记录必须写明根因、处理方式和验证证据。若反馈被判定为不成立，必须提供可复核证据并取得 reviewer 或项目所有者确认；禁止仅点击 `Resolve conversation`、忽略根因或带着未解决对话合并。
+- 仓库只有一名具备合并权限的人类维护者时，平台 required approvals 设为 `0`，但每次合并前必须在关联 Issue 或 PR 中保留项目所有者的明确决策证据。
+- 当第二名具备 `write`、`maintain` 或 `admin` 权限的人类维护者加入时，必须在下一次 PR 合并前把 required approvals 提升为 `1`；Bot、GitHub App 和自动化账号不计入维护者人数。
+- 上游缓存同步 PR 只能更新 `upstream/` 与同步报告；功能重构必须使用独立 Issue 和 PR。
+- 客户端更新、安装包、签名和下载地址只能指向 `nonononull/inputcodex`。
 
 ## UI 边界
 
