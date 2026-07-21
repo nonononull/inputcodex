@@ -37,6 +37,7 @@ closeout_ref: pending:merge-and-closeout-after-https://github.com/nonononull/inp
 - Decision: 上游 Tauri/React 管理界面、现有注入脚本和远程推荐列表只作快照审计，不直接进入新架构或最终运行面；需要保留其有效能力时另建功能或一致性例外 Issue。
 - Decision: GitHub Actions 每 6 小时监控上游，只创建或更新 Issue，不自动同步、实现、合并或发布。
 - Decision: 所有 PR 合并到 `main` 只允许 Squash Merge，禁止 Merge Commit 和 Rebase Merge；每个 Issue 在 `main` 上只保留一条可追踪、可回滚提交。
+- Decision: 单人维护阶段平台 required approvals 为 `0`，但必须保留项目所有者决策证据；第二名具备合并权限的人类维护者加入后，在下一次 PR 合并前提升为 `1`，自动化账号不计入人数。
 - Decision: 版本采用 `v<上游版本>-inputcodex.<修订号>`，安装包、更新清单、签名与下载地址全部属于 `nonononull/inputcodex`。
 - Decision: 无效功能、有害副作用或错误语义争议必须建立 `parity-exception` Issue，由项目所有者决定。
 - Reason: 用户明确拒绝 TypeScript/WebView 架构及其卡顿和异常加载问题，并批准纯 Rust、Iced、完整上游缓存、自主发布线与 Issue/PR 治理。
@@ -377,7 +378,7 @@ ci_ref: not-configured:statusCheckRollup-empty-2026-07-21
 merge_ref: pending:owner-approved-merge
 review_strategy: Fresh 本地验证后创建非 Draft PR，由项目所有者逐项核对硬约束、范围和上游基线。
 ci_expectation: 文档校验必须通过；若仓库尚无 Actions，则 PR 明确记录本地命令和结果，不伪造 CI。
-merge_policy: PR 正文必须包含 Closes #2；项目所有者批准前不合并；批准后只允许 Squash Merge，禁止 Merge Commit 和 Rebase Merge。
+merge_policy: PR 正文必须包含 Closes #2；单人阶段 required approvals 为 0 但必须有项目所有者决策证据，多人阶段 required approvals 为 1；批准后只允许 Squash Merge，禁止 Merge Commit 和 Rebase Merge。
 ```
 
 ## Completion Criteria

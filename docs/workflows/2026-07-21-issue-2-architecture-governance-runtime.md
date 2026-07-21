@@ -92,6 +92,7 @@ model_drift_guards:
   - 上游 Tauri/React 管理界面、现有注入脚本和远程推荐列表只能用于审计，不得直接进入新架构或最终运行面
   - 上游同步 PR 与功能迁移 PR 永远分离
   - 所有 PR 合并到 main 只允许 Squash Merge，禁止 Merge Commit 和 Rebase Merge
+  - 单人维护阶段 required approvals 为 0 但必须有项目所有者决策证据；第二名具备合并权限的人类维护者加入后在下一次合并前提升为 1
   - 客户端更新和资产只指向 nonononull/inputcodex
   - 争议功能必须走 parity-exception Issue
 

@@ -333,6 +333,8 @@ Release Notes 必须列出上游版本和提交、功能一致范围、自有修
 - 必须通过关联 PR。
 - 只允许 Squash Merge；仓库必须禁用 Merge Commit 和 Rebase Merge。
 - 每个 Issue 合并后在 `main` 上只形成一条可独立追踪和回滚的提交。
+- 单人维护阶段 required approvals 为 `0`，但关联 Issue 或 PR 必须存在项目所有者明确批准证据。
+- 当第二名具备 `write`、`maintain` 或 `admin` 权限的人类维护者加入时，必须在下一次 PR 合并前把 required approvals 提升为 `1`；Bot、GitHub App 和自动化账号不计入人数。
 - 必须通过要求的 CI 检查。
 - 架构、一致性例外和发布 PR 必须由项目所有者批准。
 - 合并后删除功能分支。
