@@ -12,6 +12,7 @@ active_session_plan_ref: docs/plans/sessions/2026-07-21-issue-2-architecture-gov
 active_runtime_workflow_ref: docs/workflows/2026-07-21-issue-2-architecture-governance-runtime.md
 active_pr_ref: https://github.com/nonononull/inputcodex/pull/3
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
+active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 decision_status: approved
 
 ## 当前状态
@@ -22,6 +23,7 @@ decision_status: approved
 - 本任务交付链为 `Issue #2 → 当前分支 → Fresh 验证 → 关联 PR → 项目所有者 Review → Merge`。
 - PR `#3` 已创建，状态为 `OPEN`、非 Draft、`mergeStateStatus=CLEAN`；仓库当前没有 PR 状态检查，项目所有者 Review 与合并仍未完成。
 - GitHub Ruleset `main-protection`（ID `19395456`）已激活且只命中 `main`；禁止删除、禁止 Force Push、要求 PR、要求解决 Review 对话并只允许 Squash Merge，当前单人阶段 required approvals 为 `0`。
+- 已批准 Rust CI 云端卸载策略：本地只做轻量定向验证，全量 Workspace、Windows/macOS 和发布构建交给标准 GitHub-hosted runners；当前只落盘设计，不创建 Workflow。
 
 ## 项目不变量
 
@@ -41,6 +43,7 @@ decision_status: approved
 - `main` 永久禁止删除；项目所有者与管理员无例外，误删后只能从最后一个权威提交恢复并建立事故 Issue。
 - 所有 Review 对话必须在确定根因、完成处理并回写验证证据后才能解决和合并；不成立的反馈也必须有可复核证据与 reviewer 或所有者确认。
 - 单人维护阶段 required approvals 为 `0` 且必须保留所有者决策证据；第二名具备合并权限的人类维护者加入后，在下一次合并前提升为 `1`。
+- Rust 全量编译与双平台验证默认在标准 GitHub-hosted runners 完成；禁止默认 Larger Runner、本机 self-hosted runner 和无边界 Cache/Artifact。
 
 ## 阶段索引
 
@@ -56,6 +59,7 @@ decision_status: approved
 - [x] 完成 Fresh 文档、Git、GitHub 元数据和快照治理验证。
 - [x] 提交并推送当前分支，创建包含 `Closes #2` 的 PR `#3`。
 - [x] 创建并验证仅作用于 `main` 的 GitHub Ruleset；证据见 `docs/reports/2026-07-21-main-protection-rollout.md`。
+- [x] 批准并落盘 Rust CI 云端编译卸载策略；当前不创建 Workflow。
 - [ ] 项目所有者 Review 并合并 Issue #2 PR。
 - [ ] 通过后续独立 Issue/PR 建立 Issue/PR 模板与标签。
 
@@ -63,12 +67,12 @@ decision_status: approved
 
 - 通过独立 `upstream-sync` Issue 和 PR 导入 `v1.2.41` 完整快照。
 - 创建 `source-lock.json`、同步报告和快照纯净性校验。
-- 建立每 6 小时的上游监控工作流；只管理 Issue，不自动同步、实现或合并。
+- 使用标准 `ubuntu-latest` Runner 建立每 6 小时的上游监控工作流；只管理 Issue，不编译 Rust，不自动同步、实现或合并。
 
 ### Gate 3：纯 Rust 工作区骨架（锁定）
 
 - 建立分层 Cargo Workspace、Iced 最小双平台窗口和依赖方向测试。
-- 建立 Windows/macOS CI、格式、测试、依赖、许可证和更新源归属检查。
+- 按 `docs/plans/2026-07-21-rust-ci-offload-strategy.md` 建立标准 Linux、Windows、macOS CI、格式、测试、依赖、许可证和更新源归属检查。
 - 不迁移业务功能，不创建临时 UI 事实标准。
 
 ### Gate 4：功能目录与性能基线（锁定）

@@ -200,6 +200,15 @@ GitHub Actions 使用标准 `ubuntu-latest` Runner：
 
 上游同步 PR 禁止同时修改 `apps/`、`crates/` 和产品功能。功能迁移 PR 禁止顺带更新上游快照。
 
+### 7.4 Rust CI 与本地编译边界
+
+- 采用“本地轻量验证 + GitHub Actions 全量验证”，完整方案见 `docs/plans/2026-07-21-rust-ci-offload-strategy.md`。
+- 本地默认不承担全量 Workspace、Windows/macOS 双平台和安装包构建，只执行 `build.md` 定义的快速、定向检查。
+- Gate 2 上游监控只使用标准 `ubuntu-latest` Runner，不执行 Rust 编译。
+- Gate 3 建立标准 Linux、Windows、macOS Runner Job；禁止默认 Larger Runner 和项目所有者本机 self-hosted runner。
+- PR CI 不读取发布密钥、不构建正式安装包、不上传整个 `target/`；Release 构建与普通 CI 分离。
+- 稳定 CI 建立前不配置 required status checks；Job 名称和失败语义稳定后再通过独立 Issue/PR 更新 `main-protection` Ruleset。
+
 ## 八、性能治理
 
 ### 8.1 必测指标
@@ -374,7 +383,7 @@ Release Notes 必须列出上游版本和提交、功能一致范围、自有修
 
 - 建立分层 Cargo Workspace。
 - 建立 Iced 最小双平台窗口，但不迁移业务功能。
-- 建立 Windows/macOS CI、格式、测试、依赖和许可证检查。
+- 按 `docs/plans/2026-07-21-rust-ci-offload-strategy.md` 建立标准 Linux、Windows、macOS CI、格式、测试、依赖和许可证检查。
 - 建立更新源配置的仓库归属测试。
 
 ### Gate 4：功能目录与性能基线

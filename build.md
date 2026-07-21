@@ -4,6 +4,43 @@
 
 截至 2026 年 7 月 21 日，仓库仍不包含应用源码，因此没有 Cargo、Iced 或安装包构建命令。当前可执行工作是 Gate 1 的文档、治理与 `main` Ruleset 验证；任何源码、GitHub Actions 或发布命令都属于后续独立 Issue。
 
+## Rust CI 职责边界
+
+- 已批准方案：`docs/plans/2026-07-21-rust-ci-offload-strategy.md`。
+- 当前仍无 Cargo Workspace，不能虚构 Cargo 命令；Gate 3 创建 Workspace 时必须在同一 PR 补齐准确的本地轻量与云端全量命令。
+- 本地默认只执行快速、定向检查；全量 Workspace、Windows/macOS 和发布构建由标准 GitHub-hosted runners 承担。
+- 当前 Issue `#2` 不创建 `.github/workflows/`，不启用 required status checks，不使用 Larger 或 self-hosted runner。
+
+当前设计一致性检查：
+
+```powershell
+$ciPlan = 'docs\plans\2026-07-21-rust-ci-offload-strategy.md'
+
+if (-not (Test-Path $ciPlan)) {
+  throw '缺少 Rust CI 云端编译卸载方案。'
+}
+
+$requiredRefs = @(
+  'AGENTS.md',
+  'docs\plans\2026-07-21-architecture-governance.md',
+  'docs\plans\PROJECT-MASTER-PLAN.md',
+  'docs\plans\sessions\2026-07-21-issue-2-architecture-governance.md',
+  'docs\workflows\2026-07-21-issue-2-architecture-governance-runtime.md'
+)
+
+foreach ($path in $requiredRefs) {
+  if (-not (Select-String -LiteralPath $path -Pattern 'rust-ci-offload-strategy|本地轻量验证|云端全量' -Quiet)) {
+    throw "CI 策略未同步到控制文件：$path"
+  }
+}
+
+if (Test-Path '.github\workflows') {
+  throw '当前 Gate 1 不允许创建 GitHub Actions Workflow。'
+}
+```
+
+预期结果：设计文档与全部控制面引用一致，当前仓库不存在 `.github/workflows/`。
+
 ## 环境要求
 
 - Git。

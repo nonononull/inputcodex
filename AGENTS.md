@@ -26,6 +26,9 @@
 - 改动保持小而可验证；禁止顺手重构无关代码。
 - 导入第三方或参考项目代码前，必须确认许可证、来源、提交和保留声明要求。
 - 架构与功能实现使用测试或可重复测量证据驱动，完成前运行项目定义的验证命令。
+- Rust 开发默认采用“本地轻量验证 + GitHub Actions 全量验证”：本地只执行 `build.md` 定义的快速、定向命令，Workspace 全量检查、Windows/macOS 编译测试和发布构建交给公开仓库的标准 GitHub-hosted runners。
+- 禁止默认使用 Larger Runner 或项目所有者本地机器作为 self-hosted runner；任何收费 Runner、self-hosted runner 或新的付费 CI 资源必须先建立独立 Issue 并获得项目所有者批准。
+- CI 必须限制重复运行、超时、Cache 和 Artifact；禁止上传整个 `target/`，非 Release Artifact 最长保留 7 天。CI 尚未稳定前不得把检查加入 `main` Ruleset。
 - 所有正式工作必须执行 `Issue → 分支 → 验证证据 → 关联 PR → Review/CI → Merge`，禁止直接向 `main` 写功能。
 - 所有 PR 合并到 `main` 必须使用 Squash Merge；禁止 Merge Commit 和 Rebase Merge，确保每个 Issue 在 `main` 上形成一条可独立追踪和回滚的提交。
 - 永久禁止对 `main` 使用 `git push --force` 或 `git push --force-with-lease`，项目所有者和管理员也不例外；历史错误必须通过 `revert` 提交和关联 Issue/PR 修正，紧急情况不能绕过该规则。

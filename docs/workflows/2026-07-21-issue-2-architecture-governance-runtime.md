@@ -12,10 +12,10 @@ static_workflow_refs:
   - D:/Android_source/ai-growth-os/components/rules/rules/workflows/git-snapshot-governance.md
 dynamic_workflow_gap_summary: AGOS 全局 registry 尚无 inputcodex 专属 task 与 architecture-governance business path；当前以项目原生控制面和 GitHub Issue #2 在外部项目 warning mode 执行。
 task_scope_boundary: 修改项目治理文档与仅作用于 main 的 GitHub Ruleset；不导入源码、不创建应用或 Actions、不发布、不合并、不修改其他分支规则。
-task_current_state: Ruleset main-protection（ID 19395456）已 active 且只命中 main；PR #3 为 OPEN、非 Draft、mergeStateStatus=CLEAN，等待文档证据提交与项目所有者正式 Review。
+task_current_state: Ruleset main-protection（ID 19395456）已 active 且只命中 main；Rust CI 云端编译卸载策略已批准并完成文档化，当前仍禁止创建 Workflow；PR #3 保持 OPEN 并等待项目所有者正式 Review。
 task_owner: nonononull
-task_follow_up_required: 提交并推送 Ruleset 落地证据；项目所有者在 PR 中审阅硬约束、范围、上游基线和平台规则，批准后才能合并。
-task_validation_attribution: 本地 Fresh 命令输出、GitHub Ruleset 19395456 详情、main 有效规则接口、PR #3 元数据与项目所有者决策评论。
+task_follow_up_required: 项目所有者在 PR 中审阅硬约束、范围、上游基线、平台规则和 CI 策略；所有 Review 对话完成根因闭环且验证通过后才能合并。
+task_validation_attribution: 本地 Fresh 命令输出、GitHub Ruleset 19395456 详情、main 有效规则接口、Rust CI 云端编译策略、PR #3 元数据与项目所有者决策评论。
 task_closeout_ref: pending:docs/reports/issue-2-architecture-governance-closeout.md
 
 allowed_operations:
@@ -99,6 +99,9 @@ model_drift_guards:
   - main 永久禁止删除；所有者与管理员无例外，误删后只能从最后一个权威提交恢复并建立事故 Issue
   - 所有 Review 对话必须完成根因、处理和验证闭环；禁止空点 Resolve 或带未解决对话合并
   - 活动 Ruleset 固定为 main-protection（ID 19395456），只包含 refs/heads/main 且 bypass_actors 为空
+  - Rust 构建默认本地轻量、云端全量；标准 GitHub-hosted runners 承担 Workspace、Windows/macOS 和发布构建
+  - 禁止默认 Larger Runner、本机 self-hosted runner、上传整个 target 或在 CI 稳定前配置 required status checks
+  - Fork PR 和普通 PR 不得获得发布或签名密钥，Release Job 必须与普通 CI 分离
   - 单人维护阶段 required approvals 为 0 但必须有项目所有者决策证据；第二名具备合并权限的人类维护者加入后在下一次合并前提升为 1
   - 客户端更新和资产只指向 nonononull/inputcodex
   - 争议功能必须走 parity-exception Issue
@@ -109,6 +112,7 @@ err_md_correction_watchlist:
   - Git snapshot 在关键文档未提交时返回 blocked
   - Windows 单条补丁命令长度上限
   - Codex Desktop apply_patch 包装器拒绝访问
+  - WindowsApps pwsh 被沙箱 CreateProcessAsUserW 拒绝时切换 require_escalated 或 Node 只读兜底
   - GitHub Release 或标签提交在验证期间变化
   - PR 正文遗漏 Closes #2
 
@@ -138,7 +142,7 @@ git_commit_discipline_gate:
 project_git_foundation_gate:
   - verify-project-git-foundation.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -RequireGit -ReportOnly
 project_git_foundation_status: ready
-project_git_foundation_next_action: 在现有 Issue #2 文档分支提交 Ruleset 落地证据，并等待项目所有者 Review。
+project_git_foundation_next_action: 保持当前 Issue #2 分支与证据同步，等待项目所有者 Review；禁止自动合并或进入 Gate 2。
 project_git_foundation_forbidden_ops: direct-main-write,force-push,delete-main,merge-without-review,merge-with-unresolved-review
 project_entry_doc_foundation_gate:
   - verify-project-entry-doc-foundation.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -ReportOnly
@@ -195,6 +199,7 @@ execution_windows:
   - window-2: Session Plan、Runtime Workflow、Master Plan、build.md、err.md
   - window-3: Fresh 验证、Git snapshot、提交、推送、PR
   - window-4: 审计 GitHub 配置、创建 main-protection Ruleset、验证有效规则并回写证据
+  - window-5: 批准本地轻量与云端全量 Rust CI 策略，只写设计和控制面，不创建 Workflow
 execution_ownership_contract:
   - 主线程独占本任务全部写入文件
   - 不启动未经用户要求的写入型子 agent
@@ -215,6 +220,8 @@ verification_gates:
   - gh issue view 2 --repo nonononull/inputcodex
   - gh api repos/nonononull/inputcodex/rulesets/19395456
   - gh api repos/nonononull/inputcodex/rules/branches/main
+  - Test-Path docs/plans/2026-07-21-rust-ci-offload-strategy.md
+  - rg -n "本地轻量验证|标准 GitHub-hosted runners|当前不创建.*Workflow" AGENTS.md docs/plans docs/workflows build.md
   - gh api repos/BigPizzaV3/CodexPlusPlus/releases/latest
   - gh api repos/BigPizzaV3/CodexPlusPlus/git/ref/tags/v1.2.41
 
@@ -223,7 +230,7 @@ strict_runtime_validator_claimed: false
 strict_runtime_validator_recovery: 若未来将 inputcodex 纳入 AGOS 全局 registry，先创建独立跨仓治理 Issue/PR，再映射 task 与 business path 并运行 verify-runtime-workflow.ps1。
 
 rollout_draft:
-  reusable_path: GitHub Issue 驱动的外部项目架构治理文档冻结与 main Ruleset 落地
+  reusable_path: GitHub Issue 驱动的外部项目架构治理、main Ruleset 与 Rust CI 云端卸载策略冻结
   record_at_closeout: true
   closeout_boundary: PR 合并并补齐 review_ref、ci_ref、merge_ref 后
   current_status: deferred-until-pr-3-merge-closeout

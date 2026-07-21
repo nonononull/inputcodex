@@ -42,12 +42,13 @@ closeout_ref: pending:merge-and-closeout-after-https://github.com/nonononull/inp
 - Decision: 永久禁止删除 `main`，项目所有者与管理员也不例外；误删后只能从删除前最后一个权威提交恢复同名分支并建立事故 Issue，不得借恢复改写历史。
 - Decision: 所有 Review 对话必须先确定根因、完成处理并回写验证证据后才能解决和合并；若反馈不成立，必须提供可复核证据并取得 reviewer 或项目所有者确认，禁止空点 Resolve。
 - Decision: 在 GitHub 创建活动 Ruleset `main-protection`（ID `19395456`），只包含 `refs/heads/main` 且无 bypass actor；规则为禁止删除、禁止非快进更新、要求 PR、required approvals 为 `0`、要求解决 Review 对话并只允许 Squash Merge。
+- Decision: Rust 构建采用“本地轻量验证 + GitHub Actions 全量验证”；本地默认不承担全量 Workspace、Windows/macOS 双平台或安装包编译，云端只使用标准 GitHub-hosted runners，禁止默认 Larger Runner 和本机 self-hosted runner。
 - Decision: 单人维护阶段平台 required approvals 为 `0`，但必须保留项目所有者决策证据；第二名具备合并权限的人类维护者加入后，在下一次 PR 合并前提升为 `1`，自动化账号不计入人数。
 - Decision: 版本采用 `v<上游版本>-inputcodex.<修订号>`，安装包、更新清单、签名与下载地址全部属于 `nonononull/inputcodex`。
 - Decision: 无效功能、有害副作用或错误语义争议必须建立 `parity-exception` Issue，由项目所有者决定。
-- Reason: 用户明确拒绝 TypeScript/WebView 架构及其卡顿和异常加载问题，并批准纯 Rust、Iced、完整上游缓存、自主发布线与 Issue/PR 治理。
+- Reason: 用户明确拒绝 TypeScript/WebView 架构及其卡顿和异常加载问题，并批准纯 Rust、Iced、完整上游缓存、自主发布线、Issue/PR 治理及将重型 Rust 编译从本地机器卸载到公开仓库标准 GitHub-hosted runners。
 - Scope boundary: 本 Issue 只冻结文档和治理，不提前执行 Gate 2 及其后的源码、工作流、构建或发布任务。
-- Rejected options: 继续维护半成品作为底座；直接复刻上游 Tauri/React 架构；只删除广告但保留原架构；以删除有效功能伪造性能提升；直接跟随上游 `main` 发布。
+- Rejected options: 继续维护半成品作为底座；直接复刻上游 Tauri/React 架构；只删除广告但保留原架构；以删除有效功能伪造性能提升；直接跟随上游 `main` 发布；默认本地全量编译；完全 CI-only 且不保留本地快速检查。
 
 ## Brainstorming
 
@@ -172,6 +173,7 @@ change_contract:
     expected_behavior: 仓库存在唯一、可追溯的重构与发布治理真源，并由仅作用于 main 的活动 GitHub Ruleset 强制执行已批准的合并保护规则。
     evidence_refs:
       - docs/plans/2026-07-21-architecture-governance.md
+      - docs/plans/2026-07-21-rust-ci-offload-strategy.md
       - docs/reports/2026-07-21-main-protection-rollout.md
       - https://github.com/nonononull/inputcodex/issues/2
       - https://github.com/nonononull/inputcodex/rules/19395456
@@ -200,6 +202,10 @@ change_contract:
     - name: GitHub main Ruleset
       why_adjacent: 平台规则必须与文档治理合同保持一致，并且只命中 main。
       risk: 范围扩大、bypass actor 或参数漂移会破坏已批准的单人阶段和合并门禁。
+      owner: 项目所有者
+    - name: Rust CI 云端编译边界
+      why_adjacent: 本地资源、双平台验证、GitHub 费用与未来 required checks 必须由同一策略约束。
+      risk: 过早创建 Workflow、使用收费 Runner 或把本地未构建误当成通过会造成资源浪费和虚假验证。
       owner: 项目所有者
   historical_state_refs:
     - docs/plans/2026-07-21-bootstrap.md
@@ -230,6 +236,9 @@ change_contract:
     - surface: main 有效规则
       command_or_evidence_ref: gh api repos/nonononull/inputcodex/rules/branches/main
       expected_result: deletion、non_fast_forward 与 pull_request 三条规则均来自 Ruleset 19395456
+    - surface: Rust CI 云端卸载策略
+      command_or_evidence_ref: Test-Path docs/plans/2026-07-21-rust-ci-offload-strategy.md
+      expected_result: 设计文档存在，并明确当前不创建 Workflow、标准 Runner、本地轻量和云端全量边界
   sibling_regression_guard:
     status: passed
     closeout_rule: passed-or-blocked-before-done
@@ -383,6 +392,7 @@ verification_commands:
   - verify-git-snapshot-governance.ps1 -Checkpoint -ReportOnly
   - gh api repos/nonononull/inputcodex/rulesets/19395456
   - gh api repos/nonononull/inputcodex/rules/branches/main
+  - Test-Path docs/plans/2026-07-21-rust-ci-offload-strategy.md
 ```
 
 ## Delivery Governance
@@ -405,6 +415,7 @@ merge_policy: PR 正文必须包含 Closes #2；单人阶段 required approvals 
 
 - `docs/plans/2026-07-21-architecture-governance.md` 成为明确标注的单一真源。
 - `CONTEXT.md`、`AGENTS.md`、两份 ADR、Master Plan、Session Plan 与 Runtime Workflow 互不矛盾。
+- `docs/plans/2026-07-21-rust-ci-offload-strategy.md` 明确本地轻量、云端全量、标准 Runner、缓存、Artifact、Fork 与发布密钥边界，且当前不创建 Workflow。
 - GitHub Ruleset `main-protection` 处于 active，只命中 `main`，且删除、Force Push、PR、Review 对话和 Squash-only 参数与批准决策一致。
 - `build.md` 给出当前文档任务可重复执行的验证命令，`err.md` 记录本次 AGOS 与补丁工具异常。
 - Fresh 验证已通过，提交 `4acb76a08c2f1c74b3f7672fdc9d5f96ecdc5a84` 已推送到 `docs/issue-2-architecture-governance`。
