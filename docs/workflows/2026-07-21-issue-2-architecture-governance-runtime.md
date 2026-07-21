@@ -12,10 +12,10 @@ static_workflow_refs:
   - D:/Android_source/ai-growth-os/components/rules/rules/workflows/git-snapshot-governance.md
 dynamic_workflow_gap_summary: AGOS 全局 registry 尚无 inputcodex 专属 task 与 architecture-governance business path；当前以项目原生控制面和 GitHub Issue #2 在外部项目 warning mode 执行。
 task_scope_boundary: 修改项目治理文档与仅作用于 main 的 GitHub Ruleset；不导入源码、不创建应用或 Actions、不发布、不合并、不修改其他分支规则。
-task_current_state: Ruleset main-protection（ID 19395456）已 active 且只命中 main；Rust CI 云端编译卸载策略已批准并完成文档化，当前仍禁止创建 Workflow；PR #3 保持 OPEN 并等待项目所有者正式 Review。
+task_current_state: Ruleset main-protection（ID 19395456）已 active 且只命中 main；Rust CI 云端编译卸载策略及四阶段实施计划已获项目所有者确认并完成文档化，当前仍禁止创建 Workflow 或 Rust 源码；PR #3 保持 OPEN 并等待项目所有者正式 Review。
 task_owner: nonononull
-task_follow_up_required: 项目所有者在 PR 中审阅硬约束、范围、上游基线、平台规则和 CI 策略；所有 Review 对话完成根因闭环且验证通过后才能合并。
-task_validation_attribution: 本地 Fresh 命令输出、GitHub Ruleset 19395456 详情、main 有效规则接口、Rust CI 云端编译策略、PR #3 元数据与项目所有者决策评论。
+task_follow_up_required: 项目所有者在 PR 中审阅硬约束、范围、上游基线、平台规则、CI 策略和实施计划；所有 Review 对话完成根因闭环且验证通过后才能合并。
+task_validation_attribution: 本地 Fresh 命令输出、GitHub Ruleset 19395456 详情、main 有效规则接口、Rust CI 云端编译策略与实施计划、PR #3 元数据及项目所有者决策评论。
 task_closeout_ref: pending:docs/reports/issue-2-architecture-governance-closeout.md
 
 allowed_operations:
@@ -52,7 +52,7 @@ node_order:
   - 固化总方案、项目语境和 ADR
   - 写入 Major Session Plan 与本 Runtime Workflow
   - 更新 Master Plan、build.md 和 err.md
-  - 自审占位符、矛盾、失效链接和越界内容
+  - 自审未填写字段、矛盾、失效链接和越界内容
   - 运行 Session Plan、Master Plan、Git diff 和 Git snapshot 验证
   - 暂存并运行 cached diff 验证
   - 提交并推送当前分支
@@ -151,14 +151,14 @@ project_entry_doc_foundation_next_action: 保持 README.md、AGENTS.md、build.m
 project_entry_doc_foundation_forbidden_ops: claim-entry-docs-ready-without-fresh-check
 
 post_implementation_review_gate:
-  - verify-post-implementation-review.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -ReportOnly
+  - verify-post-implementation-review.ps1 -Path docs/plans/sessions/2026-07-21-issue-2-architecture-governance.md -ReportOnly
   - 当前 docs-only 任务由主线程自审并在 GitHub PR 等待项目所有者 Review
   - 每条 Review 对话必须记录 root cause、resolution 和 verification evidence；仅标记 resolved 不构成解决
   - 若反馈不成立，必须回写可复核证据并取得 reviewer 或项目所有者确认
   - 存在未解决对话或缺少根因解决证据时禁止合并
   - 未取得 owner review_ref 前禁止合并或宣称治理闭环完成
 protected_feature_replay_gate:
-  - verify-protected-feature-replay.ps1 -SessionPlanPath docs/plans/sessions/2026-07-21-issue-2-architecture-governance.md -ReportOnly
+  - verify-protected-feature-replay.ps1 -Path docs/plans/sessions/2026-07-21-issue-2-architecture-governance.md -RequireProtectedReplay -ReportOnly
   - 回放 LICENSE 不变、仓库无应用源码、Gate 0 历史证据仍可访问
   - 未完成回放前禁止 claim-done 或 merge
 code_understanding_gate:
@@ -200,6 +200,7 @@ execution_windows:
   - window-3: Fresh 验证、Git snapshot、提交、推送、PR
   - window-4: 审计 GitHub 配置、创建 main-protection Ruleset、验证有效规则并回写证据
   - window-5: 批准本地轻量与云端全量 Rust CI 策略，只写设计和控制面，不创建 Workflow
+  - window-6: 使用 writing-plans 拆分上游监控、Workspace+三平台 CI、Cache 调优与 required check，只写实施计划
 execution_ownership_contract:
   - 主线程独占本任务全部写入文件
   - 不启动未经用户要求的写入型子 agent
@@ -209,8 +210,8 @@ verification_gates:
   - verify-project-git-foundation.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -RequireGit -ReportOnly
   - verify-project-entry-doc-foundation.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -ReportOnly
   - verify-code-understanding-tool-use.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -ReportOnly
-  - verify-post-implementation-review.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -ReportOnly
-  - verify-protected-feature-replay.ps1 -SessionPlanPath docs/plans/sessions/2026-07-21-issue-2-architecture-governance.md -ReportOnly
+  - verify-post-implementation-review.ps1 -Path docs/plans/sessions/2026-07-21-issue-2-architecture-governance.md -ReportOnly
+  - verify-protected-feature-replay.ps1 -Path docs/plans/sessions/2026-07-21-issue-2-architecture-governance.md -RequireProtectedReplay -ReportOnly
   - verify-protocol-state-evidence-contract.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -ReportOnly
   - verify-session-plan.ps1 -Path docs/plans/sessions/2026-07-21-issue-2-architecture-governance.md
   - verify-master-plan-index.ps1 -Path docs/plans/PROJECT-MASTER-PLAN.md
@@ -221,6 +222,7 @@ verification_gates:
   - gh api repos/nonononull/inputcodex/rulesets/19395456
   - gh api repos/nonononull/inputcodex/rules/branches/main
   - Test-Path docs/plans/2026-07-21-rust-ci-offload-strategy.md
+  - Test-Path docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
   - rg -n "本地轻量验证|标准 GitHub-hosted runners|当前不创建.*Workflow" AGENTS.md docs/plans docs/workflows build.md
   - gh api repos/BigPizzaV3/CodexPlusPlus/releases/latest
   - gh api repos/BigPizzaV3/CodexPlusPlus/git/ref/tags/v1.2.41
@@ -230,7 +232,7 @@ strict_runtime_validator_claimed: false
 strict_runtime_validator_recovery: 若未来将 inputcodex 纳入 AGOS 全局 registry，先创建独立跨仓治理 Issue/PR，再映射 task 与 business path 并运行 verify-runtime-workflow.ps1。
 
 rollout_draft:
-  reusable_path: GitHub Issue 驱动的外部项目架构治理、main Ruleset 与 Rust CI 云端卸载策略冻结
+  reusable_path: GitHub Issue 驱动的外部项目架构治理、main Ruleset、Rust CI 云端卸载策略与分阶段实施计划冻结
   record_at_closeout: true
   closeout_boundary: PR 合并并补齐 review_ref、ci_ref、merge_ref 后
   current_status: deferred-until-pr-3-merge-closeout

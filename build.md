@@ -7,6 +7,7 @@
 ## Rust CI 职责边界
 
 - 已批准方案：`docs/plans/2026-07-21-rust-ci-offload-strategy.md`。
+- 已批准实施计划：`docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md`；当前只保存未来独立 Issue/PR 顺序，不执行 Gate 2/3。
 - 当前仍无 Cargo Workspace，不能虚构 Cargo 命令；Gate 3 创建 Workspace 时必须在同一 PR 补齐准确的本地轻量与云端全量命令。
 - 本地默认只执行快速、定向检查；全量 Workspace、Windows/macOS 和发布构建由标准 GitHub-hosted runners 承担。
 - 当前 Issue `#2` 不创建 `.github/workflows/`，不启用 required status checks，不使用 Larger 或 self-hosted runner。
@@ -15,9 +16,14 @@
 
 ```powershell
 $ciPlan = 'docs\plans\2026-07-21-rust-ci-offload-strategy.md'
+$ciImplementationPlan = 'docs\plans\2026-07-21-rust-ci-offload-implementation-plan.md'
 
 if (-not (Test-Path $ciPlan)) {
   throw '缺少 Rust CI 云端编译卸载方案。'
+}
+
+if (-not (Test-Path $ciImplementationPlan)) {
+  throw '缺少 Rust CI 云端卸载实施计划。'
 }
 
 $requiredRefs = @(
@@ -34,12 +40,30 @@ foreach ($path in $requiredRefs) {
   }
 }
 
+$implementationRefs = @(
+  'docs\plans\2026-07-21-rust-ci-offload-strategy.md',
+  'docs\plans\2026-07-21-architecture-governance.md',
+  'docs\plans\PROJECT-MASTER-PLAN.md',
+  'docs\plans\sessions\2026-07-21-issue-2-architecture-governance.md',
+  'docs\workflows\2026-07-21-issue-2-architecture-governance-runtime.md'
+)
+
+foreach ($path in $implementationRefs) {
+  if (-not (Select-String -LiteralPath $path -Pattern 'rust-ci-offload-implementation-plan' -Quiet)) {
+    throw "CI 实施计划未同步到控制文件：$path"
+  }
+}
+
 if (Test-Path '.github\workflows') {
   throw '当前 Gate 1 不允许创建 GitHub Actions Workflow。'
 }
+
+if ((Test-Path 'Cargo.toml') -or (Test-Path 'Cargo.lock') -or (Get-ChildItem -Recurse -File -Filter '*.rs')) {
+  throw '当前 Gate 1 不允许创建 Cargo Workspace 或 Rust 源码。'
+}
 ```
 
-预期结果：设计文档与全部控制面引用一致，当前仓库不存在 `.github/workflows/`。
+预期结果：策略、实施计划与全部控制面引用一致，当前仓库不存在 `.github/workflows/`、Cargo Workspace 或 Rust 源码。
 
 ## 环境要求
 
@@ -72,6 +96,15 @@ $masterPlan = 'docs\plans\PROJECT-MASTER-PLAN.md'
 & "$rules\scripts\verify-master-plan-index.ps1" `
   -Path $masterPlan
 
+& "$rules\scripts\verify-post-implementation-review.ps1" `
+  -Path $sessionPlan `
+  -ReportOnly
+
+& "$rules\scripts\verify-protected-feature-replay.ps1" `
+  -Path $sessionPlan `
+  -RequireProtectedReplay `
+  -ReportOnly
+
 git diff --check
 git status --short --branch
 ```
@@ -81,6 +114,8 @@ git status --short --branch
 - Git foundation 与入口文档 foundation 状态为 `ready`。
 - Session Plan 输出 `SESSION_PLAN_VERIFY_OK`。
 - Master Plan 输出 `MASTER_PLAN_INDEX_VERIFY_OK`。
+- Post-implementation review 输出当前任务为 `not-required`，且无参数绑定错误。
+- Protected feature replay 输出 `passed`，且全部 known-good feature 具备回放证据。
 - `git diff --check` 无输出且退出码为 `0`。
 - 当前分支为 `docs/issue-2-architecture-governance`。
 

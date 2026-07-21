@@ -71,6 +71,24 @@
 - 验证：重新运行校验输出 `SESSION_PLAN_VERIFY_OK`，工作类别为 `major`。
 - 关联：GitHub Issue `#2`。
 
+### 2026-07-21：AGOS 验证脚本参数漂移被错误包装成退出码 0
+
+- 环境：Issue `#2` 文档分支运行 `verify-post-implementation-review.ps1` 与 `verify-protected-feature-replay.ps1`。
+- 现象：PowerShell 报告不存在参数 `ProjectRoot` 和 `SessionPlanPath`，但临时包装函数仍输出 `EXIT_CODE=0`。
+- 根因：两个脚本的真实输入参数均为 `-Path`；Runtime Workflow 保留了旧调用名。同时 `$LASTEXITCODE` 只可靠表示本机可执行程序退出码，不能单独判断 PowerShell 脚本参数绑定或异常状态。
+- 处理：通过 `Get-Command` 和脚本 `param` 块确认接口，把 Runtime Workflow 与 `build.md` 统一改为 `-Path`；受保护功能回放增加 `-RequireProtectedReplay`。后续组合验证使用 `$ErrorActionPreference = 'Stop'`、`try/catch` 或 `$?` 判断 PowerShell 脚本是否成功，不再用 `$LASTEXITCODE` 包装脚本错误；原生 `git` 则检查 `$LASTEXITCODE`，不能用 `if (git ...)` 把“成功但无输出”误判为失败。
+- 验证：使用修正参数重新运行两个脚本，分别得到 post-implementation review 的确定状态和 protected feature replay 的通过证据，且不再出现参数绑定错误。
+- 关联：GitHub Issue `#2`、PR `#3`。
+
+### 2026-07-21：受保护功能回放的实际结果与所有者状态未满足通过合同
+
+- 环境：使用 `-RequireProtectedReplay` 严格校验 Issue `#2` Session Plan。
+- 现象：校验输出 `actual-result-mismatch` 与 `owner-visible-replay-not-passed`，禁止提交、PR 和完成声明。
+- 根因：`actual_result` 虽表达了相同中文语义，但没有包含校验器要求的完整 `expected_result` 文本；同时 `owner_visible_status` 仍保留早期 `pending`，未同步项目所有者已确认方案且 Gate 0 证据仍公开可见的事实。
+- 处理：先重新核对 `LICENSE` 未变化、仓库无 Workflow/Cargo/Rust 源码、Gate 0 计划和 closeout 仍存在、Master Plan 处于 Gate 1；再让 `actual_result` 明确包含完整预期句，并把有证据的所有者可见状态更新为 `passed`。
+- 验证：`verify-protected-feature-replay.ps1 -Path docs/plans/sessions/2026-07-21-issue-2-architecture-governance.md -RequireProtectedReplay -ReportOnly` 输出 `PROTECTED_FEATURE_REPLAY_STATUS=ready`、`COMPLETION_STATUS=passed`、两个 passed count 均为 `1`，且 `FORBIDDEN_OPS=none`。
+- 关联：GitHub Issue `#2`、PR `#3`。
+
 ## 记录模板
 
 ```text

@@ -377,13 +377,13 @@ Release Notes 必须列出上游版本和提交、功能一致范围、自有修
 
 - 通过独立 Issue 和 PR 导入 `v1.2.41` 完整快照。
 - 创建 `source-lock.json` 和快照纯净性校验。
-- 建立每 6 小时的上游监控工作流。
+- 按 `docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md` 建立每 6 小时、只管理 Issue 且不编译 Rust 的上游监控工作流。
 
 ### Gate 3：纯 Rust 工作区骨架
 
 - 建立分层 Cargo Workspace。
 - 建立 Iced 最小双平台窗口，但不迁移业务功能。
-- 按 `docs/plans/2026-07-21-rust-ci-offload-strategy.md` 建立标准 Linux、Windows、macOS CI、格式、测试、依赖和许可证检查。
+- 按 `docs/plans/2026-07-21-rust-ci-offload-strategy.md` 与 `docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md` 建立标准 Linux、Windows、macOS CI、格式、测试、依赖和许可证检查；Workspace 与首版 CI 使用同一 Issue/PR，Cache 调优和 required check 分别使用后续独立 Issue/PR。
 - 建立更新源配置的仓库归属测试。
 
 ### Gate 4：功能目录与性能基线

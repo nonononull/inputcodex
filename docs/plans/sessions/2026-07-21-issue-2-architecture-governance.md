@@ -5,9 +5,9 @@ architecture_contract_version: agos.brainstorming-gate.v1
 task_id: 2026-07-21-issue-2-architecture-governance
 work_class: major
 task_status: review-pending
-task_summary: 将 inputcodex 重构、上游同步、版本发布与 GitHub 治理决策固化为项目单一真源，落地仅作用于 main 的保护 Ruleset，并通过 Issue #2 关联 PR 交付。
+task_summary: 将 inputcodex 重构、上游同步、版本发布、GitHub 治理与 Rust CI 云端卸载实施顺序固化为项目单一真源，落地仅作用于 main 的保护 Ruleset，并通过 Issue #2 关联 PR 交付。
 project_root: C:/Users/dashuai/Documents/inputcodex
-trigger_source: 用户批准架构方案、main 保护规则及其实际 GitHub 配置，并要求立即落盘和持续维护单一真源
+trigger_source: 用户批准架构方案、main 保护规则、实际 GitHub 配置与 Rust CI 云端卸载方案，并以“方案确认”批准只写实施计划、不提前创建 Workflow
 decision_status: approved
 approval_source: inherited-user-instruction
 approved_decision_ref: session-plan:2026-07-21-issue-2-architecture-governance#decision
@@ -43,6 +43,7 @@ closeout_ref: pending:merge-and-closeout-after-https://github.com/nonononull/inp
 - Decision: 所有 Review 对话必须先确定根因、完成处理并回写验证证据后才能解决和合并；若反馈不成立，必须提供可复核证据并取得 reviewer 或项目所有者确认，禁止空点 Resolve。
 - Decision: 在 GitHub 创建活动 Ruleset `main-protection`（ID `19395456`），只包含 `refs/heads/main` 且无 bypass actor；规则为禁止删除、禁止非快进更新、要求 PR、required approvals 为 `0`、要求解决 Review 对话并只允许 Squash Merge。
 - Decision: Rust 构建采用“本地轻量验证 + GitHub Actions 全量验证”；本地默认不承担全量 Workspace、Windows/macOS 双平台或安装包编译，云端只使用标准 GitHub-hosted runners，禁止默认 Larger Runner 和本机 self-hosted runner。
+- Decision: Rust CI 按四个独立 Issue/PR 执行：Gate 2 上游监控、Gate 3 Workspace 与首版三平台 CI、Cache/Artifact 证据调优、稳定后升级 `main-protection` required check；当前只批准 `docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md`，不执行这些 Gate。
 - Decision: 单人维护阶段平台 required approvals 为 `0`，但必须保留项目所有者决策证据；第二名具备合并权限的人类维护者加入后，在下一次 PR 合并前提升为 `1`，自动化账号不计入人数。
 - Decision: 版本采用 `v<上游版本>-inputcodex.<修订号>`，安装包、更新清单、签名与下载地址全部属于 `nonononull/inputcodex`。
 - Decision: 无效功能、有害副作用或错误语义争议必须建立 `parity-exception` Issue，由项目所有者决定。
@@ -174,6 +175,7 @@ change_contract:
     evidence_refs:
       - docs/plans/2026-07-21-architecture-governance.md
       - docs/plans/2026-07-21-rust-ci-offload-strategy.md
+      - docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
       - docs/reports/2026-07-21-main-protection-rollout.md
       - https://github.com/nonononull/inputcodex/issues/2
       - https://github.com/nonononull/inputcodex/rules/19395456
@@ -239,6 +241,9 @@ change_contract:
     - surface: Rust CI 云端卸载策略
       command_or_evidence_ref: Test-Path docs/plans/2026-07-21-rust-ci-offload-strategy.md
       expected_result: 设计文档存在，并明确当前不创建 Workflow、标准 Runner、本地轻量和云端全量边界
+    - surface: Rust CI 云端卸载实施计划
+      command_or_evidence_ref: Test-Path docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
+      expected_result: 实施计划存在，并把上游监控、Workspace+三平台 CI、Cache 调优和 required check 拆为独立 Issue/PR，当前仍禁止实施
   sibling_regression_guard:
     status: passed
     closeout_rule: passed-or-blocked-before-done
@@ -251,10 +256,10 @@ change_contract:
         owner: 项目所有者
         baseline_evidence_ref: docs/reports/2026-07-21-bootstrap-closeout.md
         post_change_replay_plan_ref: 提交前核对 LICENSE、仓库公开性、历史计划与主计划链接
-        post_change_replay_ref: pr:3@4acb76a08c2f1c74b3f7672fdc9d5f96ecdc5a84
+        post_change_replay_ref: local:2026-07-21:LICENSE_UNCHANGED+GATE0_PROTECTED_REPLAY_LOCAL=passed;pr:3
         expected_result: Gate 0 证据保留，当前控制面切换到 Gate 1
-        actual_result: LICENSE 未变化，仓库仍无应用源码，Gate 0 计划与 closeout 可访问，当前控制面已切换到 Gate 1。
-        owner_visible_status: pending
+        actual_result: Gate 0 证据保留，当前控制面切换到 Gate 1；LICENSE 未变化，仓库仍无应用源码，Gate 0 计划与 closeout 可访问。
+        owner_visible_status: passed
         regression_status: passed
     forbidden_ops_until_replay:
       - claim-done
@@ -393,6 +398,7 @@ verification_commands:
   - gh api repos/nonononull/inputcodex/rulesets/19395456
   - gh api repos/nonononull/inputcodex/rules/branches/main
   - Test-Path docs/plans/2026-07-21-rust-ci-offload-strategy.md
+  - Test-Path docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
 ```
 
 ## Delivery Governance
@@ -416,7 +422,8 @@ merge_policy: PR 正文必须包含 Closes #2；单人阶段 required approvals 
 - `docs/plans/2026-07-21-architecture-governance.md` 成为明确标注的单一真源。
 - `CONTEXT.md`、`AGENTS.md`、两份 ADR、Master Plan、Session Plan 与 Runtime Workflow 互不矛盾。
 - `docs/plans/2026-07-21-rust-ci-offload-strategy.md` 明确本地轻量、云端全量、标准 Runner、缓存、Artifact、Fork 与发布密钥边界，且当前不创建 Workflow。
+- `docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md` 明确四个独立 Issue/PR、精确未来文件、Job 分层、权限、触发、Cache、Artifact、失败语义和回滚方式，且当前不创建 Workflow 或 Rust 源码。
 - GitHub Ruleset `main-protection` 处于 active，只命中 `main`，且删除、Force Push、PR、Review 对话和 Squash-only 参数与批准决策一致。
 - `build.md` 给出当前文档任务可重复执行的验证命令，`err.md` 记录本次 AGOS 与补丁工具异常。
-- Fresh 验证已通过，提交 `4acb76a08c2f1c74b3f7672fdc9d5f96ecdc5a84` 已推送到 `docs/issue-2-architecture-governance`。
+- 每次新增提交都必须在 Fresh 验证通过后正常推送到 `docs/issue-2-architecture-governance`；提交证据以 PR `#3` 的 commit 列表和验证评论为准，不在本文件固化会因后续提交失效的自引用 HEAD。
 - 已创建包含 `Closes #2` 的 PR `#3`，当前状态为 `OPEN`、非 Draft、`mergeStateStatus=CLEAN`，等待项目所有者 Review；本会话不自动合并。

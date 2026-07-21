@@ -5,6 +5,7 @@ decision_date: 2026-07-21
 owner: nonononull
 scope: 设计与治理约束；当前不创建 GitHub Actions Workflow
 implementation_gate: Gate 2 上游监控与 Gate 3 Rust 工作区
+implementation_plan: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
 
 ## 一、决策
 
@@ -82,6 +83,8 @@ PR 默认不构建最终安装包，不读取发布密钥，也不上传整个 `
 - 发布资产和下载地址只能属于 `nonononull/inputcodex`。
 
 ## 五、分阶段落地
+
+具体文件、独立 Issue/PR 顺序、验证门槛和回滚方式见 `docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md`。本策略定义不可突破的边界，实施计划定义未来执行顺序；两者都不能授权当前 Gate 1 创建 Workflow 或源码。
 
 ### Gate 1：当前治理阶段
 
