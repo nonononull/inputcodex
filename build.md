@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 21 日，仓库仍不包含应用源码，因此没有 Cargo、Iced 或安装包构建命令。当前可执行工作是 Gate 1 的文档与治理验证；任何源码、GitHub Actions 或发布命令都属于后续独立 Issue。
+截至 2026 年 7 月 21 日，仓库仍不包含应用源码，因此没有 Cargo、Iced 或安装包构建命令。当前可执行工作是 Gate 1 的文档、治理与 `main` Ruleset 验证；任何源码、GitHub Actions 或发布命令都属于后续独立 Issue。
 
 ## 环境要求
 
@@ -70,6 +70,97 @@ if ($tag.object.sha -ne '3dafffcafb2566a1e8bce4b35671656d6adb3eda') {
 ```
 
 预期结果：命令无异常退出，Issue #2 仍为开放状态，上游最新正式 Release 仍是 `v1.2.41`，标签仍解析到批准提交。
+
+## GitHub `main` Ruleset 核验
+
+传统 Branch Protection 接口不是 Ruleset 的状态真源；本项目使用 Ruleset 详情和分支有效规则接口进行核验：
+
+```powershell
+$headers = @(
+  '-H', 'Accept: application/vnd.github+json',
+  '-H', 'X-GitHub-Api-Version: 2026-03-10'
+)
+$rulesetId = 19395456
+
+$ruleset = gh api @headers `
+  "repos/nonononull/inputcodex/rulesets/$rulesetId" |
+  ConvertFrom-Json
+
+$effective = @(
+  gh api @headers repos/nonononull/inputcodex/rules/branches/main |
+  ConvertFrom-Json
+)
+
+$pullRequestRule = @(
+  $ruleset.rules | Where-Object { $_.type -eq 'pull_request' }
+)
+
+if ($ruleset.enforcement -ne 'active') {
+  throw "Ruleset 未激活：$($ruleset.enforcement)"
+}
+
+if (@($ruleset.conditions.ref_name.include).Count -ne 1 -or
+    @($ruleset.conditions.ref_name.include)[0] -ne 'refs/heads/main' -or
+    @($ruleset.conditions.ref_name.exclude).Count -ne 0) {
+  throw 'Ruleset 范围不是仅 main。'
+}
+
+if (@($ruleset.bypass_actors).Count -ne 0) {
+  throw 'Ruleset 存在未经批准的 bypass actor。'
+}
+
+if (@($ruleset.rules | Where-Object type -eq 'deletion').Count -ne 1 -or
+    @($ruleset.rules | Where-Object type -eq 'non_fast_forward').Count -ne 1 -or
+    $pullRequestRule.Count -ne 1) {
+  throw 'Ruleset 缺少删除、Force Push 或 PR 门禁规则。'
+}
+
+$parameters = $pullRequestRule[0].parameters
+if ($parameters.required_approving_review_count -ne 0 -or
+    -not $parameters.required_review_thread_resolution -or
+    @($parameters.allowed_merge_methods).Count -ne 1 -or
+    @($parameters.allowed_merge_methods)[0] -ne 'squash') {
+  throw 'Ruleset 的审批、Review 对话或合并方式参数不符合批准决策。'
+}
+
+if (@($effective | Where-Object ruleset_id -eq $rulesetId).Count -ne 3) {
+  throw 'main 的三个有效规则未全部来自目标 Ruleset。'
+}
+```
+
+预期结果：命令无异常退出；Ruleset `19395456` 为 `active`，只命中 `main`、无 bypass actor，并有效提供删除保护、Force Push 保护和 PR 门禁。
+
+核验当前 PR 是否仍有未解决 Review 对话：
+
+```powershell
+$query = @'
+query($owner:String!,$name:String!,$number:Int!){
+  repository(owner:$owner,name:$name){
+    pullRequest(number:$number){
+      reviewThreads(first:100){nodes{isResolved}}
+    }
+  }
+}
+'@
+
+$response = gh api graphql `
+  -f query=$query `
+  -F owner='nonononull' `
+  -F name='inputcodex' `
+  -F number=3 |
+  ConvertFrom-Json
+
+$unresolved = @(
+  $response.data.repository.pullRequest.reviewThreads.nodes |
+  Where-Object { -not $_.isResolved }
+)
+
+if ($unresolved.Count -ne 0) {
+  throw "PR #3 仍有 $($unresolved.Count) 个未解决 Review 对话。"
+}
+```
+
+预期结果：未解决 Review 对话数量为 `0`；若未来出现对话，必须先完成根因、处理与验证闭环。
 
 ## Git 快照检查
 

@@ -4,22 +4,24 @@ schema_version: inputcodex.master-plan.v1
 active_task: 2026-07-21-issue-2-architecture-governance
 active_gate: Gate 1：方案与治理冻结
 last_verified_gate: Gate 0：仓库准备
-next_legal_gate: 项目所有者审阅并合并 PR #3；随后以新 Issue 补齐 Gate 1 的 GitHub 模板、标签和分支保护，Gate 1 完成前不得进入 Gate 2。
+next_legal_gate: 项目所有者审阅并合并 PR #3；随后以新 Issue 补齐 Gate 1 的 GitHub 模板与标签，Gate 1 完成前不得进入 Gate 2。
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/2
 active_branch_ref: docs/issue-2-architecture-governance
 active_plan_ref: docs/plans/2026-07-21-architecture-governance.md
 active_session_plan_ref: docs/plans/sessions/2026-07-21-issue-2-architecture-governance.md
 active_runtime_workflow_ref: docs/workflows/2026-07-21-issue-2-architecture-governance-runtime.md
 active_pr_ref: https://github.com/nonononull/inputcodex/pull/3
+active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 decision_status: approved
 
 ## 当前状态
 
-- 当前只执行文档与治理冻结，不导入上游源码，不创建 Rust/Iced 工程，不实现 GitHub Actions，不发布资产。
+- 当前只执行文档、治理冻结与 `main` Ruleset 落地，不导入上游源码，不创建 Rust/Iced 工程，不实现 GitHub Actions，不发布资产。
 - `BigPizzaV3/CodexPlusPlus` 最新正式 Release 是功能真源；当前冻结基线为 `v1.2.41`，提交 `3dafffcafb2566a1e8bce4b35671656d6adb3eda`。
 - `zsr131550/CodexPlusPlus` 仅作半成品参考，不作为代码底座或功能真源。
 - 本任务交付链为 `Issue #2 → 当前分支 → Fresh 验证 → 关联 PR → 项目所有者 Review → Merge`。
 - PR `#3` 已创建，状态为 `OPEN`、非 Draft、`mergeStateStatus=CLEAN`；仓库当前没有 PR 状态检查，项目所有者 Review 与合并仍未完成。
+- GitHub Ruleset `main-protection`（ID `19395456`）已激活且只命中 `main`；禁止删除、禁止 Force Push、要求 PR、要求解决 Review 对话并只允许 Squash Merge，当前单人阶段 required approvals 为 `0`。
 
 ## 项目不变量
 
@@ -53,8 +55,9 @@ decision_status: approved
 - [x] 起草单一真源、项目语境、两份 ADR、Major Session Plan 和 Runtime Workflow。
 - [x] 完成 Fresh 文档、Git、GitHub 元数据和快照治理验证。
 - [x] 提交并推送当前分支，创建包含 `Closes #2` 的 PR `#3`。
+- [x] 创建并验证仅作用于 `main` 的 GitHub Ruleset；证据见 `docs/reports/2026-07-21-main-protection-rollout.md`。
 - [ ] 项目所有者 Review 并合并 Issue #2 PR。
-- [ ] 通过后续独立 Issue/PR 建立 Issue/PR 模板、标签和 `main` 分支保护。
+- [ ] 通过后续独立 Issue/PR 建立 Issue/PR 模板与标签。
 
 ### Gate 2：导入上游基线（锁定）
 

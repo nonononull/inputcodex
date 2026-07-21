@@ -11,11 +11,11 @@ static_workflow_refs:
   - D:/Android_source/ai-growth-os/components/rules/rules/workflows/ai-growth-os-runtime-workflow.md
   - D:/Android_source/ai-growth-os/components/rules/rules/workflows/git-snapshot-governance.md
 dynamic_workflow_gap_summary: AGOS 全局 registry 尚无 inputcodex 专属 task 与 architecture-governance business path；当前以项目原生控制面和 GitHub Issue #2 在外部项目 warning mode 执行。
-task_scope_boundary: 仅修改文档与 Git 元数据；不导入源码、不创建应用或 Actions、不发布、不合并。
-task_current_state: 文档与治理方案已通过 Fresh 本地验证，提交 4acb76a 已推送，PR #3 为 OPEN、非 Draft、mergeStateStatus=CLEAN，等待项目所有者 Review。
+task_scope_boundary: 修改项目治理文档与仅作用于 main 的 GitHub Ruleset；不导入源码、不创建应用或 Actions、不发布、不合并、不修改其他分支规则。
+task_current_state: Ruleset main-protection（ID 19395456）已 active 且只命中 main；PR #3 为 OPEN、非 Draft、mergeStateStatus=CLEAN，等待文档证据提交与项目所有者正式 Review。
 task_owner: nonononull
-task_follow_up_required: 项目所有者在 PR 中审阅硬约束、范围和上游基线，批准后才能合并。
-task_validation_attribution: 本地 Fresh 命令输出、提交 4acb76a、GitHub PR #3 元数据和待补项目所有者 Review。
+task_follow_up_required: 提交并推送 Ruleset 落地证据；项目所有者在 PR 中审阅硬约束、范围、上游基线和平台规则，批准后才能合并。
+task_validation_attribution: 本地 Fresh 命令输出、GitHub Ruleset 19395456 详情、main 有效规则接口、PR #3 元数据与项目所有者决策评论。
 task_closeout_ref: pending:docs/reports/issue-2-architecture-governance-closeout.md
 
 allowed_operations:
@@ -26,6 +26,8 @@ allowed_operations:
   - git-commit
   - git-push-current-branch
   - github-create-linked-pr
+  - github-read-repository-rules
+  - github-write-main-ruleset-only
 forbidden_operations:
   - source-import
   - source-code-write
@@ -33,6 +35,7 @@ forbidden_operations:
   - github-actions-write
   - release-publish
   - merge-pr
+  - github-write-non-main-rules
   - cross-repo-agos-registry-write
 
 workflow_nodes:
@@ -95,6 +98,7 @@ model_drift_guards:
   - main 永久禁止 --force 和 --force-with-lease；错误历史与紧急修复只能通过 revert 和关联 Issue/PR 处理
   - main 永久禁止删除；所有者与管理员无例外，误删后只能从最后一个权威提交恢复并建立事故 Issue
   - 所有 Review 对话必须完成根因、处理和验证闭环；禁止空点 Resolve 或带未解决对话合并
+  - 活动 Ruleset 固定为 main-protection（ID 19395456），只包含 refs/heads/main 且 bypass_actors 为空
   - 单人维护阶段 required approvals 为 0 但必须有项目所有者决策证据；第二名具备合并权限的人类维护者加入后在下一次合并前提升为 1
   - 客户端更新和资产只指向 nonononull/inputcodex
   - 争议功能必须走 parity-exception Issue
@@ -134,7 +138,7 @@ git_commit_discipline_gate:
 project_git_foundation_gate:
   - verify-project-git-foundation.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -RequireGit -ReportOnly
 project_git_foundation_status: ready
-project_git_foundation_next_action: 在现有 Issue #2 文档分支完成验证、提交与 PR。
+project_git_foundation_next_action: 在现有 Issue #2 文档分支提交 Ruleset 落地证据，并等待项目所有者 Review。
 project_git_foundation_forbidden_ops: direct-main-write,force-push,delete-main,merge-without-review,merge-with-unresolved-review
 project_entry_doc_foundation_gate:
   - verify-project-entry-doc-foundation.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -ReportOnly
@@ -190,6 +194,7 @@ execution_windows:
   - window-1: 已批准方案、CONTEXT.md 与 ADR
   - window-2: Session Plan、Runtime Workflow、Master Plan、build.md、err.md
   - window-3: Fresh 验证、Git snapshot、提交、推送、PR
+  - window-4: 审计 GitHub 配置、创建 main-protection Ruleset、验证有效规则并回写证据
 execution_ownership_contract:
   - 主线程独占本任务全部写入文件
   - 不启动未经用户要求的写入型子 agent
@@ -208,6 +213,8 @@ verification_gates:
   - git diff --check
   - git diff --cached --check
   - gh issue view 2 --repo nonononull/inputcodex
+  - gh api repos/nonononull/inputcodex/rulesets/19395456
+  - gh api repos/nonononull/inputcodex/rules/branches/main
   - gh api repos/BigPizzaV3/CodexPlusPlus/releases/latest
   - gh api repos/BigPizzaV3/CodexPlusPlus/git/ref/tags/v1.2.41
 
@@ -216,7 +223,7 @@ strict_runtime_validator_claimed: false
 strict_runtime_validator_recovery: 若未来将 inputcodex 纳入 AGOS 全局 registry，先创建独立跨仓治理 Issue/PR，再映射 task 与 business path 并运行 verify-runtime-workflow.ps1。
 
 rollout_draft:
-  reusable_path: GitHub Issue 驱动的外部项目架构治理文档冻结
+  reusable_path: GitHub Issue 驱动的外部项目架构治理文档冻结与 main Ruleset 落地
   record_at_closeout: true
   closeout_boundary: PR 合并并补齐 review_ref、ci_ref、merge_ref 后
   current_status: deferred-until-pr-3-merge-closeout

@@ -347,6 +347,15 @@ Release Notes 必须列出上游版本和提交、功能一致范围、自有修
 - 合并后删除功能分支。
 - `main` 应保持可构建；正式发布仍需单独 Release Gate。
 
+#### 已落地状态（2026-07-21）
+
+- GitHub Ruleset `main-protection` 已启用，规则集 ID 为 `19395456`。
+- 规则范围只包含 `refs/heads/main`，无排除分支、无 bypass actor，项目所有者与管理员不在例外名单中。
+- 有效规则为 `deletion`、`non_fast_forward` 和 `pull_request`：禁止删除、禁止 Force Push、所有变更必须通过 PR。
+- `pull_request` 规则当前 required approvals 为 `0`，要求解决全部 Review 对话，且只允许 Squash Merge。
+- 当前仓库尚无 required status checks；加入 CI 后必须通过独立 Issue/PR 把稳定检查加入 Ruleset，不能伪造不存在的检查。
+- 落地与验证证据见 `docs/reports/2026-07-21-main-protection-rollout.md`。
+
 ## 十一、分阶段实施
 
 ### Gate 1：方案与治理冻结

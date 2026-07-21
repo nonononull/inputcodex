@@ -5,27 +5,28 @@ architecture_contract_version: agos.brainstorming-gate.v1
 task_id: 2026-07-21-issue-2-architecture-governance
 work_class: major
 task_status: review-pending
-task_summary: 将 inputcodex 重构、上游同步、版本发布与 GitHub 治理决策固化为项目单一真源，并通过 Issue #2 关联 PR 交付。
+task_summary: 将 inputcodex 重构、上游同步、版本发布与 GitHub 治理决策固化为项目单一真源，落地仅作用于 main 的保护 Ruleset，并通过 Issue #2 关联 PR 交付。
 project_root: C:/Users/dashuai/Documents/inputcodex
-trigger_source: 用户批准架构方案并要求立即落盘、持续维护单一真源
+trigger_source: 用户批准架构方案、main 保护规则及其实际 GitHub 配置，并要求立即落盘和持续维护单一真源
 decision_status: approved
 approval_source: inherited-user-instruction
 approved_decision_ref: session-plan:2026-07-21-issue-2-architecture-governance#decision
-scope_hash: sha256:1055a1f60198728b6f3ea489efda840cc72262828ce60180420e22326c6b5ec4
-scope_hash_source: docs-only|issue-2|architecture-governance|no-source-import|no-actions|no-app-scaffold|no-release
-mutation_intent: docs
-executor_enforcement: project-native-docs-plus-github-issue-pr
+scope_hash: sha256:671ff3b4f90a4b472c1a0d7757e3d945dd9a3f794818151f75f363eabc34591f
+scope_hash_source: docs-and-github-config|issue-2|architecture-governance|main-ruleset-only|no-source-import|no-actions|no-app-scaffold|no-release|no-merge
+mutation_intent: config
+executor_enforcement: project-native-docs-plus-github-issue-pr-and-main-ruleset
 allowed_operations:
   - 新增和修改项目治理文档、ADR、会话计划与运行工作流
   - 核验 GitHub Issue #2 与上游正式 Release 元数据
   - 更新项目总计划、构建验证入口和排错记录
   - 在验证通过后提交、推送并创建关联 Issue #2 的 PR
-scope_boundary: 仅冻结方案与治理合同；不导入上游源码，不创建 Rust/Iced 工程，不实现 GitHub Actions，不发布安装包，不合并 PR。
+  - 创建和验证仅命中 refs/heads/main 的 GitHub Ruleset，不修改其他分支规则
+scope_boundary: 冻结方案与治理合同，并落地仅作用于 main 的 GitHub Ruleset；不导入上游源码，不创建 Rust/Iced 工程，不实现 GitHub Actions，不发布安装包，不合并 PR，不修改其他分支规则。
 selected_business_path: architecture-governance
 delivery_contract: agos.issue-pr-merge.v1
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/2
 review_strategy: 本地结构与语义自审、Fresh 验证证据、GitHub PR 由项目所有者审阅；所有 Review 对话必须完成根因、处理和验证闭环
-ci_expectation: 当前仅文档变更；本地执行文档、Git 与 GitHub 元数据检查，后续仓库 CI 建立后再升级为 required checks
+ci_expectation: 当前执行文档与 GitHub Ruleset 验证；仓库尚无 Actions，后续稳定 CI 建立后再通过独立 Issue/PR 升级为 required checks
 merge_policy: 项目所有者审阅通过、检查成功且所有 Review 对话完成根因解决与验证闭环后只允许 Squash Merge；禁止 Merge Commit 和 Rebase Merge
 closeout_ref: pending:merge-and-closeout-after-https://github.com/nonononull/inputcodex/pull/3
 
@@ -40,6 +41,7 @@ closeout_ref: pending:merge-and-closeout-after-https://github.com/nonononull/inp
 - Decision: 永久禁止对 `main` 使用 `--force` 或 `--force-with-lease`；管理员也不例外，历史错误与紧急修复必须通过 `revert` 和关联 Issue/PR 处理。
 - Decision: 永久禁止删除 `main`，项目所有者与管理员也不例外；误删后只能从删除前最后一个权威提交恢复同名分支并建立事故 Issue，不得借恢复改写历史。
 - Decision: 所有 Review 对话必须先确定根因、完成处理并回写验证证据后才能解决和合并；若反馈不成立，必须提供可复核证据并取得 reviewer 或项目所有者确认，禁止空点 Resolve。
+- Decision: 在 GitHub 创建活动 Ruleset `main-protection`（ID `19395456`），只包含 `refs/heads/main` 且无 bypass actor；规则为禁止删除、禁止非快进更新、要求 PR、required approvals 为 `0`、要求解决 Review 对话并只允许 Squash Merge。
 - Decision: 单人维护阶段平台 required approvals 为 `0`，但必须保留项目所有者决策证据；第二名具备合并权限的人类维护者加入后，在下一次 PR 合并前提升为 `1`，自动化账号不计入人数。
 - Decision: 版本采用 `v<上游版本>-inputcodex.<修订号>`，安装包、更新清单、签名与下载地址全部属于 `nonononull/inputcodex`。
 - Decision: 无效功能、有害副作用或错误语义争议必须建立 `parity-exception` Issue，由项目所有者决定。
@@ -164,13 +166,15 @@ deliberation:
 
 ```yaml
 change_contract:
-  mutation_intent: docs
+  mutation_intent: config
   target_contract:
     owner: 项目所有者
-    expected_behavior: 仓库存在唯一、可追溯、可通过 PR 修改的重构和发布治理真源。
+    expected_behavior: 仓库存在唯一、可追溯的重构与发布治理真源，并由仅作用于 main 的活动 GitHub Ruleset 强制执行已批准的合并保护规则。
     evidence_refs:
       - docs/plans/2026-07-21-architecture-governance.md
+      - docs/reports/2026-07-21-main-protection-rollout.md
       - https://github.com/nonononull/inputcodex/issues/2
+      - https://github.com/nonononull/inputcodex/rules/19395456
   preserved_invariants:
     - name: 当前不包含应用源码
       owner: 项目所有者
@@ -192,6 +196,10 @@ change_contract:
     - name: build.md 与 err.md
       why_adjacent: 当前无源码时，文档验证和治理异常必须从这里进入。
       risk: 命令过期会产生虚假完成声明。
+      owner: 项目所有者
+    - name: GitHub main Ruleset
+      why_adjacent: 平台规则必须与文档治理合同保持一致，并且只命中 main。
+      risk: 范围扩大、bypass actor 或参数漂移会破坏已批准的单人阶段和合并门禁。
       owner: 项目所有者
   historical_state_refs:
     - docs/plans/2026-07-21-bootstrap.md
@@ -216,6 +224,12 @@ change_contract:
     - surface: 上游正式基线
       command_or_evidence_ref: gh api repos/BigPizzaV3/CodexPlusPlus/releases/latest
       expected_result: 最新正式 Release 为 v1.2.41
+    - surface: GitHub main Ruleset
+      command_or_evidence_ref: gh api repos/nonononull/inputcodex/rulesets/19395456
+      expected_result: active、仅命中 refs/heads/main、无 bypass actor，且参数与批准决策一致
+    - surface: main 有效规则
+      command_or_evidence_ref: gh api repos/nonononull/inputcodex/rules/branches/main
+      expected_result: deletion、non_fast_forward 与 pull_request 三条规则均来自 Ruleset 19395456
   sibling_regression_guard:
     status: passed
     closeout_rule: passed-or-blocked-before-done
@@ -357,7 +371,7 @@ skill_tree_nodes:
   - superpowers:finishing-a-development-branch
   - karpathy-guidelines
 stop_gates:
-  - 用户改变已批准架构或当前 docs-only 范围
+  - 用户改变已批准架构或当前 docs-and-github-config 范围
   - 上游最新正式 Release 不再是 v1.2.41
   - 需要导入源码、创建 Actions、搭建 Iced 或发布资产
   - 需要修改 AI Growth OS 跨仓控制面
@@ -367,6 +381,8 @@ verification_commands:
   - git diff --check
   - git diff --cached --check
   - verify-git-snapshot-governance.ps1 -Checkpoint -ReportOnly
+  - gh api repos/nonononull/inputcodex/rulesets/19395456
+  - gh api repos/nonononull/inputcodex/rules/branches/main
 ```
 
 ## Delivery Governance
@@ -377,6 +393,7 @@ tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/2
 branch_ref: docs/issue-2-architecture-governance
 review_ref: pending:project-owner-review
 pr_ref: https://github.com/nonononull/inputcodex/pull/3
+ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 ci_ref: not-configured:statusCheckRollup-empty-2026-07-21
 merge_ref: pending:owner-approved-merge
 review_strategy: Fresh 本地验证后创建非 Draft PR，由项目所有者逐项核对硬约束、范围和上游基线；每条 Review 对话必须记录根因、处理与验证证据。
@@ -388,6 +405,7 @@ merge_policy: PR 正文必须包含 Closes #2；单人阶段 required approvals 
 
 - `docs/plans/2026-07-21-architecture-governance.md` 成为明确标注的单一真源。
 - `CONTEXT.md`、`AGENTS.md`、两份 ADR、Master Plan、Session Plan 与 Runtime Workflow 互不矛盾。
+- GitHub Ruleset `main-protection` 处于 active，只命中 `main`，且删除、Force Push、PR、Review 对话和 Squash-only 参数与批准决策一致。
 - `build.md` 给出当前文档任务可重复执行的验证命令，`err.md` 记录本次 AGOS 与补丁工具异常。
 - Fresh 验证已通过，提交 `4acb76a08c2f1c74b3f7672fdc9d5f96ecdc5a84` 已推送到 `docs/issue-2-architecture-governance`。
 - 已创建包含 `Closes #2` 的 PR `#3`，当前状态为 `OPEN`、非 Draft、`mergeStateStatus=CLEAN`，等待项目所有者 Review；本会话不自动合并。
