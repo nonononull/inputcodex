@@ -333,6 +333,8 @@ Release Notes 必须列出上游版本和提交、功能一致范围、自有修
 - 必须通过关联 PR。
 - 永久禁止对 `main` 使用 Force Push，包括 `--force` 和 `--force-with-lease`；项目所有者与管理员也不得例外。
 - 已进入 `main` 的错误历史只能通过 `revert` 提交和关联 Issue/PR 修正，紧急修复不得重写历史。
+- 永久禁止删除 `main`，项目所有者与管理员也不得例外。
+- 若 `main` 被意外删除，只能从删除前最后一个权威提交恢复同名分支并建立事故 Issue；恢复过程不得改写或替换既有历史。
 - 只允许 Squash Merge；仓库必须禁用 Merge Commit 和 Rebase Merge。
 - 每个 Issue 合并后在 `main` 上只形成一条可独立追踪和回滚的提交。
 - 单人维护阶段 required approvals 为 `0`，但关联 Issue 或 PR 必须存在项目所有者明确批准证据。

@@ -26,14 +26,14 @@
 - 验证：小批次补丁可进入补丁程序并正常处理。
 - 关联：本次仓库筹备会话。
 
-### 2026-07-21：桌面版 apply_patch 包装器拒绝启动
+### 2026-07-21：桌面版 apply_patch 入口随安装版本变化
 
-- 环境：桌面版临时 `apply_patch.bat` 指向 WindowsApps 中的 Codex 可执行文件。
-- 现象：运行包装器返回 `Access is denied.`。
-- 根因：当前沙箱进程无法嵌套启动 WindowsApps 内的桌面版可执行文件。
-- 处理：改为直接调用本机 npm 安装的 Codex 官方原生二进制，并继续使用 `--codex-run-as-apply-patch` 模式。
-- 验证：最小 `README.md` 补丁返回 `Success. Updated the following files`。
-- 关联：本次仓库筹备会话。
+- 环境：Codex Desktop、PowerShell 与 `--codex-run-as-apply-patch` 模式。
+- 现象：临时 `apply_patch.bat` 曾返回 `Access is denied.`；继续硬编码 npm 包内原生二进制后又出现 `ENOENT`；通过 stdin 传递补丁时返回 `requires a UTF-8 PATCH argument`。
+- 根因：Codex 安装位置和内部原生二进制路径会随桌面版或 npm 包更新变化，不能把内部绝对路径视为稳定入口；当前接口要求把完整补丁作为单个参数传入，而不是通过 stdin。
+- 处理：先用 `Get-Command codex` 解析当前有效命令，再执行 `& codex --codex-run-as-apply-patch $patch`；禁止继续硬编码包内二进制路径或把补丁管道传入。
+- 验证：命令退出码为 `0`，并返回 `Success. Updated the following files`，本次五个治理文件均按预期更新。
+- 关联：GitHub Issue `#2`、PR `#3`。
 
 ### 2026-07-21：AGOS 严格入口未登记 inputcodex Issue #2
 

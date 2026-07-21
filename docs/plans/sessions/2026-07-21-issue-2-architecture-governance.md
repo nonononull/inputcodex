@@ -38,6 +38,7 @@ closeout_ref: pending:merge-and-closeout-after-https://github.com/nonononull/inp
 - Decision: GitHub Actions 每 6 小时监控上游，只创建或更新 Issue，不自动同步、实现、合并或发布。
 - Decision: 所有 PR 合并到 `main` 只允许 Squash Merge，禁止 Merge Commit 和 Rebase Merge；每个 Issue 在 `main` 上只保留一条可追踪、可回滚提交。
 - Decision: 永久禁止对 `main` 使用 `--force` 或 `--force-with-lease`；管理员也不例外，历史错误与紧急修复必须通过 `revert` 和关联 Issue/PR 处理。
+- Decision: 永久禁止删除 `main`，项目所有者与管理员也不例外；误删后只能从删除前最后一个权威提交恢复同名分支并建立事故 Issue，不得借恢复改写历史。
 - Decision: 单人维护阶段平台 required approvals 为 `0`，但必须保留项目所有者决策证据；第二名具备合并权限的人类维护者加入后，在下一次 PR 合并前提升为 `1`，自动化账号不计入人数。
 - Decision: 版本采用 `v<上游版本>-inputcodex.<修订号>`，安装包、更新清单、签名与下载地址全部属于 `nonononull/inputcodex`。
 - Decision: 无效功能、有害副作用或错误语义争议必须建立 `parity-exception` Issue，由项目所有者决定。
