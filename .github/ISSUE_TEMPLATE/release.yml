@@ -1,0 +1,65 @@
+name: 版本发布
+description: 规划和验收 inputcodex 自有版本、资产、签名、更新与回滚。
+title: "[Release] "
+labels:
+  - "type:release"
+  - "gate:6"
+body:
+  - type: input
+    id: version
+    attributes:
+      label: inputcodex 版本
+      placeholder: "v1.2.41-inputcodex.1"
+    validations:
+      required: true
+  - type: input
+    id: upstream_baseline
+    attributes:
+      label: 上游功能基线
+      placeholder: "v1.2.41 / commit SHA"
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: 发布范围与一致性状态
+      description: 列出纳入功能、批准例外和未解决阻塞。
+    validations:
+      required: true
+  - type: textarea
+    id: platforms
+    attributes:
+      label: Windows 与 macOS 验证
+      description: 记录安装、启动、升级、卸载、回滚和功能一致性证据。
+    validations:
+      required: true
+  - type: textarea
+    id: performance
+    attributes:
+      label: 性能预算结果
+    validations:
+      required: true
+  - type: textarea
+    id: assets
+    attributes:
+      label: 资产、签名与摘要
+      description: 所有 URL、签名、下载和更新源必须属于 `nonononull/inputcodex`。
+    validations:
+      required: true
+  - type: textarea
+    id: rollback
+    attributes:
+      label: 回滚方案
+    validations:
+      required: true
+  - type: checkboxes
+    id: gates
+    attributes:
+      label: 发布门禁
+      options:
+        - label: 功能矩阵、所有批准例外、双平台与性能预算均有可追溯证据。
+          required: true
+        - label: 最终运行面没有广告、推广、隐蔽遥测、TypeScript、JavaScript 业务代码或 WebView。
+          required: true
+        - label: Release 必须由独立 PR、CI 与项目所有者批准驱动。
+          required: true

@@ -1,0 +1,58 @@
+name: 性能基线与回归
+description: 建立可复现性能测量、预算或回归根因任务。
+title: "[Performance] "
+labels:
+  - "type:performance"
+body:
+  - type: dropdown
+    id: task_type
+    attributes:
+      label: 任务类型
+      options:
+        - 建立基线
+        - 批准性能预算
+        - 调查性能回归
+        - 优化已确认瓶颈
+    validations:
+      required: true
+  - type: textarea
+    id: scenario
+    attributes:
+      label: 用户场景与测量边界
+      description: 描述启动、交互、加载、CPU、内存、后台行为或其他场景。
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境
+      description: 记录 OS、硬件、版本、数据规模、冷/热启动和采样方法。
+    validations:
+      required: true
+  - type: textarea
+    id: baseline
+    attributes:
+      label: 当前基线与证据
+      description: 提供重复次数、统计口径、原始结果和命令。
+    validations:
+      required: true
+  - type: textarea
+    id: target
+    attributes:
+      label: 目标或回归门槛
+      description: 使用可测量阈值，不接受“更快”等模糊目标。
+    validations:
+      required: true
+  - type: textarea
+    id: root_cause
+    attributes:
+      label: 已知根因或调查计划
+      description: 禁止以删除有效功能、隐藏错误或减少可诊断性换取表面性能。
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: 验证与防回归方案
+    validations:
+      required: true

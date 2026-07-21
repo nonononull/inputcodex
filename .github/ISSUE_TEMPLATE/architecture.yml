@@ -1,0 +1,50 @@
+name: 架构与治理决策
+description: 提交需要评审的架构、依赖、状态机或仓库治理变更。
+title: "[Architecture] "
+labels:
+  - "type:architecture"
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 问题与根因
+      description: 描述当前失败模式、性能影响、错误语义或治理缺口。
+    validations:
+      required: true
+  - type: textarea
+    id: constraints
+    attributes:
+      label: 硬约束
+      description: 列出功能一致、双平台、Rust/Iced、无广告、分层和发布归属等适用约束。
+    validations:
+      required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: 备选方案与权衡
+      description: 至少给出两个方案，比较性能、复杂度、可测试性和迁移风险。
+    validations:
+      required: true
+  - type: textarea
+    id: decision
+    attributes:
+      label: 建议决策
+      description: 说明模块边界、依赖方向、状态模型和失败隔离。
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 验证与迁移证据
+      description: 列出原型、测试、基准、兼容性和回滚方案。
+    validations:
+      required: true
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: 架构边界
+      options:
+        - label: 未经方案评审，不照搬上游或半成品架构。
+          required: true
+        - label: 如涉及 UI，默认交给 Gemini；当前 Issue 不把临时 UI 设为事实标准。
+          required: true

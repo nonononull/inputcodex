@@ -1,0 +1,61 @@
+name: 功能一致性例外决策
+description: 处理无效功能、有害副作用或错误语义争议，必须由项目所有者决策。
+title: "[Parity Exception] "
+labels:
+  - "type:parity-exception"
+  - "status:needs-owner-decision"
+body:
+  - type: input
+    id: upstream_ref
+    attributes:
+      label: 上游功能与版本
+      placeholder: "v1.2.41 / 快照路径 / 提交"
+    validations:
+      required: true
+  - type: dropdown
+    id: exception_type
+    attributes:
+      label: 例外类型
+      options:
+        - 功能无效或不可达
+        - 有害或不可接受的副作用
+        - 错误或歧义语义
+        - 安全、隐私或合规风险
+        - 双平台无法合理一致
+        - 其他需所有者决策的差异
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 根因与证据
+      description: 提供复现步骤、上游行为、影响范围和可复核证据。
+    validations:
+      required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: 可选方案与权衡
+      description: 至少列出保持一致、修正语义、禁用或移除等可行方案及代价。
+    validations:
+      required: true
+  - type: textarea
+    id: recommendation
+    attributes:
+      label: 建议决策
+      description: 明确推荐方案、兼容策略和验证标准。
+    validations:
+      required: true
+  - type: textarea
+    id: owner_decision
+    attributes:
+      label: 项目所有者决策
+      description: Issue 创建后由项目所有者填写批准结论；未决期间不得实现差异。
+      placeholder: "由项目所有者在 Issue 评论或编辑中回写"
+  - type: checkboxes
+    id: gate
+    attributes:
+      label: 决策门禁
+      options:
+        - label: 在项目所有者明确批准前，不创建实现 PR，也不静默偏离上游行为。
+          required: true

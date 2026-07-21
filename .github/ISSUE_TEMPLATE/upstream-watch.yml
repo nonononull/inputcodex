@@ -1,0 +1,61 @@
+name: 上游变化监控
+description: 记录定时扫描发现的新 Release、标签或 main 变化，仅用于预警和分流。
+title: "[Upstream Watch] "
+labels:
+  - "type:upstream-watch"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        上游最新正式 Release 是功能真源，`main` 只作为变化预警源。本 Issue 不自动同步、实现或合并任何代码。
+  - type: input
+    id: observed_at
+    attributes:
+      label: 观察时间
+      description: 使用 UTC RFC3339 时间。
+      placeholder: "2026-07-21T00:00:00Z"
+    validations:
+      required: true
+  - type: input
+    id: upstream_ref
+    attributes:
+      label: 上游引用
+      description: Release、标签、提交或比较链接。
+      placeholder: "v1.2.42 / commit SHA / compare URL"
+    validations:
+      required: true
+  - type: dropdown
+    id: change_type
+    attributes:
+      label: 变化类型
+      options:
+        - 新正式 Release
+        - Release 标签提交变化
+        - main 变化预警
+        - Release 元数据变化
+        - 监控异常
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 可复核证据
+      description: 填写 API 响应摘要、SHA、发布时间和比较结果。
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: 对 inputcodex 的影响
+      description: 说明是否需要建立 upstream-sync、feature-parity 或 parity-exception Issue。
+    validations:
+      required: true
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: 边界确认
+      options:
+        - label: 本 Issue 不直接修改 `upstream/`、产品源码、Release 或 Ruleset。
+          required: true
+        - label: 我没有把上游 `main` 当作功能真源。
+          required: true

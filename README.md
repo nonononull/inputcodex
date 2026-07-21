@@ -29,21 +29,23 @@
 - 通过 Issue `#2` 批准纯 Rust/Iced、完整上游快照、自主发布线和 Issue/PR 治理方案。
 - 通过 PR `#3` Squash Merge 重构与发布治理单一真源、项目语境、ADR、Session Plan、Runtime Workflow、`main-protection` Ruleset 和 Rust CI 云端卸载计划。
 - PR `#3` 的合并提交为 `0e11375997ff10fdc0c233b31c8468af2d9a4f44`；Issue `#2` 已关闭，旧功能分支已删除。
-- 已创建 Issue `#4` 的独立 closeout PR `#5`，用于回写最终合并证据和最新 Master Plan；PR 保持开放等待项目所有者 Review。
+- 通过 PR `#5` Squash Merge Issue `#2` / PR `#3` 的最终 closeout 证据；合并提交为 `b7404b0c63f2d2ba65474c077182c42a01cc9a64`，Issue `#4` 已关闭。
+- PR `#5` 的合并提交只有一个父提交，merge tree 与最终 PR Head tree 均为 `af186e05673b441a936199e55c7d632cd06ea929`；Review 对话与 Checks 数量均为 `0`。
+- 已建立 Issue `#6`、分支 `codex/issue-6-gate-1-finalization` 和 PR `#7`，用于补齐 Issue Forms、PR 模板、项目标签与 Gate 1 最终控制面；PR 当前保持开放等待项目所有者 Review。
 
 当前明确不做：
 
 - 不导入上游或半成品源码。
 - 不创建 Rust/Iced 工程或 GitHub Actions。
-- 不执行功能迁移、安装包构建、发布或 PR 合并。
+- 不执行功能迁移、安装包构建、发布或未经项目所有者授权的 PR 合并。
 - 不让上游 Tauri/React UI、现有注入脚本和远程推荐列表进入最终运行面。
 
 ## 下一步
 
-1. 完成 Issue `#4` closeout PR 的项目所有者 Review 与 Squash Merge；该 PR 未经再次授权不得自动合并。
-2. 通过独立 Issue/PR 补齐 Issue/PR 模板和标签；`main` 分支保护已经落地并完成合并后复核。
-3. Gate 1 完成后，新建 `upstream-sync` Issue 导入 `v1.2.41` 完整快照并建立每 6 小时上游监控。
-4. 后续再分别建立 Rust/Iced 骨架、功能矩阵和性能基线 Issue；任何源码实现都需要新的 Session Plan 与批准。
+1. 通过 Issue `#6` 的关联 PR 完成 Issue Forms、PR 模板、标签和 Gate 1 最终治理收口；该 PR 未经再次授权不得自动合并。
+2. Gate 1 PR 合并后关闭筹备 Issue `#1`，并把 Master Plan 切换到 Gate 2。
+3. 新建 `upstream-sync` Issue 导入 `v1.2.41` 完整快照，再以独立 Issue/PR 建立每 6 小时上游监控。
+4. 后续分别建立 Rust/Iced 骨架、功能矩阵和性能基线 Issue；任何源码实现都需要新的 Session Plan 与批准。
 
 ## 项目文档
 
@@ -56,9 +58,10 @@
 - 项目术语：`CONTEXT.md`
 - 重构与发布治理总方案：`docs/plans/2026-07-21-architecture-governance.md`
 - Issue `#2` closeout 报告：`docs/reports/issue-2-architecture-governance-closeout.md`
-- 当前 closeout 计划：`docs/plans/2026-07-21-issue-4-gate-1-closeout.md`
-- 当前会话计划：`docs/plans/sessions/2026-07-21-issue-4-gate-1-closeout.md`
-- 当前运行工作流：`docs/workflows/2026-07-21-issue-4-gate-1-closeout-runtime.md`
+- Issue `#4` closeout 报告：`docs/reports/issue-4-gate-1-closeout.md`
+- 当前 Gate 1 收口计划：`docs/plans/2026-07-21-issue-6-gate-1-finalization.md`
+- 当前会话计划：`docs/plans/sessions/2026-07-21-issue-6-gate-1-finalization.md`
+- 当前运行工作流：`docs/workflows/2026-07-21-issue-6-gate-1-finalization-runtime.md`
 - 架构决策：`docs/adr/`
 
 ## 许可证

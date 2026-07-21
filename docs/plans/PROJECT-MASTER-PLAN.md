@@ -1,18 +1,18 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: 2026-07-21-issue-4-gate-1-closeout
-active_gate: Gate 1：合并证据 closeout
-last_verified_gate: Gate 1 子里程碑：Issue #2 / PR #3 已 Squash Merge
-next_legal_gate: 完成 Issue #4 closeout PR 的项目所有者 Review 与 Squash Merge；随后以独立 Issue/PR 补齐 GitHub 模板与标签，Gate 1 完成前不得进入 Gate 2。
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/4
-active_branch_ref: codex/issue-4-gate-1-closeout
-active_plan_ref: docs/plans/2026-07-21-issue-4-gate-1-closeout.md
-active_session_plan_ref: docs/plans/sessions/2026-07-21-issue-4-gate-1-closeout.md
-active_runtime_workflow_ref: docs/workflows/2026-07-21-issue-4-gate-1-closeout-runtime.md
-active_pr_ref: https://github.com/nonononull/inputcodex/pull/5
-closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3
-closeout_report_ref: docs/reports/issue-2-architecture-governance-closeout.md
+active_task: 2026-07-21-issue-6-gate-1-finalization
+active_gate: Gate 1：仓库治理基线最终收口
+last_verified_gate: Gate 1 子里程碑：Issue #4 / PR #5 已 Squash Merge
+next_legal_gate: 通过 Issue #6 的关联 PR 合并 Issue Forms、PR 模板、标签与最终控制面；合并并关闭 Issue #1 后才可进入 Gate 2。
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/6
+active_branch_ref: codex/issue-6-gate-1-finalization
+active_plan_ref: docs/plans/2026-07-21-issue-6-gate-1-finalization.md
+active_session_plan_ref: docs/plans/sessions/2026-07-21-issue-6-gate-1-finalization.md
+active_runtime_workflow_ref: docs/workflows/2026-07-21-issue-6-gate-1-finalization-runtime.md
+active_pr_ref: https://github.com/nonononull/inputcodex/pull/7
+closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5
+closeout_report_ref: docs/reports/issue-4-gate-1-closeout.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
@@ -28,8 +28,11 @@ decision_status: approved
 - 合并时 Review 对话总数与未解决数均为 `0`；Checks 数量为 `0`，语义是当前未配置 Actions/required checks，不是伪造的 CI 通过。
 - GitHub Ruleset `main-protection`（ID `19395456`）已激活且只命中 `main`；禁止删除、禁止 Force Push、要求 PR、要求解决 Review 对话并只允许 Squash Merge，当前单人阶段 required approvals 为 `0`。
 - 已批准 Rust CI 云端卸载策略与实施计划：本地只做轻量定向验证，全量 Workspace、Windows/macOS 和发布构建交给标准 GitHub-hosted runners；未来按上游监控、Workspace+三平台 CI、Cache 调优、Ruleset 升级四个独立 Issue/PR 推进，当前只落盘计划，不创建 Workflow。
-- 当前 Issue `#4` 只负责通过独立分支和 PR 回写上述 closeout 证据与最新 Master Plan；不进入源码、Actions、Ruleset 或发布范围。
-- Issue `#4` 对应 PR `#5` 已创建，当前为 `OPEN`、非 Draft、`mergeStateStatus=CLEAN`，PR Head 与本地/远端跟踪分支一致，Checks 与未解决 Review 对话均为 `0`；未经项目所有者再次授权不得合并。
+- Issue `#4` / PR `#5` 交付链已完成：PR 于 `2026-07-21T15:21:58Z` Squash Merge，Issue 于 `2026-07-21T15:22:00Z` 关闭。
+- PR `#5` 合并提交为 `b7404b0c63f2d2ba65474c077182c42a01cc9a64`，最终 PR Head 为 `ecd34360ae5f6c0d1f2995ccc6724fe39bf95381`；合并提交只有一个父提交，二者 tree 均为 `af186e05673b441a936199e55c7d632cd06ea929`。
+- PR `#5` 的 Review 对话总数、未解决数与 Checks 数量均为 `0`；`0 Checks` 只表示当前未配置 CI。
+- 当前 Issue `#6` 负责补齐八类 Issue Forms、PR 模板、批准标签、Issue `#4` closeout 报告和 Gate 1 最终控制面；不进入源码、Actions、Ruleset 或发布范围。
+- 当前分支为 `codex/issue-6-gate-1-finalization`，PR `#7` 创建时为 `OPEN`、非 Draft、`CLEAN`，初始 Head 为 `df3795d03027ddfff512a911bf8493b63b603275`；Checks、Reviews、Review 对话与未解决数均为 `0`，未启用自动合并，未经项目所有者再次授权不得合并。后续元数据提交以 GitHub 实时 PR Head 为准，不在控制文档中递归固化“最终 Head”。
 - AGOS 是可选外部治理辅助：可用且适用时可以补充证据；不可用、未登记、返回 `needs-input` 或异常时直接记录并绕过，不构成本项目门禁，也不得在本项目任务中修改或优化 AGOS。
 
 ## 项目不变量
@@ -61,7 +64,7 @@ decision_status: approved
 - 已建立本地与 GitHub 公开仓库、GNU AGPLv3、根文档、Issue #1 和筹备 closeout。
 - 历史证据：`docs/plans/2026-07-21-bootstrap.md`、`docs/reports/2026-07-21-bootstrap-closeout.md`。
 
-### Gate 1：方案与治理冻结（当前）
+### Gate 1：方案与治理冻结（最终收口）
 
 - [x] 用户逐项批准纯 Rust/Iced、功能一致、完整上游快照、每 6 小时监控、自主版本和 Issue/PR 治理。
 - [x] 起草单一真源、项目语境、两份 ADR、Major Session Plan 和 Runtime Workflow。
@@ -71,8 +74,9 @@ decision_status: approved
 - [x] 批准并落盘 Rust CI 云端编译卸载策略；当前不创建 Workflow。
 - [x] 批准并落盘 Rust CI 云端卸载实施计划；Gate 2/3、Cache 调优和 required check 均保持锁定并要求独立 Issue/PR。
 - [x] 项目所有者完成 Review 并以 Squash Merge 合并 PR `#3`；Issue `#2` 已关闭，旧分支已删除。
-- [ ] 通过 Issue `#4` 的独立 PR 合并 closeout 报告和最新控制面；未经再次授权不得自动合并。
-- [ ] 通过后续独立 Issue/PR 建立 Issue/PR 模板与标签。
+- [x] 通过 Issue `#4` / PR `#5` 合并 closeout 报告和最新控制面；Issue 已关闭。
+- [ ] 通过 Issue `#6` 的关联 PR 建立八类 Issue Forms、PR 模板和批准标签。
+- [ ] 合并 Issue `#6` PR 后回写最终证据、关闭筹备 Issue `#1`，再把 Gate 2 解锁为下一合法阶段。
 
 ### Gate 2：导入上游基线（锁定）
 
@@ -108,13 +112,14 @@ decision_status: approved
 - 排错与已知限制：`err.md`。
 - 单一架构真源：`docs/plans/2026-07-21-architecture-governance.md`。
 - Issue `#2` closeout 报告：`docs/reports/issue-2-architecture-governance-closeout.md`。
-- 当前任务计划：`docs/plans/2026-07-21-issue-4-gate-1-closeout.md`。
-- 当前 Session Plan：`docs/plans/sessions/2026-07-21-issue-4-gate-1-closeout.md`。
-- 当前运行图：`docs/workflows/2026-07-21-issue-4-gate-1-closeout-runtime.md`。
+- Issue `#4` closeout 报告：`docs/reports/issue-4-gate-1-closeout.md`。
+- 当前任务计划：`docs/plans/2026-07-21-issue-6-gate-1-finalization.md`。
+- 当前 Session Plan：`docs/plans/sessions/2026-07-21-issue-6-gate-1-finalization.md`。
+- 当前运行图：`docs/workflows/2026-07-21-issue-6-gate-1-finalization-runtime.md`。
 
 ## 停止条件
 
 - 用户改变已批准硬约束或当前 docs-only 范围。
 - 上游最新正式 Release 或 `v1.2.41` 标签提交发生变化。
 - 需要导入源码、实现 UI、创建 Actions、发布资产，或发现必须修改 AGOS 才能继续；AGOS 本身不可用不属于停止条件，应记录后绕过。
-- Fresh 验证失败、分支不正确、PR 无法关联 Issue #4、GitHub closeout 事实发生变化，或出现未批准的一致性差异。
+- Fresh 验证失败、分支不正确、PR 无法关联 Issue `#6`、GitHub closeout 事实发生变化，或出现未批准的一致性差异。
