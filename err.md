@@ -170,6 +170,33 @@
 - 验证：修正后的同一 Fresh 验证输出 `PR7_PREMERGE_FRESH_VERIFY_OK`，PR `#7` 随后按授权 Squash Merge。
 - 关联：GitHub PR `#7`、Issue `#8` Gate 1→2 过渡。
 
+### 2026-07-21：GitHub PR diff API 对超大快照返回 406
+
+- 环境：PR `#11` 包含 `279` 个变更文件和超过 `20,000` 行差异，使用 `gh pr diff 11 --name-only` 读取远端差异。
+- 现象：GitHub 返回 `HTTP 406` 与 `PullRequest.diff too_large`，无法通过 PR diff 媒体类型输出文件列表。
+- 根因：GitHub PR diff 接口存在 20,000 行响应上限；PR 本身仍为 `OPEN/MERGEABLE`，这不是快照损坏、权限失败或 Git 差异缺失。
+- 处理：先 `git fetch origin --prune` 刷新远端引用，再使用 `git -c core.quotePath=false diff --name-only origin/main...HEAD` 和 scoped `git diff origin/main...HEAD --check -- <generated-files>`；不得因为 API 上限缩减或改写审计快照。
+- 验证：本地三点差异得到 `279` 条路径，其中 `278` 条位于 `upstream/`、`1` 条为同步报告、`0` 条越界；PR `#11` 最终 Squash Merge 的同一差异统计仍为 `279/0`。
+- 关联：GitHub Issue `#9`、PR `#11`、Issue `#12`。
+
+### 2026-07-21：Git 默认 quotePath 导致中文路径允许范围误判
+
+- 环境：Windows Git 默认 `core.quotePath=true`，PowerShell 使用 `git diff --name-only origin/main...HEAD` 与 `^upstream/` 正则检查 PR `#11` 允许路径。
+- 现象：8 个中文 Markdown 路径被 Git 以八进制转义并包裹双引号，正则把它们误判为 `upstream/` 外文件；默认配置得到 `DEFAULT_UNEXPECTED=8`。
+- 根因：验证命令依赖调用机器的 Git 全局输出配置，没有固定 UTF-8 路径输出；文件路径和快照字节本身没有异常。
+- 处理：路径枚举固定使用 `git -c core.quotePath=false diff --name-only ...`，不修改用户或仓库全局 Git 配置；需要处理任意特殊字符时优先使用 NUL 分隔输出。
+- 验证：同一差异在 `core.quotePath=false` 下得到 `QUOTE_PATH_FALSE_UNEXPECTED=0`；修复提交 `90d35a72cffb4a13c5f7588a147e19cbd75b14c6` 已进入 PR `#11` 的 Squash tree。
+- 关联：GitHub PR `#11`、`docs/reports/2026-07-21-upstream-v1.2.41-sync.md`、Issue `#12`。
+
+### 2026-07-21：新建 Markdown 文件末尾多出空白行
+
+- 环境：Issue `#12` closeout 的四个新 Markdown 文档已精确暂存，执行 `git diff --cached --check`。
+- 现象：Git 对四个文件报告 `new blank line at EOF`，暂存门禁失败。
+- 根因：新增文件补丁在最后一条正文后保留了额外空行；这不是 CRLF 警告或 Markdown 内容语义问题。
+- 处理：删除四个文件最后正文之后的空白行，重新精确暂存受影响文件；不关闭或降低 `git diff --cached --check` 门禁。
+- 验证：重新执行 cached diff 检查，要求退出码为 `0`，并保持暂存路径仍为 Issue `#12` 批准的 `11` 个文件。
+- 关联：GitHub Issue `#12`。
+
 ## 记录模板
 
 ```text

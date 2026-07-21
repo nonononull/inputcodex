@@ -2,16 +2,17 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 21 日，Gate 1 已通过 PR `#7` 完成最终治理收口。Issue `#8` 是一次性的 Gate 1→2 控制面过渡任务，Issue `#9` 是持续开放的 Gate 2 upstream-sync 活动任务。
+截至 2026 年 7 月 21 日，PR `#11` 已将上游正式 Release `v1.2.41` 的完整只读审计快照 Squash Merge 到 `main`，合并提交为 `dde08b725eb2bf4add7fbcfa955f3eaf4eb1bbc6`；Issue `#9` 已关闭，Issue `#12` 是当前 Gate 2 closeout 活动任务。
 
-仓库当前仍没有应用源码，因此没有 Cargo、Iced、安装包或发布构建命令。本文件提供两个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照与 `upstream/source-lock.json`，但仍没有产品应用源码，因此没有 Cargo、Iced、安装包或发布构建命令。本文件当前提供三个检查点：
 
-1. Issue `#8` 过渡 PR 合并前验证。
-2. 过渡 PR Squash Merge 后的 Gate 2 最终状态验证。
+1. 上游快照、manifest、许可证与提交 blob/mode 验证。
+2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
+3. Issue `#12` closeout 分支与允许路径验证。
 
 当前禁止：
 
-- 创建或修改 `upstream/`、`source-lock.json`。
+- 在没有新的独立 upstream-sync Issue/PR 与项目所有者批准时修改 `upstream/` 或 `source-lock.json`。
 - 创建 `Cargo.toml`、Rust/Iced 源码、临时 UI 或 WebView。
 - 创建 `.github/workflows/`、Release、安装包、签名或更新资产。
 - 修改 Ruleset、required checks 或仓库级合并开关。
@@ -32,7 +33,180 @@ Set-StrictMode -Version Latest
 
 原生 `git`、`gh`、`python` 命令后必须立即检查 `$LASTEXITCODE`。只有一行输出时使用 `@(...)` 归一化，禁止把空 stdout 当成成功证据。
 
-## Gate 2 本地 Fresh 验证
+## Gate 2 快照离线验证
+
+```powershell
+@'
+import hashlib
+import json
+import subprocess
+from pathlib import Path, PurePosixPath
+
+lock = json.loads(Path('upstream/source-lock.json').read_text(encoding='utf-8'))
+root = Path(lock['snapshot']['path'])
+expected = lock['files']
+expected_paths = [item['path'] for item in expected]
+actual_paths = sorted(path.relative_to(root).as_posix() for path in root.rglob('*') if path.is_file())
+assert actual_paths == expected_paths
+assert len(actual_paths) == lock['manifest']['file_count'] == 277
+assert sum(1 for path in root.rglob('*') if path.is_dir()) == lock['tree']['directory_count'] == 70
+assert not (root / '.git').exists()
+
+manifest = bytearray()
+total_bytes = 0
+for item in expected:
+    data = (root / PurePosixPath(item['path'])).read_bytes()
+    blob = hashlib.sha1(b'blob ' + str(len(data)).encode('ascii') + b'\0' + data).hexdigest()
+    sha256 = hashlib.sha256(data).hexdigest()
+    assert len(data) == item['size']
+    assert blob == item['git_blob_sha1']
+    assert sha256 == item['sha256']
+    manifest.extend(f"{sha256}  {item['path']}\n".encode('utf-8'))
+    total_bytes += len(data)
+
+assert total_bytes == lock['manifest']['total_bytes'] == 24175877
+assert hashlib.sha256(manifest).hexdigest() == lock['manifest']['sha256']
+assert len(lock['license']['preserved_files']) == 7
+
+tree = subprocess.run(
+    ['git', '-c', 'core.quotePath=false', 'ls-tree', '-r', '-z', 'HEAD', '--', root.as_posix()],
+    check=True,
+    stdout=subprocess.PIPE,
+).stdout
+entries = {}
+for record in tree.split(b'\0'):
+    if record:
+        meta, raw_path = record.split(b'\t', 1)
+        mode, object_type, sha1 = meta.decode('ascii').split()
+        path = raw_path.decode('utf-8').removeprefix(root.as_posix() + '/')
+        entries[path] = (mode, object_type, sha1)
+assert sorted(entries) == expected_paths
+for item in expected:
+    mode, object_type, sha1 = entries[item['path']]
+    assert object_type == 'blob'
+    assert mode == item['mode']
+    assert sha1 == item['git_blob_sha1']
+
+print('UPSTREAM_SNAPSHOT_CURRENT_VERIFY_OK')
+'@ | python -
+if ($LASTEXITCODE -ne 0) { throw '上游快照离线验证失败。' }
+```
+
+## PR #11 合并与 Issue #9 关闭验证
+
+```powershell
+$repo = 'nonononull/inputcodex'
+$mergeCommit = 'dde08b725eb2bf4add7fbcfa955f3eaf4eb1bbc6'
+$mergeParent = '216d400006ad3f1dd2587ca367abb19d0191949f'
+$mergeTree = 'd0c90b9bfda70de800788782180080d50d914564'
+
+$pr = gh pr view 11 --repo $repo --json state,mergedAt,mergeCommit,headRefOid | ConvertFrom-Json
+if ($LASTEXITCODE -ne 0 -or
+    $pr.state -ne 'MERGED' -or
+    $pr.mergeCommit.oid -ne $mergeCommit -or
+    $pr.headRefOid -ne '90d35a72cffb4a13c5f7588a147e19cbd75b14c6') {
+  throw 'PR #11 合并证据不一致。'
+}
+
+$issue = gh issue view 9 --repo $repo --json state,closedAt | ConvertFrom-Json
+if ($LASTEXITCODE -ne 0 -or $issue.state -ne 'CLOSED') {
+  throw 'Issue #9 未关闭。'
+}
+
+$main = (gh api repos/$repo/git/ref/heads/main | ConvertFrom-Json).object.sha
+if ($LASTEXITCODE -ne 0 -or $main -ne $mergeCommit) {
+  throw '远端 main 未指向 PR #11 merge commit。'
+}
+
+git fetch origin main
+if ($LASTEXITCODE -ne 0) { throw '刷新 origin/main 失败。' }
+$parents = @((git show -s --format='%P' $mergeCommit) -split ' ' | Where-Object { $_ })
+if ($LASTEXITCODE -ne 0 -or $parents.Count -ne 1 -or $parents[0] -ne $mergeParent) {
+  throw 'PR #11 不是预期的单父 Squash 提交。'
+}
+$actualTree = git show -s --format='%T' $mergeCommit
+if ($LASTEXITCODE -ne 0 -or $actualTree -ne $mergeTree) {
+  throw 'PR #11 merge tree 不一致。'
+}
+$changed = @(git -c core.quotePath=false diff --name-only $mergeParent $mergeCommit)
+$unexpected = @($changed | Where-Object {
+  $_ -notlike 'upstream/*' -and $_ -ne 'docs/reports/2026-07-21-upstream-v1.2.41-sync.md'
+})
+if ($LASTEXITCODE -ne 0 -or $changed.Count -ne 279 -or $unexpected.Count -ne 0) {
+  throw 'PR #11 合并差异范围不一致。'
+}
+
+Write-Output 'PR11_GATE2_MERGE_VERIFY_OK'
+```
+
+## Issue #12 closeout 本地验证
+
+```powershell
+$allowedPaths = @(
+  'README.md',
+  'build.md',
+  'err.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/2026-07-21-issue-9-gate-2-upstream-baseline.md',
+  'docs/plans/sessions/2026-07-21-issue-9-gate-2-upstream-baseline.md',
+  'docs/workflows/2026-07-21-issue-9-gate-2-upstream-baseline-runtime.md',
+  'docs/plans/2026-07-21-issue-12-gate-2-upstream-closeout.md',
+  'docs/plans/sessions/2026-07-21-issue-12-gate-2-upstream-closeout.md',
+  'docs/workflows/2026-07-21-issue-12-gate-2-upstream-closeout-runtime.md',
+  'docs/reports/issue-12-gate-2-upstream-closeout.md'
+)
+
+foreach ($path in $allowedPaths) {
+  if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+    throw "缺少 Issue #12 控制文件：$path"
+  }
+}
+
+$branch = git branch --show-current
+if ($LASTEXITCODE -ne 0 -or $branch -ne 'codex/issue-12-gate-2-upstream-closeout') {
+  throw "当前 closeout 分支不正确：$branch"
+}
+
+$committed = @(git -c core.quotePath=false diff --name-only origin/main...HEAD)
+if ($LASTEXITCODE -ne 0) { throw '读取 closeout 已提交差异失败。' }
+$working = @(git -c core.quotePath=false diff --name-only)
+if ($LASTEXITCODE -ne 0) { throw '读取 closeout 工作树差异失败。' }
+$staged = @(git -c core.quotePath=false diff --cached --name-only)
+if ($LASTEXITCODE -ne 0) { throw '读取 closeout 暂存差异失败。' }
+$changed = @($committed + $working + $staged | Sort-Object -Unique)
+$unexpected = @($changed | Where-Object { $_ -notin $allowedPaths })
+if ($unexpected.Count -ne 0) {
+  throw "Issue #12 混入未批准路径：$($unexpected -join ', ')"
+}
+
+git diff --quiet origin/main...HEAD -- upstream
+if ($LASTEXITCODE -ne 0) { throw 'closeout 已提交差异修改了 upstream。' }
+git diff --quiet -- upstream
+if ($LASTEXITCODE -ne 0) { throw 'closeout 工作树修改了 upstream。' }
+git diff --cached --quiet -- upstream
+if ($LASTEXITCODE -ne 0) { throw 'closeout 暂存区修改了 upstream。' }
+
+foreach ($path in @('Cargo.toml', 'Cargo.lock', 'package.json', 'package-lock.json', 'pnpm-lock.yaml', 'yarn.lock', 'target', 'node_modules', 'dist')) {
+  if (Test-Path -LiteralPath $path) { throw "仓库根目录出现未批准路径：$path" }
+}
+if (Test-Path -LiteralPath '.github/workflows') {
+  if (@(Get-ChildItem -LiteralPath '.github/workflows' -Recurse -File).Count -ne 0) {
+    throw 'Issue #12 不得创建 GitHub Actions Workflow。'
+  }
+}
+
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw '工作树 diff 检查失败。' }
+git diff --cached --check
+if ($LASTEXITCODE -ne 0) { throw '暂存区 diff 检查失败。' }
+
+Write-Output "ISSUE12_CHANGED_PATHS=$($changed.Count)"
+Write-Output 'ISSUE12_CLOSEOUT_LOCAL_VERIFY_OK'
+```
+
+## 历史：Gate 2 规划阶段本地 Fresh 验证
+
+> 本节只保留 PR `#10` 合并前后的历史控制面证据，其中“禁止出现 upstream”与固定旧分支的断言不再是当前门禁。当前任务必须使用前述快照、合并与 Issue `#12` 验证命令。
 
 ```powershell
 $expectedFiles = @(
@@ -409,6 +583,7 @@ git status --short --branch
 
 ## 后续维护规则
 
-- Issue `#9` 获得快照写入批准后，在同一 PR 更新本文件，加入 `source-lock.json`、快照校验和许可证验证命令。
+- 后续任何 `upstream/` 或 `source-lock.json` 修改必须使用新的 upstream-sync Issue/PR，并更新锁定文件、同步报告和本节快照验证常量。
+- Issue `#12` closeout 合并后，由项目所有者另行批准下一活动任务；不得把 closeout 授权扩展为 Gate 3 或功能实现授权。
 - 建立首个 Cargo Workspace 时再加入 Rust 构建、测试、基准和三平台 CI 命令。
 - 任何错误先查 `err.md`，重复问题优先复用既有根因与处理方案。
