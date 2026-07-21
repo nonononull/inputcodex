@@ -6,7 +6,7 @@ source_issue_ref: https://github.com/nonononull/inputcodex/issues/9
 source_pr_ref: https://github.com/nonononull/inputcodex/pull/11
 closeout_branch_ref: codex/issue-12-gate-2-upstream-closeout
 closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/13
-closeout_pr_head: dce2f71e7f237145d7186224b621ec304f9e69f2
+closeout_pr_head: 7271b7d54a602519c0b335ac96f52c116eec8563
 
 ## 一、PR #11 合并结论
 
@@ -52,6 +52,6 @@ closeout_pr_head: dce2f71e7f237145d7186224b621ec304f9e69f2
 ## 六、PR #13 Fresh 状态
 
 - 状态：`OPEN`、非 Draft、`MERGEABLE/CLEAN`。
-- Head：`dce2f71e7f237145d7186224b621ec304f9e69f2`，Base：`main`。
+- Head：`7271b7d54a602519c0b335ac96f52c116eec8563`，Base：`main`。
 - 变更文件：`11`；Checks：`0`；Review 对话总数/未解决数：`0/0`；自动合并：关闭。
 - main Ruleset 未修改；closeout PR 尚未获得合并授权。
