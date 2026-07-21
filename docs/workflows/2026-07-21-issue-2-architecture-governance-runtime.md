@@ -91,6 +91,7 @@ model_drift_guards:
   - 上游完整快照与新产品构建必须隔离
   - 上游 Tauri/React 管理界面、现有注入脚本和远程推荐列表只能用于审计，不得直接进入新架构或最终运行面
   - 上游同步 PR 与功能迁移 PR 永远分离
+  - 所有 PR 合并到 main 只允许 Squash Merge，禁止 Merge Commit 和 Rebase Merge
   - 客户端更新和资产只指向 nonononull/inputcodex
   - 争议功能必须走 parity-exception Issue
 
@@ -123,6 +124,7 @@ git_commit_discipline_gate:
   - verify-git-snapshot-governance.ps1 -CommitDiscipline -RequireFeatureBranchForMutableWork -ReportOnly
   - 当前分支必须为 docs/issue-2-architecture-governance
   - 提交主题使用 docs: 固化重构与发布治理方案
+  - PR 最终只能 Squash Merge，使一个 Issue 在 main 上对应一条可回滚提交
   - 不允许 force push、rebase 或修改 main
 project_git_foundation_gate:
   - verify-project-git-foundation.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -RequireGit -ReportOnly

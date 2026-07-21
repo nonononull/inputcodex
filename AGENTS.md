@@ -27,6 +27,7 @@
 - 导入第三方或参考项目代码前，必须确认许可证、来源、提交和保留声明要求。
 - 架构与功能实现使用测试或可重复测量证据驱动，完成前运行项目定义的验证命令。
 - 所有正式工作必须执行 `Issue → 分支 → 验证证据 → 关联 PR → Review/CI → Merge`，禁止直接向 `main` 写功能。
+- 所有 PR 合并到 `main` 必须使用 Squash Merge；禁止 Merge Commit 和 Rebase Merge，确保每个 Issue 在 `main` 上形成一条可独立追踪和回滚的提交。
 - 上游缓存同步 PR 只能更新 `upstream/` 与同步报告；功能重构必须使用独立 Issue 和 PR。
 - 客户端更新、安装包、签名和下载地址只能指向 `nonononull/inputcodex`。
 

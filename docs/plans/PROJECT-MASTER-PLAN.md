@@ -34,6 +34,7 @@ decision_status: approved
 - 上游 Tauri/React 管理界面、现有注入脚本和远程推荐列表不得直接进入新架构或最终运行面。
 - 无效功能、有害副作用和错误语义争议必须进入 `parity-exception` Issue，由项目所有者决定。
 - 客户端更新、安装包、签名与下载地址只属于 `nonononull/inputcodex`。
+- 所有 PR 合并到 `main` 只允许 Squash Merge；禁止 Merge Commit 和 Rebase Merge。
 
 ## 阶段索引
 
