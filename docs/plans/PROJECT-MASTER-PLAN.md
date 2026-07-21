@@ -10,7 +10,7 @@ active_branch_ref: codex/issue-6-gate-1-finalization
 active_plan_ref: docs/plans/2026-07-21-issue-6-gate-1-finalization.md
 active_session_plan_ref: docs/plans/sessions/2026-07-21-issue-6-gate-1-finalization.md
 active_runtime_workflow_ref: docs/workflows/2026-07-21-issue-6-gate-1-finalization-runtime.md
-active_pr_ref: pending:issue-6-pull-request
+active_pr_ref: https://github.com/nonononull/inputcodex/pull/7
 closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5
 closeout_report_ref: docs/reports/issue-4-gate-1-closeout.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
@@ -32,7 +32,7 @@ decision_status: approved
 - PR `#5` 合并提交为 `b7404b0c63f2d2ba65474c077182c42a01cc9a64`，最终 PR Head 为 `ecd34360ae5f6c0d1f2995ccc6724fe39bf95381`；合并提交只有一个父提交，二者 tree 均为 `af186e05673b441a936199e55c7d632cd06ea929`。
 - PR `#5` 的 Review 对话总数、未解决数与 Checks 数量均为 `0`；`0 Checks` 只表示当前未配置 CI。
 - 当前 Issue `#6` 负责补齐八类 Issue Forms、PR 模板、批准标签、Issue `#4` closeout 报告和 Gate 1 最终控制面；不进入源码、Actions、Ruleset 或发布范围。
-- 当前分支为 `codex/issue-6-gate-1-finalization`；关联 PR 创建后回写真实 URL，未经项目所有者再次授权不得合并。
+- 当前分支为 `codex/issue-6-gate-1-finalization`，PR `#7` 创建时为 `OPEN`、非 Draft、`CLEAN`，初始 Head 为 `df3795d03027ddfff512a911bf8493b63b603275`；Checks、Reviews、Review 对话与未解决数均为 `0`，未启用自动合并，未经项目所有者再次授权不得合并。后续元数据提交以 GitHub 实时 PR Head 为准，不在控制文档中递归固化“最终 Head”。
 - AGOS 是可选外部治理辅助：可用且适用时可以补充证据；不可用、未登记、返回 `needs-input` 或异常时直接记录并绕过，不构成本项目门禁，也不得在本项目任务中修改或优化 AGOS。
 
 ## 项目不变量

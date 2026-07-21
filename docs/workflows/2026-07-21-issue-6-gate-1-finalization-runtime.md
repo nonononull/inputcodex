@@ -4,8 +4,9 @@ workflow_id: 2026-07-21-issue-6-gate-1-finalization
 schema_version: inputcodex.runtime-workflow.v1
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/6
 branch_ref: codex/issue-6-gate-1-finalization
+pr_ref: https://github.com/nonononull/inputcodex/pull/7
 decision_status: approved
-current_phase: governance-files
+current_phase: owner-review-wait
 external_agos_status: skipped-by-project-boundary
 
 ## 状态图
@@ -99,6 +100,8 @@ baseline-verified
 - Review 对话未解决数为 `0`；后续任何对话都必须根因闭环。
 
 ## Phase 8：owner-review-wait
+
+当前证据：PR `#7` 为 `OPEN`、非 Draft、`CLEAN`，Checks、Reviews、Review 对话与未解决数均为 `0`，未启用自动合并；本地、远端跟踪与 PR Head 在首次推送时一致为 `df3795d03027ddfff512a911bf8493b63b603275`。
 
 停止条件：PR 已开放且远端证据一致。未经项目所有者再次明确授权，不执行合并、关闭 Issue `#1` 或进入 Gate 2。
 

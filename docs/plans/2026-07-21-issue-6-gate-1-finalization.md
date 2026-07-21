@@ -8,6 +8,7 @@
 - 基线提交：`b7404b0c63f2d2ba65474c077182c42a01cc9a64`。
 - 范围哈希：`sha256:bd271f22bfb20eb32a78d99ae89e9554cc2de17c8486d1f4386b8980068659bd`。
 - 决策状态：项目所有者已批准直接开始 Gate 1 治理收口，无需追加澄清。
+- 当前状态：PR `https://github.com/nonononull/inputcodex/pull/7` 已创建并保持 `OPEN`、非 Draft、`CLEAN`，等待项目所有者 Review；未启用自动合并。
 
 ## 目标
 

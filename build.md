@@ -130,7 +130,7 @@ $requiredStatements = @(
   @{ Path = 'AGENTS.md'; Pattern = '所有 Review 对话' },
   @{ Path = 'README.md'; Pattern = 'Issue `#6`' },
   @{ Path = 'docs/plans/PROJECT-MASTER-PLAN.md'; Pattern = 'active_task: 2026-07-21-issue-6-gate-1-finalization' },
-  @{ Path = 'docs/plans/PROJECT-MASTER-PLAN.md'; Pattern = 'pending:issue-6-pull-request' },
+  @{ Path = 'docs/plans/PROJECT-MASTER-PLAN.md'; Pattern = 'https://github.com/nonononull/inputcodex/pull/7' },
   @{ Path = '.github/pull_request_template.md'; Pattern = '根因' },
   @{ Path = '.github/pull_request_template.md'; Pattern = 'Fresh 验证' },
   @{ Path = '.github/pull_request_template.md'; Pattern = 'Squash Merge' }

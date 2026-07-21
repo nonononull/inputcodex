@@ -3,7 +3,7 @@
 schema_version: inputcodex.session-plan.v1
 task_id: 2026-07-21-issue-6-gate-1-finalization
 work_class: standard
-task_status: implementation
+task_status: pr-review-pending
 task_summary: 补齐仓库模板、标签、closeout 证据和项目原生验证，完成 Gate 1 最终治理收口。
 project_root: C:/Users/dashuai/Documents/inputcodex
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/6
@@ -82,8 +82,8 @@ external_agos_execution: skipped-by-approved-project-boundary
 ## 交付证据
 
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/6
-review_ref: pending:project-owner-review
-pr_ref: pending:issue-6-pull-request
-ci_ref: not-configured:gate-1-workflows-0
+review_ref: pending:project-owner-review-on-pr-7
+pr_ref: https://github.com/nonononull/inputcodex/pull/7
+ci_ref: not-configured:pr-7-checks-0-2026-07-21
 merge_ref: none:owner-authorization-required
 closeout_ref: pending:issue-6-pr-merge

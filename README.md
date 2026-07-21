@@ -31,7 +31,7 @@
 - PR `#3` 的合并提交为 `0e11375997ff10fdc0c233b31c8468af2d9a4f44`；Issue `#2` 已关闭，旧功能分支已删除。
 - 通过 PR `#5` Squash Merge Issue `#2` / PR `#3` 的最终 closeout 证据；合并提交为 `b7404b0c63f2d2ba65474c077182c42a01cc9a64`，Issue `#4` 已关闭。
 - PR `#5` 的合并提交只有一个父提交，merge tree 与最终 PR Head tree 均为 `af186e05673b441a936199e55c7d632cd06ea929`；Review 对话与 Checks 数量均为 `0`。
-- 已建立 Issue `#6` 和分支 `codex/issue-6-gate-1-finalization`，用于补齐 Issue Forms、PR 模板、项目标签与 Gate 1 最终控制面。
+- 已建立 Issue `#6`、分支 `codex/issue-6-gate-1-finalization` 和 PR `#7`，用于补齐 Issue Forms、PR 模板、项目标签与 Gate 1 最终控制面；PR 当前保持开放等待项目所有者 Review。
 
 当前明确不做：
 
