@@ -29,7 +29,7 @@
 - 通过 Issue `#2` 批准纯 Rust/Iced、完整上游快照、自主发布线和 Issue/PR 治理方案。
 - 通过 PR `#3` Squash Merge 重构与发布治理单一真源、项目语境、ADR、Session Plan、Runtime Workflow、`main-protection` Ruleset 和 Rust CI 云端卸载计划。
 - PR `#3` 的合并提交为 `0e11375997ff10fdc0c233b31c8468af2d9a4f44`；Issue `#2` 已关闭，旧功能分支已删除。
-- 通过 Issue `#4` 的独立分支准备回写最终 closeout 证据和最新 Master Plan。
+- 已创建 Issue `#4` 的独立 closeout PR `#5`，用于回写最终合并证据和最新 Master Plan；PR 保持开放等待项目所有者 Review。
 
 当前明确不做：
 

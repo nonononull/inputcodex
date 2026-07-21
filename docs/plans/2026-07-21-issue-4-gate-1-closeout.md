@@ -7,7 +7,7 @@
 - 执行分支：`codex/issue-4-gate-1-closeout`。
 - 基线提交：`0e11375997ff10fdc0c233b31c8468af2d9a4f44`。
 - 范围哈希：`sha256:637905998a3a14ff89cb1c3a4ca93fb688fdec9fab183503c56cbf423f8280c6`。
-- 当前状态：执行中；关联 PR 创建后保持开放，等待项目所有者 Review。
+- 当前状态：PR `https://github.com/nonononull/inputcodex/pull/5` 已创建并保持 `OPEN`、非 Draft、`CLEAN`，等待项目所有者 Review。
 
 ## 目标
 

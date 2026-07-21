@@ -12,9 +12,9 @@ static_workflow_refs:
   - D:/Android_source/ai-growth-os/components/rules/rules/workflows/git-snapshot-governance.md
 dynamic_workflow_gap_summary: AGOS registry 未登记 inputcodex task 与 architecture-governance 路径；本任务以 Issue #4、专用分支和项目原生控制文档在 warning mode 执行。
 task_scope_boundary: 只回写 Issue #2 / PR #3 已发生的 closeout 事实并创建 Issue #4 开放 PR；不导入源码、不创建 Actions、不修改 Ruleset、不发布、不合并当前 PR。
-task_current_state: Issue #4 OPEN，分支 codex/issue-4-gate-1-closeout 基于 main 合并提交 0e113759；closeout 文档正在写入，关联 PR 尚未创建。
+task_current_state: Issue #4 OPEN；PR #5 已创建并为 OPEN、非 Draft、CLEAN，Head 为 f78d6ead6da39579d38ce49a9edd552ba1af844b，Checks 与未解决 Review 对话均为 0。
 task_owner: nonononull
-task_follow_up_required: Fresh 验证、提交、正常推送、创建包含 Closes #4 的开放 PR，回写真实 PR URL 后停止等待项目所有者 Review。
+task_follow_up_required: 回写 PR #5 URL和 Git API 同步证据，完成 Fresh 验证与正常追加提交后停止等待项目所有者 Review；不自动合并。
 task_validation_attribution: GitHub Issue/PR/GraphQL/Ruleset API、Git commit/tree 对象、本地 refs、项目验证脚本与 diff 检查。
 task_closeout_ref: pending:issue-4-pr-merge-closeout
 
@@ -138,9 +138,9 @@ strict_runtime_validator_recovery: 若未来要纳入 AGOS 正式 registry，必
 delivery_evidence:
   tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/4
   branch_ref: codex/issue-4-gate-1-closeout
-  review_ref: pending:project-owner-review-on-issue-4-pr
-  pr_ref: pending:issue-4-closeout-pr
-  ci_ref: not-configured:repository-has-no-actions-or-required-checks
+  review_ref: pending:project-owner-review-on-pr-5
+  pr_ref: https://github.com/nonononull/inputcodex/pull/5
+  ci_ref: not-configured:pr-5-checks-0-2026-07-21
   merge_ref: none:issue-4-pr-must-remain-open
 
 rollout_record:

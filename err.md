@@ -125,6 +125,15 @@
 - 验证：Issue `#2` 关闭时间格式化为 `2026-07-21T13:15:52Z`，PR `#3` 合并时间格式化为 `2026-07-21T13:15:51Z`，closeout 检查通过。
 - 关联：GitHub Issue `#4`、`build.md` 的 GitHub 与上游基线核验。
 
+### 2026-07-21：Git push 连接失败后用 Git Database API 精确同步功能分支
+
+- 环境：Issue `#4` closeout 提交已在本地完成并通过 Fresh 验证，正常 `git push` 需要创建新的远端功能分支。
+- 现象：默认 Git HTTPS push 返回 `Recv failure: Connection was reset`；仅切换 HTTP/1.1 后又返回端口 `443` 连接超时，而同一时段 `gh api` 读写 GitHub API 正常。
+- 根因：故障仍位于 Git smart HTTP 传输路径。首次直接用工作区文本创建 GitHub tree 时，7 个既有文件受 `core.autocrlf` 工作区 CRLF 与 Git index LF 归一化影响，tree SHA 不一致；随后 GitHub Commit API 保留 `+0800` 时区，但省略本地 `git commit` 默认添加的提交消息末尾换行，因此 commit SHA 不同。
+- 处理：不 force push、不改 `main`。从本地 Git blob 对象读取原始字节，以 Base64 逐个调用 Git Database API，并要求每个远端 blob SHA 与本地 SHA 相同；重建得到与本地完全一致的 tree `a23e7f5d30178da95d33509894cadf4b97c08b0c`。GitHub API 创建 commit `f78d6ead6da39579d38ce49a9edd552ba1af844b` 后，验证它与本地预推送提交只有消息末尾换行差异，tree 与 parent 完全相同；本地精确重建该对象，再创建远端新分支 ref，并用原子 `git update-ref` 对齐本地功能分支和 `origin/*` 跟踪引用。
+- 验证：远端 `refs/heads/codex/issue-4-gate-1-closeout`、本地 HEAD 与 `origin/codex/issue-4-gate-1-closeout` 均为 `f78d6ead6da39579d38ce49a9edd552ba1af844b`；工作树干净；PR `#5` 已创建并为 `OPEN`、非 Draft、`CLEAN`，Head 匹配，Checks 与 Review 对话均为 `0`。
+- 关联：GitHub Issue `#4`、PR `#5`。本地预推送提交 `316d4afec8b67b857b6f217847cd3f0cf8ed0d58` 和诊断对象 `e6780bc2ccc22192e3f23c7868c56ba5f683af97` 已无 ref；错误 CRLF tree `811b432374ad56430645ec2215f6475b93c0520e` 未被任何远端 ref 使用，不执行激进清理。
+
 ## 记录模板
 
 ```text

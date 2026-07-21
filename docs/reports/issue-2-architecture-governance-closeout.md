@@ -16,7 +16,7 @@
 - `pr_ref`：`https://github.com/nonononull/inputcodex/pull/3`。
 - `ci_ref`：`not-configured`；合并时 `statusCheckRollup` 为空，Checks 数量为 `0`。
 - `merge_ref`：`https://github.com/nonononull/inputcodex/commit/0e11375997ff10fdc0c233b31c8468af2d9a4f44`。
-- 本次 closeout 跟踪：`https://github.com/nonononull/inputcodex/issues/4`。
+- 本次 closeout 跟踪：Issue `https://github.com/nonononull/inputcodex/issues/4`、PR `https://github.com/nonononull/inputcodex/pull/5`。
 
 ## GitHub 最终状态
 
@@ -88,6 +88,6 @@ Review 对话通过 GitHub GraphQL `reviewThreads(first:100)` 核验；远端旧
 
 ## 后续
 
-1. 通过 Issue `#4` 的独立 PR 合并本 closeout 证据；该 PR 在项目所有者再次授权前保持开放。
+1. PR `#5` 已创建；在项目所有者再次授权前保持开放，获批后也只能 Squash Merge。
 2. 另建 Issue/PR 补齐 Issue 模板、PR 模板和标签，完成 Gate 1 剩余治理工作。
 3. Gate 1 完成后才能建立 Gate 2 的 `upstream-sync` Issue，导入 `v1.2.41` 完整快照并创建每 6 小时上游监控。

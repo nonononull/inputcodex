@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 21 日，仓库仍不包含应用源码，因此没有 Cargo、Iced 或安装包构建命令。Issue `#2` / PR `#3` 已完成 Squash Merge；当前可执行工作是 Issue `#4` 的 Gate 1 closeout 文档、合并证据与 `main` Ruleset 复核。任何源码、GitHub Actions 或发布命令都属于后续独立 Issue。
+截至 2026 年 7 月 21 日，仓库仍不包含应用源码，因此没有 Cargo、Iced 或安装包构建命令。Issue `#2` / PR `#3` 已完成 Squash Merge；Issue `#4` 对应 PR `#5` 已创建并保持开放。当前可执行工作是 Gate 1 closeout 文档、合并证据与 `main` Ruleset 复核；任何源码、GitHub Actions 或发布命令都属于后续独立 Issue。
 
 ## Rust CI 职责边界
 
