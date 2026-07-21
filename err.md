@@ -89,6 +89,15 @@
 - 验证：`verify-protected-feature-replay.ps1 -Path docs/plans/sessions/2026-07-21-issue-2-architecture-governance.md -RequireProtectedReplay -ReportOnly` 输出 `PROTECTED_FEATURE_REPLAY_STATUS=ready`、`COMPLETION_STATUS=passed`、两个 passed count 均为 `1`，且 `FORBIDDEN_OPS=none`。
 - 关联：GitHub Issue `#2`、PR `#3`。
 
+### 2026-07-21：合并门错误地把仓库级开关当成 main 的有效规则
+
+- 环境：项目所有者授权 Squash 合并 PR `#3` 后执行 Fresh 合并门检查。
+- 现象：自定义检查发现仓库级 `allow_merge_commit` 与 `allow_rebase_merge` 为 `true`，因而错误报告不符合 Squash-only；与此同时 `main-protection` Ruleset 明确只允许 `squash`。
+- 根因：检查器混淆了两个不同作用域：仓库级开关控制整个仓库可提供的合并方式，`main` Ruleset 控制目标分支的实际允许方式。Gate 1 已批准且在 `docs/reports/2026-07-21-main-protection-rollout.md` 明确记录“只约束 main、不修改仓库级开关”，因此仓库级布尔值不能单独判定 PR `#3` 的合并门失败；总架构中“仓库必须禁用”的措辞也扩大了已批准范围。
+- 处理：合并门改用 `main` 的有效 Ruleset、PR 目标分支和显式 `--squash` 作为权威证据；修正总架构措辞，明确 Gate 1 不改变其他分支可用方式。若未来要求全仓关闭 Merge Commit/Rebase Merge，必须另建 Issue/PR 并获得项目所有者批准。
+- 验证：Ruleset `19395456` 为 `active`，只包含 `refs/heads/main`，无 bypass actor，`allowed_merge_methods` 仅为 `squash`；PR `#3` 目标为 `main` 且合并命令显式使用 `--squash`。
+- 关联：GitHub Issue `#2`、PR `#3`。
+
 ## 记录模板
 
 ```text

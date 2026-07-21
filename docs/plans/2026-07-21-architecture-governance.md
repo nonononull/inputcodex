@@ -347,7 +347,7 @@ Release Notes 必须列出上游版本和提交、功能一致范围、自有修
 - 仓库规则必须启用合并前解决所有 Review 对话。
 - 每条 Review 对话只有在根因已确定、处理已完成且验证证据已回写后才可解决；若反馈不成立，必须给出可复核证据并取得 reviewer 或项目所有者确认。
 - 禁止仅点击 `Resolve conversation`、以关闭对话代替解决问题，或带着任何未解决对话合并 PR。
-- 只允许 Squash Merge；仓库必须禁用 Merge Commit 和 Rebase Merge。
+- 所有合并到 `main` 的 PR 只允许 Squash Merge；由只命中 `main` 的 Ruleset 禁止 Merge Commit 和 Rebase Merge。Gate 1 不修改仓库级合并开关，避免把当前保护范围扩展到其他分支；若未来要求全仓禁用，必须建立独立 Issue/PR 并取得项目所有者批准。
 - 每个 Issue 合并后在 `main` 上只形成一条可独立追踪和回滚的提交。
 - 单人维护阶段 required approvals 为 `0`，但关联 Issue 或 PR 必须存在项目所有者明确批准证据。
 - 当第二名具备 `write`、`maintain` 或 `admin` 权限的人类维护者加入时，必须在下一次 PR 合并前把 required approvals 提升为 `1`；Bot、GitHub App 和自动化账号不计入人数。
