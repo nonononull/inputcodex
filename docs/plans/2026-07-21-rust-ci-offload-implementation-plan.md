@@ -281,7 +281,7 @@ Gate 3 的 Workspace 与首版 CI 必须处于同一个 PR：Workspace 没有云
 - 每个失败先查 `err.md`，确定根因并记录修复与验证，不通过盲目重跑关闭问题。
 - 所有 Review 对话均有根因、处理和验证证据；未解决对话为零。
 - PR 使用 Squash Merge，合并后删除功能分支；禁止 Force Push 和删除 `main`。
-- 形成新稳定面后保存 Git snapshot；正式 closeout 补齐 `review_ref`、`ci_ref`、`merge_ref` 并按 AI Growth OS 记录 rollout。
+- 形成新稳定面后使用项目原生 Git 状态、HEAD 与 diff 保存可复核快照；正式 closeout 补齐 `review_ref`、`ci_ref`、`merge_ref`。如外部 AGOS 可用且适用，可补充记录 rollout；不可用时绕过，不影响 closeout，且禁止在本项目任务中优化 AGOS。
 
 ## 当前计划 PR 的验收
 

@@ -27,7 +27,9 @@
 - 固定项目名称、无广告原则和性能优先目标。
 - 建立项目级构建、排错、计划与执行约束文档。
 - 通过 Issue `#2` 批准纯 Rust/Iced、完整上游快照、自主发布线和 Issue/PR 治理方案。
-- 起草重构与发布治理单一真源、项目语境、ADR、Major Session Plan 和 Runtime Workflow。
+- 通过 PR `#3` Squash Merge 重构与发布治理单一真源、项目语境、ADR、Session Plan、Runtime Workflow、`main-protection` Ruleset 和 Rust CI 云端卸载计划。
+- PR `#3` 的合并提交为 `0e11375997ff10fdc0c233b31c8468af2d9a4f44`；Issue `#2` 已关闭，旧功能分支已删除。
+- 已创建 Issue `#4` 的独立 closeout PR `#5`，用于回写最终合并证据和最新 Master Plan；PR 保持开放等待项目所有者 Review。
 
 当前明确不做：
 
@@ -38,8 +40,8 @@
 
 ## 下一步
 
-1. 完成 Issue `#2` 文档验证、关联 PR 和项目所有者 Review。
-2. 通过独立 Issue/PR 补齐 Issue/PR 模板、标签和 `main` 分支保护，完成 Gate 1。
+1. 完成 Issue `#4` closeout PR 的项目所有者 Review 与 Squash Merge；该 PR 未经再次授权不得自动合并。
+2. 通过独立 Issue/PR 补齐 Issue/PR 模板和标签；`main` 分支保护已经落地并完成合并后复核。
 3. Gate 1 完成后，新建 `upstream-sync` Issue 导入 `v1.2.41` 完整快照并建立每 6 小时上游监控。
 4. 后续再分别建立 Rust/Iced 骨架、功能矩阵和性能基线 Issue；任何源码实现都需要新的 Session Plan 与批准。
 
@@ -53,8 +55,10 @@
 - 筹备运行工作流：`docs/workflows/2026-07-21-inputcodex-bootstrap-runtime.md`
 - 项目术语：`CONTEXT.md`
 - 重构与发布治理总方案：`docs/plans/2026-07-21-architecture-governance.md`
-- 当前会话计划：`docs/plans/sessions/2026-07-21-issue-2-architecture-governance.md`
-- 当前运行工作流：`docs/workflows/2026-07-21-issue-2-architecture-governance-runtime.md`
+- Issue `#2` closeout 报告：`docs/reports/issue-2-architecture-governance-closeout.md`
+- 当前 closeout 计划：`docs/plans/2026-07-21-issue-4-gate-1-closeout.md`
+- 当前会话计划：`docs/plans/sessions/2026-07-21-issue-4-gate-1-closeout.md`
+- 当前运行工作流：`docs/workflows/2026-07-21-issue-4-gate-1-closeout-runtime.md`
 - 架构决策：`docs/adr/`
 
 ## 许可证
