@@ -1,39 +1,36 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: 2026-07-21-issue-6-gate-1-finalization
-active_gate: Gate 1：仓库治理基线最终收口
-last_verified_gate: Gate 1 子里程碑：Issue #4 / PR #5 已 Squash Merge
-next_legal_gate: 通过 Issue #6 的关联 PR 合并 Issue Forms、PR 模板、标签与最终控制面；合并并关闭 Issue #1 后才可进入 Gate 2。
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/6
-active_branch_ref: codex/issue-6-gate-1-finalization
-active_plan_ref: docs/plans/2026-07-21-issue-6-gate-1-finalization.md
-active_session_plan_ref: docs/plans/sessions/2026-07-21-issue-6-gate-1-finalization.md
-active_runtime_workflow_ref: docs/workflows/2026-07-21-issue-6-gate-1-finalization-runtime.md
-active_pr_ref: https://github.com/nonononull/inputcodex/pull/7
-closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5
-closeout_report_ref: docs/reports/issue-4-gate-1-closeout.md
+active_task: 2026-07-21-issue-9-gate-2-upstream-baseline
+active_gate: Gate 2：导入上游基线（规划与来源锁定）
+last_verified_gate: Gate 1：Issue #6 / PR #7 已 Squash Merge，Issue #1/#6 已关闭
+next_legal_gate: 完成 Issue #8 Gate 1→2 过渡 PR；随后在 Issue #9 中批准 Session Plan 与快照导入范围，才可修改 `upstream/`
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/9
+transition_issue_ref: https://github.com/nonononull/inputcodex/issues/8
+active_branch_ref: pending:issue-9-approved-execution-branch
+transition_branch_ref: codex/issue-8-gate-2-transition
+active_plan_ref: docs/plans/2026-07-21-issue-9-gate-2-upstream-baseline.md
+active_session_plan_ref: docs/plans/sessions/2026-07-21-issue-9-gate-2-upstream-baseline.md
+active_runtime_workflow_ref: docs/workflows/2026-07-21-issue-9-gate-2-upstream-baseline-runtime.md
+active_pr_ref: none:issue-9-execution-not-started
+transition_pr_ref: pending:issue-8-transition-pr
+closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5, https://github.com/nonononull/inputcodex/pull/7
+closeout_report_ref: docs/reports/issue-6-gate-1-finalization-closeout.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-decision_status: approved
+decision_status: gate-2-transition-approved-import-scope-pending
 
 ## 当前状态
 
-- 当前只执行文档、治理冻结与 `main` Ruleset 落地，不导入上游源码，不创建 Rust/Iced 工程，不实现 GitHub Actions，不发布资产。
-- `BigPizzaV3/CodexPlusPlus` 最新正式 Release 是功能真源；当前冻结基线为 `v1.2.41`，提交 `3dafffcafb2566a1e8bce4b35671656d6adb3eda`。
-- `zsr131550/CodexPlusPlus` 仅作半成品参考，不作为代码底座或功能真源。
-- Issue `#2` / PR `#3` 交付链已完成：PR 于 `2026-07-21T13:15:51Z` Squash Merge，Issue 于 `2026-07-21T13:15:52Z` 关闭，旧功能分支已删除。
-- PR `#3` 合并提交为 `0e11375997ff10fdc0c233b31c8468af2d9a4f44`；只有一个父提交，且 merge tree 与最终 PR Head tree 完全一致。
-- 合并时 Review 对话总数与未解决数均为 `0`；Checks 数量为 `0`，语义是当前未配置 Actions/required checks，不是伪造的 CI 通过。
-- GitHub Ruleset `main-protection`（ID `19395456`）已激活且只命中 `main`；禁止删除、禁止 Force Push、要求 PR、要求解决 Review 对话并只允许 Squash Merge，当前单人阶段 required approvals 为 `0`。
-- 已批准 Rust CI 云端卸载策略与实施计划：本地只做轻量定向验证，全量 Workspace、Windows/macOS 和发布构建交给标准 GitHub-hosted runners；未来按上游监控、Workspace+三平台 CI、Cache 调优、Ruleset 升级四个独立 Issue/PR 推进，当前只落盘计划，不创建 Workflow。
-- Issue `#4` / PR `#5` 交付链已完成：PR 于 `2026-07-21T15:21:58Z` Squash Merge，Issue 于 `2026-07-21T15:22:00Z` 关闭。
-- PR `#5` 合并提交为 `b7404b0c63f2d2ba65474c077182c42a01cc9a64`，最终 PR Head 为 `ecd34360ae5f6c0d1f2995ccc6724fe39bf95381`；合并提交只有一个父提交，二者 tree 均为 `af186e05673b441a936199e55c7d632cd06ea929`。
-- PR `#5` 的 Review 对话总数、未解决数与 Checks 数量均为 `0`；`0 Checks` 只表示当前未配置 CI。
-- 当前 Issue `#6` 负责补齐八类 Issue Forms、PR 模板、批准标签、Issue `#4` closeout 报告和 Gate 1 最终控制面；不进入源码、Actions、Ruleset 或发布范围。
-- 当前分支为 `codex/issue-6-gate-1-finalization`，PR `#7` 创建时为 `OPEN`、非 Draft、`CLEAN`，初始 Head 为 `df3795d03027ddfff512a911bf8493b63b603275`；Checks、Reviews、Review 对话与未解决数均为 `0`，未启用自动合并，未经项目所有者再次授权不得合并。后续元数据提交以 GitHub 实时 PR Head 为准，不在控制文档中递归固化“最终 Head”。
-- AGOS 是可选外部治理辅助：可用且适用时可以补充证据；不可用、未登记、返回 `needs-input` 或异常时直接记录并绕过，不构成本项目门禁，也不得在本项目任务中修改或优化 AGOS。
+- Gate 1 已完成：Issue `#2` / PR `#3`、Issue `#4` / PR `#5`、Issue `#6` / PR `#7` 均已按治理链完成；筹备 Issue `#1` 已以 `completed` 关闭。
+- PR `#7` 合并提交为 `c74b66422ba47f96bd3eb2b2385cdfb90541808e`，由 GitHub 生成有效签名；只有一个父提交 `b7404b0c63f2d2ba65474c077182c42a01cc9a64`，tree 为 `00f0f7fe0e408a1e6f218ee8e1be0d8442ed1e65`。
+- PR `#7` 的 Review 对话总数、未解决数与 Checks 数量均为 `0`；`0 Checks` 只表示当前尚未配置 CI。
+- `main-protection` Ruleset（ID `19395456`）仍为 `active`，只命中 `main`，禁止删除与 Force Push，要求解决全部 Review 对话，只允许 Squash Merge，单人阶段 required approvals 为 `0`。
+- 当前 Gate 2 活动任务为 Issue `#9`，上游正式 Release 基线为 `v1.2.41`，提交为 `3dafffcafb2566a1e8bce4b35671656d6adb3eda`。
+- Gate 2 当前只进行来源锁定、许可证、快照边界和纯净性验证方案；尚未导入上游源码、创建 `source-lock.json`、Cargo Workspace 或 GitHub Actions。
+- Issue `#8` 负责把本 Master Plan 和入口文档切换到 Gate 2；该过渡 PR 只允许文档与验证控制面改动。
+- AGOS 仍是可选外部辅助；本仓库可用原生控制面时不运行它，不在本任务中修改或优化它。
 
 ## 项目不变量
 
@@ -49,77 +46,68 @@ decision_status: approved
 - 无效功能、有害副作用和错误语义争议必须进入 `parity-exception` Issue，由项目所有者决定。
 - 客户端更新、安装包、签名与下载地址只属于 `nonononull/inputcodex`。
 - 所有 PR 合并到 `main` 只允许 Squash Merge；禁止 Merge Commit 和 Rebase Merge。
-- `main` 永久禁止 `--force` 和 `--force-with-lease`；错误历史与紧急修复只能通过 `revert` 和关联 Issue/PR 处理。
-- `main` 永久禁止删除；项目所有者与管理员无例外，误删后只能从最后一个权威提交恢复并建立事故 Issue。
-- 所有 Review 对话必须在确定根因、完成处理并回写验证证据后才能解决和合并；不成立的反馈也必须有可复核证据与 reviewer 或所有者确认。
-- 单人维护阶段 required approvals 为 `0` 且必须保留所有者决策证据；第二名具备合并权限的人类维护者加入后，在下一次合并前提升为 `1`。
-- Rust 全量编译与双平台验证默认在标准 GitHub-hosted runners 完成；禁止默认 Larger Runner、本机 self-hosted runner 和无边界 Cache/Artifact。
-- 本项目的权威治理控制面是 `AGENTS.md`、`README.md`、`build.md`、`err.md`、本 Master Plan、当前任务计划以及 GitHub Issue/PR/Review/CI/合并证据；任何外部治理框架只能提供可选辅助证据。
-- 外部 AGOS 无法执行时必须走本仓原生验证链；需要修改 AGOS 时停止本仓写入并等待项目所有者另行批准独立跨仓任务，禁止借当前 Issue/PR 顺手修复。
+- `main` 永久禁止 Force Push、删除和绕过 Ruleset；错误历史只能通过关联 Issue/PR 的 revert 处理。
+- 所有 Review 对话必须在确定根因、完成处理并回写验证证据后才能解决和合并。
+- 单人维护阶段 required approvals 为 `0`，但必须保留所有者决策证据；第二名具备合并权限的人类维护者加入后，在下一次合并前提升为 `1`。
+- Rust 全量编译与双平台验证默认在标准 GitHub-hosted runners 完成；当前 Gate 2 不创建 Workflow。
+- 权威控制面是 `AGENTS.md`、`README.md`、`build.md`、`err.md`、本 Master Plan、任务计划和 GitHub 证据；外部框架只能提供可选辅助。
 
 ## 阶段索引
 
 ### Gate 0：仓库准备（已验证）
 
-- 已建立本地与 GitHub 公开仓库、GNU AGPLv3、根文档、Issue #1 和筹备 closeout。
-- 历史证据：`docs/plans/2026-07-21-bootstrap.md`、`docs/reports/2026-07-21-bootstrap-closeout.md`。
+- 已建立本地与 GitHub 公开仓库、许可证、根文档、Issue #1 和筹备 closeout。
 
-### Gate 1：方案与治理冻结（最终收口）
+### Gate 1：方案与治理冻结（已完成）
 
-- [x] 用户逐项批准纯 Rust/Iced、功能一致、完整上游快照、每 6 小时监控、自主版本和 Issue/PR 治理。
-- [x] 起草单一真源、项目语境、两份 ADR、Major Session Plan 和 Runtime Workflow。
-- [x] 完成 Fresh 文档、Git、GitHub 元数据和快照治理验证。
-- [x] 提交并推送当前分支，创建包含 `Closes #2` 的 PR `#3`。
-- [x] 创建并验证仅作用于 `main` 的 GitHub Ruleset；证据见 `docs/reports/2026-07-21-main-protection-rollout.md`。
-- [x] 批准并落盘 Rust CI 云端编译卸载策略；当前不创建 Workflow。
-- [x] 批准并落盘 Rust CI 云端卸载实施计划；Gate 2/3、Cache 调优和 required check 均保持锁定并要求独立 Issue/PR。
-- [x] 项目所有者完成 Review 并以 Squash Merge 合并 PR `#3`；Issue `#2` 已关闭，旧分支已删除。
-- [x] 通过 Issue `#4` / PR `#5` 合并 closeout 报告和最新控制面；Issue 已关闭。
-- [ ] 通过 Issue `#6` 的关联 PR 建立八类 Issue Forms、PR 模板和批准标签。
-- [ ] 合并 Issue `#6` PR 后回写最终证据、关闭筹备 Issue `#1`，再把 Gate 2 解锁为下一合法阶段。
+- [x] 冻结纯 Rust/Iced、性能优先、功能一致、双平台一致和无广告硬约束。
+- [x] 完成架构治理、Ruleset、CI 云端卸载策略和项目原生验证入口。
+- [x] PR `#3`、`#5`、`#7` 均以 Squash Merge 合入 `main`。
+- [x] Issue `#1`、`#2`、`#4`、`#6` 均完成关闭证据；PR #7 旧分支已清理。
+- [x] Issue Forms、PR 模板与项目标签已进入 `main`。
 
-### Gate 2：导入上游基线（锁定）
+### Gate 2：导入上游基线（当前）
 
-- 通过独立 `upstream-sync` Issue 和 PR 导入 `v1.2.41` 完整快照。
-- 创建 `source-lock.json`、同步报告和快照纯净性校验。
-- 按 `docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md` 使用标准 `ubuntu-latest` Runner 建立每 6 小时的上游监控工作流；只管理 Issue，不编译 Rust，不自动同步、实现或合并。
+- [x] 创建 Issue `#9`，锁定当前上游正式 Release `v1.2.41` 与提交。
+- [x] 创建 Gate 2 Session Plan、Runtime Workflow 和来源/许可证/纯净性验证范围。
+- [ ] 完成 Issue `#8` 的 Gate 1→2 控制面过渡 PR。
+- [ ] 获得 Issue `#9` 的快照导入范围批准。
+- [ ] 通过独立 upstream-sync PR 只更新 `upstream/`、source-lock 和同步报告。
+- [ ] 在快照导入后建立每 6 小时只管理 Issue 的上游监控 PR。
 
 ### Gate 3：纯 Rust 工作区骨架（锁定）
 
 - 建立分层 Cargo Workspace、Iced 最小双平台窗口和依赖方向测试。
-- 按 `docs/plans/2026-07-21-rust-ci-offload-strategy.md` 与 `docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md` 在同一 Gate 3 Issue/PR 建立 Workspace、标准 Linux/Windows/macOS CI、格式、测试、依赖、许可证和更新源归属检查。
-- 不迁移业务功能，不创建临时 UI 事实标准。
+- 通过标准 Linux/Windows/macOS CI 验证，但不迁移业务功能或创建临时 UI 事实标准。
 
 ### Gate 4：功能目录与性能基线（锁定）
 
-- 从上游快照生成首版功能矩阵、合同和脱敏夹具。
-- 测量上游、半成品与新骨架的启动、交互、加载、内存、CPU 和后台行为。
-- 通过独立 Issue/PR 批准可复现的性能预算和回归门槛。
+- 从上游快照生成首版功能矩阵、行为合同、脱敏夹具和性能预算。
 
 ### Gate 5：分域迁移（锁定）
 
-- 按基础能力、供应商与网络、会话与数据、插件与脚本、远程集成与安装五个域分批迁移。
-- 每个可独立验收功能使用独立 Issue 和 PR；上游同步 PR 与功能迁移 PR 永远分离。
+- 按基础能力、供应商与网络、会话与数据、插件与脚本、远程集成与安装分域迁移。
+- 每个可独立验收功能使用独立 Issue 和 PR，上游同步与功能重构永远分离。
 
 ### Gate 6：首个正式版本（锁定）
 
-- 功能矩阵、双平台、性能预算、差异批准、签名、安装、升级、回滚和自主更新源全部通过。
-- 首个目标版本为 `v1.2.41-inputcodex.1`；如基线在 Gate 2 前变化，必须新 Issue 重新决策。
+- 完成功能矩阵、双平台、性能预算、差异批准、签名、安装、升级、回滚和自主更新源。
+- 首个目标版本为 `v1.2.41-inputcodex.1`。
 
 ## 当前验证入口
 
-- 构建与文档验证：`build.md`。
+- 构建与 Gate 2 规划验证：`build.md`。
 - 排错与已知限制：`err.md`。
 - 单一架构真源：`docs/plans/2026-07-21-architecture-governance.md`。
-- Issue `#2` closeout 报告：`docs/reports/issue-2-architecture-governance-closeout.md`。
-- Issue `#4` closeout 报告：`docs/reports/issue-4-gate-1-closeout.md`。
-- 当前任务计划：`docs/plans/2026-07-21-issue-6-gate-1-finalization.md`。
-- 当前 Session Plan：`docs/plans/sessions/2026-07-21-issue-6-gate-1-finalization.md`。
-- 当前运行图：`docs/workflows/2026-07-21-issue-6-gate-1-finalization-runtime.md`。
+- Gate 1 最终 closeout：`docs/reports/issue-6-gate-1-finalization-closeout.md`。
+- Gate 1→2 过渡计划：`docs/plans/2026-07-21-issue-8-gate-2-transition.md`。
+- 当前 Gate 2 计划：`docs/plans/2026-07-21-issue-9-gate-2-upstream-baseline.md`。
+- 当前 Session Plan：`docs/plans/sessions/2026-07-21-issue-9-gate-2-upstream-baseline.md`。
+- 当前 Runtime Workflow：`docs/workflows/2026-07-21-issue-9-gate-2-upstream-baseline-runtime.md`。
 
 ## 停止条件
 
-- 用户改变已批准硬约束或当前 docs-only 范围。
 - 上游最新正式 Release 或 `v1.2.41` 标签提交发生变化。
-- 需要导入源码、实现 UI、创建 Actions、发布资产，或发现必须修改 AGOS 才能继续；AGOS 本身不可用不属于停止条件，应记录后绕过。
-- Fresh 验证失败、分支不正确、PR 无法关联 Issue `#6`、GitHub closeout 事实发生变化，或出现未批准的一致性差异。
+- 需要导入源码、创建 Cargo、实现 UI、创建 Actions、发布资产或修改 AGOS。
+- Issue `#9` 未获得新的 Session Plan、允许写入范围和项目所有者决策，却要求修改 `upstream/`。
+- Fresh 验证失败、Ruleset 变化、Review 对话未闭环或出现未批准的一致性差异。
