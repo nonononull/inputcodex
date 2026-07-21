@@ -5,8 +5,9 @@ schema_version: inputcodex.runtime-workflow.v1
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/8
 active_gate_issue_ref: https://github.com/nonononull/inputcodex/issues/9
 branch_ref: codex/issue-8-gate-2-transition
+pr_ref: https://github.com/nonononull/inputcodex/pull/10
 decision_status: approved
-current_phase: gate-2-transition
+current_phase: authorized-squash
 external_agos_status: skipped-by-project-native-boundary
 
 ## 状态图

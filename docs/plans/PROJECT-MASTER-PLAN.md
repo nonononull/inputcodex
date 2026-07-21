@@ -4,7 +4,7 @@ schema_version: inputcodex.master-plan.v1
 active_task: 2026-07-21-issue-9-gate-2-upstream-baseline
 active_gate: Gate 2：导入上游基线（规划与来源锁定）
 last_verified_gate: Gate 1：Issue #6 / PR #7 已 Squash Merge，Issue #1/#6 已关闭
-next_legal_gate: 完成 Issue #8 Gate 1→2 过渡 PR；随后在 Issue #9 中批准 Session Plan 与快照导入范围，才可修改 `upstream/`
+next_legal_gate: 在 Issue #9 中批准 Session Plan、来源锁定格式和快照导入范围，才可修改 `upstream/`
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/9
 transition_issue_ref: https://github.com/nonononull/inputcodex/issues/8
 active_branch_ref: pending:issue-9-approved-execution-branch
@@ -13,7 +13,7 @@ active_plan_ref: docs/plans/2026-07-21-issue-9-gate-2-upstream-baseline.md
 active_session_plan_ref: docs/plans/sessions/2026-07-21-issue-9-gate-2-upstream-baseline.md
 active_runtime_workflow_ref: docs/workflows/2026-07-21-issue-9-gate-2-upstream-baseline-runtime.md
 active_pr_ref: none:issue-9-execution-not-started
-transition_pr_ref: pending:issue-8-transition-pr
+transition_pr_ref: https://github.com/nonononull/inputcodex/pull/10
 closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5, https://github.com/nonononull/inputcodex/pull/7
 closeout_report_ref: docs/reports/issue-6-gate-1-finalization-closeout.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
@@ -29,7 +29,7 @@ decision_status: gate-2-transition-approved-import-scope-pending
 - `main-protection` Ruleset（ID `19395456`）仍为 `active`，只命中 `main`，禁止删除与 Force Push，要求解决全部 Review 对话，只允许 Squash Merge，单人阶段 required approvals 为 `0`。
 - 当前 Gate 2 活动任务为 Issue `#9`，上游正式 Release 基线为 `v1.2.41`，提交为 `3dafffcafb2566a1e8bce4b35671656d6adb3eda`。
 - Gate 2 当前只进行来源锁定、许可证、快照边界和纯净性验证方案；尚未导入上游源码、创建 `source-lock.json`、Cargo Workspace 或 GitHub Actions。
-- Issue `#8` 负责把本 Master Plan 和入口文档切换到 Gate 2；该过渡 PR 只允许文档与验证控制面改动。
+- Issue `#8` 的过渡交付为 PR `#10`；该 PR 只包含文档与验证控制面，并按项目所有者明确授权执行 Squash Merge。
 - AGOS 仍是可选外部辅助；本仓库可用原生控制面时不运行它，不在本任务中修改或优化它。
 
 ## 项目不变量
@@ -70,7 +70,7 @@ decision_status: gate-2-transition-approved-import-scope-pending
 
 - [x] 创建 Issue `#9`，锁定当前上游正式 Release `v1.2.41` 与提交。
 - [x] 创建 Gate 2 Session Plan、Runtime Workflow 和来源/许可证/纯净性验证范围。
-- [ ] 完成 Issue `#8` 的 Gate 1→2 控制面过渡 PR。
+- [x] 通过 Issue `#8` / PR `#10` 完成 Gate 1→2 控制面过渡。
 - [ ] 获得 Issue `#9` 的快照导入范围批准。
 - [ ] 通过独立 upstream-sync PR 只更新 `upstream/`、source-lock 和同步报告。
 - [ ] 在快照导入后建立每 6 小时只管理 Issue 的上游监控 PR。

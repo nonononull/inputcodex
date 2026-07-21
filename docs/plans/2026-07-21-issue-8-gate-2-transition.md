@@ -8,6 +8,7 @@
 - 基线提交：`c74b66422ba47f96bd3eb2b2385cdfb90541808e`。
 - 范围哈希：`sha256:085e4272380212c1c5a99490996d21e814578995db58dccee0ca8249eec9e4d3`。
 - 活动 Gate 2 Issue：`https://github.com/nonononull/inputcodex/issues/9`。
+- 过渡 PR：`https://github.com/nonononull/inputcodex/pull/10`。
 - 决策状态：项目所有者已授权 PR `#7` 合并、Issue `#1` 关闭并切换 Gate 2。
 
 ## 目标

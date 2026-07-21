@@ -3,7 +3,7 @@
 schema_version: inputcodex.session-plan.v1
 task_id: 2026-07-21-issue-8-gate-2-transition
 work_class: standard
-task_status: transition-pr-authorized
+task_status: transition-merge-authorized
 task_summary: 回写 PR #7 合并 closeout，并把项目控制面切换到 Gate 2 活动 Issue #9。
 project_root: C:/Users/dashuai/Documents/inputcodex
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/8
@@ -20,7 +20,7 @@ mutation_intent: 只更新项目治理文档与任务控制面，不导入快照
 executor_enforcement: 只允许在 codex/issue-8-gate-2-transition 分支写入；过渡 PR 使用 Closes #8；禁止 Force Push 与绕过 main Ruleset。
 external_agos_policy: available-optional-unavailable-bypass-no-optimization
 external_agos_execution: skipped-by-project-native-boundary
-transition_pr_ref: pending:issue-8-transition-pr
+transition_pr_ref: https://github.com/nonononull/inputcodex/pull/10
 
 ## 批准决策
 
@@ -68,7 +68,7 @@ transition_pr_ref: pending:issue-8-transition-pr
 
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/8
 active_gate_issue_ref: https://github.com/nonononull/inputcodex/issues/9
-review_ref: pending:owner-review-on-transition-pr
-pr_ref: pending:issue-8-transition-pr
+review_ref: owner-authorization:user-message-switch-gate2
+pr_ref: https://github.com/nonononull/inputcodex/pull/10
 ci_ref: not-configured:gate-2-transition-checks-0
-merge_ref: owner-authorized-squash-pending
+merge_ref: authorized:squash-pr-10

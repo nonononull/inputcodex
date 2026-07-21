@@ -51,10 +51,9 @@
 
 ## 下一步
 
-1. 完成 Issue `#8` 的控制面过渡 PR，使 Master Plan 正式指向 Gate 2 和 Issue `#9`。
-2. 在 Issue `#9` 中批准来源锁定格式、许可证保留、快照纯净性和导入范围。
-3. 通过独立 `upstream-sync` PR 导入 `v1.2.41` 完整快照。
-4. 再以独立 Issue/PR 建立每 6 小时上游监控；Rust/Iced 骨架保持 Gate 3 锁定。
+1. 在 Issue `#9` 中批准来源锁定格式、许可证保留、快照纯净性和导入范围。
+2. 通过独立 `upstream-sync` PR 导入 `v1.2.41` 完整快照。
+3. 再以独立 Issue/PR 建立每 6 小时上游监控；Rust/Iced 骨架保持 Gate 3 锁定。
 
 ## 项目文档
 

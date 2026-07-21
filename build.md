@@ -129,7 +129,7 @@ $requiredStatements = @(
   @{ Path = 'README.md'; Pattern = 'Issue `#9`' },
   @{ Path = 'docs/plans/PROJECT-MASTER-PLAN.md'; Pattern = 'active_task: 2026-07-21-issue-9-gate-2-upstream-baseline' },
   @{ Path = 'docs/plans/PROJECT-MASTER-PLAN.md'; Pattern = 'active_gate: Gate 2' },
-  @{ Path = 'docs/plans/PROJECT-MASTER-PLAN.md'; Pattern = 'transition_pr_ref: pending:issue-8-transition-pr' },
+  @{ Path = 'docs/plans/PROJECT-MASTER-PLAN.md'; Pattern = 'transition_pr_ref: https://github.com/nonononull/inputcodex/pull/10' },
   @{ Path = 'docs/reports/issue-6-gate-1-finalization-closeout.md'; Pattern = 'c74b66422ba47f96bd3eb2b2385cdfb90541808e' },
   @{ Path = 'docs/plans/2026-07-21-issue-9-gate-2-upstream-baseline.md'; Pattern = '尚未批准快照写入' }
 )
