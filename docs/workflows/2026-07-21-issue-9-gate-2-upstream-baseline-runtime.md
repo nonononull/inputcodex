@@ -3,9 +3,9 @@
 workflow_id: 2026-07-21-issue-9-gate-2-upstream-baseline
 schema_version: inputcodex.runtime-workflow.v1
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/9
-branch_ref: pending:issue-9-execution-branch
-decision_status: transition-approved-import-scope-pending
-current_phase: planning-only
+branch_ref: codex/issue-9-upstream-sync
+decision_status: completed-squash-merged
+current_phase: complete
 external_agos_status: not-needed-project-native-control-plane
 
 ## 状态图
@@ -19,35 +19,46 @@ release-verified
   -> upstream-sync-branch
   -> snapshot-verify
   -> upstream-sync-pr
+  -> owner-review
+  -> squash-merged
 ```
 
 ## Phase 1：release-verified
 
-当前冻结：`v1.2.41` / `3dafffcafb2566a1e8bce4b35671656d6adb3eda`。如最新正式 Release 或标签提交变化，停止并重新建立决策证据。
+已冻结并 Fresh 复核：`v1.2.41` / `3dafffcafb2566a1e8bce4b35671656d6adb3eda` / tree `22e3a9c8ad15e18b972eae44a892b7980dca5ec2`。
 
 ## Phase 2：license-and-source-reviewed
 
-记录 GNU AGPLv3、来源仓库、精确提交和必须保留的声明；不复制任何产品运行代码。
+已记录 GNU AGPLv3、来源仓库、精确提交和 `7` 份许可证/声明；快照不接入产品运行面。
 
 ## Phase 3：source-lock-designed
 
-设计 Release、提交、仓库、许可证、树哈希、文件哈希、生成时间和验证工具版本字段。格式获批前不创建文件。
+已生成 `upstream/source-lock.json`，记录 Release、提交、tree、归档、逐文件 blob/SHA-256、许可证和生成工具版本。
 
 ## Phase 4：purity-check-designed
 
-验证快照只存在于 `upstream/`，不被 Cargo、Iced、产品运行面或发布资产引用；排除广告、推广、隐蔽遥测和不允许进入最终运行面的内容。
+已验证快照只存在于 `upstream/`，仓库根没有 Cargo、Iced、产品运行面、Workflow 或发布资产；广告、推广、遥测及其他不允许内容只能作为审计输入。
 
 ## Phase 5：owner-scope-approval
 
-必须获得项目所有者对允许写入路径、验证命令、许可证处理和回滚方案的明确批准；本阶段之前只允许文档和 GitHub Issue 证据。
+项目所有者已批准允许写入路径、验证命令、许可证处理和回滚边界，决策引用为 `user-message:approve-issue-9-upstream-sync-2026-07-21`。
 
 ## Phase 6：upstream-sync-branch / snapshot-verify
 
-后续执行必须从独立分支开始，staged diff 只能包含 `upstream/`、`source-lock.json` 和同步报告；不得混入产品代码或 Workflow。
+执行使用独立分支 `codex/issue-9-upstream-sync`；PR 共 `279` 条路径，其中 `278` 条位于 `upstream/`，`1` 条为同步报告，未混入产品代码或 Workflow。
 
 ## Phase 7：upstream-sync-pr
 
-同步 PR 必须关联 Issue `#9`，完成 Review 根因闭环、CI/验证证据、Squash Merge 和分支清理。功能实现另建 Issue/PR。
+同步 PR `#11` 已关联并关闭 Issue `#9`，完成 Review 根因闭环和 Fresh 验证后，于 `2026-07-21T19:01:02Z` Squash Merge。功能实现仍必须另建 Issue/PR。
+
+## 完成证据
+
+- 获批 Head：`90d35a72cffb4a13c5f7588a147e19cbd75b14c6`。
+- Squash Merge：`dde08b725eb2bf4add7fbcfa955f3eaf4eb1bbc6`。
+- Merge tree 与获批 Head tree：`d0c90b9bfda70de800788782180080d50d914564`，完全一致。
+- 快照：`277` 个文件、`70` 个目录、`24,175,877` 字节、manifest SHA-256 `3c9b16802f49a1bcb56fda9630d97edc52c918c30d1924145244d9239801d3d4`。
+- Checks：`0`，只表示项目尚未配置 CI；Review 对话：`0`。
+- 控制面收口：Issue `#12`，不得修改已合并快照。
 
 ## 停止条件
 

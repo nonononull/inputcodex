@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结并进入 Gate 2 上游基线规划阶段。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结和 Gate 2 上游 `v1.2.41` 审计快照导入，正在通过独立 Issue `#12` / closeout PR 回写合并证据与最新控制面。
 
 ## 项目目标
 
@@ -17,7 +17,7 @@
 - 上游项目：`BigPizzaV3/CodexPlusPlus`
 - 半成品参考：`zsr131550/CodexPlusPlus`
 
-两份参考项目均采用 GNU AGPLv3。当前仓库同样采用 GNU AGPLv3，但尚未导入任何参考项目源码。
+两份参考项目均采用 GNU AGPLv3。当前仓库同样采用 GNU AGPLv3；`BigPizzaV3/CodexPlusPlus` 正式 Release `v1.2.41` 已以完整只读审计快照导入 `upstream/CodexPlusPlus/`，半成品参考仓库尚未导入。
 
 ## 当前阶段
 
@@ -33,27 +33,30 @@
 - PR `#5` 的合并提交只有一个父提交，merge tree 与最终 PR Head tree 均为 `af186e05673b441a936199e55c7d632cd06ea929`；Review 对话与 Checks 数量均为 `0`。
 - 通过 PR `#7` Squash Merge Issue Forms、PR 模板、项目标签与 Gate 1 最终控制面；合并提交为 `c74b66422ba47f96bd3eb2b2385cdfb90541808e`，Issue `#6` 已关闭。
 - 筹备 Issue `#1` 已回写 Gate 1 完成证据并以 `completed` 关闭。
-- 已建立 Issue `#8` 负责 Gate 1→2 控制面过渡，Issue `#9` 作为 Gate 2 上游 `v1.2.41` 基线的持续开放任务。
+- 通过 PR `#10` Squash Merge Gate 1→2 控制面过渡；合并提交为 `216d400006ad3f1dd2587ca367abb19d0191949f`，Issue `#8` 已关闭。
+- 通过 PR `#11` Squash Merge 上游 `v1.2.41` 完整只读审计快照、`source-lock.json` 与同步报告；合并提交为 `dde08b725eb2bf4add7fbcfa955f3eaf4eb1bbc6`，Issue `#9` 已关闭。
+- 已建立 Issue `#12`，使用独立 closeout PR 回写 PR `#11` 合并证据、`build.md`、`err.md` 和最新 Master Plan。
 
 当前明确不做：
 
-- 不导入上游或半成品源码。
+- 不把已导入的上游审计快照接入产品构建或运行面，也不在非 upstream-sync Issue 中修改快照。
+- 不导入半成品参考仓库源码。
 - 不创建 Rust/Iced 工程或 GitHub Actions。
 - 不执行功能迁移、安装包构建、发布或未经项目所有者授权的 PR 合并。
 - 不让上游 Tauri/React UI、现有注入脚本和远程推荐列表进入最终运行面。
 
 ## 当前 Gate 2 边界
 
-- Gate 2 活动 Issue 为 `#9`，当前只允许来源锁定、许可证、快照边界和纯净性验证方案。
-- 尚未导入 `v1.2.41` 源码，也未创建 `source-lock.json`、Cargo Workspace 或 GitHub Actions。
-- 开始快照导入前，必须为 Issue `#9` 获得新的 Session Plan 与允许写入范围批准。
-- 快照导入 PR 只能更新 `upstream/`、来源锁定文件和同步报告，不得实现功能或修改产品架构。
+- Gate 2 上游基线任务 Issue `#9` / PR `#11` 已完成；活动任务为 closeout Issue `#12`。
+- `upstream/CodexPlusPlus/` 含 `v1.2.41` 的 `277` 个只读审计文件，`upstream/source-lock.json` 记录来源、tree、逐文件 blob/SHA-256、许可证和生成工具证据。
+- 当前仍没有 Cargo Workspace、产品 Rust/Iced 源码、GitHub Actions、Release、安装包、签名或更新资产。
+- closeout 只允许更新项目原生控制文档与报告；不得修改 `upstream/`、实现功能、切换 Gate 3 或修改 AGOS。
 
 ## 下一步
 
-1. 在 Issue `#9` 中批准来源锁定格式、许可证保留、快照纯净性和导入范围。
-2. 通过独立 `upstream-sync` PR 导入 `v1.2.41` 完整快照。
-3. 再以独立 Issue/PR 建立每 6 小时上游监控；Rust/Iced 骨架保持 Gate 3 锁定。
+1. 完成 Issue `#12` closeout PR 的验证、Review 根因闭环和项目所有者 Squash Merge 决策。
+2. 由项目所有者另行批准下一项 Gate 2 任务；每 6 小时上游监控必须使用独立 Issue/PR。
+3. Rust/Iced 骨架继续保持 Gate 3 锁定，未经新 Session Plan 与明确范围批准不创建产品源码。
 
 ## 项目文档
 
@@ -72,6 +75,11 @@
 - Gate 2 活动计划：`docs/plans/2026-07-21-issue-9-gate-2-upstream-baseline.md`
 - Gate 2 Session Plan：`docs/plans/sessions/2026-07-21-issue-9-gate-2-upstream-baseline.md`
 - Gate 2 Runtime Workflow：`docs/workflows/2026-07-21-issue-9-gate-2-upstream-baseline-runtime.md`
+- 上游 `v1.2.41` 同步报告：`docs/reports/2026-07-21-upstream-v1.2.41-sync.md`
+- Gate 2 closeout 计划：`docs/plans/2026-07-21-issue-12-gate-2-upstream-closeout.md`
+- Gate 2 closeout Session Plan：`docs/plans/sessions/2026-07-21-issue-12-gate-2-upstream-closeout.md`
+- Gate 2 closeout Runtime Workflow：`docs/workflows/2026-07-21-issue-12-gate-2-upstream-closeout-runtime.md`
+- Gate 2 closeout 报告：`docs/reports/issue-12-gate-2-upstream-closeout.md`
 - 架构决策：`docs/adr/`
 
 ## 许可证
