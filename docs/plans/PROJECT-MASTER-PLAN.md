@@ -30,6 +30,7 @@ decision_status: approved
 - 已批准 Rust CI 云端卸载策略与实施计划：本地只做轻量定向验证，全量 Workspace、Windows/macOS 和发布构建交给标准 GitHub-hosted runners；未来按上游监控、Workspace+三平台 CI、Cache 调优、Ruleset 升级四个独立 Issue/PR 推进，当前只落盘计划，不创建 Workflow。
 - 当前 Issue `#4` 只负责通过独立分支和 PR 回写上述 closeout 证据与最新 Master Plan；不进入源码、Actions、Ruleset 或发布范围。
 - Issue `#4` 对应 PR `#5` 已创建，当前为 `OPEN`、非 Draft、`mergeStateStatus=CLEAN`，PR Head 与本地/远端跟踪分支一致，Checks 与未解决 Review 对话均为 `0`；未经项目所有者再次授权不得合并。
+- AGOS 是可选外部治理辅助：可用且适用时可以补充证据；不可用、未登记、返回 `needs-input` 或异常时直接记录并绕过，不构成本项目门禁，也不得在本项目任务中修改或优化 AGOS。
 
 ## 项目不变量
 
@@ -50,6 +51,8 @@ decision_status: approved
 - 所有 Review 对话必须在确定根因、完成处理并回写验证证据后才能解决和合并；不成立的反馈也必须有可复核证据与 reviewer 或所有者确认。
 - 单人维护阶段 required approvals 为 `0` 且必须保留所有者决策证据；第二名具备合并权限的人类维护者加入后，在下一次合并前提升为 `1`。
 - Rust 全量编译与双平台验证默认在标准 GitHub-hosted runners 完成；禁止默认 Larger Runner、本机 self-hosted runner 和无边界 Cache/Artifact。
+- 本项目的权威治理控制面是 `AGENTS.md`、`README.md`、`build.md`、`err.md`、本 Master Plan、当前任务计划以及 GitHub Issue/PR/Review/CI/合并证据；任何外部治理框架只能提供可选辅助证据。
+- 外部 AGOS 无法执行时必须走本仓原生验证链；需要修改 AGOS 时停止本仓写入并等待项目所有者另行批准独立跨仓任务，禁止借当前 Issue/PR 顺手修复。
 
 ## 阶段索引
 
@@ -113,5 +116,5 @@ decision_status: approved
 
 - 用户改变已批准硬约束或当前 docs-only 范围。
 - 上游最新正式 Release 或 `v1.2.41` 标签提交发生变化。
-- 需要导入源码、实现 UI、创建 Actions、发布资产或跨仓修改 AI Growth OS 控制面。
+- 需要导入源码、实现 UI、创建 Actions、发布资产，或发现必须修改 AGOS 才能继续；AGOS 本身不可用不属于停止条件，应记录后绕过。
 - Fresh 验证失败、分支不正确、PR 无法关联 Issue #4、GitHub closeout 事实发生变化，或出现未批准的一致性差异。

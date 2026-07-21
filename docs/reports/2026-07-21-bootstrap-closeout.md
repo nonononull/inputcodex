@@ -15,14 +15,14 @@
 
 ## 验证证据
 
-### 会话计划
+### 会话计划（历史可选 AGOS 辅助证据）
 
 ```powershell
 & 'D:\Android_source\ai-growth-os\components\rules\scripts\verify-session-plan.ps1' `
   -Path '.\docs\plans\sessions\2026-07-21-inputcodex-bootstrap.md'
 ```
 
-结果：输出 `SESSION_PLAN_VERIFY_OK`。
+结果：当时输出 `SESSION_PLAN_VERIFY_OK`。该结果仅作为历史补充证据，项目准备结论同时由下方 Git、GitHub、许可证和文件边界原生检查独立支撑。
 
 ### 许可证与源码边界
 
@@ -68,7 +68,7 @@ git remote -v
 ## 剩余边界
 
 - 当前没有可构建产品，因此没有产品构建或测试结果。
-- AGOS 默认入口仍可能把外部新项目标记为待登记；这不影响本次仓库准备，但下一阶段源码审计前应重新运行门禁并建立新的会话计划。
+- AGOS 默认入口可能把外部新项目标记为待登记；该状态不影响本项目，也不要求下一阶段重新运行。仅在 AGOS 可用且确有帮助时作为辅助，不可用或 `needs-input` 时记录并绕过，禁止在 `inputcodex` 任务中优化 AGOS。
 - 下一阶段必须先审计两份参考仓库，复现卡顿与加载异常，再由用户批准架构路线。
 
 ## 下一步建议

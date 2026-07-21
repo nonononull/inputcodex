@@ -2,6 +2,9 @@
 
 schema_version: agos.session-plan.v1
 architecture_contract_version: agos.brainstorming-gate.v1
+schema_role: optional-external-format-compatibility
+governance_authority: inputcodex-project-native
+external_agos_policy: use-when-available-bypass-when-unavailable-no-optimization
 task_id: 2026-07-21-issue-2-architecture-governance
 work_class: major
 task_status: merged-closeout-recorded
@@ -24,6 +27,7 @@ allowed_operations:
 scope_boundary: 冻结方案与治理合同，并落地仅作用于 main 的 GitHub Ruleset；不导入上游源码，不创建 Rust/Iced 工程，不实现 GitHub Actions，不发布安装包，不合并 PR，不修改其他分支规则。
 selected_business_path: architecture-governance
 delivery_contract: agos.issue-pr-merge.v1
+delivery_contract_role: optional-format-compatibility-only
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/2
 review_strategy: 本地结构与语义自审、Fresh 验证证据、GitHub PR 由项目所有者审阅；所有 Review 对话必须完成根因、处理和验证闭环
 ci_expectation: 当前执行文档与 GitHub Ruleset 验证；仓库尚无 Actions，后续稳定 CI 建立后再通过独立 Issue/PR 升级为 required checks
@@ -114,7 +118,7 @@ agent_proposals:
     recommendation: 所有架构、同步、迁移和发布决策都必须映射到可重复命令、性能数据、PR 与 Release 证据。
     risks: 只写原则而没有 Fresh 验证，会形成无法执行的治理装饰。
     required_changes: 固化 Session Plan、Runtime Workflow、Master Plan、Git checkpoint、PR 证据和后续性能预算门。
-    reject_if: 宣称严格 AGOS、CI、性能或发布能力已完成，但没有对应命令输出和托管证据。
+    reject_if: 宣称 CI、性能或发布能力已完成却没有对应命令输出和托管证据，或把可选 AGOS 状态误写成本项目门禁。
 user_decision: 批准纯 Rust/Iced 重构、完整上游快照、每 6 小时云端监控、自主版本发布与 Issue/PR 合并治理。
 decision_reason: 性能和稳定性必须从架构根因解决，同时保留有效功能并持续跟踪上游。
 rejected_options:
@@ -273,10 +277,10 @@ local_knowledge_lookup:
   gbrain_queries:
     - inputcodex CodexPlusPlus 纯 Rust Iced 桌面重构 上游快照 发布治理 性能优先 功能一致
   gbrain_result: no-results
-  vault_refs:
+  optional_external_vault_refs:
     - D:/Android_source/ai-growth-os/components/vault/08-Skills/AI-Growth-OS.md
     - D:/Android_source/ai-growth-os/components/vault/07-Workflows/Core/AI-Growth-OS-Brainstorming-Gate-And-Session-Plan.md
-  rules_refs:
+  optional_external_rules_refs:
     - D:/Android_source/ai-growth-os/components/rules/rules/workflows/ai-growth-os-auto-application.md
     - D:/Android_source/ai-growth-os/components/rules/rules/workflows/ai-growth-os-brainstorming-gate.md
     - D:/Android_source/ai-growth-os/components/rules/rules/workflows/ai-growth-os-runtime-workflow.md
@@ -295,7 +299,7 @@ local_knowledge_lookup:
     - https://github.com/zsr131550/CodexPlusPlus
   missing_coverage:
     - 本地知识库未命中 CodexPlusPlus 专项资料，架构事实仍以仓库审计、上游快照和实测为准。
-    - AGOS 全局 registry 没有 inputcodex 专属 task 与 business path；本外部项目按 warning mode 记录，不跨仓修改 AI Growth OS 控制面。
+    - AGOS 全局 registry 没有 inputcodex 专属 task 与 business path；该外部状态仅作历史观测并已绕过，不影响本项目交付，也不触发跨仓修改。
 ```
 
 ## Superpowers Method Discipline
@@ -313,7 +317,7 @@ superpowers_method_discipline:
     writing_skill: superpowers:writing-plans
     executing_skill: superpowers:executing-plans
     subagent_skill: superpowers:subagent-driven-development
-    plan_control_plane: project-native AGOS control docs
+    plan_control_plane: inputcodex project-native docs; AGOS optional external assistance only
   test_driven_development:
     skill: superpowers:test-driven-development
     cycle: RED/GREEN/REFACTOR
@@ -336,18 +340,22 @@ superpowers_method_discipline:
     docs_superpowers_boundary: docs/superpowers remains archive-only, not the active control plane
 ```
 
-## AGOS Entry Status
+## External AGOS Observation
 
 ```yaml
-agos_default_entry:
+external_agos_observation:
   command_date: 2026-07-21
-  status: needs-input
+  role: optional-external-assistance
+  observed_status: needs-input
   task_registration_status: unregistered
   project_git_foundation_status: ready
   project_entry_doc_foundation_status: ready
   local_knowledge_lookup_status: ready
+  project_gate_effect: none
+  bypass_status: applied
   strict_runtime_validation_claimed: false
-  handling: 外部项目 warning mode；以 GitHub Issue #2、当前分支和项目所有者批准作为本仓正式任务证据，不修改 D:/Android_source/ai-growth-os registry。
+  external_mutation_permission: forbidden
+  handling: 保留 needs-input 作为历史外部观测；Issue #2 以当前分支、项目原生文档、GitHub 交付证据和项目所有者批准完成，未修改、修复或优化 AGOS。
   source_implementation_admission: forbidden
 ```
 
@@ -388,23 +396,26 @@ stop_gates:
   - 用户改变已批准架构或当前 docs-and-github-config 范围
   - 上游最新正式 Release 不再是 v1.2.41
   - 需要导入源码、创建 Actions、搭建 Iced 或发布资产
-  - 需要修改 AI Growth OS 跨仓控制面
-verification_commands:
-  - verify-session-plan.ps1
-  - verify-master-plan-index.ps1
+  - 需要修改 AGOS 跨仓控制面；该动作必须移出本任务并等待项目所有者另行批准
+project_verification_commands:
   - git diff --check
   - git diff --cached --check
-  - verify-git-snapshot-governance.ps1 -Checkpoint -ReportOnly
   - gh api repos/nonononull/inputcodex/rulesets/19395456
   - gh api repos/nonononull/inputcodex/rules/branches/main
   - Test-Path docs/plans/2026-07-21-rust-ci-offload-strategy.md
   - Test-Path docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
+optional_external_verification_commands:
+  - verify-session-plan.ps1
+  - verify-master-plan-index.ps1
+  - verify-git-snapshot-governance.ps1 -Checkpoint -ReportOnly
+optional_external_failure_policy: record-and-bypass; never optimize AGOS in inputcodex
 ```
 
 ## Delivery Governance
 
 ```yaml
 delivery_contract: agos.issue-pr-merge.v1
+delivery_contract_role: optional-format-compatibility-only
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/2
 branch_ref: docs/issue-2-architecture-governance
 review_ref: https://github.com/nonononull/inputcodex/pull/3#issuecomment-5034419368
@@ -449,6 +460,6 @@ closeout_tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/4
 - `docs/plans/2026-07-21-rust-ci-offload-strategy.md` 明确本地轻量、云端全量、标准 Runner、缓存、Artifact、Fork 与发布密钥边界，且当前不创建 Workflow。
 - `docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md` 明确四个独立 Issue/PR、精确未来文件、Job 分层、权限、触发、Cache、Artifact、失败语义和回滚方式，且当前不创建 Workflow 或 Rust 源码。
 - GitHub Ruleset `main-protection` 处于 active，只命中 `main`，且删除、Force Push、PR、Review 对话和 Squash-only 参数与批准决策一致。
-- `build.md` 给出当前文档任务可重复执行的验证命令，`err.md` 记录本次 AGOS 与补丁工具异常。
+- `build.md` 给出当前文档任务可重复执行的项目原生验证命令，`err.md` 记录外部 AGOS 历史观测与补丁工具异常。
 - 历史分支 `docs/issue-2-architecture-governance` 的全部提交均在 Fresh 验证后正常推送，并已由 PR `#3` Squash Merge；分支现已删除，提交与验证证据以 PR 记录和最终 closeout 报告为准。
 - 包含 `Closes #2` 的 PR `#3` 已由项目所有者完成 Review 并于 `2026-07-21T13:15:51Z` Squash Merge；Issue `#2` 已关闭，旧分支已删除，最终证据见 `docs/reports/issue-2-architecture-governance-closeout.md`。

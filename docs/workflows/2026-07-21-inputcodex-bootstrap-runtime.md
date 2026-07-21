@@ -5,6 +5,7 @@ task_id: 2026-07-21-inputcodex-bootstrap
 session_plan_ref: docs/plans/sessions/2026-07-21-inputcodex-bootstrap.md
 approved_decision_ref: user:2026-07-21#continue-preparation
 selected_business_path: project-bootstrap
+external_agos_policy: optional-external-use-or-bypass-no-optimization
 node_order:
   - 读取项目与全局规则
   - 完成本地知识查询
@@ -13,7 +14,7 @@ node_order:
   - 关联本地 main 与 origin/main
   - 创建筹备 Issue
   - 写入项目原生控制文档
-  - 运行格式、GitHub 与 Git 快照验证
+  - 运行项目原生格式、GitHub 与 Git 快照验证；AGOS 仅在可用且适用时补充
   - 提交并推送准备基线
 subagent_roles: []
 skill_tree_nodes:
@@ -32,7 +33,7 @@ model_drift_guards:
   - 无广告原则不得弱化
   - 架构讨论前不得开始实现
 err_md_correction_watchlist:
-  - AGOS 默认入口缺少项目入口文档
+  - AGOS 默认入口缺少项目入口文档；仅记录并绕过，不在本项目修复
   - 新旧远端分支关联错误
   - 许可证与参考项目不一致
   - Windows 命令行长度上限
@@ -41,12 +42,14 @@ stop_gates:
   - 用户改变准备范围
   - GitHub 仓库名已被占用
   - 参考仓库许可证核验失败
-verification_gates:
+project_verification_gates:
   - git diff --check
   - git status --short --branch
   - gh repo view nonononull/inputcodex
-  - AGOS Git snapshot checkpoint
-rollout_draft:
+optional_external_verification:
+  - AGOS Git snapshot checkpoint；仅在命令可用且有帮助时运行，失败不影响项目结论
+  - 禁止修改、修复或优化 AGOS
+historical_external_rollout_draft:
   reusable_path: 新项目公开仓库最小治理初始化
   record_at_closeout: false
   reason: 单次准备流程尚未达到 workflow candidate 重复阈值

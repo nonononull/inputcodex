@@ -2,6 +2,9 @@
 
 schema_version: agos.session-plan.v1
 architecture_contract_version: agos.brainstorming-gate.v1
+schema_role: optional-external-format-compatibility
+governance_authority: inputcodex-project-native
+external_agos_policy: use-when-available-bypass-when-unavailable-no-optimization
 task_id: 2026-07-21-inputcodex-bootstrap
 work_class: standard
 task_status: verified
@@ -110,10 +113,10 @@ change_contract:
 local_knowledge_lookup:
   gbrain_queries:
     - inputcodex CodexPlusPlus 桌面应用重构 性能 卡顿 功能加载 广告
-  vault_refs:
+  optional_external_vault_refs:
     - D:/Android_source/ai-growth-os/components/vault/08-Skills/AI-Growth-OS.md
     - D:/Android_source/ai-growth-os/components/vault/07-Workflows/Core/AI-Growth-OS-Brainstorming-Gate-And-Session-Plan.md
-  rules_refs:
+  optional_external_rules_refs:
     - D:/Android_source/ai-growth-os/components/rules/rules/workflows/ai-growth-os-auto-application.md
     - D:/Android_source/ai-growth-os/components/rules/rules/workflows/ai-growth-os-brainstorming-gate.md
   project_refs:
@@ -153,7 +156,7 @@ superpowers_method_discipline:
     writing_skill: superpowers:writing-plans
     executing_skill: superpowers:executing-plans
     subagent_skill: superpowers:subagent-driven-development
-    plan_control_plane: project-native AGOS control docs
+    plan_control_plane: inputcodex project-native docs; AGOS optional external assistance only
   finishing_branch:
     skill: superpowers:finishing-a-development-branch
     evidence: 直接初始化 main，不建立功能分支

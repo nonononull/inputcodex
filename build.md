@@ -70,58 +70,95 @@ if ((Test-Path 'Cargo.toml') -or (Test-Path 'Cargo.lock') -or (Get-ChildItem -Re
 - Git。
 - GitHub CLI `gh`，已登录 `nonononull` 账号。
 - Windows PowerShell 5.1 或 PowerShell 7。
-- 当前机器的 AI Growth OS 规则根目录：`D:\Android_source\ai-growth-os\components\rules`。
+- AGOS 不是必需环境；仅在本机已有、命令可用且适合当前任务时作为可选外部辅助。
 
-## Issue #4 closeout 文档验证
+## Issue #4 closeout 文档验证（项目原生）
 
 在仓库根目录执行：
 
 ```powershell
-$rules = 'D:\Android_source\ai-growth-os\components\rules'
-$issue2Session = 'docs\plans\sessions\2026-07-21-issue-2-architecture-governance.md'
-$issue4Session = 'docs\plans\sessions\2026-07-21-issue-4-gate-1-closeout.md'
-$masterPlan = 'docs\plans\PROJECT-MASTER-PLAN.md'
+$requiredFiles = @(
+  'AGENTS.md',
+  'README.md',
+  'build.md',
+  'err.md',
+  'docs\plans\PROJECT-MASTER-PLAN.md',
+  'docs\plans\2026-07-21-issue-4-gate-1-closeout.md',
+  'docs\plans\sessions\2026-07-21-issue-4-gate-1-closeout.md',
+  'docs\workflows\2026-07-21-issue-4-gate-1-closeout-runtime.md',
+  'docs\reports\issue-2-architecture-governance-closeout.md'
+)
 
-& "$rules\scripts\verify-project-git-foundation.ps1" `
-  -ProjectRoot (Get-Location).Path `
-  -RequireGit `
-  -ReportOnly
+foreach ($path in $requiredFiles) {
+  if (-not (Test-Path -LiteralPath $path)) {
+    throw "缺少项目控制文件：$path"
+  }
+}
 
-& "$rules\scripts\verify-project-entry-doc-foundation.ps1" `
-  -ProjectRoot (Get-Location).Path `
-  -ReportOnly
+$policyChecks = @{
+  'AGENTS.md' = 'AGOS 仅作为可选外部治理辅助'
+  'docs\plans\PROJECT-MASTER-PLAN.md' = '不构成本项目门禁'
+  'docs\plans\sessions\2026-07-21-issue-4-gate-1-closeout.md' = 'optional-external-assistance'
+  'docs\workflows\2026-07-21-issue-4-gate-1-closeout-runtime.md' = 'optional-external'
+  'docs\reports\issue-2-architecture-governance-closeout.md' = '可选外部辅助'
+}
 
-& "$rules\scripts\verify-session-plan.ps1" `
-  -Path $issue2Session
+foreach ($entry in $policyChecks.GetEnumerator()) {
+  if (-not (Select-String -LiteralPath $entry.Key -SimpleMatch $entry.Value -Quiet)) {
+    throw "AGOS 外部辅助边界未同步：$($entry.Key)"
+  }
+}
 
-& "$rules\scripts\verify-session-plan.ps1" `
-  -Path $issue4Session
+if (Test-Path '.github\workflows') {
+  throw '当前 Gate 1 不允许创建 GitHub Actions Workflow。'
+}
 
-& "$rules\scripts\verify-master-plan-index.ps1" `
-  -Path $masterPlan
+if ((Test-Path 'Cargo.toml') -or (Test-Path 'Cargo.lock') -or (Get-ChildItem -Recurse -File -Filter '*.rs')) {
+  throw '当前 Gate 1 不允许创建 Cargo Workspace 或 Rust 源码。'
+}
 
-& "$rules\scripts\verify-post-implementation-review.ps1" `
-  -Path $issue4Session `
-  -ReportOnly
-
-& "$rules\scripts\verify-protected-feature-replay.ps1" `
-  -Path $issue4Session `
-  -RequireProtectedReplay `
-  -ReportOnly
+$branch = git branch --show-current
+if ($LASTEXITCODE -ne 0 -or $branch -ne 'codex/issue-4-gate-1-closeout') {
+  throw "当前分支不正确：$branch"
+}
 
 git diff --check
+if ($LASTEXITCODE -ne 0) {
+  throw 'git diff --check 失败。'
+}
+
 git status --short --branch
 ```
 
 预期结果：
 
-- Git foundation 与入口文档 foundation 状态为 `ready`。
-- Issue `#2` 与 Issue `#4` Session Plan 均输出 `SESSION_PLAN_VERIFY_OK`。
-- Master Plan 输出 `MASTER_PLAN_INDEX_VERIFY_OK`。
-- Post-implementation review 输出当前任务为 `not-required`，且无参数绑定错误。
-- Protected feature replay 输出 `passed`，且全部 known-good feature 具备回放证据。
+- 所有项目控制文件存在，AGOS 可选辅助边界在规则、Master Plan、Session Plan、Runtime Workflow 与 closeout 报告中一致。
+- 当前仍不存在 `.github/workflows/`、Cargo Workspace 或 Rust 源码。
 - `git diff --check` 无输出且退出码为 `0`。
 - 当前分支为 `codex/issue-4-gate-1-closeout`。
+
+## 可选外部 AGOS 辅助验证
+
+AGOS 不属于本项目环境要求或合并门禁。只有在本机已存在、命令接口可用且当前任务确实受益时，才可运行只读或 `ReportOnly` 辅助检查。出现路径缺失、未登记、`needs-input`、接口漂移或执行异常时，写入警告并立即绕过；不得因此停止本项目流程，也不得在 `inputcodex` 的 Issue/PR 中修改或优化 AGOS。
+
+示例：
+
+```powershell
+$rules = 'D:\Android_source\ai-growth-os\components\rules'
+$optionalVerifier = Join-Path $rules 'scripts\verify-session-plan.ps1'
+
+if (Test-Path -LiteralPath $optionalVerifier) {
+  try {
+    & $optionalVerifier -Path 'docs\plans\sessions\2026-07-21-issue-4-gate-1-closeout.md'
+  } catch {
+    Write-Warning "AGOS 可选辅助验证不可用，已绕过：$($_.Exception.Message)"
+  }
+} else {
+  Write-Host 'AGOS 可选辅助验证不存在，已绕过。'
+}
+```
+
+无论该可选命令输出成功、`needs-input` 或异常，项目结论都以本文件定义的原生验证、GitHub 事实与项目所有者决策为准。
 
 ## GitHub 与上游基线核验
 
@@ -315,23 +352,45 @@ if (-not [string]::IsNullOrWhiteSpace(($localBranch -join ''))) {
 
 预期结果：合并提交只有一个父节点，merge tree 与 PR Head tree 都是 `0730422eb3fa738fe2d05a51e5191832fbfec0fe`，远端与本地旧分支均不存在。
 
-## Git 快照检查
+## Git 快照检查（项目原生）
 
 写入批次完成、重验证前、暂存前和交接前分别执行：
 
 ```powershell
-$rules = 'D:\Android_source\ai-growth-os\components\rules'
+$branch = git branch --show-current
+if ($LASTEXITCODE -ne 0) {
+  throw '读取当前分支失败。'
+}
 
-& "$rules\scripts\verify-git-snapshot-governance.ps1" `
-  -ProjectRoot (Get-Location).Path `
-  -TaskId '2026-07-21-issue-4-gate-1-closeout' `
-  -WorkflowNode 'verify' `
-  -CheckpointReason 'Issue #4 Gate 1 closeout checkpoint' `
-  -Checkpoint `
-  -ReportOnly
+$head = git rev-parse HEAD
+if ($LASTEXITCODE -ne 0) {
+  throw '读取当前 HEAD 失败。'
+}
+
+git status --short --branch
+if ($LASTEXITCODE -ne 0) {
+  throw '读取 Git 状态失败。'
+}
+
+git diff --check
+if ($LASTEXITCODE -ne 0) {
+  throw 'git diff --check 失败。'
+}
+
+git diff --stat
+if ($LASTEXITCODE -ne 0) {
+  throw '读取 Git diff 统计失败。'
+}
+
+if ($branch -ne 'codex/issue-4-gate-1-closeout') {
+  throw "当前分支不正确：$branch"
+}
+
+Write-Output "GIT_SNAPSHOT_BRANCH=$branch"
+Write-Output "GIT_SNAPSHOT_HEAD=$head"
 ```
 
-未提交的关键文档会使检查输出 `blocked`；这表示必须停止扩大范围并完成验证、暂存和命名 Git 快照，不表示可以忽略。
+输出必须能明确识别当前分支、HEAD、未提交文件和 diff；发现无关文件时停止扩大范围并先完成清理或拆分。AGOS Git snapshot 命令如可用可以作为补充，但其缺失或失败不影响本项目原生检查。
 
 ## 提交前验证
 
@@ -392,9 +451,9 @@ if ($unresolved.Count -ne 0) {
 
 预期结果：存在且仅存在一个来自当前分支的开放非 Draft PR，未解决 Review 对话为 `0`；本命令不执行合并。
 
-## Runtime Workflow 校验边界
+## 外部 AGOS 使用边界
 
-当前 AI Growth OS 全局 `registry/task-backlog.yml` 和 `registry/business-paths.yml` 尚未登记 `inputcodex` 的本任务与 `architecture-governance` 路径，因此本项目不宣称 `verify-runtime-workflow.ps1` 严格校验通过。若未来需要接入严格模式，必须在 AI Growth OS 仓库另建 Issue/PR 完成跨仓登记，再执行该校验；不得在本项目 PR 中越权修改外部控制面。
+AGOS 可用且适用时可以提供只读辅助验证；不可用、未登记、返回 `needs-input` 或异常时必须记录并绕过，不构成 Runtime Workflow、PR 或合并阻塞。若发现 AGOS 本身需要修改，只记录外部缺口并停止该外部动作；不得在本项目 PR 中修改、修复或优化其 Registry、脚本、规则、Workflow 或 Vault。
 
 ## 后续维护规则
 

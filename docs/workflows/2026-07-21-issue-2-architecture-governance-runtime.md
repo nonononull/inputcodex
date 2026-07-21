@@ -5,12 +5,13 @@ task_id: 2026-07-21-issue-2-architecture-governance
 session_plan_ref: docs/plans/sessions/2026-07-21-issue-2-architecture-governance.md
 approved_decision_ref: session-plan:2026-07-21-issue-2-architecture-governance#decision
 selected_business_path: architecture-governance
-workflow_lookup_mode: dynamic-generated
-static_workflow_refs:
+workflow_lookup_mode: project-native-with-optional-external
+external_agos_policy: optional-external-use-or-bypass-no-optimization
+optional_external_workflow_refs:
   - D:/Android_source/ai-growth-os/components/rules/rules/workflows/ai-growth-os-auto-application.md
   - D:/Android_source/ai-growth-os/components/rules/rules/workflows/ai-growth-os-runtime-workflow.md
   - D:/Android_source/ai-growth-os/components/rules/rules/workflows/git-snapshot-governance.md
-dynamic_workflow_gap_summary: AGOS 全局 registry 尚无 inputcodex 专属 task 与 architecture-governance business path；当前以项目原生控制面和 GitHub Issue #2 在外部项目 warning mode 执行。
+external_workflow_observation: AGOS 全局 registry 尚无 inputcodex 专属 task 与 architecture-governance business path；该外部状态已记录并绕过，Issue #2 始终以项目原生控制面和 GitHub 交付链执行。
 task_scope_boundary: 修改项目治理文档与仅作用于 main 的 GitHub Ruleset；不导入源码、不创建应用或 Actions、不发布、不合并、不修改其他分支规则。
 task_current_state: Ruleset main-protection（ID 19395456）保持 active 且只命中 main；Rust CI 云端编译卸载策略及四阶段实施计划已完成文档化；PR #3 已于 2026-07-21T13:15:51Z Squash Merge，Issue #2 已关闭，旧分支已删除。
 task_owner: nonononull
@@ -37,6 +38,7 @@ forbidden_operations:
   - merge-pr
   - github-write-non-main-rules
   - cross-repo-agos-registry-write
+  - cross-repo-agos-optimization
 
 workflow_nodes:
   - startup
@@ -47,13 +49,13 @@ workflow_nodes:
   - sync
 node_order:
   - 读取项目规则、构建入口、排错记录和已批准方案
-  - 完成 GBrain、Vault、Rules 和项目文档查询
+  - 完成本仓项目文档查询；GBrain、Vault 与外部 Rules 仅在可用且适用时作为可选辅助
   - 核验 Issue #2、上游最新正式 Release 和 v1.2.41 标签提交
   - 固化总方案、项目语境和 ADR
   - 写入 Major Session Plan 与本 Runtime Workflow
   - 更新 Master Plan、build.md 和 err.md
   - 自审未填写字段、矛盾、失效链接和越界内容
-  - 运行 Session Plan、Master Plan、Git diff 和 Git snapshot 验证
+  - 运行项目原生文档、Git diff、GitHub 和 Ruleset 验证；外部 AGOS 检查失败时记录并绕过
   - 暂存并运行 cached diff 验证
   - 提交并推送当前分支
   - 创建包含 Closes #2 的待审 PR
@@ -71,12 +73,12 @@ skill_tree_nodes:
   - superpowers:finishing-a-development-branch
   - karpathy-guidelines
 
-code_authoring_rules:
+optional_external_code_authoring_rules:
   - rules/domain/agent-generated-code.md
   - rules/quality/comments.md
   - rules/quality/complexity-file-size.md
   - rules/quality/testing.md
-code_authoring_gates:
+project_code_authoring_gates:
   - non-obvious logic must have boundary comments；本任务没有产品逻辑，文档中的非显然约束必须写明理由和停止条件
   - trivial-code no-comment decision；本任务不新增代码，不为显然事实堆砌注释或解释
   - ownership, dependency, risk, and verification boundaries 必须在 Session Plan、Runtime Workflow 与总方案中可追溯
@@ -107,9 +109,9 @@ model_drift_guards:
   - 争议功能必须走 parity-exception Issue
 
 err_md_correction_watchlist:
-  - AGOS 默认入口对未登记外部任务返回 needs-input
-  - AGOS 严格 Runtime Workflow 校验依赖已登记 business path
-  - Git snapshot 在关键文档未提交时返回 blocked
+  - AGOS 默认入口对未登记外部任务返回 needs-input；仅记录并绕过，不作为项目阻塞
+  - AGOS 严格 Runtime Workflow 校验依赖已登记 business path；本项目不负责登记或修复
+  - 外部 Git snapshot 检查不可用或 blocked 时回到项目原生 git status/diff 快照
   - Windows 单条补丁命令长度上限
   - Codex Desktop apply_patch 包装器拒绝访问
   - WindowsApps pwsh 被沙箱 CreateProcessAsUserW 拒绝时切换 require_escalated 或 Node 只读兜底
@@ -121,51 +123,50 @@ stop_gates:
   - 上游最新正式 Release 不再是 v1.2.41
   - 上游 v1.2.41 标签不再解析到 3dafffcafb2566a1e8bce4b35671656d6adb3eda
   - 任一文档要求导入源码、搭建 Rust/Iced、创建 Actions 或发布资产
-  - 任一改动需要跨仓修改 D:/Android_source/ai-growth-os
-  - 验证脚本、git diff --check 或 cached diff 检查失败
+  - 任一改动需要跨仓修改 D:/Android_source/ai-growth-os；该动作必须移出本任务并另行批准
+  - 项目原生文档、Git、GitHub、Ruleset、git diff --check 或 cached diff 检查失败
   - 当前分支不是 docs/issue-2-architecture-governance
   - PR 不能关联 Issue #2
 
 git_progress_checkpoints:
-  - startup-baseline: verify-git-snapshot-governance.ps1 -Checkpoint -ReportOnly；记录现有草案未提交状态
-  - after-control-docs: 写完 Session Plan、Runtime Workflow、Master Plan、build.md 和 err.md 后再次执行
-  - pre-verification: 重验证前执行并停止扩大范围
+  - startup-baseline: 记录 git status、当前分支、HEAD 与跟踪分支
+  - after-control-docs: 写完 Session Plan、Runtime Workflow、Master Plan、build.md 和 err.md 后运行 git diff --check 与 git diff --stat
+  - pre-verification: 重验证前重新记录 Git 快照并停止扩大范围
   - pre-commit: 暂存前后分别执行 Git 状态和 diff 检查
   - handoff: 创建 PR 后记录分支、提交和 PR URL
 git_commit_discipline_gate:
-  - verify-git-snapshot-governance.ps1 -CommitDiscipline -RequireFeatureBranchForMutableWork -ReportOnly
+  - git branch --show-current、git status --short --branch 与 git diff --check 必须给出可解释结果
   - 当前分支必须为 docs/issue-2-architecture-governance
   - 提交主题使用 docs: 固化重构与发布治理方案
   - PR 最终只能 Squash Merge，使一个 Issue 在 main 上对应一条可回滚提交
   - 所有 Review 对话必须写明根因、处理方式与验证证据后才能解决；反馈不成立时必须有证据和 reviewer 或所有者确认
   - 不允许对 main 使用 force push 或删除 main；不允许绕过 PR 直接修改 main
-project_git_foundation_gate:
-  - verify-project-git-foundation.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -RequireGit -ReportOnly
+project_git_foundation_check:
+  - git rev-parse --show-toplevel
+  - git status --short --branch
 project_git_foundation_status: ready
 project_git_foundation_next_action: Issue #2 分支已在 Squash Merge 后删除；当前由 codex/issue-4-gate-1-closeout 通过独立 PR 回写证据，禁止直接进入 Gate 2。
 project_git_foundation_forbidden_ops: direct-main-write,force-push,delete-main,merge-without-review,merge-with-unresolved-review
-project_entry_doc_foundation_gate:
-  - verify-project-entry-doc-foundation.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -ReportOnly
+project_entry_doc_foundation_check:
+  - Test-Path README.md, AGENTS.md, build.md, err.md 与 docs/plans/PROJECT-MASTER-PLAN.md
 project_entry_doc_foundation_status: ready
 project_entry_doc_foundation_next_action: 保持 README.md、AGENTS.md、build.md、err.md 与当前任务计划同步。
 project_entry_doc_foundation_forbidden_ops: claim-entry-docs-ready-without-fresh-check
 
 post_implementation_review_gate:
-  - verify-post-implementation-review.ps1 -Path docs/plans/sessions/2026-07-21-issue-2-architecture-governance.md -ReportOnly
+  - 通过 GitHub PR Review 对话、项目所有者决策评论和 closeout 报告核验
   - docs-only 任务已由主线程自审并取得项目所有者 Review/合并授权，最终证据由 Issue #4 closeout 回写
   - 每条 Review 对话必须记录 root cause、resolution 和 verification evidence；仅标记 resolved 不构成解决
   - 若反馈不成立，必须回写可复核证据并取得 reviewer 或项目所有者确认
   - 存在未解决对话或缺少根因解决证据时禁止合并
   - 未取得 owner review_ref 前禁止合并或宣称治理闭环完成
 protected_feature_replay_gate:
-  - verify-protected-feature-replay.ps1 -Path docs/plans/sessions/2026-07-21-issue-2-architecture-governance.md -RequireProtectedReplay -ReportOnly
+  - git diff -- LICENSE、源码/Cargo/Workflow 不存在检查与 Gate 0 历史证据访问检查
   - 回放 LICENSE 不变、仓库无应用源码、Gate 0 历史证据仍可访问
   - 未完成回放前禁止 claim-done 或 merge
 code_understanding_gate:
-  - verify-code-understanding-tool-use.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -ReportOnly
   - 当前仓库无应用源码且 .codegraph 不存在，因此代码理解门为 not-required
 protocol_state_evidence_gate:
-  - verify-protocol-state-evidence-contract.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -ReportOnly
   - 本任务不涉及协议状态，必须明确 not-required，禁止伪造协议证据
 protocol_sync_closure_gate:
   - 当前不执行协议同步；状态为 not-required
@@ -209,16 +210,10 @@ execution_ownership_contract:
   - 不启动未经用户要求的写入型子 agent
   - PR 创建后不在本会话自动合并或删除分支
 
-verification_gates:
-  - verify-project-git-foundation.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -RequireGit -ReportOnly
-  - verify-project-entry-doc-foundation.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -ReportOnly
-  - verify-code-understanding-tool-use.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -ReportOnly
-  - verify-post-implementation-review.ps1 -Path docs/plans/sessions/2026-07-21-issue-2-architecture-governance.md -ReportOnly
-  - verify-protected-feature-replay.ps1 -Path docs/plans/sessions/2026-07-21-issue-2-architecture-governance.md -RequireProtectedReplay -ReportOnly
-  - verify-protocol-state-evidence-contract.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -ReportOnly
-  - verify-session-plan.ps1 -Path docs/plans/sessions/2026-07-21-issue-2-architecture-governance.md
-  - verify-master-plan-index.ps1 -Path docs/plans/PROJECT-MASTER-PLAN.md
-  - verify-git-snapshot-governance.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -TaskId 2026-07-21-issue-2-architecture-governance -WorkflowNode verify -Checkpoint -ReportOnly
+project_verification_gates:
+  - Test-Path README.md, AGENTS.md, build.md, err.md, Master Plan、Session Plan、Runtime Workflow 与 closeout 报告
+  - git branch --show-current
+  - git status --short --branch
   - git diff --check
   - git diff --cached --check
   - gh issue view 2 --repo nonononull/inputcodex
@@ -229,6 +224,13 @@ verification_gates:
   - rg -n "本地轻量验证|标准 GitHub-hosted runners|当前不创建.*Workflow" AGENTS.md docs/plans docs/workflows build.md
   - gh api repos/BigPizzaV3/CodexPlusPlus/releases/latest
   - gh api repos/BigPizzaV3/CodexPlusPlus/git/ref/tags/v1.2.41
+
+optional_external_verification:
+  role: supplemental-only
+  use_condition: AGOS 已存在、接口可用且当前任务确实受益
+  bypass_on: path-missing,task-unregistered,needs-input,interface-incompatible,execution-error
+  project_gate_effect: none
+  external_mutation_permission: forbidden
 
 delivery_closeout:
   delivery_status: merged-and-closed
@@ -246,11 +248,12 @@ delivery_closeout:
   squash_parent_count: 1
   merge_tree_equals_pr_head_tree: true
 
-strict_runtime_validator_status: blocked-by-unregistered-external-task-and-business-path
+external_agos_status: optional-bypassed-unregistered
 strict_runtime_validator_claimed: false
-strict_runtime_validator_recovery: 若未来将 inputcodex 纳入 AGOS 全局 registry，先创建独立跨仓治理 Issue/PR，再映射 task 与 business path 并运行 verify-runtime-workflow.ps1。
+project_gate_effect: none
+external_recovery: 本项目不登记、修复或优化 AGOS；如项目所有者未来希望改动 AGOS，必须另行批准独立跨仓任务。
 
-rollout_draft:
+historical_external_rollout_observation:
   reusable_path: GitHub Issue 驱动的外部项目架构治理、main Ruleset、Rust CI 云端卸载策略与分阶段实施计划冻结
   record_at_closeout: true
   closeout_boundary: PR 合并并补齐 review_ref、ci_ref、merge_ref 后
@@ -258,5 +261,6 @@ rollout_draft:
   recorder_result: WORKFLOW_ROLLOUT_REPAIR_REQUIRED
   suggested_task_id: agos-p2-2026-07-21-issue-2-architecture-governance
   cross_repo_write_performed: false
+  project_follow_up: none; result recorded and bypassed
   candidate_rule: 单次 rollout 不能生成 workflow candidate
 ```

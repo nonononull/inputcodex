@@ -65,11 +65,11 @@
 - 未创建 required status checks，未修改 Ruleset，未发布版本或安装包。
 - 上游最新正式 Release 仍为 `v1.2.41`，标签仍解析到 `3dafffcafb2566a1e8bce4b35671656d6adb3eda`。
 
-## AGOS warning-mode 边界
+## 可选外部 AGOS 辅助边界
 
-- `invoke-agos-default-entry.ps1 -ReportOnly` 对 Issue `#4` 返回 `AGOS_DEFAULT_ENTRY_STATUS=needs-input`，原因是全局 registry 未登记 inputcodex task/business path；项目 Git foundation、入口文档和本地知识查询均为 `ready`。
-- `record-workflow-rollout.ps1` dry-run 返回 `WORKFLOW_ROLLOUT_REPAIR_REQUIRED`，建议任务 ID 为 `agos-p2-2026-07-21-issue-2-architecture-governance`；未写 task intake draft，也未修改 AI Growth OS 仓库。
-- 本项目只记录上述真实缺口，不宣称 strict runtime 或正式 rollout 已通过；如需接入，必须在 AI Growth OS 仓库另建 Issue/PR。
+- 历史辅助观测：`invoke-agos-default-entry.ps1 -ReportOnly` 对 Issue `#4` 返回 `AGOS_DEFAULT_ENTRY_STATUS=needs-input`，原因是外部 registry 未登记 inputcodex task/business path；该结果已记录并绕过，不影响本项目 Git foundation、入口文档或交付链。
+- 历史辅助观测：`record-workflow-rollout.ps1` dry-run 返回 `WORKFLOW_ROLLOUT_REPAIR_REQUIRED`；本任务未写 task intake draft，也未修改、修复或优化 AI Growth OS 仓库。
+- 项目所有者批准的长期边界是“可用则用、不可用绕过、禁止在本仓优化 AGOS”。AGOS 输出只能补充证据，不构成 Issue、PR、Review、验证或合并门禁；任何 AGOS 改动必须另行批准为独立跨仓任务。
 
 ## 可重复验证
 

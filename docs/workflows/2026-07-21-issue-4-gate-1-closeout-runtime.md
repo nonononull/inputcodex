@@ -5,17 +5,18 @@ task_id: 2026-07-21-issue-4-gate-1-closeout
 session_plan_ref: docs/plans/sessions/2026-07-21-issue-4-gate-1-closeout.md
 approved_decision_ref: session-plan:2026-07-21-issue-4-gate-1-closeout#decision
 selected_business_path: architecture-governance
-workflow_lookup_mode: dynamic-generated
-static_workflow_refs:
+workflow_lookup_mode: project-native-with-optional-external
+external_agos_policy: optional-external-use-or-bypass-no-optimization
+optional_external_workflow_refs:
   - D:/Android_source/ai-growth-os/components/rules/rules/workflows/ai-growth-os-auto-application.md
   - D:/Android_source/ai-growth-os/components/rules/rules/workflows/ai-growth-os-runtime-workflow.md
   - D:/Android_source/ai-growth-os/components/rules/rules/workflows/git-snapshot-governance.md
-dynamic_workflow_gap_summary: AGOS registry 未登记 inputcodex task 与 architecture-governance 路径；本任务以 Issue #4、专用分支和项目原生控制文档在 warning mode 执行。
+external_workflow_observation: AGOS registry 未登记 inputcodex task 与 architecture-governance 路径；该外部状态已记录并绕过，本任务始终以 Issue #4、专用分支和项目原生控制文档执行。
 task_scope_boundary: 只回写 Issue #2 / PR #3 已发生的 closeout 事实并创建 Issue #4 开放 PR；不导入源码、不创建 Actions、不修改 Ruleset、不发布、不合并当前 PR。
 task_current_state: Issue #4 OPEN；PR #5 已创建并为 OPEN、非 Draft、CLEAN，PR Head 与本地/远端跟踪分支一致，Checks 与未解决 Review 对话均为 0。
 task_owner: nonononull
 task_follow_up_required: 回写 PR #5 URL和 Git API 同步证据，完成 Fresh 验证与正常追加提交后停止等待项目所有者 Review；不自动合并。
-task_validation_attribution: GitHub Issue/PR/GraphQL/Ruleset API、Git commit/tree 对象、本地 refs、项目验证脚本与 diff 检查。
+task_validation_attribution: GitHub Issue/PR/GraphQL/Ruleset API、Git commit/tree 对象、本地 refs、项目原生文档检查与 diff 检查；AGOS 输出仅可作为补充证据。
 task_closeout_ref: pending:issue-4-pr-merge-closeout
 
 allowed_operations:
@@ -39,6 +40,7 @@ forbidden_operations:
   - direct-main-write
   - merge-current-pr
   - cross-repo-agos-registry-write
+  - cross-repo-agos-optimization
 
 workflow_nodes:
   - startup
@@ -51,12 +53,12 @@ workflow_nodes:
   - handoff
 node_order:
   - 读取 AGENTS.md、README.md、build.md、err.md、Master Plan 和 Issue #2 控制文档
-  - 运行 GBrain 查询并读取 AI Growth OS Vault/Rules；记录无命中与 warning-mode 缺口
+  - 优先查询本仓项目资料；AGOS/GBrain 仅在可用且适用时作为可选外部辅助，不可用时记录并绕过
   - 核验 Issue #4、Issue #2、PR #3、Review 对话、Checks、合并提交、tree、分支和 Ruleset
   - 写入 Issue #4 计划、Session Plan、Runtime Workflow 与 Issue #2 closeout 报告
   - 更新 Master Plan、README、总架构、Issue #2 Session Plan/Runtime、build.md 与 err.md
-  - 运行 AGOS 默认入口 ReportOnly、Session Plan、Master Plan、protected replay 和 Git snapshot 验证
-  - 运行 rollout recorder dry-run；未登记外部 task 时只记录 repair-required，不跨仓写 registry
+  - 运行项目原生文档、Git、GitHub、Ruleset、Review 与 Squash 证据验证
+  - 如 AGOS 可用且适用，可运行只读或 ReportOnly 辅助检查；任何 `needs-input`、未登记或异常均不阻塞，且不执行 AGOS 修复、登记或 rollout 优化
   - 精确暂存允许文件，运行 cached diff 检查并创建命名提交
   - 正常推送当前分支并创建包含 Closes #4 的非 Draft PR
   - 回写真实 PR URL，重验证、提交、推送并复核 PR OPEN/CLEAN/Review 状态
@@ -85,13 +87,14 @@ err_md_correction_watchlist:
   - Ruleset 与仓库级合并开关作用域不同，main 的有效规则以 Ruleset 为准
 
 git_progress_checkpoints:
-  - startup-baseline: 已在 clean 分支 0e113759 上运行 verify-git-snapshot-governance.ps1 -Checkpoint -ReportOnly
-  - after-docs: 文档批次完成后运行并停止扩大范围
-  - pre-verification: Fresh 重验证前运行
+  - startup-baseline: 已记录 clean 分支、HEAD 0e113759、本地跟踪分支与远端一致状态
+  - after-docs: 文档批次完成后运行 git status、git diff --check 与 git diff --stat，并停止扩大范围
+  - pre-verification: Fresh 重验证前再次记录分支、HEAD 与未提交文件
   - pre-commit: 暂存前后核对 status、diff 与 cached diff
-  - handoff: PR 创建与 URL 回写后运行
+  - handoff: PR 更新后复核本地 HEAD、远端跟踪分支和 PR Head 一致
 git_commit_discipline_gate:
-  - verify-git-snapshot-governance.ps1 -CommitDiscipline -RequireFeatureBranchForMutableWork -ReportOnly
+  - git branch --show-current 必须返回 codex/issue-4-gate-1-closeout
+  - git status --short --branch、git diff --check 与 git diff --cached --check 必须给出可解释结果
   - 当前分支必须为 codex/issue-4-gate-1-closeout
   - 首个提交主题使用 docs: 回写 Gate 1 合并 closeout 证据
   - PR URL 回写提交主题使用 docs: 记录 Issue 4 closeout PR
@@ -111,14 +114,11 @@ task_interruption_packets:
   - verification-failure: 先查 err.md，使用 systematic-debugging 确定根因
   - scope-change: 将 decision_status 改为 needs-user，禁止继续 mutation
 
-verification_gates:
-  - verify-project-git-foundation.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -RequireGit -ReportOnly
-  - verify-project-entry-doc-foundation.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -ReportOnly
-  - verify-session-plan.ps1 -Path docs/plans/sessions/2026-07-21-issue-2-architecture-governance.md
-  - verify-session-plan.ps1 -Path docs/plans/sessions/2026-07-21-issue-4-gate-1-closeout.md
-  - verify-master-plan-index.ps1 -Path docs/plans/PROJECT-MASTER-PLAN.md
-  - verify-protected-feature-replay.ps1 -Path docs/plans/sessions/2026-07-21-issue-4-gate-1-closeout.md -RequireProtectedReplay -ReportOnly
-  - verify-git-snapshot-governance.ps1 -ProjectRoot C:/Users/dashuai/Documents/inputcodex -TaskId 2026-07-21-issue-4-gate-1-closeout -WorkflowNode verify -Checkpoint -ReportOnly
+project_verification_gates:
+  - Test-Path AGENTS.md, README.md, build.md, err.md, Master Plan, Issue #4 Plan/Session/Runtime 与 closeout 报告
+  - Select-String 核验 AGOS 可选外部辅助、不可用绕过和禁止本仓优化三条边界已同步
+  - git branch --show-current
+  - git status --short --branch
   - git diff --check
   - git diff --cached --check
   - gh issue view 2 --repo nonononull/inputcodex
@@ -131,9 +131,22 @@ verification_gates:
   - git show -s --format=%T 0e11375997ff10fdc0c233b31c8468af2d9a4f44
   - git show -s --format=%T 6b090ba5aa479c714c9e231aa07787724d6a8190
 
-strict_runtime_validator_status: blocked-by-unregistered-external-task-and-business-path
+optional_external_verification:
+  role: supplemental-only
+  use_condition: AGOS 已存在、命令接口可用且当前任务确实受益
+  bypass_conditions:
+    - path-missing
+    - task-unregistered
+    - needs-input
+    - interface-incompatible
+    - execution-error
+  project_gate_effect: none
+  external_mutation_permission: forbidden
+
+external_agos_status: optional-bypassed-needs-input
 strict_runtime_validator_claimed: false
-strict_runtime_validator_recovery: 若未来要纳入 AGOS 正式 registry，必须在 AI Growth OS 仓库另建 Issue/PR，登记 task/business path 后重放；本仓不越权修复。
+project_gate_effect: none
+external_recovery: 本项目不修复或优化 AGOS；如项目所有者未来希望改动 AGOS，必须另行批准独立跨仓任务。
 
 delivery_evidence:
   tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/4
@@ -143,7 +156,7 @@ delivery_evidence:
   ci_ref: not-configured:pr-5-checks-0-2026-07-21
   merge_ref: none:issue-4-pr-must-remain-open
 
-rollout_record:
+historical_external_rollout_observation:
   reusable_path: 外部 GitHub 项目在 Squash Merge 后通过独立 Issue/PR 回写 closeout、Master Plan 与 delivery evidence
   recorder_mode: dry-run
   current_status: repair-required-unregistered-source-task
@@ -153,5 +166,6 @@ rollout_record:
   task_intake_draft_status: ready-for-main-thread-review
   task_intake_draft_write_status: stdout-only
   cross_repo_write_performed: false
+  project_follow_up: none; result recorded and bypassed
   candidate_rule: 单次 rollout 不能生成 workflow candidate
 ```

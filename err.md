@@ -8,13 +8,22 @@
 
 ## 已知记录
 
-### 2026-07-21：AGOS 默认入口处于筹备阻塞状态
+### 2026-07-21：AGOS 可选外部辅助边界被误写为项目门禁
+
+- 环境：`inputcodex` 文档 closeout 复核。
+- 现象：部分 Session Plan、Runtime Workflow、`build.md` 和 closeout 报告把 AGOS 的未登记、`needs-input`、严格校验与 rollout 状态写成当前项目必须处理的门禁或后续动作。
+- 根因：混淆了 `inputcodex` 项目原生控制面与外部 AGOS 辅助框架的责任边界；外部工具状态被错误提升为本项目交付状态。
+- 处理：固化“可用则用、不可用绕过、禁止在本仓优化 AGOS”；项目验证回到 `AGENTS.md`、`build.md`、任务计划、Git/GitHub 和项目所有者决策，AGOS 只保留可选辅助与历史观测角色。
+- 验证：项目规则、Master Plan、Issue `#4` Plan/Session/Runtime、closeout 报告和 PR 正文使用一致边界；本仓原生验证不依赖 AGOS 路径、Registry 或严格校验结果。
+- 关联：GitHub Issue `#4`、PR `#5`。
+
+### 2026-07-21：AGOS 默认入口曾返回 needs-input（外部历史记录）
 
 - 环境：仅有空 Git 仓库，尚无项目级入口文档和任务登记。
 - 现象：`invoke-agos-default-entry.ps1 -ReportOnly` 返回 `AGOS_DEFAULT_ENTRY_STATUS=needs-input`。
 - 根因：新项目尚未建立项目入口文档和正式任务控制材料。
-- 处理：创建项目治理文档、筹备计划、运行工作流和 GitHub Issue；当前不导入源码。
-- 验证：文档提交后重新运行默认入口报告与 Git 快照治理检查。
+- 处理：当时创建项目治理文档、筹备计划、运行工作流和 GitHub Issue；当前结论补充为该外部状态不构成本项目阻塞，后续不可用时直接绕过。
+- 验证：项目原生文档、Git 与 GitHub 交付链可独立完成；是否重新运行 AGOS 只取决于其是否可用且对当前任务有帮助。
 - 关联：GitHub Issue `#1`。
 
 ### 2026-07-21：单条补丁命令超过 Windows 长度上限
@@ -44,13 +53,13 @@
 - 验证：Node REPL 成功读取 Git 状态和控制文档；提升后的 Shell 成功执行相同 Git、`rg` 与 `Get-Content` 查询。
 - 关联：GitHub Issue `#2`、PR `#3`。
 
-### 2026-07-21：AGOS 严格入口未登记 inputcodex Issue #2
+### 2026-07-21：AGOS 严格入口未登记 inputcodex Issue #2（外部历史记录）
 
 - 环境：外部项目 `C:\Users\dashuai\Documents\inputcodex` 调用 AI Growth OS 默认入口。
 - 现象：`invoke-agos-default-entry.ps1 -ReportOnly` 返回 `TASK_REGISTRATION_STATUS=unregistered`、`AGOS_DEFAULT_ENTRY_STATUS=needs-input`，并禁止严格模式下的项目文档写入、提交和 PR。
 - 根因：AI Growth OS 全局 `registry/task-backlog.yml` 和 `registry/business-paths.yml` 尚未登记本项目任务 `2026-07-21-issue-2-architecture-governance` 与 `architecture-governance` 路径。
-- 处理：不在 inputcodex PR 中越权修改跨仓控制面；在 Session Plan、Runtime Workflow 和 `build.md` 中明确外部项目 warning mode，以 GitHub Issue `#2`、当前分支和项目所有者批准作为本仓任务证据，并继续禁止源码实现。
-- 验证：默认入口同时报告 Git foundation、入口文档和本地知识查询为 `ready`；当前不宣称 `verify-runtime-workflow.ps1` 严格校验通过。
+- 处理：不在 inputcodex PR 中越权修改跨仓控制面；以 GitHub Issue `#2`、当前分支、项目原生文档和项目所有者批准作为本仓任务证据。后续该状态只记录并绕过，不再使用 warning mode 充当项目门禁。
+- 验证：Issue `#2` / PR `#3` 已通过本项目交付链完成 Squash Merge；未登记与严格校验状态没有阻塞项目，也未触发 AGOS 修改。
 - 关联：GitHub Issue `#2`。
 
 ### 2026-07-21：Git 快照检查阻止继续扩大未提交文档
@@ -76,7 +85,7 @@
 - 环境：Issue `#2` 文档分支运行 `verify-post-implementation-review.ps1` 与 `verify-protected-feature-replay.ps1`。
 - 现象：PowerShell 报告不存在参数 `ProjectRoot` 和 `SessionPlanPath`，但临时包装函数仍输出 `EXIT_CODE=0`。
 - 根因：两个脚本的真实输入参数均为 `-Path`；Runtime Workflow 保留了旧调用名。同时 `$LASTEXITCODE` 只可靠表示本机可执行程序退出码，不能单独判断 PowerShell 脚本参数绑定或异常状态。
-- 处理：通过 `Get-Command` 和脚本 `param` 块确认接口，把 Runtime Workflow 与 `build.md` 统一改为 `-Path`；受保护功能回放增加 `-RequireProtectedReplay`。后续组合验证使用 `$ErrorActionPreference = 'Stop'`、`try/catch` 或 `$?` 判断 PowerShell 脚本是否成功，不再用 `$LASTEXITCODE` 包装脚本错误；原生 `git` 则检查 `$LASTEXITCODE`，不能用 `if (git ...)` 把“成功但无输出”误判为失败。
+- 处理：当时通过 `Get-Command` 和脚本 `param` 块确认接口，把可选调用统一改为 `-Path`；受保护功能回放增加 `-RequireProtectedReplay`。当前边界进一步明确：AGOS 接口再次漂移或异常时只记录并绕过，不在本仓修复脚本；原生 `git` 仍检查 `$LASTEXITCODE`，不能用 `if (git ...)` 把“成功但无输出”误判为失败。
 - 验证：使用修正参数重新运行两个脚本，分别得到 post-implementation review 的确定状态和 protected feature replay 的通过证据，且不再出现参数绑定错误。
 - 关联：GitHub Issue `#2`、PR `#3`。
 

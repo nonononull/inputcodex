@@ -2,6 +2,9 @@
 
 schema_version: agos.session-plan.v1
 architecture_contract_version: agos.brainstorming-gate.v1
+schema_role: optional-external-format-compatibility
+governance_authority: inputcodex-project-native
+external_agos_policy: use-when-available-bypass-when-unavailable-no-optimization
 task_id: 2026-07-21-issue-4-gate-1-closeout
 work_class: standard
 task_status: pr-review-pending
@@ -11,8 +14,8 @@ trigger_source: 用户明确要求现在同步，并建立独立 closeout Issue/
 decision_status: approved
 approval_source: inherited-user-instruction
 approved_decision_ref: session-plan:2026-07-21-issue-4-gate-1-closeout#decision
-scope_hash: sha256:637905998a3a14ff89cb1c3a4ca93fb688fdec9fab183503c56cbf423f8280c6
-scope_hash_source: docs-closeout|issue-4|pr-3-merge-evidence|master-plan|issue-2-session-runtime|build-err|no-source|no-actions|no-ruleset-change|no-release|no-merge
+scope_hash: sha256:91d211b15a79b3795b61048db95ae5490726ceac5a25da98fda60cf693790aa8
+scope_hash_source: docs-closeout|issue-4|pr-3-merge-evidence|master-plan|issue-2-session-runtime|build-err|agos-optional-use-or-bypass|no-agos-optimization|no-source|no-actions|no-ruleset-change|no-release|no-merge
 mutation_intent: docs
 executor_enforcement: project-native-docs-plus-github-issue-pr
 allowed_operations:
@@ -24,6 +27,7 @@ allowed_operations:
 scope_boundary: 只写回 Issue #2 / PR #3 的已发生事实和当前 Gate 1 控制面；不导入源码、不创建 Actions、不修改 Ruleset、不发布、不合并本 closeout PR。
 selected_business_path: architecture-governance
 delivery_contract: agos.issue-pr-merge.v1
+delivery_contract_role: optional-format-compatibility-only
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/4
 review_strategy: 主线程完成结构与事实自审，GitHub PR 由项目所有者审阅；所有 Review 对话必须完成根因、处理和验证闭环。
 ci_expectation: 仓库当前没有 Actions 或 required checks；以 Fresh 本地验证和 GitHub API 事实为证据，不把 Checks 0 伪装成 CI 通过。
@@ -37,6 +41,7 @@ closeout_ref: pending:issue-4-pr-merge-closeout
 - Decision: `review_ref`、`ci_ref`、`merge_ref`、Issue 关闭、Squash 单父提交、tree 一致和分支删除必须有可重复核验的证据。
 - Decision: 本任务继续保持 docs-only；禁止源码、Cargo、Rust/Iced、UI、Actions、Ruleset、required checks 与发布变更。
 - Decision: closeout PR 创建后保持开放，未经项目所有者再次明确授权不得合并。
+- Decision: AGOS 可用且适用时只作为可选外部辅助；不可用、未登记、`needs-input` 或异常时记录并绕过，不构成本项目门禁，且禁止在本仓任务中修改或优化 AGOS。
 - Reason: PR `#3` 已于 `2026-07-21T13:15:51Z` Squash Merge，Issue `#2` 已关闭，但 `main` 上的控制文档仍保留合并前状态。
 - Scope boundary: 只修正 closeout 事实和控制面索引，不进入 Gate 2，也不补做未获批准的 GitHub 配置。
 
@@ -159,10 +164,10 @@ local_knowledge_lookup:
   gbrain_queries:
     - inputcodex GitHub Issue PR Squash Merge closeout 证据 Master Plan Git snapshot governance
   gbrain_result: no-results
-  vault_refs:
+  optional_external_vault_refs:
     - D:/Android_source/ai-growth-os/components/vault/08-Skills/AI-Growth-OS.md
     - D:/Android_source/ai-growth-os/components/vault/07-Workflows/Core/AI-Growth-OS-Brainstorming-Gate-And-Session-Plan.md
-  rules_refs:
+  optional_external_rules_refs:
     - D:/Android_source/ai-growth-os/components/rules/rules/workflows/ai-growth-os-auto-application.md
     - D:/Android_source/ai-growth-os/components/rules/rules/workflows/ai-growth-os-brainstorming-gate.md
     - D:/Android_source/ai-growth-os/components/rules/rules/workflows/ai-growth-os-runtime-workflow.md
@@ -177,7 +182,7 @@ local_knowledge_lookup:
     - docs/workflows/2026-07-21-issue-2-architecture-governance-runtime.md
   missing_coverage:
     - GBrain 未命中 inputcodex closeout 专项资料，事实以本仓文档、Git 对象和 GitHub API 为准。
-    - AGOS 全局 registry 未登记 inputcodex task/business path；本任务保持外部项目 warning mode，不跨仓写 registry。
+    - AGOS 全局 registry 未登记 inputcodex task/business path；该外部状态已记录并绕过，不影响本项目交付，也不触发任何跨仓修复。
     - 仓库没有 .codegraph，按项目规则不擅自初始化。
 ```
 
@@ -196,7 +201,7 @@ superpowers_method_discipline:
     writing_skill: superpowers:writing-plans
     executing_skill: superpowers:executing-plans
     subagent_skill: superpowers:subagent-driven-development
-    plan_control_plane: project-native AGOS control docs
+    plan_control_plane: inputcodex project-native docs; AGOS optional external assistance only
   test_driven_development:
     skill: superpowers:test-driven-development
     cycle: not-applicable-docs-only
@@ -219,20 +224,23 @@ superpowers_method_discipline:
     docs_superpowers_boundary: docs/superpowers remains archive-only, not the active control plane
 ```
 
-## AGOS Entry Status
+## External AGOS Observation
 
 ```yaml
-agos_default_entry:
+external_agos_observation:
   command_date: 2026-07-21
-  status: needs-input
+  role: optional-external-assistance
+  observed_status: needs-input
   task_registration_status: unregistered
   project_git_foundation_status: ready
   project_entry_doc_foundation_status: ready
   local_knowledge_lookup_status: ready
-  continuation_status: intake-only
-  owner_direct_write_admission_status: blocked-by-global-unregistered-task
+  project_gate_effect: none
+  bypass_status: applied
+  project_native_continuation_status: allowed
   strict_runtime_validation_claimed: false
-  handling: 外部项目 warning mode；全局入口不构成 governed green，以 Issue #4、当前分支和继承的项目所有者批准作为本仓任务证据，不修改 AI Growth OS registry，也不宣称 strict runtime 通过。
+  external_mutation_permission: forbidden
+  handling: 保留 needs-input 作为历史外部观测；本任务以 Issue #4、当前分支、项目原生文档、Git/GitHub 事实和项目所有者批准为权威证据，绕过外部门禁，不修改、修复或优化 AGOS。
   source_implementation_admission: forbidden
 ```
 
