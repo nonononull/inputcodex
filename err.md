@@ -35,6 +35,33 @@
 - 验证：最小 `README.md` 补丁返回 `Success. Updated the following files`。
 - 关联：本次仓库筹备会话。
 
+### 2026-07-21：AGOS 严格入口未登记 inputcodex Issue #2
+
+- 环境：外部项目 `C:\Users\dashuai\Documents\inputcodex` 调用 AI Growth OS 默认入口。
+- 现象：`invoke-agos-default-entry.ps1 -ReportOnly` 返回 `TASK_REGISTRATION_STATUS=unregistered`、`AGOS_DEFAULT_ENTRY_STATUS=needs-input`，并禁止严格模式下的项目文档写入、提交和 PR。
+- 根因：AI Growth OS 全局 `registry/task-backlog.yml` 和 `registry/business-paths.yml` 尚未登记本项目任务 `2026-07-21-issue-2-architecture-governance` 与 `architecture-governance` 路径。
+- 处理：不在 inputcodex PR 中越权修改跨仓控制面；在 Session Plan、Runtime Workflow 和 `build.md` 中明确外部项目 warning mode，以 GitHub Issue `#2`、当前分支和项目所有者批准作为本仓任务证据，并继续禁止源码实现。
+- 验证：默认入口同时报告 Git foundation、入口文档和本地知识查询为 `ready`；当前不宣称 `verify-runtime-workflow.ps1` 严格校验通过。
+- 关联：GitHub Issue `#2`。
+
+### 2026-07-21：Git 快照检查阻止继续扩大未提交文档
+
+- 环境：Issue `#2` 文档分支已有未提交的总方案和 ADR。
+- 现象：`verify-git-snapshot-governance.ps1 -Checkpoint -ReportOnly` 返回 `GIT_SNAPSHOT_STATUS=blocked`，并列出三个 critical untracked 文档。
+- 根因：关键治理文档尚未形成命名 Git 快照；检查器按设计阻止在脏工作树上无限扩展改动。
+- 处理：将现有草案视为同一个有界执行批次，补齐 Session Plan、Runtime Workflow、Master Plan、`build.md` 和本记录后停止扩大范围，运行 Fresh 验证并提交快照。
+- 验证：提交前重新执行 Git snapshot、`git diff --check` 和 `git diff --cached --check`；提交后要求工作树只保留预期状态。
+- 关联：GitHub Issue `#2`。
+
+### 2026-07-21：Major Session Plan 使用了非标准 reviewer 角色
+
+- 环境：运行 `verify-session-plan.ps1` 校验 Issue `#2` 的 Major Session Plan。
+- 现象：校验器报错 `Major session plan missing proposal role: architecture-reviewer`。
+- 根因：草案把三个方案路线误写为 `agent_proposals.role`，并使用了校验器不接受的 `proposal_mode: owner-dialogue`；Major 合同要求固定的 `architecture-reviewer`、`operator-experience-reviewer`、`verification-reviewer` 与受支持枚举。
+- 处理：保留用户已批准的实质决策，把三个审查视角映射到标准角色，并将模式改为 `simulated-roles`，明确未启动子 agent 的原因。
+- 验证：重新运行校验输出 `SESSION_PLAN_VERIFY_OK`，工作类别为 `major`。
+- 关联：GitHub Issue `#2`。
+
 ## 记录模板
 
 ```text
