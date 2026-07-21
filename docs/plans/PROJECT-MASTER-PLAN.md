@@ -35,6 +35,7 @@ decision_status: approved
 - 无效功能、有害副作用和错误语义争议必须进入 `parity-exception` Issue，由项目所有者决定。
 - 客户端更新、安装包、签名与下载地址只属于 `nonononull/inputcodex`。
 - 所有 PR 合并到 `main` 只允许 Squash Merge；禁止 Merge Commit 和 Rebase Merge。
+- `main` 永久禁止 `--force` 和 `--force-with-lease`；错误历史与紧急修复只能通过 `revert` 和关联 Issue/PR 处理。
 - 单人维护阶段 required approvals 为 `0` 且必须保留所有者决策证据；第二名具备合并权限的人类维护者加入后，在下一次合并前提升为 `1`。
 
 ## 阶段索引

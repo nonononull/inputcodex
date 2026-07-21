@@ -28,6 +28,7 @@
 - 架构与功能实现使用测试或可重复测量证据驱动，完成前运行项目定义的验证命令。
 - 所有正式工作必须执行 `Issue → 分支 → 验证证据 → 关联 PR → Review/CI → Merge`，禁止直接向 `main` 写功能。
 - 所有 PR 合并到 `main` 必须使用 Squash Merge；禁止 Merge Commit 和 Rebase Merge，确保每个 Issue 在 `main` 上形成一条可独立追踪和回滚的提交。
+- 永久禁止对 `main` 使用 `git push --force` 或 `git push --force-with-lease`，项目所有者和管理员也不例外；历史错误必须通过 `revert` 提交和关联 Issue/PR 修正，紧急情况不能绕过该规则。
 - 仓库只有一名具备合并权限的人类维护者时，平台 required approvals 设为 `0`，但每次合并前必须在关联 Issue 或 PR 中保留项目所有者的明确决策证据。
 - 当第二名具备 `write`、`maintain` 或 `admin` 权限的人类维护者加入时，必须在下一次 PR 合并前把 required approvals 提升为 `1`；Bot、GitHub App 和自动化账号不计入维护者人数。
 - 上游缓存同步 PR 只能更新 `upstream/` 与同步报告；功能重构必须使用独立 Issue 和 PR。
