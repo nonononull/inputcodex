@@ -6,7 +6,7 @@ source_issue_ref: https://github.com/nonononull/inputcodex/issues/9
 source_pr_ref: https://github.com/nonononull/inputcodex/pull/11
 closeout_branch_ref: codex/issue-12-gate-2-upstream-closeout
 closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/13
-closeout_pr_head: 7271b7d54a602519c0b335ac96f52c116eec8563
+closeout_pr_head_at_last_remote_verify: 247da434fa79b8cd070dceda47fbcac8def51e7f
 
 ## 一、PR #11 合并结论
 
@@ -41,6 +41,7 @@ closeout_pr_head: 7271b7d54a602519c0b335ac96f52c116eec8563
 - GitHub PR diff API 对本次超过 20,000 行的差异返回 `406 too_large`；改用已刷新远端引用的本地三点差异验证 279 条路径。
 - Windows Git 默认路径转义导致中文路径正则误判；固定使用 `git -c core.quotePath=false diff --name-only`，不修改全局 Git 配置。
 - 上游原始 whitespace 保持原字节；只对 source-lock 和同步报告执行 scoped `git diff --check`，快照使用 blob/SHA-256 对账。
+- closeout 最终 head 的普通 Git push 两次遭遇 `Recv failure: Connection was reset`；按 `err.md` 已有恢复流程用 Git Database API 写入两个已校验 blob、同 tree 单父 commit，并以 `force:false` 快进 ref；远端 commit SHA 与本地 `247da434fa79b8cd070dceda47fbcac8def51e7f` 完全一致。
 
 ## 五、当前边界
 
@@ -52,6 +53,6 @@ closeout_pr_head: 7271b7d54a602519c0b335ac96f52c116eec8563
 ## 六、PR #13 Fresh 状态
 
 - 状态：`OPEN`、非 Draft、`MERGEABLE/CLEAN`。
-- Head：`7271b7d54a602519c0b335ac96f52c116eec8563`，Base：`main`。
+- 最近一次元数据提交前的远端 Fresh Head：`247da434fa79b8cd070dceda47fbcac8def51e7f`，Base：`main`；PR URL 是后续动态 Head 的权威来源。
 - 变更文件：`11`；Checks：`0`；Review 对话总数/未解决数：`0/0`；自动合并：关闭。
 - main Ruleset 未修改；closeout PR 尚未获得合并授权。
