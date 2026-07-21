@@ -119,10 +119,10 @@
 ### 2026-07-21：quiet 原生命令不能只凭空输出判断成功
 
 - 环境：PowerShell 中执行 `gh api --silent`、`git for-each-ref` 等可能成功但没有 stdout 的原生命令。
-- 现象：若脚本只判断输出是否为空，会把“成功且无结果”“目标不存在”“命令执行失败”混成同一状态；远端分支删除与 Git ref 查询因此可能产生假结论。
-- 根因：原生命令的 stdout 内容和进程退出状态是两条不同证据；`--silent` 会主动抑制成功输出，PowerShell 也不会自动把非零退出码转换为可捕获异常。
-- 处理：原生 `git`、`gh` 命令执行后立即保存并检查 `$LASTEXITCODE`，再解释 stdout；PowerShell 脚本仍使用 `$ErrorActionPreference = 'Stop'`、`try/catch` 或 `$?`，不能反过来只用 `$LASTEXITCODE` 判断脚本参数绑定错误。
-- 验证：远端旧分支查询明确得到 `gh` 退出码 `1`，本地 ref 查询退出码为 `0` 且输出为空；两条证据共同证明旧分支已删除，并能区分网络或命令异常。
+- 现象：若脚本只判断输出是否为空，会把“成功且无结果”“目标不存在”“命令执行失败”混成同一状态；只有一行输出时，PowerShell 还可能返回标量字符串，直接使用 `$result[0]` 会取得首字符而不是第一行。远端分支删除、Git ref 与工作树状态查询因此可能产生假结论。
+- 根因：原生命令的 stdout 内容、输出形状和进程退出状态是三条不同证据；`--silent` 会主动抑制成功输出，单行 stdout 会发生标量解包，PowerShell 也不会自动把非零退出码转换为可捕获异常。
+- 处理：原生 `git`、`gh` 命令执行后立即保存并检查 `$LASTEXITCODE`，再解释 stdout；需要按行计数或索引时使用 `@(...)` 强制数组归一化。PowerShell 脚本仍使用 `$ErrorActionPreference = 'Stop'`、`try/catch` 或 `$?`，不能反过来只用 `$LASTEXITCODE` 判断脚本参数绑定错误。
+- 验证：远端旧分支查询明确得到 `gh` 退出码 `1`，本地 ref 查询退出码为 `0` 且输出为空；PR `#5` 最终核验把 `git status --short --branch` 包装为数组后，正确识别唯一分支状态行并输出 `PR5_AGOS_BOUNDARY_UPDATE_VERIFY_OK`。
 - 关联：GitHub Issue `#4`、`build.md` 的 Squash 与分支清理核验。
 
 ### 2026-07-21：PowerShell 把 GitHub 时间字符串自动解析为 DateTime
