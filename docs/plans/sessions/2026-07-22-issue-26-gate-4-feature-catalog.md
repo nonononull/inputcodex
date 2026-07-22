@@ -1,7 +1,7 @@
 # Session Plan：Issue #26 Gate 4 功能目录、行为合同与脱敏夹具
 
 schema_version: inputcodex.session-plan.v1
-session_status: rust-schema-green-checkpoint-complete-source-index-in-progress
+session_status: feature-catalog-green-checkpoint-pending
 task_id: 2026-07-22-issue-26-gate-4-feature-catalog
 work_class: major
 task_summary: 建立上游 v1.2.41 功能目录、行为合同、脱敏夹具和纯 Rust parity 验证器，不迁移产品功能，不进行性能优化。
@@ -22,6 +22,7 @@ pr_ref: pending
 control_plane_checkpoint_ref: commit:80e0ddbb734496e95e89fe57fd89ddb668c8c276;issuecomment:5047590347
 red_checkpoint_ref: commit:532fba89d882862438345788ed2fdd73faede507;issuecomment:5048079257
 green_checkpoint_ref: commit:8b18f0a2a37829af3338edba34454eb6690af77a;issuecomment:5048438316
+feature_catalog_checkpoint_ref: pending-commit-and-issue-comment
 scope_hash: sha256:e8a1cbccfc3f0026e90fcb49264de5ea69980fa2e1faa03b520d9bedaf61e772
 scope_path_count: 36
 control_plane_path_count: 8
@@ -244,4 +245,12 @@ GitHub 全量验证:
 - `catalog.rs`、`contract.rs`、`fixture.rs` 与 `validation.rs` 已实现纯内存 schema、稳定状态、六加载状态、必填段、唯一性、引用、双平台字段、相对路径和结构化敏感值验证；`lib.rs` 只公开验证 API。
 - `cargo +1.93.1-x86_64-pc-windows-msvc test --locked --offline --ignore-rust-version -p inputcodex-parity --test catalog_schema --test contract_schema --test fixture_safety --test error_signature`：退出码 `0`，共 `26` 个测试通过，其中 schema 测试 `25` 个、既有错误签名回归 `1` 个。
 - `cargo +1.93.1-x86_64-pc-windows-msvc fmt --package inputcodex-parity -- --check`、库级离线 `check` 与 `clippy -- -D warnings` 均退出码 `0`。
-- `catalog_repository` 继续延后到 source-index 与目录数据建立后运行；当前不得用缺失数据面伪造仓库级 GREEN。
+- `catalog_repository` 新增 6 条 source-index 内存验证与 1 条真实仓库对账；完整合同/fixture 测试继续延后到 Phase 5，未用缺失数据伪造全仓 GREEN。
+
+## 十三、source-index 与功能目录 GREEN 执行证据
+
+- source-index RED 首先以 `E0432` / `E0599` 证明 `parse_source_index`、`validate_source_index`、仓库 API 和对应验证码缺失；未映射、重复 source ID、Release 漂移、悬空 feature 与非法证据路径均有独立失败测试。
+- 静态枚举锁定快照中的 `84` 个 Tauri command、`45` 个 `codex-plus-core` 公开模块和 `4` 个 `codex-plus-data` 公开模块，共 `133` 条入口。
+- 五域目录共登记 `36` 个 feature：正常能力为 `unassessed`，`10` 个广告、远程推荐或注入依赖能力为 `exception-pending`；另有 `3` 个旧适配入口显式排除。
+- `validate_feature_repository` 从真实 `source-lock.json`、上游模块入口和 feature 文件逐条对账，结果为 `source=133`、`feature=36`、`excluded=3`、`exception-pending=10`、`coverage-gap=0`。
+- `cargo +1.93.1-x86_64-pc-windows-msvc test --locked --offline --ignore-rust-version -p inputcodex-parity --test catalog_repository 仓库source_index_覆盖锁定上游公开入口 -- --exact`：退出码 `0`，真实仓库级 source-index 测试 `1/1` 通过。

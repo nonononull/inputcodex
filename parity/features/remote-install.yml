@@ -1,0 +1,99 @@
+schema_version: inputcodex.feature-catalog.v1
+release:
+  tag: v1.2.41
+  tag_commit: 3dafffcafb2566a1e8bce4b35671656d6adb3eda
+domain: remote-install
+features:
+  - id: feature.remote-install.application-update
+    name: '应用更新'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/update.rs
+        symbol: update
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: check_update
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: perform_update
+    entry_points:
+      - core-module:update
+      - tauri-command:check_update
+      - tauri-command:perform_update
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '只检查、下载和安装 nonononull/inputcodex 发布物。'
+      macos:
+        applicability: supported
+        semantics: '只检查、下载和安装 nonononull/inputcodex 发布物。'
+    decision_refs:
+      - issue:26
+      - rule:own-repository-updates
+  - id: feature.remote-install.entrypoint-installation
+    name: '入口与快捷方式维护'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/install/mod.rs
+        symbol: install
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: install_entrypoints
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: repair_shortcuts
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: uninstall_entrypoints
+    entry_points:
+      - core-module:install
+      - tauri-command:install_entrypoints
+      - tauri-command:repair_shortcuts
+      - tauri-command:uninstall_entrypoints
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '安装、卸载和修复双平台启动入口，禁止越权写入。'
+      macos:
+        applicability: supported
+        semantics: '安装、卸载和修复双平台启动入口，禁止越权写入。'
+    decision_refs:
+      - issue:26
+  - id: feature.remote-install.upstream-worktree
+    name: 'Upstream worktree 工作流'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/upstream_worktree.rs
+        symbol: upstream_worktree
+    entry_points:
+      - core-module:upstream_worktree
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '识别并打开受控 worktree，不改写上游缓存。'
+      macos:
+        applicability: supported
+        semantics: '识别并打开受控 worktree，不改写上游缓存。'
+    decision_refs:
+      - issue:26
+  - id: feature.remote-install.zed-remote
+    name: 'Zed Remote 工作流'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/zed_remote.rs
+        symbol: zed_remote
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: forget_zed_remote_project
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: list_zed_remote_projects
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: open_zed_remote
+    entry_points:
+      - core-module:zed_remote
+      - tauri-command:forget_zed_remote_project
+      - tauri-command:list_zed_remote_projects
+      - tauri-command:open_zed_remote
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '识别远程项目并用校验后的目标在 Zed 打开。'
+      macos:
+        applicability: supported
+        semantics: '识别远程项目并用校验后的目标在 Zed 打开。'
+    decision_refs:
+      - issue:26

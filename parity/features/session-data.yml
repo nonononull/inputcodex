@@ -1,0 +1,98 @@
+schema_version: inputcodex.feature-catalog.v1
+release:
+  tag: v1.2.41
+  tag_commit: 3dafffcafb2566a1e8bce4b35671656d6adb3eda
+domain: session-data
+features:
+  - id: feature.session-data.local-session-management
+    name: '本地会话与项目管理'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/codex_sqlite.rs
+        symbol: codex_sqlite
+      - path: upstream/CodexPlusPlus/crates/codex-plus-data/src/storage.rs
+        symbol: storage
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: delete_local_session
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: list_local_sessions
+    entry_points:
+      - core-module:codex_sqlite
+      - data-module:storage
+      - tauri-command:delete_local_session
+      - tauri-command:list_local_sessions
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '扫描、删除和移动本地会话或项目数据，删除保留可恢复证据。'
+      macos:
+        applicability: supported
+        semantics: '扫描、删除和移动本地会话或项目数据，删除保留可恢复证据。'
+    decision_refs:
+      - issue:26
+  - id: feature.session-data.markdown-export
+    name: 'Markdown 导出'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-data/src/markdown.rs
+        symbol: markdown
+    entry_points:
+      - data-module:markdown
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '将选定会话导出为确定性 Markdown，失败不得修改源数据。'
+      macos:
+        applicability: supported
+        semantics: '将选定会话导出为确定性 Markdown，失败不得修改源数据。'
+    decision_refs:
+      - issue:26
+  - id: feature.session-data.provider-metadata-maintenance
+    name: 'Provider 元数据维护'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-data/src/backup.rs
+        symbol: backup
+      - path: upstream/CodexPlusPlus/crates/codex-plus-data/src/provider_sync.rs
+        symbol: provider_sync
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: apply_session_index_cleanup
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: load_provider_sync_targets
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: preview_session_index_cleanup
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: sync_providers_now
+    entry_points:
+      - data-module:backup
+      - data-module:provider_sync
+      - tauri-command:apply_session_index_cleanup
+      - tauri-command:load_provider_sync_targets
+      - tauri-command:preview_session_index_cleanup
+      - tauri-command:sync_providers_now
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '同步 metadata、预览与应用索引清理并生成本地备份。'
+      macos:
+        applicability: supported
+        semantics: '同步 metadata、预览与应用索引清理并生成本地备份。'
+    decision_refs:
+      - issue:26
+  - id: feature.session-data.token-usage-history
+    name: 'Token 用量历史'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/codex_local_storage.rs
+        symbol: codex_local_storage
+    entry_points:
+      - core-module:codex_local_storage
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '读取并规范化本地 Token 用量历史，不依赖 WebView 或注入。'
+      macos:
+        applicability: supported
+        semantics: '读取并规范化本地 Token 用量历史，不依赖 WebView 或注入。'
+    decision_refs:
+      - issue:26

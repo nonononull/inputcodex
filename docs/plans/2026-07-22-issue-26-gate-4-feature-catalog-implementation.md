@@ -171,12 +171,12 @@ docs/workflows/2026-07-22-issue-26-gate-4-feature-catalog-runtime.md
 
 **文件：** `parity/README.md`、`source-index.yml`、五个 feature 文件、目录仓库测试。
 
-- [ ] 从缓存 `upstream/CodexPlusPlus/` 静态枚举公开命令、核心能力入口、持久化/网络/进程/安装更新副作用和平台条件。
-- [ ] 每个入口映射到一个 feature ID、明确排除项或 `exception-pending`；禁止静默丢弃 Tauri/React、注入或远程推荐背后的能力证据。
-- [ ] 按五个 domain 建立稳定 feature ID；首次状态只允许 `unassessed` 或 `exception-pending`。
-- [ ] 为每条 feature 保存 `v1.2.41`、tag SHA、缓存证据路径、入口和双平台适用性。
-- [ ] 对无法证明完整性的模块记录缺口，不宣称“全部功能已盘点”。
-- [ ] 运行 source-index 覆盖与目录仓库测试，形成目录 checkpoint。
+- [x] 从缓存 `upstream/CodexPlusPlus/` 静态枚举公开命令、核心能力入口、持久化/网络/进程/安装更新副作用和平台条件。
+- [x] 每个入口映射到一个 feature ID、明确排除项或 `exception-pending`；禁止静默丢弃 Tauri/React、注入或远程推荐背后的能力证据。
+- [x] 按五个 domain 建立稳定 feature ID；首次状态只允许 `unassessed` 或 `exception-pending`。
+- [x] 为每条 feature 保存 `v1.2.41`、tag SHA、缓存证据路径、入口和双平台适用性。
+- [x] 对无法证明完整性的模块记录缺口，不宣称“全部功能已盘点”。
+- [x] 运行 source-index 覆盖与目录仓库测试，形成目录 checkpoint；commit 与 Issue 评论在普通 push 后回填。
 
 ### Task 4：行为合同与脱敏夹具
 

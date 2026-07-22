@@ -1,7 +1,7 @@
 # Issue #26：Gate 4 功能目录、行为合同与脱敏夹具报告
 
 schema_version: inputcodex.report.v1
-report_status: rust-schema-green-checkpoint-complete-source-index-in-progress
+report_status: feature-catalog-green-checkpoint-pending
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/26
 branch_ref: codex/issue-26-gate-4-feature-catalog
 baseline_ref: 431682296f53e86de1184c732b0d4748857c9390
@@ -10,12 +10,14 @@ scope_hash: sha256:e8a1cbccfc3f0026e90fcb49264de5ea69980fa2e1faa03b520d9bedaf61e
 control_plane_checkpoint_ref: commit:80e0ddbb734496e95e89fe57fd89ddb668c8c276;issuecomment:5047590347
 implementation_decision_ref: user-message:approve-issue-26-implementation-2026-07-22
 implementation_approval_ref: issuecomment:5047650154
+feature_catalog_checkpoint_ref: pending-commit-and-issue-comment
 
 ## 一、当前结论
 
 - Issue `#26` 已建立并验证为 OPEN，标签为 `type:architecture`、`gate:4`。
 - 项目所有者已要求建立独立 Session Plan、Runtime Workflow、精确范围和新 `scope_hash`。
 - 依赖、RED schema 与最小 Rust GREEN 已执行：纯内存 catalog/contract/fixture 类型和验证器已实现，不进入桌面产品运行面。
+- source-index 与五域功能目录已转 GREEN：`133` 条锁定上游公开入口映射为 `36` 个 feature、`3` 个显式排除，覆盖缺口为 `0`。
 - 当前授权允许 36 条范围内实现、验证、普通提交、普通推送和 PR 创建，不包含最终合并。
 - 未知 PR 与未知最终 Head 不能取得空白合并授权；最终 Squash Merge 仍需具体 owner 决策证据。
 
@@ -36,7 +38,7 @@ implementation_approval_ref: issuecomment:5047650154
 - 规范化：`StringComparer.Ordinal` 升序、UTF-8 无 BOM、LF 分隔、保留末尾 LF。
 - 范围哈希：`sha256:e8a1cbccfc3f0026e90fcb49264de5ea69980fa2e1faa03b520d9bedaf61e772`。
 - control-plane checkpoint 曾只允许 8 条路径；项目所有者批准后，实施阶段按 36 条最大范围分批写入。
-- 当前实际变更仅包含已批准的 parity Cargo、Rust、测试、子项目 build/err 与任务控制面；`parity/` 数据、CI、upstream、benchmarks、产品、Ruleset、Release 和 AGOS 保持零差异。
+- 当前实际变更仅包含已批准的 parity Rust、测试、`parity/` 功能目录、子项目 build/err 与任务控制面；CI、upstream、benchmarks、产品、Ruleset、Release 和 AGOS 保持零差异。
 
 ## 四、冻结的实现结构
 
@@ -78,7 +80,7 @@ implementation_approval_ref: issuecomment:5047650154
 - `catalog_schema --no-run`、`contract_schema --no-run` 与 `fixture_safety --no-run` 均使用既有 Rust `1.93.1` 加 `--ignore-rust-version` 进行本地定向编译，退出码均为 `1`。
 - 三组首要诊断均为 `E0432`，分别证明 catalog、contract 和 fixture 的预期公开 API 尚不存在，符合 TDD RED 根因。
 - 输出中的 `E0282` 是目标函数未解析后返回类型未知的级联诊断；依赖下载、Cargo 锁定、YAML 测试文本和测试语法未产生错误。
-- `catalog_repository` 已建立但未运行；它必须等 source-index、五分域目录、合同和 fixture 数据存在后才能提供有效仓库级证据。
+- source-index 的 6 条内存 RED/GREEN 与真实仓库对账已运行；完整合同和 fixture 仓库验证仍等待 Phase 5 数据面。
 
 ## 九、Rust schema GREEN 证据
 
@@ -86,7 +88,7 @@ implementation_approval_ref: issuecomment:5047650154
 - contract schema 覆盖六加载状态、请求标识、必填行为段、合同身份、重复 ID、悬空 feature/fixture 与跨 feature fixture 引用。
 - fixture schema 覆盖 manifest 必填字段、重复/归属、相对路径、反斜杠、Windows/POSIX 私人绝对路径和结构化敏感值占位策略。
 - 四个定向测试目标共 `26` 个测试通过；格式、离线库 check 与 Clippy `-D warnings` 均通过。
-- `catalog_repository` 必须等 Phase 4 数据面存在后运行，当前未伪造仓库级完整性结果。
+- Phase 4 数据面已由真实 source-lock 和上游入口枚举验证为 `133/133`；尚未把缺失合同/fixture 伪造成完整仓库 GREEN。
 
 ## 十、待完成
 
@@ -94,22 +96,24 @@ implementation_approval_ref: issuecomment:5047650154
 - 普通 control-plane checkpoint `80e0ddbb734496e95e89fe57fd89ddb668c8c276` 已 push。
 - Issue `#26` 评论 `5047590347` 已回写 commit、计划引用、范围哈希和实现待批准边界。
 - RED checkpoint `532fba89d882862438345788ed2fdd73faede507` 已普通 push，并通过 Issue 评论 `5048079257` 回写。
-- GREEN checkpoint `8b18f0a2a37829af3338edba34454eb6690af77a` 已普通 push，并通过 Issue 评论 `5048438316` 回写；当前进入 source-index 与五分域功能目录。
+- GREEN checkpoint `8b18f0a2a37829af3338edba34454eb6690af77a` 已普通 push，并通过 Issue 评论 `5048438316` 回写。
+- source-index 与五域功能目录已完成本地 GREEN，Phase 4 checkpoint 的 commit 与 Issue 评论将在普通 push 后回填；随后进入行为合同与脱敏 fixture。
 
 ## 十一、完成状态占位
 
 以下字段只在真实证据产生后填写，当前不得伪造：
 
 ```text
-feature_count: pending-implementation
+feature_count: 36
 contract_count: pending-implementation
 fixture_count: pending-implementation
-source_entry_count: pending-implementation
-excluded_entry_count: pending-implementation
-exception_pending_count: pending-implementation
-coverage_gap_count: pending-implementation
+source_entry_count: 133
+excluded_entry_count: 3
+exception_pending_count: 10
+coverage_gap_count: 0
 red_checkpoint_ref: commit:532fba89d882862438345788ed2fdd73faede507;issuecomment:5048079257
 green_checkpoint_ref: commit:8b18f0a2a37829af3338edba34454eb6690af77a;issuecomment:5048438316
+feature_catalog_checkpoint_ref: pending-commit-and-issue-comment
 pr_ref: pending-implementation
 ci_ref: pending-implementation
 merge_ref: pending-owner-authorization
