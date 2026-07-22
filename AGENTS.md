@@ -53,5 +53,5 @@
 - Gate 3 合并证据已通过 Issue `#22` / PR `#23` 完成独立 closeout；合并提交为 `f470c062037042a1f7833a29cdcf216f6c0f5601`，Issue `#22` 已按 `COMPLETED` 关闭，合并后 `main` CI 六 Job 全绿。
 - Issue `#24` / PR `#25` 已完成 Gate 4 规划合同并 Squash Merge 为 `431682296f53e86de1184c732b0d4748857c9390`；Issue `#24` 已按 `COMPLETED` 关闭。
 - Issue `#26` / PR `#27` 已完成 Gate 4 功能目录执行、Review/CI 与 Squash Merge；来源事实只能通过独立 Closeout 回写，不得改写来源提交。
-- Issue `#28` / PR `#29` 是当前 Gate 4 Closeout：仅回写来源合并证据与项目状态；最终 Squash Merge 仍需项目所有者针对 PR `#29` 最终 Head 的独立授权。
-- 性能基线、预算与优化继续使用后续独立 Issue；必须在 PR `#29` 合并后才能启动，Gate 5 保持锁定。
+- Issue `#28` / PR `#29` 已完成 Gate 4 独立 Closeout；PR `#29` 以单父 Squash 提交 `c07da0cad33e09b5c54e528a8a6728a048c88c0b` 进入 `main`，Issue `#28` 已关闭，合并后主干 CI 六 Job 全绿且 Artifact 数为 `0`。
+- 下一项可启动工作是独立性能基线 Issue：必须重新冻结测量对象、可比环境、范围哈希与项目所有者批准；性能基线、预算与优化继续使用不同 Issue/PR，Gate 5 保持锁定。
