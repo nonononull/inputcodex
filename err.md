@@ -17,14 +17,14 @@
 - 验证：项目规则、Master Plan、Issue `#4` Plan/Session/Runtime、closeout 报告和 PR 正文使用一致边界；本仓原生验证不依赖 AGOS 路径、Registry 或严格校验结果。
 - 关联：GitHub Issue `#4`、PR `#5`。
 
-### 2026-07-21：AGOS 默认入口曾返回 needs-input（外部历史记录）
+### 2026-07-21：AGOS 默认入口返回 needs-input / unregistered（外部历史记录）
 
-- 环境：仅有空 Git 仓库，尚无项目级入口文档和任务登记。
-- 现象：`invoke-agos-default-entry.ps1 -ReportOnly` 返回 `AGOS_DEFAULT_ENTRY_STATUS=needs-input`。
-- 根因：新项目尚未建立项目入口文档和正式任务控制材料。
-- 处理：当时创建项目治理文档、筹备计划、运行工作流和 GitHub Issue；当前结论补充为该外部状态不构成本项目阻塞，后续不可用时直接绕过。
-- 验证：项目原生文档、Git 与 GitHub 交付链可独立完成；是否重新运行 AGOS 只取决于其是否可用且对当前任务有帮助。
-- 关联：GitHub Issue `#1`。
+- 环境：首次发生于空仓筹备；Issue `#17` Gate 3 规划再次以 report-only 调用同一外部入口。
+- 现象：首次返回 `AGOS_DEFAULT_ENTRY_STATUS=needs-input`；Issue `#17` 返回 `needs-input`、任务 `unregistered`，同时报告项目 Git foundation 与入口文档均为 `ready`。
+- 根因：外部 AGOS 任务登记与 `inputcodex` 项目原生 Issue/计划不是同一控制面；任务未登记不能推导为本项目缺少批准或无法交付。
+- 处理：把外部状态记录到对应 Session Plan 后立即绕过，继续 `Issue → 分支 → 计划 → PR` 原生流程；不在本仓登记、修复或优化 AGOS。
+- 验证：Issue `#17` 已使用真实 GitHub Issue、独立分支、项目原生计划和允许路径继续推进；项目验证不依赖 AGOS 返回成功。
+- 关联：GitHub Issue `#1`、Issue `#17`。
 
 ### 2026-07-21：单条补丁命令超过 Windows 长度上限
 
@@ -239,8 +239,8 @@
 - 现象：`WindowsApps` 下的 `apply_patch.bat` 或 `pwsh.exe` 偶发返回 `CreateProcessAsUserW failed: 5 (拒绝访问)`，命令尚未修改仓库。
 - 根因：失败发生在 WindowsApps 别名进程创建阶段，不是补丁内容、项目文件权限或测试逻辑错误。
 - 处理：补丁统一通过 Codex 的 apply-patch 入口 `& codex --codex-run-as-apply-patch $patch` 执行；只读 PowerShell 启动失败时确认零副作用后重试，不用改写项目或关闭门禁绕过。
-- 验证：同一补丁入口成功更新受控文件，后续 `git diff --check` 与 Fresh 测试用于确认没有部分写入。
-- 关联：GitHub Issue `#14`、本地 Codex Windows 执行环境。
+- 验证：Issue `#14` 与 Issue `#17` 均通过稳定 PowerShell、Node 只读通道和 Codex apply-patch 入口继续；后续 `git diff --check` 与 Fresh 验证确认没有部分写入。
+- 关联：GitHub Issue `#14`、Issue `#17`、本地 Codex Windows 执行环境。
 
 ### 2026-07-22：Git HTTPS 传输与 OAuth `workflow` scope 双重阻断 Workflow 分支 push
 
@@ -250,6 +250,24 @@
 - 处理：每次失败后先用 GitHub API确认远端分支和对象是否存在，禁止盲目重推或 Force Push；停止未完成的 OAuth 刷新流程，使用已通过 `git ls-remote` 验证的 GitHub SSH 身份执行普通 push。一次临时 URL 命令同时产生 HTTPS 拒绝与 SSH 成功输出，因此不采用其整体退出码作为成功证据，改用 GitHub API核对远端 ref。
 - 验证：远端 `refs/heads/codex/issue-14-gate-2-upstream-watch` 精确指向 `43707034caa2e7b51ec011ce5fbbb61578a0afc3`；PR `#15` 的 `headRefOid` 一致，首轮 Actions `29889749336` 的 `validate` 成功且 `watch` 跳过。
 - 关联：GitHub Issue `#14`、PR `#15`、本地 Git/GitHub 认证环境。
+
+### 2026-07-22：Gate 3 文档门禁的过度匹配产生假失败
+
+- 环境：Issue `#17` 规划文档完成后运行允许路径、引用和占位符 Fresh 验证。
+- 现象：第一轮把 README 必须包含裸文本 `issues/17` 作为合同，但 README 使用可读的 `Issue #17`；第二轮在全部历史文档扫描“待补充”，命中 `err.md` 对旧模板问题的原文记录。
+- 根因：验证断言绑定了非必要的具体表现形式，并把本任务新增文档门禁错误扩展到历史排错语料；两次失败都不代表项目入口缺失或存在未完成占位符。
+- 处理：README 合同改为核对 `Issue #17` 与真实计划路径；占位符扫描只覆盖四份新 Gate 3 文档，同时继续单独禁止 Gate 2 最终报告中的过期 `pending` 语义。
+- 验证：完整门禁输出 `ISSUE17_CHANGED_PATHS=11`、`ISSUE17_PRODUCT_CARGO_FILES=0`、`ISSUE17_PRODUCT_RUST_FILES=0`、`ISSUE17_WORKFLOW_FILES=1` 和 `ISSUE17_GATE3_PLANNING_LOCAL_VERIFY_OK`。
+- 关联：GitHub Issue `#17`、`build.md`。
+
+### 2026-07-22：纯文档 PR 未触发上游监控 Check
+
+- 环境：Issue `#17` 的 PR `#18` 只修改 `11` 条治理文档路径，仓库现有唯一 Workflow 为 `.github/workflows/upstream-watch.yml`。
+- 现象：PR 创建后 `gh pr checks 18` 返回 `no checks reported`，按分支查询 Actions 运行列表为空。
+- 根因：Workflow 的 `pull_request.paths` 只包含监控 Python、测试、Workflow 自身和 `upstream/source-lock.json`；PR `#18` 没有修改这些路径，所以 GitHub 正确地不创建 Workflow 运行。
+- 处理：不扩大现有上游监控 Workflow 的职责，也不为文档 PR伪造检查；任务证据记录为 `ci_ref: not-triggered:docs-only-path-filter`，并使用本地门禁、远端文件列表、Review 对话、Ruleset 和 Fresh 基线完成审阅。
+- 验证：PR `#18` 远端文件为批准的 `11` 条文档路径，Actions 分支运行列表为 `[]`，Review 对话为 `0`，自动合并关闭；`0 Checks` 没有被解释为 CI 通过。
+- 关联：GitHub Issue `#17`、PR `#18`、`.github/workflows/upstream-watch.yml`。
 
 ## 记录模板
 

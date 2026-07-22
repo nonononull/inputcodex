@@ -1,13 +1,13 @@
 # Rust CI 云端卸载实施计划
 
-> **执行代理要求：** 实施本计划时必须使用 `superpowers:executing-plans` 或 `superpowers:subagent-driven-development` 逐项执行；每个任务先建立独立 Issue、Session Plan 与 Runtime Workflow，再创建分支和关联 PR。当前 PR `#3` 只批准并保存本计划，不执行任何任务。
+> **执行要求：** 每个任务先建立独立 Issue、Session Plan 与 Runtime Workflow，再创建分支和关联 PR。Issue `#17` 只冻结 Gate 3 实施合同，不创建 Workspace、Rust 源码或产品 CI；后续实现仍需新的 Issue 和项目所有者批准。
 
-status: approved-plan-only
+status: gate-3-planning-active-implementation-locked
 decision_date: 2026-07-21
 owner: nonononull
-owner_decision_ref: 当前任务对话中的“方案确认”
+owner_decision_ref: 当前任务对话中的“方案确认”, user-message:approve-gate-3-planning-2026-07-22
 strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
-current_scope: 仅文档与未来执行顺序；禁止创建 Workflow、Cargo Workspace、Rust 源码、required status checks 或发布配置
+current_scope: Issue #17 只更新规划文档和 Gate 2 最终证据；禁止创建 Workflow、Cargo Workspace、Rust 源码、required status checks 或发布配置
 
 **目标：** 在不占用项目所有者本地机器承担全量 Rust 编译的前提下，分阶段建立每 6 小时上游监控、纯 Rust/Iced 双平台工作区、标准 GitHub-hosted runners 全量 CI，以及证据充分后的 `main` required check。
 
@@ -30,18 +30,19 @@ current_scope: 仅文档与未来执行顺序；禁止创建 Workflow、Cargo Wo
 - 禁止上传整个 `target/`；非 Release Artifact 最长保留 7 天。
 - 每个任务都必须执行 `Issue → 分支 → 验证证据 → 关联 PR → Review/CI → Squash Merge`，禁止直接写 `main`、Force Push 或删除 `main`。
 - 所有 Review 对话必须先记录根因、处理方式与验证证据，再由 reviewer 或项目所有者确认解决。
-- 当前 Gate 1 仍处于锁定状态；PR `#3` 合并且 Gate 1 余项完成前，不得执行本计划中的 Gate 2 或 Gate 3 任务。
+- Gate 2 已完成；Issue `#17` 的 Gate 3 规划活动，但 Task 2 的 Workspace 与 CI 实现仍锁定，直到规划 PR Squash Merge 且项目所有者批准新的实现 Issue。
 
 ## 交付拆分
 
 | 顺序 | 独立 Issue 标题 | 建议分支 | 单一交付物 | 准入条件 |
 | --- | --- | --- | --- | --- |
-| 1 | `[Gate 2] 建立每 6 小时上游 Release 与 main 变化监控` | `codex/gate-2-upstream-monitor` | 只读上游、只写 Issue 的监控工作流 | Gate 1 已完成；`upstream/source-lock.json` 已由独立快照 PR 合并 |
-| 2 | `[Gate 3] 建立纯 Rust Workspace 与三平台首版 CI` | `codex/gate-3-rust-workspace-ci` | 分层 Workspace、最小双平台骨架、无缓存首版 CI | Gate 2 基线快照已合并；项目所有者批准 Gate 3 Session Plan |
-| 3 | `[Gate 3] 基于冷构建证据优化 Cargo Cache 与诊断 Artifact` | `codex/gate-3-ci-cache-tuning` | 有测量证据的缓存配置或明确维持无缓存的报告 | 至少 10 次源码影响运行且覆盖三个 Runner；观测期不少于 7 天 |
-| 4 | `[Gate 3] 将稳定 CI 汇总检查加入 main-protection` | `codex/gate-3-required-check` | Ruleset required check 与落地报告 | Job 名称、触发和失败语义稳定；项目所有者再次批准 |
+| 1 | `[Gate 2] 建立每 6 小时上游 Release 与 main 变化监控` | `codex/issue-14-gate-2-upstream-watch` | 已通过 PR `#15` 完成，只读上游、只写 Issue 的监控工作流 | 已完成 |
+| 2 | `[Gate 3] 冻结纯 Rust Workspace 骨架规划` | `codex/issue-17-gate-3-rust-workspace-plan` | 仅规划、Session、Runtime、报告和项目入口 | 已批准规划；禁止源码实现 |
+| 3 | `[Gate 3] 建立纯 Rust Workspace 与三平台首版 CI` | `codex/issue-<真实编号>-gate-3-rust-workspace-ci` | 分层 Workspace、最小双平台骨架、无缓存首版 CI | Issue `#17` 规划 PR 已合并；项目所有者批准新实现 Issue |
+| 4 | `[Gate 3] 基于冷构建证据优化 Cargo Cache 与诊断 Artifact` | `codex/gate-3-ci-cache-tuning` | 有测量证据的缓存配置或明确维持无缓存的报告 | 至少 10 次源码影响运行且覆盖三个 Runner；观测期不少于 7 天 |
+| 5 | `[Gate 3] 将稳定 CI 汇总检查加入 main-protection` | `codex/gate-3-required-check` | Ruleset required check 与落地报告 | Job 名称、触发和失败语义稳定；项目所有者再次批准 |
 
-Gate 3 的 Workspace 与首版 CI 必须处于同一个 PR：Workspace 没有云端三平台证据不能合并，CI 没有真实 Workspace 也无法被验收。缓存调优与 Ruleset 升级可以被独立拒绝，因此必须拆成后续 PR。
+Issue `#17` 的规划 PR 不包含 Workspace。规划合并后，Gate 3 的 Workspace 与首版 CI 必须处于同一个实现 PR：Workspace 没有云端三平台证据不能合并，CI 没有真实 Workspace 也无法被验收。缓存调优与 Ruleset 升级可以被独立拒绝，因此必须拆成后续 PR。
 
 ## 文件责任地图
 
@@ -134,7 +135,7 @@ Gate 3 的 Workspace 与首版 CI 必须处于同一个 PR：Workspace 没有云
 
 **回滚：** 通过新 PR 删除或禁用 `.github/workflows/upstream-monitor.yml`，保留历史 Issue 和报告；不得 Force Push、删除 `main` 或自动回退 `source-lock.json`。
 
-## Task 2：Gate 3 Workspace 与首版三平台 CI
+## Task 2：Gate 3 Workspace 与首版三平台 CI（Issue #17 规划合并后）
 
 **接口：**
 
@@ -143,9 +144,9 @@ Gate 3 的 Workspace 与首版 CI 必须处于同一个 PR：Workspace 没有云
 - CI 工作流名称固定为 `CI`，稳定汇总 Job 名称固定为 `required`，GitHub 检查上下文预期为 `CI / required`。
 - 重型路径固定包括根 Cargo 文件、`rust-toolchain.toml`、`apps/**`、`crates/**`、`xtask/**`、`benchmarks/**`、`parity/**`、`scripts/ci/**` 和 `.github/workflows/ci.yml`。
 
-- [ ] **步骤 1：建立 Gate 3 Issue、工具链决策和执行控制面**
+- [ ] **步骤 1：建立 Gate 3 实现 Issue、工具链决策和执行控制面**
 
-  Issue 必须记录选定 Rust 精确版本、Iced 精确版本、许可证核验、平台系统依赖和本地资源预算；禁止使用浮动 `stable`、通配依赖版本或未锁定依赖。Iced 展示文件由 Gemini 负责实现或审阅，当前执行者不得自行确立视觉设计系统。
+  只有 Issue `#17` 的规划 PR Squash Merge 且项目所有者重新批准后，才能创建实现 Issue。候选为 Rust `1.97.1` 与 Iced `0.14.0`；实现开工前必须 Fresh 复核版本、Iced checksum、许可证、MSRV、平台系统依赖和本地资源预算。禁止使用浮动 `stable`、通配依赖版本或未锁定依赖。Iced 展示文件由 Gemini 负责实现或审阅，当前执行者不得自行确立视觉设计系统。
 
 - [ ] **步骤 2：先写分层和治理失败测试**
 
@@ -283,10 +284,10 @@ Gate 3 的 Workspace 与首版 CI 必须处于同一个 PR：Workspace 没有云
 - PR 使用 Squash Merge，合并后删除功能分支；禁止 Force Push 和删除 `main`。
 - 形成新稳定面后使用项目原生 Git 状态、HEAD 与 diff 保存可复核快照；正式 closeout 补齐 `review_ref`、`ci_ref`、`merge_ref`。如外部 AGOS 可用且适用，可补充记录 rollout；不可用时绕过，不影响 closeout，且禁止在本项目任务中优化 AGOS。
 
-## 当前计划 PR 的验收
+## Issue #17 规划 PR 的验收
 
-- 本文件、CI 策略、Master Plan、Session Plan、Runtime Workflow、总架构方案和 `build.md` 互相引用且语义一致。
-- 当前仓库不存在 `.github/workflows/`、`Cargo.toml`、`Cargo.lock` 或 `.rs` 文件。
-- 本计划没有创建未来 Gate 的 Issue、分支、Workflow、Ruleset required check 或发布配置。
-- Gate 2、Gate 3、Cache 调优和 Ruleset 升级各自具备独立 Issue/PR、验证、失败语义与回滚路径。
-- PR `#3` 继续保持未合并；只有项目所有者完成 Review 且所有对话根因闭环后才允许 Squash Merge。
+- 本文件、CI 策略、Master Plan、Issue `#17` 主计划、Session Plan、Runtime Workflow、总架构方案和 `build.md` 互相引用且语义一致。
+- 当前仓库只保留既有 `.github/workflows/upstream-watch.yml`，不存在产品 `Cargo.toml`、`Cargo.lock`、`rust-toolchain.toml` 或非快照 `.rs` 文件。
+- Issue `#17` 只创建规划 Issue、分支和文档；没有创建 Gate 3 实现 Issue、产品 Workflow、Ruleset required check 或发布配置。
+- Gate 2 已完成；Gate 3 实现、Cache 调优和 Ruleset 升级分别使用后续独立 Issue/PR、验证、失败语义与回滚路径。
+- 规划 PR 只有在项目所有者完成 Review、所有对话根因闭环、现有 CI 成功并提供新的明确授权后才允许 Squash Merge。

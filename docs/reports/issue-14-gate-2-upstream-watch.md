@@ -1,12 +1,13 @@
 # Issue #14：Gate 2 上游变化监控交付报告
 
-report_status: pr-open-final-ci-pending
+report_status: completed-squash-merged-and-live-verified
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/14
 branch_ref: codex/issue-14-gate-2-upstream-watch
 pr_ref: https://github.com/nonononull/inputcodex/pull/15
-ci_ref: https://github.com/nonononull/inputcodex/actions/runs/29889749336
+ci_ref: https://github.com/nonononull/inputcodex/actions/runs/29890179462, https://github.com/nonononull/inputcodex/actions/runs/29890586102, https://github.com/nonononull/inputcodex/actions/runs/29890641799
 review_ref: https://github.com/nonononull/inputcodex/pull/15#issuecomment-5041714708
-merge_ref: pending
+merge_ref: 113476fb96623452f9a69526edabc73a57d812a1
+machine_state_ref: https://github.com/nonononull/inputcodex/issues/16
 
 ## 一、批准范围
 
@@ -18,6 +19,7 @@ merge_ref: pending
 ## 二、Fresh 基线
 
 - `main` 基线：`5e64015075ddf2adef4bf685f50977b47b7f72e7`。
+- Gate 2 最终 `main`：`113476fb96623452f9a69526edabc73a57d812a1`。
 - 最新正式 Release：`v1.2.41`，发布时间 `2026-07-20T01:48:40Z`。
 - Release 标签提交：`3dafffcafb2566a1e8bce4b35671656d6adb3eda`。
 - 上游 `main`：`6fa0a57decbb3382771a981247e6922799e97f5d`，仅作变化预警源。
@@ -39,14 +41,16 @@ merge_ref: pending
 - 本地 Fresh：`python -m unittest discover -s .github/scripts/tests -p 'test_*.py' -v` 共 `28` 项通过；`py_compile`、`--validate-only` 与 Workflow YAML 合同均通过。
 - 路径门禁首次正确发现仓库内 `__pycache__`；根因是 Python 默认缓存目录。验证入口改用工作区外 `PYTHONPYCACHEPREFIX` 后重新运行，测试与编译通过且未产生未跟踪 `.pyc`。
 - Fresh 远端对账仍为 Release `v1.2.41`、标签提交 `3dafffcafb2566a1e8bce4b35671656d6adb3eda`、上游 `main` `6fa0a57decbb3382771a981247e6922799e97f5d`，未触发停止条件。
-- 真实 Actions、首次状态 Issue 与第二次幂等运行必须在 Squash Merge 后补充；合并前不得把这些待验证项描述为已通过。
+- 最终 PR CI `29890179462` 在获批 Head 上完成：`validate=SUCCESS`、`watch=SKIPPED`，证明 PR 事件没有进入 Issue 写入 Job。
+- 第一次 `main` 真实运行 `29890586102` 的 `validate/watch` 均成功，创建唯一状态 Issue `#16`，日志摘要为 `event_count=0,state_action=created`。
+- 第二次 `main` 真实运行 `29890641799` 的 `validate/watch` 均成功，复用 Issue `#16`，正文、标题和更新时间均未变化，日志摘要为 `event_count=0,state_action=unchanged`。
+- 最终机器状态为精确状态标记 `1`、告警 Issue `0`；Issue `#16` 继续由 Workflow 维护，不得人工编辑或关闭。
 
 ## 五、Review 与合并证据
 
-- PR `#15` 为非 Draft、目标 `main`，首轮 Head 为 `43707034caa2e7b51ec011ce5fbbb61578a0afc3`，远端文件列表与 Session Plan 的 `11` 条允许路径完全一致。
-- 首轮 Actions `29889749336` 在该 Head 上完成：`validate=SUCCESS`、`watch=SKIPPED`；这证明 PR 事件只运行只读验证，没有进入 Issue 写入 Job。
-- Ruleset `19395456` Fresh 状态为 active、无 bypass actor、required approvals `0`、必须解决 Review 对话且只允许 Squash Merge；PR 自动合并未启用，首轮状态为 `MERGEABLE/CLEAN`。
-- 首轮 Review 对话为 `0`；Owner Review 跟踪锚点为 `https://github.com/nonononull/inputcodex/pull/15#issuecomment-5041714708`，当前明确标记为“尚未最终通过”。
-- 本次文档回写提交后必须重新核对最终 Head、最终 CI、Review 对话和 Fresh 上游基线，再把同一 Owner Review 评论原位更新为最终通过证据。
-- Squash Merge、两次真实运行、Issue 关闭和签名证据尚未发生，不得提前填充或解释为已完成。
-- 项目所有者已通过 `user-message:create-upstream-watch-full-delivery-2026-07-22` 提供执行批准和门禁满足后的条件式 Squash Merge 授权；该授权不能替代 CI、Review 对话闭环或合并前 Fresh 核对。
+- PR `#15` 的最终获批 Head 为 `1ffa8fd7084eae8056e65d3aef58fb15d46cbd19`，目标为 `main`、非 Draft，最终 `11` 条路径与 Session Plan 完全一致。
+- Owner Review 锚点 `https://github.com/nonononull/inputcodex/pull/15#issuecomment-5041714708` 已原位更新为最终通过；Review 对话总数与未解决数均为 `0`。
+- PR `#15` 于 `2026-07-22T04:13:54Z` Squash Merge；合并提交为 `113476fb96623452f9a69526edabc73a57d812a1`，单父为 `5e64015075ddf2adef4bf685f50977b47b7f72e7`，tree 与最终 Head 一致，GitHub 签名为 `valid`。
+- Issue `#14` 已按 `COMPLETED` 关闭，远端分支 `codex/issue-14-gate-2-upstream-watch` 已删除。
+- Ruleset `19395456` 在合并前后均为 active、无 bypass actor、required approvals `0`、必须解决 Review 对话且只允许 Squash Merge；自动合并未启用。
+- 项目所有者条件式 Squash Merge 授权引用为 `user-message:create-upstream-watch-full-delivery-2026-07-22`；最终 closeout 锚点为 `https://github.com/nonononull/inputcodex/pull/15#issuecomment-5041811562`。
