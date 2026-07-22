@@ -455,8 +455,8 @@
 - 现象：运行 `29916309635` 的 Windows 在桌面冷构建步骤失败，Linux、macOS、classify、governance 成功，`required` 失败。
 - 根因：Windows 日志包含唯一稳定标记并报告 `inputcodex-platform` 编译失败；`required.json` 的唯一 failures 项为 `windows=failure`。
 - 处理：删除唯一 Windows cfg 探针，不新增平台分支、不修改 `PlatformKind` 语义，也不 rerun 旧失败。
-- 验证：失败 Artifact 只有 Windows `desktop-build.log`/`toolchain.txt` 与 `required.json`，不含 `target/`；删除探针后的本地 Windows platform check 与 Fresh CI 仍待后续运行确认。
-- 关联：GitHub PR `#21`、运行 `29916309635`、Artifact `windows-failure-29916309635-1`、Artifact `required-failure-29916309635-1`。
+- 验证：失败 Artifact 只有 Windows `desktop-build.log`/`toolchain.txt` 与 `required.json`，不含 `target/`；修复提交 `436f7273b589f0dcca0c574aae611bf919d687f8` 触发运行 `29916670916`，六 Job 全绿且成功 Artifact 数为 `0`。
+- 关联：GitHub PR `#21`、失败运行 `29916309635`、修复运行 `29916670916`、Artifact `windows-failure-29916309635-1`、Artifact `required-failure-29916309635-1`。
 
 ## 记录模板
 
