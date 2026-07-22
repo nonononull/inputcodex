@@ -1,11 +1,14 @@
 # Issue #19 Runtime Workflow：Gate 3 纯 Rust Workspace 与首版三平台 CI
 
-workflow_status: pr-review-ready-owner-merge-authorization-pending
+workflow_status: completed-squash-merged
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 session_plan_ref: docs/plans/sessions/2026-07-22-issue-19-gate-3-rust-workspace-ci.md
 implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
 architecture_plan_ref: docs/plans/2026-07-22-issue-17-gate-3-rust-workspace-plan.md
 approved_decision_ref: user-message:approve-gate-3-implementation-2026-07-22
+owner_merge_authorization_ref: user-message:authorize-squash-merge-pr-21-2026-07-22
+merge_ref: 0716ec0debcd3e059cc4ca88a072232841ca73b4
+closeout_issue_ref: https://github.com/nonononull/inputcodex/issues/22
 scope_hash: sha256:2e101627480012d57d6d0472a08cfbe03fc401f6ac74ef3ae1e6a42929ed61ba
 
 ## 当前执行 checkpoint
@@ -23,7 +26,10 @@ scope_hash: sha256:2e101627480012d57d6d0472a08cfbe03fc401f6ac74ef3ae1e6a42929ed6
 - 首个成功样本的 metrics 只写 Step Summary，当前 API 无法在完成后复取二进制字节数；已用合同 RED→GREEN 要求后续 metrics 同时写控制台日志与 Step Summary。
 - Phase 7 已完成：治理、rustfmt、通用 Rust、Windows 条件编译、macOS 条件编译五类失败语义均由普通修复提交恢复全绿，未 rerun 旧失败、未 Force Push、未关闭平台 Job。
 - Linux、Windows、macOS 已各取得 `3/3` 次无缓存成功样本；最新产品源码修复运行 `29917649550` 六 Job 全绿且成功 Artifact 数为 `0`。
-- 当前进入 Phase 8：提交最终控制面 checkpoint，等待最终 PR Head 的六 Job 与 Fresh Review 证据，转为 Ready for review 后停在新的项目所有者 Squash Merge 授权前。
+- Phase 8 已完成：最终 Head `9a4a4425f2fb0d8235554d3e83577111ae34efcc` 的运行 `29918843397` 六 Job 全绿，Review 对话 `0`，项目所有者授权后已执行 Squash Merge。
+- PR `#21` 合并提交为 `0716ec0debcd3e059cc4ca88a072232841ca73b4`，Issue `#19` 为 `CLOSED / COMPLETED`；单父、tree 等价和 GitHub 签名 `valid` 已验证。
+- 合并后 `main` 运行 `29919596057` 六 Job 全绿且成功 Artifact 数为 `0`；远端功能分支已删除。
+- 当前 Runtime Workflow 已封存；后续只由 Issue `#22` closeout 控制面持久化合并证据。
 
 ## Phase 0：startup-baseline
 

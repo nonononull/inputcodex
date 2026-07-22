@@ -467,6 +467,22 @@
 - 验证：失败 Artifact 只有 macOS `desktop-build.log`/`toolchain.txt` 与 `required.json`，不含 `target/`；修复提交 `41c0cc2924a45f3d8e2a5fe2e47e2e254a9dbb3b` 触发运行 `29917649550`，六 Job 全绿且成功 Artifact 数为 `0`。
 - 关联：GitHub PR `#21`、失败运行 `29917061781`、修复运行 `29917649550`、Artifact `macos-failure-29917061781-1`、Artifact `required-failure-29917061781-1`。
 
+## 2026-07-22：HTTPS fetch 临时失败但 GitHub API 与 SSH 正常
+
+- 环境：PR `#21` 已成功合并，使用本地 HTTPS `origin` 执行 `git fetch --prune origin` 同步 `main`。
+- 现象：先后出现 `RPC failed; curl 28 Recv failure: Connection was reset` 与 `Failed to connect to github.com port 443`；同一时段 `gh` API 与 GitHub Actions 查询正常。
+- 根因：HTTPS Git 传输链路临时不可用，不是仓库、提交、凭据或 GitHub 合并状态错误。
+- 处理：不修改 `origin` 配置，不重写历史；使用一次性 SSH refspec `git fetch --prune git@github.com:nonononull/inputcodex.git '+refs/heads/*:refs/remotes/origin/*'` 同步并 prune。
+- 验证：`origin/main` 与本地 `main` 均快进到 `0716ec0debcd3e059cc4ca88a072232841ca73b4`，远端功能分支引用被删除，工作树干净。
+
+## 2026-07-22：PowerShell 多行数组被 `gh pr edit --body` 误解析
+
+- 环境：合并后需要把 PR `#21` 正文中的“待授权”边界替换为真实 merge/CI 结果。
+- 现象：`gh pr view --jq .body` 的多行输出在 PowerShell 中形成字符串数组，直接传给 `gh pr edit --body $prBody` 后，正文第二行起被解析为独立 CLI 参数并报 `unknown shorthand flag`。
+- 根因：PowerShell 的原生命令参数绑定会展开字符串数组；`--body` 只接受单个字符串参数。
+- 处理：先以 ``$prBodyLines -join "`n"`` 还原单个正文字符串，完成精确旧段落匹配后，通过 `--body-file -` 从标准输入提交。
+- 验证：PR `#21` 正文成功回写 merge commit `0716ec0...` 与主干运行 `29919596057`，Issue `#19` closeout 评论成功创建；没有修改 Git 历史或仓库文件。
+
 ## 记录模板
 
 ```text

@@ -1,31 +1,34 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: 2026-07-22-issue-19-gate-3-rust-workspace-ci
-active_gate: Gate 3：纯 Rust Workspace 与首版三平台 CI 实现
-last_verified_gate: Gate 3 实现证据：PR #21 五类失败语义 5/5、Linux/Windows/macOS 各 3/3 次无缓存成功样本，最新修复运行 29917649550 六 Job 全绿
-next_legal_gate: 提交最终控制面 checkpoint，等待最终 PR Head 的 Review/CI 收口并转为 Ready for review；取得项目所有者新的明确授权前不得 Squash Merge 或关闭 Issue #19
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
+active_task: 2026-07-22-issue-22-gate-3-closeout
+active_gate: Gate 3：合并证据 closeout，Gate 4 锁定
+last_verified_gate: Gate 3 已通过 PR #21 Squash Merge；merge 0716ec0 单父、tree 与最终 Head 等价、签名 valid，Issue #19 COMPLETED，main 运行 29919596057 六 Job 全绿
+next_legal_gate: 完成 Issue #22 独立 closeout PR；合并后保持 Gate 4 锁定，功能目录、性能预算或业务迁移必须由项目所有者批准新的独立 Issue
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/22
+closed_implementation_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 planning_issue_ref: https://github.com/nonononull/inputcodex/issues/17
 upstream_watch_issue_ref: https://github.com/nonononull/inputcodex/issues/14
 transition_issue_ref: https://github.com/nonononull/inputcodex/issues/8
 upstream_sync_issue_ref: https://github.com/nonononull/inputcodex/issues/9
-active_branch_ref: codex/issue-19-gate-3-rust-workspace-ci
+active_branch_ref: codex/issue-22-gate-3-closeout
 transition_branch_ref: codex/issue-8-gate-2-transition
-active_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-active_session_plan_ref: docs/plans/sessions/2026-07-22-issue-19-gate-3-rust-workspace-ci.md
-active_runtime_workflow_ref: docs/workflows/2026-07-22-issue-19-gate-3-rust-workspace-ci-runtime.md
-active_pr_ref: https://github.com/nonononull/inputcodex/pull/21
+active_plan_ref: docs/plans/2026-07-22-issue-22-gate-3-closeout.md
+active_session_plan_ref: docs/plans/sessions/2026-07-22-issue-22-gate-3-closeout.md
+active_runtime_workflow_ref: docs/workflows/2026-07-22-issue-22-gate-3-closeout-runtime.md
+active_pr_ref: pending-until-closeout-pr-created
+gate_3_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/21
 planning_pr_ref: https://github.com/nonononull/inputcodex/pull/18
 transition_pr_ref: https://github.com/nonononull/inputcodex/pull/10
 upstream_sync_pr_ref: https://github.com/nonononull/inputcodex/pull/11
-closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5, https://github.com/nonononull/inputcodex/pull/7, https://github.com/nonononull/inputcodex/pull/10, https://github.com/nonononull/inputcodex/pull/11, https://github.com/nonononull/inputcodex/pull/13, https://github.com/nonononull/inputcodex/pull/15, https://github.com/nonononull/inputcodex/pull/18
-active_report_ref: docs/reports/issue-19-gate-3-rust-workspace-ci.md
+closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5, https://github.com/nonononull/inputcodex/pull/7, https://github.com/nonononull/inputcodex/pull/10, https://github.com/nonononull/inputcodex/pull/11, https://github.com/nonononull/inputcodex/pull/13, https://github.com/nonononull/inputcodex/pull/15, https://github.com/nonononull/inputcodex/pull/18, https://github.com/nonononull/inputcodex/pull/21
+active_report_ref: docs/reports/issue-22-gate-3-closeout.md
+gate_3_implementation_report_ref: docs/reports/issue-19-gate-3-rust-workspace-ci.md
 gate_2_watch_report_ref: docs/reports/issue-14-gate-2-upstream-watch.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-decision_status: gate-3-implementation-approved-control-plane-active-merge-authorization-pending
+decision_status: gate-3-closeout-approved-and-squash-merge-authorized-gate-4-locked
 
 ## 当前状态
 
@@ -39,8 +42,9 @@ decision_status: gate-3-implementation-approved-control-plane-active-merge-autho
 - Issue `#12` / PR `#13` 已完成上游基线 closeout；PR `#13` 的 Squash Merge 提交为 `5e64015075ddf2adef4bf685f50977b47b7f72e7`，Issue `#12` 已关闭。
 - Issue `#14` / PR `#15` 已完成每 6 小时上游监控；最终 PR CI、两次 `main` 真实运行、唯一状态 Issue `#16`、分支清理和有效 GitHub 签名均已闭环。
 - Issue `#17` / PR `#18` 已完成 Gate 3 规划交付；PR `#18` 的 Squash Merge 提交为 `477d110a9b284e127af365f5278901bcfa69e093`，Issue `#17` 已关闭。
-- 当前活动任务为 Issue `#19` / Draft PR `#21`；治理合同为 `30/30`，七成员 Workspace、首版无缓存三平台 CI、五类失败语义与三平台各 `3/3` 次最低冷构建基线均已完成。最新修复运行 `29917649550` 六 Job 全绿且成功 Artifact 数为 `0`，当前进入最终 PR Review/CI 收口。
-- Issue `#19` 的实现顺序已完整执行：RED 治理合同、GREEN 治理脚本、最小分层 Workspace、三平台 CI、真实失败恢复与冷构建基线；最终合并仍需新的明确授权。
+- Issue `#19` / PR `#21` 已完成 Gate 3 实现：治理合同 `30/30`、七成员 Workspace、首版无缓存三平台 CI、五类失败语义与三平台各 `3/3` 次最低冷构建基线均已进入 `main`。
+- PR `#21` 于 `2026-07-22T12:25:59Z` Squash Merge 为 `0716ec0debcd3e059cc4ca88a072232841ca73b4`；Issue `#19` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29919596057` 六 Job 全绿且成功 Artifact 数为 `0`。
+- 当前活动任务为 Issue `#22`，只通过独立 closeout PR 持久化 merge/tree/签名/Issue/CI/Review/Ruleset 证据并修正陈旧控制面；项目所有者已授权该冻结范围的最终 Squash Merge。
 - Issue `#8` 的过渡交付为 PR `#10`；该 PR 只包含文档与验证控制面，并按项目所有者明确授权执行 Squash Merge。
 - AGOS 仍是可选外部辅助；本仓库可用原生控制面时不运行它，不在本任务中修改或优化它。
 
@@ -88,13 +92,14 @@ decision_status: gate-3-implementation-approved-control-plane-active-merge-autho
 - [x] 通过 Issue `#12` / PR `#13` 回写 merge ref、`build.md`、`err.md` 和最新控制面。
 - [x] 通过 Issue `#14` / PR `#15` 建立每 6 小时只管理 Issue 的上游监控，并完成两次真实 Actions 幂等验证。
 
-### Gate 3：纯 Rust 工作区骨架（实现活动）
+### Gate 3：纯 Rust 工作区骨架（实现完成，closeout 活动）
 
 - [x] 通过 Issue `#17` / PR `#18` 冻结分层 Workspace、Iced 隔离、平台端口、加载状态、性能诊断和三平台 CI 合同。
 - [x] 创建实现 Issue `#19`、独立分支、Session Plan、Runtime Workflow 与初始报告，并取得项目所有者实现批准。
 - [x] 先建立 `scripts/ci` 的可信 RED/GREEN 治理合同，再创建七成员 Workspace；当前合同为 `30/30`，七成员 Workspace checkpoint 已推送。
 - [x] 在同一实现 PR 中通过标准 Linux、Windows、macOS Runner、`required` 汇总、五类真实失败恢复和三平台各 `3/3` 次无缓存冷构建基线。
-- [ ] 完成 PR `#21` 最终 Head 的 Review/CI 收口，取得项目所有者新的明确 Squash Merge 授权后合并并关闭 Issue `#19`。
+- [x] PR `#21` 最终 Head 六 Job 全绿、Review 对话为 `0`，已按明确授权 Squash Merge；Issue `#19` 已关闭，合并后主干 CI 全绿。
+- [ ] 通过 Issue `#22` 的独立 closeout PR 持久化最终合并证据并清除仓库内 pending/Draft/OPEN 陈旧状态。
 - 不迁移业务功能，不创建临时 UI 事实标准；最小窗口的视觉和交互默认由 Gemini 实现或审阅。
 
 ### Gate 4：功能目录与性能基线（锁定）
@@ -126,15 +131,19 @@ decision_status: gate-3-implementation-approved-control-plane-active-merge-autho
 - Gate 2 基线 closeout 报告：`docs/reports/issue-12-gate-2-upstream-closeout.md`。
 - 已完成上游监控计划：`docs/plans/2026-07-22-issue-14-gate-2-upstream-watch.md`。
 - Gate 2 上游监控报告：`docs/reports/issue-14-gate-2-upstream-watch.md`。
-- 当前 Gate 3 规划：`docs/plans/2026-07-22-issue-17-gate-3-rust-workspace-plan.md`。
-- 当前实现 Session Plan：`docs/plans/sessions/2026-07-22-issue-19-gate-3-rust-workspace-ci.md`。
-- 当前实现 Runtime Workflow：`docs/workflows/2026-07-22-issue-19-gate-3-rust-workspace-ci-runtime.md`。
-- 当前实现报告：`docs/reports/issue-19-gate-3-rust-workspace-ci.md`。
-- 当前无缓存冷构建基线：`docs/reports/rust-ci-cold-baseline.md`。
+- Gate 3 架构规划：`docs/plans/2026-07-22-issue-17-gate-3-rust-workspace-plan.md`。
+- 已完成实现 Session Plan：`docs/plans/sessions/2026-07-22-issue-19-gate-3-rust-workspace-ci.md`。
+- 已完成实现 Runtime Workflow：`docs/workflows/2026-07-22-issue-19-gate-3-rust-workspace-ci-runtime.md`。
+- 已完成实现报告：`docs/reports/issue-19-gate-3-rust-workspace-ci.md`。
+- 无缓存冷构建基线：`docs/reports/rust-ci-cold-baseline.md`。
+- 当前 Gate 3 closeout 计划：`docs/plans/2026-07-22-issue-22-gate-3-closeout.md`。
+- 当前 Gate 3 closeout Session Plan：`docs/plans/sessions/2026-07-22-issue-22-gate-3-closeout.md`。
+- 当前 Gate 3 closeout Runtime Workflow：`docs/workflows/2026-07-22-issue-22-gate-3-closeout-runtime.md`。
+- 当前 Gate 3 closeout 报告：`docs/reports/issue-22-gate-3-closeout.md`。
 
 ## 停止条件
 
 - 上游最新正式 Release 或 `v1.2.41` 标签提交发生变化。
 - 需要修改 `upstream/` 或 `source-lock.json`，但没有新的独立 upstream-sync Issue/PR 与项目所有者批准。
-- 在 Issue `#17` 规划 PR 中需要创建 Cargo、Rust、Iced、UI、新 Actions、发布资产、功能实现或修改 AGOS。
+- 在 Issue `#22` closeout PR 中需要修改 Cargo、Rust 产品、测试、CI、upstream、Ruleset、发布资产、Gate 4 功能或 AGOS。
 - Fresh 验证失败、Ruleset 变化、Review 对话未闭环或出现未批准的一致性差异。

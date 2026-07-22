@@ -2,9 +2,9 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 22 日，PR `#18` 已将 Gate 3 规划 Squash Merge 到 `main`，合并提交为 `477d110a9b284e127af365f5278901bcfa69e093`；Issue `#17` 已关闭，Issue `#19` 已完成 Gate 3 Workspace、首版三平台 CI、五类失败语义与三平台最低冷构建基线，当前进入 PR Review/CI 收口。
+截至 2026 年 7 月 22 日，PR `#21` 已将 Gate 3 七成员 Workspace、首版无缓存三平台 CI、五类失败语义与三平台最低冷构建基线 Squash Merge 到 `main`，合并提交为 `0716ec0debcd3e059cc4ca88a072232841ca73b4`；Issue `#19` 已按 `COMPLETED` 关闭，Issue `#22` 是当前独立 closeout 任务。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照与 `upstream/source-lock.json`；Issue `#19` 已创建七成员纯 Rust Workspace、精确工具链文件、`Cargo.lock`、最小分层源码和首版无缓存三平台 `CI` Workflow。本文件当前提供十一个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供十二个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -17,11 +17,13 @@
 9. Issue `#19` 七成员 Workspace、锁文件、轻量 crate 测试和 Iced 边界验证。
 10. Issue `#19` 首版 `CI` Workflow 的 YAML、Job、权限、Action 固定 SHA、无 Cache 与 Artifact 白名单静态验证。
 11. Issue `#19` 五类真实失败语义、三平台各 `3/3` 次无缓存成功样本、最终修复全绿运行与冷构建基线报告验证。
+12. Issue `#22` Gate 3 merge/tree/Issue/CI 证据、14 条 closeout 路径和受保护表面验证。
 
 当前禁止：
 
 - 在没有新的独立 upstream-sync Issue/PR 与项目所有者批准时修改 `upstream/` 或 `source-lock.json`。
 - 把三平台各 `3/3` 次最低冷构建基线解释为已经完成 Cache、P95、七天观测或最终性能预算。
+- 在 Issue `#22` 中修改 Cargo、产品源码、测试、CI、`upstream/`、Ruleset 或 AGOS。
 - 创建 Release Workflow、安装包、签名、更新资产、临时 UI 或 WebView。
 - 修改 Ruleset、required checks 或仓库级合并开关。
 - 修改或优化外部 AGOS。
@@ -41,6 +43,101 @@ Set-StrictMode -Version Latest
 ```
 
 原生 `git`、`gh`、`python` 命令后必须立即检查 `$LASTEXITCODE`。只有一行输出时使用 `@(...)` 归一化，禁止把空 stdout 当成成功证据。
+
+## Issue #22 Gate 3 closeout 本地验证
+
+本节只验证 14 条治理/文档路径和已合并证据，不执行本地全 Workspace/Iced 重型编译：
+
+```powershell
+$baseline = '0716ec0debcd3e059cc4ca88a072232841ca73b4'
+$expectedBranch = 'codex/issue-22-gate-3-closeout'
+$expectedPaths = @(
+  'AGENTS.md',
+  'README.md',
+  'build.md',
+  'err.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md',
+  'docs/plans/sessions/2026-07-22-issue-19-gate-3-rust-workspace-ci.md',
+  'docs/workflows/2026-07-22-issue-19-gate-3-rust-workspace-ci-runtime.md',
+  'docs/reports/issue-19-gate-3-rust-workspace-ci.md',
+  'docs/reports/rust-ci-cold-baseline.md',
+  'docs/plans/2026-07-22-issue-22-gate-3-closeout.md',
+  'docs/plans/sessions/2026-07-22-issue-22-gate-3-closeout.md',
+  'docs/workflows/2026-07-22-issue-22-gate-3-closeout-runtime.md',
+  'docs/reports/issue-22-gate-3-closeout.md'
+)
+
+$branch = (git branch --show-current).Trim()
+if ($LASTEXITCODE -ne 0 -or $branch -ne $expectedBranch) {
+  throw "Issue #22 当前分支不正确：$branch"
+}
+$changed = @(
+  git -c core.quotePath=false diff --name-only $baseline
+  git -c core.quotePath=false ls-files --others --exclude-standard
+) | Where-Object { $_ } | Sort-Object -Unique
+if ($LASTEXITCODE -ne 0) { throw '读取 Issue #22 变更路径失败。' }
+$unexpected = @($changed | Where-Object { $_ -notin $expectedPaths })
+$missing = @($expectedPaths | Where-Object { $_ -notin $changed })
+if ($unexpected.Count -ne 0 -or $missing.Count -ne 0 -or $changed.Count -ne 14) {
+  throw "Issue #22 路径不一致；越界=$($unexpected -join ',')；缺失=$($missing -join ',')；总数=$($changed.Count)"
+}
+
+$protected = @($changed | Where-Object {
+  $_ -in @('Cargo.toml','Cargo.lock','rust-toolchain.toml','.github/workflows/ci.yml') -or
+  $_ -like 'apps/*' -or $_ -like 'crates/*' -or $_ -like 'scripts/ci/*' -or
+  $_ -like 'upstream/*' -or $_ -match '(?i)agos'
+})
+if ($protected.Count -ne 0) { throw "Issue #22 触及受保护路径：$($protected -join ',')" }
+
+$controlFiles = @(
+  'docs/plans/2026-07-22-issue-22-gate-3-closeout.md',
+  'docs/plans/sessions/2026-07-22-issue-22-gate-3-closeout.md',
+  'docs/workflows/2026-07-22-issue-22-gate-3-closeout-runtime.md',
+  'docs/reports/issue-22-gate-3-closeout.md'
+)
+$controlText = ($controlFiles | ForEach-Object { Get-Content -LiteralPath $_ -Raw -Encoding UTF8 }) -join "`n"
+foreach ($required in @(
+  'user-message:create-gate3-closeout-through-squash-merge-2026-07-22',
+  'sha256:16760a8ce385b171b007451a43a3acb604a7b8ffc06b098b5482b8d803115ec8',
+  '0716ec0debcd3e059cc4ca88a072232841ca73b4',
+  '4881ce609370f77181d9545474c029ab0c5d4972',
+  '29919596057'
+)) {
+  if (-not $controlText.Contains($required)) { throw "Issue #22 控制面缺少：$required" }
+}
+
+$sourceControl = @(
+  Get-Content -LiteralPath 'AGENTS.md' -Raw -Encoding UTF8
+  Get-Content -LiteralPath 'docs/plans/sessions/2026-07-22-issue-19-gate-3-rust-workspace-ci.md' -Raw -Encoding UTF8
+  Get-Content -LiteralPath 'docs/workflows/2026-07-22-issue-19-gate-3-rust-workspace-ci-runtime.md' -Raw -Encoding UTF8
+  Get-Content -LiteralPath 'docs/reports/issue-19-gate-3-rust-workspace-ci.md' -Raw -Encoding UTF8
+) -join "`n"
+if ($sourceControl -match '当前仓库尚未导入应用源码|pr-review-ready-owner-merge-authorization-pending|merge_ref:\s*pending|Issue `#19` 仍 OPEN') {
+  throw 'Issue #22 未清除来源 Gate 3 的陈旧状态。'
+}
+
+$scriptPaths = @(
+  'scripts/ci/Collect-Changes.ps1',
+  'scripts/ci/Classify-Changes.ps1',
+  'scripts/ci/Verify-RepositoryPolicy.ps1',
+  'scripts/ci/Test-CiScripts.ps1'
+)
+foreach ($scriptPath in $scriptPaths) {
+  $tokens = $null
+  $errors = $null
+  [void][System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path -LiteralPath $scriptPath), [ref]$tokens, [ref]$errors)
+  if (@($errors).Count -ne 0) { throw "$scriptPath AST 解析失败。" }
+}
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+if ($LASTEXITCODE -ne 0) { throw 'Issue #22 治理合同失败。' }
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw 'Issue #22 真实仓库政策失败。' }
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'Issue #22 工作树存在空白错误。' }
+Write-Output 'ISSUE22_GATE3_CLOSEOUT_LOCAL_VERIFY_OK'
+```
 
 ## Issue #19 Workspace 本地轻量验证
 
