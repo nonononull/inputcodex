@@ -1,13 +1,13 @@
 # Issue #22：Gate 3 合并 closeout 报告
 
-report_status: pr-open-review-ci-in-progress
+report_status: pr-review-ready-owner-merge-authorized
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/22
 source_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 source_pr_ref: https://github.com/nonononull/inputcodex/pull/21
 closeout_branch_ref: codex/issue-22-gate-3-closeout
 closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/23
-review_ref: github-pr-23-review-threads-pending
-ci_ref: github-pr-23-checks-pending
+review_ref: github-pr-23-review-threads-0
+ci_ref: https://github.com/nonononull/inputcodex/actions/runs/29921450017
 merge_ref: pending-closeout-pr
 approved_decision_ref: user-message:create-gate3-closeout-through-squash-merge-2026-07-22
 owner_merge_authorization_ref: user-message:create-gate3-closeout-through-squash-merge-2026-07-22
@@ -57,3 +57,11 @@ owner_merge_authorization_ref: user-message:create-gate3-closeout-through-squash
 - closeout PR 自身的 PR/Review/CI/merge 动态引用在创建和验证后回写。
 - 当前消息已授权最终 Squash Merge，但只有在范围、Head、CI、Review 和 Ruleset Fresh 一致时才允许执行。
 - closeout 合并后 Gate 3 完成，Gate 4 仍需新的独立规划 Issue 与项目所有者批准。
+
+## 七、PR #23 Review/CI checkpoint
+
+- 候选 Head `956214529c5ea5fce9e70f70a6907d1d147fb2e3` 的运行 `29921450017` 为 `success`。
+- `classify`、`governance`、`required` 成功；Linux、Windows、macOS 因文档-only 分类按合同跳过，成功 Artifact 数为 `0`。
+- PR `#23` 为 OPEN、非 Draft、Merge State `CLEAN`、自动合并关闭；Review 对话总数为 `0`。
+- Ruleset、维护者数量与 14 条允许路径无漂移；已记录的 owner merge authorization 继续覆盖当前范围。
+- 最终状态封口提交完成后必须等待新的 Head CI；不得把本运行替代最终 Head 验证。
