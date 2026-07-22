@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游 `v1.2.41` 审计快照导入与 closeout，正在通过独立 Issue `#14` 建立每 6 小时只管理 GitHub Issue 的上游变化监控。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游 `v1.2.41` 审计快照与每 6 小时监控，正在通过 Issue `#17` 冻结 Gate 3 纯 Rust Workspace 骨架的实施门禁。
 
 ## 项目目标
 
@@ -36,28 +36,30 @@
 - 通过 PR `#10` Squash Merge Gate 1→2 控制面过渡；合并提交为 `216d400006ad3f1dd2587ca367abb19d0191949f`，Issue `#8` 已关闭。
 - 通过 PR `#11` Squash Merge 上游 `v1.2.41` 完整只读审计快照、`source-lock.json` 与同步报告；合并提交为 `dde08b725eb2bf4add7fbcfa955f3eaf4eb1bbc6`，Issue `#9` 已关闭。
 - 通过 PR `#13` Squash Merge Gate 2 上游基线 closeout；合并提交为 `5e64015075ddf2adef4bf685f50977b47b7f72e7`，Issue `#12` 已关闭。
-- 已建立 Issue `#14` 与分支 `codex/issue-14-gate-2-upstream-watch`，实现定时/手动上游监控、只读 PR 验证和幂等 Issue 状态机。
+- 通过 PR `#15` Squash Merge 定时/手动上游监控、只读 PR 验证和幂等 Issue 状态机；合并提交为 `113476fb96623452f9a69526edabc73a57d812a1`，Issue `#14` 已关闭。
+- `main` 上两次真实运行 `29890586102` 与 `29890641799` 均成功；唯一机器状态为 Issue `#16`，重复告警数量为 `0`。
+- 已建立 Gate 3 规划 Issue `#17` 与分支 `codex/issue-17-gate-3-rust-workspace-plan`，当前只落盘 Workspace、Iced 隔离、双平台抽象、性能诊断和三平台 CI 合同。
 
 当前明确不做：
 
 - 不把已导入的上游审计快照接入产品构建或运行面，也不在非 upstream-sync Issue 中修改快照。
 - 不导入半成品参考仓库源码。
-- 不创建 Rust/Iced 工程、产品构建 CI、发布 Workflow 或 Issue `#14` 之外的 GitHub Actions。
+- 不在 Issue `#17` 规划 PR 中创建 Rust/Iced 工程、产品构建 CI、发布 Workflow 或新的 GitHub Actions。
 - 不执行功能迁移、安装包构建、发布或未经项目所有者授权的 PR 合并。
 - 不让上游 Tauri/React UI、现有注入脚本和远程推荐列表进入最终运行面。
 
-## 当前 Gate 2 边界
+## 当前 Gate 3 规划边界
 
-- Gate 2 上游基线任务 Issue `#9` / PR `#11` 与 closeout Issue `#12` / PR `#13` 均已完成；活动任务为上游监控 Issue `#14`。
+- Gate 2 的 Issue `#9/#12/#14` 与 PR `#11/#13/#15` 均已完成；上游监控 Workflow 持续运行，Issue `#16` 只由机器维护。
 - `upstream/CodexPlusPlus/` 含 `v1.2.41` 的 `277` 个只读审计文件，`upstream/source-lock.json` 记录来源、tree、逐文件 blob/SHA-256、许可证和生成工具证据。
-- 当前仍没有 Cargo Workspace、产品 Rust/Iced 源码、Release、安装包、签名或更新资产；Issue `#14` 只新增上游监控 Workflow 和治理脚本。
-- 监控只读取公开上游元数据与 `upstream/source-lock.json`，只管理带 inputcodex 精确机器标记的 Issue；不得修改 `upstream/`、实现功能、切换 Gate 3 或修改 AGOS。
+- 当前仍没有 Cargo Workspace、产品 Rust/Iced 源码、Release、安装包、签名或更新资产；Issue `#17` 只允许治理文档。
+- Gate 3 规划采用“合同先行，规划与实现拆分”；规划 PR 合并后仍需新的实现 Issue 和项目所有者明确批准，才能创建 Workspace 与首版三平台 CI。
 
 ## 下一步
 
-1. 完成 Issue `#14` 的本地验证、关联 PR、只读 PR CI、Review 根因闭环与 Squash Merge。
-2. 合并后在 `main` 手动运行两次上游监控，确认单一状态 Issue、零重复告警和最小权限。
-3. Gate 2 收口后由项目所有者另行批准 Gate 3 Session Plan；此前不创建 Cargo/Rust/Iced 产品源码。
+1. 完成 Issue `#17` 的文档验证、关联规划 PR、Review 根因闭环与现有只读 CI。
+2. 取得新的明确授权后，以 Squash Merge 收口 Gate 3 规划；本次规划批准不自动包含合并授权。
+3. 规划合并后另建 Gate 3 实现 Issue，经项目所有者批准后，才在同一实现 PR 中创建 Workspace、最小双平台窗口和首版三平台 CI。
 
 ## 项目文档
 
@@ -85,6 +87,10 @@
 - Issue `#14` Session Plan：`docs/plans/sessions/2026-07-22-issue-14-gate-2-upstream-watch.md`
 - Issue `#14` Runtime Workflow：`docs/workflows/2026-07-22-issue-14-gate-2-upstream-watch-runtime.md`
 - Issue `#14` 交付报告：`docs/reports/issue-14-gate-2-upstream-watch.md`
+- Issue `#17` Gate 3 规划：`docs/plans/2026-07-22-issue-17-gate-3-rust-workspace-plan.md`
+- Issue `#17` Session Plan：`docs/plans/sessions/2026-07-22-issue-17-gate-3-rust-workspace-plan.md`
+- Issue `#17` Runtime Workflow：`docs/workflows/2026-07-22-issue-17-gate-3-rust-workspace-plan-runtime.md`
+- Issue `#17` 规划报告：`docs/reports/issue-17-gate-3-rust-workspace-plan.md`
 - 架构决策：`docs/adr/`
 
 ## 许可证

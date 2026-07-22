@@ -2,7 +2,7 @@
 
 ## 文档状态
 
-- 状态：已批准方案，PR `#3` 已创建并等待项目所有者审阅与合并。
+- 状态：已批准单一真源；Gate 1 与 Gate 2 已完成，Gate 3 规划 Issue `#17` 活动。
 - 决策日期：2026 年 7 月 21 日。
 - 功能真源：`BigPizzaV3/CodexPlusPlus` 最新正式 Release。
 - 起始上游基线：`v1.2.41`。
@@ -10,6 +10,7 @@
 - 半成品参考：`zsr131550/CodexPlusPlus`，不作为代码底座或功能真源。
 - 跟踪 Issue：`#2`。
 - 交付 PR：`#3`。
+- 当前 Gate 3 规划：Issue `#17`，计划 `docs/plans/2026-07-22-issue-17-gate-3-rust-workspace-plan.md`。
 
 本文件是当前重构方案的单一真源。聊天记录、临时评论和旧筹备计划不能覆盖本文件中的已批准决策；方案变化必须通过新 Issue 和关联 PR 修改本文件或对应 ADR。
 
@@ -383,15 +384,15 @@ Release Notes 必须列出上游版本和提交、功能一致范围、自有修
 
 ### Gate 2：导入上游基线
 
-- 通过独立 Issue 和 PR 导入 `v1.2.41` 完整快照。
-- 创建 `source-lock.json` 和快照纯净性校验。
-- 按 `docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md` 建立每 6 小时、只管理 Issue 且不编译 Rust 的上游监控工作流。
-- Issue `#9` 是当前 Gate 2 活动任务；在新的 Session Plan 与允许写入范围获批前，只进行来源锁定、许可证和快照验证方案，不导入源码。
+- Issue `#9` / PR `#11` 已导入 `v1.2.41` 完整只读快照、`source-lock.json` 和纯净性证据。
+- Issue `#12` / PR `#13` 已完成 Gate 2 基线 closeout。
+- Issue `#14` / PR `#15` 已建立每 6 小时、只管理 Issue 且不编译 Rust 的上游监控；两次真实运行均成功，唯一机器状态为 Issue `#16`。
 
 ### Gate 3：纯 Rust 工作区骨架
 
-- 建立分层 Cargo Workspace。
-- 建立 Iced 最小双平台窗口，但不迁移业务功能。
+- Issue `#17` 只冻结实施合同，不创建 Cargo、Rust、Iced、产品 CI 或功能实现；执行入口为 `docs/plans/2026-07-22-issue-17-gate-3-rust-workspace-plan.md`。
+- 规划 PR 合并后必须新建实现 Issue 并取得项目所有者明确批准，才能建立分层 Cargo Workspace。
+- 后续实现建立 Iced 最小双平台窗口，但不迁移业务功能；视觉和交互默认由 Gemini 实现或审阅。
 - 按 `docs/plans/2026-07-21-rust-ci-offload-strategy.md` 与 `docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md` 建立标准 Linux、Windows、macOS CI、格式、测试、依赖和许可证检查；Workspace 与首版 CI 使用同一 Issue/PR，Cache 调优和 required check 分别使用后续独立 Issue/PR。
 - 建立更新源配置的仓库归属测试。
 

@@ -2,19 +2,20 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 22 日，PR `#13` 已将 Gate 2 上游基线 closeout Squash Merge 到 `main`，合并提交为 `5e64015075ddf2adef4bf685f50977b47b7f72e7`；Issue `#12` 已关闭，Issue `#14` 是当前上游监控活动任务。
+截至 2026 年 7 月 22 日，PR `#15` 已将 Gate 2 上游监控 Squash Merge 到 `main`，合并提交为 `113476fb96623452f9a69526edabc73a57d812a1`；Issue `#14` 已关闭，两次真实运行成功，Issue `#17` 是当前 Gate 3 规划任务。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照与 `upstream/source-lock.json`，但仍没有产品应用源码，因此没有 Cargo、Iced、安装包或发布构建命令。本文件当前提供四个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照与 `upstream/source-lock.json`，但仍没有产品应用源码，因此没有 Cargo、Iced、安装包或发布构建命令。本文件当前提供五个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
 3. Issue `#12` / PR `#13` closeout 合并证据验证。
 4. Issue `#14` 上游监控合同、Workflow、允许路径与合并后幂等验证。
+5. Issue `#17` Gate 3 规划文档、允许路径和禁止产品表面验证。
 
 当前禁止：
 
 - 在没有新的独立 upstream-sync Issue/PR 与项目所有者批准时修改 `upstream/` 或 `source-lock.json`。
-- 创建 `Cargo.toml`、Rust/Iced 源码、临时 UI 或 WebView。
+- 在 Issue `#17` 规划 PR 中创建 `Cargo.toml`、`Cargo.lock`、`rust-toolchain.toml`、Rust/Iced 源码、临时 UI 或 WebView。
 - 创建 `.github/workflows/upstream-watch.yml` 之外的 Workflow、Release、安装包、签名或更新资产。
 - 修改 Ruleset、required checks 或仓库级合并开关。
 - 修改或优化外部 AGOS。
@@ -33,6 +34,79 @@ Set-StrictMode -Version Latest
 ```
 
 原生 `git`、`gh`、`python` 命令后必须立即检查 `$LASTEXITCODE`。只有一行输出时使用 `@(...)` 归一化，禁止把空 stdout 当成成功证据。
+
+## Issue #17 Gate 3 规划本地验证
+
+本节只验证治理文档与禁止表面，不编译 Rust、不运行全 Workspace，也不联网写 GitHub：
+
+```powershell
+$baseline = '113476fb96623452f9a69526edabc73a57d812a1'
+$allowedPaths = @(
+  'README.md',
+  'build.md',
+  'err.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/2026-07-21-architecture-governance.md',
+  'docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md',
+  'docs/plans/2026-07-22-issue-17-gate-3-rust-workspace-plan.md',
+  'docs/plans/sessions/2026-07-22-issue-17-gate-3-rust-workspace-plan.md',
+  'docs/workflows/2026-07-22-issue-17-gate-3-rust-workspace-plan-runtime.md',
+  'docs/reports/issue-17-gate-3-rust-workspace-plan.md',
+  'docs/reports/issue-14-gate-2-upstream-watch.md'
+)
+
+$changedPaths = @(
+  git -c core.quotePath=false diff --name-only "$baseline...HEAD"
+  git -c core.quotePath=false diff --name-only
+  git -c core.quotePath=false ls-files --others --exclude-standard
+) | Where-Object { $_ } | Sort-Object -Unique
+
+$unexpectedPaths = @($changedPaths | Where-Object { $_ -notin $allowedPaths })
+if ($unexpectedPaths.Count -ne 0) {
+  throw "Issue #17 存在越界路径：$($unexpectedPaths -join ', ')"
+}
+if ($changedPaths.Count -ne 11) {
+  throw "Issue #17 完整规划应修改 11 条路径，实际为 $($changedPaths.Count)。"
+}
+
+$requiredFiles = @(
+  'docs/plans/2026-07-22-issue-17-gate-3-rust-workspace-plan.md',
+  'docs/plans/sessions/2026-07-22-issue-17-gate-3-rust-workspace-plan.md',
+  'docs/workflows/2026-07-22-issue-17-gate-3-rust-workspace-plan-runtime.md',
+  'docs/reports/issue-17-gate-3-rust-workspace-plan.md'
+)
+foreach ($path in $requiredFiles) {
+  if (-not (Test-Path -LiteralPath $path)) { throw "缺少 Gate 3 规划文件：$path" }
+}
+
+$productCargoFiles = @(
+  Get-ChildItem -LiteralPath . -Recurse -File -Include 'Cargo.toml','Cargo.lock','rust-toolchain.toml' |
+  Where-Object { $_.FullName -notmatch '[\\/]upstream[\\/]' -and $_.FullName -notmatch '[\\/]\.git[\\/]' }
+)
+$productRustFiles = @(
+  Get-ChildItem -LiteralPath . -Recurse -File -Filter '*.rs' |
+  Where-Object { $_.FullName -notmatch '[\\/]upstream[\\/]' -and $_.FullName -notmatch '[\\/]\.git[\\/]' }
+)
+if ($productCargoFiles.Count -ne 0 -or $productRustFiles.Count -ne 0) {
+  throw 'Issue #17 规划阶段禁止出现产品 Cargo 或 Rust 文件。'
+}
+
+$workflowNames = @(Get-ChildItem -LiteralPath '.github/workflows' -File | Select-Object -ExpandProperty Name)
+if ($workflowNames.Count -ne 1 -or $workflowNames[0] -ne 'upstream-watch.yml') {
+  throw 'Issue #17 规划阶段不得新增或替换产品 Workflow。'
+}
+
+$master = Get-Content -LiteralPath 'docs/plans/PROJECT-MASTER-PLAN.md' -Raw
+if ($master -notmatch 'active_task: 2026-07-22-issue-17-gate-3-rust-workspace-plan' -or
+    $master -notmatch 'tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/17' -or
+    $master -notmatch 'gate-3-planning-approved-implementation-locked') {
+  throw 'Master Plan 未正确指向 Issue #17。'
+}
+
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'Issue #17 工作树 diff 检查失败。' }
+Write-Output 'ISSUE17_GATE3_PLANNING_LOCAL_VERIFY_OK'
+```
 
 ## Issue #14 上游监控本地验证
 
@@ -692,11 +766,11 @@ git status --short --branch
 
 ## 外部 AGOS 使用边界
 
-本任务使用项目原生控制面，不运行 AGOS。AGOS 不属于环境要求或合并门禁；不得在本过渡 PR 中修改、修复或优化其 Registry、脚本、规则、Workflow 或 Vault。
+Issue `#17` 曾以 report-only 运行 AGOS 默认入口，结果为 `needs-input/unregistered`；已按项目规则记录并绕过。AGOS 不属于环境要求或合并门禁；不得在本规划 PR 中修改、修复或优化其 Registry、脚本、规则、Workflow 或 Vault。
 
 ## 后续维护规则
 
 - 后续任何 `upstream/` 或 `source-lock.json` 修改必须使用新的 upstream-sync Issue/PR，并更新锁定文件、同步报告和本节快照验证常量。
-- Issue `#14` 合并并完成两次真实运行后，Gate 2 才能收口；不得把本任务授权扩展为 Gate 3 或功能实现授权。
+- Issue `#14` / PR `#15` 与两次真实运行已经完成；Issue `#17` 只批准 Gate 3 规划，不得扩展为 Workspace、CI、UI 或功能实现授权。
 - 建立首个 Cargo Workspace 时再加入 Rust 构建、测试、基准和三平台 CI 命令。
 - 任何错误先查 `err.md`，重复问题优先复用既有根因与处理方案。
