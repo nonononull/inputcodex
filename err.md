@@ -269,6 +269,204 @@
 - 验证：PR `#18` 远端文件为批准的 `11` 条文档路径，Actions 分支运行列表为 `[]`，Review 对话为 `0`，自动合并关闭；`0 Checks` 没有被解释为 CI 通过。
 - 关联：GitHub Issue `#17`、PR `#18`、`.github/workflows/upstream-watch.yml`。
 
+### 2026-07-22：Rust 官方分发响应被 PowerShell 识别为字节数组
+
+- 环境：Issue `#19` 创建前使用 `Invoke-WebRequest` Fresh 核验 `channel-rust-1.97.1.toml` 与其 SHA-256 文件。
+- 现象：校验脚本直接对 `Content` 调用 `.Trim()`，PowerShell 报告 `System.Byte` 不包含该方法；远端与仓库均无写入。
+- 根因：该环境对 `static.rust-lang.org` 响应返回 `byte[]`，脚本错误假设所有 `Invoke-WebRequest.Content` 都是字符串。
+- 处理：在解析日期、版本和 checksum 前，若响应为 `byte[]` 则使用 `System.Text.Encoding.UTF8.GetString` 显式解码；不降低来源、版本或 checksum 校验。
+- 验证：Fresh 读取返回 Rust `1.97.1 (8bab26f4f 2026-07-14)`、channel 日期 `2026-07-16` 和可复核 manifest SHA-256；Issue `#19` 随后使用同一证据创建。
+- 关联：GitHub Issue `#19`。
+
+### 2026-07-22：治理 RED 夹具误用反斜杠转义导致 PowerShell AST 失败
+
+- 环境：Issue `#19` 创建 `scripts/ci/Test-CiScripts.ps1`，在 Cargo 夹具字符串中写入双引号和多行 Workspace 成员。
+- 现象：首次 AST 解析返回 `5` 个错误，首个错误位于 Workspace 成员替换表达式，包含 `Missing ')' in method call` 与 `Unexpected token`；测试尚未进入治理入口缺失检查。
+- 根因：PowerShell 字符串不使用反斜杠转义双引号，三处 `\"` 沿用了其他语言的转义语义，导致解析器提前结束字符串；这属于测试夹具语法错误，不能作为治理 RED 证据。
+- 处理：简单字符串改用 PowerShell 反引号转义；多行替换值改为字符串数组后使用 `[Environment]::NewLine` 连接，避免在单个表达式中混合多层引号。
+- 验证：同一 AST 命令返回 `AST_ERROR_COUNT=0`；随后实际执行返回 `RED_EXIT_CODE=10`，唯一标记 `CI_CONTRACT_RED_MISSING_IMPLEMENTATION` 出现 `1` 次，并精确列出两个尚不存在的治理实现脚本。
+- 关联：GitHub Issue `#19`、`scripts/ci/Test-CiScripts.ps1`。
+
+### 2026-07-22：治理 GREEN 自测的空集合形状与 TOML 表依赖绕过
+
+- 环境：Issue `#19` 在 RED checkpoint 后实现 `Classify-Changes.ps1` 与 `Verify-RepositoryPolicy.ps1`，运行同一 `Test-CiScripts.ps1` 合同转 GREEN。
+- 现象：首轮在测试启动层报告 `$missingImplementations.Count` 不存在；修复后空 diff 因参数绑定拒绝空数组失败；基础 `21/21` 通过后，新增的 TOML 表形式 Tauri 别名和逆向依赖测试稳定失败，政策脚本错误返回 `ok=true`。
+- 根因：PowerShell 零结果管道被解包为 `$null`，数组参数默认不接受空集合；依赖解析器只识别 `[dependencies]` 中的内联赋值，没有识别 `[dependencies.alias]`、目标条件或 workspace 表形式，并且没有读取表内 `package` 的真实 crate 名称。
+- 处理：按 `err.md` 既有结论用 `@(...)` 固定零结果形状，为空 diff 参数增加 `[AllowEmptyCollection()]`；依赖解析器在进入 TOML 表 section 时登记别名，并用表内 `package` 更新真实依赖名，随后统一执行分层和禁止依赖检查。
+- 验证：三份 PowerShell 文件 AST 均为 `0` 个错误；最终 `Test-CiScripts.ps1` 输出 `CI_CONTRACT_GREEN passed=23` 并以退出码 `0` 完成，Tauri 表别名与依赖方向表形式均通过拒绝测试。
+- 关联：GitHub Issue `#19`、`scripts/ci/Test-CiScripts.ps1`、`scripts/ci/Verify-RepositoryPolicy.ps1`。
+
+### 2026-07-22：治理依赖白名单比批准架构箭头更宽
+
+- 环境：Issue `#19` 首个治理 GREEN checkpoint 完成后，进入 Phase 4 前重新对照 `docs/plans/2026-07-22-issue-17-gate-3-rust-workspace-plan.md` 的依赖图。
+- 现象：合法夹具与政策白名单允许 infrastructure/platform/presentation 直接依赖 domain，并允许 parity 依赖 platform；这四条关系在首个 `23/23` 合同中没有被拒绝。
+- 根因：治理实现依据早期实现草图补全允许关系，没有逐箭头对账已批准架构真源；测试又从同一宽松映射生成合法夹具，形成“实现与测试同时同意错误”的闭环。
+- 处理：先把合法夹具改为批准箭头，再新增四条独立拒绝测试，稳定复现旧政策错误返回 `ok=true`；随后只收紧 `allowedLocalDependencies`，不改动其他政策。
+- 验证：完整合同输出 `CI_CONTRACT_GREEN passed=27`；四条越过批准箭头的依赖均返回 `DEPENDENCY_DIRECTION_INVALID`，且当前仍无产品 Workspace 或 CI Workflow。
+- 关联：GitHub Issue `#19`、`scripts/ci/Test-CiScripts.ps1`、`scripts/ci/Verify-RepositoryPolicy.ps1`、Gate 3 架构规划。
+
+### 2026-07-22：Issue 评论双引号 here-string 把 Markdown 反引号解析为 Unicode 转义
+
+- 环境：治理 GREEN 提交已通过 SSH 普通 push，准备使用 PowerShell 双引号 here-string 组装 GitHub Issue 评论正文。
+- 现象：命令在解析阶段对 Markdown `` `upstream/` `` 报告无效 Unicode 转义，尚未执行远端读取、fetch 或评论写入。
+- 根因：PowerShell 双引号字符串把反引号视为转义前缀，`` `u `` 被解释为 Unicode escape 起点；Markdown 行内代码不应直接放入需要插值的双引号 here-string。
+- 处理：改用单引号 here-string 保存评论模板，以 `{0}`、`{1}`、`{2}` 占位后再执行 `-f` 格式化，只插入经过本地固定的 commit/tree/parent。
+- 验证：远端 GREEN commit、tree、parent 精确对账，Issue 评论 `5043682396` 创建成功，本地远端跟踪引用与远端 Head 一致。
+- 关联：GitHub Issue `#19`、提交 `be9259f55b32014e918113936e6e6ddfdd16765f`。
+
+### 2026-07-22：多包 Cargo RED 未固定 offline 导致 registry 刷新超时
+
+- 环境：Issue `#19` 已加入 Iced 可选依赖和七成员清单，准备对 infrastructure/platform/parity/presentation 逐包取得编译 RED。
+- 现象：串行 `cargo test` 在 180 秒后超时且没有输出，留下两个低 CPU Cargo 进程；`Cargo.lock` 仍是旧的本地两包内容，无法把该失败解释为缺失 API。
+- 根因：命令没有固定 `--offline`，Cargo 在进入目标包编译前尝试刷新/解析 registry；PowerShell 又先收集子命令全部输出，超时前没有把阶段信息打印出来。网络阶段与代码 RED 混在一起。
+- 处理：核对 PID、进程名和启动时间后只终止本次两个 Cargo 进程；后续轻量 RED 固定 `--offline`，逐包检查退出码与缺失符号标记。
+- 验证：离线命令在数秒内分别返回退出码 `101`，根因精确为缺失 `UnconfiguredLoadPort`、`SystemPlatform`、`ErrorSignature`、`PresentationState`；实现后四包测试全部通过。
+- 关联：GitHub Issue `#19`、Runtime Workflow Phase 4。
+
+### 2026-07-22：Rust 1.97.1 minimal 本地安装超时并占用 rustup 锁
+
+- 环境：Workspace 源码完成后尝试安装精确 `1.97.1` minimal、`rustfmt` 与 `clippy`，只计划运行 domain 轻量验证。
+- 现象：安装命令超过 5 分钟仍无完成输出；后续 `rustup toolchain list` 和版本检查也被安装锁阻塞，进程列表显示本次 `rustup` 与经 rustup shim 启动的 `rustc` 残留。
+- 根因：本机 Rust 分发下载/安装路径未在本次时间预算内完成；没有证据表明工具链、组件或仓库代码本身损坏。继续重试会违背“本地轻验 + GitHub Actions 全量验证”的资源合同。
+- 处理：按 PID、进程名和启动时间只终止本次 rustup/rustc；Fresh 查询确认已安装列表仍只有 stable 与 `1.93.1`。不删除任何既有工具链，不改 `rust-toolchain.toml`，不降级为浮动 stable。
+- 验证：残留进程数为 `0`；使用现有 `1.93.1`、`--ignore-rust-version` 与 `--offline` 完成 metadata、fmt、domain check 和六个轻量 crate 测试；精确 `1.97.1` 证据明确转交 CI。
+- 关联：GitHub Issue `#19`、`build.md`、`rust-toolchain.toml`。
+
+### 2026-07-22：Cargo 的 Locking 数量不等于 Cargo.lock 总记录数
+
+- 环境：Workspace 最终门禁根据 `cargo generate-lockfile` 输出的 `Locking 329 packages` 记录依赖数量，并用正则统计 `Cargo.lock` 的 `[[package]]`。
+- 现象：Fresh 门禁得到 `LOCK_PACKAGE_COUNT=336`，与文档中的 `329` 不一致；Iced checksum 和所有代码测试仍通过。
+- 根因：Cargo 日志中的 `329` 表示本次锁定的 registry 外部包，不包含没有 `source` 字段的 `7` 个 Workspace 包；文档把外部依赖数误写为锁文件总记录数。
+- 处理：按每个 package block 是否包含 `source =` 分组，不修改锁文件；总记录固定写为 `336`，同时分别记录外部包 `329` 和 Workspace 包 `7`。
+- 验证：七个无 source 包名精确为 inputcodex 的七个成员；`336 = 329 + 7`，Iced `0.14.0` checksum 仍与批准值一致。
+- 关联：GitHub Issue `#19`、`Cargo.lock`、`build.md`、任务报告。
+
+### 2026-07-22：离线 Cargo feature tree 需要未缓存的 crate 源包
+
+- 环境：`Cargo.lock` 已生成并锁定 `336` 个 package 记录（`329` 个外部包 + `7` 个 Workspace 包），尝试用 `cargo tree --offline -e features -p inputcodex-desktop` 本地确认 Iced feature 图，不执行编译。
+- 现象：命令退出 `101`，报告缺少未缓存的 `arrayref v0.3.9`，若继续需要联网下载 registry 源包。
+- 根因：`cargo tree -e features` 需要读取依赖包的 feature 元数据，只有锁文件和稀疏索引不足以覆盖尚未下载的 crate；失败不代表根清单 feature 或 Iced checksum 错误。
+- 处理：不为本地取证下载并展开完整 `329` 个外部包源图；本地核对根 `Cargo.toml` 显式 feature、`default-features = false`、锁文件 Iced 版本/checksum和仓库政策，真实 feature 解析与 desktop 编译交给 GitHub Actions。
+- 验证：本地清单只声明 `wgpu`、`thread-pool`、`x11`、`wayland`，未声明 `webgl`、`web-colors`、`crisp`；治理脚本对真实仓库返回 `ok=true`，轻量 crate 全部通过。
+- 关联：GitHub Issue `#19`、`Cargo.toml`、`Cargo.lock`、首版三平台 CI 待办。
+
+### 2026-07-22：单行 Git 输出被 PowerShell 解包后索引成字符
+
+- 环境：Issue `#19` 为变更收集器补充真实临时 Git 仓库合同，收集器实现落盘后首次运行完整 `Test-CiScripts.ps1`。
+- 现象：既有 `27` 项通过，新增测试在解析 `git rev-parse HEAD` 时报告 `System.Char` 不存在 `Trim`；收集器进程尚未启动。
+- 根因：`Invoke-TestGit` 用 `@($output)` 返回单行结果时，PowerShell 函数输出管道仍会把单元素数组解包为字符串；调用方的 `[0]` 因而取得首字符，不是首行字符串。
+- 处理：只把测试辅助函数返回改为一元逗号 `,$output`，强制把结果数组作为单个管道对象返回；不修改收集器合同或生产实现。
+- 验证：最小形状实验显示旧返回类型为 `System.String`、索引类型为 `System.Char`，新返回类型为 `System.Object[]`、索引类型为 `System.String`；四份脚本 AST 为 `0` 个错误，完整合同输出 `CI_CONTRACT_GREEN passed=29`。
+- 关联：GitHub Issue `#19`、`scripts/ci/Test-CiScripts.ps1`、`scripts/ci/Collect-Changes.ps1`。
+
+### 2026-07-22：Workspace 许可证元数据与仓库 LICENSE 冲突
+
+- 环境：Issue `#19` 创建首版 `governance` Job 时，对账“许可证检查”职责、根 `Cargo.toml`、README 和仓库 `LICENSE`。
+- 现象：根 `LICENSE` 与 README 明确声明 GNU AGPLv3，但 Workspace 元数据及实现报告误写为 `MIT`；Iced 依赖本身才是 MIT。
+- 根因：创建 Workspace 时把 Iced 的依赖许可证错误沿用为本项目包许可证，既有政策脚本又没有根许可证一致性测试，导致错误元数据通过 `27/27` 旧合同。
+- 处理：将 Workspace 元数据改为 SPDX `AGPL-3.0-only`，成员继续继承 workspace license；治理合同拒绝任何非 `AGPL-3.0-only` 值，并保留 Iced `0.14.0` 的 MIT 审计结论。
+- 验证：许可证 RED 先稳定复现旧政策对错误值返回 `ok=true`；修复后完整合同输出 `CI_CONTRACT_GREEN passed=29`，真实仓库政策返回 `ok=true`、`violation_count=0`，CI YAML/静态合同通过。
+- 关联：GitHub Issue `#19`、`Cargo.toml`、`LICENSE`、`README.md`、`scripts/ci/Test-CiScripts.ps1`、`scripts/ci/Verify-RepositoryPolicy.ps1`。
+
+### 2026-07-22：计划中的 GitHub Action 固定版本在实现前发生时效漂移
+
+- 环境：Issue `#19` 首版 CI 本地静态通过后执行提交前供应链安全复核，向 GitHub 官方 API Fresh 查询 `actions/checkout` 与 `actions/upload-artifact`。
+- 现象：早期计划记录的 checkout `v4.2.2` 与 upload-artifact `v4.6.2` 均使用 Node 20；截至 2026-07-22，两仓最新稳定 Release 已是 `v7.0.1`，Action 运行时均为 Node 24。
+- 根因：Action 固定提交是在规划阶段核验，执行阶段跨过了官方大版本更新；不可变 SHA 能防篡改，但不会自动解决依赖时效漂移。
+- 处理：改用官方最新稳定补丁的不可变提交：checkout `3d3c42e5aac5ba805825da76410c181273ba90b1`、upload-artifact `043fb46d1a93c77aae656e7c1c64a875d1fc6a0a`；仍禁止浮动 major tag。
+- 验证：官方 Release API 分别返回 `v7.0.1`（checkout 发布于 `2026-07-20`，upload-artifact 发布于 `2026-04-10`）；tag ref 与上述 40 位提交一致，两份 `action.yml` 均声明 `using: node24`。
+- 关联：GitHub Issue `#19`、`.github/workflows/ci.yml`、`build.md`。
+
+### 2026-07-22：Windows PowerShell 5.1 错误读取 UTF-8 无 BOM 合同脚本
+
+- 环境：变更收集器 RED 复现时误用 `powershell -File scripts/ci/Test-CiScripts.ps1`，而项目构建入口明确要求 PowerShell 7 `pwsh`。
+- 现象：脚本在进入测试前出现大量 `Unexpected token`、乱码字符串和 `&` 解析错误，看似源文件语法损坏。
+- 根因：Windows PowerShell 5.1 默认没有按 UTF-8 读取无 BOM 中文脚本；同一文件由当前 `pwsh 7.6.3` AST 解析为 `0` 个错误。
+- 处理：不修改脚本编码和语法；统一通过 `pwsh -NoProfile -File` 或当前 PowerShell 7 可执行文件运行合同，Windows PowerShell 5.1 不属于支持入口。
+- 验证：PowerShell 7 fresh 执行完整合同输出 `CI_CONTRACT_GREEN passed=29`，证明最初解析错误只来自错误宿主。
+- 关联：GitHub Issue `#19`、`build.md`、`scripts/ci/Test-CiScripts.ps1`。
+
+### 2026-07-22：PowerShell 未引用 Git tree rev-spec 污染 Issue checkpoint 证据
+
+- 环境：CI checkpoint `f3107dd16705dd3a25bc8c3acc540a3c6c6990a3` 普通 push 后，脚本组装 Issue `#19` 评论中的 commit/tree/parent。
+- 现象：未引用的 `git rev-parse HEAD^{tree}` 被 PowerShell 参数编组误解析，Git 报告 ambiguous argument，评论中的 tree 被写成 `System.Object[]`；首次复核又对 `gh --jq '.body'` 的多行数组直接使用 `-notmatch`，产生一次误判。
+- 根因：包含花括号的 Git rev-spec 没有作为单个字符串传递；同时忘记 `gh` 多行 stdout 会被 PowerShell 枚举为字符串数组。
+- 处理：改为 `git rev-parse 'HEAD^{tree}'`，每条原生命令后立即检查退出码；复核前用 `@(...) -join "`n"` 固定评论正文形状，并通过 `gh issue comment --edit-last` 原位修正，不新增错误评论。
+- 验证：Issue 评论 `5044470597` 当前精确包含 tree `1dc0caf58276d67731600a157adc4abd1a1f9e6e`，且不再包含 `System.Object[]`；commit 与 parent 也分别匹配本地提交和其单一父提交。
+- 关联：GitHub Issue `#19`、评论 `5044470597`、提交 `f3107dd16705dd3a25bc8c3acc540a3c6c6990a3`。
+
+### 2026-07-22：GitHub Actions job 级 env 不支持 runner.temp 上下文
+
+- 环境：Draft PR `#21` 创建后，首版 `.github/workflows/ci.yml` 尝试在 `linux-quality`、`windows`、`macos` 的 job 级 `env` 设置 `${{ runner.temp }}/inputcodex-ci/...`。
+- 现象：运行 `29910132968` 与 `29910379208` 均为工作流文件级 failure、Job 数为 `0`；GitHub UI 注解报告第 `233`、`330`、`414` 行 `Unrecognized named-value: 'runner'`。
+- 根因：`runner` 上下文只在 Runner 已分配后的步骤上下文可用，不能在 `jobs.<job_id>.env` 的调度前求值阶段使用；本地通用 YAML 解析无法验证 GitHub 上下文可用性。
+- 处理：删除三个 job 级 `REPORT_DIR`，在各平台 Job 的第一个 PowerShell 步骤用 `$env:RUNNER_TEMP` 计算目录并写入 `$env:GITHUB_ENV`；Artifact 仍只引用步骤上下文允许的 `${{ runner.temp }}` 白名单路径。
+- 验证：本地 PyYAML 门禁新增遍历所有 job 级 `env` 并拒绝 `runner.*`；修复后必须通过新普通提交触发 PR synchronize 运行，不 rerun 旧失败。
+- 关联：GitHub PR `#21`、运行 `29910132968`、运行 `29910379208`、`.github/workflows/ci.yml`、`build.md`。
+
+### 2026-07-22：Linux Clippy 拒绝仅在 Windows/macOS 使用的无条件导入
+
+- 环境：job-context 修复提交 `4a20c1e878283b2007f79bfa7f22aa8ebbee9f59` 触发 PR `#21` 运行 `29910847062`，首次真正执行 Rust `1.97.1` 三平台 Job。
+- 现象：classify、governance、Windows、macOS 成功；Linux `cargo clippy --workspace --all-targets --locked -- -D warnings` 报告 `crates/inputcodex-platform/tests/platform_contract.rs` 的 `PlatformKind` 未使用，`required` 随之失败并上传白名单 Artifact。
+- 根因：`PlatformKind` 被无条件导入，但只出现在 `#[cfg(target_os = "windows")]` 与 `#[cfg(target_os = "macos")]` 断言；Linux 只执行 `ErrorKind::Unsupported` 分支。
+- 处理：给 `PlatformKind` 导入增加与断言一致的 Windows/macOS cfg，`PlatformPort` 保持全平台导入；不添加 `allow(unused_imports)`，不降低 `-D warnings`。
+- 验证：Windows 本地 `cargo clippy -p inputcodex-platform --tests -- -D warnings` 通过，但不能复现 Linux 条件编译；最终验证必须来自后续普通提交触发的新 Linux Runner，禁止 rerun 旧失败。
+- 关联：GitHub PR `#21`、运行 `29910847062`、Job `88893173619`、`crates/inputcodex-platform/tests/platform_contract.rs`。
+
+### 2026-07-22：冷构建指标只写 Step Summary 造成完成后取证缺口
+
+- 环境：Draft PR `#21` 的首个全绿运行 `29911337652` 已在 Linux、Windows、macOS 生成 `metrics.txt`，但摘要步骤只把内容追加到 `$GITHUB_STEP_SUMMARY`。
+- 现象：Actions Job 时间与关键步骤秒数可由 API 复核，Check Run `output.summary` 却为空；成功运行不上传 Artifact，因此首样本的精确 stopwatch 秒数与 Windows/macOS 二进制字节数无法在完成后复取。
+- 根因：Workflow 没有把 metrics 输出到普通控制台日志；Step Summary 是面向运行页面的展示面，不是本项目可依赖的持久机器取证接口。
+- 处理：先在 `Test-CiScripts.ps1` 新增“三个平台必须读取 metrics、写控制台、写 Step Summary”合同，旧 Workflow 稳定 RED 为读取数量 `0`、期望 `3`；再只修改三个摘要步骤，把同一 `$metrics` 同时送入 `Write-Output` 与 `$GITHUB_STEP_SUMMARY`。
+- 验证：PowerShell 7 完整合同恢复为 `CI_CONTRACT_GREEN passed=30`；首样本缺失值保持未知，不伪造。远端可复取性由后续普通提交触发的新运行验证。
+- 关联：GitHub PR `#21`、运行 `29911337652`、`.github/workflows/ci.yml`、`scripts/ci/Test-CiScripts.ps1`、`docs/reports/rust-ci-cold-baseline.md`。
+
+### 2026-07-22：受控 TypeScript 探针验证治理与 required 失败语义
+
+- 环境：Gate 3 Phase 7 通过普通提交 `a0252bffd90deaa9f583c6386837f3fd087101ea` 临时新增 `apps/inputcodex-desktop/src/governance_failure.ts`，不修改治理脚本、Job 条件或 `required` 汇总逻辑。
+- 现象：运行 `29913582488` 的 governance 失败，classify、Linux、Windows、macOS 成功，`required` 随后失败；整体运行结论为 failure。
+- 根因：真实仓库政策返回唯一违规 `SCRIPT_LANGUAGE_FORBIDDEN`，路径精确指向临时 `.ts` 探针；`required.json` 的唯一 failures 项为 `governance=failure`。
+- 处理：使用后续普通提交删除探针，不加白名单、不改扩展名规则、不跳过 governance，也不 rerun 旧失败。
+- 验证：失败 Artifact 只有 governance 的 `contract.log`/`policy.json` 与 required 的 `required.json`；三平台成功且成功平台不上传 Artifact。修复提交 `d474c47f5ab02ef9ed9804b208a739823819c9e9` 触发运行 `29914029406`，六 Job 全绿且 Artifact 数为 `0`。
+- 关联：GitHub PR `#21`、失败运行 `29913582488`、修复运行 `29914029406`、Artifact `governance-failure-29913582488-1`、Artifact `required-failure-29913582488-1`。
+
+### 2026-07-22：受控单行格式差异验证 rustfmt 与 required 失败语义
+
+- 环境：普通提交 `743da60b81161f2c18d6db9b0a1b03f976b04cea` 只把 `DiagnosticCode::new` 改成语法有效但不符合 rustfmt 的空格形状；没有加入 `rustfmt::skip`、allow 或 Workflow 例外。
+- 现象：运行 `29914734781` 的 linux-quality 在“检查 Rust 格式”步骤退出 `1`，后续 Linux Clippy/测试被正常跳过；governance、Windows、macOS 成功，`required` 失败。
+- 根因：`fmt.log` 精确显示 `pub const fn new( value: &'static str)->Self{` 应恢复为 `pub const fn new(value: &'static str) -> Self {`；`required.json` 的唯一 failures 项为 `linux-quality=failure`。
+- 处理：恢复唯一格式行，不修改逻辑。首次本地命令复用了根 `err.md` 已记录的 rustup 固定工具链超时结论，精确终止本次残留 PID 后，直接使用已安装 `1.93.1` 工具链二进制证明“fmt RED、domain check GREEN”，未下载或编译 Iced Workspace。
+- 验证：失败 Artifact 白名单只有 `fmt.log`、`toolchain.txt` 与 `required.json`；修复提交 `71be06abea3baf7f1689e01504f7ea203f026797` 触发运行 `29915134906`，六 Job 全绿且成功 Artifact 数为 `0`。
+- 关联：GitHub PR `#21`、失败运行 `29914734781`、修复运行 `29915134906`、Artifact `linux-quality-failure-29914734781-1`、Artifact `required-failure-29914734781-1`。
+
+### 2026-07-22：全平台 compile_error 探针验证通用 Rust 编译失败语义
+
+- 环境：普通提交 `a77d8789c79fc853956833dec693e53122b5bd55` 在 `inputcodex-domain` 顶层加入 `compile_error!("GATE3_GENERIC_RUST_COMPILE_FAILURE")`；rustfmt 仍通过，治理规则、Runner 与构建命令未修改。
+- 现象：运行 `29915537702` 的 Linux 在 Workspace Clippy、Windows/macOS 在桌面冷构建步骤失败；classify 与 governance 成功，`required` 失败。
+- 根因：三个平台日志均包含同一稳定标记和 `could not compile inputcodex-domain`；`required.json` 同时列出 `linux-quality=failure`、`windows=failure`、`macos=failure`。
+- 处理：删除唯一 `compile_error!` 探针，不加入 cfg、allow、跳过或平台特例，也不 rerun 旧失败。
+- 验证：失败 Artifact 分别只包含 Clippy/desktop build、toolchain、metrics 与 `required.json` 白名单文件，不含 `target/`；修复提交 `3ca5866a88319a6b8bfccd87ead2cfab98070397` 触发运行 `29915879951`，六 Job 全绿且成功 Artifact 数为 `0`。
+- 关联：GitHub PR `#21`、失败运行 `29915537702`、修复运行 `29915879951`、Artifacts `linux-quality-failure-29915537702-1`、`windows-failure-29915537702-1`、`macos-failure-29915537702-1`、`required-failure-29915537702-1`。
+
+### 2026-07-22：Windows cfg compile_error 探针验证平台隔离失败语义
+
+- 环境：普通提交 `d69915ad60c6ca89a59d824543792d3147092217` 只在 platform crate 顶层加入 `#[cfg(target_os = "windows")] compile_error!("GATE3_WINDOWS_CONDITIONAL_COMPILE_FAILURE")`；平台接口与 Workflow 未修改。
+- 现象：运行 `29916309635` 的 Windows 在桌面冷构建步骤失败，Linux、macOS、classify、governance 成功，`required` 失败。
+- 根因：Windows 日志包含唯一稳定标记并报告 `inputcodex-platform` 编译失败；`required.json` 的唯一 failures 项为 `windows=failure`。
+- 处理：删除唯一 Windows cfg 探针，不新增平台分支、不修改 `PlatformKind` 语义，也不 rerun 旧失败。
+- 验证：失败 Artifact 只有 Windows `desktop-build.log`/`toolchain.txt` 与 `required.json`，不含 `target/`；修复提交 `436f7273b589f0dcca0c574aae611bf919d687f8` 触发运行 `29916670916`，六 Job 全绿且成功 Artifact 数为 `0`。
+- 关联：GitHub PR `#21`、失败运行 `29916309635`、修复运行 `29916670916`、Artifact `windows-failure-29916309635-1`、Artifact `required-failure-29916309635-1`。
+
+### 2026-07-22：macOS cfg compile_error 探针验证平台隔离失败语义
+
+- 环境：普通提交 `01a99167c3729c2e1269b289433ee310a4ebaa8c` 只在 platform crate 顶层加入 `#[cfg(target_os = "macos")] compile_error!("GATE3_MACOS_CONDITIONAL_COMPILE_FAILURE")`；Windows 本地 platform check 保持通过。
+- 现象：运行 `29917061781` 的 macOS 在桌面冷构建步骤失败，Linux、Windows、classify、governance 成功，`required` 失败。
+- 根因：macOS 日志包含唯一稳定标记并报告 `inputcodex-platform` 编译失败；`required.json` 的唯一 failures 项为 `macos=failure`。
+- 处理：删除唯一 macOS cfg 探针，不新增平台分支、不修改 `PlatformKind` 语义，也不 rerun 旧失败。
+- 验证：失败 Artifact 只有 macOS `desktop-build.log`/`toolchain.txt` 与 `required.json`，不含 `target/`；修复提交 `41c0cc2924a45f3d8e2a5fe2e47e2e254a9dbb3b` 触发运行 `29917649550`，六 Job 全绿且成功 Artifact 数为 `0`。
+- 关联：GitHub PR `#21`、失败运行 `29917061781`、修复运行 `29917649550`、Artifact `macos-failure-29917061781-1`、Artifact `required-failure-29917061781-1`。
+
 ## 记录模板
 
 ```text

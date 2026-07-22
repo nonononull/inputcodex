@@ -135,7 +135,7 @@ Issue `#17` 的规划 PR 不包含 Workspace。规划合并后，Gate 3 的 Work
 
 **回滚：** 通过新 PR 删除或禁用 `.github/workflows/upstream-monitor.yml`，保留历史 Issue 和报告；不得 Force Push、删除 `main` 或自动回退 `source-lock.json`。
 
-## Task 2：Gate 3 Workspace 与首版三平台 CI（Issue #17 规划合并后）
+## Task 2：Gate 3 Workspace 与首版三平台 CI（Issue #19 实现活动）
 
 **接口：**
 
@@ -144,11 +144,11 @@ Issue `#17` 的规划 PR 不包含 Workspace。规划合并后，Gate 3 的 Work
 - CI 工作流名称固定为 `CI`，稳定汇总 Job 名称固定为 `required`，GitHub 检查上下文预期为 `CI / required`。
 - 重型路径固定包括根 Cargo 文件、`rust-toolchain.toml`、`apps/**`、`crates/**`、`xtask/**`、`benchmarks/**`、`parity/**`、`scripts/ci/**` 和 `.github/workflows/ci.yml`。
 
-- [ ] **步骤 1：建立 Gate 3 实现 Issue、工具链决策和执行控制面**
+- [x] **步骤 1：建立 Gate 3 实现 Issue、工具链决策和执行控制面**
 
-  只有 Issue `#17` 的规划 PR Squash Merge 且项目所有者重新批准后，才能创建实现 Issue。候选为 Rust `1.97.1` 与 Iced `0.14.0`；实现开工前必须 Fresh 复核版本、Iced checksum、许可证、MSRV、平台系统依赖和本地资源预算。禁止使用浮动 `stable`、通配依赖版本或未锁定依赖。Iced 展示文件由 Gemini 负责实现或审阅，当前执行者不得自行确立视觉设计系统。
+  Issue `#17` / PR `#18` 已完成规划 Squash Merge；项目所有者以 `user-message:approve-gate-3-implementation-2026-07-22` 批准实现。Issue `#19`、分支 `codex/issue-19-gate-3-rust-workspace-ci`、Session Plan、Runtime Workflow 和初始报告已建立。Fresh 候选固定为 Rust `1.97.1` 与 Iced `0.14.0`，Iced checksum、MIT、MSRV `1.88` 和未撤回状态已复核；本地资源边界仍为轻量定向验证。禁止使用浮动 `stable`、通配依赖版本或未锁定依赖。Iced 展示文件由 Gemini 负责实现或审阅，当前执行者不得自行确立视觉设计系统。
 
-- [ ] **步骤 2：先写分层和治理失败测试**
+- [x] **步骤 2：先写分层和治理失败测试**
 
   `scripts/ci/Test-CiScripts.ps1` 先构造违规夹具，证明以下情况会失败：领域层依赖 Iced、生产目录出现 `.ts/.js` 业务文件、Cargo 依赖包含 WebView/Tauri、更新地址不属于 `nonononull/inputcodex`、`upstream/` 被加入 Workspace、广告或遥测依赖进入生产清单。
 
@@ -156,19 +156,19 @@ Issue `#17` 的规划 PR 不包含 Workspace。规划合并后，Gate 3 的 Work
 
   预期：治理脚本尚未实现时退出非零。
 
-- [ ] **步骤 3：创建最小分层 Workspace**
+- [x] **步骤 3：创建最小分层 Workspace**
 
   每个 crate 只建立其职责所需的最小公开接口和单元测试，不迁移上游功能、不引入数据库、网络、更新、广告、注入或远程推荐实现。`apps/inputcodex-desktop` 只组装依赖并打开最小 Iced 窗口；窗口之外不确立视觉规范。
 
-- [ ] **步骤 4：补齐所有子项目构建与排错文档**
+- [x] **步骤 4：补齐所有子项目构建与排错文档**
 
   每个可单独构建的 app/crate 根目录创建 `build.md` 与 `err.md`，写明定向 `cargo check -p 包名`、单元测试和已知平台依赖；根 `build.md` 记录本地轻量命令与云端全量命令的责任边界。
 
-- [ ] **步骤 5：实现分类与仓库治理脚本**
+- [x] **步骤 5：实现分类与仓库治理脚本**
 
   `Classify-Changes.ps1` 只解析 Git diff 路径并输出布尔结果，不执行构建；`Verify-RepositoryPolicy.ps1` 解析 Workspace 清单和受控源目录。脚本必须对路径穿越、空 diff、重命名和删除场景有确定结果。
 
-- [ ] **步骤 6：运行本地轻量验证**
+- [x] **步骤 6：运行本地轻量验证**
 
   运行：
 
@@ -181,7 +181,7 @@ Issue `#17` 的规划 PR 不包含 Workspace。规划合并后，Gate 3 的 Work
 
   预期：本地只验证最小领域包和 CI 脚本，不运行全 Workspace 或双平台安装包构建。
 
-- [ ] **步骤 7：创建无缓存首版 CI**
+- [x] **步骤 7：创建无缓存首版 CI**
 
   `.github/workflows/ci.yml` 只监听目标为 `main` 的 `pull_request`、`main` 的 `push` 与 `workflow_dispatch`，避免同一功能分支同时由 push 和 PR 重复跑全量。顶层权限固定 `contents: read`；并发键按 PR 编号或 ref 隔离，`cancel-in-progress: true`。
 
@@ -198,17 +198,21 @@ Issue `#17` 的规划 PR 不包含 Workspace。规划合并后，Gate 3 的 Work
 
   PR 的非重型文档改动可以跳过三个编译 Job，但 `governance` 与 `required` 必须始终运行；`main` push 与手动运行必须执行全部 Job。首版禁止 Cargo Cache，用真实冷构建数据填写 `docs/reports/rust-ci-cold-baseline.md`。
 
-- [ ] **步骤 8：约束 Artifact 与日志**
+- [x] **步骤 8：约束 Artifact 与日志**
 
   成功运行默认不上传 Artifact。失败时只允许上传测试报告、治理报告和经过脱敏的命令日志，`retention-days: 7`；上传路径必须显式列举，禁止 `target/`、Cargo registry、Git 凭据、环境转储和整个工作区。
 
-- [ ] **步骤 9：验证真实三平台失败语义**
+- [x] **步骤 9：验证真实三平台失败语义**
 
   在 PR 分支使用普通提交分别制造并修复格式、Rust 编译、Windows 条件编译、macOS 条件编译和治理违规；每次保留失败运行链接，再用后续普通提交修复。禁止 Force Push 或只靠重新运行掩盖失败。
 
-- [ ] **步骤 10：记录冷构建基线并提交 PR**
+  已完成：治理 `29913582488`→`29914029406`、rustfmt `29914734781`→`29915134906`、通用 Rust `29915537702`→`29915879951`、Windows `29916309635`→`29916670916`、macOS `29917061781`→`29917649550`；五类失败均先确定根因，再由普通修复提交恢复全绿。
+
+- [x] **步骤 10：记录冷构建基线并提交 PR**
 
   报告记录每个 Job 至少三次无缓存运行的耗时、排队时间、成功/失败原因和所选超时依据；PR 必须等待 Linux、Windows、macOS 和 `required` 成功，所有 Review 对话完成根因闭环后才能 Squash Merge。
+
+  已完成：运行 `29911337652`、`29913139948`、`29914029406` 使三平台各达到 `3/3`；Job 执行时间中位数为 Linux `133` 秒、Windows `212` 秒、macOS `96` 秒，报告保留无 Cache 边界。Draft PR `#21` 已创建，最终 Squash Merge 仍需新的项目所有者授权。
 
   提交信息：`build: 建立 Rust 工作区与三平台 CI`
 

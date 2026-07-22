@@ -1,0 +1,19 @@
+[package]
+name = "inputcodex-presentation"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[features]
+default = []
+iced-runtime = ["dep:iced"]
+
+[dependencies]
+inputcodex-application.workspace = true
+iced = { workspace = true, optional = true }
+
+[lints]
+workspace = true

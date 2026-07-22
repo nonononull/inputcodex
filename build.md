@@ -2,21 +2,27 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 22 日，PR `#15` 已将 Gate 2 上游监控 Squash Merge 到 `main`，合并提交为 `113476fb96623452f9a69526edabc73a57d812a1`；Issue `#14` 已关闭，两次真实运行成功，Issue `#17` 是当前 Gate 3 规划任务。
+截至 2026 年 7 月 22 日，PR `#18` 已将 Gate 3 规划 Squash Merge 到 `main`，合并提交为 `477d110a9b284e127af365f5278901bcfa69e093`；Issue `#17` 已关闭，Issue `#19` 已完成 Gate 3 Workspace、首版三平台 CI、五类失败语义与三平台最低冷构建基线，当前进入 PR Review/CI 收口。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照与 `upstream/source-lock.json`，但仍没有产品应用源码，因此没有 Cargo、Iced、安装包或发布构建命令。本文件当前提供五个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照与 `upstream/source-lock.json`；Issue `#19` 已创建七成员纯 Rust Workspace、精确工具链文件、`Cargo.lock`、最小分层源码和首版无缓存三平台 `CI` Workflow。本文件当前提供十一个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
 3. Issue `#12` / PR `#13` closeout 合并证据验证。
 4. Issue `#14` 上游监控合同、Workflow、允许路径与合并后幂等验证。
 5. Issue `#17` Gate 3 规划文档、允许路径和禁止产品表面验证。
+6. Issue `#19` Gate 3 实现控制面、批准引用、范围哈希和 RED 前置门禁验证。
+7. Issue `#19` 治理 RED 合同的 AST、非零退出码、稳定标记和实现缺失根因验证。
+8. Issue `#19` 路径分类、许可证、仓库政策与冷构建日志脚本的 `30/30` GREEN 合同验证。
+9. Issue `#19` 七成员 Workspace、锁文件、轻量 crate 测试和 Iced 边界验证。
+10. Issue `#19` 首版 `CI` Workflow 的 YAML、Job、权限、Action 固定 SHA、无 Cache 与 Artifact 白名单静态验证。
+11. Issue `#19` 五类真实失败语义、三平台各 `3/3` 次无缓存成功样本、最终修复全绿运行与冷构建基线报告验证。
 
 当前禁止：
 
 - 在没有新的独立 upstream-sync Issue/PR 与项目所有者批准时修改 `upstream/` 或 `source-lock.json`。
-- 在 Issue `#17` 规划 PR 中创建 `Cargo.toml`、`Cargo.lock`、`rust-toolchain.toml`、Rust/Iced 源码、临时 UI 或 WebView。
-- 创建 `.github/workflows/upstream-watch.yml` 之外的 Workflow、Release、安装包、签名或更新资产。
+- 把三平台各 `3/3` 次最低冷构建基线解释为已经完成 Cache、P95、七天观测或最终性能预算。
+- 创建 Release Workflow、安装包、签名、更新资产、临时 UI 或 WebView。
 - 修改 Ruleset、required checks 或仓库级合并开关。
 - 修改或优化外部 AGOS。
 
@@ -26,6 +32,7 @@
 - Git。
 - GitHub CLI `gh`，已登录 `nonononull`。
 - Python 3 与 PyYAML。
+- Rust `1.97.1`、`rustfmt` 与 `clippy`；本机缺少精确工具链时不得改成浮动 `stable`。
 
 ```powershell
 Set-Location 'C:\Users\dashuai\Documents\inputcodex'
@@ -34,6 +41,219 @@ Set-StrictMode -Version Latest
 ```
 
 原生 `git`、`gh`、`python` 命令后必须立即检查 `$LASTEXITCODE`。只有一行输出时使用 `@(...)` 归一化，禁止把空 stdout 当成成功证据。
+
+## Issue #19 Workspace 本地轻量验证
+
+标准命令由 Rust `1.97.1` 执行：
+
+```powershell
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+cargo metadata --locked --no-deps --format-version 1
+cargo fmt --all -- --check
+cargo check --locked -p inputcodex-domain
+cargo test --locked -p inputcodex-domain
+```
+
+本机在 2026 年 7 月 22 日安装 `1.97.1` minimal 工具链超过 5 分钟仍无完成证据，已终止残留进程并按项目 CI 卸载合同绕过。以下命令只证明轻量代码可在现有 `1.93.1` 上运行，不构成精确工具链或桌面编译证据：
+
+```powershell
+$env:RUSTUP_TOOLCHAIN = '1.93.1-x86_64-pc-windows-msvc'
+cargo metadata --locked --offline --no-deps --format-version 1
+cargo fmt --all -- --check
+cargo check --locked --offline --ignore-rust-version -p inputcodex-domain
+cargo test --locked --offline --ignore-rust-version `
+  -p inputcodex-domain `
+  -p inputcodex-application `
+  -p inputcodex-infrastructure `
+  -p inputcodex-platform `
+  -p inputcodex-parity `
+  -p inputcodex-presentation `
+  --no-default-features
+```
+
+`Cargo.lock` 当前包含 `336` 个 package 记录，其中 `329` 个有 registry source、`7` 个是本 Workspace 包；Workspace 许可证必须与根 `LICENSE` 一致并固定为 `AGPL-3.0-only`。Iced 必须为 `0.14.0` 且 checksum 为 `000e01026c93ba643f8357a3db3ada0e6555265a377f6f9291c472f6dd701fb3`；根清单只允许 Iced feature `wgpu`、`thread-pool`、`x11`、`wayland`，禁止 `webgl`、`web-colors`、`crisp` 和默认 features。
+
+`cargo check -p inputcodex-desktop`、Iced 运行时、Windows/macOS 编译与全 Workspace 测试只在标准 GitHub-hosted runners 执行；不得为本地取证下载并编译完整 `329` 个外部包依赖图。
+
+## Issue #19 治理 RED checkpoint 验证
+
+当前 RED 合同只允许新增 `scripts/ci/Test-CiScripts.ps1` 与任务控制面；执行必须因为 `Classify-Changes.ps1` 和 `Verify-RepositoryPolicy.ps1` 尚不存在而失败：
+
+```powershell
+$testScript = (Resolve-Path -LiteralPath 'scripts/ci/Test-CiScripts.ps1').Path
+$tokens = $null
+$parseErrors = $null
+[void][System.Management.Automation.Language.Parser]::ParseFile(
+  $testScript,
+  [ref]$tokens,
+  [ref]$parseErrors
+)
+if ($parseErrors.Count -ne 0) {
+  throw "RED 合同存在 AST 错误：$($parseErrors.Message -join '; ')"
+}
+
+if ((Test-Path -LiteralPath 'scripts/ci/Classify-Changes.ps1') -or
+    (Test-Path -LiteralPath 'scripts/ci/Verify-RepositoryPolicy.ps1')) {
+  throw 'RED checkpoint 不允许治理实现提前存在。'
+}
+
+$powerShellExecutable = (Get-Process -Id $PID).Path
+$output = @(& $powerShellExecutable -NoLogo -NoProfile -File $testScript 2>&1)
+$redExitCode = $LASTEXITCODE
+$redText = ($output | ForEach-Object { $_.ToString() }) -join "`n"
+$redMarkerCount = ([regex]::Matches($redText, 'CI_CONTRACT_RED_MISSING_IMPLEMENTATION')).Count
+if ($redExitCode -ne 10 -or $redMarkerCount -ne 1) {
+  throw "RED 根因不可信；exit=$redExitCode；marker_count=$redMarkerCount；output=$redText"
+}
+```
+
+验证通过时必须同时得到 `AST_ERROR_COUNT=0`、`RED_EXIT_CODE=10` 和 `RED_MARKER_COUNT=1`；这不是 GREEN，也不得解释为治理能力已经实现。
+
+## Issue #19 治理 GREEN checkpoint 验证
+
+```powershell
+$scripts = @(
+  'scripts/ci/Test-CiScripts.ps1',
+  'scripts/ci/Collect-Changes.ps1',
+  'scripts/ci/Classify-Changes.ps1',
+  'scripts/ci/Verify-RepositoryPolicy.ps1'
+)
+foreach ($scriptPath in $scripts) {
+  $tokens = $null
+  $parseErrors = $null
+  [void][System.Management.Automation.Language.Parser]::ParseFile(
+    (Resolve-Path -LiteralPath $scriptPath).Path,
+    [ref]$tokens,
+    [ref]$parseErrors
+  )
+  if ($parseErrors.Count -ne 0) {
+    throw "$scriptPath 存在 AST 错误：$($parseErrors.Message -join '; ')"
+  }
+}
+
+$powerShellExecutable = (Get-Process -Id $PID).Path
+$output = @(& $powerShellExecutable -NoLogo -NoProfile -File 'scripts/ci/Test-CiScripts.ps1' 2>&1)
+$greenExitCode = $LASTEXITCODE
+$greenText = ($output | ForEach-Object { $_.ToString() }) -join "`n"
+if ($greenExitCode -ne 0 -or $greenText -notmatch 'CI_CONTRACT_GREEN passed=30') {
+  throw "治理合同未 GREEN；exit=$greenExitCode；output=$greenText"
+}
+
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'GREEN checkpoint 存在空白错误。' }
+```
+
+GREEN 夹具覆盖空 diff、文档/重型路径、删除/重命名、真实 Git NUL 变更收集、非法路径、`AGPL-3.0-only` Workspace 许可证、Iced 越层、`upstream/` Workspace 越界、生产脚本语言、Tauri/WebView、广告/遥测、非本仓更新源、精确依赖方向、TOML 内联与表形式的依赖声明，以及三平台冷构建指标同时写入控制台日志与 Step Summary。
+
+## Issue #19 首版 CI 本地静态验证
+
+本地只验证 Workflow 语法和治理合同，不执行三平台 Rust 全量编译：
+
+```powershell
+python -c "from pathlib import Path; import yaml; data=yaml.safe_load(Path('.github/workflows/ci.yml').read_text(encoding='utf-8')); jobs=data['jobs']; invalid=[name for name,job in jobs.items() if any('runner.' in str(value) for value in (job.get('env') or {}).values())]; assert not invalid, f'runner context is unavailable in job-level env: {invalid}'; print('CI_YAML_PARSE_OK')"
+if ($LASTEXITCODE -ne 0) { throw 'CI Workflow YAML 解析失败。' }
+
+$workflow = Get-Content -LiteralPath '.github/workflows/ci.yml' -Raw -Encoding utf8
+$requiredFragments = @(
+  'name: CI',
+  'contents: read',
+  'cancel-in-progress: true',
+  'classify:',
+  'governance:',
+  'linux-quality:',
+  'windows:',
+  'macos:',
+  'required:',
+  'if: ${{ always() }}',
+  'retention-days: 7',
+  'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1',
+  'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
+)
+foreach ($fragment in $requiredFragments) {
+  if (-not $workflow.Contains($fragment)) { throw "CI Workflow 缺少合同片段：$fragment" }
+}
+if ($workflow -match '(?im)uses:\s*[^\s@]+@(?![0-9a-f]{40}\b)') {
+  throw "CI Workflow 存在未固定到 40 位 SHA 的 Action：$($Matches[0])"
+}
+if ($workflow -match '(?im)cache|target/\*\*|target\\\*\*') {
+  throw "首版 CI 出现禁止的 Cache 或 target Artifact：$($Matches[0])"
+}
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+if ($LASTEXITCODE -ne 0) { throw 'CI 治理合同失败。' }
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw '真实仓库政策失败。' }
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'CI checkpoint 存在空白错误。' }
+```
+
+真实 Rust `1.97.1`、Linux Clippy/Workspace 测试、Windows/macOS 桌面构建、`required` 汇总和失败 Artifact 只能由关联 PR 的标准 GitHub-hosted runners 证明。CI 稳定前不得把 `CI / required` 写入 `main` Ruleset。
+
+截至本轮收口，治理、rustfmt、通用 Rust 编译、Windows 条件编译、macOS 条件编译五类失败语义均已通过普通提交完成 RED→GREEN；最新修复运行 `29917649550` 六 Job 全绿且成功 Artifact 数为 `0`。Linux、Windows、macOS 已分别接受运行 `29911337652`、`29913139948`、`29914029406`，达到各 `3/3` 次无缓存成功样本；完整测量与失败运行引用见 `docs/reports/rust-ci-cold-baseline.md`。
+
+正式合并前仍需在最终 PR Head 上重新确认所有适用 Job 成功、Review 对话为 `0`、自动合并关闭、Ruleset 无漂移，并取得项目所有者新的明确 Squash Merge 授权。
+
+## Issue #19 Gate 3 实现控制面 checkpoint 验证
+
+本节只用于 RED 批次开始前的首个命名 checkpoint；创建治理脚本或 Cargo Workspace 后，必须按 Runtime Workflow 更新为对应批次验证：
+
+```powershell
+$baseline = '477d110a9b284e127af365f5278901bcfa69e093'
+$expectedBranch = 'codex/issue-19-gate-3-rust-workspace-ci'
+$expectedPaths = @(
+  'README.md',
+  'build.md',
+  'err.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md',
+  'docs/plans/sessions/2026-07-22-issue-19-gate-3-rust-workspace-ci.md',
+  'docs/workflows/2026-07-22-issue-19-gate-3-rust-workspace-ci-runtime.md',
+  'docs/reports/issue-17-gate-3-rust-workspace-plan.md',
+  'docs/reports/issue-19-gate-3-rust-workspace-ci.md'
+)
+
+$branch = (git branch --show-current).Trim()
+if ($LASTEXITCODE -ne 0 -or $branch -ne $expectedBranch) {
+  throw "Issue #19 当前分支不正确：$branch"
+}
+$trackedChanges = @(git diff --name-only $baseline | Where-Object { $_ })
+if ($LASTEXITCODE -ne 0) { throw '读取 Issue #19 已跟踪变更路径失败。' }
+$untrackedChanges = @(git ls-files --others --exclude-standard | Where-Object { $_ })
+if ($LASTEXITCODE -ne 0) { throw '读取 Issue #19 未跟踪变更路径失败。' }
+$changedPaths = @(($trackedChanges + $untrackedChanges) | Sort-Object -Unique)
+$unexpected = @($changedPaths | Where-Object { $_ -notin $expectedPaths })
+$missing = @($expectedPaths | Where-Object { $_ -notin $changedPaths })
+if ($unexpected.Count -ne 0 -or $missing.Count -ne 0) {
+  throw "Issue #19 checkpoint 路径不一致；越界=$($unexpected -join ',')；缺失=$($missing -join ',')"
+}
+
+$requiredFiles = @(
+  'docs/plans/sessions/2026-07-22-issue-19-gate-3-rust-workspace-ci.md',
+  'docs/workflows/2026-07-22-issue-19-gate-3-rust-workspace-ci-runtime.md',
+  'docs/reports/issue-19-gate-3-rust-workspace-ci.md'
+)
+foreach ($path in $requiredFiles) {
+  if (-not (Test-Path -LiteralPath $path)) { throw "缺少 Issue #19 控制面文件：$path" }
+}
+
+$controlText = ($requiredFiles | ForEach-Object { Get-Content -LiteralPath $_ -Raw }) -join "`n"
+if ($controlText -notmatch 'user-message:approve-gate-3-implementation-2026-07-22' -or
+    $controlText -notmatch 'sha256:2e101627480012d57d6d0472a08cfbe03fc401f6ac74ef3ae1e6a42929ed61ba' -or
+    $controlText -match '__ISSUE_|pending-self-reference') {
+  throw 'Issue #19 控制面缺少批准/范围证据或仍含占位符。'
+}
+
+$productCargo = @(Get-ChildItem -Recurse -File -Include Cargo.toml,Cargo.lock,rust-toolchain.toml -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch '[\\/]upstream[\\/]' })
+$productRust = @(Get-ChildItem -Recurse -File -Filter '*.rs' -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch '[\\/]upstream[\\/]' })
+if ($productCargo.Count -ne 0 -or $productRust.Count -ne 0 -or (Test-Path -LiteralPath '.github/workflows/ci.yml')) {
+  throw '控制面 checkpoint 禁止提前出现产品 Cargo/Rust 或 CI Workflow。'
+}
+
+git diff --check $baseline
+if ($LASTEXITCODE -ne 0) { throw 'Issue #19 checkpoint diff 检查失败。' }
+Write-Output 'ISSUE19_GATE3_CONTROL_PLANE_VERIFY_OK'
+```
 
 ## Issue #17 Gate 3 规划本地验证
 

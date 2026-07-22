@@ -1,0 +1,15 @@
+[package]
+name = "inputcodex-parity"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+inputcodex-domain.workspace = true
+inputcodex-application.workspace = true
+
+[lints]
+workspace = true
