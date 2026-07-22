@@ -160,12 +160,12 @@ docs/workflows/2026-07-22-issue-26-gate-4-feature-catalog-runtime.md
 
 **文件：** `catalog.rs`、`contract.rs`、`fixture.rs`、`validation.rs`、`lib.rs`。
 
-- [ ] 实现无 I/O 的 ID/domain/status 值类型和反序列化。
-- [ ] 实现 feature、contract、fixture manifest 的最小数据结构。
-- [ ] 实现仓库相对路径规范化，拒绝绝对路径、反斜杠、控制字符和 `..`。
-- [ ] 实现唯一性、引用完整性、同 feature fixture 归属和平台字段验证。
-- [ ] 实现结构化敏感键和值检查，测试通过后再扩展规则。
-- [ ] 运行 parity crate 定向测试并形成 GREEN checkpoint。
+- [x] 实现无 I/O 的 ID/domain/status 值类型和反序列化。
+- [x] 实现 feature、contract、fixture manifest 的最小数据结构。
+- [x] 实现仓库相对路径规范化，拒绝绝对路径、反斜杠、控制字符和 `..`。
+- [x] 实现唯一性、引用完整性、同 feature fixture 归属和平台字段验证。
+- [x] 实现结构化敏感键和值检查，测试通过后再扩展规则。
+- [ ] 运行 parity crate 定向测试并形成 GREEN checkpoint；当前测试、格式、check 与 Clippy 已通过，等待普通提交、push 和 Issue 回写。
 
 ### Task 3：上游入口清单与功能目录
 

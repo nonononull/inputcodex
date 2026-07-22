@@ -26,7 +26,8 @@ pr_ref: pending
 - 项目所有者已通过 Issue 评论 `5047650154` 批准实施。
 - Phase 2 已完成依赖锁定和三组 RED 定向编译：`catalog_schema`、`contract_schema`、`fixture_safety` 均以退出码 `1` 失败在 crate root 缺少预期 API；`E0282` 为未解析返回类型的级联诊断，未发现依赖、YAML、fixture 或测试语法错误。
 - RED checkpoint 已以普通提交 `532fba89d882862438345788ed2fdd73faede507` 推送，并回写 Issue 评论 `5048079257`。
-- 生产实现仍为零；RED 门禁已经满足，当前进入 Phase 3 最小 Rust schema GREEN。
+- Phase 3 最小 Rust schema 已实现并通过 `25` 个 schema 测试与 `1` 个既有回归；格式、离线库 check 和 Clippy 严格警告门禁均通过。
+- 当前只允许形成普通 GREEN checkpoint 并回写 Issue；`catalog_repository` 与 `parity/` 数据面仍未进入 Phase 4。
 
 ## Phase 0：startup-baseline
 
@@ -69,6 +70,13 @@ pr_ref: pending
 4. 在 `validation.rs` 实现唯一性、引用、来源路径、fixture 归属和验证错误聚合。
 5. `lib.rs` 只公开稳定验证 API；不得加入 Iced、platform、presentation 或产品调用。
 6. 定向测试 GREEN 后形成普通 checkpoint；任何绕过失败测试的实现必须回退。
+
+执行结果：
+
+- 初始 GREEN 后补充了唯一性、稳定 ID、合同身份、fixture 悬空/跨 feature 引用、必填段、双平台字段与 POSIX 私人路径 RED；每条行为均先观察正确失败再实现。
+- 表驱动 `id` 删除片段曾因缩进错误零命中；修正后增加目标片段存在性自检，并写入 parity crate `err.md`。
+- 四个定向测试目标共 `26` 个测试通过；`fmt --check`、离线库 `check` 与 `clippy -- -D warnings` 均通过。
+- GREEN checkpoint 尚未提交；提交前仍需核对 36 条范围、产品/CI/upstream/AGOS 零差异和 `git diff --check`。
 
 ## Phase 4：source-index-and-feature-catalog
 

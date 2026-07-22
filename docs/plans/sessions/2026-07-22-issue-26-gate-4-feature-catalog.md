@@ -1,7 +1,7 @@
 # Session Plan：Issue #26 Gate 4 功能目录、行为合同与脱敏夹具
 
 schema_version: inputcodex.session-plan.v1
-session_status: red-schema-checkpoint-complete-rust-schema-green-in-progress
+session_status: rust-schema-green-verified-checkpoint-pending
 task_id: 2026-07-22-issue-26-gate-4-feature-catalog
 work_class: major
 task_summary: 建立上游 v1.2.41 功能目录、行为合同、脱敏夹具和纯 Rust parity 验证器，不迁移产品功能，不进行性能优化。
@@ -21,6 +21,7 @@ report_ref: docs/reports/issue-26-gate-4-feature-catalog.md
 pr_ref: pending
 control_plane_checkpoint_ref: commit:80e0ddbb734496e95e89fe57fd89ddb668c8c276;issuecomment:5047590347
 red_checkpoint_ref: commit:532fba89d882862438345788ed2fdd73faede507;issuecomment:5048079257
+green_checkpoint_ref: pending-current-green-checkpoint
 scope_hash: sha256:e8a1cbccfc3f0026e90fcb49264de5ea69980fa2e1faa03b520d9bedaf61e772
 scope_path_count: 36
 control_plane_path_count: 8
@@ -235,3 +236,12 @@ GitHub 全量验证:
 - `cargo +1.93.1-x86_64-pc-windows-msvc test --ignore-rust-version -p inputcodex-parity --test fixture_safety --no-run`：退出码 `1`；`E0432` 明确指出 `ValidationCode`、`parse_fixture_manifest`、`validate_fixture_manifest` 和 `validate_fixture_payload` 尚不存在。
 - 三组输出中的 `E0282` 都是目标函数未解析后返回类型未知的级联诊断，不是独立根因；没有 YAML 拼写、fixture 内容、依赖下载或测试语法错误。
 - `catalog_repository` 已先写入，但按计划保留到 source-index 与目录数据建立后运行，不能用空仓库数据伪造 RED。
+
+## 十二、Rust schema GREEN 执行证据
+
+- 补充 RED 先后证明：唯一性/身份/fixture 引用验证码缺失时产生 `E0599`；缺少 macOS 字段、schema version 和行为合同必填段时解析器会错误接受；Windows 上 POSIX `/Users/...` 私人路径会漏检。
+- 表驱动合同测试曾因 `id` 删除片段缩进错误而零命中；根因已记录到 `crates/inputcodex-parity/err.md`，三组表驱动测试现均先断言目标片段存在。
+- `catalog.rs`、`contract.rs`、`fixture.rs` 与 `validation.rs` 已实现纯内存 schema、稳定状态、六加载状态、必填段、唯一性、引用、双平台字段、相对路径和结构化敏感值验证；`lib.rs` 只公开验证 API。
+- `cargo +1.93.1-x86_64-pc-windows-msvc test --locked --offline --ignore-rust-version -p inputcodex-parity --test catalog_schema --test contract_schema --test fixture_safety --test error_signature`：退出码 `0`，共 `26` 个测试通过，其中 schema 测试 `25` 个、既有错误签名回归 `1` 个。
+- `cargo +1.93.1-x86_64-pc-windows-msvc fmt --package inputcodex-parity -- --check`、库级离线 `check` 与 `clippy -- -D warnings` 均退出码 `0`。
+- `catalog_repository` 继续延后到 source-index 与目录数据建立后运行；当前不得用缺失数据面伪造仓库级 GREEN。

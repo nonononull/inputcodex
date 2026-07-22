@@ -1,7 +1,25 @@
 #![forbid(unsafe_code)]
 
+mod catalog;
+mod contract;
+mod fixture;
+mod validation;
+
 use inputcodex_application::{ApplicationError, ErrorKind};
 use inputcodex_domain::DiagnosticCode;
+
+pub use catalog::{
+    FeatureCatalog, FeatureDefinition, FeatureDomain, ParityStatus, parse_feature_catalog,
+    validate_feature_catalog,
+};
+pub use contract::{
+    BehaviorContract, ContractCatalog, LoadingContract, LoadingState, parse_contract_catalog,
+    validate_contract_catalog,
+};
+pub use fixture::{
+    FixtureManifest, parse_fixture_manifest, validate_fixture_manifest, validate_fixture_payload,
+};
+pub use validation::{ValidationCode, ValidationIssue};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ErrorSignature {
