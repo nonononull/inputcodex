@@ -483,6 +483,22 @@
 - 处理：先以 ``$prBodyLines -join "`n"`` 还原单个正文字符串，完成精确旧段落匹配后，通过 `--body-file -` 从标准输入提交。
 - 验证：PR `#21` 正文成功回写 merge commit `0716ec0...` 与主干运行 `29919596057`，Issue `#19` closeout 评论成功创建；没有修改 Git 历史或仓库文件。
 
+## 2026-07-22：Codex Windows 沙箱偶发拒绝启动 PowerShell 子进程
+
+- 环境：Issue `#24` Gate 4 规划阶段，在工作树干净且命令本身只读或为已批准分支操作时，通过 Codex Desktop `shell_command` 启动 PowerShell。
+- 现象：部分复合命令和 `git switch -c` 在仓库命令执行前失败，返回 `CreateProcessAsUserW failed: 5 (拒绝访问。)`；相同 Git、`rg`、`Get-Content` 或 `gh` 参数没有产生仓库级错误输出。
+- 根因：失败发生在 Windows 沙箱 runner 创建 PowerShell 进程阶段，而不是 Git、GitHub API 或项目脚本内部；同一命令经受控 `require_escalated` 执行后立即成功，证明仓库状态和命令参数有效。
+- 处理：优先拆短复合命令；仍被沙箱启动器拒绝时，使用带明确用途和窄前缀的受控提权重试。禁止因此修改仓库远端、Git 配置、权限规则或项目脚本。
+- 验证：`git status`、Gate 4 上游 Fresh 查询、Issue `#24` 创建、分支 `codex/issue-24-gate-4-planning` 创建和范围哈希计算均在相同参数下成功；`main` 历史未改写，受保护表面未发生变化。
+
+## 2026-07-22：临时 apply_patch 包装器指向受限 WindowsApps 可执行文件
+
+- 环境：Issue `#24` 按工程规则使用 `apply_patch` 修改规划文档；`Get-Command apply_patch` 指向 `C:\Users\dashuai\.codex\tmp\arg0\...\apply_patch.bat`。
+- 现象：无论在默认沙箱还是受控提权环境执行临时包装器，都在应用补丁前返回 `Access is denied.`。
+- 根因：包装器直接调用 `C:\Program Files\WindowsApps\OpenAI.Codex_26.715.7063.0_x64__2p2nqsd0c76g0\app\resources\codex.exe`，当前子进程没有执行该打包路径的权限；另外 apply-patch 模式要求补丁作为 UTF-8 参数传入，不能通过 stdin 管道传递。
+- 处理：不改写包装器或系统 ACL，改用已安装的 `C:\Users\dashuai\AppData\Roaming\npm\codex.ps1 --codex-run-as-apply-patch <PATCH>`；补丁先统一为 LF，并按文件拆分以避开 Windows 命令行长度限制。
+- 验证：AGENTS、README、build 与 Master Plan 均通过同一 apply-patch 引擎成功更新；失败补丁没有产生部分写入，Master Plan 中一次仓库名拼写错误也被补丁上下文安全拒绝。
+
 ## 记录模板
 
 ```text
