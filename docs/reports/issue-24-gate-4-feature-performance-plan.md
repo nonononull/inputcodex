@@ -1,11 +1,11 @@
 # Issue #24：Gate 4 功能目录与性能基线规划报告
 
-report_status: pr-open-review-ci-pending
+report_status: candidate-review-ci-green-final-seal-pending
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/24
 branch_ref: codex/issue-24-gate-4-planning
 pr_ref: https://github.com/nonononull/inputcodex/pull/25
-review_ref: github-pr-25-review-pending
-ci_ref: github-pr-25-ci-pending
+review_ref: github-pr-25-review-comments-0
+ci_ref: https://github.com/nonononull/inputcodex/actions/runs/29925622836
 merge_ref: not-authorized
 approved_decision_ref: user-message:approve-gate-4-option-2-planning-2026-07-22
 scope_hash: sha256:72e2f5d774080a55599297909600aba3c9f58470710b71db25d3690a61a1cbf0
@@ -54,7 +54,7 @@ scope_hash: sha256:72e2f5d774080a55599297909600aba3c9f58470710b71db25d3690a61a1c
 
 ## 七、待完成
 
-- 等待 PR `#25` 最终 Head 的 Review 与 CI，并回写确定引用。
+- 提交候选 Review/CI checkpoint，等待新的最终 Head CI。
 - 在 Review/CI 完成后停止，等待项目所有者新的 Squash Merge 授权。
 
 ## 八、本地验证结果
@@ -72,3 +72,13 @@ scope_hash: sha256:72e2f5d774080a55599297909600aba3c9f58470710b71db25d3690a61a1c
 - 已普通推送 `codex/issue-24-gate-4-planning`，未使用 Force Push。
 - 非 Draft PR：`https://github.com/nonononull/inputcodex/pull/25`。
 - PR 正文包含 `Closes #24`、9 条范围、验证证据和“未授权合并/执行”边界。
+
+## 十、PR #25 候选 Review/CI checkpoint
+
+- 候选 Head：`8b2c9688f3e2d533804c80dd0d7dd290b7e18c90`。
+- 运行 `29925622836` 为 `success`；`classify`、`governance`、`required` 成功，Linux/Windows/macOS 因文档-only 分类按合同跳过。
+- 成功 Artifact 数为 `0`。
+- PR 为 OPEN、非 Draft、Merge State `CLEAN`、自动合并关闭。
+- Review 对话/行评论数为 `0`。
+- Ruleset `19395456` active、无 bypass、审批 `0`、必须解决 Review 对话、Squash-only；具备合并权限的人类维护者仍只有 `nonononull`。
+- 当前授权仍不包含合并；最终封口提交后必须等待新的 Head CI，不能把本运行替代最终 Head 验证。

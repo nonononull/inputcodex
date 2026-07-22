@@ -1,7 +1,7 @@
 # Session Plan：Issue #24 Gate 4 功能目录与性能基线规划
 
 schema_version: inputcodex.session-plan.v1
-session_status: pr-open-review-ci-pending
+session_status: candidate-review-ci-green-final-seal-pending
 task_id: issue-24-gate-4-feature-performance-plan
 task_summary: 采用两阶段拆分冻结 Gate 4 功能矩阵、行为合同、脱敏夹具、性能测量协议和后续执行 Issue 边界；本任务不创建实际目录、基准或产品实现。
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/24

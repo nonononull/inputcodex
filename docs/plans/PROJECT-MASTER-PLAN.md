@@ -31,7 +31,7 @@ gate_2_watch_report_ref: docs/reports/issue-14-gate-2-upstream-watch.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-decision_status: gate-4-option-2-planning-approved-pr-creation-authorized-execution-locked
+decision_status: gate-4-planning-candidate-review-ci-green-final-seal-pending-merge-not-authorized
 
 ## 当前状态
 

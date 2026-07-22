@@ -1,6 +1,6 @@
 # Issue #24：Gate 4 功能目录与性能基线规划
 
-plan_status: pr-open-review-ci-pending
+plan_status: candidate-review-ci-green-final-seal-pending
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/24
 branch_ref: codex/issue-24-gate-4-planning
 pr_ref: https://github.com/nonononull/inputcodex/pull/25
