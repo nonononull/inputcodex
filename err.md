@@ -296,6 +296,24 @@
 - 验证：三份 PowerShell 文件 AST 均为 `0` 个错误；最终 `Test-CiScripts.ps1` 输出 `CI_CONTRACT_GREEN passed=23` 并以退出码 `0` 完成，Tauri 表别名与依赖方向表形式均通过拒绝测试。
 - 关联：GitHub Issue `#19`、`scripts/ci/Test-CiScripts.ps1`、`scripts/ci/Verify-RepositoryPolicy.ps1`。
 
+### 2026-07-22：治理依赖白名单比批准架构箭头更宽
+
+- 环境：Issue `#19` 首个治理 GREEN checkpoint 完成后，进入 Phase 4 前重新对照 `docs/plans/2026-07-22-issue-17-gate-3-rust-workspace-plan.md` 的依赖图。
+- 现象：合法夹具与政策白名单允许 infrastructure/platform/presentation 直接依赖 domain，并允许 parity 依赖 platform；这四条关系在首个 `23/23` 合同中没有被拒绝。
+- 根因：治理实现依据早期实现草图补全允许关系，没有逐箭头对账已批准架构真源；测试又从同一宽松映射生成合法夹具，形成“实现与测试同时同意错误”的闭环。
+- 处理：先把合法夹具改为批准箭头，再新增四条独立拒绝测试，稳定复现旧政策错误返回 `ok=true`；随后只收紧 `allowedLocalDependencies`，不改动其他政策。
+- 验证：完整合同输出 `CI_CONTRACT_GREEN passed=27`；四条越过批准箭头的依赖均返回 `DEPENDENCY_DIRECTION_INVALID`，且当前仍无产品 Workspace 或 CI Workflow。
+- 关联：GitHub Issue `#19`、`scripts/ci/Test-CiScripts.ps1`、`scripts/ci/Verify-RepositoryPolicy.ps1`、Gate 3 架构规划。
+
+### 2026-07-22：Issue 评论双引号 here-string 把 Markdown 反引号解析为 Unicode 转义
+
+- 环境：治理 GREEN 提交已通过 SSH 普通 push，准备使用 PowerShell 双引号 here-string 组装 GitHub Issue 评论正文。
+- 现象：命令在解析阶段对 Markdown `` `upstream/` `` 报告无效 Unicode 转义，尚未执行远端读取、fetch 或评论写入。
+- 根因：PowerShell 双引号字符串把反引号视为转义前缀，`` `u `` 被解释为 Unicode escape 起点；Markdown 行内代码不应直接放入需要插值的双引号 here-string。
+- 处理：改用单引号 here-string 保存评论模板，以 `{0}`、`{1}`、`{2}` 占位后再执行 `-f` 格式化，只插入经过本地固定的 commit/tree/parent。
+- 验证：远端 GREEN commit、tree、parent 精确对账，Issue 评论 `5043682396` 创建成功，本地远端跟踪引用与远端 Head 一致。
+- 关联：GitHub Issue `#19`、提交 `be9259f55b32014e918113936e6e6ddfdd16765f`。
+
 ## 记录模板
 
 ```text

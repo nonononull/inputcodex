@@ -1,6 +1,6 @@
 # Issue #19：Gate 3 纯 Rust Workspace 与首版三平台 CI 报告
 
-report_status: governance-green-verified-awaiting-checkpoint-push
+report_status: governance-dependency-alignment-verified-awaiting-checkpoint-push
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 branch_ref: codex/issue-19-gate-3-rust-workspace-ci
 baseline_ref: 477d110a9b284e127af365f5278901bcfa69e093
@@ -43,16 +43,22 @@ merge_ref: pending
 - 仓库政策验证器固定七成员显式 Workspace、包名与依赖方向；Iced 只能直接存在于 presentation，并拒绝生产 TypeScript/JavaScript、Tauri/WebView、广告/遥测和外部更新源。
 - 初始 GREEN 自测暴露测试夹具的零结果数组形状和空集合参数绑定问题；均确定根因并修复测试，不降低实现门禁。
 - 安全复核先新增 TOML 表形式的 Tauri 别名与逆向依赖 RED，再修复依赖解析器，防止通过 `[dependencies.alias]` 绕过政策。
-- 最终合同测试 `23/23` 通过，三份 PowerShell 脚本 AST 均为 `0` 个错误，测试退出码为 `0`。
+- 首个合同测试 `23/23` 通过，三份 PowerShell 脚本 AST 均为 `0` 个错误，测试退出码为 `0`；提交 `be9259f55b32014e918113936e6e6ddfdd16765f` 已推送并回写 Issue 评论 `5043682396`。
+
+## 五、批准依赖方向纠偏
+
+- 架构复核发现首个合法夹具与政策白名单错误允许 infrastructure/platform/presentation 直连 domain，并允许 parity 依赖 platform，违反已批准依赖图。
+- 四条新增测试先稳定复现政策错误返回 `ok=true`，证明不是文档措辞问题，而是机器门禁真实放宽。
+- 允许图已收紧为批准箭头，完整合同达到 `27/27` GREEN；当前仍没有产品 Cargo、Rust/Iced 或产品 CI Workflow。
 - 当前仍不存在产品 `Cargo.toml`、`Cargo.lock`、`rust-toolchain.toml`、`.rs`、Iced 或 `.github/workflows/ci.yml`。
 
-## 五、下一合法批次
+## 六、下一合法批次
 
-1. 提交并普通 push 治理 GREEN checkpoint，在 Issue `#19` 回写 `23/23`、commit、失败恢复和安全复核证据。
+1. 提交并普通 push 治理依赖方向纠偏 checkpoint，在 Issue `#19` 回写 `27/27`、commit、根因和精确允许图。
 2. 按 Runtime Workflow 的 Phase 4 顺序创建七成员最小 Workspace、加载状态语义、平台 unsupported 合同与 Iced 展示层隔离。
 3. Workspace checkpoint 完成并回写 Issue 前不得创建 `.github/workflows/ci.yml`。
 
-## 六、收口边界
+## 七、收口边界
 
 - PR、CI、Review 和 merge 字段保持 `pending`，不得提前宣称通过。
 - 最终 PR 必须包含 `Closes #19`，所有适用 Job 成功、Review 对话根因闭环后，再等待项目所有者新的 Squash Merge 授权。

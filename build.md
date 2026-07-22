@@ -4,7 +4,7 @@
 
 截至 2026 年 7 月 22 日，PR `#18` 已将 Gate 3 规划 Squash Merge 到 `main`，合并提交为 `477d110a9b284e127af365f5278901bcfa69e093`；Issue `#17` 已关闭，Issue `#19` 是当前 Gate 3 Workspace 与首版三平台 CI 实现任务。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照与 `upstream/source-lock.json`；Issue `#19` 的治理合同已从可信 RED 转为 `23/23` GREEN，但仍未创建产品应用源码，因此暂时没有 Cargo/Iced 构建命令。本文件当前提供八个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照与 `upstream/source-lock.json`；Issue `#19` 的治理合同已从可信 RED 转为 `27/27` GREEN，并按批准架构收紧依赖方向，但仍未创建产品应用源码，因此暂时没有 Cargo/Iced 构建命令。本文件当前提供八个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -13,7 +13,7 @@
 5. Issue `#17` Gate 3 规划文档、允许路径和禁止产品表面验证。
 6. Issue `#19` Gate 3 实现控制面、批准引用、范围哈希和 RED 前置门禁验证。
 7. Issue `#19` 治理 RED 合同的 AST、非零退出码、稳定标记和实现缺失根因验证。
-8. Issue `#19` 路径分类与仓库政策脚本的 `23/23` GREEN 合同验证。
+8. Issue `#19` 路径分类与仓库政策脚本的 `27/27` GREEN 合同验证。
 
 当前禁止：
 
@@ -97,7 +97,7 @@ $powerShellExecutable = (Get-Process -Id $PID).Path
 $output = @(& $powerShellExecutable -NoLogo -NoProfile -File 'scripts/ci/Test-CiScripts.ps1' 2>&1)
 $greenExitCode = $LASTEXITCODE
 $greenText = ($output | ForEach-Object { $_.ToString() }) -join "`n"
-if ($greenExitCode -ne 0 -or $greenText -notmatch 'CI_CONTRACT_GREEN passed=23') {
+if ($greenExitCode -ne 0 -or $greenText -notmatch 'CI_CONTRACT_GREEN passed=27') {
   throw "治理合同未 GREEN；exit=$greenExitCode；output=$greenText"
 }
 
@@ -105,7 +105,7 @@ git diff --check
 if ($LASTEXITCODE -ne 0) { throw 'GREEN checkpoint 存在空白错误。' }
 ```
 
-GREEN 夹具覆盖空 diff、文档/重型路径、删除/重命名、非法路径、Iced 越层、`upstream/` Workspace 越界、生产脚本语言、Tauri/WebView、广告/遥测、非本仓更新源、依赖方向，以及 TOML 内联与表形式的依赖声明。
+GREEN 夹具覆盖空 diff、文档/重型路径、删除/重命名、非法路径、Iced 越层、`upstream/` Workspace 越界、生产脚本语言、Tauri/WebView、广告/遥测、非本仓更新源、精确依赖方向，以及 TOML 内联与表形式的依赖声明。
 
 ## Issue #19 Gate 3 实现控制面 checkpoint 验证
 

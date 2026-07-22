@@ -339,7 +339,6 @@ rust-version.workspace = true
 license.workspace = true
 
 [dependencies]
-inputcodex-domain = { path = "../inputcodex-domain" }
 inputcodex-application = { path = "../inputcodex-application" }
 "@
     Write-Utf8File -Path (Join-Path $Path 'crates/inputcodex-infrastructure/Cargo.toml') -Content $infrastructureManifest
@@ -354,7 +353,6 @@ rust-version.workspace = true
 license.workspace = true
 
 [dependencies]
-inputcodex-domain = { path = "../inputcodex-domain" }
 inputcodex-application = { path = "../inputcodex-application" }
 "@
     Write-Utf8File -Path (Join-Path $Path 'crates/inputcodex-platform/Cargo.toml') -Content $platformManifest
@@ -369,7 +367,6 @@ rust-version.workspace = true
 license.workspace = true
 
 [dependencies]
-inputcodex-domain = { path = "../inputcodex-domain" }
 inputcodex-application = { path = "../inputcodex-application" }
 iced = "0.14.0"
 "@
@@ -387,7 +384,6 @@ license.workspace = true
 [dependencies]
 inputcodex-domain = { path = "../inputcodex-domain" }
 inputcodex-application = { path = "../inputcodex-application" }
-inputcodex-platform = { path = "../inputcodex-platform" }
 "@
     Write-Utf8File -Path (Join-Path $Path 'crates/inputcodex-parity/Cargo.toml') -Content $parityManifest
     Write-Utf8File -Path (Join-Path $Path 'crates/inputcodex-parity/src/lib.rs') -Content 'pub struct ParityMarker;'
@@ -537,6 +533,38 @@ Invoke-ContractTest -Name '拒绝 Workspace 依赖方向反转' -Body {
     Add-Content -LiteralPath (Join-Path $repository 'crates/inputcodex-domain/Cargo.toml') -Value "`n[dependencies]`ninputcodex-presentation = { path = `"../inputcodex-presentation`" }" -Encoding utf8NoBOM
     $result = Invoke-PolicyCase -RepositoryRoot $repository
     Assert-PolicyFailureCode -Result $result -Code 'DEPENDENCY_DIRECTION_INVALID'
+}
+
+$forbiddenDirectDependencyCases = @(
+    [pscustomobject]@{
+        name = 'infrastructure-domain'
+        manifest = 'crates/inputcodex-infrastructure/Cargo.toml'
+        dependency = 'inputcodex-domain = { path = "../inputcodex-domain" }'
+    }
+    [pscustomobject]@{
+        name = 'platform-domain'
+        manifest = 'crates/inputcodex-platform/Cargo.toml'
+        dependency = 'inputcodex-domain = { path = "../inputcodex-domain" }'
+    }
+    [pscustomobject]@{
+        name = 'presentation-domain'
+        manifest = 'crates/inputcodex-presentation/Cargo.toml'
+        dependency = 'inputcodex-domain = { path = "../inputcodex-domain" }'
+    }
+    [pscustomobject]@{
+        name = 'parity-platform'
+        manifest = 'crates/inputcodex-parity/Cargo.toml'
+        dependency = 'inputcodex-platform = { path = "../inputcodex-platform" }'
+    }
+)
+
+foreach ($forbiddenDirectDependencyCase in $forbiddenDirectDependencyCases) {
+    Invoke-ContractTest -Name "拒绝越过批准箭头 $($forbiddenDirectDependencyCase.name)" -Body {
+        $repository = Copy-RepositoryFixture -Source $validRepository -Name "repository-$($forbiddenDirectDependencyCase.name)"
+        Add-Content -LiteralPath (Join-Path $repository $forbiddenDirectDependencyCase.manifest) -Value $forbiddenDirectDependencyCase.dependency -Encoding utf8NoBOM
+        $result = Invoke-PolicyCase -RepositoryRoot $repository
+        Assert-PolicyFailureCode -Result $result -Code 'DEPENDENCY_DIRECTION_INVALID'
+    }
 }
 
 Invoke-ContractTest -Name '拒绝 TOML 表形式的依赖方向反转' -Body {

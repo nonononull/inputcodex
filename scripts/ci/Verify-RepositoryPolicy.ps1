@@ -241,10 +241,10 @@ $expectedPackages = [ordered]@{
 $allowedLocalDependencies = @{
     'inputcodex-domain' = @()
     'inputcodex-application' = @('inputcodex-domain')
-    'inputcodex-infrastructure' = @('inputcodex-domain', 'inputcodex-application')
-    'inputcodex-platform' = @('inputcodex-domain', 'inputcodex-application')
-    'inputcodex-presentation' = @('inputcodex-domain', 'inputcodex-application')
-    'inputcodex-parity' = @('inputcodex-domain', 'inputcodex-application', 'inputcodex-platform')
+    'inputcodex-infrastructure' = @('inputcodex-application')
+    'inputcodex-platform' = @('inputcodex-application')
+    'inputcodex-presentation' = @('inputcodex-application')
+    'inputcodex-parity' = @('inputcodex-domain', 'inputcodex-application')
     'inputcodex-desktop' = @(
         'inputcodex-application',
         'inputcodex-infrastructure',

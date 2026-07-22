@@ -1,6 +1,6 @@
 # Issue #19 Runtime Workflow：Gate 3 纯 Rust Workspace 与首版三平台 CI
 
-workflow_status: governance-green-verified-awaiting-checkpoint-push
+workflow_status: governance-dependency-alignment-verified-awaiting-checkpoint-push
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 session_plan_ref: docs/plans/sessions/2026-07-22-issue-19-gate-3-rust-workspace-ci.md
 implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
@@ -13,7 +13,8 @@ scope_hash: sha256:2e101627480012d57d6d0472a08cfbe03fc401f6ac74ef3ae1e6a42929ed6
 - Phase 0 Fresh 基线已完成，未发现分支、Issue、Ruleset、Release/tag、Rust/Iced 元数据或 Issue `#16` 漂移。
 - Phase 2 RED 合同已通过 AST 验证并以退出码 `10`、唯一标记 `CI_CONTRACT_RED_MISSING_IMPLEMENTATION` 证明两个治理实现入口缺失。
 - RED checkpoint 已以提交 `67fe99457e1aa2717cc29c70d51114028d68dafd` 推送并回写 Issue `#19`。
-- Phase 3 两个治理实现已通过 `23/23` 合同；当前必须先提交、普通 push 并回写 GREEN checkpoint，再进入 Phase 4 创建 Cargo Workspace。
+- Phase 3 首个 GREEN 提交 `be9259f55b32014e918113936e6e6ddfdd16765f` 已推送并回写 Issue。
+- Phase 4 复核发现依赖白名单比批准箭头更宽；四条新增 RED 已证明根因，政策已收紧并达到 `27/27` GREEN。当前必须先推送纠偏 checkpoint，再创建 Cargo Workspace。
 
 ## Phase 0：startup-baseline
 
