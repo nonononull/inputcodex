@@ -197,6 +197,51 @@
 - 验证：重新执行 cached diff 检查，要求退出码为 `0`，并保持暂存路径仍为 Issue `#12` 批准的 `11` 个文件。
 - 关联：GitHub Issue `#12`。
 
+### 2026-07-22：新 Workflow 在合并前缺少可用的手动 CI 入口
+
+- 环境：Issue `#14` 计划只包含 `schedule` 与 `workflow_dispatch`，Workflow 尚未进入默认分支。
+- 现象：合并前无法把手动调度当作 PR 的真实检查证据；若直接合并后再验证，权限或 YAML 错误会过早进入 `main`。
+- 根因：GitHub 的手动调度入口依赖默认分支中的 Workflow，而原方案没有 PR 事件的只读验证路径。
+- 处理：增加 `pull_request` 触发的 `validate` Job，只运行无网络测试、Python 编译和冻结基线校验；写 Issue 的 `watch` Job 明确排除 PR 事件，并在 Job 级才授予 `issues: write`。
+- 验证：静态合同确认 PR `validate` 继承顶层 `contents: read`，全文件仅出现一次 `issues: write`，且 `watch.if` 为 `github.event_name != 'pull_request'`。
+- 关联：GitHub Issue `#14`、`.github/workflows/upstream-watch.yml`。
+
+### 2026-07-22：安全校验测试夹具与动态输入正则产生假失败
+
+- 环境：Issue `#14` 首轮 GREEN 后运行 Issue upsert 与 Workflow 动态输入合同测试。
+- 现象：两个测试使用不属于 `nonononull/inputcodex` 的伪造 Issue URL，被生产端精确 URL 校验拒绝；动态输入正则同时误伤只用于 concurrency 分组的 `github.event.pull_request.number`。
+- 根因：测试夹具没有满足生产白名单合同，正则又把“进入 shell 的动态文本”和“非 shell 的数字并发键”混为一类。
+- 处理：把夹具 URL 改为目标仓库的真实格式；收窄正则，只禁止除 `pull_request.number` 外的 PR 动态字段进入 Workflow 文本，不降低生产 URL 校验。
+- 验证：对应测试与完整 `28` 项无网络合同测试均通过。
+- 关联：GitHub Issue `#14`、`.github/scripts/tests/test_upstream_watch.py`。
+
+### 2026-07-22：状态恢复和损坏 Issue 条目曾被静默处理
+
+- 环境：Issue `#14` 实现后进行安全自审，检查人工关闭状态 Issue 与 GitHub Issues API 异常响应。
+- 现象：相同物质状态的状态 Issue 若已关闭，旧逻辑会直接返回 unchanged；API 数组中的非对象条目会在过滤阶段被静默丢弃。
+- 根因：幂等判断只比较状态内容，没有把 Issue 的 OPEN/CLOSED 生命周期纳入合同；API 适配器先过滤后校验，破坏了“损坏输入必须失败”的语义。
+- 处理：只有状态相同且 Issue 为 OPEN 时才返回 unchanged，否则更新并恢复 OPEN；分页读取先校验每个条目为对象，再过滤 Pull Request。
+- 验证：新增 `test_closed_state_issue_is_reopened_even_without_material_change` 与 `test_issue_api_rejects_non_object_entries`，完整 `28` 项测试通过。
+- 关联：GitHub Issue `#14`、`.github/scripts/upstream_watch.py`、`.github/scripts/tests/test_upstream_watch.py`。
+
+### 2026-07-22：Python 验证缓存污染允许路径
+
+- 环境：运行 Issue `#14` 的单元测试、`py_compile` 后执行未跟踪路径门禁。
+- 现象：门禁发现 `.github/scripts/__pycache__/upstream_watch.cpython-313.pyc` 与测试目录中的 `.pyc`，正确拒绝继续。
+- 根因：本机 Python 默认 `sys.pycache_prefix=None` 且允许写字节码，测试导入和 `py_compile` 都把缓存写入源码目录；原 `build.md` 没有隔离验证产物。
+- 处理：本地命令临时把 `PYTHONPYCACHEPREFIX` 指向系统临时目录并在 `finally` 恢复环境；Workflow 固定使用 `/tmp/inputcodex-pycache`，对应静态合同同步锁定。
+- 验证：隔离探针确认 `py_compile` 输出转移到 `C:\tmp`；清理本轮生成物后重新运行 `28` 项测试、编译与 YAML 合同，仓库内未再出现 `.pyc` 或 `__pycache__`。
+- 关联：GitHub Issue `#14`、`build.md`、`.github/workflows/upstream-watch.yml`。
+
+### 2026-07-22：WindowsApps ACL 间歇拒绝补丁与 PowerShell 启动
+
+- 环境：Windows Codex 沙箱中执行补丁和只读 PowerShell 命令。
+- 现象：`WindowsApps` 下的 `apply_patch.bat` 或 `pwsh.exe` 偶发返回 `CreateProcessAsUserW failed: 5 (拒绝访问)`，命令尚未修改仓库。
+- 根因：失败发生在 WindowsApps 别名进程创建阶段，不是补丁内容、项目文件权限或测试逻辑错误。
+- 处理：补丁统一通过 Codex 的 apply-patch 入口 `& codex --codex-run-as-apply-patch $patch` 执行；只读 PowerShell 启动失败时确认零副作用后重试，不用改写项目或关闭门禁绕过。
+- 验证：同一补丁入口成功更新受控文件，后续 `git diff --check` 与 Fresh 测试用于确认没有部分写入。
+- 关联：GitHub Issue `#14`、本地 Codex Windows 执行环境。
+
 ## 记录模板
 
 ```text
