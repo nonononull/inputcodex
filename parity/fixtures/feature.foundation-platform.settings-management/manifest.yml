@@ -1,0 +1,10 @@
+schema_version: inputcodex.fixture-manifest.v1
+feature_id: feature.foundation-platform.settings-management
+fixtures:
+  - id: fixture.feature.foundation-platform.settings-management.baseline
+    scenario: baseline
+    kind: synthetic
+    files:
+      - path: baseline.yml
+        format: yaml
+        description: '合成设置文档，覆盖布尔值、枚举与语言字段。'

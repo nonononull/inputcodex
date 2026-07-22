@@ -1,0 +1,6 @@
+schema_version: inputcodex.synthetic.model-catalog.v1
+models:
+  - id: gpt-synthetic
+    context_window: 200000
+    auto_compact_threshold: 180000
+    enabled: true

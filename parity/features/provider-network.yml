@@ -1,0 +1,243 @@
+schema_version: inputcodex.feature-catalog.v1
+release:
+  tag: v1.2.41
+  tag_commit: 3dafffcafb2566a1e8bce4b35671656d6adb3eda
+domain: provider-network
+features:
+  - id: feature.provider-network.aggregate-routing
+    name: '聚合供应商路由'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/relay_rotation.rs
+        symbol: relay_rotation
+    entry_points:
+      - core-module:relay_rotation
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '支持故障转移、会话轮转、请求轮转和权重轮转并留证。'
+      macos:
+        applicability: supported
+        semantics: '支持故障转移、会话轮转、请求轮转和权重轮转并留证。'
+    decision_refs:
+      - issue:26
+  - id: feature.provider-network.context-entry-management
+    name: '上下文能力选择'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: delete_context_entry
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: extract_relay_common_config
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: list_context_entries
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: read_live_context_entries
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: sync_live_context_entries
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: upsert_context_entry
+    entry_points:
+      - tauri-command:delete_context_entry
+      - tauri-command:extract_relay_common_config
+      - tauri-command:list_context_entries
+      - tauri-command:read_live_context_entries
+      - tauri-command:sync_live_context_entries
+      - tauri-command:upsert_context_entry
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '管理供应商关联的 MCP、Skill 与 Plugin 并与实时配置同步。'
+      macos:
+        applicability: supported
+        semantics: '管理供应商关联的 MCP、Skill 与 Plugin 并与实时配置同步。'
+    decision_refs:
+      - issue:26
+  - id: feature.provider-network.model-catalog
+    name: '模型目录与上下文'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/model_catalog.rs
+        symbol: model_catalog
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/model_suffix.rs
+        symbol: model_suffix
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/models.rs
+        symbol: models
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: fetch_relay_profile_models
+    entry_points:
+      - core-module:model_catalog
+      - core-module:model_suffix
+      - core-module:models
+      - tauri-command:fetch_relay_profile_models
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '维护模型列表、上下文窗口、自动压缩阈值与 model_catalog_json。'
+      macos:
+        applicability: supported
+        semantics: '维护模型列表、上下文窗口、自动压缩阈值与 model_catalog_json。'
+    decision_refs:
+      - issue:26
+  - id: feature.provider-network.network-environment
+    name: '网络环境诊断'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/proxy.rs
+        symbol: proxy
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/relay_environment.rs
+        symbol: relay_environment
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: check_relay_environment
+    entry_points:
+      - core-module:proxy
+      - core-module:relay_environment
+      - tauri-command:check_relay_environment
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '检查系统代理、环境变量与 Relay 前置条件，默认不修改环境。'
+      macos:
+        applicability: supported
+        semantics: '检查系统代理、环境变量与 Relay 前置条件，默认不修改环境。'
+    decision_refs:
+      - issue:26
+  - id: feature.provider-network.protocol-proxy
+    name: '协议代理'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/ports.rs
+        symbol: ports
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/protocol_proxy.rs
+        symbol: protocol_proxy
+    entry_points:
+      - core-module:ports
+      - core-module:protocol_proxy
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '转换 Responses 与 Chat Completions，请求隔离且不污染语义。'
+      macos:
+        applicability: supported
+        semantics: '转换 Responses 与 Chat Completions，请求隔离且不污染语义。'
+    decision_refs:
+      - issue:26
+  - id: feature.provider-network.provider-configuration-application
+    name: '供应商配置应用'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/codex_app_state.rs
+        symbol: codex_app_state
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/relay_switch.rs
+        symbol: relay_switch
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: apply_pure_api_injection
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: apply_relay_injection
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: clear_relay_injection
+    entry_points:
+      - core-module:codex_app_state
+      - core-module:relay_switch
+      - tauri-command:apply_pure_api_injection
+      - tauri-command:apply_relay_injection
+      - tauri-command:clear_relay_injection
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '以纯 Rust 配置写入实现供应商切换，不复用注入脚本。'
+      macos:
+        applicability: supported
+        semantics: '以纯 Rust 配置写入实现供应商切换，不复用注入脚本。'
+    decision_refs:
+      - issue:26
+  - id: feature.provider-network.provider-diagnostics
+    name: '供应商测试与诊断'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/http_client.rs
+        symbol: http_client
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: diagnose_relay_profile
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: test_relay_profile
+    entry_points:
+      - core-module:http_client
+      - tauri-command:diagnose_relay_profile
+      - tauri-command:test_relay_profile
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '测试连接并生成 Provider Doctor 证据，网络失败可超时取消。'
+      macos:
+        applicability: supported
+        semantics: '测试连接并生成 Provider Doctor 证据，网络失败可超时取消。'
+    decision_refs:
+      - issue:26
+  - id: feature.provider-network.provider-import
+    name: '供应商导入'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/ccs_import.rs
+        symbol: ccs_import
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/provider_import.rs
+        symbol: provider_import
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: confirm_pending_provider_import
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: dismiss_pending_provider_import
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: import_ccs_providers
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: load_ccs_providers
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: load_pending_provider_import
+    entry_points:
+      - core-module:ccs_import
+      - core-module:provider_import
+      - tauri-command:confirm_pending_provider_import
+      - tauri-command:dismiss_pending_provider_import
+      - tauri-command:import_ccs_providers
+      - tauri-command:load_ccs_providers
+      - tauri-command:load_pending_provider_import
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '读取供应商配置，预览后再确认写入并禁止泄漏凭据。'
+      macos:
+        applicability: supported
+        semantics: '读取供应商配置，预览后再确认写入并禁止泄漏凭据。'
+    decision_refs:
+      - issue:26
+  - id: feature.provider-network.relay-profile-management
+    name: 'Relay 配置管理'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/relay_config.rs
+        symbol: relay_config
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: backfill_relay_profile_from_live
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: read_relay_files
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: relay_status
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: save_relay_file
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: switch_relay_profile
+    entry_points:
+      - core-module:relay_config
+      - tauri-command:backfill_relay_profile_from_live
+      - tauri-command:read_relay_files
+      - tauri-command:relay_status
+      - tauri-command:save_relay_file
+      - tauri-command:switch_relay_profile
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '读取、保存、切换和回填 Relay 配置，切换前保存当前状态。'
+      macos:
+        applicability: supported
+        semantics: '读取、保存、切换和回填 Relay 配置，切换前保存当前状态。'
+    decision_refs:
+      - issue:26

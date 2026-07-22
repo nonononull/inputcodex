@@ -1,0 +1,6 @@
+schema_version: inputcodex.synthetic.markdown-export.v1
+title: Synthetic session
+markdown: |-
+  # Synthetic session
+  - role: user
+    content: synthetic prompt

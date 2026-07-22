@@ -1,0 +1,6 @@
+schema_version: inputcodex.synthetic.sessions.v1
+sessions:
+  - id: synthetic-session-001
+    project: synthetic-project
+    updated_at: 2026-01-01T00:00:00Z
+    token_total: 42

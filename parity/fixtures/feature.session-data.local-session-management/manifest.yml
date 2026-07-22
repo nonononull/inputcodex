@@ -1,0 +1,10 @@
+schema_version: inputcodex.fixture-manifest.v1
+feature_id: feature.session-data.local-session-management
+fixtures:
+  - id: fixture.feature.session-data.local-session-management.baseline
+    scenario: baseline
+    kind: synthetic
+    files:
+      - path: baseline.yml
+        format: yaml
+        description: '合成本地会话分页记录，不含真实会话内容或私人路径。'

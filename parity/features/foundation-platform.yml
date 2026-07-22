@@ -1,0 +1,223 @@
+schema_version: inputcodex.feature-catalog.v1
+release:
+  tag: v1.2.41
+  tag_commit: 3dafffcafb2566a1e8bce4b35671656d6adb3eda
+domain: foundation-platform
+features:
+  - id: feature.foundation-platform.advertising
+    name: '广告与推广内容'
+    status: exception-pending
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/ads.rs
+        symbol: ads
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: load_ads
+    entry_points:
+      - core-module:ads
+      - tauri-command:load_ads
+    platforms:
+      windows:
+        applicability: exception-pending
+        semantics: '项目禁止广告、推广位和付费导流，仅保留上游证据。'
+      macos:
+        applicability: exception-pending
+        semantics: '项目禁止广告、推广位和付费导流，仅保留上游证据。'
+    decision_refs:
+      - issue:26
+      - rule:AGENTS-product-constraints
+  - id: feature.foundation-platform.application-lifecycle
+    name: '应用生命周期'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: launch_codex_plus
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: restart_codex_plus
+    entry_points:
+      - tauri-command:launch_codex_plus
+      - tauri-command:restart_codex_plus
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '启动或重启受管 Codex 进程，明确超时、取消和进程隔离。'
+      macos:
+        applicability: supported
+        semantics: '启动或重启受管 Codex 进程，明确超时、取消和进程隔离。'
+    decision_refs:
+      - issue:26
+  - id: feature.foundation-platform.application-overview
+    name: '应用概览与检测'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/status.rs
+        symbol: status
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: load_overview
+    entry_points:
+      - core-module:status
+      - tauri-command:load_overview
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '检测本机 Codex 应用、运行状态与必要路径，失败必须隔离并可诊断。'
+      macos:
+        applicability: supported
+        semantics: '检测本机 Codex 应用、运行状态与必要路径，失败必须隔离并可诊断。'
+    decision_refs:
+      - issue:26
+  - id: feature.foundation-platform.diagnostics
+    name: '日志与诊断'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/diagnostic_log.rs
+        symbol: diagnostic_log
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: clear_logs
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: copy_diagnostics
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: read_latest_logs
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: write_diagnostic_event
+    entry_points:
+      - core-module:diagnostic_log
+      - tauri-command:clear_logs
+      - tauri-command:copy_diagnostics
+      - tauri-command:read_latest_logs
+      - tauri-command:write_diagnostic_event
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '读取、清理和复制诊断材料，必须脱敏并限制数据边界。'
+      macos:
+        applicability: supported
+        semantics: '读取、清理和复制诊断材料，必须脱敏并限制数据边界。'
+    decision_refs:
+      - issue:26
+  - id: feature.foundation-platform.environment-conflicts
+    name: '环境冲突检查'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/env_conflicts.rs
+        symbol: env_conflicts
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: check_env_conflicts
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: remove_env_conflicts
+    entry_points:
+      - core-module:env_conflicts
+      - tauri-command:check_env_conflicts
+      - tauri-command:remove_env_conflicts
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '检测并按明确授权清理冲突环境配置，默认只读并保留证据。'
+      macos:
+        applicability: supported
+        semantics: '检测并按明确授权清理冲突环境配置，默认只读并保留证据。'
+    decision_refs:
+      - issue:26
+  - id: feature.foundation-platform.platform-paths
+    name: '平台路径解析'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/app_paths.rs
+        symbol: app_paths
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/codex_home.rs
+        symbol: codex_home
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/paths.rs
+        symbol: paths
+    entry_points:
+      - core-module:app_paths
+      - core-module:codex_home
+      - core-module:paths
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '在 Windows 与 macOS 上解析等价路径，不暴露私人绝对路径。'
+      macos:
+        applicability: supported
+        semantics: '在 Windows 与 macOS 上解析等价路径，不暴露私人绝对路径。'
+    decision_refs:
+      - issue:26
+  - id: feature.foundation-platform.settings-management
+    name: '设置管理'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/settings.rs
+        symbol: settings
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: load_settings
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: reset_settings
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: save_settings
+    entry_points:
+      - core-module:settings
+      - tauri-command:load_settings
+      - tauri-command:reset_settings
+      - tauri-command:save_settings
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '加载、保存和重置本地设置，写入必须原子化并可恢复。'
+      macos:
+        applicability: supported
+        semantics: '加载、保存和重置本地设置，写入必须原子化并可恢复。'
+    decision_refs:
+      - issue:26
+  - id: feature.foundation-platform.version-and-startup
+    name: '版本与启动参数'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/version.rs
+        symbol: version
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: backend_version
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: startup_options
+    entry_points:
+      - core-module:version
+      - tauri-command:backend_version
+      - tauri-command:startup_options
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '读取版本与启动参数，结果稳定且不触发隐式网络或写入。'
+      macos:
+        applicability: supported
+        semantics: '读取版本与启动参数，结果稳定且不触发隐式网络或写入。'
+    decision_refs:
+      - issue:26
+  - id: feature.foundation-platform.watcher
+    name: 'Watcher 管理'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/watcher.rs
+        symbol: watcher
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: disable_watcher
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: enable_watcher
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: install_watcher
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: load_watcher_state
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: uninstall_watcher
+    entry_points:
+      - core-module:watcher
+      - tauri-command:disable_watcher
+      - tauri-command:enable_watcher
+      - tauri-command:install_watcher
+      - tauri-command:load_watcher_state
+      - tauri-command:uninstall_watcher
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '安装、启停和查询 Watcher，进程与持久化状态必须可诊断。'
+      macos:
+        applicability: supported
+        semantics: '安装、启停和查询 Watcher，进程与持久化状态必须可诊断。'
+    decision_refs:
+      - issue:26

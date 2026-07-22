@@ -1,0 +1,455 @@
+schema_version: inputcodex.behavior-contract.v1
+domain: plugin-script
+contracts:
+  - id: contract.feature.plugin-script.dream-skin-library.baseline
+    feature_id: feature.plugin-script.dream-skin-library
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: dream-skin-library-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: dream-skin-library-result
+        description: 'Dream Skin 本地主题库的稳定结果或明确空结果。'
+    side_effects:
+      - filesystem-read
+      - filesystem-write
+    persistence: '文件写入原子化，失败不得留下半成品或凭据日志。'
+    errors:
+      - code: DREAM_SKIN_LIBRARY_FAILED
+        kind: feature
+        semantics: 'Dream Skin 本地主题库失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次Dream Skin 本地主题库请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: 'Dream Skin 本地主题库单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '审计本地图片导入、主题保存与选择，不预设注入式应用。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: required
+      reason: '使用合成 fixture 固定结构字段、边界值与引用关系。'
+    fixture_refs:
+      - fixture.feature.plugin-script.dream-skin-library.baseline
+  - id: contract.feature.plugin-script.dream-skin-marketplace.baseline
+    feature_id: feature.plugin-script.dream-skin-marketplace
+    scenario: baseline
+    preconditions:
+      - '独立 parity-exception 尚未获得项目所有者决定。'
+    inputs:
+      - name: decision_ref
+        data_type: decision-reference
+        required: false
+        description: '可选的一致性例外决定引用；缺失时保持 pending。'
+    outputs:
+      - name: exception_status
+        data_type: parity-exception-status
+        description: '只返回待决策状态，不执行上游实现。'
+    side_effects:
+      - none
+    persistence: '只保存审计决定引用，不加载、下载或执行上游实现。'
+    errors:
+      - code: PARITY_EXCEPTION_PENDING
+        kind: policy
+        semantics: '没有 owner 决定时明确失败，禁止静默启用。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次Dream Skin 市场请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: 'Dream Skin 市场单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '远程主题推荐列表不得进入运行面。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '只记录待决策状态，禁止执行上游实现。'
+    fixture_refs: []
+  - id: contract.feature.plugin-script.dream-skin-runtime.baseline
+    feature_id: feature.plugin-script.dream-skin-runtime
+    scenario: baseline
+    preconditions:
+      - '独立 parity-exception 尚未获得项目所有者决定。'
+    inputs:
+      - name: decision_ref
+        data_type: decision-reference
+        required: false
+        description: '可选的一致性例外决定引用；缺失时保持 pending。'
+    outputs:
+      - name: exception_status
+        data_type: parity-exception-status
+        description: '只返回待决策状态，不执行上游实现。'
+    side_effects:
+      - none
+    persistence: '只保存审计决定引用，不加载、下载或执行上游实现。'
+    errors:
+      - code: PARITY_EXCEPTION_PENDING
+        kind: policy
+        semantics: '没有 owner 决定时明确失败，禁止静默启用。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次Dream Skin 运行时请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: 'Dream Skin 运行时单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '现有运行时依赖 renderer 注入，需决定无注入等价语义。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '只记录待决策状态，禁止执行上游实现。'
+    fixture_refs: []
+  - id: contract.feature.plugin-script.image-analysis.baseline
+    feature_id: feature.plugin-script.image-analysis
+    scenario: baseline
+    preconditions:
+      - '独立 parity-exception 尚未获得项目所有者决定。'
+    inputs:
+      - name: decision_ref
+        data_type: decision-reference
+        required: false
+        description: '可选的一致性例外决定引用；缺失时保持 pending。'
+    outputs:
+      - name: exception_status
+        data_type: parity-exception-status
+        description: '只返回待决策状态，不执行上游实现。'
+    side_effects:
+      - none
+    persistence: '只保存审计决定引用，不加载、下载或执行上游实现。'
+    errors:
+      - code: PARITY_EXCEPTION_PENDING
+        kind: policy
+        semantics: '没有 owner 决定时明确失败，禁止静默启用。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次图片分析增强请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '图片分析增强单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '现有能力改写请求并依赖注入链。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '只记录待决策状态，禁止执行上游实现。'
+    fixture_refs: []
+  - id: contract.feature.plugin-script.native-menu-localization.baseline
+    feature_id: feature.plugin-script.native-menu-localization
+    scenario: baseline
+    preconditions:
+      - '独立 parity-exception 尚未获得项目所有者决定。'
+    inputs:
+      - name: decision_ref
+        data_type: decision-reference
+        required: false
+        description: '可选的一致性例外决定引用；缺失时保持 pending。'
+    outputs:
+      - name: exception_status
+        data_type: parity-exception-status
+        description: '只返回待决策状态，不执行上游实现。'
+    side_effects:
+      - none
+    persistence: '只保存审计决定引用，不加载、下载或执行上游实现。'
+    errors:
+      - code: PARITY_EXCEPTION_PENDING
+        kind: policy
+        semantics: '没有 owner 决定时明确失败，禁止静默启用。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次原生菜单本地化请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '原生菜单本地化单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '现有能力依赖调试协议与脚本注入。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '只记录待决策状态，禁止执行上游实现。'
+    fixture_refs: []
+  - id: contract.feature.plugin-script.plugin-marketplace.baseline
+    feature_id: feature.plugin-script.plugin-marketplace
+    scenario: baseline
+    preconditions:
+      - '独立 parity-exception 尚未获得项目所有者决定。'
+    inputs:
+      - name: decision_ref
+        data_type: decision-reference
+        required: false
+        description: '可选的一致性例外决定引用；缺失时保持 pending。'
+    outputs:
+      - name: exception_status
+        data_type: parity-exception-status
+        description: '只返回待决策状态，不执行上游实现。'
+    side_effects:
+      - none
+    persistence: '只保存审计决定引用，不加载、下载或执行上游实现。'
+    errors:
+      - code: PARITY_EXCEPTION_PENDING
+        kind: policy
+        semantics: '没有 owner 决定时明确失败，禁止静默启用。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次插件市场配置请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '插件市场配置单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '远程推荐列表与注入式插件解锁不得直接迁移。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '只记录待决策状态，禁止执行上游实现。'
+    fixture_refs: []
+  - id: contract.feature.plugin-script.renderer-enhancements.baseline
+    feature_id: feature.plugin-script.renderer-enhancements
+    scenario: baseline
+    preconditions:
+      - '独立 parity-exception 尚未获得项目所有者决定。'
+    inputs:
+      - name: decision_ref
+        data_type: decision-reference
+        required: false
+        description: '可选的一致性例外决定引用；缺失时保持 pending。'
+    outputs:
+      - name: exception_status
+        data_type: parity-exception-status
+        description: '只返回待决策状态，不执行上游实现。'
+    side_effects:
+      - none
+    persistence: '只保存审计决定引用，不加载、下载或执行上游实现。'
+    errors:
+      - code: PARITY_EXCEPTION_PENDING
+        kind: policy
+        semantics: '没有 owner 决定时明确失败，禁止静默启用。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次Codex 界面增强请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: 'Codex 界面增强单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '粘贴修复、中文化、Goals 与覆盖层依赖 renderer 注入。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '只记录待决策状态，禁止执行上游实现。'
+    fixture_refs: []
+  - id: contract.feature.plugin-script.script-marketplace.baseline
+    feature_id: feature.plugin-script.script-marketplace
+    scenario: baseline
+    preconditions:
+      - '独立 parity-exception 尚未获得项目所有者决定。'
+    inputs:
+      - name: decision_ref
+        data_type: decision-reference
+        required: false
+        description: '可选的一致性例外决定引用；缺失时保持 pending。'
+    outputs:
+      - name: exception_status
+        data_type: parity-exception-status
+        description: '只返回待决策状态，不执行上游实现。'
+    side_effects:
+      - none
+    persistence: '只保存审计决定引用，不加载、下载或执行上游实现。'
+    errors:
+      - code: PARITY_EXCEPTION_PENDING
+        kind: policy
+        semantics: '没有 owner 决定时明确失败，禁止静默启用。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次脚本市场请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '脚本市场单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '远程推荐脚本列表不得进入运行面。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '只记录待决策状态，禁止执行上游实现。'
+    fixture_refs: []
+  - id: contract.feature.plugin-script.stepwise-suggestions.baseline
+    feature_id: feature.plugin-script.stepwise-suggestions
+    scenario: baseline
+    preconditions:
+      - '独立 parity-exception 尚未获得项目所有者决定。'
+    inputs:
+      - name: decision_ref
+        data_type: decision-reference
+        required: false
+        description: '可选的一致性例外决定引用；缺失时保持 pending。'
+    outputs:
+      - name: exception_status
+        data_type: parity-exception-status
+        description: '只返回待决策状态，不执行上游实现。'
+    side_effects:
+      - none
+    persistence: '只保存审计决定引用，不加载、下载或执行上游实现。'
+    errors:
+      - code: PARITY_EXCEPTION_PENDING
+        kind: policy
+        semantics: '没有 owner 决定时明确失败，禁止静默启用。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次Stepwise 建议请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: 'Stepwise 建议单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '建议生成可审计，但现有呈现依赖注入。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '只记录待决策状态，禁止执行上游实现。'
+    fixture_refs: []
+  - id: contract.feature.plugin-script.user-scripts.baseline
+    feature_id: feature.plugin-script.user-scripts
+    scenario: baseline
+    preconditions:
+      - '独立 parity-exception 尚未获得项目所有者决定。'
+    inputs:
+      - name: decision_ref
+        data_type: decision-reference
+        required: false
+        description: '可选的一致性例外决定引用；缺失时保持 pending。'
+    outputs:
+      - name: exception_status
+        data_type: parity-exception-status
+        description: '只返回待决策状态，不执行上游实现。'
+    side_effects:
+      - none
+    persistence: '只保存审计决定引用，不加载、下载或执行上游实现。'
+    errors:
+      - code: PARITY_EXCEPTION_PENDING
+        kind: policy
+        semantics: '没有 owner 决定时明确失败，禁止静默启用。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次用户脚本请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '用户脚本单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '上游用户脚本依赖注入执行，仅审计安装与启停语义。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '只记录待决策状态，禁止执行上游实现。'
+    fixture_refs: []

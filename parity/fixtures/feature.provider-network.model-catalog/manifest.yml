@@ -1,0 +1,10 @@
+schema_version: inputcodex.fixture-manifest.v1
+feature_id: feature.provider-network.model-catalog
+fixtures:
+  - id: fixture.feature.provider-network.model-catalog.baseline
+    scenario: baseline
+    kind: synthetic
+    files:
+      - path: baseline.yml
+        format: yaml
+        description: '合成模型目录，覆盖上下文窗口与压缩阈值。'

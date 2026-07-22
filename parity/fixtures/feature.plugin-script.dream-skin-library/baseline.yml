@@ -1,0 +1,6 @@
+schema_version: inputcodex.synthetic.dream-skin.v1
+theme:
+  id: synthetic-theme
+  display_name: Synthetic Theme
+  image_ref: synthetic-image.png
+  accent: synthetic-accent-336699

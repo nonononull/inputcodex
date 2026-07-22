@@ -1,0 +1,193 @@
+schema_version: inputcodex.behavior-contract.v1
+domain: session-data
+contracts:
+  - id: contract.feature.session-data.local-session-management.baseline
+    feature_id: feature.session-data.local-session-management
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: local-session-management-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: local-session-management-result
+        description: '本地会话与项目管理的稳定结果或明确空结果。'
+    side_effects:
+      - database-read
+      - database-write
+      - filesystem-write
+    persistence: '数据库写入事务化，失败回滚且不删除原始数据。'
+    errors:
+      - code: LOCAL_SESSION_MANAGEMENT_FAILED
+        kind: feature
+        semantics: '本地会话与项目管理失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次本地会话与项目管理请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '本地会话与项目管理单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '扫描、删除和移动本地会话或项目数据，删除保留可恢复证据。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: required
+      reason: '使用合成 fixture 固定结构字段、边界值与引用关系。'
+    fixture_refs:
+      - fixture.feature.session-data.local-session-management.baseline
+  - id: contract.feature.session-data.markdown-export.baseline
+    feature_id: feature.session-data.markdown-export
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: markdown-export-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: markdown-export-result
+        description: 'Markdown 导出的稳定结果或明确空结果。'
+    side_effects:
+      - filesystem-read
+      - filesystem-write
+    persistence: '文件写入原子化，失败不得留下半成品或凭据日志。'
+    errors:
+      - code: MARKDOWN_EXPORT_FAILED
+        kind: feature
+        semantics: 'Markdown 导出失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次Markdown 导出请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: 'Markdown 导出单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '将选定会话导出为确定性 Markdown，失败不得修改源数据。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: required
+      reason: '使用合成 fixture 固定结构字段、边界值与引用关系。'
+    fixture_refs:
+      - fixture.feature.session-data.markdown-export.baseline
+  - id: contract.feature.session-data.provider-metadata-maintenance.baseline
+    feature_id: feature.session-data.provider-metadata-maintenance
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: provider-metadata-maintenance-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: provider-metadata-maintenance-result
+        description: 'Provider 元数据维护的稳定结果或明确空结果。'
+    side_effects:
+      - database-read
+      - database-write
+      - filesystem-write
+    persistence: '数据库写入事务化，失败回滚且不删除原始数据。'
+    errors:
+      - code: PROVIDER_METADATA_MAINTENANCE_FAILED
+        kind: feature
+        semantics: 'Provider 元数据维护失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次Provider 元数据维护请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: 'Provider 元数据维护单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '同步 metadata、预览与应用索引清理并生成本地备份。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: required
+      reason: '使用合成 fixture 固定结构字段、边界值与引用关系。'
+    fixture_refs:
+      - fixture.feature.session-data.provider-metadata-maintenance.baseline
+  - id: contract.feature.session-data.token-usage-history.baseline
+    feature_id: feature.session-data.token-usage-history
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: token-usage-history-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: token-usage-history-result
+        description: 'Token 用量历史的稳定结果或明确空结果。'
+    side_effects:
+      - database-read
+      - filesystem-read
+    persistence: '不持久化私人路径、凭据或真实会话内容。'
+    errors:
+      - code: TOKEN_USAGE_HISTORY_FAILED
+        kind: feature
+        semantics: 'Token 用量历史失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次Token 用量历史请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: 'Token 用量历史单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '读取并规范化本地 Token 用量历史，不依赖 WebView 或注入。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: required
+      reason: '使用合成 fixture 固定结构字段、边界值与引用关系。'
+    fixture_refs:
+      - fixture.feature.session-data.token-usage-history.baseline

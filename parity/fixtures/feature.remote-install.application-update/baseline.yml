@@ -1,0 +1,7 @@
+schema_version: inputcodex.synthetic.update.v1
+release:
+  repository: nonononull/inputcodex
+  tag: v0.1.0
+  asset: inputcodex-windows-x86_64.exe
+  download_url: https://downloads.example.invalid/inputcodex.exe
+  checksum: synthetic-sha256-placeholder

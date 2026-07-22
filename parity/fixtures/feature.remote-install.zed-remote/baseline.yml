@@ -1,0 +1,6 @@
+schema_version: inputcodex.synthetic.zed-remote.v1
+target:
+  host: example.invalid
+  user: synthetic-user
+  port: 22
+  remote_path: synthetic/workspace

@@ -1,0 +1,10 @@
+schema_version: inputcodex.fixture-manifest.v1
+feature_id: feature.plugin-script.dream-skin-library
+fixtures:
+  - id: fixture.feature.plugin-script.dream-skin-library.baseline
+    scenario: baseline
+    kind: synthetic
+    files:
+      - path: baseline.yml
+        format: yaml
+        description: '合成本地主题元数据，不包含真实图片。'

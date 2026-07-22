@@ -1,0 +1,6 @@
+schema_version: inputcodex.synthetic.token-usage.v1
+usage:
+  - day: 2026-01-01
+    input_tokens: 100
+    output_tokens: 20
+    cached_tokens: 5

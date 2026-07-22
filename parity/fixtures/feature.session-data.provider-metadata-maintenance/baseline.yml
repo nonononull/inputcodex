@@ -1,0 +1,8 @@
+schema_version: inputcodex.synthetic.provider-metadata.v1
+targets:
+  - id: synthetic-target
+    selected: true
+cleanup_candidates:
+  - session_id: synthetic-session-archived
+    reason: missing-provider
+backup_id: synthetic-backup-001

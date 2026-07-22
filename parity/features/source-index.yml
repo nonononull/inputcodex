@@ -1,0 +1,1463 @@
+schema_version: inputcodex.source-index.v1
+release:
+  tag: v1.2.41
+  tag_commit: 3dafffcafb2566a1e8bce4b35671656d6adb3eda
+sources:
+  - id: core-module:ads
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/ads.rs
+      symbol: ads
+    platforms: [windows, macos]
+    side_effects: [network-read]
+    disposition:
+      type: exception-pending
+      feature_id: feature.foundation-platform.advertising
+      reason: '项目禁止广告、推广位和付费导流。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: core-module:app_paths
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/app_paths.rs
+      symbol: app_paths
+    platforms: [windows, macos]
+    side_effects: [filesystem-read]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.platform-paths
+  - id: core-module:assets
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/assets.rs
+      symbol: assets
+    platforms: [windows, macos]
+    side_effects: [process-control, injection]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.renderer-enhancements
+      reason: '界面增强依赖调试协议与脚本注入。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: core-module:bridge
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/bridge.rs
+      symbol: bridge
+    platforms: [windows, macos]
+    side_effects: [process-control, injection]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.renderer-enhancements
+      reason: '界面增强依赖调试协议与脚本注入。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: core-module:ccs_import
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/ccs_import.rs
+      symbol: ccs_import
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.provider-import
+  - id: core-module:cdp
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/cdp.rs
+      symbol: cdp
+    platforms: [windows, macos]
+    side_effects: [process-control, injection]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.renderer-enhancements
+      reason: '界面增强依赖调试协议与脚本注入。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: core-module:codex_app_state
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/codex_app_state.rs
+      symbol: codex_app_state
+    platforms: [windows, macos]
+    side_effects: [filesystem-write, process-control]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.provider-configuration-application
+  - id: core-module:codex_home
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/codex_home.rs
+      symbol: codex_home
+    platforms: [windows, macos]
+    side_effects: [filesystem-read]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.platform-paths
+  - id: core-module:codex_local_storage
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/codex_local_storage.rs
+      symbol: codex_local_storage
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, database-read]
+    disposition:
+      type: feature
+      feature_id: feature.session-data.token-usage-history
+  - id: core-module:codex_sqlite
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/codex_sqlite.rs
+      symbol: codex_sqlite
+    platforms: [windows, macos]
+    side_effects: [database-read, database-write, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.session-data.local-session-management
+  - id: core-module:diagnostic_log
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/diagnostic_log.rs
+      symbol: diagnostic_log
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write, clipboard-write]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.diagnostics
+  - id: core-module:dream_skin
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/dream_skin.rs
+      symbol: dream_skin
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.plugin-script.dream-skin-library
+  - id: core-module:dream_skin_library
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/dream_skin_library.rs
+      symbol: dream_skin_library
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.plugin-script.dream-skin-library
+  - id: core-module:dream_skin_market
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/dream_skin_market.rs
+      symbol: dream_skin_market
+    platforms: [windows, macos]
+    side_effects: [network-read, filesystem-write]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.dream-skin-marketplace
+      reason: '远程推荐主题列表被项目排除。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: core-module:dream_skin_runtime
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/dream_skin_runtime.rs
+      symbol: dream_skin_runtime
+    platforms: [windows, macos]
+    side_effects: [process-control, injection]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.dream-skin-runtime
+      reason: 'Dream Skin 运行时依赖 renderer 注入。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: core-module:env_conflicts
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/env_conflicts.rs
+      symbol: env_conflicts
+    platforms: [windows, macos]
+    side_effects: [environment-read, environment-write]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.environment-conflicts
+  - id: core-module:http_client
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/http_client.rs
+      symbol: http_client
+    platforms: [windows, macos]
+    side_effects: [network-read]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.provider-diagnostics
+  - id: core-module:install
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/install/mod.rs
+      symbol: install
+    platforms: [windows, macos]
+    side_effects: [filesystem-write, process-control]
+    disposition:
+      type: feature
+      feature_id: feature.remote-install.entrypoint-installation
+  - id: core-module:launcher
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/launcher.rs
+      symbol: launcher
+    platforms: [windows, macos]
+    side_effects: [process-control, injection]
+    disposition:
+      type: excluded
+      code: legacy-coupled-launcher
+      reason: '进程生命周期与禁止的 renderer 注入耦合。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: core-module:model_catalog
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/model_catalog.rs
+      symbol: model_catalog
+    platforms: [windows, macos]
+    side_effects: [network-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.model-catalog
+  - id: core-module:model_suffix
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/model_suffix.rs
+      symbol: model_suffix
+    platforms: [windows, macos]
+    side_effects: [network-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.model-catalog
+  - id: core-module:models
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/models.rs
+      symbol: models
+    platforms: [windows, macos]
+    side_effects: [network-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.model-catalog
+  - id: core-module:native_menu
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/native_menu.rs
+      symbol: native_menu
+    platforms: [windows, macos]
+    side_effects: [process-control, injection]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.native-menu-localization
+      reason: '菜单本地化依赖调试协议与脚本注入。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: core-module:paths
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/paths.rs
+      symbol: paths
+    platforms: [windows, macos]
+    side_effects: [filesystem-read]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.platform-paths
+  - id: core-module:plugin_marketplace
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/plugin_marketplace.rs
+      symbol: plugin_marketplace
+    platforms: [windows, macos]
+    side_effects: [network-read, filesystem-write, injection]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.plugin-marketplace
+      reason: '远程推荐插件列表与注入式解锁需独立决策。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: core-module:ports
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/ports.rs
+      symbol: ports
+    platforms: [windows, macos]
+    side_effects: [network-listen, network-read]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.protocol-proxy
+  - id: core-module:protocol_proxy
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/protocol_proxy.rs
+      symbol: protocol_proxy
+    platforms: [windows, macos]
+    side_effects: [network-listen, network-read]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.protocol-proxy
+  - id: core-module:provider_import
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/provider_import.rs
+      symbol: provider_import
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.provider-import
+  - id: core-module:proxy
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/proxy.rs
+      symbol: proxy
+    platforms: [windows, macos]
+    side_effects: [environment-read, network-read]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.network-environment
+  - id: core-module:relay_config
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/relay_config.rs
+      symbol: relay_config
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.relay-profile-management
+  - id: core-module:relay_environment
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/relay_environment.rs
+      symbol: relay_environment
+    platforms: [windows, macos]
+    side_effects: [environment-read, network-read]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.network-environment
+  - id: core-module:relay_rotation
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/relay_rotation.rs
+      symbol: relay_rotation
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.aggregate-routing
+  - id: core-module:relay_switch
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/relay_switch.rs
+      symbol: relay_switch
+    platforms: [windows, macos]
+    side_effects: [filesystem-write, process-control]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.provider-configuration-application
+  - id: core-module:routes
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/routes.rs
+      symbol: routes
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write, injection]
+    disposition:
+      type: excluded
+      code: legacy-renderer-bridge-router
+      reason: '旧 renderer bridge 路由器不进入新架构。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: core-module:script_market
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/script_market.rs
+      symbol: script_market
+    platforms: [windows, macos]
+    side_effects: [network-read, filesystem-write]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.script-marketplace
+      reason: '远程推荐脚本列表被项目排除。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: core-module:settings
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/settings.rs
+      symbol: settings
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.settings-management
+  - id: core-module:status
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/status.rs
+      symbol: status
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, process-read]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.application-overview
+  - id: core-module:stepwise
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/stepwise.rs
+      symbol: stepwise
+    platforms: [windows, macos]
+    side_effects: [network-read, injection]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.stepwise-suggestions
+      reason: 'Stepwise 呈现依赖 renderer 注入。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: core-module:update
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/update.rs
+      symbol: update
+    platforms: [windows, macos]
+    side_effects: [network-read, filesystem-write, process-control]
+    disposition:
+      type: feature
+      feature_id: feature.remote-install.application-update
+  - id: core-module:upstream_worktree
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/upstream_worktree.rs
+      symbol: upstream_worktree
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, process-control]
+    disposition:
+      type: feature
+      feature_id: feature.remote-install.upstream-worktree
+  - id: core-module:user_scripts
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/user_scripts.rs
+      symbol: user_scripts
+    platforms: [windows, macos]
+    side_effects: [filesystem-write, injection]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.user-scripts
+      reason: '用户脚本执行依赖注入链。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: core-module:version
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/version.rs
+      symbol: version
+    platforms: [windows, macos]
+    side_effects: [process-read]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.version-and-startup
+  - id: core-module:vision
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/vision.rs
+      symbol: vision
+    platforms: [windows, macos]
+    side_effects: [network-read, request-mutation, injection]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.image-analysis
+      reason: '图片分析改写请求并依赖注入链。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: core-module:watcher
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/watcher.rs
+      symbol: watcher
+    platforms: [windows, macos]
+    side_effects: [filesystem-write, process-control]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.watcher
+  - id: core-module:zed_remote
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/zed_remote.rs
+      symbol: zed_remote
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, process-control]
+    disposition:
+      type: feature
+      feature_id: feature.remote-install.zed-remote
+  - id: data-module:backup
+    kind: data-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-data/src/backup.rs
+      symbol: backup
+    platforms: [windows, macos]
+    side_effects: [database-read, database-write, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.session-data.provider-metadata-maintenance
+  - id: data-module:markdown
+    kind: data-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-data/src/markdown.rs
+      symbol: markdown
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.session-data.markdown-export
+  - id: data-module:provider_sync
+    kind: data-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-data/src/provider_sync.rs
+      symbol: provider_sync
+    platforms: [windows, macos]
+    side_effects: [database-read, database-write, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.session-data.provider-metadata-maintenance
+  - id: data-module:storage
+    kind: data-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-data/src/storage.rs
+      symbol: storage
+    platforms: [windows, macos]
+    side_effects: [database-read, database-write, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.session-data.local-session-management
+  - id: tauri-command:activate_dream_skin_theme
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: activate_dream_skin_theme
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.plugin-script.dream-skin-library
+  - id: tauri-command:apply_dream_skin
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: apply_dream_skin
+    platforms: [windows, macos]
+    side_effects: [process-control, injection]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.dream-skin-runtime
+      reason: 'Dream Skin 运行时依赖 renderer 注入。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: tauri-command:apply_pure_api_injection
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: apply_pure_api_injection
+    platforms: [windows, macos]
+    side_effects: [filesystem-write, process-control]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.provider-configuration-application
+  - id: tauri-command:apply_relay_injection
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: apply_relay_injection
+    platforms: [windows, macos]
+    side_effects: [filesystem-write, process-control]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.provider-configuration-application
+  - id: tauri-command:apply_session_index_cleanup
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: apply_session_index_cleanup
+    platforms: [windows, macos]
+    side_effects: [database-read, database-write, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.session-data.provider-metadata-maintenance
+  - id: tauri-command:backend_version
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: backend_version
+    platforms: [windows, macos]
+    side_effects: [process-read]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.version-and-startup
+  - id: tauri-command:backfill_relay_profile_from_live
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: backfill_relay_profile_from_live
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.relay-profile-management
+  - id: tauri-command:check_env_conflicts
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: check_env_conflicts
+    platforms: [windows, macos]
+    side_effects: [environment-read, environment-write]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.environment-conflicts
+  - id: tauri-command:check_relay_environment
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: check_relay_environment
+    platforms: [windows, macos]
+    side_effects: [environment-read, network-read]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.network-environment
+  - id: tauri-command:check_update
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: check_update
+    platforms: [windows, macos]
+    side_effects: [network-read, filesystem-write, process-control]
+    disposition:
+      type: feature
+      feature_id: feature.remote-install.application-update
+  - id: tauri-command:clear_logs
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: clear_logs
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write, clipboard-write]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.diagnostics
+  - id: tauri-command:clear_relay_injection
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: clear_relay_injection
+    platforms: [windows, macos]
+    side_effects: [filesystem-write, process-control]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.provider-configuration-application
+  - id: tauri-command:confirm_pending_provider_import
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: confirm_pending_provider_import
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.provider-import
+  - id: tauri-command:copy_diagnostics
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: copy_diagnostics
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write, clipboard-write]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.diagnostics
+  - id: tauri-command:create_dream_skin_theme
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: create_dream_skin_theme
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.plugin-script.dream-skin-library
+  - id: tauri-command:delete_context_entry
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: delete_context_entry
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.context-entry-management
+  - id: tauri-command:delete_dream_skin_theme
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: delete_dream_skin_theme
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.plugin-script.dream-skin-library
+  - id: tauri-command:delete_local_session
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: delete_local_session
+    platforms: [windows, macos]
+    side_effects: [database-read, database-write, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.session-data.local-session-management
+  - id: tauri-command:delete_user_script
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: delete_user_script
+    platforms: [windows, macos]
+    side_effects: [filesystem-write, injection]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.user-scripts
+      reason: '用户脚本执行依赖注入链。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: tauri-command:diagnose_relay_profile
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: diagnose_relay_profile
+    platforms: [windows, macos]
+    side_effects: [network-read]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.provider-diagnostics
+  - id: tauri-command:disable_watcher
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: disable_watcher
+    platforms: [windows, macos]
+    side_effects: [filesystem-write, process-control]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.watcher
+  - id: tauri-command:dismiss_pending_provider_import
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: dismiss_pending_provider_import
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.provider-import
+  - id: tauri-command:dream_skin_status
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: dream_skin_status
+    platforms: [windows, macos]
+    side_effects: [process-control, injection]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.dream-skin-runtime
+      reason: 'Dream Skin 运行时依赖 renderer 注入。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: tauri-command:enable_watcher
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: enable_watcher
+    platforms: [windows, macos]
+    side_effects: [filesystem-write, process-control]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.watcher
+  - id: tauri-command:extract_relay_common_config
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: extract_relay_common_config
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.context-entry-management
+  - id: tauri-command:fetch_relay_profile_models
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: fetch_relay_profile_models
+    platforms: [windows, macos]
+    side_effects: [network-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.model-catalog
+  - id: tauri-command:forget_zed_remote_project
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: forget_zed_remote_project
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, process-control]
+    disposition:
+      type: feature
+      feature_id: feature.remote-install.zed-remote
+  - id: tauri-command:import_ccs_providers
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: import_ccs_providers
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.provider-import
+  - id: tauri-command:import_dream_skin_image
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: import_dream_skin_image
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.plugin-script.dream-skin-library
+  - id: tauri-command:install_dream_skin_market_theme
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: install_dream_skin_market_theme
+    platforms: [windows, macos]
+    side_effects: [network-read, filesystem-write]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.dream-skin-marketplace
+      reason: '远程推荐主题列表被项目排除。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: tauri-command:install_entrypoints
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: install_entrypoints
+    platforms: [windows, macos]
+    side_effects: [filesystem-write, process-control]
+    disposition:
+      type: feature
+      feature_id: feature.remote-install.entrypoint-installation
+  - id: tauri-command:install_market_script
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: install_market_script
+    platforms: [windows, macos]
+    side_effects: [network-read, filesystem-write]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.script-marketplace
+      reason: '远程推荐脚本列表被项目排除。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: tauri-command:install_watcher
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: install_watcher
+    platforms: [windows, macos]
+    side_effects: [filesystem-write, process-control]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.watcher
+  - id: tauri-command:launch_codex_plus
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: launch_codex_plus
+    platforms: [windows, macos]
+    side_effects: [process-control]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.application-lifecycle
+  - id: tauri-command:list_context_entries
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: list_context_entries
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.context-entry-management
+  - id: tauri-command:list_dream_skin_themes
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: list_dream_skin_themes
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.plugin-script.dream-skin-library
+  - id: tauri-command:list_local_sessions
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: list_local_sessions
+    platforms: [windows, macos]
+    side_effects: [database-read, database-write, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.session-data.local-session-management
+  - id: tauri-command:list_zed_remote_projects
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: list_zed_remote_projects
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, process-control]
+    disposition:
+      type: feature
+      feature_id: feature.remote-install.zed-remote
+  - id: tauri-command:load_ads
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: load_ads
+    platforms: [windows, macos]
+    side_effects: [network-read]
+    disposition:
+      type: exception-pending
+      feature_id: feature.foundation-platform.advertising
+      reason: '项目禁止广告、推广位和付费导流。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: tauri-command:load_ccs_providers
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: load_ccs_providers
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.provider-import
+  - id: tauri-command:load_dream_skin_theme
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: load_dream_skin_theme
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.plugin-script.dream-skin-library
+  - id: tauri-command:load_overview
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: load_overview
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, process-read]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.application-overview
+  - id: tauri-command:load_pending_provider_import
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: load_pending_provider_import
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.provider-import
+  - id: tauri-command:load_provider_sync_targets
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: load_provider_sync_targets
+    platforms: [windows, macos]
+    side_effects: [database-read, database-write, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.session-data.provider-metadata-maintenance
+  - id: tauri-command:load_settings
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: load_settings
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.settings-management
+  - id: tauri-command:load_watcher_state
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: load_watcher_state
+    platforms: [windows, macos]
+    side_effects: [filesystem-write, process-control]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.watcher
+  - id: tauri-command:open_external_url
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: open_external_url
+    platforms: [windows, macos]
+    side_effects: [process-control]
+    disposition:
+      type: excluded
+      code: presentation-adapter-only
+      reason: '通用 Tauri 外链桥不是独立产品能力。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: tauri-command:open_zed_remote
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: open_zed_remote
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, process-control]
+    disposition:
+      type: feature
+      feature_id: feature.remote-install.zed-remote
+  - id: tauri-command:perform_update
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: perform_update
+    platforms: [windows, macos]
+    side_effects: [network-read, filesystem-write, process-control]
+    disposition:
+      type: feature
+      feature_id: feature.remote-install.application-update
+  - id: tauri-command:plugin_marketplace_status
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: plugin_marketplace_status
+    platforms: [windows, macos]
+    side_effects: [network-read, filesystem-write, injection]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.plugin-marketplace
+      reason: '远程推荐插件列表与注入式解锁需独立决策。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: tauri-command:preview_session_index_cleanup
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: preview_session_index_cleanup
+    platforms: [windows, macos]
+    side_effects: [database-read, database-write, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.session-data.provider-metadata-maintenance
+  - id: tauri-command:read_latest_logs
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: read_latest_logs
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write, clipboard-write]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.diagnostics
+  - id: tauri-command:read_live_context_entries
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: read_live_context_entries
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.context-entry-management
+  - id: tauri-command:read_relay_files
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: read_relay_files
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.relay-profile-management
+  - id: tauri-command:refresh_dream_skin_market
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: refresh_dream_skin_market
+    platforms: [windows, macos]
+    side_effects: [network-read, filesystem-write]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.dream-skin-marketplace
+      reason: '远程推荐主题列表被项目排除。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: tauri-command:refresh_script_market
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: refresh_script_market
+    platforms: [windows, macos]
+    side_effects: [network-read, filesystem-write]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.script-marketplace
+      reason: '远程推荐脚本列表被项目排除。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: tauri-command:relay_status
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: relay_status
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.relay-profile-management
+  - id: tauri-command:remote_plugin_marketplace_status
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: remote_plugin_marketplace_status
+    platforms: [windows, macos]
+    side_effects: [network-read, filesystem-write, injection]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.plugin-marketplace
+      reason: '远程推荐插件列表与注入式解锁需独立决策。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: tauri-command:remove_env_conflicts
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: remove_env_conflicts
+    platforms: [windows, macos]
+    side_effects: [environment-read, environment-write]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.environment-conflicts
+  - id: tauri-command:rename_dream_skin_theme
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: rename_dream_skin_theme
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.plugin-script.dream-skin-library
+  - id: tauri-command:repair_plugin_marketplace
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: repair_plugin_marketplace
+    platforms: [windows, macos]
+    side_effects: [network-read, filesystem-write, injection]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.plugin-marketplace
+      reason: '远程推荐插件列表与注入式解锁需独立决策。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: tauri-command:repair_remote_plugin_marketplace
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: repair_remote_plugin_marketplace
+    platforms: [windows, macos]
+    side_effects: [network-read, filesystem-write, injection]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.plugin-marketplace
+      reason: '远程推荐插件列表与注入式解锁需独立决策。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: tauri-command:repair_shortcuts
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: repair_shortcuts
+    platforms: [windows, macos]
+    side_effects: [filesystem-write, process-control]
+    disposition:
+      type: feature
+      feature_id: feature.remote-install.entrypoint-installation
+  - id: tauri-command:reset_dream_skin_image
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: reset_dream_skin_image
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.plugin-script.dream-skin-library
+  - id: tauri-command:reset_dream_skin_theme
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: reset_dream_skin_theme
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.plugin-script.dream-skin-library
+  - id: tauri-command:reset_image_overlay_settings
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: reset_image_overlay_settings
+    platforms: [windows, macos]
+    side_effects: [process-control, injection]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.renderer-enhancements
+      reason: '界面增强依赖调试协议与脚本注入。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: tauri-command:reset_settings
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: reset_settings
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.settings-management
+  - id: tauri-command:restart_codex_plus
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: restart_codex_plus
+    platforms: [windows, macos]
+    side_effects: [process-control]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.application-lifecycle
+  - id: tauri-command:restore_dream_skin
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: restore_dream_skin
+    platforms: [windows, macos]
+    side_effects: [process-control, injection]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.dream-skin-runtime
+      reason: 'Dream Skin 运行时依赖 renderer 注入。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: tauri-command:save_dream_skin_theme
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: save_dream_skin_theme
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.plugin-script.dream-skin-library
+  - id: tauri-command:save_relay_file
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: save_relay_file
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.relay-profile-management
+  - id: tauri-command:save_settings
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: save_settings
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.settings-management
+  - id: tauri-command:set_user_script_enabled
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: set_user_script_enabled
+    platforms: [windows, macos]
+    side_effects: [filesystem-write, injection]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.user-scripts
+      reason: '用户脚本执行依赖注入链。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: tauri-command:startup_options
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: startup_options
+    platforms: [windows, macos]
+    side_effects: [process-read]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.version-and-startup
+  - id: tauri-command:switch_relay_profile
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: switch_relay_profile
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.relay-profile-management
+  - id: tauri-command:sync_live_context_entries
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: sync_live_context_entries
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.context-entry-management
+  - id: tauri-command:sync_providers_now
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: sync_providers_now
+    platforms: [windows, macos]
+    side_effects: [database-read, database-write, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.session-data.provider-metadata-maintenance
+  - id: tauri-command:test_relay_profile
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: test_relay_profile
+    platforms: [windows, macos]
+    side_effects: [network-read]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.provider-diagnostics
+  - id: tauri-command:test_stepwise_settings
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: test_stepwise_settings
+    platforms: [windows, macos]
+    side_effects: [network-read, injection]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.stepwise-suggestions
+      reason: 'Stepwise 呈现依赖 renderer 注入。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: tauri-command:uninstall_entrypoints
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: uninstall_entrypoints
+    platforms: [windows, macos]
+    side_effects: [filesystem-write, process-control]
+    disposition:
+      type: feature
+      feature_id: feature.remote-install.entrypoint-installation
+  - id: tauri-command:uninstall_watcher
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: uninstall_watcher
+    platforms: [windows, macos]
+    side_effects: [filesystem-write, process-control]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.watcher
+  - id: tauri-command:upsert_context_entry
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: upsert_context_entry
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.context-entry-management
+  - id: tauri-command:verify_dream_skin
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: verify_dream_skin
+    platforms: [windows, macos]
+    side_effects: [process-control, injection]
+    disposition:
+      type: exception-pending
+      feature_id: feature.plugin-script.dream-skin-runtime
+      reason: 'Dream Skin 运行时依赖 renderer 注入。'
+      decision_refs:
+        - issue:26
+        - rule:AGENTS-product-constraints
+  - id: tauri-command:write_diagnostic_event
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: write_diagnostic_event
+    platforms: [windows, macos]
+    side_effects: [filesystem-read, filesystem-write, clipboard-write]
+    disposition:
+      type: feature
+      feature_id: feature.foundation-platform.diagnostics

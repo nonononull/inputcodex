@@ -1,0 +1,10 @@
+schema_version: inputcodex.fixture-manifest.v1
+feature_id: feature.provider-network.provider-import
+fixtures:
+  - id: fixture.feature.provider-network.provider-import.baseline
+    scenario: baseline
+    kind: synthetic
+    files:
+      - path: baseline.yml
+        format: yaml
+        description: '合成供应商导入记录，凭据使用显式占位值。'

@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游 `v1.2.41` 审计快照与每 6 小时监控，并已通过 Issue `#19/#22`、PR `#21/#23` 完成 Gate 3 纯 Rust Workspace、五类失败语义、三平台最低冷构建基线和独立 closeout；Issue `#24` 正在建立 Gate 4 功能目录与性能基线的规划控制面，实际执行仍锁定。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游 `v1.2.41` 审计快照与每 6 小时监控，并已通过 Issue `#19/#22`、PR `#21/#23` 完成 Gate 3 纯 Rust Workspace、五类失败语义、三平台最低冷构建基线和独立 closeout；Issue `#24` / PR `#25` 已完成 Gate 4 规划合同，Issue `#26` 已完成 source-index、五域功能目录、行为合同与脱敏 fixture 的本地验证，下一步创建关联 PR 并等待 Review/CI。
 
 ## 项目目标
 
@@ -42,17 +42,18 @@
 - 通过 PR `#21` Squash Merge Gate 3 七成员 Workspace、首版无缓存三平台 CI、五类失败语义和冷构建最低基线；合并提交为 `0716ec0debcd3e059cc4ca88a072232841ca73b4`，Issue `#19` 已按 `COMPLETED` 关闭。
 - PR `#21` 的最终 Head 为 `9a4a4425f2fb0d8235554d3e83577111ae34efcc`；merge/head tree 均为 `4881ce609370f77181d9545474c029ab0c5d4972`，GitHub 签名 `valid`，合并后 `main` 运行 `29919596057` 六 Job 全绿且成功 Artifact 数为 `0`。
 - 通过 PR `#23` Squash Merge Gate 3 独立 closeout；合并提交为 `f470c062037042a1f7833a29cdcf216f6c0f5601`，Issue `#22` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29922385227` 六 Job 全绿且成功 Artifact 数为 `0`。
-- 已创建 Issue `#24` 与分支 `codex/issue-24-gate-4-planning`，采用“两阶段拆分”：本任务只冻结 Gate 4 规划合同，功能目录与性能基线分别使用后续独立执行 Issue。
+- Issue `#24` / PR `#25` 已 Squash Merge Gate 4 两阶段规划合同；合并提交为 `431682296f53e86de1184c732b0d4748857c9390`，Issue `#24` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29926710342` 六 Job 全绿且成功 Artifact 数为 `0`。
+- 已创建 Issue `#26` 与分支 `codex/issue-26-gate-4-feature-catalog`；Session Plan、Runtime Workflow、36 条最大范围和新 `scope_hash` 已获项目所有者批准，最终合并仍需具体 PR 与最终 Head 的独立授权。
 
 当前明确不做：
 
 - 不把已导入的上游审计快照接入产品构建或运行面，也不在非 upstream-sync Issue 中修改快照。
 - 不导入半成品参考仓库源码。
-- 不在 Issue `#24` 中创建 `parity/`、`benchmarks/`，也不修改 Cargo、Rust 产品源码、测试、CI Workflow、发布资产或上游快照。
+- 不创建 `benchmarks/`，不修改 CI Workflow、发布资产或上游快照；Issue `#26` 只继续写入已批准的 parity 合同、fixture、验证器和任务证据。
 - 不执行功能迁移、安装包构建、发布或未经项目所有者授权的 PR 合并。
 - 不让上游 Tauri/React UI、现有注入脚本和远程推荐列表进入最终运行面。
 
-## 当前 Gate 4 规划边界
+## 当前 Gate 4 功能目录边界
 
 - Gate 2 的 Issue `#9/#12/#14` 与 PR `#11/#13/#15` 均已完成；上游监控 Workflow 持续运行，Issue `#16` 只由机器维护。
 - `upstream/CodexPlusPlus/` 含 `v1.2.41` 的 `277` 个只读审计文件，`upstream/source-lock.json` 记录来源、tree、逐文件 blob/SHA-256、许可证和生成工具证据。
@@ -61,14 +62,16 @@
 - Linux、Windows、macOS 已各取得 `3/3` 次无缓存成功样本；Job 执行时间中位数分别为 `133`、`212`、`96` 秒，最低基线不包含 Cache、P95 或七天调优结论。
 - Gate 3 实现顺序固定为“RED 治理合同 → GREEN 治理脚本 → 七成员 Workspace → 无缓存三平台 CI → 真实失败恢复 → 冷构建基线”。
 - Iced 只能直接存在于 presentation crate；最小窗口不建立 UI 设计系统，视觉与交互由 Gemini 实现或审阅。
-- Gate 4 当前只规划功能矩阵字段、行为合同、脱敏夹具规则、可比性能测量协议和后续两个执行 Issue；不创建实际矩阵数据、合同测试、基准代码或预算数值。
+- Gate 4 规划合同已进入 `main`；Issue `#26` 的 source-index 与五域功能目录 checkpoint `87537e6e4a0e6911dd1427cc23f52dcb805a4679` 已普通 push，Issue 评论 `5048930060` 记录 `133` 条入口、`36` 个 feature、`3` 个排除和 `0` 个覆盖缺口。
+- Issue `#26` 已在同一批准范围内建立 `36` 份五域行为合同、`11` 个合成或不可逆脱敏 fixture manifest，并通过完整 `validate_repository`、路径/敏感值安全与文本控制字节回归；普通 checkpoint `c50ec7b` 已 push，Issue 评论 `5049288893` 已回写，尚未创建 PR，最终合并仍需独立授权。
+- Issue `#26` 最大候选写集合为 36 条路径或路径模式，范围哈希为 `sha256:e8a1cbccfc3f0026e90fcb49264de5ea69980fa2e1faa03b520d9bedaf61e772`。
 - 最新正式功能真源仍为 `v1.2.41`；上游 `main` 当前变化只进入 Issue `#20` 预警，不自动改变 Gate 4 基线。
 
 ## 下一步
 
-1. 通过 Issue `#24` 建立 Gate 4 任务计划、Session Plan、Runtime Workflow、初始报告和 Master Plan 状态。
-2. 规划 PR 只允许治理与文档路径；创建 PR 后仍需项目所有者单独授权才能 Squash Merge。
-3. 规划 PR 合并后，分别创建“功能矩阵/行为合同/脱敏夹具”和“性能基线/预算批准”执行 Issue；两者都需要新的明确批准，Gate 5 继续锁定。
+1. 将完成本地验证的 Issue `#26` 作为独立 checkpoint 普通提交、普通 push，并回写 Issue 证据。
+2. 创建关联 Issue `#26` 的非 Draft PR，完成 Review 对话根因闭环和 Linux/Windows/macOS/required CI。
+3. 仅在项目所有者对具体 PR 与最终 Head 明确授权后 Squash Merge；功能目录收口后才创建性能基线 Issue，Gate 5 继续锁定。
 
 ## 项目文档
 
@@ -79,6 +82,10 @@
 - Gate 4 Session Plan：`docs/plans/sessions/2026-07-22-issue-24-gate-4-feature-performance-plan.md`
 - Gate 4 Runtime Workflow：`docs/workflows/2026-07-22-issue-24-gate-4-feature-performance-runtime.md`
 - Gate 4 初始报告：`docs/reports/issue-24-gate-4-feature-performance-plan.md`
+- Issue `#26` 实现计划：`docs/plans/2026-07-22-issue-26-gate-4-feature-catalog-implementation.md`
+- Issue `#26` Session Plan：`docs/plans/sessions/2026-07-22-issue-26-gate-4-feature-catalog.md`
+- Issue `#26` Runtime Workflow：`docs/workflows/2026-07-22-issue-26-gate-4-feature-catalog-runtime.md`
+- Issue `#26` 初始报告：`docs/reports/issue-26-gate-4-feature-catalog.md`
 - 本次筹备计划：`docs/plans/2026-07-21-bootstrap.md`
 - 筹备会话计划：`docs/plans/sessions/2026-07-21-inputcodex-bootstrap.md`
 - 筹备运行工作流：`docs/workflows/2026-07-21-inputcodex-bootstrap-runtime.md`

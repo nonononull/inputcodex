@@ -1,0 +1,272 @@
+schema_version: inputcodex.feature-catalog.v1
+release:
+  tag: v1.2.41
+  tag_commit: 3dafffcafb2566a1e8bce4b35671656d6adb3eda
+domain: plugin-script
+features:
+  - id: feature.plugin-script.dream-skin-library
+    name: 'Dream Skin 本地主题库'
+    status: unassessed
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/dream_skin.rs
+        symbol: dream_skin
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/dream_skin_library.rs
+        symbol: dream_skin_library
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: activate_dream_skin_theme
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: create_dream_skin_theme
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: delete_dream_skin_theme
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: import_dream_skin_image
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: list_dream_skin_themes
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: load_dream_skin_theme
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: rename_dream_skin_theme
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: reset_dream_skin_image
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: reset_dream_skin_theme
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: save_dream_skin_theme
+    entry_points:
+      - core-module:dream_skin
+      - core-module:dream_skin_library
+      - tauri-command:activate_dream_skin_theme
+      - tauri-command:create_dream_skin_theme
+      - tauri-command:delete_dream_skin_theme
+      - tauri-command:import_dream_skin_image
+      - tauri-command:list_dream_skin_themes
+      - tauri-command:load_dream_skin_theme
+      - tauri-command:rename_dream_skin_theme
+      - tauri-command:reset_dream_skin_image
+      - tauri-command:reset_dream_skin_theme
+      - tauri-command:save_dream_skin_theme
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '审计本地图片导入、主题保存与选择，不预设注入式应用。'
+      macos:
+        applicability: supported
+        semantics: '审计本地图片导入、主题保存与选择，不预设注入式应用。'
+    decision_refs:
+      - issue:26
+  - id: feature.plugin-script.dream-skin-marketplace
+    name: 'Dream Skin 市场'
+    status: exception-pending
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/dream_skin_market.rs
+        symbol: dream_skin_market
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: install_dream_skin_market_theme
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: refresh_dream_skin_market
+    entry_points:
+      - core-module:dream_skin_market
+      - tauri-command:install_dream_skin_market_theme
+      - tauri-command:refresh_dream_skin_market
+    platforms:
+      windows:
+        applicability: exception-pending
+        semantics: '远程主题推荐列表不得进入运行面。'
+      macos:
+        applicability: exception-pending
+        semantics: '远程主题推荐列表不得进入运行面。'
+    decision_refs:
+      - issue:26
+      - rule:AGENTS-product-constraints
+  - id: feature.plugin-script.dream-skin-runtime
+    name: 'Dream Skin 运行时'
+    status: exception-pending
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/dream_skin_runtime.rs
+        symbol: dream_skin_runtime
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: apply_dream_skin
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: dream_skin_status
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: restore_dream_skin
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: verify_dream_skin
+    entry_points:
+      - core-module:dream_skin_runtime
+      - tauri-command:apply_dream_skin
+      - tauri-command:dream_skin_status
+      - tauri-command:restore_dream_skin
+      - tauri-command:verify_dream_skin
+    platforms:
+      windows:
+        applicability: exception-pending
+        semantics: '现有运行时依赖 renderer 注入，需决定无注入等价语义。'
+      macos:
+        applicability: exception-pending
+        semantics: '现有运行时依赖 renderer 注入，需决定无注入等价语义。'
+    decision_refs:
+      - issue:26
+      - rule:AGENTS-product-constraints
+  - id: feature.plugin-script.image-analysis
+    name: '图片分析增强'
+    status: exception-pending
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/vision.rs
+        symbol: vision
+    entry_points:
+      - core-module:vision
+    platforms:
+      windows:
+        applicability: exception-pending
+        semantics: '现有能力改写请求并依赖注入链。'
+      macos:
+        applicability: exception-pending
+        semantics: '现有能力改写请求并依赖注入链。'
+    decision_refs:
+      - issue:26
+      - rule:AGENTS-product-constraints
+  - id: feature.plugin-script.native-menu-localization
+    name: '原生菜单本地化'
+    status: exception-pending
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/native_menu.rs
+        symbol: native_menu
+    entry_points:
+      - core-module:native_menu
+    platforms:
+      windows:
+        applicability: exception-pending
+        semantics: '现有能力依赖调试协议与脚本注入。'
+      macos:
+        applicability: exception-pending
+        semantics: '现有能力依赖调试协议与脚本注入。'
+    decision_refs:
+      - issue:26
+      - rule:AGENTS-product-constraints
+  - id: feature.plugin-script.plugin-marketplace
+    name: '插件市场配置'
+    status: exception-pending
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/plugin_marketplace.rs
+        symbol: plugin_marketplace
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: plugin_marketplace_status
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: remote_plugin_marketplace_status
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: repair_plugin_marketplace
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: repair_remote_plugin_marketplace
+    entry_points:
+      - core-module:plugin_marketplace
+      - tauri-command:plugin_marketplace_status
+      - tauri-command:remote_plugin_marketplace_status
+      - tauri-command:repair_plugin_marketplace
+      - tauri-command:repair_remote_plugin_marketplace
+    platforms:
+      windows:
+        applicability: exception-pending
+        semantics: '远程推荐列表与注入式插件解锁不得直接迁移。'
+      macos:
+        applicability: exception-pending
+        semantics: '远程推荐列表与注入式插件解锁不得直接迁移。'
+    decision_refs:
+      - issue:26
+      - rule:AGENTS-product-constraints
+  - id: feature.plugin-script.renderer-enhancements
+    name: 'Codex 界面增强'
+    status: exception-pending
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/assets.rs
+        symbol: assets
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/bridge.rs
+        symbol: bridge
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/cdp.rs
+        symbol: cdp
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: reset_image_overlay_settings
+    entry_points:
+      - core-module:assets
+      - core-module:bridge
+      - core-module:cdp
+      - tauri-command:reset_image_overlay_settings
+    platforms:
+      windows:
+        applicability: exception-pending
+        semantics: '粘贴修复、中文化、Goals 与覆盖层依赖 renderer 注入。'
+      macos:
+        applicability: exception-pending
+        semantics: '粘贴修复、中文化、Goals 与覆盖层依赖 renderer 注入。'
+    decision_refs:
+      - issue:26
+      - rule:AGENTS-product-constraints
+  - id: feature.plugin-script.script-marketplace
+    name: '脚本市场'
+    status: exception-pending
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/script_market.rs
+        symbol: script_market
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: install_market_script
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: refresh_script_market
+    entry_points:
+      - core-module:script_market
+      - tauri-command:install_market_script
+      - tauri-command:refresh_script_market
+    platforms:
+      windows:
+        applicability: exception-pending
+        semantics: '远程推荐脚本列表不得进入运行面。'
+      macos:
+        applicability: exception-pending
+        semantics: '远程推荐脚本列表不得进入运行面。'
+    decision_refs:
+      - issue:26
+      - rule:AGENTS-product-constraints
+  - id: feature.plugin-script.stepwise-suggestions
+    name: 'Stepwise 建议'
+    status: exception-pending
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/stepwise.rs
+        symbol: stepwise
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: test_stepwise_settings
+    entry_points:
+      - core-module:stepwise
+      - tauri-command:test_stepwise_settings
+    platforms:
+      windows:
+        applicability: exception-pending
+        semantics: '建议生成可审计，但现有呈现依赖注入。'
+      macos:
+        applicability: exception-pending
+        semantics: '建议生成可审计，但现有呈现依赖注入。'
+    decision_refs:
+      - issue:26
+      - rule:AGENTS-product-constraints
+  - id: feature.plugin-script.user-scripts
+    name: '用户脚本'
+    status: exception-pending
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/user_scripts.rs
+        symbol: user_scripts
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: delete_user_script
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: set_user_script_enabled
+    entry_points:
+      - core-module:user_scripts
+      - tauri-command:delete_user_script
+      - tauri-command:set_user_script_enabled
+    platforms:
+      windows:
+        applicability: exception-pending
+        semantics: '上游用户脚本依赖注入执行，仅审计安装与启停语义。'
+      macos:
+        applicability: exception-pending
+        semantics: '上游用户脚本依赖注入执行，仅审计安装与启停语义。'
+    decision_refs:
+      - issue:26
+      - rule:AGENTS-product-constraints

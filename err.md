@@ -499,6 +499,24 @@
 - 处理：不改写包装器或系统 ACL，改用已安装的 `C:\Users\dashuai\AppData\Roaming\npm\codex.ps1 --codex-run-as-apply-patch <PATCH>`；补丁先统一为 LF，并按文件拆分以避开 Windows 命令行长度限制。
 - 验证：AGENTS、README、build 与 Master Plan 均通过同一 apply-patch 引擎成功更新；失败补丁没有产生部分写入，Master Plan 中一次仓库名拼写错误也被补丁上下文安全拒绝。
 
+## 2026-07-22：Windows 大型 apply_patch 参数超限与切片首记录缩进丢失
+
+- 环境：Issue `#26` 生成约 `100 KB` 的 source-index、五域功能目录和 README，仍要求所有仓库写入经过官方 apply-patch 引擎。
+- 现象：单次 `--codex-run-as-apply-patch` 返回 `spawnSync ... ENAMETOOLONG`；改为记录切片后，5 个追加 hunk 的首条 YAML 记录少 1 个缩进，仓库测试在 `source-index.yml:302` 报 `did not find expected key`。
+- 根因：Windows 子进程把完整补丁作为单个参数传递，超过命令行长度上限；追加 hunk 的上下文与首条记录若不保留补丁格式要求的前导空格，会被解析器消费 1 个缩进。早期切片脚本另使用 `-like '*** *'`，其中星号被当作通配符并误跳过内容行。
+- 处理：按文件与完整 YAML 记录把补丁限制在 `24 KB` 以下；每次重建先删除半成品，执行 `133/133` 映射自检，再对追加 hunk 首记录做精确缩进修复。禁止把空文件创建成功当作数据写入成功。
+- 验证：最终 source-index 可解析，`133` 条入口、`36` 个 feature、`3` 个显式排除、`10` 个 `exception-pending` feature 与 `0` 个覆盖缺口通过 `validate_feature_repository` 真实仓库对账。
+- 关联：Issue `#26` Phase 4，`crates/inputcodex-parity/tests/catalog_repository.rs`。
+
+## 2026-07-22：PowerShell 生成 Markdown 时把反引号 e 转成 ESC
+
+- 环境：Issue `#26` Phase 5 数据面完成后，对 Parity 文档执行文本控制字节扫描。
+- 现象：`parity/README.md` 两处 `exception-pending` 被写成 `0x1B` 加 `xception-pending`，终端显示为不可见控制字符；Rust 数据验证未覆盖该 Markdown 字节层。
+- 根因：使用 PowerShell 双引号字符串生成 Markdown 时，`` `e`` 被解释为 ESC 转义，而不是保留 Markdown 代码标记和字母 `e`。
+- 处理：通过 apply-patch 将两处文本恢复为字面量 `` `exception-pending` ``；不修改已推送提交历史，并增加本批次文本控制字节扫描作为验证证据。
+- 验证：全仓文本文件扫描仅允许制表、换行和回车后，非法控制字节数量为 `0`；Parity 仓库级 Rust 验证继续通过。
+- 关联：Issue `#26` Phase 5，`parity/README.md`。
+
 ## 记录模板
 
 ```text
