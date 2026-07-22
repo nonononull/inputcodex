@@ -1,0 +1,64 @@
+name: Upstream Watch
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/scripts/upstream_watch.py
+      - .github/scripts/tests/test_upstream_watch.py
+      - .github/workflows/upstream-watch.yml
+      - upstream/source-lock.json
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONPYCACHEPREFIX: /tmp/inputcodex-pycache
+
+concurrency:
+  group: upstream-monitor-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: 运行无网络合同测试
+        run: python3 -m unittest discover -s .github/scripts/tests -p 'test_*.py' -v
+
+      - name: 验证 Python 与冻结基线
+        run: |
+          python3 -m py_compile .github/scripts/upstream_watch.py .github/scripts/tests/test_upstream_watch.py
+          python3 .github/scripts/upstream_watch.py --validate-only
+
+  watch:
+    name: watch
+    if: github.event_name != 'pull_request'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: 扫描上游并管理预警 Issue
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 .github/scripts/upstream_watch.py

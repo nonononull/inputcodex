@@ -2,19 +2,20 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 21 日，PR `#11` 已将上游正式 Release `v1.2.41` 的完整只读审计快照 Squash Merge 到 `main`，合并提交为 `dde08b725eb2bf4add7fbcfa955f3eaf4eb1bbc6`；Issue `#9` 已关闭，Issue `#12` 是当前 Gate 2 closeout 活动任务。
+截至 2026 年 7 月 22 日，PR `#13` 已将 Gate 2 上游基线 closeout Squash Merge 到 `main`，合并提交为 `5e64015075ddf2adef4bf685f50977b47b7f72e7`；Issue `#12` 已关闭，Issue `#14` 是当前上游监控活动任务。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照与 `upstream/source-lock.json`，但仍没有产品应用源码，因此没有 Cargo、Iced、安装包或发布构建命令。本文件当前提供三个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照与 `upstream/source-lock.json`，但仍没有产品应用源码，因此没有 Cargo、Iced、安装包或发布构建命令。本文件当前提供四个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
-3. Issue `#12` closeout 分支与允许路径验证。
+3. Issue `#12` / PR `#13` closeout 合并证据验证。
+4. Issue `#14` 上游监控合同、Workflow、允许路径与合并后幂等验证。
 
 当前禁止：
 
 - 在没有新的独立 upstream-sync Issue/PR 与项目所有者批准时修改 `upstream/` 或 `source-lock.json`。
 - 创建 `Cargo.toml`、Rust/Iced 源码、临时 UI 或 WebView。
-- 创建 `.github/workflows/`、Release、安装包、签名或更新资产。
+- 创建 `.github/workflows/upstream-watch.yml` 之外的 Workflow、Release、安装包、签名或更新资产。
 - 修改 Ruleset、required checks 或仓库级合并开关。
 - 修改或优化外部 AGOS。
 
@@ -32,6 +33,118 @@ Set-StrictMode -Version Latest
 ```
 
 原生 `git`、`gh`、`python` 命令后必须立即检查 `$LASTEXITCODE`。只有一行输出时使用 `@(...)` 归一化，禁止把空 stdout 当成成功证据。
+
+## Issue #14 上游监控本地验证
+
+本地验证不联网、不写 GitHub Issue，也不编译 Rust。运行：
+
+```powershell
+$previousPycachePrefix = $env:PYTHONPYCACHEPREFIX
+$env:PYTHONPYCACHEPREFIX = Join-Path ([IO.Path]::GetTempPath()) 'inputcodex-issue14-pycache'
+try {
+  python -m unittest discover -s .github/scripts/tests -p 'test_*.py' -v
+  if ($LASTEXITCODE -ne 0) { throw '上游监控无网络合同测试失败。' }
+
+  python -m py_compile .github/scripts/upstream_watch.py .github/scripts/tests/test_upstream_watch.py
+  if ($LASTEXITCODE -ne 0) { throw '上游监控 Python 编译检查失败。' }
+
+  python .github/scripts/upstream_watch.py --validate-only
+  if ($LASTEXITCODE -ne 0) { throw '上游监控冻结基线验证失败。' }
+
+  @'
+from pathlib import Path
+import yaml
+
+path = Path('.github/workflows/upstream-watch.yml')
+data = yaml.load(path.read_text(encoding='utf-8'), Loader=yaml.BaseLoader)
+triggers = data['on']
+assert triggers['schedule'] == [{'cron': '17 */6 * * *'}]
+assert 'workflow_dispatch' in triggers
+assert 'pull_request' in triggers
+assert data['permissions'] == {'contents': 'read'}
+assert data['env'] == {'PYTHONPYCACHEPREFIX': '/tmp/inputcodex-pycache'}
+assert data['jobs']['watch']['permissions'] == {'contents': 'read', 'issues': 'write'}
+assert data['jobs']['watch']['if'] == "github.event_name != 'pull_request'"
+assert data['jobs']['watch']['timeout-minutes'] == '10'
+print('UPSTREAM_WATCH_WORKFLOW_YAML_OK')
+'@ | python -
+  if ($LASTEXITCODE -ne 0) { throw '上游监控 Workflow YAML 合同失败。' }
+} finally {
+  if ($null -eq $previousPycachePrefix) {
+    Remove-Item Env:PYTHONPYCACHEPREFIX -ErrorAction SilentlyContinue
+  } else {
+    $env:PYTHONPYCACHEPREFIX = $previousPycachePrefix
+  }
+}
+```
+
+允许路径和禁止修改面验证：
+
+```powershell
+$allowedPaths = @(
+  '.github/scripts/tests/test_upstream_watch.py',
+  '.github/scripts/upstream_watch.py',
+  '.github/workflows/upstream-watch.yml',
+  'README.md',
+  'build.md',
+  'docs/plans/2026-07-22-issue-14-gate-2-upstream-watch.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-07-22-issue-14-gate-2-upstream-watch.md',
+  'docs/reports/issue-14-gate-2-upstream-watch.md',
+  'docs/workflows/2026-07-22-issue-14-gate-2-upstream-watch-runtime.md',
+  'err.md'
+)
+
+$branch = git branch --show-current
+if ($LASTEXITCODE -ne 0 -or $branch -ne 'codex/issue-14-gate-2-upstream-watch') {
+  throw "当前 Issue #14 分支不正确：$branch"
+}
+
+$committed = @(git -c core.quotePath=false diff --name-only origin/main...HEAD)
+if ($LASTEXITCODE -ne 0) { throw '读取 Issue #14 已提交差异失败。' }
+$working = @(git -c core.quotePath=false diff --name-only)
+if ($LASTEXITCODE -ne 0) { throw '读取 Issue #14 工作树差异失败。' }
+$staged = @(git -c core.quotePath=false diff --cached --name-only)
+if ($LASTEXITCODE -ne 0) { throw '读取 Issue #14 暂存差异失败。' }
+$untracked = @(git -c core.quotePath=false ls-files --others --exclude-standard)
+if ($LASTEXITCODE -ne 0) { throw '读取 Issue #14 未跟踪路径失败。' }
+$changed = @($committed + $working + $staged + $untracked | Sort-Object -Unique)
+$unexpected = @($changed | Where-Object { $_ -notin $allowedPaths })
+if ($unexpected.Count -ne 0) {
+  throw "Issue #14 混入未批准路径：$($unexpected -join ', ')"
+}
+
+foreach ($path in $allowedPaths) {
+  if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+    throw "缺少 Issue #14 允许文件：$path"
+  }
+}
+
+git diff --quiet origin/main...HEAD -- upstream
+if ($LASTEXITCODE -ne 0) { throw 'Issue #14 已提交差异修改了 upstream。' }
+git diff --quiet -- upstream
+if ($LASTEXITCODE -ne 0) { throw 'Issue #14 工作树修改了 upstream。' }
+git diff --cached --quiet -- upstream
+if ($LASTEXITCODE -ne 0) { throw 'Issue #14 暂存区修改了 upstream。' }
+
+foreach ($path in @('Cargo.toml', 'Cargo.lock', 'package.json', 'package-lock.json', 'target')) {
+  if (Test-Path -LiteralPath $path) { throw "Issue #14 禁止出现：$path" }
+}
+
+Write-Output 'ISSUE14_UPSTREAM_WATCH_LOCAL_VERIFY_OK'
+```
+
+合并后在 `main` 执行两次真实监控：
+
+```powershell
+gh workflow run upstream-watch.yml --repo nonononull/inputcodex --ref main
+if ($LASTEXITCODE -ne 0) { throw '首次触发上游监控失败。' }
+
+gh run list --repo nonononull/inputcodex --workflow upstream-watch.yml --limit 5
+if ($LASTEXITCODE -ne 0) { throw '读取上游监控运行列表失败。' }
+```
+
+等待首次运行成功并建立唯一状态 Issue 后，再触发第二次；第二次必须复用状态 Issue 且不得创建重复告警。失败必须先查 `err.md`，不得通过盲目重跑掩盖根因。
 
 ## Gate 2 快照离线验证
 
@@ -584,6 +697,6 @@ git status --short --branch
 ## 后续维护规则
 
 - 后续任何 `upstream/` 或 `source-lock.json` 修改必须使用新的 upstream-sync Issue/PR，并更新锁定文件、同步报告和本节快照验证常量。
-- Issue `#12` closeout 合并后，由项目所有者另行批准下一活动任务；不得把 closeout 授权扩展为 Gate 3 或功能实现授权。
+- Issue `#14` 合并并完成两次真实运行后，Gate 2 才能收口；不得把本任务授权扩展为 Gate 3 或功能实现授权。
 - 建立首个 Cargo Workspace 时再加入 Rust 构建、测试、基准和三平台 CI 命令。
 - 任何错误先查 `err.md`，重复问题优先复用既有根因与处理方案。
