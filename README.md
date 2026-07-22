@@ -53,15 +53,15 @@
 
 - Gate 2 的 Issue `#9/#12/#14` 与 PR `#11/#13/#15` 均已完成；上游监控 Workflow 持续运行，Issue `#16` 只由机器维护。
 - `upstream/CodexPlusPlus/` 含 `v1.2.41` 的 `277` 个只读审计文件，`upstream/source-lock.json` 记录来源、tree、逐文件 blob/SHA-256、许可证和生成工具证据。
-- 当前仍没有 Cargo Workspace、产品 Rust/Iced 源码、Release、安装包、签名或更新资产；Issue `#19` 已完成控制面 checkpoint，并取得治理入口缺失的可信 RED 证据。
+- 当前仍没有 Cargo Workspace、产品 Rust/Iced 源码、Release、安装包、签名或更新资产；Issue `#19` 的治理入口已由可信 RED 转为 `23/23` GREEN。
 - Gate 3 实现顺序固定为“RED 治理合同 → GREEN 治理脚本 → 七成员 Workspace → 无缓存三平台 CI → 真实失败恢复 → 冷构建基线”。
 - Iced 只能直接存在于 presentation crate；最小窗口不建立 UI 设计系统，视觉与交互由 Gemini 实现或审阅。
 
 ## 下一步
 
-1. 提交并普通 push Issue `#19` 的治理 RED checkpoint，在 Issue 回写 AST、退出码、稳定标记、commit 与根因证据。
-2. 实现 `scripts/ci/Classify-Changes.ps1` 与 `scripts/ci/Verify-RepositoryPolicy.ps1`，使同一合同测试转为 GREEN。
-3. GREEN 治理 checkpoint 完成后，再按 Runtime Workflow 创建最小 Workspace、三平台 CI、真实失败恢复和冷构建基线；最终 PR 合并仍需新的明确授权。
+1. 提交并普通 push Issue `#19` 的治理 GREEN checkpoint，在 Issue 回写 `23/23` 结果、commit、修复根因与安全边界。
+2. GREEN checkpoint 远端对账后，按 `domain → application → infrastructure/platform/parity → presentation → desktop` 创建七成员最小 Workspace。
+3. Workspace checkpoint 完成后，再创建三平台 CI、真实失败恢复和冷构建基线；最终 PR 合并仍需新的明确授权。
 
 ## 项目文档
 

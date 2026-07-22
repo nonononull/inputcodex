@@ -3,7 +3,7 @@
 schema_version: inputcodex.session-plan.v1
 task_id: 2026-07-22-issue-19-gate-3-rust-workspace-ci
 work_class: major
-task_status: governance-red-verified-awaiting-checkpoint-push
+task_status: governance-green-verified-awaiting-checkpoint-push
 task_summary: 按已批准的 Gate 3 合同建立七成员纯 Rust Workspace、Iced 展示层隔离、最小加载/平台语义、治理脚本与首版无缓存三平台 CI，不迁移任何上游业务功能。
 project_root: C:/Users/dashuai/Documents/inputcodex
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
@@ -27,7 +27,10 @@ external_agos_execution: needs-input-unregistered-recorded-and-bypassed
 red_contract_status: verified
 red_contract_exit_code: 10
 red_contract_marker: CI_CONTRACT_RED_MISSING_IMPLEMENTATION
-red_checkpoint_ref: pending-push
+red_checkpoint_ref: commit:67fe99457e1aa2717cc29c70d51114028d68dafd;issuecomment:5043557146
+green_contract_status: verified
+green_contract_passed: 23
+green_checkpoint_ref: pending-push
 
 ## 一、批准决策
 
@@ -217,3 +220,11 @@ owner_merge_authorization_ref: pending-new-owner-authorization-required
 - `scripts/ci/Test-CiScripts.ps1` 已预置路径分类和仓库政策 GREEN 夹具，但首先检查两个实现入口是否存在。
 - PowerShell AST 解析结果为 `0` 个错误；实际执行退出码为 `10`，唯一错误标记为 `CI_CONTRACT_RED_MISSING_IMPLEMENTATION`。
 - RED 输出精确列出缺失的 `scripts/ci/Classify-Changes.ps1` 与 `scripts/ci/Verify-RepositoryPolicy.ps1`；当前仍不存在产品 Workspace、Rust/Iced 源码或 `.github/workflows/ci.yml`。
+
+## 十四、治理 GREEN 执行记录
+
+- `scripts/ci/Classify-Changes.ps1` 只读取 JSON 变更记录，拒绝路径穿越、绝对路径、反斜杠、控制字符和不完整重命名，不执行构建或网络调用。
+- `scripts/ci/Verify-RepositoryPolicy.ps1` 固定七成员 Workspace、依赖方向、Iced 展示层边界、禁止脚本语言、WebView/Tauri、广告/遥测和更新源合同，不执行仓库代码或网络调用。
+- 首轮 GREEN 启动失败复用了 `err.md` 已有“零结果必须用 `@(...)` 归一化”结论；第二轮空 diff 夹具通过 `[AllowEmptyCollection()]` 修复，均未降低生产检查。
+- 安全复核新增 TOML 表形式依赖夹具，先稳定复现 Tauri 别名与依赖方向绕过，再修复解析器根因。
+- 最终三份 PowerShell 文件 AST 均为 `0` 个错误，合同测试退出码为 `0`，输出 `CI_CONTRACT_GREEN passed=23`。

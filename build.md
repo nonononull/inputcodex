@@ -4,7 +4,7 @@
 
 截至 2026 年 7 月 22 日，PR `#18` 已将 Gate 3 规划 Squash Merge 到 `main`，合并提交为 `477d110a9b284e127af365f5278901bcfa69e093`；Issue `#17` 已关闭，Issue `#19` 是当前 Gate 3 Workspace 与首版三平台 CI 实现任务。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照与 `upstream/source-lock.json`；Issue `#19` 已取得可信治理 RED，但仍未创建产品应用源码，因此暂时没有 Cargo/Iced 构建命令。本文件当前提供七个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照与 `upstream/source-lock.json`；Issue `#19` 的治理合同已从可信 RED 转为 `23/23` GREEN，但仍未创建产品应用源码，因此暂时没有 Cargo/Iced 构建命令。本文件当前提供八个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -13,11 +13,12 @@
 5. Issue `#17` Gate 3 规划文档、允许路径和禁止产品表面验证。
 6. Issue `#19` Gate 3 实现控制面、批准引用、范围哈希和 RED 前置门禁验证。
 7. Issue `#19` 治理 RED 合同的 AST、非零退出码、稳定标记和实现缺失根因验证。
+8. Issue `#19` 路径分类与仓库政策脚本的 `23/23` GREEN 合同验证。
 
 当前禁止：
 
 - 在没有新的独立 upstream-sync Issue/PR 与项目所有者批准时修改 `upstream/` 或 `source-lock.json`。
-- 在 Issue `#19` 的可信 RED checkpoint 尚未提交、普通 push 并回写 Issue 前创建 `Cargo.toml`、`Cargo.lock`、`rust-toolchain.toml`、Rust/Iced 源码或 `.github/workflows/ci.yml`。
+- 在 Issue `#19` 的 GREEN 治理 checkpoint 尚未提交、普通 push 并回写 Issue 前创建 `Cargo.toml`、`Cargo.lock`、`rust-toolchain.toml`、Rust/Iced 源码或 `.github/workflows/ci.yml`。
 - 创建 Release Workflow、安装包、签名、更新资产、临时 UI 或 WebView。
 - 修改 Ruleset、required checks 或仓库级合并开关。
 - 修改或优化外部 AGOS。
@@ -70,6 +71,41 @@ if ($redExitCode -ne 10 -or $redMarkerCount -ne 1) {
 ```
 
 验证通过时必须同时得到 `AST_ERROR_COUNT=0`、`RED_EXIT_CODE=10` 和 `RED_MARKER_COUNT=1`；这不是 GREEN，也不得解释为治理能力已经实现。
+
+## Issue #19 治理 GREEN checkpoint 验证
+
+```powershell
+$scripts = @(
+  'scripts/ci/Test-CiScripts.ps1',
+  'scripts/ci/Classify-Changes.ps1',
+  'scripts/ci/Verify-RepositoryPolicy.ps1'
+)
+foreach ($scriptPath in $scripts) {
+  $tokens = $null
+  $parseErrors = $null
+  [void][System.Management.Automation.Language.Parser]::ParseFile(
+    (Resolve-Path -LiteralPath $scriptPath).Path,
+    [ref]$tokens,
+    [ref]$parseErrors
+  )
+  if ($parseErrors.Count -ne 0) {
+    throw "$scriptPath 存在 AST 错误：$($parseErrors.Message -join '; ')"
+  }
+}
+
+$powerShellExecutable = (Get-Process -Id $PID).Path
+$output = @(& $powerShellExecutable -NoLogo -NoProfile -File 'scripts/ci/Test-CiScripts.ps1' 2>&1)
+$greenExitCode = $LASTEXITCODE
+$greenText = ($output | ForEach-Object { $_.ToString() }) -join "`n"
+if ($greenExitCode -ne 0 -or $greenText -notmatch 'CI_CONTRACT_GREEN passed=23') {
+  throw "治理合同未 GREEN；exit=$greenExitCode；output=$greenText"
+}
+
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'GREEN checkpoint 存在空白错误。' }
+```
+
+GREEN 夹具覆盖空 diff、文档/重型路径、删除/重命名、非法路径、Iced 越层、`upstream/` Workspace 越界、生产脚本语言、Tauri/WebView、广告/遥测、非本仓更新源、依赖方向，以及 TOML 内联与表形式的依赖声明。
 
 ## Issue #19 Gate 3 实现控制面 checkpoint 验证
 

@@ -8,9 +8,11 @@ $scriptDirectory = Split-Path -Parent $PSCommandPath
 $classifierScript = Join-Path $scriptDirectory 'Classify-Changes.ps1'
 $policyScript = Join-Path $scriptDirectory 'Verify-RepositoryPolicy.ps1'
 $missingImplementations = @(
-    $classifierScript
-    $policyScript
-) | Where-Object { -not (Test-Path -LiteralPath $_ -PathType Leaf) }
+    @(
+        $classifierScript
+        $policyScript
+    ) | Where-Object { -not (Test-Path -LiteralPath $_ -PathType Leaf) }
+)
 
 if ($missingImplementations.Count -gt 0) {
     [Console]::Error.WriteLine('CI_CONTRACT_RED_MISSING_IMPLEMENTATION')
@@ -144,6 +146,7 @@ function Invoke-ClassifierCase {
         [string]$Name,
 
         [Parameter(Mandatory)]
+        [AllowEmptyCollection()]
         [object[]]$Changes
     )
 
@@ -491,6 +494,14 @@ Invoke-ContractTest -Name '拒绝 Tauri 运行时依赖' -Body {
     Assert-PolicyFailureCode -Result $result -Code 'WEB_RUNTIME_DEPENDENCY_FORBIDDEN'
 }
 
+Invoke-ContractTest -Name '拒绝 TOML 表形式的 Tauri 别名依赖' -Body {
+    $repository = Copy-RepositoryFixture -Source $validRepository -Name 'repository-tauri-table'
+    $tableDependency = "`n[dependencies.desktop-runtime]`npackage = `"tauri`"`nversion = `"2.0.0`""
+    Add-Content -LiteralPath (Join-Path $repository 'apps/inputcodex-desktop/Cargo.toml') -Value $tableDependency -Encoding utf8NoBOM
+    $result = Invoke-PolicyCase -RepositoryRoot $repository
+    Assert-PolicyFailureCode -Result $result -Code 'WEB_RUNTIME_DEPENDENCY_FORBIDDEN'
+}
+
 Invoke-ContractTest -Name '拒绝 WebView 运行时依赖' -Body {
     $repository = Copy-RepositoryFixture -Source $validRepository -Name 'repository-webview'
     Add-Content -LiteralPath (Join-Path $repository 'apps/inputcodex-desktop/Cargo.toml') -Value 'wry = "0.53.0"' -Encoding utf8NoBOM
@@ -524,6 +535,14 @@ Invoke-ContractTest -Name '拒绝非本仓 Release 或更新源' -Body {
 Invoke-ContractTest -Name '拒绝 Workspace 依赖方向反转' -Body {
     $repository = Copy-RepositoryFixture -Source $validRepository -Name 'repository-dependency-direction'
     Add-Content -LiteralPath (Join-Path $repository 'crates/inputcodex-domain/Cargo.toml') -Value "`n[dependencies]`ninputcodex-presentation = { path = `"../inputcodex-presentation`" }" -Encoding utf8NoBOM
+    $result = Invoke-PolicyCase -RepositoryRoot $repository
+    Assert-PolicyFailureCode -Result $result -Code 'DEPENDENCY_DIRECTION_INVALID'
+}
+
+Invoke-ContractTest -Name '拒绝 TOML 表形式的依赖方向反转' -Body {
+    $repository = Copy-RepositoryFixture -Source $validRepository -Name 'repository-dependency-table-direction'
+    $tableDependency = "`n[dependencies.ui-layer]`npackage = `"inputcodex-presentation`"`npath = `"../inputcodex-presentation`""
+    Add-Content -LiteralPath (Join-Path $repository 'crates/inputcodex-domain/Cargo.toml') -Value $tableDependency -Encoding utf8NoBOM
     $result = Invoke-PolicyCase -RepositoryRoot $repository
     Assert-PolicyFailureCode -Result $result -Code 'DEPENDENCY_DIRECTION_INVALID'
 }

@@ -1,6 +1,6 @@
 # Issue #19：Gate 3 纯 Rust Workspace 与首版三平台 CI 报告
 
-report_status: governance-red-verified-awaiting-checkpoint-push
+report_status: governance-green-verified-awaiting-checkpoint-push
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 branch_ref: codex/issue-19-gate-3-rust-workspace-ci
 baseline_ref: 477d110a9b284e127af365f5278901bcfa69e093
@@ -35,15 +35,24 @@ merge_ref: pending
 - `scripts/ci/Test-CiScripts.ps1` 已预置空 diff、文档、重型路径、删除、重命名、非法路径、Iced 越层、Workspace 越界、脚本语言、WebView/Tauri、广告/遥测、更新源和依赖方向夹具。
 - PowerShell AST 解析为 `0` 个错误；实际 RED 执行退出码为 `10`，稳定标记 `CI_CONTRACT_RED_MISSING_IMPLEMENTATION` 恰好出现一次。
 - RED 根因是 `scripts/ci/Classify-Changes.ps1` 与 `scripts/ci/Verify-RepositoryPolicy.ps1` 尚不存在，不是路径、拼写、解析或夹具错误。
+- RED 提交 `67fe99457e1aa2717cc29c70d51114028d68dafd`、tree `21bc79da1e402c4d7266d4d8b54af6866a685463` 已通过普通 fast-forward push，并回写 Issue 评论 `5043557146`。
+
+## 四、治理 GREEN 证据
+
+- 路径分类器输出确定 JSON，区分空 diff、纯文档和重型路径，并审计删除、重命名的新旧路径。
+- 仓库政策验证器固定七成员显式 Workspace、包名与依赖方向；Iced 只能直接存在于 presentation，并拒绝生产 TypeScript/JavaScript、Tauri/WebView、广告/遥测和外部更新源。
+- 初始 GREEN 自测暴露测试夹具的零结果数组形状和空集合参数绑定问题；均确定根因并修复测试，不降低实现门禁。
+- 安全复核先新增 TOML 表形式的 Tauri 别名与逆向依赖 RED，再修复依赖解析器，防止通过 `[dependencies.alias]` 绕过政策。
+- 最终合同测试 `23/23` 通过，三份 PowerShell 脚本 AST 均为 `0` 个错误，测试退出码为 `0`。
 - 当前仍不存在产品 `Cargo.toml`、`Cargo.lock`、`rust-toolchain.toml`、`.rs`、Iced 或 `.github/workflows/ci.yml`。
 
-## 四、下一合法批次
+## 五、下一合法批次
 
-1. 提交并普通 push 治理 RED checkpoint，在 Issue `#19` 回写命令、AST、退出码、稳定标记、commit 与根因。
-2. 只实现 `scripts/ci/Classify-Changes.ps1` 与 `scripts/ci/Verify-RepositoryPolicy.ps1`，使同一测试合同转为 GREEN。
-3. GREEN checkpoint 提交、推送并回写 Issue 前不得创建 Cargo Workspace。
+1. 提交并普通 push 治理 GREEN checkpoint，在 Issue `#19` 回写 `23/23`、commit、失败恢复和安全复核证据。
+2. 按 Runtime Workflow 的 Phase 4 顺序创建七成员最小 Workspace、加载状态语义、平台 unsupported 合同与 Iced 展示层隔离。
+3. Workspace checkpoint 完成并回写 Issue 前不得创建 `.github/workflows/ci.yml`。
 
-## 五、收口边界
+## 六、收口边界
 
 - PR、CI、Review 和 merge 字段保持 `pending`，不得提前宣称通过。
 - 最终 PR 必须包含 `Closes #19`，所有适用 Job 成功、Review 对话根因闭环后，再等待项目所有者新的 Squash Merge 授权。

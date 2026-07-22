@@ -287,6 +287,15 @@
 - 验证：同一 AST 命令返回 `AST_ERROR_COUNT=0`；随后实际执行返回 `RED_EXIT_CODE=10`，唯一标记 `CI_CONTRACT_RED_MISSING_IMPLEMENTATION` 出现 `1` 次，并精确列出两个尚不存在的治理实现脚本。
 - 关联：GitHub Issue `#19`、`scripts/ci/Test-CiScripts.ps1`。
 
+### 2026-07-22：治理 GREEN 自测的空集合形状与 TOML 表依赖绕过
+
+- 环境：Issue `#19` 在 RED checkpoint 后实现 `Classify-Changes.ps1` 与 `Verify-RepositoryPolicy.ps1`，运行同一 `Test-CiScripts.ps1` 合同转 GREEN。
+- 现象：首轮在测试启动层报告 `$missingImplementations.Count` 不存在；修复后空 diff 因参数绑定拒绝空数组失败；基础 `21/21` 通过后，新增的 TOML 表形式 Tauri 别名和逆向依赖测试稳定失败，政策脚本错误返回 `ok=true`。
+- 根因：PowerShell 零结果管道被解包为 `$null`，数组参数默认不接受空集合；依赖解析器只识别 `[dependencies]` 中的内联赋值，没有识别 `[dependencies.alias]`、目标条件或 workspace 表形式，并且没有读取表内 `package` 的真实 crate 名称。
+- 处理：按 `err.md` 既有结论用 `@(...)` 固定零结果形状，为空 diff 参数增加 `[AllowEmptyCollection()]`；依赖解析器在进入 TOML 表 section 时登记别名，并用表内 `package` 更新真实依赖名，随后统一执行分层和禁止依赖检查。
+- 验证：三份 PowerShell 文件 AST 均为 `0` 个错误；最终 `Test-CiScripts.ps1` 输出 `CI_CONTRACT_GREEN passed=23` 并以退出码 `0` 完成，Tauri 表别名与依赖方向表形式均通过拒绝测试。
+- 关联：GitHub Issue `#19`、`scripts/ci/Test-CiScripts.ps1`、`scripts/ci/Verify-RepositoryPolicy.ps1`。
+
 ## 记录模板
 
 ```text
