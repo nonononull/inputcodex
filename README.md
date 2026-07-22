@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游 `v1.2.41` 审计快照与每 6 小时监控，并已通过 Issue `#19/#22`、PR `#21/#23` 完成 Gate 3 纯 Rust Workspace、五类失败语义、三平台最低冷构建基线和独立 closeout；Issue `#24` / PR `#25` 已完成 Gate 4 规划合同，Issue `#26` 已完成 source-index、五域功能目录、行为合同与脱敏 fixture 的本地验证，下一步创建关联 PR 并等待 Review/CI。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游 `v1.2.41` 审计快照与每 6 小时监控，并已通过 Issue `#19/#22`、PR `#21/#23` 完成 Gate 3 纯 Rust Workspace、五类失败语义、三平台最低冷构建基线和独立 closeout；Issue `#24` / PR `#25` 已完成 Gate 4 规划合同，Issue `#26` / PR `#27` 已完成 source-index、五域功能目录、行为合同与脱敏 fixture 的实现、Review/CI 与 Squash Merge。当前仅在 Issue `#28` 回写独立 Closeout 证据；性能基线仍须在 Closeout 合并后使用新的独立 Issue 启动。
 
 ## 项目目标
 
@@ -43,13 +43,13 @@
 - PR `#21` 的最终 Head 为 `9a4a4425f2fb0d8235554d3e83577111ae34efcc`；merge/head tree 均为 `4881ce609370f77181d9545474c029ab0c5d4972`，GitHub 签名 `valid`，合并后 `main` 运行 `29919596057` 六 Job 全绿且成功 Artifact 数为 `0`。
 - 通过 PR `#23` Squash Merge Gate 3 独立 closeout；合并提交为 `f470c062037042a1f7833a29cdcf216f6c0f5601`，Issue `#22` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29922385227` 六 Job 全绿且成功 Artifact 数为 `0`。
 - Issue `#24` / PR `#25` 已 Squash Merge Gate 4 两阶段规划合同；合并提交为 `431682296f53e86de1184c732b0d4748857c9390`，Issue `#24` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29926710342` 六 Job 全绿且成功 Artifact 数为 `0`。
-- 已创建 Issue `#26` 与分支 `codex/issue-26-gate-4-feature-catalog`；Session Plan、Runtime Workflow、36 条最大范围和新 `scope_hash` 已获项目所有者批准，最终合并仍需具体 PR 与最终 Head 的独立授权。
+- Issue `#26` / PR `#27` 已完成 Gate 4 功能目录执行：最终 Head `1d1bf32cdc4edc45e2d28f1047604222ebdb51e4` 以 Squash 提交 `a9b20f00ae069aedd42c8124d2789b230187258c` 进入 `main`；merge/head tree 均为 `205c24e05e0451a3aa39af4f43f0d9853cc7a6a2`，GitHub 签名 `valid`，PR 与合并后主干 CI 均六 Job 全绿且成功 Artifact 数为 `0`。
 
 当前明确不做：
 
 - 不把已导入的上游审计快照接入产品构建或运行面，也不在非 upstream-sync Issue 中修改快照。
 - 不导入半成品参考仓库源码。
-- 不创建 `benchmarks/`，不修改 CI Workflow、发布资产或上游快照；Issue `#26` 只继续写入已批准的 parity 合同、fixture、验证器和任务证据。
+- 不创建 `benchmarks/`，不修改 CI Workflow、发布资产或上游快照；Issue `#28` 只回写 Gate 4 已发生的合并证据，不建立性能基线、性能预算或优化。
 - 不执行功能迁移、安装包构建、发布或未经项目所有者授权的 PR 合并。
 - 不让上游 Tauri/React UI、现有注入脚本和远程推荐列表进入最终运行面。
 
@@ -62,16 +62,16 @@
 - Linux、Windows、macOS 已各取得 `3/3` 次无缓存成功样本；Job 执行时间中位数分别为 `133`、`212`、`96` 秒，最低基线不包含 Cache、P95 或七天调优结论。
 - Gate 3 实现顺序固定为“RED 治理合同 → GREEN 治理脚本 → 七成员 Workspace → 无缓存三平台 CI → 真实失败恢复 → 冷构建基线”。
 - Iced 只能直接存在于 presentation crate；最小窗口不建立 UI 设计系统，视觉与交互由 Gemini 实现或审阅。
-- Gate 4 规划合同已进入 `main`；Issue `#26` 的 source-index 与五域功能目录 checkpoint `87537e6e4a0e6911dd1427cc23f52dcb805a4679` 已普通 push，Issue 评论 `5048930060` 记录 `133` 条入口、`36` 个 feature、`3` 个排除和 `0` 个覆盖缺口。
-- Issue `#26` 已在同一批准范围内建立 `36` 份五域行为合同、`11` 个合成或不可逆脱敏 fixture manifest，并通过完整 `validate_repository`、路径/敏感值安全与文本控制字节回归；普通 checkpoint `c50ec7b` 已 push，Issue 评论 `5049288893` 已回写，尚未创建 PR，最终合并仍需独立授权。
-- Issue `#26` 最大候选写集合为 36 条路径或路径模式，范围哈希为 `sha256:e8a1cbccfc3f0026e90fcb49264de5ea69980fa2e1faa03b520d9bedaf61e772`。
+- Gate 4 规划合同已进入 `main`；Issue `#26` 的 source-index 与五域功能目录 checkpoint `87537e6e4a0e6911dd1427cc23f52dcb805a4679` 已记录 `133` 条入口、`36` 个 feature、`3` 个排除和 `0` 个覆盖缺口。
+- Issue `#26` / PR `#27` 已将 `36` 份五域行为合同、`11` 个合成或不可逆脱敏 fixture manifest 与验证器合入 `main`；来源 PR 的 `classify`、`governance`、`linux-quality`、`windows`、`macos`、`required` 均成功，Issue 已关闭，来源功能分支的远端、本地与远端跟踪引用均已清理。
+- Issue `#28` 是唯一活动的 Gate 4 Closeout 任务，只允许回写来源合并证据；功能目录与性能基线继续保持不同 Issue/PR，Gate 5 仍锁定。
 - 最新正式功能真源仍为 `v1.2.41`；上游 `main` 当前变化只进入 Issue `#20` 预警，不自动改变 Gate 4 基线。
 
 ## 下一步
 
-1. 将完成本地验证的 Issue `#26` 作为独立 checkpoint 普通提交、普通 push，并回写 Issue 证据。
-2. 创建关联 Issue `#26` 的非 Draft PR，完成 Review 对话根因闭环和 Linux/Windows/macOS/required CI。
-3. 仅在项目所有者对具体 PR 与最终 Head 明确授权后 Squash Merge；功能目录收口后才创建性能基线 Issue，Gate 5 继续锁定。
+1. 完成 Issue `#28` 的独立 Closeout PR：只回写来源 Issue、PR、Review、CI、Squash、分支清理与项目控制面证据。
+2. 仅在项目所有者对 Issue `#28` 的具体 PR 与最终 Head 明确授权后 Squash Merge。
+3. Closeout 合并后才创建独立性能基线 Issue；基线与优化保持不同 Issue/PR，Gate 5 继续锁定。
 
 ## 项目文档
 

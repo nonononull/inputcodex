@@ -1,37 +1,39 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: 2026-07-22-issue-26-gate-4-feature-catalog
-active_gate: Gate 4：行为合同与脱敏夹具本地验证完成、PR 待创建
-last_verified_gate: Issue #26 Phase 5 checkpoint c50ec7b 已普通 push，Issue 评论 5049288893 已回写 36 份合同、11 个 fixture manifest、133 条入口、36 个 feature、3 个排除、10 个 exception-pending 与 0 个覆盖缺口；PR 尚未创建
-next_legal_gate: 完成独立证据回填、最终复验后创建关联 Issue #26 的非 Draft PR
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/26
+active_task: 2026-07-22-issue-28-gate-4-feature-catalog-closeout
+active_gate: Gate 4：功能目录来源 PR 已合并，独立 Closeout 证据回写进行中
+last_verified_gate: Issue #26 已 CLOSED；PR #27 最终 Head 1d1bf32 已以 Squash 提交 a9b20f0 合入 main，merge/head tree 为 205c24e0，GitHub 签名 valid，PR 与合并后 main CI 均六 Job 成功、Artifact 数均为 0；Issue #28 已建立并完成控制面 checkpoint
+next_legal_gate: 在 Issue #28 的七路径范围内回写来源事实、完成最终轻量验证并创建非 Draft Closeout PR；未经该 PR 的项目所有者明确授权不得合并
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/28
+source_implementation_issue_ref: https://github.com/nonononull/inputcodex/issues/26
+source_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/27
 closed_gate_3_closeout_issue_ref: https://github.com/nonononull/inputcodex/issues/22
 closed_implementation_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 gate_3_planning_issue_ref: https://github.com/nonononull/inputcodex/issues/17
 upstream_watch_issue_ref: https://github.com/nonononull/inputcodex/issues/14
 transition_issue_ref: https://github.com/nonononull/inputcodex/issues/8
 upstream_sync_issue_ref: https://github.com/nonononull/inputcodex/issues/9
-active_branch_ref: codex/issue-26-gate-4-feature-catalog
+active_branch_ref: codex/issue-28-gate-4-feature-catalog-closeout
 transition_branch_ref: codex/issue-8-gate-2-transition
-active_plan_ref: docs/plans/2026-07-22-issue-26-gate-4-feature-catalog-implementation.md
-active_session_plan_ref: docs/plans/sessions/2026-07-22-issue-26-gate-4-feature-catalog.md
-active_runtime_workflow_ref: docs/workflows/2026-07-22-issue-26-gate-4-feature-catalog-runtime.md
-active_pr_ref: pending-creation
+active_plan_ref: docs/plans/2026-07-22-issue-28-gate-4-feature-catalog-closeout.md
+active_session_plan_ref: docs/plans/sessions/2026-07-22-issue-28-gate-4-feature-catalog-closeout.md
+active_runtime_workflow_ref: docs/workflows/2026-07-22-issue-28-gate-4-feature-catalog-closeout-runtime.md
+active_pr_ref: not-created-for-issue-28
 gate_3_closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/23
 gate_3_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/21
 gate_3_planning_pr_ref: https://github.com/nonononull/inputcodex/pull/18
 transition_pr_ref: https://github.com/nonononull/inputcodex/pull/10
 upstream_sync_pr_ref: https://github.com/nonononull/inputcodex/pull/11
-closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5, https://github.com/nonononull/inputcodex/pull/7, https://github.com/nonononull/inputcodex/pull/10, https://github.com/nonononull/inputcodex/pull/11, https://github.com/nonononull/inputcodex/pull/13, https://github.com/nonononull/inputcodex/pull/15, https://github.com/nonononull/inputcodex/pull/18, https://github.com/nonononull/inputcodex/pull/21, https://github.com/nonononull/inputcodex/pull/23
-active_report_ref: docs/reports/issue-26-gate-4-feature-catalog.md
+closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5, https://github.com/nonononull/inputcodex/pull/7, https://github.com/nonononull/inputcodex/pull/10, https://github.com/nonononull/inputcodex/pull/11, https://github.com/nonononull/inputcodex/pull/13, https://github.com/nonononull/inputcodex/pull/15, https://github.com/nonononull/inputcodex/pull/18, https://github.com/nonononull/inputcodex/pull/21, https://github.com/nonononull/inputcodex/pull/23, https://github.com/nonononull/inputcodex/pull/25, https://github.com/nonononull/inputcodex/pull/27
+active_report_ref: docs/reports/issue-28-gate-4-feature-catalog-closeout.md
 gate_3_closeout_report_ref: docs/reports/issue-22-gate-3-closeout.md
 gate_3_implementation_report_ref: docs/reports/issue-19-gate-3-rust-workspace-ci.md
 gate_2_watch_report_ref: docs/reports/issue-14-gate-2-upstream-watch.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-decision_status: gate-4-feature-catalog-phase-5-checkpoint-pushed-evidence-backfill-pr-pending-merge-not-authorized
+decision_status: gate-4-feature-catalog-source-pr-merged-independent-closeout-in-progress-performance-baseline-not-authorized
 
 ## 当前状态
 
@@ -49,7 +51,7 @@ decision_status: gate-4-feature-catalog-phase-5-checkpoint-pushed-evidence-backf
 - PR `#21` 于 `2026-07-22T12:25:59Z` Squash Merge 为 `0716ec0debcd3e059cc4ca88a072232841ca73b4`；Issue `#19` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29919596057` 六 Job 全绿且成功 Artifact 数为 `0`。
 - Issue `#22` / PR `#23` 已完成 Gate 3 独立 closeout；PR `#23` 于 `2026-07-22T13:05:34Z` Squash Merge 为 `f470c062037042a1f7833a29cdcf216f6c0f5601`，Issue `#22` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29922385227` 六 Job 全绿且成功 Artifact 数为 `0`。
 - Issue `#24` / PR `#25` 已完成“两阶段拆分”规划合同；PR `#25` 于 2026 年 7 月 22 日 Squash Merge 为 `431682296f53e86de1184c732b0d4748857c9390`，Issue `#24` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29926710342` 六 Job 全绿且成功 Artifact 数为 `0`。
-- 当前活动任务为 Issue `#26`，分支为 `codex/issue-26-gate-4-feature-catalog`；Phase 4 checkpoint `87537e6e4a0e6911dd1427cc23f52dcb805a4679` 与 Issue 评论 `5048930060` 已证明 `133` 条入口、`36` 个 feature、`3` 个排除、`10` 个 `exception-pending` feature 和 `0` 个覆盖缺口；Phase 5 checkpoint `c50ec7b` 与 Issue 评论 `5049288893` 已记录 `36` 份合同、`11` 个 fixture manifest 与完整仓库安全，当前进入证据回填和 PR 创建。
+- Issue `#26` / PR `#27` 已完成功能目录执行：`133` 条入口映射为 `36` 个 feature、`3` 个排除、`10` 个 `exception-pending` 与 `0` 个覆盖缺口；`36` 份合同、`11` 个 fixture manifest 和验证器已合入 main。当前活动任务为 Issue `#28`，分支为 `codex/issue-28-gate-4-feature-catalog-closeout`，只回写来源 PR、CI、Review、Squash、签名、tree 与分支清理证据。
 - 最新正式 Release 仍为 `v1.2.41`；上游 `main` 已前进到 `91376ee3518cb5fe5ec8eead179418f706c25870`，只由 Issue `#20` 预警，不改变当前缓存功能真源。
 - Issue `#8` 的过渡交付为 PR `#10`；该 PR 只包含文档与验证控制面，并按项目所有者明确授权执行 Squash Merge。
 - AGOS 仍是可选外部辅助；本仓库可用原生控制面时不运行它，不在本任务中修改或优化它。
@@ -108,7 +110,7 @@ decision_status: gate-4-feature-catalog-phase-5-checkpoint-pushed-evidence-backf
 - [x] Issue `#22` / PR `#23` 已完成独立 closeout，merge/tree/签名/Issue/CI/Review/Ruleset 和分支删除证据均已闭环。
 - 不迁移业务功能，不创建临时 UI 事实标准；最小窗口的视觉和交互默认由 Gemini 实现或审阅。
 
-### Gate 4：功能目录与性能基线（功能目录实现活动）
+### Gate 4：功能目录与性能基线（独立 Closeout 活动）
 
 - [x] 创建 Issue `#24`，批准采用“规划合同 → 两个独立执行 Issue”的拆分方案。
 - [x] 冻结功能矩阵的稳定标识、证据路径、行为字段、既有一致性状态和决策引用。
@@ -119,8 +121,9 @@ decision_status: gate-4-feature-catalog-phase-5-checkpoint-pushed-evidence-backf
 - [x] 提交 Issue `#26` 任务计划、Session Plan、Runtime Workflow、36 条范围和新 scope hash checkpoint，并取得项目所有者实现批准。
 - [x] 完成 RED schema、GREEN Rust 验证器与 source-index/五域功能目录 checkpoint；不得迁移产品功能。
 - [x] 建立五域 `36` 份行为合同与必要的 `11` 个脱敏 fixture manifest，并完成完整本地仓库验证；产品、CI、Ruleset、Release、`upstream/`、`benchmarks/` 和 AGOS 保持零差异。
-- [ ] 为 Issue `#26` 创建关联 PR，完成 Review/CI 和项目所有者对具体 PR 与最终 Head 的 Squash Merge gate。
-- [ ] 功能目录收口后创建独立性能基线 Issue；基线与优化保持不同 Issue/PR。
+- [x] PR `#27` 已完成 Review/CI 并按项目所有者对具体 PR 与最终 Head 的授权 Squash Merge；Issue `#26` 已关闭，来源分支本地、远端和远端跟踪引用均已清理。
+- [ ] Issue `#28` 以独立 Closeout PR 回写来源 Issue、PR、Review、CI、Squash、签名、tree 与分支清理证据；本任务不创建性能基线或优化。
+- [ ] Issue `#28` Closeout 合并后创建独立性能基线 Issue；基线与优化保持不同 Issue/PR。
 
 ### Gate 5：分域迁移（锁定）
 
@@ -160,15 +163,19 @@ decision_status: gate-4-feature-catalog-phase-5-checkpoint-pushed-evidence-backf
 - 当前 Gate 4 Session Plan：`docs/plans/sessions/2026-07-22-issue-24-gate-4-feature-performance-plan.md`。
 - 当前 Gate 4 Runtime Workflow：`docs/workflows/2026-07-22-issue-24-gate-4-feature-performance-runtime.md`。
 - 当前 Gate 4 初始报告：`docs/reports/issue-24-gate-4-feature-performance-plan.md`。
-- 当前 Issue `#26` 实现计划：`docs/plans/2026-07-22-issue-26-gate-4-feature-catalog-implementation.md`。
-- 当前 Issue `#26` Session Plan：`docs/plans/sessions/2026-07-22-issue-26-gate-4-feature-catalog.md`。
-- 当前 Issue `#26` Runtime Workflow：`docs/workflows/2026-07-22-issue-26-gate-4-feature-catalog-runtime.md`。
-- 当前 Issue `#26` 初始报告：`docs/reports/issue-26-gate-4-feature-catalog.md`。
+- 已完成 Issue `#26` 实现计划：`docs/plans/2026-07-22-issue-26-gate-4-feature-catalog-implementation.md`。
+- 已完成 Issue `#26` Session Plan：`docs/plans/sessions/2026-07-22-issue-26-gate-4-feature-catalog.md`。
+- 已完成 Issue `#26` Runtime Workflow：`docs/workflows/2026-07-22-issue-26-gate-4-feature-catalog-runtime.md`。
+- 已完成 Issue `#26` 报告：`docs/reports/issue-26-gate-4-feature-catalog.md`。
+- 当前 Gate 4 Closeout 计划：`docs/plans/2026-07-22-issue-28-gate-4-feature-catalog-closeout.md`。
+- 当前 Gate 4 Closeout Session Plan：`docs/plans/sessions/2026-07-22-issue-28-gate-4-feature-catalog-closeout.md`。
+- 当前 Gate 4 Closeout Runtime Workflow：`docs/workflows/2026-07-22-issue-28-gate-4-feature-catalog-closeout-runtime.md`。
+- 当前 Gate 4 Closeout 报告：`docs/reports/issue-28-gate-4-feature-catalog-closeout.md`。
 
 ## 停止条件
 
 - 上游最新正式 Release 或 `v1.2.41` 标签提交发生变化。
 - 需要修改 `upstream/` 或 `source-lock.json`，但没有新的独立 upstream-sync Issue/PR 与项目所有者批准。
-- 在 Issue `#26` control-plane checkpoint 中需要创建 `parity/`、修改 Cargo/Rust、测试、CI、upstream、benchmarks、Ruleset、发布资产或 AGOS。
-- 需要越过 Issue `#26` 的 36 条最大范围、决定 `parity-exception`、运行上游/半成品或填写绝对性能预算，但没有新的项目所有者批准。
+- 在 Issue `#28` Closeout 中需要创建 `parity/`、`benchmarks/`，修改 Cargo/Rust、测试、CI、upstream、Ruleset、发布资产或 AGOS。
+- 在 Issue `#28` Closeout 合并前需要创建性能基线、性能优化、产品迁移、`parity-exception`、运行上游/半成品或填写绝对性能预算，但没有新的独立 Issue 与项目所有者批准。
 - Fresh 验证失败、Ruleset 变化、Review 对话未闭环或出现未批准的一致性差异。
