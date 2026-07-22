@@ -154,7 +154,7 @@ docs/workflows/2026-07-22-issue-26-gate-4-feature-catalog-runtime.md
 - [x] 编写合同必填字段、六状态加载机、请求标识和 fixture 引用失败测试。
 - [x] 编写路径穿越、真实秘密、私人绝对路径和跨 feature fixture 引用失败测试。
 - [x] 保存 RED 命令、退出码和根因；三组定向编译均以退出码 `1` 失败在 crate root 缺少预期 API，`E0282` 仅为未解析返回类型导致的级联错误，依赖下载、YAML 文本和测试语法均已通过此前编译阶段。
-- [ ] 形成独立 RED checkpoint 提交并回写 Issue。
+- [x] 形成独立 RED checkpoint 提交 `532fba89d882862438345788ed2fdd73faede507`，并回写 Issue 评论 `5048079257`。
 
 ### Task 2：最小 Rust 类型与解析 GREEN
 

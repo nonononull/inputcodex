@@ -25,7 +25,8 @@ pr_ref: pending
 - control-plane checkpoint 已以普通提交 `80e0ddbb734496e95e89fe57fd89ddb668c8c276` 推送，并回写 Issue 评论 `5047590347`。
 - 项目所有者已通过 Issue 评论 `5047650154` 批准实施。
 - Phase 2 已完成依赖锁定和三组 RED 定向编译：`catalog_schema`、`contract_schema`、`fixture_safety` 均以退出码 `1` 失败在 crate root 缺少预期 API；`E0282` 为未解析返回类型的级联诊断，未发现依赖、YAML、fixture 或测试语法错误。
-- 当前只允许形成普通 RED checkpoint 并回写 Issue；生产实现仍为零，尚未进入 Phase 3。
+- RED checkpoint 已以普通提交 `532fba89d882862438345788ed2fdd73faede507` 推送，并回写 Issue 评论 `5048079257`。
+- 生产实现仍为零；RED 门禁已经满足，当前进入 Phase 3 最小 Rust schema GREEN。
 
 ## Phase 0：startup-baseline
 

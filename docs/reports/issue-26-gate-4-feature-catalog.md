@@ -1,7 +1,7 @@
 # Issue #26：Gate 4 功能目录、行为合同与脱敏夹具报告
 
 schema_version: inputcodex.report.v1
-report_status: red-schema-verified-checkpoint-pending
+report_status: red-schema-checkpoint-complete-rust-schema-green-in-progress
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/26
 branch_ref: codex/issue-26-gate-4-feature-catalog
 baseline_ref: 431682296f53e86de1184c732b0d4748857c9390
@@ -85,7 +85,7 @@ implementation_approval_ref: issuecomment:5047650154
 - 8 条控制面路径、36 条范围、scope hash、占位符、治理合同、仓库政策和空白检查已通过。
 - 普通 control-plane checkpoint `80e0ddbb734496e95e89fe57fd89ddb668c8c276` 已 push。
 - Issue `#26` 评论 `5047590347` 已回写 commit、计划引用、范围哈希和实现待批准边界。
-- 项目所有者已批准实现；当前正在形成并回写独立 RED checkpoint，之后才可进入最小 Rust schema GREEN。
+- RED checkpoint `532fba89d882862438345788ed2fdd73faede507` 已普通 push，并通过 Issue 评论 `5048079257` 回写；当前进入最小 Rust schema GREEN。
 
 ## 十、完成状态占位
 
@@ -99,7 +99,7 @@ source_entry_count: pending-implementation
 excluded_entry_count: pending-implementation
 exception_pending_count: pending-implementation
 coverage_gap_count: pending-implementation
-red_checkpoint_ref: pending-current-red-checkpoint
+red_checkpoint_ref: commit:532fba89d882862438345788ed2fdd73faede507;issuecomment:5048079257
 green_checkpoint_ref: pending-implementation
 pr_ref: pending-implementation
 ci_ref: pending-implementation
