@@ -1,7 +1,7 @@
 # Session Plan：Issue #24 Gate 4 功能目录与性能基线规划
 
 schema_version: inputcodex.session-plan.v1
-session_status: local-verified-pr-creation-pending
+session_status: pr-open-review-ci-pending
 task_id: issue-24-gate-4-feature-performance-plan
 task_summary: 采用两阶段拆分冻结 Gate 4 功能矩阵、行为合同、脱敏夹具、性能测量协议和后续执行 Issue 边界；本任务不创建实际目录、基准或产品实现。
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/24
@@ -10,6 +10,7 @@ session_plan_ref: docs/plans/sessions/2026-07-22-issue-24-gate-4-feature-perform
 runtime_workflow_ref: docs/workflows/2026-07-22-issue-24-gate-4-feature-performance-runtime.md
 task_plan_ref: docs/plans/2026-07-22-issue-24-gate-4-feature-performance-plan.md
 report_ref: docs/reports/issue-24-gate-4-feature-performance-plan.md
+pr_ref: https://github.com/nonononull/inputcodex/pull/25
 approved_decision_ref: user-message:approve-gate-4-option-2-planning-2026-07-22
 scope_hash: sha256:72e2f5d774080a55599297909600aba3c9f58470710b71db25d3690a61a1cbf0
 mutation_intent: planning-control-plane-only

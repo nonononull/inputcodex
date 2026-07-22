@@ -1,11 +1,11 @@
 # Issue #24：Gate 4 功能目录与性能基线规划报告
 
-report_status: local-verified-pr-creation-pending
+report_status: pr-open-review-ci-pending
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/24
 branch_ref: codex/issue-24-gate-4-planning
-pr_ref: pending-gate-4-planning-pr
-review_ref: pending-pr-review
-ci_ref: pending-pr-ci
+pr_ref: https://github.com/nonononull/inputcodex/pull/25
+review_ref: github-pr-25-review-pending
+ci_ref: github-pr-25-ci-pending
 merge_ref: not-authorized
 approved_decision_ref: user-message:approve-gate-4-option-2-planning-2026-07-22
 scope_hash: sha256:72e2f5d774080a55599297909600aba3c9f58470710b71db25d3690a61a1cbf0
@@ -54,8 +54,7 @@ scope_hash: sha256:72e2f5d774080a55599297909600aba3c9f58470710b71db25d3690a61a1c
 
 ## 七、待完成
 
-- 创建普通提交、推送并创建非 Draft 规划 PR。
-- 回写 PR、Review 和 CI 动态引用。
+- 等待 PR `#25` 最终 Head 的 Review 与 CI，并回写确定引用。
 - 在 Review/CI 完成后停止，等待项目所有者新的 Squash Merge 授权。
 
 ## 八、本地验证结果
@@ -66,3 +65,10 @@ scope_hash: sha256:72e2f5d774080a55599297909600aba3c9f58470710b71db25d3690a61a1c
 - 治理合同：`CI_CONTRACT_GREEN passed=30`。
 - 真实仓库政策：`ok=true`、`violation_count=0`。
 - `git diff --check`：通过。
+
+## 九、交付 checkpoint
+
+- 首个规划提交：`8ada763da8b8205866b2f4a4e1e30eeaacd7e409`。
+- 已普通推送 `codex/issue-24-gate-4-planning`，未使用 Force Push。
+- 非 Draft PR：`https://github.com/nonononull/inputcodex/pull/25`。
+- PR 正文包含 `Closes #24`、9 条范围、验证证据和“未授权合并/执行”边界。

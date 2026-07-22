@@ -1,9 +1,9 @@
 # Issue #24：Gate 4 功能目录与性能基线规划
 
-plan_status: local-verified-pr-creation-pending
+plan_status: pr-open-review-ci-pending
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/24
 branch_ref: codex/issue-24-gate-4-planning
-pr_ref: pending-gate-4-planning-pr
+pr_ref: https://github.com/nonononull/inputcodex/pull/25
 approved_decision_ref: user-message:approve-gate-4-option-2-planning-2026-07-22
 scope_hash: sha256:72e2f5d774080a55599297909600aba3c9f58470710b71db25d3690a61a1cbf0
 baseline_ref: f470c062037042a1f7833a29cdcf216f6c0f5601

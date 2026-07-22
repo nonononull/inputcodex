@@ -17,7 +17,7 @@ transition_branch_ref: codex/issue-8-gate-2-transition
 active_plan_ref: docs/plans/2026-07-22-issue-24-gate-4-feature-performance-plan.md
 active_session_plan_ref: docs/plans/sessions/2026-07-22-issue-24-gate-4-feature-performance-plan.md
 active_runtime_workflow_ref: docs/workflows/2026-07-22-issue-24-gate-4-feature-performance-runtime.md
-active_pr_ref: pending-gate-4-planning-pr
+active_pr_ref: https://github.com/nonononull/inputcodex/pull/25
 gate_3_closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/23
 gate_3_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/21
 gate_3_planning_pr_ref: https://github.com/nonononull/inputcodex/pull/18
