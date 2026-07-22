@@ -27,7 +27,8 @@ pr_ref: pending
 - Phase 2 已完成依赖锁定和三组 RED 定向编译：`catalog_schema`、`contract_schema`、`fixture_safety` 均以退出码 `1` 失败在 crate root 缺少预期 API；`E0282` 为未解析返回类型的级联诊断，未发现依赖、YAML、fixture 或测试语法错误。
 - RED checkpoint 已以普通提交 `532fba89d882862438345788ed2fdd73faede507` 推送，并回写 Issue 评论 `5048079257`。
 - Phase 3 最小 Rust schema 已实现并通过 `25` 个 schema 测试与 `1` 个既有回归；格式、离线库 check 和 Clippy 严格警告门禁均通过。
-- 当前只允许形成普通 GREEN checkpoint 并回写 Issue；`catalog_repository` 与 `parity/` 数据面仍未进入 Phase 4。
+- GREEN checkpoint 已以普通提交 `8b18f0a2a37829af3338edba34454eb6690af77a` 推送，并回写 Issue 评论 `5048438316`。
+- 当前进入 Phase 4 source-index 与五分域功能目录；`catalog_repository` 只有在真实数据面建立后才能转 GREEN。
 
 ## Phase 0：startup-baseline
 
