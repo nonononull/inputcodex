@@ -1,7 +1,5 @@
 #![forbid(unsafe_code)]
 
-compile_error!("GATE3_GENERIC_RUST_COMPILE_FAILURE");
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct DiagnosticCode(&'static str);
 

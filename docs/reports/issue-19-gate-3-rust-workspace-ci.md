@@ -90,6 +90,8 @@ merge_ref: pending
 - rustfmt 失败语义提交 `743da60b81161f2c18d6db9b0a1b03f976b04cea` 只改变 `DiagnosticCode::new` 的空格形状；运行 `29914734781` 在 Linux “检查 Rust 格式”步骤失败，Windows/macOS 与治理成功，`required` 精确报告 `linux-quality=failure`。
 - 对应失败 Artifact 只有 `fmt.log`、`toolchain.txt` 与 `required.json`；当前修复恢复 rustfmt 标准格式，不跳过格式检查，也不改变 Rust 语义。
 - rustfmt 修复提交 `71be06abea3baf7f1689e01504f7ea203f026797` 触发运行 `29915134906`，六 Job 全绿且成功 Artifact 数为 `0`。
+- 通用 Rust 编译失败提交 `a77d8789c79fc853956833dec693e53122b5bd55` 在 domain 顶层加入稳定 `compile_error!` 探针；运行 `29915537702` 的 Linux Clippy、Windows/macOS 桌面冷构建均报告 `GATE3_GENERIC_RUST_COMPILE_FAILURE`，治理保持成功。
+- `required` 精确汇总 `linux-quality=failure；windows=failure；macos=failure`；四个失败 Artifact 只含 Clippy/desktop build、toolchain、metrics 与 `required.json` 白名单文件。当前修复删除探针，不改变编译命令或平台 Job。
 
 ## 九、下一合法批次
 

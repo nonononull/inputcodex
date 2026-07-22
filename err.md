@@ -440,6 +440,15 @@
 - 验证：失败 Artifact 白名单只有 `fmt.log`、`toolchain.txt` 与 `required.json`；修复提交 `71be06abea3baf7f1689e01504f7ea203f026797` 触发运行 `29915134906`，六 Job 全绿且成功 Artifact 数为 `0`。
 - 关联：GitHub PR `#21`、失败运行 `29914734781`、修复运行 `29915134906`、Artifact `linux-quality-failure-29914734781-1`、Artifact `required-failure-29914734781-1`。
 
+### 2026-07-22：全平台 compile_error 探针验证通用 Rust 编译失败语义
+
+- 环境：普通提交 `a77d8789c79fc853956833dec693e53122b5bd55` 在 `inputcodex-domain` 顶层加入 `compile_error!("GATE3_GENERIC_RUST_COMPILE_FAILURE")`；rustfmt 仍通过，治理规则、Runner 与构建命令未修改。
+- 现象：运行 `29915537702` 的 Linux 在 Workspace Clippy、Windows/macOS 在桌面冷构建步骤失败；classify 与 governance 成功，`required` 失败。
+- 根因：三个平台日志均包含同一稳定标记和 `could not compile inputcodex-domain`；`required.json` 同时列出 `linux-quality=failure`、`windows=failure`、`macos=failure`。
+- 处理：删除唯一 `compile_error!` 探针，不加入 cfg、allow、跳过或平台特例，也不 rerun 旧失败。
+- 验证：失败 Artifact 分别只包含 Clippy/desktop build、toolchain、metrics 与 `required.json` 白名单文件，不含 `target/`；删除探针后的本地 domain check 与 Fresh CI 仍待后续运行确认。
+- 关联：GitHub PR `#21`、运行 `29915537702`、Artifacts `linux-quality-failure-29915537702-1`、`windows-failure-29915537702-1`、`macos-failure-29915537702-1`、`required-failure-29915537702-1`。
+
 ## 记录模板
 
 ```text
