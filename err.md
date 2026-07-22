@@ -422,6 +422,15 @@
 - 验证：PowerShell 7 完整合同恢复为 `CI_CONTRACT_GREEN passed=30`；首样本缺失值保持未知，不伪造。远端可复取性由后续普通提交触发的新运行验证。
 - 关联：GitHub PR `#21`、运行 `29911337652`、`.github/workflows/ci.yml`、`scripts/ci/Test-CiScripts.ps1`、`docs/reports/rust-ci-cold-baseline.md`。
 
+### 2026-07-22：受控 TypeScript 探针验证治理与 required 失败语义
+
+- 环境：Gate 3 Phase 7 通过普通提交 `a0252bffd90deaa9f583c6386837f3fd087101ea` 临时新增 `apps/inputcodex-desktop/src/governance_failure.ts`，不修改治理脚本、Job 条件或 `required` 汇总逻辑。
+- 现象：运行 `29913582488` 的 governance 失败，classify、Linux、Windows、macOS 成功，`required` 随后失败；整体运行结论为 failure。
+- 根因：真实仓库政策返回唯一违规 `SCRIPT_LANGUAGE_FORBIDDEN`，路径精确指向临时 `.ts` 探针；`required.json` 的唯一 failures 项为 `governance=failure`。
+- 处理：使用后续普通提交删除探针，不加白名单、不改扩展名规则、不跳过 governance，也不 rerun 旧失败。
+- 验证：失败 Artifact 只有 governance 的 `contract.log`/`policy.json` 与 required 的 `required.json`；三平台成功且成功平台不上传 Artifact。删除探针后的 Fresh CI 仍待后续运行确认。
+- 关联：GitHub PR `#21`、运行 `29913582488`、Artifact `governance-failure-29913582488-1`、Artifact `required-failure-29913582488-1`。
+
 ## 记录模板
 
 ```text

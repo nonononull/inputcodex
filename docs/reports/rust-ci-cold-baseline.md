@@ -67,6 +67,7 @@ external_package_count: 329
 | `29910132968` | Workflow 文件级失败，0 Job | job 级 `env` 使用不可用的 `runner.temp` | 后续普通提交改为 `RUNNER_TEMP` + `GITHUB_ENV` | 否 |
 | `29910379208` | Workflow 文件级失败，0 Job | 同上；用于取得官方行级注解 | 不 rerun，继续由修复提交触发新运行 | 否 |
 | `29910847062` | Linux Clippy 与 required 失败 | Linux 下无条件导入仅供 Windows/macOS 使用的 `PlatformKind` | 后续普通提交按 cfg 收紧导入 | 否 |
+| `29913582488` | governance 与 required 失败，三平台成功 | 受控 `.ts` 探针触发 `SCRIPT_LANGUAGE_FORBIDDEN` | 删除探针并由后续普通提交重新验证 | 否 |
 
 ## 四、样本槽位
 
