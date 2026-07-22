@@ -1,6 +1,6 @@
 # Issue #35 Runtime Workflow：Release 审计基线解耦
 
-workflow_status: executing-before-pr
+workflow_status: ci-repair-verified-awaiting-github-hosted-ci
 task_id: 2026-07-22-issue-35-release-catalog-decoupling
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/35
 branch_ref: codex/issue-35-release-catalog-decoupling
@@ -23,6 +23,7 @@ agos_status: bypassed-needs-input-unregistered
 4. **定向验证**：依次运行 `Test-CiScripts.ps1`、`cargo test -p inputcodex-parity --test catalog_repository --offline release_audit_显式解耦快照与功能目录审计基线`、仓库政策、格式和差异检查。
 5. **PR 交付**：普通提交、普通推送、创建非 Draft PR，PR body 关联 `Closes #35`；等待 GitHub-hosted 全量 CI，解决每条 Review 对话并回写根因、处理和验证证据。
 6. **合并边界**：仅在最终 Head、CI、Review 与范围均 fresh 后，由项目所有者明确授权 Squash Merge。未经该授权，不合并、不自动合并、不删除功能分支。
+7. **CI 失败修复**：PR `#36` 首轮失败时先下载失败 Artifact 和读取 Clippy 日志，写 RED 合同复现 legacy base，再以最小修复、定向 Clippy、普通提交和普通推送更新同一 PR；禁止 force push、禁止忽略失败或修改 Ruleset。
 
 ## 失败恢复
 

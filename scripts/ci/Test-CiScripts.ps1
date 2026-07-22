@@ -187,6 +187,23 @@ function New-ReleaseAuditSourceLock {
     }
 }
 
+function New-LegacySourceLock {
+    param(
+        [Parameter(Mandatory)]
+        [string]$SnapshotTag,
+
+        [Parameter(Mandatory)]
+        [string]$SnapshotCommit
+    )
+
+    [pscustomobject][ordered]@{
+        snapshot = [pscustomobject][ordered]@{
+            release_tag = $SnapshotTag
+            commit = $SnapshotCommit
+        }
+    }
+}
+
 function Invoke-ReleaseAuditGateCase {
     param(
         [Parameter(Mandatory)]
@@ -403,6 +420,16 @@ Invoke-ContractTest -Name 'Release 审计门区分 current 与 stale 并阻断�
         -BaseSourceLock $current `
         -HeadSourceLock $current `
         -Changes @()
+    Assert-ReleaseAuditSuccess -Result $result -ExpectedStatus 'current' -ExpectedReaudit $false
+
+    $legacyBase = New-LegacySourceLock `
+        -SnapshotTag 'v1.2.41' `
+        -SnapshotCommit '3dafffcafb2566a1e8bce4b35671656d6adb3eda'
+    $result = Invoke-ReleaseAuditGateCase `
+        -Name 'current-legacy-base' `
+        -BaseSourceLock $legacyBase `
+        -HeadSourceLock $current `
+        -Changes @([pscustomobject]@{ status = 'M'; path = 'upstream/source-lock.json' })
     Assert-ReleaseAuditSuccess -Result $result -ExpectedStatus 'current' -ExpectedReaudit $false
 
     $result = Invoke-ReleaseAuditGateCase `

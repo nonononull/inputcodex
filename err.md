@@ -535,6 +535,42 @@
 - 验证：先新增 `current-empty-change-set` RED 用例，合同按预期失败；修复后 `Test-CiScripts.ps1` 再次输出 `CI_CONTRACT_GREEN passed=32`。
 - 关联：Issue `#35`，`scripts/ci/Verify-ReleaseAuditGate.ps1`。
 
+## 2026-07-22：PR 基线仍为旧 source-lock schema 时误做新 schema 校验
+
+- 环境：Issue `#35` 的 PR `#36` 首轮 GitHub-hosted CI，Release 审计门同时读取 base `939f3454b34e0faa42897be7489b344f2bec1d4c` 与 Head 的 `upstream/source-lock.json`。
+- 现象：base 尚未引入 `release_audit`，门禁却将其按 Head 的新 schema 解析，`release-audit` Job 因三条 `RELEASE_AUDIT_INVALID` 失败；`required` 随依赖失败而拒绝。
+- 根因：schema 迁移本身发生在 PR Head，base 只能提供“迁移前后是否发生目录审计状态变化”的比较事实，不能满足 Head 的新字段合同。
+- 处理：仅校验 Head 的新 schema；base 只用于生成 release_audit fingerprint。新增 `current-legacy-base` RED/GREEN 合同，明确允许 legacy base 与合法 current Head 的首次迁移。
+- 验证：`pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1` 输出 `CI_CONTRACT_GREEN passed=32`；修复提交推送后必须等待新的 GitHub-hosted CI 作为全量证据。
+- 关联：Issue `#35`、PR `#36`、run `29957699187`、`scripts/ci/Verify-ReleaseAuditGate.ps1`、`scripts/ci/Test-CiScripts.ps1`。
+
+## 2026-07-22：Linux Clippy 拒绝测试夹具的八参数 helper
+
+- 环境：Issue `#35` 的 PR `#36` 首轮 Linux `cargo clippy -p inputcodex-parity --tests --locked -- -D warnings`。
+- 现象：`FeatureRepositoryFixture::write_source_lock` 随 Release 审计状态增加为七个业务参数加 `&self`，触发 `clippy::too_many_arguments`（`8/7`），Linux quality Job 失败。
+- 根因：夹具把一组属于同一 source-lock 状态的字段继续保持为位置参数；这既违反 lint 预算，也使后续用例调用难以辨识。
+- 处理：使用仅限测试的 `SourceLockState` 聚合快照、目录基线和 stale 状态；保留相同 fixture 行为，不添加 lint allow。
+- 验证：`cargo test -p inputcodex-parity --test catalog_repository --offline` 通过 `10/10`；`cargo clippy -p inputcodex-parity --tests --locked --offline -- -D warnings` 通过。
+- 关联：Issue `#35`、PR `#36`、run `29957699187`、`crates/inputcodex-parity/tests/catalog_repository.rs`。
+
+## 2026-07-22：多文件 apply_patch 在后续上下文失败后可能保留前段写入
+
+- 环境：Issue `#35` 使用 `codex.ps1 --codex-run-as-apply-patch` 对 Rust、CI 脚本和控制文档执行多文件补丁。
+- 现象：后半段 hunk 的上下文不匹配会让补丁命令报告失败，但前面已成功匹配的文件或 hunk 可能已经写入工作树，不能把退出非零误当作整批原子回滚。
+- 根因：补丁执行按目标文件和 hunk 顺序处理，不提供事务性跨文件回滚。
+- 处理：把写入拆为小补丁；每次失败后立即执行 `git status --short`、读取受影响文件并按真实状态继续，禁止基于“失败即未写入”的假设重试。
+- 验证：本次修复在提交前以 `git diff --check`、精确 14 路径集合和受影响文件复核为准；不依赖补丁命令退出码推断文件状态。
+- 关联：Issue `#35`、`err.md`、`C:\Users\dashuai\AppData\Roaming\npm\codex.ps1`。
+
+## 2026-07-22：GitHub Release 元数据与 tag 类型不能直接代表审计提交
+
+- 环境：Issue `#35` 提交前 Fresh 核验上游 `BigPizzaV3/CodexPlusPlus` 最新正式 Release 与其 `v1.2.42` 提交。
+- 现象：GitHub Releases API 的 `target_commitish` 返回创建 Release 时的分支名 `main`，而 `git ls-remote --tags` 对 `v1.2.42` 只返回直接 ref，没有 annotated tag 才有的 `^{}` peeled ref。
+- 根因：Release 元数据的 `target_commitish` 不是不可变 commit 证明，且 Git tag 既可以是 annotated tag，也可以是 lightweight tag；两种 tag 的 ref 形状不同。
+- 处理：先由 Releases API 确认最新正式 tag，再通过 SSH 读取该 tag ref；存在唯一 `^{}` 时使用 peeled commit，否则使用唯一直接 ref。禁止把分支名或“必须有 peeled ref”当作提交核验。
+- 验证：2026 年 7 月 22 日，API 返回最新正式 Release 为 `v1.2.42`；SSH 将 lightweight tag 直接解析为 `657cd33e009ad02515d30db6492cd4e669b06318`。
+- 关联：Issue `#35`、`BigPizzaV3/CodexPlusPlus` Release `v1.2.42`、上游监控流程。
+
 ## 记录模板
 
 ```text

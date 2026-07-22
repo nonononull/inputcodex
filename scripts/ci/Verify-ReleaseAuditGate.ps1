@@ -286,7 +286,6 @@ $baseSourceLock = Read-JsonObject `
     -Path $BaseSourceLockPath `
     -ErrorCode 'RELEASE_AUDIT_INVALID' `
     -ErrorMessage '无法读取基线 source-lock'
-$null = Get-ReleaseAuditState -SourceLock $baseSourceLock -Location '基线 source-lock'
 $changes = Read-JsonObject `
     -Path $InputFile `
     -ErrorCode 'RELEASE_AUDIT_INVALID_CHANGESET' `

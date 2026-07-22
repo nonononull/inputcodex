@@ -3,7 +3,7 @@
 schema_version: inputcodex.master-plan.v1
 active_task: 2026-07-22-issue-35-release-catalog-decoupling
 active_gate: Gate 4：功能目录与独立 Closeout 已完成；先解除上游缓存与目录审计的错误耦合，再推进缓存同步、重新审计和独立性能基线
-last_verified_gate: Issue #35 已取得十四路径范围批准；Fresh 基线为 main 939f345、上游最新正式 Release v1.2.42@657cd33，Rust 与 CI 门禁定向 GREEN 已完成，PR 尚未创建
+last_verified_gate: Issue #35 已创建 PR #36；首轮 CI 确认 legacy base source-lock 与 Clippy 夹具根因，修复后的本地完整轻量验证与提交前 Fresh 核验已通过，新的 GitHub-hosted CI 仍是合并前硬条件
 next_legal_gate: 完成 Issue #35 的 Review/CI/PR 后，以独立 upstream-sync Issue 缓存 v1.2.42 并显式进入 stale；完成对应目录重新审计恢复 current 后，才可执行已立项的独立性能基线 Issue #32
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/35
 source_implementation_issue_ref: https://github.com/nonononull/inputcodex/issues/26
@@ -19,7 +19,7 @@ transition_branch_ref: codex/issue-8-gate-2-transition
 active_plan_ref: docs/plans/2026-07-22-issue-35-release-catalog-decoupling.md
 active_session_plan_ref: docs/plans/sessions/2026-07-22-issue-35-release-catalog-decoupling.md
 active_runtime_workflow_ref: docs/workflows/2026-07-22-issue-35-release-catalog-decoupling-runtime.md
-active_pr_ref: not-created-for-issue-35
+active_pr_ref: https://github.com/nonononull/inputcodex/pull/36
 gate_3_closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/23
 gate_3_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/21
 gate_3_planning_pr_ref: https://github.com/nonononull/inputcodex/pull/18
@@ -33,7 +33,7 @@ gate_2_watch_report_ref: docs/reports/issue-14-gate-2-upstream-watch.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-decision_status: issue-35-release-audit-decoupling-approved-implementation-before-pr-performance-baseline-and-gate-5-blocked-until-current
+decision_status: issue-35-release-audit-decoupling-approved-ci-repair-awaiting-new-github-ci-performance-baseline-and-gate-5-blocked-until-current
 
 ## 当前状态
 
@@ -53,7 +53,7 @@ decision_status: issue-35-release-audit-decoupling-approved-implementation-befor
 - Issue `#24` / PR `#25` 已完成“两阶段拆分”规划合同；PR `#25` 于 2026 年 7 月 22 日 Squash Merge 为 `431682296f53e86de1184c732b0d4748857c9390`，Issue `#24` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29926710342` 六 Job 全绿且成功 Artifact 数为 `0`。
 - Issue `#26` / PR `#27` 已完成功能目录执行：`133` 条入口映射为 `36` 个 feature、`3` 个排除、`10` 个 `exception-pending` 与 `0` 个覆盖缺口；`36` 份合同、`11` 个 fixture manifest 和验证器已合入 main。独立 Closeout 已由 Issue `#28` / PR `#29` 完成：Squash 提交 `c07da0cad33e09b5c54e528a8a6728a048c88c0b`、单父、tree `02ab8a3d8497ebb7b990e4078122b9bf916ef454`、GitHub 签名有效、合并后 main CI `29948874307` 六 Job 全成功且 Artifact 数为 `0`。
 - Issue `#33` 已发现上游最新正式 Release `v1.2.42` / `657cd33e009ad02515d30db6492cd4e669b06318`；Issue `#34` 审计确认旧验证会把“已缓存但未复审”误判为损坏，故保持 blocked，未伪造目录一致性。
-- Issue `#35` 已获十四路径范围批准，正在实现 `release_audit` 解耦、可诊断 stale 状态和 PR 路径门禁；本任务不更新 `upstream/CodexPlusPlus/` 字节、不创建性能基线或产品迁移。
+- Issue `#35` 已获十四路径范围批准并创建 PR `#36`。首轮 CI 已确定旧 base `source-lock` schema 兼容与测试夹具 Clippy 根因；修复已完成本地完整轻量验证与提交前 Fresh 核验，修复后的 Head 必须以同一 PR 的新 GitHub-hosted CI 证实。本任务仍不更新 `upstream/CodexPlusPlus/` 字节、不创建性能基线或产品迁移。
 - Issue `#8` 的过渡交付为 PR `#10`；该 PR 只包含文档与验证控制面，并按项目所有者明确授权执行 Squash Merge。
 - AGOS 仍是可选外部辅助；本仓库可用原生控制面时不运行它，不在本任务中修改或优化它。
 

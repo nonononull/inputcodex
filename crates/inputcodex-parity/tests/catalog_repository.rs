@@ -50,6 +50,16 @@ struct FeatureRepositoryFixture {
     root: PathBuf,
 }
 
+struct SourceLockState<'a> {
+    snapshot_tag: &'a str,
+    snapshot_commit: &'a str,
+    catalog_tag: &'a str,
+    catalog_commit: &'a str,
+    status: &'a str,
+    stale_reason: Option<&'a str>,
+    re_audit_issue_ref: Option<&'a str>,
+}
+
 impl FeatureRepositoryFixture {
     fn new() -> Self {
         let nonce = SystemTime::now()
@@ -78,37 +88,37 @@ impl FeatureRepositoryFixture {
         &self.root
     }
 
-    fn write_source_lock(
-        &self,
-        snapshot_tag: &str,
-        snapshot_commit: &str,
-        catalog_tag: &str,
-        catalog_commit: &str,
-        status: &str,
-        stale_reason: Option<&str>,
-        re_audit_issue_ref: Option<&str>,
-    ) {
-        let stale_reason =
-            stale_reason.map_or_else(|| "null".to_owned(), |value| format!("\"{value}\""));
-        let re_audit_issue_ref =
-            re_audit_issue_ref.map_or_else(|| "null".to_owned(), |value| format!("\"{value}\""));
+    fn write_source_lock(&self, state: SourceLockState<'_>) {
+        let stale_reason = state
+            .stale_reason
+            .map_or_else(|| "null".to_owned(), |value| format!("\"{value}\""));
+        let re_audit_issue_ref = state
+            .re_audit_issue_ref
+            .map_or_else(|| "null".to_owned(), |value| format!("\"{value}\""));
         let source_lock = format!(
             r#"{{
   "snapshot": {{
-    "release_tag": "{snapshot_tag}",
-    "commit": "{snapshot_commit}"
+    "release_tag": "{}",
+    "commit": "{}"
   }},
   "release_audit": {{
     "schema_version": "inputcodex.release-audit.v1",
     "catalog_release": {{
-      "tag": "{catalog_tag}",
-      "commit": "{catalog_commit}"
+      "tag": "{}",
+      "commit": "{}"
     }},
-    "status": "{status}",
-    "stale_reason": {stale_reason},
-    "re_audit_issue_ref": {re_audit_issue_ref}
+    "status": "{}",
+    "stale_reason": {},
+    "re_audit_issue_ref": {}
   }}
 }}"#,
+            state.snapshot_tag,
+            state.snapshot_commit,
+            state.catalog_tag,
+            state.catalog_commit,
+            state.status,
+            stale_reason,
+            re_audit_issue_ref,
         );
 
         let source_lock_path = self.root.join("upstream/source-lock.json");
@@ -253,41 +263,41 @@ fn source_index_证据路径必须位于锁定上游快照() {
 fn release_audit_显式解耦快照与功能目录审计基线() {
     let fixture = FeatureRepositoryFixture::new();
 
-    fixture.write_source_lock(
-        RELEASE_TAG,
-        RELEASE_COMMIT,
-        RELEASE_TAG,
-        RELEASE_COMMIT,
-        "current",
-        None,
-        None,
-    );
+    fixture.write_source_lock(SourceLockState {
+        snapshot_tag: RELEASE_TAG,
+        snapshot_commit: RELEASE_COMMIT,
+        catalog_tag: RELEASE_TAG,
+        catalog_commit: RELEASE_COMMIT,
+        status: "current",
+        stale_reason: None,
+        re_audit_issue_ref: None,
+    });
     let summary =
         validate_feature_repository(fixture.root()).expect("current 审计基线必须通过功能目录验证");
     assert!(!summary.requires_reaudit());
 
-    fixture.write_source_lock(
-        RELEASE_42_TAG,
-        RELEASE_42_COMMIT,
-        RELEASE_TAG,
-        RELEASE_COMMIT,
-        "stale-re-audit-required",
-        Some("上游 v1.2.42 已缓存，功能目录尚未完成复审"),
-        Some(RE_AUDIT_ISSUE_URL),
-    );
+    fixture.write_source_lock(SourceLockState {
+        snapshot_tag: RELEASE_42_TAG,
+        snapshot_commit: RELEASE_42_COMMIT,
+        catalog_tag: RELEASE_TAG,
+        catalog_commit: RELEASE_COMMIT,
+        status: "stale-re-audit-required",
+        stale_reason: Some("上游 v1.2.42 已缓存，功能目录尚未完成复审"),
+        re_audit_issue_ref: Some(RE_AUDIT_ISSUE_URL),
+    });
     let summary = validate_feature_repository(fixture.root())
         .expect("显式 stale 审计基线必须允许同步与目录复审继续进行");
     assert!(summary.requires_reaudit());
 
-    fixture.write_source_lock(
-        RELEASE_TAG,
-        RELEASE_COMMIT,
-        RELEASE_TAG,
-        RELEASE_COMMIT,
-        "stale-re-audit-required",
-        Some("快照与目录版本相同却被标记为 stale"),
-        Some(RE_AUDIT_ISSUE_URL),
-    );
+    fixture.write_source_lock(SourceLockState {
+        snapshot_tag: RELEASE_TAG,
+        snapshot_commit: RELEASE_COMMIT,
+        catalog_tag: RELEASE_TAG,
+        catalog_commit: RELEASE_COMMIT,
+        status: "stale-re-audit-required",
+        stale_reason: Some("快照与目录版本相同却被标记为 stale"),
+        re_audit_issue_ref: Some(RE_AUDIT_ISSUE_URL),
+    });
     let error = validate_feature_repository(fixture.root())
         .expect_err("stale 审计状态必须对应不同的快照与目录版本");
     assert!(
@@ -297,15 +307,15 @@ fn release_audit_显式解耦快照与功能目录审计基线() {
             .any(|issue| issue.code() == ValidationCode::ReleaseMismatch)
     );
 
-    fixture.write_source_lock(
-        RELEASE_42_TAG,
-        RELEASE_42_COMMIT,
-        RELEASE_TAG,
-        RELEASE_COMMIT,
-        "stale-re-audit-required",
-        None,
-        Some(RE_AUDIT_ISSUE_URL),
-    );
+    fixture.write_source_lock(SourceLockState {
+        snapshot_tag: RELEASE_42_TAG,
+        snapshot_commit: RELEASE_42_COMMIT,
+        catalog_tag: RELEASE_TAG,
+        catalog_commit: RELEASE_COMMIT,
+        status: "stale-re-audit-required",
+        stale_reason: None,
+        re_audit_issue_ref: Some(RE_AUDIT_ISSUE_URL),
+    });
     let error = validate_feature_repository(fixture.root())
         .expect_err("stale 审计状态必须说明重新审计根因");
     assert!(
@@ -315,15 +325,15 @@ fn release_audit_显式解耦快照与功能目录审计基线() {
             .any(|issue| issue.code() == ValidationCode::ReleaseMismatch)
     );
 
-    fixture.write_source_lock(
-        RELEASE_42_TAG,
-        RELEASE_42_COMMIT,
-        RELEASE_TAG,
-        RELEASE_COMMIT,
-        "stale-re-audit-required",
-        Some("上游 v1.2.42 已缓存，功能目录尚未完成复审"),
-        Some("https://github.com/nonononull/inputcodex/pull/34"),
-    );
+    fixture.write_source_lock(SourceLockState {
+        snapshot_tag: RELEASE_42_TAG,
+        snapshot_commit: RELEASE_42_COMMIT,
+        catalog_tag: RELEASE_TAG,
+        catalog_commit: RELEASE_COMMIT,
+        status: "stale-re-audit-required",
+        stale_reason: Some("上游 v1.2.42 已缓存，功能目录尚未完成复审"),
+        re_audit_issue_ref: Some("https://github.com/nonononull/inputcodex/pull/34"),
+    });
     let error = validate_feature_repository(fixture.root())
         .expect_err("stale 审计状态必须关联 inputcodex 的重新审计 Issue");
     assert!(

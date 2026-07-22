@@ -1,6 +1,6 @@
 # Issue #35：Release 审计基线解耦报告
 
-report_status: implementation-verified-before-pr
+report_status: ci-repair-verified-awaiting-github-hosted-ci
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/35
 branch_ref: codex/issue-35-release-catalog-decoupling
 baseline_ref: 939f3454b34e0faa42897be7489b344f2bec1d4c
@@ -12,9 +12,9 @@ implementation_plan_ref: docs/plans/2026-07-22-issue-35-release-catalog-decoupli
 runtime_workflow_ref: docs/workflows/2026-07-22-issue-35-release-catalog-decoupling-runtime.md
 adr_ref: docs/adr/0003-release-snapshot-catalog-audit-decoupling.md
 agos_status: bypassed-needs-input-unregistered
-pr_ref: not-created
-ci_ref: pending-pr
-review_ref: pending-pr
+pr_ref: https://github.com/nonononull/inputcodex/pull/36
+ci_ref: https://github.com/nonononull/inputcodex/actions/runs/29957699187
+review_ref: https://github.com/nonononull/inputcodex/pull/36#issuecomment-5051536714
 merge_ref: none
 owner_merge_authorization_ref: none
 
@@ -41,9 +41,16 @@ owner_merge_authorization_ref: none
 - 独立 `release-audit` Job 在 PR 上读取 base/head 变更；stale 阻断 `benchmarks/`、`apps/`、产品 crate、`Cargo.toml`、`Cargo.lock`，并阻断同 PR 的 audit 与受阻路径混合。
 - `push` 与 `workflow_dispatch` 仅验证状态结构，合法 stale 不会被误报为仓库损坏；`required` Job 已显式依赖 `release-audit`。
 
+## 第一轮 PR CI 根因与修复
+
+- PR `#36` 的首轮 GitHub-hosted CI（run `29957699187`）中，governance、macOS 与 Windows 通过；`release-audit`、Linux Clippy 与其 `required` 汇总失败，因此没有进入 Review 或合并阶段。
+- `release-audit` Artifact 证明 base `939f345` 的 `source-lock.json` 仍是 schema 迁移前版本，没有 `release_audit`。门禁错误地校验 base 与 Head 使用相同的新 schema，导致三条 `RELEASE_AUDIT_INVALID`。修复后只验证 Head 的状态，base 只用于 fingerprint；新增 `current-legacy-base` RED/GREEN 合同。
+- Linux Clippy 报 `write_source_lock` 有 `8/7` 个参数。未使用 lint allow，改为 `SourceLockState` 测试状态结构体；本地 `cargo clippy -p inputcodex-parity --tests --locked --offline -- -D warnings` 已通过。
+- 修复后的本地证据为：`Test-CiScripts.ps1` 通过、parity `catalog_repository` 为 `10/10`、定向 Clippy 通过；提交前 Fresh 核验确认 `main` 仍为 `939f345`、上游最新正式 Release 仍为 `v1.2.42@657cd33`。修复后的 Head 必须等待同一 PR 的新 GitHub-hosted CI 结果。
+
 ## 未完成交付
 
-- 尚未执行普通 commit、普通 push 或创建 PR。
-- 尚未取得 GitHub-hosted 全量 CI、Review 对话、最终 Head 或 Squash Merge 证据。
+- PR `#36` 已创建；修复后的 Head 尚未取得新的 GitHub-hosted CI，首轮失败不能视为通过证据。
+- 尚未取得修复后 GitHub-hosted 全量 CI、Review 对话、最终 Head 或 Squash Merge 证据。
 - 项目所有者的范围批准不包含合并授权；在 PR CI 全绿、Review 对话为零且范围保持不变后，仍必须请求独立 Squash Merge 授权。
 - 此报告不关闭 Issue `#35`，不创建额外 Closeout Issue，也不授权更新 Issue `#34` 的上游快照。

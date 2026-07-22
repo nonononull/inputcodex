@@ -1,6 +1,6 @@
 # Issue #35 Session Plan：Release 审计基线解耦
 
-session_plan_status: approved-and-executing
+session_plan_status: ci-repair-verified-awaiting-github-hosted-ci
 task_id: 2026-07-22-issue-35-release-catalog-decoupling
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/35
 session_plan_ref: docs/plans/sessions/2026-07-22-issue-35-release-catalog-decoupling.md
@@ -31,6 +31,13 @@ owner_merge_authorization_ref: none
 3. 实现 `release_audit` 结构、Rust 可诊断状态、PR 门禁与 CI 汇总依赖。
 4. 回跑 RED 对应 GREEN；记录任何可复用排错结论到 `err.md`。
 5. 写入 ADR、构建入口、主计划、运行工作流和报告；验证范围哈希、策略、格式与差异后才允许提交与 PR。
+
+## CI 修复检查点
+
+- PR `#36` 首轮 CI 中，governance、macOS 与 Windows 已通过；release-audit 与 Linux Clippy 失败，`required` 因依赖失败而拒绝。
+- release-audit Artifact 显示 base `source-lock` 未包含新字段，故 base 只能作为 fingerprint 而非新 schema 验证对象；已以 legacy-base RED/GREEN 合同锁定。
+- Rust 夹具的八参数 helper 触发 Clippy；已重构为状态结构体并以定向 Clippy 验证，不添加 lint allow。
+- 提交前 Fresh 核验确认 `main` 仍为 `939f345`、上游最新正式 Release 仍为 `v1.2.42@657cd33`；修复后的 Head 必须等待同一 PR 的新 GitHub-hosted CI 结果。
 
 ## 不可变边界
 
