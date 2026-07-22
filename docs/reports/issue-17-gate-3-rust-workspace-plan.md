@@ -1,12 +1,12 @@
 # Issue #17：Gate 3 纯 Rust Workspace 骨架规划报告
 
-report_status: local-verified-pr-pending
+report_status: pr-open-owner-merge-authorization-pending
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/17
 branch_ref: codex/issue-17-gate-3-rust-workspace-plan
 baseline_ref: 113476fb96623452f9a69526edabc73a57d812a1
-pr_ref: pending
-ci_ref: pending
-review_ref: pending
+pr_ref: https://github.com/nonononull/inputcodex/pull/18
+ci_ref: not-triggered:docs-only-path-filter
+review_ref: https://github.com/nonononull/inputcodex/pull/18#issuecomment-5042127837
 merge_ref: pending
 
 ## 一、批准范围
@@ -41,5 +41,6 @@ merge_ref: pending
 
 - 当前允许路径共 `11` 条，范围哈希为 `sha256:0c4fc5017aed0b5883b5cb597b2afc2680646479de32916cc4e720aff67dfd05`。
 - 本地 Fresh 验证已通过：变更路径 `11`、越界路径 `0`、产品 Cargo 文件 `0`、产品 Rust 文件 `0`、Workflow 文件 `1` 且仅为既有 `upstream-watch.yml`，`git diff --check` 通过。
-- 当前尚未完成提交、push、PR、Review/CI 或合并，对应动态字段保持 `pending`。
-- 规划 PR 创建后必须重新核对真实 Head、文件列表、CI、Review 对话、Ruleset 与上游基线；不得提前描述为完成。
+- PR `#18` 已创建，初始远端 Head 为 `1ecc4426df33ad728b44ef0bbacc928d18b4bcf9`，状态为 OPEN、非 Draft、`MERGEABLE/CLEAN`；远端文件列表与允许路径完全一致，Review 对话 `0`，自动合并关闭。
+- 现有 `Upstream Watch` Workflow 的 `pull_request.paths` 只监听监控脚本、Workflow 与 `upstream/source-lock.json`；本 PR 只改文档，因此没有 Actions 运行或 Check。该事实记录为 `not-triggered:docs-only-path-filter`，不表述为 CI 通过。
+- 当前尚未获得项目所有者对 PR `#18` 的 Squash Merge 授权；最终 Head、Fresh Review、Ruleset 与上游基线将回写到同一 Review 锚点，`merge_ref` 保持 `pending`。

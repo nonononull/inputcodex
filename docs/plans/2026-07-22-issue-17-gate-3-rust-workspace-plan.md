@@ -30,7 +30,7 @@
 - 创建 Issue `#17` 的主计划、Session Plan、Runtime Workflow 和初始报告。
 - 更新 `README.md`、Master Plan、总架构方案、Rust CI 实施计划、`build.md` 与 `err.md` 中的当前状态或既有排错引用。
 - 把 Issue `#14` / PR `#15` 已完成的动态证据回写到 Gate 2 交付报告。
-- 创建文档规划 PR，并通过 Review、现有只读 CI 和 Squash Merge 门禁收口。
+- 创建文档规划 PR，并通过 Fresh Review、适用检查与 Squash Merge 门禁收口；若纯文档路径不命中现有 Workflow，必须记录 `not-triggered`，不得把 `0 Checks` 表述为 CI 通过。
 
 ### 禁止
 
@@ -190,7 +190,7 @@ docs/reports/issue-14-gate-2-upstream-watch.md
 - Gate 2 最终合并、两次真实运行、Issue `#16` 唯一状态和签名证据不再保留 `pending`。
 - 本 PR 只有上述文档路径；仓库继续没有产品 Cargo/Rust/Iced 文件或新的产品 Workflow。
 - 本地文档合同、路径门禁和 `git diff --check` 通过。
-- PR Review 对话全部完成根因、处理、验证和确认闭环；现有 CI 成功后等待项目所有者新的 Squash Merge 授权。
+- PR Review 对话全部完成根因、处理、验证和确认闭环；适用检查成功，或以可复核路径过滤证据确认没有适用 Check 后，等待项目所有者新的 Squash Merge 授权。
 
 ## 十一、停止与回滚
 

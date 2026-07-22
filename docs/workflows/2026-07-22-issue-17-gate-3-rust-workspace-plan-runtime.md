@@ -50,14 +50,14 @@ scope_hash: sha256:0c4fc5017aed0b5883b5cb597b2afc2680646479de32916cc4e720aff67df
 1. 精确暂存允许路径，推荐提交主题：`docs: 规划 Gate 3 Rust Workspace 骨架`。
 2. 普通 push 到 `codex/issue-17-gate-3-rust-workspace-plan`；禁止 Force Push。
 3. 创建包含 `Closes #17` 的非 Draft 规划 PR，正文列出批准范围、11 条路径、验证证据和明确的源码后置边界。
-4. 在 Issue 与 PR 回写 Head、验证命令、现有 CI 预期和项目所有者规划批准引用。
+4. 在 Issue 与 PR 回写 Head、验证命令、适用检查预期和项目所有者规划批准引用；不得预设纯文档路径一定触发 Workflow。
 
-## Phase 6：review-and-ci
+## Phase 6：review-and-applicable-checks
 
-1. PR 只应触发现有 `Upstream Watch / validate`；`watch` 必须 skipped，不得写 Issue。
+1. 先按 `.github/workflows/upstream-watch.yml` 的 `pull_request.paths` 判断是否存在适用 Check；本次纯文档路径不命中过滤条件，GitHub 不创建 Check，必须记录 `not-triggered:docs-only-path-filter`，不能解释为成功。
 2. Fresh 核对 PR 文件、Head、Ruleset、Review 对话、自动合并和 mergeable 状态。
 3. 每条 Review 反馈先确定根因，再处理和 Fresh 验证；若反馈不成立，提供可复核证据并取得 reviewer 或项目所有者确认。
-4. CI、Review 对话、允许路径或 Fresh 基线任何一项失败均禁止合并。
+4. 适用 Check 失败、Review 对话未闭环、允许路径越界或 Fresh 基线失败均禁止合并；没有适用 Check 时以 Workflow 路径合同和远端运行列表作为证据。
 5. 本次规划批准不包含合并授权；必须等待项目所有者新的明确 Squash Merge 授权。
 
 ## Phase 7：squash-merge-closeout

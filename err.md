@@ -260,6 +260,15 @@
 - 验证：完整门禁输出 `ISSUE17_CHANGED_PATHS=11`、`ISSUE17_PRODUCT_CARGO_FILES=0`、`ISSUE17_PRODUCT_RUST_FILES=0`、`ISSUE17_WORKFLOW_FILES=1` 和 `ISSUE17_GATE3_PLANNING_LOCAL_VERIFY_OK`。
 - 关联：GitHub Issue `#17`、`build.md`。
 
+### 2026-07-22：纯文档 PR 未触发上游监控 Check
+
+- 环境：Issue `#17` 的 PR `#18` 只修改 `11` 条治理文档路径，仓库现有唯一 Workflow 为 `.github/workflows/upstream-watch.yml`。
+- 现象：PR 创建后 `gh pr checks 18` 返回 `no checks reported`，按分支查询 Actions 运行列表为空。
+- 根因：Workflow 的 `pull_request.paths` 只包含监控 Python、测试、Workflow 自身和 `upstream/source-lock.json`；PR `#18` 没有修改这些路径，所以 GitHub 正确地不创建 Workflow 运行。
+- 处理：不扩大现有上游监控 Workflow 的职责，也不为文档 PR伪造检查；任务证据记录为 `ci_ref: not-triggered:docs-only-path-filter`，并使用本地门禁、远端文件列表、Review 对话、Ruleset 和 Fresh 基线完成审阅。
+- 验证：PR `#18` 远端文件为批准的 `11` 条文档路径，Actions 分支运行列表为 `[]`，Review 对话为 `0`，自动合并关闭；`0 Checks` 没有被解释为 CI 通过。
+- 关联：GitHub Issue `#17`、PR `#18`、`.github/workflows/upstream-watch.yml`。
+
 ## 记录模板
 
 ```text

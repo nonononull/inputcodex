@@ -3,7 +3,7 @@
 schema_version: inputcodex.session-plan.v1
 task_id: 2026-07-22-issue-17-gate-3-rust-workspace-plan
 work_class: standard
-task_status: local-verified-pr-pending
+task_status: pr-open-owner-merge-authorization-pending
 task_summary: 仅冻结 Gate 3 Rust Workspace、Iced 隔离、双平台抽象、性能诊断和首版三平台 CI 的后续实现合同，不创建产品源码。
 project_root: C:/Users/dashuai/Documents/inputcodex
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/17
@@ -137,7 +137,7 @@ external_agos:
 4. 更新项目入口、架构/CI 真源、构建验证和 Gate 2 最终报告。
 5. 运行本地文档合同、允许路径、禁止表面和 diff 验证。
 6. 精确暂存、提交、普通 push，并创建关联 Issue `#17` 的非 Draft PR。
-7. 完成 Review 根因闭环和现有 CI；等待项目所有者新的 Squash Merge 授权。
+7. 完成 Review 根因闭环和适用检查核对；本次纯文档 PR 记录路径过滤未触发 Check，等待项目所有者新的 Squash Merge 授权。
 
 ## 十、验证合同
 
@@ -151,9 +151,9 @@ project_verification_commands:
   - 校验 Master Plan、README、计划、Session、Runtime、报告互相引用
   - Fresh 核对 Issue #17、Ruleset 19395456、上游 v1.2.41 与 Issue #16
 ci_expectation:
-  - 规划 PR 只运行现有 Upstream Watch validate
-  - watch Job 在 pull_request 事件中必须 skipped
-  - 本 PR 不创建 CI Workflow，也不把不存在的检查加入 Ruleset
+  - 现有 Upstream Watch 的 pull_request.paths 只监听监控脚本、Workflow 与 upstream/source-lock.json
+  - 本次 11 条纯文档路径不命中过滤条件，因此 GitHub 不创建 Check；ci_ref 记录 not-triggered:docs-only-path-filter
+  - 0 Checks 不等于 CI 通过；本 PR 不创建 CI Workflow，也不把不存在的检查加入 Ruleset
 ```
 
 ## 十一、停止条件
@@ -167,8 +167,8 @@ ci_expectation:
 ## 十二、交付证据
 
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/17
-review_ref: pending
-pr_ref: pending
-ci_ref: pending
+review_ref: https://github.com/nonononull/inputcodex/pull/18#issuecomment-5042127837
+pr_ref: https://github.com/nonononull/inputcodex/pull/18
+ci_ref: not-triggered:docs-only-path-filter
 merge_ref: pending
 owner_merge_authorization_ref: pending-new-owner-authorization-required

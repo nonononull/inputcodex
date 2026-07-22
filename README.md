@@ -57,7 +57,7 @@
 
 ## 下一步
 
-1. 完成 Issue `#17` 的文档验证、关联规划 PR、Review 根因闭环与现有只读 CI。
+1. 完成 PR `#18` 的 Fresh Review 与所有者决策证据；本次纯文档路径不命中现有 Workflow，`0 Checks` 记录为不适用而非 CI 通过。
 2. 取得新的明确授权后，以 Squash Merge 收口 Gate 3 规划；本次规划批准不自动包含合并授权。
 3. 规划合并后另建 Gate 3 实现 Issue，经项目所有者批准后，才在同一实现 PR 中创建 Workspace、最小双平台窗口和首版三平台 CI。
 

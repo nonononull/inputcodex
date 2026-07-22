@@ -4,7 +4,7 @@ schema_version: inputcodex.master-plan.v1
 active_task: 2026-07-22-issue-17-gate-3-rust-workspace-plan
 active_gate: Gate 3：纯 Rust Workspace 骨架规划
 last_verified_gate: Gate 2：Issue #14 / PR #15 已 Squash Merge，两次真实 Actions 幂等验证通过，唯一机器状态 Issue #16 正常
-next_legal_gate: 完成 Issue #17 规划 PR 的 Review/CI 与 Squash Merge；此后仍需项目所有者另行批准 Gate 3 Workspace 与首版三平台 CI 实现 Issue
+next_legal_gate: 完成 PR #18 的 Fresh Review 并取得项目所有者新的 Squash Merge 授权；纯文档路径未触发现有 Workflow，不得把 0 Checks 解释为 CI 通过
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/17
 upstream_watch_issue_ref: https://github.com/nonononull/inputcodex/issues/14
 transition_issue_ref: https://github.com/nonononull/inputcodex/issues/8
@@ -14,7 +14,7 @@ transition_branch_ref: codex/issue-8-gate-2-transition
 active_plan_ref: docs/plans/2026-07-22-issue-17-gate-3-rust-workspace-plan.md
 active_session_plan_ref: docs/plans/sessions/2026-07-22-issue-17-gate-3-rust-workspace-plan.md
 active_runtime_workflow_ref: docs/workflows/2026-07-22-issue-17-gate-3-rust-workspace-plan-runtime.md
-active_pr_ref: pending
+active_pr_ref: https://github.com/nonononull/inputcodex/pull/18
 transition_pr_ref: https://github.com/nonononull/inputcodex/pull/10
 upstream_sync_pr_ref: https://github.com/nonononull/inputcodex/pull/11
 closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5, https://github.com/nonononull/inputcodex/pull/7, https://github.com/nonononull/inputcodex/pull/10, https://github.com/nonononull/inputcodex/pull/11, https://github.com/nonononull/inputcodex/pull/13, https://github.com/nonononull/inputcodex/pull/15
@@ -23,7 +23,7 @@ gate_2_watch_report_ref: docs/reports/issue-14-gate-2-upstream-watch.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-decision_status: gate-3-planning-approved-implementation-locked
+decision_status: gate-3-planning-pr-open-owner-merge-authorization-pending
 
 ## 当前状态
 
@@ -37,6 +37,7 @@ decision_status: gate-3-planning-approved-implementation-locked
 - Issue `#12` / PR `#13` 已完成上游基线 closeout；PR `#13` 的 Squash Merge 提交为 `5e64015075ddf2adef4bf685f50977b47b7f72e7`，Issue `#12` 已关闭。
 - Issue `#14` / PR `#15` 已完成每 6 小时上游监控；最终 PR CI、两次 `main` 真实运行、唯一状态 Issue `#16`、分支清理和有效 GitHub 签名均已闭环。
 - 当前活动任务为 Issue `#17`，只冻结 Gate 3 Workspace、Iced 隔离、双平台抽象、加载/诊断和首版三平台 CI 的后续实施合同；仓库仍无 Cargo Workspace 或产品 Rust/Iced 源码。
+- PR `#18` 已创建且远端文件列表为批准的 `11` 条路径；现有 `Upstream Watch` Workflow 的 PR 路径过滤只监听监控脚本、Workflow 与 `source-lock`，因此本次纯文档 PR 不产生 Check，记录为 `not-triggered:docs-only-path-filter`。
 - Issue `#8` 的过渡交付为 PR `#10`；该 PR 只包含文档与验证控制面，并按项目所有者明确授权执行 Squash Merge。
 - AGOS 仍是可选外部辅助；本仓库可用原生控制面时不运行它，不在本任务中修改或优化它。
 
