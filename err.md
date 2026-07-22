@@ -404,6 +404,15 @@
 - 验证：本地 PyYAML 门禁新增遍历所有 job 级 `env` 并拒绝 `runner.*`；修复后必须通过新普通提交触发 PR synchronize 运行，不 rerun 旧失败。
 - 关联：GitHub PR `#21`、运行 `29910132968`、运行 `29910379208`、`.github/workflows/ci.yml`、`build.md`。
 
+### 2026-07-22：Linux Clippy 拒绝仅在 Windows/macOS 使用的无条件导入
+
+- 环境：job-context 修复提交 `4a20c1e878283b2007f79bfa7f22aa8ebbee9f59` 触发 PR `#21` 运行 `29910847062`，首次真正执行 Rust `1.97.1` 三平台 Job。
+- 现象：classify、governance、Windows、macOS 成功；Linux `cargo clippy --workspace --all-targets --locked -- -D warnings` 报告 `crates/inputcodex-platform/tests/platform_contract.rs` 的 `PlatformKind` 未使用，`required` 随之失败并上传白名单 Artifact。
+- 根因：`PlatformKind` 被无条件导入，但只出现在 `#[cfg(target_os = "windows")]` 与 `#[cfg(target_os = "macos")]` 断言；Linux 只执行 `ErrorKind::Unsupported` 分支。
+- 处理：给 `PlatformKind` 导入增加与断言一致的 Windows/macOS cfg，`PlatformPort` 保持全平台导入；不添加 `allow(unused_imports)`，不降低 `-D warnings`。
+- 验证：Windows 本地 `cargo clippy -p inputcodex-platform --tests -- -D warnings` 通过，但不能复现 Linux 条件编译；最终验证必须来自后续普通提交触发的新 Linux Runner，禁止 rerun 旧失败。
+- 关联：GitHub PR `#21`、运行 `29910847062`、Job `88893173619`、`crates/inputcodex-platform/tests/platform_contract.rs`。
+
 ## 记录模板
 
 ```text

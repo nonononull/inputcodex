@@ -1,6 +1,8 @@
 #[cfg(not(any(target_os = "windows", target_os = "macos")))]
 use inputcodex_application::ErrorKind;
-use inputcodex_application::{PlatformKind, PlatformPort};
+#[cfg(any(target_os = "windows", target_os = "macos"))]
+use inputcodex_application::PlatformKind;
+use inputcodex_application::PlatformPort;
 use inputcodex_platform::SystemPlatform;
 
 #[test]

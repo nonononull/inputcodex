@@ -1,6 +1,6 @@
 # Issue #19：Gate 3 纯 Rust Workspace 与首版三平台 CI 报告
 
-report_status: first-ci-real-red-root-cause-fix-in-progress
+report_status: first-ci-linux-clippy-fix-in-progress
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 branch_ref: codex/issue-19-gate-3-rust-workspace-ci
 baseline_ref: 477d110a9b284e127af365f5278901bcfa69e093
@@ -79,6 +79,8 @@ merge_ref: pending
 - 本地 YAML 解析通过，但精确 Rust `1.97.1`、Iced/desktop、Linux/Windows/macOS 及 `required` 仍是远端待验证事实，不提前宣称通过。
 - Draft PR `#21` 首轮运行 `29910132968` 与 `29910379208` 均在创建 Job 前失败；GitHub 注解将根因定位到三个平台 Job 的 job 级 `env` 使用了不可用的 `runner.temp` 上下文。
 - 修复改为平台 Job 首步从 `RUNNER_TEMP` 计算报告目录并写入 `GITHUB_ENV`，不改变 Artifact 白名单、权限、超时、Runner 或构建命令；本地 YAML 门禁同步拒绝未来 job 级 `runner.*` 回归。
+- 上下文修复后的运行 `29910847062` 已证明 classify、governance、Windows 与 macOS 成功；Linux Clippy 唯一根因是 `platform_contract.rs` 无条件导入只在 Windows/macOS 条件断言使用的 `PlatformKind`，`required` 按设计阻断。
+- 当前修复只把该导入收紧到 Windows/macOS cfg；下一运行必须重新证明 Linux Clippy、Workspace 测试、desktop check 与 `required`，不以 Windows 本地 Clippy 替代 Linux 证据。
 
 ## 九、下一合法批次
 

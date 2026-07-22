@@ -3,7 +3,7 @@
 schema_version: inputcodex.session-plan.v1
 task_id: 2026-07-22-issue-19-gate-3-rust-workspace-ci
 work_class: major
-task_status: first-ci-real-red-root-cause-fix-in-progress
+task_status: first-ci-linux-clippy-fix-in-progress
 task_summary: 按已批准的 Gate 3 合同建立七成员纯 Rust Workspace、Iced 展示层隔离、最小加载/平台语义、治理脚本与首版无缓存三平台 CI，不迁移任何上游业务功能。
 project_root: C:/Users/dashuai/Documents/inputcodex
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
@@ -271,3 +271,5 @@ owner_merge_authorization_ref: pending-new-owner-authorization-required
 - 本地 YAML 解析与 Workflow 静态合同已通过；这些证据不等于 Rust `1.97.1`、Iced/desktop 或三平台编译通过，下一步必须普通提交/push 后创建关联 PR 并观察 GitHub Actions。
 - Draft PR `#21` 创建后，GitHub 对提交 `f3107dd` 与 `96374d9` 均生成工作流文件级失败且没有 Job；运行 `29910379208` 的官方注解精确指出三处 job 级 `env` 中 `runner.temp` 不可用。
 - 根因修复不降低合同：移除三个平台 Job 的 job 级 `REPORT_DIR` 表达式，改为各 Job 首步用运行时 `RUNNER_TEMP` 创建目录并写入 `GITHUB_ENV`；本地 YAML 门禁新增禁止 job 级 `runner.*` 上下文检查。
+- 修复提交 `4a20c1e878283b2007f79bfa7f22aa8ebbee9f59` 已创建真实运行 `29910847062`：classify、governance、Windows、macOS 成功，Linux 仅在 Clippy 因 `PlatformKind` 的 Linux 未使用导入失败，`required` 正确阻断。
+- 当前只把 `PlatformKind` 导入收紧到 Windows/macOS cfg；本地 Windows 定向 Clippy 通过不替代 Linux 证据，必须由新普通提交触发后续 Linux Runner 验证。
