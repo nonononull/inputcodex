@@ -1,8 +1,5 @@
 #![forbid(unsafe_code)]
 
-#[cfg(target_os = "macos")]
-compile_error!("GATE3_MACOS_CONDITIONAL_COMPILE_FAILURE");
-
 use inputcodex_application::{ApplicationError, PlatformKind, PlatformPort};
 
 #[derive(Debug, Clone, Copy, Default)]

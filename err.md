@@ -458,6 +458,15 @@
 - 验证：失败 Artifact 只有 Windows `desktop-build.log`/`toolchain.txt` 与 `required.json`，不含 `target/`；修复提交 `436f7273b589f0dcca0c574aae611bf919d687f8` 触发运行 `29916670916`，六 Job 全绿且成功 Artifact 数为 `0`。
 - 关联：GitHub PR `#21`、失败运行 `29916309635`、修复运行 `29916670916`、Artifact `windows-failure-29916309635-1`、Artifact `required-failure-29916309635-1`。
 
+### 2026-07-22：macOS cfg compile_error 探针验证平台隔离失败语义
+
+- 环境：普通提交 `01a99167c3729c2e1269b289433ee310a4ebaa8c` 只在 platform crate 顶层加入 `#[cfg(target_os = "macos")] compile_error!("GATE3_MACOS_CONDITIONAL_COMPILE_FAILURE")`；Windows 本地 platform check 保持通过。
+- 现象：运行 `29917061781` 的 macOS 在桌面冷构建步骤失败，Linux、Windows、classify、governance 成功，`required` 失败。
+- 根因：macOS 日志包含唯一稳定标记并报告 `inputcodex-platform` 编译失败；`required.json` 的唯一 failures 项为 `macos=failure`。
+- 处理：删除唯一 macOS cfg 探针，不新增平台分支、不修改 `PlatformKind` 语义，也不 rerun 旧失败。
+- 验证：失败 Artifact 只有 macOS `desktop-build.log`/`toolchain.txt` 与 `required.json`，不含 `target/`；删除探针后的本地 Windows platform check 与 Fresh macOS CI 仍待后续运行确认。
+- 关联：GitHub PR `#21`、运行 `29917061781`、Artifact `macos-failure-29917061781-1`、Artifact `required-failure-29917061781-1`。
+
 ## 记录模板
 
 ```text
