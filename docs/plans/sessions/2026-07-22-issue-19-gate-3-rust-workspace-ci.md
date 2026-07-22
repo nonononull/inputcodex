@@ -3,7 +3,7 @@
 schema_version: inputcodex.session-plan.v1
 task_id: 2026-07-22-issue-19-gate-3-rust-workspace-ci
 work_class: major
-task_status: governance-dependency-alignment-verified-awaiting-checkpoint-push
+task_status: workspace-local-light-verified-awaiting-checkpoint-push
 task_summary: 按已批准的 Gate 3 合同建立七成员纯 Rust Workspace、Iced 展示层隔离、最小加载/平台语义、治理脚本与首版无缓存三平台 CI，不迁移任何上游业务功能。
 project_root: C:/Users/dashuai/Documents/inputcodex
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
@@ -32,7 +32,15 @@ green_contract_status: verified
 green_contract_passed: 27
 green_checkpoint_ref: commit:be9259f55b32014e918113936e6e6ddfdd16765f;issuecomment:5043682396
 governance_alignment_status: verified
-governance_alignment_checkpoint_ref: pending-push
+governance_alignment_checkpoint_ref: commit:2d8a1466ae42d6b208258bee3d0cb6bd5647bb12;issuecomment:5043770155
+workspace_status: seven-members-local-light-green
+workspace_member_count: 7
+lock_package_count: 336
+lock_external_package_count: 329
+local_toolchain_evidence: rust-1.93.1-ignore-rust-version-only
+exact_toolchain_evidence: pending-github-actions
+desktop_iced_compile: pending-github-actions
+workspace_checkpoint_ref: pending-push
 
 ## 一、批准决策
 
@@ -237,3 +245,14 @@ owner_merge_authorization_ref: pending-new-owner-authorization-required
 - 先移除合法夹具中的越层依赖，并新增 `infrastructure → domain`、`platform → domain`、`presentation → domain`、`parity → platform` 四条拒绝测试；旧政策稳定错误返回 `ok=true`。
 - 政策白名单已精确收紧为：application → domain；infrastructure/platform/presentation → application；parity → application + domain；desktop → presentation + application + infrastructure + platform。
 - 完整合同最终输出 `CI_CONTRACT_GREEN passed=27`；纠偏 checkpoint 推送并回写 Issue 前仍不得创建 Cargo Workspace。
+
+## 十六、最小 Workspace 执行记录
+
+- 已创建七个显式成员、resolver `3`、统一 edition `2024`、Rust `1.97.1`、MIT、仓库地址和 `Cargo.lock`；`upstream/` 未进入 Workspace。
+- domain/application 先以缺失 `DiagnosticCode`、`LoadCoordinator` 等符号取得编译 RED，再实现稳定诊断码、请求标识、六状态加载机、过期结果和取消后结果失效语义。
+- infrastructure/platform/parity/presentation 分别先以缺失端口类型取得 RED，再实现未配置数据源明确失败、Windows/macOS 统一平台语义、非发布目标 unsupported、稳定错误签名和展示层消息映射。
+- presentation 只有可选 `iced-runtime` 能直接启用 Iced `0.14.0`；desktop 仅依赖 presentation 暴露的启动入口，不直接依赖 Iced。UI 仍未建立设计系统。
+- `Cargo.lock` 包含 `336` 个 package 记录，其中 `329` 个外部包、`7` 个 Workspace 包；Iced checksum 与批准值一致；直接 feature 仅为 `wgpu`、`thread-pool`、`x11`、`wayland`，默认 features、`webgl`、`web-colors`、`crisp` 未启用。
+- 本地现有 Rust `1.93.1` 下，metadata、fmt、domain check 与六个轻量 crate 测试通过；命令使用 `--ignore-rust-version`，只作为逻辑证据。
+- 精确 Rust `1.97.1` minimal 安装超过 5 分钟未完成，残留 rustup/rustc 进程已精确终止且工具链未安装；按本地轻验/云端全量合同不再重试，精确工具链与 Iced/desktop 编译等待 GitHub Actions。
+- 离线 `cargo tree` 因未下载 `arrayref` 源包失败；未为取证下载并编译完整 `329` 个外部包图，feature 图与真实桌面编译改由 CI 验证。

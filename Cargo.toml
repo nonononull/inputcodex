@@ -1,0 +1,35 @@
+[workspace]
+resolver = "3"
+members = [
+    "apps/inputcodex-desktop",
+    "crates/inputcodex-domain",
+    "crates/inputcodex-application",
+    "crates/inputcodex-infrastructure",
+    "crates/inputcodex-platform",
+    "crates/inputcodex-presentation",
+    "crates/inputcodex-parity",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.97.1"
+license = "MIT"
+repository = "https://github.com/nonononull/inputcodex"
+
+[workspace.dependencies]
+inputcodex-domain = { path = "crates/inputcodex-domain" }
+inputcodex-application = { path = "crates/inputcodex-application" }
+inputcodex-infrastructure = { path = "crates/inputcodex-infrastructure" }
+inputcodex-platform = { path = "crates/inputcodex-platform" }
+inputcodex-presentation = { path = "crates/inputcodex-presentation" }
+inputcodex-parity = { path = "crates/inputcodex-parity" }
+iced = { version = "=0.14.0", default-features = false, features = [
+    "wgpu",
+    "thread-pool",
+    "x11",
+    "wayland",
+] }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"

@@ -4,7 +4,7 @@
 
 截至 2026 年 7 月 22 日，PR `#18` 已将 Gate 3 规划 Squash Merge 到 `main`，合并提交为 `477d110a9b284e127af365f5278901bcfa69e093`；Issue `#17` 已关闭，Issue `#19` 是当前 Gate 3 Workspace 与首版三平台 CI 实现任务。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照与 `upstream/source-lock.json`；Issue `#19` 的治理合同已从可信 RED 转为 `27/27` GREEN，并按批准架构收紧依赖方向，但仍未创建产品应用源码，因此暂时没有 Cargo/Iced 构建命令。本文件当前提供八个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照与 `upstream/source-lock.json`；Issue `#19` 已创建七成员纯 Rust Workspace、精确工具链文件、`Cargo.lock` 和最小分层源码。本文件当前提供九个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -14,11 +14,12 @@
 6. Issue `#19` Gate 3 实现控制面、批准引用、范围哈希和 RED 前置门禁验证。
 7. Issue `#19` 治理 RED 合同的 AST、非零退出码、稳定标记和实现缺失根因验证。
 8. Issue `#19` 路径分类与仓库政策脚本的 `27/27` GREEN 合同验证。
+9. Issue `#19` 七成员 Workspace、锁文件、轻量 crate 测试和 Iced 边界验证。
 
 当前禁止：
 
 - 在没有新的独立 upstream-sync Issue/PR 与项目所有者批准时修改 `upstream/` 或 `source-lock.json`。
-- 在 Issue `#19` 的 GREEN 治理 checkpoint 尚未提交、普通 push 并回写 Issue 前创建 `Cargo.toml`、`Cargo.lock`、`rust-toolchain.toml`、Rust/Iced 源码或 `.github/workflows/ci.yml`。
+- 在 Issue `#19` 的 Workspace checkpoint 尚未提交、普通 push 并回写 Issue 前创建 `.github/workflows/ci.yml`。
 - 创建 Release Workflow、安装包、签名、更新资产、临时 UI 或 WebView。
 - 修改 Ruleset、required checks 或仓库级合并开关。
 - 修改或优化外部 AGOS。
@@ -29,6 +30,7 @@
 - Git。
 - GitHub CLI `gh`，已登录 `nonononull`。
 - Python 3 与 PyYAML。
+- Rust `1.97.1`、`rustfmt` 与 `clippy`；本机缺少精确工具链时不得改成浮动 `stable`。
 
 ```powershell
 Set-Location 'C:\Users\dashuai\Documents\inputcodex'
@@ -37,6 +39,40 @@ Set-StrictMode -Version Latest
 ```
 
 原生 `git`、`gh`、`python` 命令后必须立即检查 `$LASTEXITCODE`。只有一行输出时使用 `@(...)` 归一化，禁止把空 stdout 当成成功证据。
+
+## Issue #19 Workspace 本地轻量验证
+
+标准命令由 Rust `1.97.1` 执行：
+
+```powershell
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+cargo metadata --locked --no-deps --format-version 1
+cargo fmt --all -- --check
+cargo check --locked -p inputcodex-domain
+cargo test --locked -p inputcodex-domain
+```
+
+本机在 2026 年 7 月 22 日安装 `1.97.1` minimal 工具链超过 5 分钟仍无完成证据，已终止残留进程并按项目 CI 卸载合同绕过。以下命令只证明轻量代码可在现有 `1.93.1` 上运行，不构成精确工具链或桌面编译证据：
+
+```powershell
+$env:RUSTUP_TOOLCHAIN = '1.93.1-x86_64-pc-windows-msvc'
+cargo metadata --locked --offline --no-deps --format-version 1
+cargo fmt --all -- --check
+cargo check --locked --offline --ignore-rust-version -p inputcodex-domain
+cargo test --locked --offline --ignore-rust-version `
+  -p inputcodex-domain `
+  -p inputcodex-application `
+  -p inputcodex-infrastructure `
+  -p inputcodex-platform `
+  -p inputcodex-parity `
+  -p inputcodex-presentation `
+  --no-default-features
+```
+
+`Cargo.lock` 当前包含 `336` 个 package 记录，其中 `329` 个有 registry source、`7` 个是本 Workspace 包；Iced 必须为 `0.14.0` 且 checksum 为 `000e01026c93ba643f8357a3db3ada0e6555265a377f6f9291c472f6dd701fb3`。根清单只允许 Iced feature `wgpu`、`thread-pool`、`x11`、`wayland`，禁止 `webgl`、`web-colors`、`crisp` 和默认 features。
+
+`cargo check -p inputcodex-desktop`、Iced 运行时、Windows/macOS 编译与全 Workspace 测试只在标准 GitHub-hosted runners 执行；不得为本地取证下载并编译完整 `329` 个外部包依赖图。
 
 ## Issue #19 治理 RED checkpoint 验证
 

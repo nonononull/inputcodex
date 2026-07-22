@@ -1,0 +1,17 @@
+[package]
+name = "inputcodex-desktop"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+inputcodex-application.workspace = true
+inputcodex-infrastructure.workspace = true
+inputcodex-platform.workspace = true
+inputcodex-presentation = { workspace = true, features = ["iced-runtime"] }
+
+[lints]
+workspace = true

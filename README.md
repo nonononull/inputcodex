@@ -53,15 +53,15 @@
 
 - Gate 2 的 Issue `#9/#12/#14` 与 PR `#11/#13/#15` 均已完成；上游监控 Workflow 持续运行，Issue `#16` 只由机器维护。
 - `upstream/CodexPlusPlus/` 含 `v1.2.41` 的 `277` 个只读审计文件，`upstream/source-lock.json` 记录来源、tree、逐文件 blob/SHA-256、许可证和生成工具证据。
-- 当前仍没有 Cargo Workspace、产品 Rust/Iced 源码、Release、安装包、签名或更新资产；Issue `#19` 的治理入口已由可信 RED 转为 `27/27` GREEN，并按批准架构收紧依赖方向。
+- Issue `#19` 已创建七成员纯 Rust Workspace、Rust `1.97.1` 工具链文件、`Cargo.lock` 和最小分层源码；仍没有 Release、安装包、签名、更新资产或上游业务功能迁移。
 - Gate 3 实现顺序固定为“RED 治理合同 → GREEN 治理脚本 → 七成员 Workspace → 无缓存三平台 CI → 真实失败恢复 → 冷构建基线”。
 - Iced 只能直接存在于 presentation crate；最小窗口不建立 UI 设计系统，视觉与交互由 Gemini 实现或审阅。
 
 ## 下一步
 
-1. 提交并普通 push Issue `#19` 的治理依赖方向纠偏 checkpoint，在 Issue 回写 `27/27` 结果、commit、修复根因与精确架构箭头。
-2. GREEN checkpoint 远端对账后，按 `domain → application → infrastructure/platform/parity → presentation → desktop` 创建七成员最小 Workspace。
-3. Workspace checkpoint 完成后，再创建三平台 CI、真实失败恢复和冷构建基线；最终 PR 合并仍需新的明确授权。
+1. 提交并普通 push Issue `#19` 的 Workspace checkpoint，在 Issue 回写 RED/GREEN、七成员依赖图、锁文件和本地轻验边界。
+2. Workspace checkpoint 远端对账后，创建首版无缓存三平台 `CI` Workflow，由 GitHub Actions 完成 Rust `1.97.1`、Iced/desktop 和 Windows/macOS 全量编译。
+3. CI 稳定后按 Runtime Workflow 制造并修复真实失败、记录三平台冷构建基线；最终 PR 合并仍需新的明确授权。
 
 ## 项目文档
 

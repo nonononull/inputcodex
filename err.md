@@ -314,6 +314,42 @@
 - 验证：远端 GREEN commit、tree、parent 精确对账，Issue 评论 `5043682396` 创建成功，本地远端跟踪引用与远端 Head 一致。
 - 关联：GitHub Issue `#19`、提交 `be9259f55b32014e918113936e6e6ddfdd16765f`。
 
+### 2026-07-22：多包 Cargo RED 未固定 offline 导致 registry 刷新超时
+
+- 环境：Issue `#19` 已加入 Iced 可选依赖和七成员清单，准备对 infrastructure/platform/parity/presentation 逐包取得编译 RED。
+- 现象：串行 `cargo test` 在 180 秒后超时且没有输出，留下两个低 CPU Cargo 进程；`Cargo.lock` 仍是旧的本地两包内容，无法把该失败解释为缺失 API。
+- 根因：命令没有固定 `--offline`，Cargo 在进入目标包编译前尝试刷新/解析 registry；PowerShell 又先收集子命令全部输出，超时前没有把阶段信息打印出来。网络阶段与代码 RED 混在一起。
+- 处理：核对 PID、进程名和启动时间后只终止本次两个 Cargo 进程；后续轻量 RED 固定 `--offline`，逐包检查退出码与缺失符号标记。
+- 验证：离线命令在数秒内分别返回退出码 `101`，根因精确为缺失 `UnconfiguredLoadPort`、`SystemPlatform`、`ErrorSignature`、`PresentationState`；实现后四包测试全部通过。
+- 关联：GitHub Issue `#19`、Runtime Workflow Phase 4。
+
+### 2026-07-22：Rust 1.97.1 minimal 本地安装超时并占用 rustup 锁
+
+- 环境：Workspace 源码完成后尝试安装精确 `1.97.1` minimal、`rustfmt` 与 `clippy`，只计划运行 domain 轻量验证。
+- 现象：安装命令超过 5 分钟仍无完成输出；后续 `rustup toolchain list` 和版本检查也被安装锁阻塞，进程列表显示本次 `rustup` 与经 rustup shim 启动的 `rustc` 残留。
+- 根因：本机 Rust 分发下载/安装路径未在本次时间预算内完成；没有证据表明工具链、组件或仓库代码本身损坏。继续重试会违背“本地轻验 + GitHub Actions 全量验证”的资源合同。
+- 处理：按 PID、进程名和启动时间只终止本次 rustup/rustc；Fresh 查询确认已安装列表仍只有 stable 与 `1.93.1`。不删除任何既有工具链，不改 `rust-toolchain.toml`，不降级为浮动 stable。
+- 验证：残留进程数为 `0`；使用现有 `1.93.1`、`--ignore-rust-version` 与 `--offline` 完成 metadata、fmt、domain check 和六个轻量 crate 测试；精确 `1.97.1` 证据明确转交 CI。
+- 关联：GitHub Issue `#19`、`build.md`、`rust-toolchain.toml`。
+
+### 2026-07-22：Cargo 的 Locking 数量不等于 Cargo.lock 总记录数
+
+- 环境：Workspace 最终门禁根据 `cargo generate-lockfile` 输出的 `Locking 329 packages` 记录依赖数量，并用正则统计 `Cargo.lock` 的 `[[package]]`。
+- 现象：Fresh 门禁得到 `LOCK_PACKAGE_COUNT=336`，与文档中的 `329` 不一致；Iced checksum 和所有代码测试仍通过。
+- 根因：Cargo 日志中的 `329` 表示本次锁定的 registry 外部包，不包含没有 `source` 字段的 `7` 个 Workspace 包；文档把外部依赖数误写为锁文件总记录数。
+- 处理：按每个 package block 是否包含 `source =` 分组，不修改锁文件；总记录固定写为 `336`，同时分别记录外部包 `329` 和 Workspace 包 `7`。
+- 验证：七个无 source 包名精确为 inputcodex 的七个成员；`336 = 329 + 7`，Iced `0.14.0` checksum 仍与批准值一致。
+- 关联：GitHub Issue `#19`、`Cargo.lock`、`build.md`、任务报告。
+
+### 2026-07-22：离线 Cargo feature tree 需要未缓存的 crate 源包
+
+- 环境：`Cargo.lock` 已生成并锁定 `336` 个 package 记录（`329` 个外部包 + `7` 个 Workspace 包），尝试用 `cargo tree --offline -e features -p inputcodex-desktop` 本地确认 Iced feature 图，不执行编译。
+- 现象：命令退出 `101`，报告缺少未缓存的 `arrayref v0.3.9`，若继续需要联网下载 registry 源包。
+- 根因：`cargo tree -e features` 需要读取依赖包的 feature 元数据，只有锁文件和稀疏索引不足以覆盖尚未下载的 crate；失败不代表根清单 feature 或 Iced checksum 错误。
+- 处理：不为本地取证下载并展开完整 `329` 个外部包源图；本地核对根 `Cargo.toml` 显式 feature、`default-features = false`、锁文件 Iced 版本/checksum和仓库政策，真实 feature 解析与 desktop 编译交给 GitHub Actions。
+- 验证：本地清单只声明 `wgpu`、`thread-pool`、`x11`、`wayland`，未声明 `webgl`、`web-colors`、`crisp`；治理脚本对真实仓库返回 `ok=true`，轻量 crate 全部通过。
+- 关联：GitHub Issue `#19`、`Cargo.toml`、`Cargo.lock`、首版三平台 CI 待办。
+
 ## 记录模板
 
 ```text

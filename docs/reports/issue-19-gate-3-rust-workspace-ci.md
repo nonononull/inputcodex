@@ -1,6 +1,6 @@
 # Issue #19：Gate 3 纯 Rust Workspace 与首版三平台 CI 报告
 
-report_status: governance-dependency-alignment-verified-awaiting-checkpoint-push
+report_status: workspace-local-light-verified-awaiting-checkpoint-push
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 branch_ref: codex/issue-19-gate-3-rust-workspace-ci
 baseline_ref: 477d110a9b284e127af365f5278901bcfa69e093
@@ -50,15 +50,33 @@ merge_ref: pending
 - 架构复核发现首个合法夹具与政策白名单错误允许 infrastructure/platform/presentation 直连 domain，并允许 parity 依赖 platform，违反已批准依赖图。
 - 四条新增测试先稳定复现政策错误返回 `ok=true`，证明不是文档措辞问题，而是机器门禁真实放宽。
 - 允许图已收紧为批准箭头，完整合同达到 `27/27` GREEN；当前仍没有产品 Cargo、Rust/Iced 或产品 CI Workflow。
-- 当前仍不存在产品 `Cargo.toml`、`Cargo.lock`、`rust-toolchain.toml`、`.rs`、Iced 或 `.github/workflows/ci.yml`。
+- 纠偏提交 `2d8a1466ae42d6b208258bee3d0cb6bd5647bb12` 已普通 push，并回写 Issue 评论 `5043770155`。
 
-## 六、下一合法批次
+## 六、最小 Workspace 证据
 
-1. 提交并普通 push 治理依赖方向纠偏 checkpoint，在 Issue `#19` 回写 `27/27`、commit、根因和精确允许图。
-2. 按 Runtime Workflow 的 Phase 4 顺序创建七成员最小 Workspace、加载状态语义、平台 unsupported 合同与 Iced 展示层隔离。
-3. Workspace checkpoint 完成并回写 Issue 前不得创建 `.github/workflows/ci.yml`。
+- 七成员路径与批准合同一致，根清单使用 resolver `3`、edition `2024`、Rust `1.97.1`、MIT 和本仓 repository；每个 app/crate 均有独立 `build.md` 与 `err.md`。
+- domain/application 的编译 RED 分别由缺失 `DiagnosticCode` 与加载状态 API 触发；最终 domain `1` 项、application `3` 项集成测试通过。
+- infrastructure、platform、parity、presentation 的编译 RED 分别由缺失批准类型触发；最终四个包各 `1` 项集成测试通过。
+- application 固化 `Idle / Loading / Ready / Empty / Failed / Cancelling`；新请求使旧结果过期，取消后结果失效，取消完成需要匹配请求标识。
+- infrastructure 未配置端口返回 `Unavailable / LOAD_SOURCE_UNCONFIGURED`，不伪造空结果；非 Windows/macOS 返回 `Unsupported / PLATFORM_UNSUPPORTED`。
+- presentation 只依赖 application，Iced `0.14.0` 为可选 `iced-runtime`；desktop 直接依赖 application/infrastructure/platform/presentation，但不直接依赖 Iced；parity 不链接 desktop。
+- `Cargo.lock` 包含 `336` 个 package 记录，其中 `329` 个外部包、`7` 个 Workspace 包；Iced checksum 为批准值；直接 features 为 `wgpu`、`thread-pool`、`x11`、`wayland`，未启用默认 features 或 Web/WebGL 相关 feature。
 
-## 七、收口边界
+## 七、本地验证与资源边界
+
+- 治理合同 `27/27` 与真实仓库政策 `ok=true`；Cargo metadata、rustfmt、domain check 和六个轻量 crate 测试通过。
+- 本机只有 Rust `1.93.1`；轻验使用 `--ignore-rust-version`，不得解释为 Rust `1.97.1` 或桌面运行时通过。
+- Rust `1.97.1` minimal 安装超过 5 分钟仍无完成证据，已精确终止本次 rustup/rustc 残留，确认工具链未安装；按 CI 卸载合同不再消耗本地机器。
+- 首次非离线多包 RED 因 registry 刷新超时并留下 Cargo 进程；终止本次 PID 后用 `--offline` 立即复现批准 API 缺失，证明网络阶段与代码 RED 已分离。
+- 离线 feature tree 因缺少 `arrayref` crate 源包失败；没有为本地取证下载或编译完整 `329` 个外部包图，精确 feature 解析和 desktop 编译等待 GitHub Actions。
+
+## 八、下一合法批次
+
+1. 提交并普通 push Workspace checkpoint，在 Issue `#19` 回写七成员图、RED/GREEN、锁文件、本地轻验与云端待验证边界。
+2. 创建 `.github/workflows/ci.yml`，使用标准 GitHub-hosted runners 完成 Rust `1.97.1`、Iced/desktop、Linux/Windows/macOS 全量验证。
+3. CI 稳定前不得修改 `main` Ruleset required checks，不得在本地机器执行全 Workspace 或桌面重型编译。
+
+## 九、收口边界
 
 - PR、CI、Review 和 merge 字段保持 `pending`，不得提前宣称通过。
 - 最终 PR 必须包含 `Closes #19`，所有适用 Job 成功、Review 对话根因闭环后，再等待项目所有者新的 Squash Merge 授权。
