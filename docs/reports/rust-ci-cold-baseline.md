@@ -84,6 +84,7 @@ external_package_count: 329
 | `29913582488` | governance 与 required 失败，三平台成功 | 受控 `.ts` 探针触发 `SCRIPT_LANGUAGE_FORBIDDEN` | 删除探针并由后续普通提交重新验证 | 否 |
 | `29914734781` | linux-quality 与 required 失败，Windows/macOS 成功 | 受控单行格式差异使 `cargo fmt --check` 失败 | `71be06a` 恢复格式，运行 `29915134906` 六 Job 全绿 | 否 |
 | `29915537702` | Linux、Windows、macOS 与 required 失败 | 全平台 `compile_error!` 探针触发稳定标记 `GATE3_GENERIC_RUST_COMPILE_FAILURE` | `3ca5866` 删除探针，运行 `29915879951` 六 Job 全绿 | 否 |
+| `29916309635` | Windows 与 required 失败，Linux/macOS 成功 | Windows cfg `compile_error!` 探针触发 `GATE3_WINDOWS_CONDITIONAL_COMPILE_FAILURE` | 删除探针并由后续普通提交重新验证 | 否 |
 
 ## 四、样本槽位
 

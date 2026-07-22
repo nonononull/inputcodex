@@ -449,6 +449,15 @@
 - 验证：失败 Artifact 分别只包含 Clippy/desktop build、toolchain、metrics 与 `required.json` 白名单文件，不含 `target/`；修复提交 `3ca5866a88319a6b8bfccd87ead2cfab98070397` 触发运行 `29915879951`，六 Job 全绿且成功 Artifact 数为 `0`。
 - 关联：GitHub PR `#21`、失败运行 `29915537702`、修复运行 `29915879951`、Artifacts `linux-quality-failure-29915537702-1`、`windows-failure-29915537702-1`、`macos-failure-29915537702-1`、`required-failure-29915537702-1`。
 
+### 2026-07-22：Windows cfg compile_error 探针验证平台隔离失败语义
+
+- 环境：普通提交 `d69915ad60c6ca89a59d824543792d3147092217` 只在 platform crate 顶层加入 `#[cfg(target_os = "windows")] compile_error!("GATE3_WINDOWS_CONDITIONAL_COMPILE_FAILURE")`；平台接口与 Workflow 未修改。
+- 现象：运行 `29916309635` 的 Windows 在桌面冷构建步骤失败，Linux、macOS、classify、governance 成功，`required` 失败。
+- 根因：Windows 日志包含唯一稳定标记并报告 `inputcodex-platform` 编译失败；`required.json` 的唯一 failures 项为 `windows=failure`。
+- 处理：删除唯一 Windows cfg 探针，不新增平台分支、不修改 `PlatformKind` 语义，也不 rerun 旧失败。
+- 验证：失败 Artifact 只有 Windows `desktop-build.log`/`toolchain.txt` 与 `required.json`，不含 `target/`；删除探针后的本地 Windows platform check 与 Fresh CI 仍待后续运行确认。
+- 关联：GitHub PR `#21`、运行 `29916309635`、Artifact `windows-failure-29916309635-1`、Artifact `required-failure-29916309635-1`。
+
 ## 记录模板
 
 ```text

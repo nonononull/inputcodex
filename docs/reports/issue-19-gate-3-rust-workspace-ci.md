@@ -93,6 +93,8 @@ merge_ref: pending
 - 通用 Rust 编译失败提交 `a77d8789c79fc853956833dec693e53122b5bd55` 在 domain 顶层加入稳定 `compile_error!` 探针；运行 `29915537702` 的 Linux Clippy、Windows/macOS 桌面冷构建均报告 `GATE3_GENERIC_RUST_COMPILE_FAILURE`，治理保持成功。
 - `required` 精确汇总 `linux-quality=failure；windows=failure；macos=failure`；四个失败 Artifact 只含 Clippy/desktop build、toolchain、metrics 与 `required.json` 白名单文件。当前修复删除探针，不改变编译命令或平台 Job。
 - 通用编译修复提交 `3ca5866a88319a6b8bfccd87ead2cfab98070397` 触发运行 `29915879951`，六 Job 全绿且成功 Artifact 数为 `0`。
+- Windows 条件编译失败提交 `d69915ad60c6ca89a59d824543792d3147092217` 只在 platform crate 加入 Windows cfg `compile_error!`；运行 `29916309635` 中 Windows 桌面冷构建报告 `GATE3_WINDOWS_CONDITIONAL_COMPILE_FAILURE`，Linux/macOS 与治理成功。
+- `required` 的唯一 failure 为 `windows=failure`；失败 Artifact 只有 Windows `desktop-build.log`/`toolchain.txt` 与 `required.json`。当前修复删除探针，不复制或改写双平台业务语义。
 
 ## 九、下一合法批次
 
