@@ -437,8 +437,8 @@
 - 现象：运行 `29914734781` 的 linux-quality 在“检查 Rust 格式”步骤退出 `1`，后续 Linux Clippy/测试被正常跳过；governance、Windows、macOS 成功，`required` 失败。
 - 根因：`fmt.log` 精确显示 `pub const fn new( value: &'static str)->Self{` 应恢复为 `pub const fn new(value: &'static str) -> Self {`；`required.json` 的唯一 failures 项为 `linux-quality=failure`。
 - 处理：恢复唯一格式行，不修改逻辑。首次本地命令复用了根 `err.md` 已记录的 rustup 固定工具链超时结论，精确终止本次残留 PID 后，直接使用已安装 `1.93.1` 工具链二进制证明“fmt RED、domain check GREEN”，未下载或编译 Iced Workspace。
-- 验证：失败 Artifact 白名单只有 `fmt.log`、`toolchain.txt` 与 `required.json`；恢复格式后的本地 fmt/domain 定向验证与 Fresh CI 仍待后续运行确认。
-- 关联：GitHub PR `#21`、运行 `29914734781`、Artifact `linux-quality-failure-29914734781-1`、Artifact `required-failure-29914734781-1`。
+- 验证：失败 Artifact 白名单只有 `fmt.log`、`toolchain.txt` 与 `required.json`；修复提交 `71be06abea3baf7f1689e01504f7ea203f026797` 触发运行 `29915134906`，六 Job 全绿且成功 Artifact 数为 `0`。
+- 关联：GitHub PR `#21`、失败运行 `29914734781`、修复运行 `29915134906`、Artifact `linux-quality-failure-29914734781-1`、Artifact `required-failure-29914734781-1`。
 
 ## 记录模板
 
