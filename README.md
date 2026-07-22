@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游 `v1.2.41` 审计快照与每 6 小时监控，并已通过 Issue `#17` / PR `#18` 冻结 Gate 3 合同；Issue `#19` 已完成纯 Rust Workspace、五类失败语义与三平台最低冷构建基线，Draft PR `#21` 正在进入 Review/CI 收口。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游 `v1.2.41` 审计快照与每 6 小时监控，并已通过 Issue `#19` / PR `#21` 将 Gate 3 纯 Rust Workspace、五类失败语义和三平台最低冷构建基线 Squash Merge 到 `main`；Issue `#22` 正在持久化最终合并证据。
 
 ## 项目目标
 
@@ -39,13 +39,15 @@
 - 通过 PR `#15` Squash Merge 定时/手动上游监控、只读 PR 验证和幂等 Issue 状态机；合并提交为 `113476fb96623452f9a69526edabc73a57d812a1`，Issue `#14` 已关闭。
 - `main` 上两次真实运行 `29890586102` 与 `29890641799` 均成功；唯一机器状态为 Issue `#16`，重复告警数量为 `0`。
 - 通过 PR `#18` Squash Merge Gate 3 Workspace、Iced 隔离、双平台抽象、性能诊断和三平台 CI 合同；合并提交为 `477d110a9b284e127af365f5278901bcfa69e093`，Issue `#17` 已关闭。
-- 已创建实现 Issue `#19` 与分支 `codex/issue-19-gate-3-rust-workspace-ci`，项目所有者已批准并完成 RED/GREEN 治理合同、Workspace、首版 CI、失败语义与最低冷构建基线；最终 Squash Merge 仍需新的明确授权。
+- 通过 PR `#21` Squash Merge Gate 3 七成员 Workspace、首版无缓存三平台 CI、五类失败语义和冷构建最低基线；合并提交为 `0716ec0debcd3e059cc4ca88a072232841ca73b4`，Issue `#19` 已按 `COMPLETED` 关闭。
+- PR `#21` 的最终 Head 为 `9a4a4425f2fb0d8235554d3e83577111ae34efcc`；merge/head tree 均为 `4881ce609370f77181d9545474c029ab0c5d4972`，GitHub 签名 `valid`，合并后 `main` 运行 `29919596057` 六 Job 全绿且成功 Artifact 数为 `0`。
+- 已创建 Issue `#22`、分支 `codex/issue-22-gate-3-closeout` 与 PR `#23`，只用于回写 Gate 3 合并证据和修正陈旧控制面。
 
 当前明确不做：
 
 - 不把已导入的上游审计快照接入产品构建或运行面，也不在非 upstream-sync Issue 中修改快照。
 - 不导入半成品参考仓库源码。
-- 不在取得可信 RED 治理证据前创建 Cargo Workspace，也不在 Issue `#19` 中创建发布 Workflow、安装包、签名或更新资产。
+- 不在 Issue `#22` 中修改 Cargo、Rust 产品源码、测试、CI Workflow、发布资产或上游快照。
 - 不执行功能迁移、安装包构建、发布或未经项目所有者授权的 PR 合并。
 - 不让上游 Tauri/React UI、现有注入脚本和远程推荐列表进入最终运行面。
 
@@ -53,17 +55,17 @@
 
 - Gate 2 的 Issue `#9/#12/#14` 与 PR `#11/#13/#15` 均已完成；上游监控 Workflow 持续运行，Issue `#16` 只由机器维护。
 - `upstream/CodexPlusPlus/` 含 `v1.2.41` 的 `277` 个只读审计文件，`upstream/source-lock.json` 记录来源、tree、逐文件 blob/SHA-256、许可证和生成工具证据。
-- Issue `#19` 已创建七成员纯 Rust Workspace、Rust `1.97.1` 工具链文件、`Cargo.lock`、最小分层源码与首版无缓存三平台 `CI` Workflow；仍没有 Release、安装包、签名、更新资产或上游业务功能迁移。
-- 当前治理合同为 `30/30`，Workspace 许可证元数据已与根 `LICENSE` 对齐为 `AGPL-3.0-only`；五类受控失败语义已全部完成普通提交 RED→GREEN，最新修复运行 `29917649550` 六 Job 全绿且成功 Artifact 数为 `0`。
+- Issue `#19` / PR `#21` 已将七成员纯 Rust Workspace、Rust `1.97.1` 工具链文件、`Cargo.lock`、最小分层源码与首版无缓存三平台 `CI` Workflow 合入 `main`；仍没有 Release、安装包、签名、更新资产或上游业务功能迁移。
+- 当前治理合同为 `30/30`，Workspace 许可证元数据已与根 `LICENSE` 对齐为 `AGPL-3.0-only`；五类受控失败语义已全部完成普通提交 RED→GREEN，最终 PR 运行 `29918843397` 与合并后主干运行 `29919596057` 均六 Job 全绿。
 - Linux、Windows、macOS 已各取得 `3/3` 次无缓存成功样本；Job 执行时间中位数分别为 `133`、`212`、`96` 秒，最低基线不包含 Cache、P95 或七天调优结论。
 - Gate 3 实现顺序固定为“RED 治理合同 → GREEN 治理脚本 → 七成员 Workspace → 无缓存三平台 CI → 真实失败恢复 → 冷构建基线”。
 - Iced 只能直接存在于 presentation crate；最小窗口不建立 UI 设计系统，视觉与交互由 Gemini 实现或审阅。
 
 ## 下一步
 
-1. 提交并推送 Gate 3 最终控制面 checkpoint，不修改产品语义、Ruleset、`upstream/` 或外部 AGOS。
-2. 等待最终 PR Head 的六个 CI Job 成功，Fresh 复核允许路径、自动合并、Ruleset 与 Review 对话数量后把 Draft PR `#21` 转为 Ready for review。
-3. 停在等待项目所有者新的明确 Squash Merge 授权；未授权前不合并 PR、不关闭 Issue `#19`。
+1. 通过 Issue `#22` / PR `#23` 的独立 closeout 交付持久化 PR `#21` merge、Issue `#19` 关闭、主干 CI、Review、Ruleset 与签名证据。
+2. closeout PR 只修改 14 条治理/文档路径；所有适用检查成功、Review 对话为 `0` 后按已记录授权执行 Squash Merge。
+3. Gate 3 closeout 完成后保持 Gate 4 锁定；开始功能目录、性能预算或业务迁移前必须取得新的独立批准。
 
 ## 项目文档
 

@@ -1,7 +1,7 @@
 # Rust CI 无缓存冷构建基线
 
 schema_version: inputcodex.rust-ci-cold-baseline.v1
-report_status: minimum-baseline-complete
+report_status: minimum-baseline-complete-and-merged
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 pr_ref: https://github.com/nonononull/inputcodex/pull/21
 workflow_ref: .github/workflows/ci.yml
@@ -14,7 +14,10 @@ dependency_package_count: 336
 workspace_package_count: 7
 external_package_count: 329
 failure_semantics_status: verified-5-of-5
-latest_full_green_ci_ref: https://github.com/nonononull/inputcodex/actions/runs/29917649550
+implementation_merge_ref: https://github.com/nonononull/inputcodex/commit/0716ec0debcd3e059cc4ca88a072232841ca73b4
+final_pr_ci_ref: https://github.com/nonononull/inputcodex/actions/runs/29918843397
+latest_full_green_ci_ref: https://github.com/nonononull/inputcodex/actions/runs/29919596057
+closeout_issue_ref: https://github.com/nonononull/inputcodex/issues/22
 
 ## 一、测量边界
 

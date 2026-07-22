@@ -2,12 +2,12 @@
 
 > **执行要求：** 每个任务先建立独立 Issue、Session Plan 与 Runtime Workflow，再创建分支和关联 PR。Issue `#17` 只冻结 Gate 3 实施合同，不创建 Workspace、Rust 源码或产品 CI；后续实现仍需新的 Issue 和项目所有者批准。
 
-status: gate-3-planning-active-implementation-locked
+status: gate-3-implementation-completed-closeout-active
 decision_date: 2026-07-21
 owner: nonononull
-owner_decision_ref: 当前任务对话中的“方案确认”, user-message:approve-gate-3-planning-2026-07-22
+owner_decision_ref: 当前任务对话中的“方案确认”, user-message:approve-gate-3-planning-2026-07-22, user-message:authorize-squash-merge-pr-21-2026-07-22
 strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
-current_scope: Issue #17 只更新规划文档和 Gate 2 最终证据；禁止创建 Workflow、Cargo Workspace、Rust 源码、required status checks 或发布配置
+current_scope: Gate 3 实现已通过 Issue #19 / PR #21 合并；Issue #22 只持久化 closeout 证据，Gate 4 与 Cache/Ruleset 调优仍需独立批准
 
 **目标：** 在不占用项目所有者本地机器承担全量 Rust 编译的前提下，分阶段建立每 6 小时上游监控、纯 Rust/Iced 双平台工作区、标准 GitHub-hosted runners 全量 CI，以及证据充分后的 `main` required check。
 
@@ -217,6 +217,14 @@ Issue `#17` 的规划 PR 不包含 Workspace。规划合并后，Gate 3 的 Work
   提交信息：`build: 建立 Rust 工作区与三平台 CI`
 
 **回滚：** 若 Workspace 骨架有根因缺陷，使用关联 Issue/PR 的 `revert` 恢复合并提交；若只发生 CI 配置故障，使用新 PR 修复或临时禁用对应 Workflow。不得删除 `main`、Force Push 或以关闭平台 Job 冒充恢复。
+
+### Gate 3 实施交付结果
+
+- PR `#21` 最终 Head `9a4a4425f2fb0d8235554d3e83577111ae34efcc` 的运行 `29918843397` 六 Job 全绿，成功 Artifact 数为 `0`。
+- PR `#21` 于 `2026-07-22T12:25:59Z` Squash Merge 为 `0716ec0debcd3e059cc4ca88a072232841ca73b4`，唯一父提交为 `477d110a9b284e127af365f5278901bcfa69e093`。
+- Merge tree 与最终 Head tree 均为 `4881ce609370f77181d9545474c029ab0c5d4972`，GitHub 签名 `valid`；Issue `#19` 已按 `COMPLETED` 关闭。
+- 合并后 `main` 运行 `29919596057` 六 Job 全绿且成功 Artifact 数为 `0`。
+- Gate 3 实施步骤 `1–10` 全部完成；Cache、P95、Ruleset required check 和 Gate 4 继续使用独立 Issue/PR。
 
 ## Task 3：Cache 与诊断 Artifact 调优
 

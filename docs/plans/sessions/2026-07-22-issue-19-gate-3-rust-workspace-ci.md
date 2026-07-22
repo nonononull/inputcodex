@@ -3,7 +3,7 @@
 schema_version: inputcodex.session-plan.v1
 task_id: 2026-07-22-issue-19-gate-3-rust-workspace-ci
 work_class: major
-task_status: pr-review-ready-owner-merge-authorization-pending
+task_status: completed-squash-merged
 task_summary: 按已批准的 Gate 3 合同建立七成员纯 Rust Workspace、Iced 展示层隔离、最小加载/平台语义、治理脚本与首版无缓存三平台 CI，不迁移任何上游业务功能。
 project_root: C:/Users/dashuai/Documents/inputcodex
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
@@ -11,13 +11,14 @@ planning_issue_ref: https://github.com/nonononull/inputcodex/issues/17
 planning_pr_ref: https://github.com/nonononull/inputcodex/pull/18
 branch_ref: codex/issue-19-gate-3-rust-workspace-ci
 baseline_ref: 477d110a9b284e127af365f5278901bcfa69e093
-decision_status: approved-implementation-merge-authorization-pending
+decision_status: approved-implementation-and-squash-merge-completed
 approved_decision_ref: user-message:approve-gate-3-implementation-2026-07-22
 session_plan_ref: docs/plans/sessions/2026-07-22-issue-19-gate-3-rust-workspace-ci.md
 implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
 architecture_plan_ref: docs/plans/2026-07-22-issue-17-gate-3-rust-workspace-plan.md
 runtime_workflow_ref: docs/workflows/2026-07-22-issue-19-gate-3-rust-workspace-ci-runtime.md
 report_ref: docs/reports/issue-19-gate-3-rust-workspace-ci.md
+closeout_issue_ref: https://github.com/nonononull/inputcodex/issues/22
 scope_hash: sha256:2e101627480012d57d6d0472a08cfbe03fc401f6ac74ef3ae1e6a42929ed61ba
 mutation_intent: 先提交项目原生控制面，再按 RED 治理合同、GREEN Workspace、三平台 CI、真实失败恢复和冷构建基线分批实现；任何批次不得越过 23 条允许路径模式。
 executor_enforcement: 每个执行批次前后核对分支、允许路径、禁止依赖、测试状态和 Git 快照；本地只跑轻量定向验证，Workspace 与 Windows/macOS 全量验证交给标准 GitHub-hosted runners。
@@ -49,6 +50,8 @@ first_full_green_ci_ref: https://github.com/nonononull/inputcodex/actions/runs/2
 failure_semantics_status: verified-5-of-5
 cold_baseline_status: verified-3-per-platform
 latest_full_green_ci_ref: https://github.com/nonononull/inputcodex/actions/runs/29917649550
+final_pr_ci_ref: https://github.com/nonononull/inputcodex/actions/runs/29918843397
+post_merge_main_ci_ref: https://github.com/nonononull/inputcodex/actions/runs/29919596057
 
 ## 一、批准决策
 
@@ -225,11 +228,11 @@ ci_policy:
 ## 十二、交付证据
 
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
-review_ref: github-pr-21-review-threads-0-owner-decision-pending
+review_ref: github-pr-21-review-threads-0-owner-authorized
 pr_ref: https://github.com/nonononull/inputcodex/pull/21
-ci_ref: https://github.com/nonononull/inputcodex/actions/runs/29917649550
-merge_ref: pending
-owner_merge_authorization_ref: pending-new-owner-authorization-required
+ci_ref: https://github.com/nonononull/inputcodex/actions/runs/29919596057
+merge_ref: https://github.com/nonononull/inputcodex/commit/0716ec0debcd3e059cc4ca88a072232841ca73b4
+owner_merge_authorization_ref: user-message:authorize-squash-merge-pr-21-2026-07-22
 
 ## 十三、治理 RED 执行记录
 
@@ -281,3 +284,12 @@ owner_merge_authorization_ref: pending-new-owner-authorization-required
 - Phase 7 已完成：治理、rustfmt、通用 Rust、Windows 条件编译、macOS 条件编译五类失败语义均以普通提交完成 RED→GREEN；修复运行依次为 `29914029406`、`29915134906`、`29915879951`、`29916670916`、`29917649550`。
 - Linux、Windows、macOS 已分别接受运行 `29911337652`、`29913139948`、`29914029406`，均达到最低 `3/3` 次无缓存成功样本；Job 执行时间中位数为 `133`、`212`、`96` 秒。
 - 最新产品源码修复提交 `41c0cc2924a45f3d8e2a5fe2e47e2e254a9dbb3b` 的运行 `29917649550` 六 Job 全绿且成功 Artifact 数为 `0`；当前只允许完成最终控制面 checkpoint、Review/CI 收口与 Ready 转换，等待新的 Squash Merge 授权。
+
+## 十八、Squash Merge 完成记录
+
+- 最终控制面 Head `9a4a4425f2fb0d8235554d3e83577111ae34efcc` 的运行 `29918843397` 六 Job 全绿，成功 Artifact 数为 `0`，Review 对话为 `0`，Merge State 为 `CLEAN`。
+- 项目所有者授权引用为 `user-message:authorize-squash-merge-pr-21-2026-07-22`；授权证据已写入 PR 评论，未使用管理员绕过。
+- PR `#21` 于 `2026-07-22T12:25:59Z` Squash Merge 为 `0716ec0debcd3e059cc4ca88a072232841ca73b4`；Issue `#19` 于 `2026-07-22T12:26:00Z` 按 `COMPLETED` 关闭。
+- 合并提交只有一个父提交 `477d110a9b284e127af365f5278901bcfa69e093`；merge/head tree 均为 `4881ce609370f77181d9545474c029ab0c5d4972`，GitHub 签名 `valid`。
+- 合并后 `main` 运行 `29919596057` 六 Job 全绿、成功 Artifact 数为 `0`；远端功能分支已删除，本地 `main` 已同步且工作树干净。
+- 后续只允许 Issue `#22` 的独立 closeout PR 持久化上述证据；Gate 4 仍锁定。
