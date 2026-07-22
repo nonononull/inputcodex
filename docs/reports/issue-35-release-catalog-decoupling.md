@@ -6,7 +6,8 @@ branch_ref: codex/issue-35-release-catalog-decoupling
 baseline_ref: 939f3454b34e0faa42897be7489b344f2bec1d4c
 approved_decision_ref: user-message:approve-issue-35-14-path-scope-2026-07-22
 owner_scope_approval_comment_ref: https://github.com/nonononull/inputcodex/issues/35#issuecomment-5051128101
-scope_hash: sha256:446444f8cef61de3923d8fe40823ee6b1719a424d9f9e013ee26e70d2f20686a
+scope_extension_approval_ref: user-message:write-local-machine-time-rule-to-project-agents-2026-07-22
+scope_hash: sha256:42bc11297aa5d91ff876ceb17296cef337034a11c041f565b642abae20c48a4c
 session_plan_ref: docs/plans/sessions/2026-07-22-issue-35-release-catalog-decoupling.md
 implementation_plan_ref: docs/plans/2026-07-22-issue-35-release-catalog-decoupling.md
 runtime_workflow_ref: docs/workflows/2026-07-22-issue-35-release-catalog-decoupling-runtime.md
@@ -20,7 +21,7 @@ owner_merge_authorization_ref: none
 
 ## 范围与根因
 
-此任务只实现状态和门禁，未更新 `upstream/CodexPlusPlus/` 快照字节。根因是旧验证把 `snapshot` 同时作为“最新完整缓存”和“已完成目录审计”的唯一 Release：缓存上游 `v1.2.42` 时会误判为损坏，机械重写目录 Release 又会伪造一致性。
+此任务只实现状态和门禁，未更新 `upstream/CodexPlusPlus/` 快照字节。项目所有者随后批准把本机时间规则写入 `AGENTS.md`，范围因此扩展为十五路径；该治理变更不改变 Release 审计语义。根因是旧验证把 `snapshot` 同时作为“最新完整缓存”和“已完成目录审计”的唯一 Release：缓存上游 `v1.2.42` 时会误判为损坏，机械重写目录 Release 又会伪造一致性。
 
 最终模型保持 `snapshot` 表示完整缓存，新增 `release_audit.catalog_release` 表示目录审计基线。当前 `source-lock.json` 仍是 `v1.2.41` / `3dafffcafb2566a1e8bce4b35671656d6adb3eda` 的 `current` 状态；新 `v1.2.42` 的未来缓存将以独立 PR 进入显式 stale，而不是在本 PR 提前改写上游快照。
 

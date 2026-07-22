@@ -1,14 +1,15 @@
 # Issue #35：Release 快照与功能目录审计基线解耦实施计划
 
-plan_status: approved-scope-frozen
+plan_status: approved-scope-extended-for-local-time-rule
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/35
 branch_ref: codex/issue-35-release-catalog-decoupling
 baseline_ref: 939f3454b34e0faa42897be7489b344f2bec1d4c
 approved_decision_ref: user-message:approve-issue-35-14-path-scope-2026-07-22
-scope_hash: sha256:446444f8cef61de3923d8fe40823ee6b1719a424d9f9e013ee26e70d2f20686a
+scope_extension_approval_ref: user-message:write-local-machine-time-rule-to-project-agents-2026-07-22
+scope_hash: sha256:42bc11297aa5d91ff876ceb17296cef337034a11c041f565b642abae20c48a4c
 allowed_operations: project-doc-write, rust-validation-write, test-write, ci-script-write, workflow-write, source-lock-metadata-write, ordinary-commit, ordinary-push, issue-comment, pull-request-create, review-ci-evidence-read
 mutation_intent: 建立可诊断的上游快照与功能目录审计基线解耦状态；不更新上游快照字节、不迁移产品功能、不建立性能基线或预算。
-executor_enforcement: 仅允许下列十四路径；范围外写入、上游事实漂移、未解决 Review、CI 失败、缺少最终所有者 Squash 授权均停止推进。
+executor_enforcement: 仅允许下列十五路径；范围外写入、上游事实漂移、未解决 Review、CI 失败、缺少最终所有者 Squash 授权均停止推进。
 agos_status: bypassed-needs-input-unregistered
 owner_merge_authorization_ref: none
 
@@ -21,6 +22,7 @@ owner_merge_authorization_ref: none
 ## 二、Fresh 基线
 
 - Issue `#35` 在实施开始时保持 `OPEN`；所有者批准评论为 `https://github.com/nonononull/inputcodex/issues/35#issuecomment-5051128101`，并已移除 `status:needs-owner-decision`。
+- 项目所有者随后明确批准将本机时间规则写入 `AGENTS.md`；该路径扩展不改变 Release 审计语义、不授予合并权限。
 - 远端 `main`、当前隔离工作树 Head 均为 `939f3454b34e0faa42897be7489b344f2bec1d4c`，分支干净且不存在该分支的既有 PR。
 - 上游最新正式 Release 为 `v1.2.42`，提交为 `657cd33e009ad02515d30db6492cd4e669b06318`；当前缓存与目录审计基线均仍为 `v1.2.41` / `3dafffcafb2566a1e8bce4b35671656d6adb3eda`。
 - AGOS 默认入口已返回 `needs-input`、`unregistered` 且 doctor 为 `blocked`；依项目规则记录为外部缺口并绕过，不修改任何 AGOS 跨仓表面。
@@ -30,19 +32,20 @@ owner_merge_authorization_ref: none
 按路径升序、LF 分隔、末尾保留 LF 后计算顶部 `scope_hash`：
 
 1. `.github/workflows/ci.yml`
-2. `build.md`
-3. `crates/inputcodex-parity/src/validation.rs`
-4. `crates/inputcodex-parity/tests/catalog_repository.rs`
-5. `docs/adr/0003-release-snapshot-catalog-audit-decoupling.md`
-6. `docs/plans/2026-07-22-issue-35-release-catalog-decoupling.md`
-7. `docs/plans/PROJECT-MASTER-PLAN.md`
-8. `docs/plans/sessions/2026-07-22-issue-35-release-catalog-decoupling.md`
-9. `docs/reports/issue-35-release-catalog-decoupling.md`
-10. `docs/workflows/2026-07-22-issue-35-release-catalog-decoupling-runtime.md`
-11. `err.md`
-12. `scripts/ci/Test-CiScripts.ps1`
-13. `scripts/ci/Verify-ReleaseAuditGate.ps1`
-14. `upstream/source-lock.json`
+2. `AGENTS.md`
+3. `build.md`
+4. `crates/inputcodex-parity/src/validation.rs`
+5. `crates/inputcodex-parity/tests/catalog_repository.rs`
+6. `docs/adr/0003-release-snapshot-catalog-audit-decoupling.md`
+7. `docs/plans/2026-07-22-issue-35-release-catalog-decoupling.md`
+8. `docs/plans/PROJECT-MASTER-PLAN.md`
+9. `docs/plans/sessions/2026-07-22-issue-35-release-catalog-decoupling.md`
+10. `docs/reports/issue-35-release-catalog-decoupling.md`
+11. `docs/workflows/2026-07-22-issue-35-release-catalog-decoupling-runtime.md`
+12. `err.md`
+13. `scripts/ci/Test-CiScripts.ps1`
+14. `scripts/ci/Verify-ReleaseAuditGate.ps1`
+15. `upstream/source-lock.json`
 
 禁止修改 `upstream/CodexPlusPlus/` 任意快照字节、产品 `apps/`、非 parity Rust crate、`Cargo.toml`、`Cargo.lock`、`benchmarks/`、Release、Ruleset、AGOS 或任何分支删除表面。
 

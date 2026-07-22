@@ -571,6 +571,15 @@
 - 验证：2026 年 7 月 22 日，API 返回最新正式 Release 为 `v1.2.42`；SSH 将 lightweight tag 直接解析为 `657cd33e009ad02515d30db6492cd4e669b06318`。
 - 关联：Issue `#35`、`BigPizzaV3/CodexPlusPlus` Release `v1.2.42`、上游监控流程。
 
+## 2026-07-22：助手元数据不应覆写项目所有者本机 Git 时间
+
+- 环境：Issue `#35` 修复提交前，项目所有者要求 Git 时间以 Windows 本机时间为准；本机 `Get-Date` 读数与会话外部日期标记不一致。
+- 现象：修复提交曾通过 `GIT_AUTHOR_DATE` 与 `GIT_COMMITTER_DATE` 采用会话日期，而不是 Git 默认读取的本机时间。
+- 根因：项目控制面此前没有明确 Git 时间源，执行中错误地把助手或外部时间元数据当作可覆写本机 Git 时间的依据。
+- 处理：项目所有者明确要求后，将 Windows 本机 `Get-Date` 写入 `AGENTS.md` 作为 Git 与本地审计的唯一时间源；未经所有者明确批准禁止设置 `GIT_AUTHOR_DATE` 或 `GIT_COMMITTER_DATE`。已推送提交不 amend、不 rebase、不 force push，后续以普通提交修正流程。
+- 验证：`AGENTS.md` 已包含时间源和服务端事件分离规则；本次范围扩展为十五路径并重新计算 `scope_hash`。
+- 关联：Issue `#35`、PR `#36`、提交 `b4b3c3c37e0194521b651cf4b700b4e09801ac85`。
+
 ## 记录模板
 
 ```text

@@ -10,16 +10,17 @@ report_ref: docs/reports/issue-35-release-catalog-decoupling.md
 branch_ref: codex/issue-35-release-catalog-decoupling
 baseline_ref: 939f3454b34e0faa42897be7489b344f2bec1d4c
 approved_decision_ref: user-message:approve-issue-35-14-path-scope-2026-07-22
-scope_hash: sha256:446444f8cef61de3923d8fe40823ee6b1719a424d9f9e013ee26e70d2f20686a
+scope_extension_approval_ref: user-message:write-local-machine-time-rule-to-project-agents-2026-07-22
+scope_hash: sha256:42bc11297aa5d91ff876ceb17296cef337034a11c041f565b642abae20c48a4c
 allowed_operations: project-doc-write, rust-validation-write, test-write, ci-script-write, workflow-write, source-lock-metadata-write, ordinary-commit, ordinary-push, issue-comment, pull-request-create, review-ci-evidence-read
 mutation_intent: 让“最新完整缓存”与“已经审计的功能目录”可以有受控间隔；不修改上游快照字节，不实施性能或产品功能。
-executor_enforcement: 在隔离工作树实施；每个行为先 RED 后 GREEN；只在批准的十四路径写入；全量 Rust 与三平台 CI 只在 GitHub-hosted runners 执行。
+executor_enforcement: 在隔离工作树实施；每个行为先 RED 后 GREEN；只在批准的十五路径写入；全量 Rust 与三平台 CI 只在 GitHub-hosted runners 执行。
 agos_status: bypassed-needs-input-unregistered
 owner_merge_authorization_ref: none
 
 ## 输入与事实
 
-- 项目所有者的十四路径批准已以 Issue 评论 `5051128101` 回写，允许普通提交、推送和 PR 创建，不授权最终合并。
+- 项目所有者的十四路径批准已以 Issue 评论 `5051128101` 回写，随后又明确批准将本机时间规则写入 `AGENTS.md`，因此当前精确范围为十五路径；允许普通提交、推送和 PR 创建，不授权最终合并。
 - 上游 `v1.2.42` / `657cd33e009ad02515d30db6492cd4e669b06318` 是 fresh 核验时的最新正式 Release；缓存中的 `v1.2.41` 是此任务唯一允许写入元数据的基础。
 - `BigPizzaV3/CodexPlusPlus` 的 Tauri/React 管理面、注入脚本和远程推荐仍只作为审计输入，不进入 Rust 产品架构。
 - AGOS 报告不能替代本任务的 Issue、计划、测试、PR、Review 或 CI 证据；发生 `needs-input` / `unregistered` 时立即绕过。

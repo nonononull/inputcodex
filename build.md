@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 22 日，PR `#21` 已将 Gate 3 七成员 Workspace、首版无缓存三平台 CI、五类失败语义与三平台最低冷构建基线 Squash Merge 到 `main`；PR `#23` 已完成独立 closeout。Issue `#24` / PR `#25` 已将 Gate 4 两阶段规划合同 Squash Merge 为 `431682296f53e86de1184c732b0d4748857c9390`，Issue `#24` 已按 `COMPLETED` 关闭。Issue `#26` 的功能目录与独立 Closeout 均已完成。Issue `#35` 正在以已批准的十四路径范围解耦完整上游快照与目录审计基线；本地仅执行定向验证，最终 PR 合并仍需独立授权。
+截至 2026 年 7 月 22 日，PR `#21` 已将 Gate 3 七成员 Workspace、首版无缓存三平台 CI、五类失败语义与三平台最低冷构建基线 Squash Merge 到 `main`；PR `#23` 已完成独立 closeout。Issue `#24` / PR `#25` 已将 Gate 4 两阶段规划合同 Squash Merge 为 `431682296f53e86de1184c732b0d4748857c9390`，Issue `#24` 已按 `COMPLETED` 关闭。Issue `#26` 的功能目录与独立 Closeout 均已完成。Issue `#35` 正在以项目所有者批准的十五路径范围解耦完整上游快照与目录审计基线，其中 `AGENTS.md` 固化本机时间规则；本地仅执行定向验证，最终 PR 合并仍需独立授权。
 
 仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供十五个检查点：
 
