@@ -1,12 +1,13 @@
 # Issue #26：Gate 4 功能目录、行为合同与脱敏夹具报告
 
 schema_version: inputcodex.report.v1
-report_status: control-plane-verified-commit-pending
+report_status: control-plane-checkpoint-pushed-owner-review-pending
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/26
 branch_ref: codex/issue-26-gate-4-feature-catalog
 baseline_ref: 431682296f53e86de1184c732b0d4748857c9390
 approved_decision_ref: user-message:create-issue-26-session-plan-runtime-scope-hash-2026-07-22
 scope_hash: sha256:e8a1cbccfc3f0026e90fcb49264de5ea69980fa2e1faa03b520d9bedaf61e772
+control_plane_checkpoint_ref: commit:80e0ddbb734496e95e89fe57fd89ddb668c8c276;issuecomment:5047590347
 
 ## 一、当前结论
 
@@ -73,8 +74,8 @@ scope_hash: sha256:e8a1cbccfc3f0026e90fcb49264de5ea69980fa2e1faa03b520d9bedaf61e
 ## 八、待完成
 
 - 8 条控制面路径、36 条范围、scope hash、占位符、治理合同、仓库政策和空白检查已通过。
-- 创建普通 control-plane checkpoint 提交并普通 push。
-- 在 Issue `#26` 回写 commit、计划引用、范围哈希和实现待批准边界。
+- 普通 control-plane checkpoint `80e0ddbb734496e95e89fe57fd89ddb668c8c276` 已 push。
+- Issue `#26` 评论 `5047590347` 已回写 commit、计划引用、范围哈希和实现待批准边界。
 - 等待项目所有者明确批准实现，再进入依赖与 RED schema 批次。
 
 ## 九、完成状态占位

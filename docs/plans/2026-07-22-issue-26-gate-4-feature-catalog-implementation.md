@@ -139,8 +139,8 @@ docs/workflows/2026-07-22-issue-26-gate-4-feature-catalog-runtime.md
 - [x] 创建 Session Plan、Runtime Workflow、任务计划和初始报告。
 - [x] 更新 AGENTS、README、build 与 Master Plan 的活动状态。
 - [x] 运行规划 checkpoint 验证，确认 8/8 路径、36 条范围和治理合同通过。
-- [ ] 创建普通 checkpoint 提交并普通推送。
-- [ ] 在 Issue `#26` 回写 checkpoint，等待实现批准。
+- [x] 创建普通 checkpoint 提交 `80e0ddbb734496e95e89fe57fd89ddb668c8c276` 并普通推送。
+- [x] 在 Issue `#26` 回写 checkpoint `5047590347`，进入实现批准等待状态。
 
 ### Task 1：依赖元数据与 RED schema
 
