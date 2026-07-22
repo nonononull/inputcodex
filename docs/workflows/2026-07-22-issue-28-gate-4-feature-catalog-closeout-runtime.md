@@ -7,7 +7,8 @@ source_pr_ref: https://github.com/nonononull/inputcodex/pull/27
 branch_ref: codex/issue-28-gate-4-feature-catalog-closeout
 baseline_ref: a9b20f00ae069aedd42c8124d2789b230187258c
 approved_decision_ref: user-message:approve-gate-4-closeout-issue-2026-07-22
-scope_hash: sha256:91cd1bd908b61e32c573706f26a4bb5d09c6cf5371382ebc0d14d87ae7a4fc29
+scope_amendment_decision_ref: user-message:approve-issue-28-scope-amendment-agents-md-2026-07-22
+scope_hash: sha256:a6559a9538dc16908d76c6a0360c1b7c7cb3323158764d244ca891f49d587e1a
 allowed_operations: project-doc-write, ordinary-commit, ordinary-push, issue-comment, pull-request-create, review-ci-evidence-read
 mutation_intent: 将已经发生的 Issue #26 / PR #27 合并事实回写项目原生控制面。
 executor_enforcement: 当前分支、工作树、允许路径、GitHub Fresh 事实和验证结果任一项异常即停止。
@@ -24,9 +25,10 @@ agos_status: bypassed-needs-input-unregistered
 ## Phase 1：控制面 checkpoint
 
 1. 新建实施计划、Session Plan、Runtime Workflow 与初始 Closeout 报告。
-2. 计算且复算七路径 `scope_hash`；仅允许以下集合：
+2. 计算且复算八路径 `scope_hash`；仅允许以下集合：
 
 ```text
+AGENTS.md
 README.md
 docs/plans/2026-07-22-issue-28-gate-4-feature-catalog-closeout.md
 docs/plans/PROJECT-MASTER-PLAN.md
@@ -36,8 +38,9 @@ docs/reports/issue-28-gate-4-feature-catalog-closeout.md
 docs/workflows/2026-07-22-issue-28-gate-4-feature-catalog-closeout-runtime.md
 ```
 
-3. 运行路径、范围哈希、文本控制字节和 `git diff --check` 自检。
-4. 普通提交、普通推送、在 Issue `#28` 创建 checkpoint 评论；评论必须包含 commit、四份文档、范围哈希、批准引用和 AGOS 绕过原因。
+3. 项目所有者批准将 `AGENTS.md` 纳入状态回写范围后，只更正该文件中的当前 Gate、Closeout PR 与性能基线锁定状态；不得扩展到产品、性能、上游、CI 或 AGOS 表面。
+4. 运行路径、范围哈希、文本控制字节和 `git diff --check` 自检。
+5. 普通提交、普通推送、在 Issue `#28` 创建 checkpoint 评论；评论必须包含 commit、`AGENTS.md`、四份控制面文档、范围哈希、范围扩展批准引用和 AGOS 绕过原因。
 
 ## Phase 2：来源事实回写
 
@@ -48,11 +51,11 @@ docs/workflows/2026-07-22-issue-28-gate-4-feature-catalog-closeout-runtime.md
 
 ## Phase 3：本地轻量验证与 PR
 
-1. 运行允许路径白名单与范围哈希验证。
+1. 使用 `git diff --name-only <baseline>` 与 `git ls-files --others --exclude-standard` 的并集运行八路径白名单与范围哈希验证。
 2. 运行来源事实 Fresh 验证、`scripts/ci/Verify-RepositoryPolicy.ps1`、文本控制字节扫描与 `git diff --check`。
-3. 运行 `git status --short --branch`，确认无意外文件；普通提交并推送。
-4. 创建关联的非 Draft PR；正文列出 Issue、范围、禁止表面、验证命令和“需要独立 owner Squash Merge 授权”。
-5. PR 创建后回写 Issue `#28`：PR、候选 Head、CI 与 Review 初始状态。
+3. 运行 `git status --short --branch`，确认无意外文件；普通提交并推送。范围扩展后的新 Head 必须重新触发 CI，旧 Head CI 不得复用。
+4. 更新关联的非 Draft PR 正文，列出八路径、最新 `scope_hash`、范围扩展批准、禁止表面、验证命令和“需要独立 owner Squash Merge 授权”。
+5. 新 Head push 后回写 Issue `#28`：PR、候选 Head、CI 与 Review 初始状态。
 
 ## Phase 4：Review、CI 与合并前门槛
 

@@ -1,13 +1,14 @@
 # Issue #28：Gate 4 功能目录执行合并证据 Closeout 报告
 
-report_status: source-evidence-fresh-state-backfill-complete-awaiting-final-verification
+report_status: scope-amendment-approved-awaiting-new-head-ci
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/28
 source_issue_ref: https://github.com/nonononull/inputcodex/issues/26
 source_pr_ref: https://github.com/nonononull/inputcodex/pull/27
 closeout_branch_ref: codex/issue-28-gate-4-feature-catalog-closeout
 baseline_ref: a9b20f00ae069aedd42c8124d2789b230187258c
 approved_decision_ref: user-message:approve-gate-4-closeout-issue-2026-07-22
-scope_hash: sha256:91cd1bd908b61e32c573706f26a4bb5d09c6cf5371382ebc0d14d87ae7a4fc29
+scope_amendment_decision_ref: user-message:approve-issue-28-scope-amendment-agents-md-2026-07-22
+scope_hash: sha256:a6559a9538dc16908d76c6a0360c1b7c7cb3323158764d244ca891f49d587e1a
 allowed_operations: project-doc-write, ordinary-commit, ordinary-push, issue-comment, pull-request-create, review-ci-evidence-read
 mutation_intent: 仅将已发生的 Gate 4 功能目录合并事实收口到项目原生控制面。
 executor_enforcement: 范围外路径、事实漂移、验证失败、未解决 Review 或缺少最终 owner 授权均阻止推进。
@@ -40,7 +41,7 @@ source_branch_cleanup_ref: issuecomment:5049570338
 
 已对 `inputcodex-issue-28-gate-4-feature-catalog-closeout` 执行 AGOS `-ReportOnly`。结果为 `needs-input`、任务 `unregistered`、doctor `blocked`，且其输出禁止在该框架下的项目文档写入。按项目规则记录为绕过，不改动 AGOS 的任何文件；本任务继续遵守项目原生 Issue、计划、工作流、报告、PR 与 CI 控制面。
 
-## 四、当前 checkpoint 范围
+## 四、历史 checkpoint 与当前范围
 
 控制面 checkpoint `608c6dd0f6b106d5f6bd77649be0c914d957ebdd` 已普通 push，并通过 Issue `#28` 评论 `5049829624` 回写。该 checkpoint 只新增以下四份控制面文件：
 
@@ -53,8 +54,25 @@ docs/workflows/2026-07-22-issue-28-gate-4-feature-catalog-closeout-runtime.md
 
 本批次已按 Session Plan 完成 `README.md`、Master Plan 与 Issue `#26` 来源报告的来源事实回写；不得再扩展到产品、性能、上游、CI 或 AGOS 表面。
 
+项目所有者随后批准将 `AGENTS.md` 纳入本 Issue 的状态回写范围，批准引用为 `user-message:approve-issue-28-scope-amendment-agents-md-2026-07-22`。当前八路径允许集合为：
+
+```text
+AGENTS.md
+README.md
+docs/plans/2026-07-22-issue-28-gate-4-feature-catalog-closeout.md
+docs/plans/PROJECT-MASTER-PLAN.md
+docs/plans/sessions/2026-07-22-issue-28-gate-4-feature-catalog-closeout.md
+docs/reports/issue-26-gate-4-feature-catalog.md
+docs/reports/issue-28-gate-4-feature-catalog-closeout.md
+docs/workflows/2026-07-22-issue-28-gate-4-feature-catalog-closeout-runtime.md
+```
+
+该集合按路径升序、LF 分隔并保留末尾 LF 的 `scope_hash` 为 `sha256:a6559a9538dc16908d76c6a0360c1b7c7cb3323158764d244ca891f49d587e1a`。`AGENTS.md` 只更正当前 Gate 为 Issue `#28` / PR `#29` Closeout，并将性能基线继续锁定到 PR `#29` 合并之后。
+
+PR `#29` 的旧 Head `479e083cd666356f05751a2610d4f27164c61cfd` 与其成功 CI `29946947621` 仅保留为范围扩展前的历史证据。该扩展必须形成新的普通提交与新 Head，并等待新的 GitHub-hosted CI；旧 Head CI 不得用于合并判断。
+
 ## 五、待完成的 Closeout 步骤
 
 1. 已完成控制面 checkpoint 的路径、范围哈希、文本与仓库政策验证，并将 commit/证据回写 Issue `#28`。
 2. 已 Fresh 复核来源 Issue、PR、CI、Review、Squash 与分支清理，并更新三份既有状态页。
-3. 下一步运行最终轻量验证，创建关联 PR，处理 Review/CI，并等待项目所有者针对 Closeout PR 的明确 Squash Merge 授权。
+3. 按扩展后的八路径范围运行最终轻量验证，普通提交并推送新 Head，更新关联 PR 的范围与 `scope_hash`，等待新 Head 的 CI 与 Review，再请求项目所有者针对最终 Head 的明确 Squash Merge 授权。

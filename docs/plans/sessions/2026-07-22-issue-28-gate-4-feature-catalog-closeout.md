@@ -7,7 +7,8 @@ source_pr_ref: https://github.com/nonononull/inputcodex/pull/27
 branch_ref: codex/issue-28-gate-4-feature-catalog-closeout
 baseline_ref: a9b20f00ae069aedd42c8124d2789b230187258c
 approved_decision_ref: user-message:approve-gate-4-closeout-issue-2026-07-22
-scope_hash: sha256:91cd1bd908b61e32c573706f26a4bb5d09c6cf5371382ebc0d14d87ae7a4fc29
+scope_amendment_decision_ref: user-message:approve-issue-28-scope-amendment-agents-md-2026-07-22
+scope_hash: sha256:a6559a9538dc16908d76c6a0360c1b7c7cb3323158764d244ca891f49d587e1a
 allowed_operations: project-doc-write, ordinary-commit, ordinary-push, issue-comment, pull-request-create, review-ci-evidence-read
 mutation_intent: 关闭已合并 Gate 4 功能目录执行的控制面漂移，不增加任何产品、性能、上游或 CI 能力。
 executor_enforcement: 每次写入前后执行 Git 快照、路径白名单、GitHub Fresh 证据和轻量验证；任何漂移立即停止。
@@ -19,12 +20,14 @@ executor_enforcement: 每次写入前后执行 Git 快照、路径白名单、Gi
 - 当前隔离工作树位于 `C:\Users\dashuai\Documents\inputcodex-worktrees\issue-28-gate-4-feature-catalog-closeout`；主工作树保留在干净的 `main`。
 - 来源 Issue `#26` 已关闭，来源 PR `#27` 的 Head `1d1bf32cdc4edc45e2d28f1047604222ebdb51e4` 已以 Squash 提交 `a9b20f00ae069aedd42c8124d2789b230187258c` 进入 `main`。
 - 来源 PR 六项 CI 与合并后 `main` CI 均已成功；这些事实仍须在最终变更前 Fresh 复核。
+- 项目所有者已批准将 `AGENTS.md` 纳入状态回写范围，引用为 `user-message:approve-issue-28-scope-amendment-agents-md-2026-07-22`；该扩展仅更正当前 Gate、Closeout PR 与性能基线锁定状态。
 
 ## 二、范围锁定
 
 允许路径为：
 
 ```text
+AGENTS.md
 README.md
 docs/plans/2026-07-22-issue-28-gate-4-feature-catalog-closeout.md
 docs/plans/PROJECT-MASTER-PLAN.md
@@ -34,7 +37,7 @@ docs/reports/issue-28-gate-4-feature-catalog-closeout.md
 docs/workflows/2026-07-22-issue-28-gate-4-feature-catalog-closeout-runtime.md
 ```
 
-路径升序、LF 分隔、末尾 LF 的 SHA-256 为 `91cd1bd908b61e32c573706f26a4bb5d09c6cf5371382ebc0d14d87ae7a4fc29`。
+路径升序、LF 分隔、末尾 LF 的 SHA-256 为 `a6559a9538dc16908d76c6a0360c1b7c7cb3323158764d244ca891f49d587e1a`。
 
 以下表面永久禁止写入：Cargo、Rust、`parity/`、`benchmarks/`、`.github/`、`scripts/ci/`、`upstream/`、Ruleset、Release、Issue `#16/#20` 和 AGOS 跨仓文件。
 
@@ -50,7 +53,7 @@ docs/workflows/2026-07-22-issue-28-gate-4-feature-catalog-closeout-runtime.md
 ### Checkpoint A：控制面骨架
 
 1. 新建实施计划、Session Plan、Runtime Workflow 和初始 Closeout 报告。
-2. 验证只新增四条路径，范围哈希未漂移，工作树没有范围外变更。
+2. 初始 checkpoint 只新增四条控制面路径；来源事实回写后形成七路径净变更，项目所有者已批准将 `AGENTS.md` 作为第八条状态回写路径纳入当前范围。
 3. 普通提交并推送；在 Issue `#28` 回写提交、文档引用、范围哈希、AGOS 绕过原因和后续写入范围。
 
 ### Checkpoint B：事实回写
@@ -61,9 +64,9 @@ docs/workflows/2026-07-22-issue-28-gate-4-feature-catalog-closeout-runtime.md
 
 ### Checkpoint C：PR 就绪
 
-1. 验证允许路径、仓库政策、文本控制字节与 `git diff --check`。
+1. 使用基线差异路径与未跟踪文件的并集验证八路径允许集合、仓库政策、文本控制字节与 `git diff --check`。
 2. 普通提交、普通推送、创建非 Draft PR，并在 Issue `#28` 回写最终候选 Head 与 PR 引用。
-3. 等待最终 Head 的 GitHub-hosted CI；逐条处理 Review 对话。
+3. 范围扩展产生新 Head 后，旧 Head CI 不得复用；等待最终 Head 的 GitHub-hosted CI，并逐条处理 Review 对话。
 
 ### Checkpoint D：合并前门槛
 
