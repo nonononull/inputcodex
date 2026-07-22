@@ -1,14 +1,14 @@
 # Rust CI 无缓存冷构建基线
 
 schema_version: inputcodex.rust-ci-cold-baseline.v1
-report_status: sampling-in-progress
+report_status: minimum-samples-collected-failure-semantics-in-progress
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 pr_ref: https://github.com/nonononull/inputcodex/pull/21
 workflow_ref: .github/workflows/ci.yml
 required_success_samples_per_platform: 3
-accepted_success_samples_linux: 2
-accepted_success_samples_windows: 2
-accepted_success_samples_macos: 2
+accepted_success_samples_linux: 3
+accepted_success_samples_windows: 3
+accepted_success_samples_macos: 3
 cache_policy: disabled-and-out-of-scope-for-issue-19
 dependency_package_count: 336
 workspace_package_count: 7
@@ -60,6 +60,20 @@ external_package_count: 329
 
 辅助 Job：classify 执行 `9` 秒，governance 执行 `28` 秒，required 在前置 Job 完成后执行 `8` 秒。required 的 `234` 秒开始延迟仍是依赖等待。
 
+### 样本 3：运行 29914029406
+
+- 时间：`2026-07-22T10:59:53Z` 至 `2026-07-22T11:04:02Z`。
+- Head：`d474c47f5ab02ef9ed9804b208a739823819c9e9`。
+- 结果：治理探针删除后六个 Job 全部成功；成功 Artifact 数为 `0`。
+
+| 平台 | 排队时间 | Job 执行时间 | Workflow 内部 metrics | 二进制字节数 | 结果 |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Linux | 22 秒 | 141 秒 | Clippy `39.965` 秒 | 不适用 | 成功 |
+| Windows | 23 秒 | 212 秒 | 桌面冷构建 `118.349` 秒 | `26,347,520` | 成功 |
+| macOS | 22 秒 | 96 秒 | 桌面冷构建 `50.326` 秒 | `53,510,976` | 成功 |
+
+辅助 Job：classify 执行 `14` 秒，governance 执行 `32` 秒，required 在前置 Job 完成后执行 `8` 秒。required 的 `240` 秒开始延迟仍是依赖等待。
+
 ## 三、失败恢复样本
 
 | 运行 | 结果 | 根因 | 处理 | 是否计入成功样本 |
@@ -73,18 +87,18 @@ external_package_count: 329
 
 | 平台 | 样本 1 | 样本 2 | 样本 3 | 当前状态 |
 | --- | --- | --- | --- | --- |
-| Linux | `29911337652` | `29913139948` | pending | `2/3` |
-| Windows | `29911337652` | `29913139948` | pending | `2/3` |
-| macOS | `29911337652` | `29913139948` | pending | `2/3` |
+| Linux | `29911337652` | `29913139948` | `29914029406` | `3/3` |
+| Windows | `29911337652` | `29913139948` | `29914029406` | `3/3` |
+| macOS | `29911337652` | `29913139948` | `29914029406` | `3/3` |
 
 后续每个样本必须补：run/Head、排队时间、Job 时间、内部 metrics、Windows/macOS 二进制字节数、Artifact 数量、结论和异常说明。
 
 ## 五、当前超时依据
 
-| Job | Workflow 超时 | 样本 1 执行时间 | 当前结论 |
-| --- | ---: | ---: | --- |
-| linux-quality | 30 分钟 | 112 秒 | 保持；单样本不足以收紧 |
-| windows | 45 分钟 | 211 秒 | 保持；Windows 为当前最慢平台 |
-| macos | 45 分钟 | 94 秒 | 保持；单样本不足以收紧 |
+| Job | Workflow 超时 | 三样本中位数 | 三样本范围 | 当前结论 |
+| --- | ---: | ---: | ---: | --- |
+| linux-quality | 30 分钟 | 133 秒 | 112–141 秒 | 保持；失败语义尚未全部完成 |
+| windows | 45 分钟 | 212 秒 | 211–213 秒 | 保持；Windows 为稳定最慢平台 |
+| macos | 45 分钟 | 96 秒 | 94–152 秒 | 保持；样本 2 存在明显但未超时的波动 |
 
-只有三平台各至少三次成功样本完成后，才计算中位数和初步离散度；Cache、P95、七天观测和至少十次重型运行属于后续独立调优 Issue。
+三平台各三次成功样本已满足 Gate 3 最低基线：排队时间中位数分别为 Linux `17` 秒、Windows `18` 秒、macOS `18` 秒；Windows/macOS 两次精确二进制字节数分别稳定为 `26,347,520` 与 `53,510,976`。Cache、P95、七天观测和至少十次重型运行仍属于后续独立调优 Issue。

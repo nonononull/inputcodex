@@ -86,6 +86,7 @@ merge_ref: pending
 - 运行 `29913139948` 六 Job 全绿，成功 Artifact 数为 `0`；第二个无缓存样本已复取 Linux Clippy `38.732` 秒、Windows 冷构建 `117.053` 秒/`26,347,520` 字节、macOS 冷构建 `78.163` 秒/`53,510,976` 字节。
 - 治理失败语义运行 `29913582488` 中，临时生产目录 `.ts` 探针使 governance 以唯一违规码 `SCRIPT_LANGUAGE_FORBIDDEN` 失败，`required` 精确报告 `governance=failure`；classify 与三平台 Job 均成功。
 - 该失败只上传 `governance-failure-29913582488-1` 与 `required-failure-29913582488-1`，内容白名单为 `contract.log`、`policy.json`、`required.json`，不存在 `target/`、环境转储或整个工作区；当前修复删除探针，不降低治理规则。
+- 治理修复提交 `d474c47f5ab02ef9ed9804b208a739823819c9e9` 触发运行 `29914029406`，六 Job 全绿且 Artifact 数为 `0`；三平台无缓存成功样本由此达到最低 `3/3`。
 
 ## 九、下一合法批次
 
