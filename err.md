@@ -269,6 +269,15 @@
 - 验证：PR `#18` 远端文件为批准的 `11` 条文档路径，Actions 分支运行列表为 `[]`，Review 对话为 `0`，自动合并关闭；`0 Checks` 没有被解释为 CI 通过。
 - 关联：GitHub Issue `#17`、PR `#18`、`.github/workflows/upstream-watch.yml`。
 
+### 2026-07-22：Rust 官方分发响应被 PowerShell 识别为字节数组
+
+- 环境：Issue `#19` 创建前使用 `Invoke-WebRequest` Fresh 核验 `channel-rust-1.97.1.toml` 与其 SHA-256 文件。
+- 现象：校验脚本直接对 `Content` 调用 `.Trim()`，PowerShell 报告 `System.Byte` 不包含该方法；远端与仓库均无写入。
+- 根因：该环境对 `static.rust-lang.org` 响应返回 `byte[]`，脚本错误假设所有 `Invoke-WebRequest.Content` 都是字符串。
+- 处理：在解析日期、版本和 checksum 前，若响应为 `byte[]` 则使用 `System.Text.Encoding.UTF8.GetString` 显式解码；不降低来源、版本或 checksum 校验。
+- 验证：Fresh 读取返回 Rust `1.97.1 (8bab26f4f 2026-07-14)`、channel 日期 `2026-07-16` 和可复核 manifest SHA-256；Issue `#19` 随后使用同一证据创建。
+- 关联：GitHub Issue `#19`。
+
 ## 记录模板
 
 ```text

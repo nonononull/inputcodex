@@ -2,21 +2,22 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 22 日，PR `#15` 已将 Gate 2 上游监控 Squash Merge 到 `main`，合并提交为 `113476fb96623452f9a69526edabc73a57d812a1`；Issue `#14` 已关闭，两次真实运行成功，Issue `#17` 是当前 Gate 3 规划任务。
+截至 2026 年 7 月 22 日，PR `#18` 已将 Gate 3 规划 Squash Merge 到 `main`，合并提交为 `477d110a9b284e127af365f5278901bcfa69e093`；Issue `#17` 已关闭，Issue `#19` 是当前 Gate 3 Workspace 与首版三平台 CI 实现任务。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照与 `upstream/source-lock.json`，但仍没有产品应用源码，因此没有 Cargo、Iced、安装包或发布构建命令。本文件当前提供五个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照与 `upstream/source-lock.json`，但 Issue `#19` 的首个 checkpoint 仍未创建产品应用源码，因此暂时没有 Cargo/Iced 构建命令。本文件当前提供六个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
 3. Issue `#12` / PR `#13` closeout 合并证据验证。
 4. Issue `#14` 上游监控合同、Workflow、允许路径与合并后幂等验证。
 5. Issue `#17` Gate 3 规划文档、允许路径和禁止产品表面验证。
+6. Issue `#19` Gate 3 实现控制面、批准引用、范围哈希和 RED 前置门禁验证。
 
 当前禁止：
 
 - 在没有新的独立 upstream-sync Issue/PR 与项目所有者批准时修改 `upstream/` 或 `source-lock.json`。
-- 在 Issue `#17` 规划 PR 中创建 `Cargo.toml`、`Cargo.lock`、`rust-toolchain.toml`、Rust/Iced 源码、临时 UI 或 WebView。
-- 创建 `.github/workflows/upstream-watch.yml` 之外的 Workflow、Release、安装包、签名或更新资产。
+- 在 Issue `#19` 取得可信 RED 治理证据前创建 `Cargo.toml`、`Cargo.lock`、`rust-toolchain.toml`、Rust/Iced 源码或 `.github/workflows/ci.yml`。
+- 创建 Release Workflow、安装包、签名、更新资产、临时 UI 或 WebView。
 - 修改 Ruleset、required checks 或仓库级合并开关。
 - 修改或优化外部 AGOS。
 
@@ -34,6 +35,67 @@ Set-StrictMode -Version Latest
 ```
 
 原生 `git`、`gh`、`python` 命令后必须立即检查 `$LASTEXITCODE`。只有一行输出时使用 `@(...)` 归一化，禁止把空 stdout 当成成功证据。
+
+## Issue #19 Gate 3 实现控制面 checkpoint 验证
+
+本节只用于 RED 批次开始前的首个命名 checkpoint；创建治理脚本或 Cargo Workspace 后，必须按 Runtime Workflow 更新为对应批次验证：
+
+```powershell
+$baseline = '477d110a9b284e127af365f5278901bcfa69e093'
+$expectedBranch = 'codex/issue-19-gate-3-rust-workspace-ci'
+$expectedPaths = @(
+  'README.md',
+  'build.md',
+  'err.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md',
+  'docs/plans/sessions/2026-07-22-issue-19-gate-3-rust-workspace-ci.md',
+  'docs/workflows/2026-07-22-issue-19-gate-3-rust-workspace-ci-runtime.md',
+  'docs/reports/issue-17-gate-3-rust-workspace-plan.md',
+  'docs/reports/issue-19-gate-3-rust-workspace-ci.md'
+)
+
+$branch = (git branch --show-current).Trim()
+if ($LASTEXITCODE -ne 0 -or $branch -ne $expectedBranch) {
+  throw "Issue #19 当前分支不正确：$branch"
+}
+$trackedChanges = @(git diff --name-only $baseline | Where-Object { $_ })
+if ($LASTEXITCODE -ne 0) { throw '读取 Issue #19 已跟踪变更路径失败。' }
+$untrackedChanges = @(git ls-files --others --exclude-standard | Where-Object { $_ })
+if ($LASTEXITCODE -ne 0) { throw '读取 Issue #19 未跟踪变更路径失败。' }
+$changedPaths = @(($trackedChanges + $untrackedChanges) | Sort-Object -Unique)
+$unexpected = @($changedPaths | Where-Object { $_ -notin $expectedPaths })
+$missing = @($expectedPaths | Where-Object { $_ -notin $changedPaths })
+if ($unexpected.Count -ne 0 -or $missing.Count -ne 0) {
+  throw "Issue #19 checkpoint 路径不一致；越界=$($unexpected -join ',')；缺失=$($missing -join ',')"
+}
+
+$requiredFiles = @(
+  'docs/plans/sessions/2026-07-22-issue-19-gate-3-rust-workspace-ci.md',
+  'docs/workflows/2026-07-22-issue-19-gate-3-rust-workspace-ci-runtime.md',
+  'docs/reports/issue-19-gate-3-rust-workspace-ci.md'
+)
+foreach ($path in $requiredFiles) {
+  if (-not (Test-Path -LiteralPath $path)) { throw "缺少 Issue #19 控制面文件：$path" }
+}
+
+$controlText = ($requiredFiles | ForEach-Object { Get-Content -LiteralPath $_ -Raw }) -join "`n"
+if ($controlText -notmatch 'user-message:approve-gate-3-implementation-2026-07-22' -or
+    $controlText -notmatch 'sha256:2e101627480012d57d6d0472a08cfbe03fc401f6ac74ef3ae1e6a42929ed61ba' -or
+    $controlText -match '__ISSUE_|pending-self-reference') {
+  throw 'Issue #19 控制面缺少批准/范围证据或仍含占位符。'
+}
+
+$productCargo = @(Get-ChildItem -Recurse -File -Include Cargo.toml,Cargo.lock,rust-toolchain.toml -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch '[\\/]upstream[\\/]' })
+$productRust = @(Get-ChildItem -Recurse -File -Filter '*.rs' -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch '[\\/]upstream[\\/]' })
+if ($productCargo.Count -ne 0 -or $productRust.Count -ne 0 -or (Test-Path -LiteralPath '.github/workflows/ci.yml')) {
+  throw '控制面 checkpoint 禁止提前出现产品 Cargo/Rust 或 CI Workflow。'
+}
+
+git diff --check $baseline
+if ($LASTEXITCODE -ne 0) { throw 'Issue #19 checkpoint diff 检查失败。' }
+Write-Output 'ISSUE19_GATE3_CONTROL_PLANE_VERIFY_OK'
+```
 
 ## Issue #17 Gate 3 规划本地验证
 

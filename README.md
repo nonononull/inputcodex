@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游 `v1.2.41` 审计快照与每 6 小时监控，正在通过 Issue `#17` 冻结 Gate 3 纯 Rust Workspace 骨架的实施门禁。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游 `v1.2.41` 审计快照与每 6 小时监控，并已通过 Issue `#17` / PR `#18` 冻结 Gate 3 合同；Issue `#19` 正在建立纯 Rust Workspace 与首版三平台 CI。
 
 ## 项目目标
 
@@ -38,28 +38,30 @@
 - 通过 PR `#13` Squash Merge Gate 2 上游基线 closeout；合并提交为 `5e64015075ddf2adef4bf685f50977b47b7f72e7`，Issue `#12` 已关闭。
 - 通过 PR `#15` Squash Merge 定时/手动上游监控、只读 PR 验证和幂等 Issue 状态机；合并提交为 `113476fb96623452f9a69526edabc73a57d812a1`，Issue `#14` 已关闭。
 - `main` 上两次真实运行 `29890586102` 与 `29890641799` 均成功；唯一机器状态为 Issue `#16`，重复告警数量为 `0`。
-- 已建立 Gate 3 规划 Issue `#17` 与分支 `codex/issue-17-gate-3-rust-workspace-plan`，当前只落盘 Workspace、Iced 隔离、双平台抽象、性能诊断和三平台 CI 合同。
+- 通过 PR `#18` Squash Merge Gate 3 Workspace、Iced 隔离、双平台抽象、性能诊断和三平台 CI 合同；合并提交为 `477d110a9b284e127af365f5278901bcfa69e093`，Issue `#17` 已关闭。
+- 已创建实现 Issue `#19` 与分支 `codex/issue-19-gate-3-rust-workspace-ci`，项目所有者已批准进入 RED 治理合同与后续 Workspace/CI 实现。
 
 当前明确不做：
 
 - 不把已导入的上游审计快照接入产品构建或运行面，也不在非 upstream-sync Issue 中修改快照。
 - 不导入半成品参考仓库源码。
-- 不在 Issue `#17` 规划 PR 中创建 Rust/Iced 工程、产品构建 CI、发布 Workflow 或新的 GitHub Actions。
+- 不在取得可信 RED 治理证据前创建 Cargo Workspace，也不在 Issue `#19` 中创建发布 Workflow、安装包、签名或更新资产。
 - 不执行功能迁移、安装包构建、发布或未经项目所有者授权的 PR 合并。
 - 不让上游 Tauri/React UI、现有注入脚本和远程推荐列表进入最终运行面。
 
-## 当前 Gate 3 规划边界
+## 当前 Gate 3 实现边界
 
 - Gate 2 的 Issue `#9/#12/#14` 与 PR `#11/#13/#15` 均已完成；上游监控 Workflow 持续运行，Issue `#16` 只由机器维护。
 - `upstream/CodexPlusPlus/` 含 `v1.2.41` 的 `277` 个只读审计文件，`upstream/source-lock.json` 记录来源、tree、逐文件 blob/SHA-256、许可证和生成工具证据。
-- 当前仍没有 Cargo Workspace、产品 Rust/Iced 源码、Release、安装包、签名或更新资产；Issue `#17` 只允许治理文档。
-- Gate 3 规划采用“合同先行，规划与实现拆分”；规划 PR 合并后仍需新的实现 Issue 和项目所有者明确批准，才能创建 Workspace 与首版三平台 CI。
+- 当前仍没有 Cargo Workspace、产品 Rust/Iced 源码、Release、安装包、签名或更新资产；Issue `#19` 的首个 checkpoint 只建立 Session Plan、Runtime Workflow 与项目控制面。
+- Gate 3 实现顺序固定为“RED 治理合同 → GREEN 治理脚本 → 七成员 Workspace → 无缓存三平台 CI → 真实失败恢复 → 冷构建基线”。
+- Iced 只能直接存在于 presentation crate；最小窗口不建立 UI 设计系统，视觉与交互由 Gemini 实现或审阅。
 
 ## 下一步
 
-1. 完成 PR `#18` 的 Fresh Review 与所有者决策证据；本次纯文档路径不命中现有 Workflow，`0 Checks` 记录为不适用而非 CI 通过。
-2. 取得新的明确授权后，以 Squash Merge 收口 Gate 3 规划；本次规划批准不自动包含合并授权。
-3. 规划合并后另建 Gate 3 实现 Issue，经项目所有者批准后，才在同一实现 PR 中创建 Workspace、最小双平台窗口和首版三平台 CI。
+1. 提交并普通 push Issue `#19` 的控制面 checkpoint，在 Issue 回写 commit、Session Plan 与 Runtime Workflow。
+2. 创建 `scripts/ci/Test-CiScripts.ps1`，取得治理入口缺失和违规夹具的可信 RED 证据；RED 根因正确前不得创建 Workspace。
+3. 按 Runtime Workflow 推进 GREEN 治理脚本、最小 Workspace、三平台 CI、真实失败恢复和冷构建基线；最终 PR 合并仍需新的明确授权。
 
 ## 项目文档
 
@@ -87,7 +89,10 @@
 - Issue `#14` Session Plan：`docs/plans/sessions/2026-07-22-issue-14-gate-2-upstream-watch.md`
 - Issue `#14` Runtime Workflow：`docs/workflows/2026-07-22-issue-14-gate-2-upstream-watch-runtime.md`
 - Issue `#14` 交付报告：`docs/reports/issue-14-gate-2-upstream-watch.md`
-- Issue `#17` Gate 3 规划：`docs/plans/2026-07-22-issue-17-gate-3-rust-workspace-plan.md`
+- 已完成 Issue `#17` Gate 3 规划：`docs/plans/2026-07-22-issue-17-gate-3-rust-workspace-plan.md`
+- Issue `#19` Gate 3 实现 Session Plan：`docs/plans/sessions/2026-07-22-issue-19-gate-3-rust-workspace-ci.md`
+- Issue `#19` Gate 3 实现 Runtime Workflow：`docs/workflows/2026-07-22-issue-19-gate-3-rust-workspace-ci-runtime.md`
+- Issue `#19` Gate 3 实现报告：`docs/reports/issue-19-gate-3-rust-workspace-ci.md`
 - Issue `#17` Session Plan：`docs/plans/sessions/2026-07-22-issue-17-gate-3-rust-workspace-plan.md`
 - Issue `#17` Runtime Workflow：`docs/workflows/2026-07-22-issue-17-gate-3-rust-workspace-plan-runtime.md`
 - Issue `#17` 规划报告：`docs/reports/issue-17-gate-3-rust-workspace-plan.md`

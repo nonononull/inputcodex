@@ -135,7 +135,7 @@ Issue `#17` 的规划 PR 不包含 Workspace。规划合并后，Gate 3 的 Work
 
 **回滚：** 通过新 PR 删除或禁用 `.github/workflows/upstream-monitor.yml`，保留历史 Issue 和报告；不得 Force Push、删除 `main` 或自动回退 `source-lock.json`。
 
-## Task 2：Gate 3 Workspace 与首版三平台 CI（Issue #17 规划合并后）
+## Task 2：Gate 3 Workspace 与首版三平台 CI（Issue #19 实现活动）
 
 **接口：**
 
@@ -144,9 +144,9 @@ Issue `#17` 的规划 PR 不包含 Workspace。规划合并后，Gate 3 的 Work
 - CI 工作流名称固定为 `CI`，稳定汇总 Job 名称固定为 `required`，GitHub 检查上下文预期为 `CI / required`。
 - 重型路径固定包括根 Cargo 文件、`rust-toolchain.toml`、`apps/**`、`crates/**`、`xtask/**`、`benchmarks/**`、`parity/**`、`scripts/ci/**` 和 `.github/workflows/ci.yml`。
 
-- [ ] **步骤 1：建立 Gate 3 实现 Issue、工具链决策和执行控制面**
+- [x] **步骤 1：建立 Gate 3 实现 Issue、工具链决策和执行控制面**
 
-  只有 Issue `#17` 的规划 PR Squash Merge 且项目所有者重新批准后，才能创建实现 Issue。候选为 Rust `1.97.1` 与 Iced `0.14.0`；实现开工前必须 Fresh 复核版本、Iced checksum、许可证、MSRV、平台系统依赖和本地资源预算。禁止使用浮动 `stable`、通配依赖版本或未锁定依赖。Iced 展示文件由 Gemini 负责实现或审阅，当前执行者不得自行确立视觉设计系统。
+  Issue `#17` / PR `#18` 已完成规划 Squash Merge；项目所有者以 `user-message:approve-gate-3-implementation-2026-07-22` 批准实现。Issue `#19`、分支 `codex/issue-19-gate-3-rust-workspace-ci`、Session Plan、Runtime Workflow 和初始报告已建立。Fresh 候选固定为 Rust `1.97.1` 与 Iced `0.14.0`，Iced checksum、MIT、MSRV `1.88` 和未撤回状态已复核；本地资源边界仍为轻量定向验证。禁止使用浮动 `stable`、通配依赖版本或未锁定依赖。Iced 展示文件由 Gemini 负责实现或审阅，当前执行者不得自行确立视觉设计系统。
 
 - [ ] **步骤 2：先写分层和治理失败测试**
 

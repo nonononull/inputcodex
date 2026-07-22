@@ -1,13 +1,13 @@
 # Issue #17：Gate 3 纯 Rust Workspace 骨架规划报告
 
-report_status: pr-open-owner-merge-authorization-pending
+report_status: merged-closeout-recorded
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/17
 branch_ref: codex/issue-17-gate-3-rust-workspace-plan
 baseline_ref: 113476fb96623452f9a69526edabc73a57d812a1
 pr_ref: https://github.com/nonononull/inputcodex/pull/18
 ci_ref: not-triggered:docs-only-path-filter
 review_ref: https://github.com/nonononull/inputcodex/pull/18#issuecomment-5042127837
-merge_ref: pending
+merge_ref: 477d110a9b284e127af365f5278901bcfa69e093
 
 ## 一、批准范围
 
@@ -43,4 +43,11 @@ merge_ref: pending
 - 本地 Fresh 验证已通过：变更路径 `11`、越界路径 `0`、产品 Cargo 文件 `0`、产品 Rust 文件 `0`、Workflow 文件 `1` 且仅为既有 `upstream-watch.yml`，`git diff --check` 通过。
 - PR `#18` 已创建，初始远端 Head 为 `1ecc4426df33ad728b44ef0bbacc928d18b4bcf9`，状态为 OPEN、非 Draft、`MERGEABLE/CLEAN`；远端文件列表与允许路径完全一致，Review 对话 `0`，自动合并关闭。
 - 现有 `Upstream Watch` Workflow 的 `pull_request.paths` 只监听监控脚本、Workflow 与 `upstream/source-lock.json`；本 PR 只改文档，因此没有 Actions 运行或 Check。该事实记录为 `not-triggered:docs-only-path-filter`，不表述为 CI 通过。
-- 当前尚未获得项目所有者对 PR `#18` 的 Squash Merge 授权；最终 Head、Fresh Review、Ruleset 与上游基线将回写到同一 Review 锚点，`merge_ref` 保持 `pending`。
+- 项目所有者以 `user-message:authorize-squash-merge-pr-18-2026-07-22` 授权 PR `#18`；最终 Review 与 merge closeout 已回写到同一 Review 锚点。
+
+## 六、最终合并证据
+
+- PR `#18` 于 `2026-07-22T07:23:29Z` Squash Merge，合并提交为 `477d110a9b284e127af365f5278901bcfa69e093`。
+- 合并提交只有一个父提交 `113476fb96623452f9a69526edabc73a57d812a1`；merge tree 与最终获批 Head `199fbdb8b7e2d1efb26a795997c37771cdf0fc58` 的 tree 均为 `ef577a37544579a53bd38bb880c4bc6006e09db1`。
+- GitHub 提交验证为 `verified=true`、`reason=valid`；Issue `#17` 已由 PR 自动按 `COMPLETED` 关闭，远端与本地规划分支均已删除。
+- 规划 closeout 后已创建实现 Issue `#19`；实现批准不自动包含最终实现 PR 的 Squash Merge 授权。
