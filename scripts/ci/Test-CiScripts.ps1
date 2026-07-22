@@ -5,9 +5,11 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $scriptDirectory = Split-Path -Parent $PSCommandPath
+$repositoryRoot = (Resolve-Path -LiteralPath (Join-Path $scriptDirectory '../..')).Path
 $classifierScript = Join-Path $scriptDirectory 'Classify-Changes.ps1'
 $policyScript = Join-Path $scriptDirectory 'Verify-RepositoryPolicy.ps1'
 $collectorScript = Join-Path $scriptDirectory 'Collect-Changes.ps1'
+$workflowPath = Join-Path $repositoryRoot '.github/workflows/ci.yml'
 $missingImplementations = @(
     @(
         $classifierScript
@@ -258,6 +260,15 @@ Invoke-ContractTest -Name '重命名缺失旧路径时失败' -Body {
     )
     $result = Invoke-ClassifierCase -Name 'rename-without-old-path' -Changes $changes
     Assert-ClassifierFailureCode -Result $result -Code 'OLD_PATH_REQUIRED'
+}
+
+Invoke-ContractTest -Name '冷构建指标同时写入日志与摘要' -Body {
+    Assert-True -Condition (Test-Path -LiteralPath $workflowPath -PathType Leaf) -Message 'CI Workflow 必须存在'
+    $workflow = Get-Content -LiteralPath $workflowPath -Raw
+
+    Assert-Equal -Expected 3 -Actual ([regex]::Matches($workflow, [regex]::Escape('$metrics = Get-Content')).Count) -Message '三个平台都必须显式读取冷构建指标'
+    Assert-Equal -Expected 3 -Actual ([regex]::Matches($workflow, [regex]::Escape('$metrics | Write-Output')).Count) -Message '三个平台都必须把冷构建指标写入控制台日志'
+    Assert-Equal -Expected 3 -Actual ([regex]::Matches($workflow, [regex]::Escape('$metrics | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY')).Count) -Message '三个平台都必须把冷构建指标写入 Step Summary'
 }
 
 function Write-Utf8File {

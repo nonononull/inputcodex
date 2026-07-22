@@ -307,8 +307,9 @@ jobs:
       - name: 写入 Linux 冷构建摘要
         shell: pwsh
         run: |
-          Get-Content -LiteralPath (Join-Path $env:REPORT_DIR 'metrics.txt') |
-            Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Encoding utf8
+          $metrics = Get-Content -LiteralPath (Join-Path $env:REPORT_DIR 'metrics.txt')
+          $metrics | Write-Output
+          $metrics | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Encoding utf8
 
       - name: 上传 Linux 失败证据
         if: ${{ failure() }}
@@ -397,8 +398,9 @@ jobs:
       - name: 写入 Windows 冷构建摘要
         shell: pwsh
         run: |
-          Get-Content -LiteralPath (Join-Path $env:REPORT_DIR 'metrics.txt') |
-            Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Encoding utf8
+          $metrics = Get-Content -LiteralPath (Join-Path $env:REPORT_DIR 'metrics.txt')
+          $metrics | Write-Output
+          $metrics | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Encoding utf8
 
       - name: 上传 Windows 失败证据
         if: ${{ failure() }}
@@ -486,8 +488,9 @@ jobs:
       - name: 写入 macOS 冷构建摘要
         shell: pwsh
         run: |
-          Get-Content -LiteralPath (Join-Path $env:REPORT_DIR 'metrics.txt') |
-            Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Encoding utf8
+          $metrics = Get-Content -LiteralPath (Join-Path $env:REPORT_DIR 'metrics.txt')
+          $metrics | Write-Output
+          $metrics | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Encoding utf8
 
       - name: 上传 macOS 失败证据
         if: ${{ failure() }}

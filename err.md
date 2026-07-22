@@ -413,6 +413,15 @@
 - 验证：Windows 本地 `cargo clippy -p inputcodex-platform --tests -- -D warnings` 通过，但不能复现 Linux 条件编译；最终验证必须来自后续普通提交触发的新 Linux Runner，禁止 rerun 旧失败。
 - 关联：GitHub PR `#21`、运行 `29910847062`、Job `88893173619`、`crates/inputcodex-platform/tests/platform_contract.rs`。
 
+### 2026-07-22：冷构建指标只写 Step Summary 造成完成后取证缺口
+
+- 环境：Draft PR `#21` 的首个全绿运行 `29911337652` 已在 Linux、Windows、macOS 生成 `metrics.txt`，但摘要步骤只把内容追加到 `$GITHUB_STEP_SUMMARY`。
+- 现象：Actions Job 时间与关键步骤秒数可由 API 复核，Check Run `output.summary` 却为空；成功运行不上传 Artifact，因此首样本的精确 stopwatch 秒数与 Windows/macOS 二进制字节数无法在完成后复取。
+- 根因：Workflow 没有把 metrics 输出到普通控制台日志；Step Summary 是面向运行页面的展示面，不是本项目可依赖的持久机器取证接口。
+- 处理：先在 `Test-CiScripts.ps1` 新增“三个平台必须读取 metrics、写控制台、写 Step Summary”合同，旧 Workflow 稳定 RED 为读取数量 `0`、期望 `3`；再只修改三个摘要步骤，把同一 `$metrics` 同时送入 `Write-Output` 与 `$GITHUB_STEP_SUMMARY`。
+- 验证：PowerShell 7 完整合同恢复为 `CI_CONTRACT_GREEN passed=30`；首样本缺失值保持未知，不伪造。远端可复取性由后续普通提交触发的新运行验证。
+- 关联：GitHub PR `#21`、运行 `29911337652`、`.github/workflows/ci.yml`、`scripts/ci/Test-CiScripts.ps1`、`docs/reports/rust-ci-cold-baseline.md`。
+
 ## 记录模板
 
 ```text

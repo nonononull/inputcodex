@@ -54,15 +54,15 @@
 - Gate 2 的 Issue `#9/#12/#14` 与 PR `#11/#13/#15` 均已完成；上游监控 Workflow 持续运行，Issue `#16` 只由机器维护。
 - `upstream/CodexPlusPlus/` 含 `v1.2.41` 的 `277` 个只读审计文件，`upstream/source-lock.json` 记录来源、tree、逐文件 blob/SHA-256、许可证和生成工具证据。
 - Issue `#19` 已创建七成员纯 Rust Workspace、Rust `1.97.1` 工具链文件、`Cargo.lock`、最小分层源码与首版无缓存三平台 `CI` Workflow；仍没有 Release、安装包、签名、更新资产或上游业务功能迁移。
-- 当前治理合同为 `29/29`，Workspace 许可证元数据已与根 `LICENSE` 对齐为 `AGPL-3.0-only`；CI 已通过本地 YAML/静态合同，精确工具链与三平台编译等待 GitHub Actions。
+- 当前治理合同为 `30/30`，Workspace 许可证元数据已与根 `LICENSE` 对齐为 `AGPL-3.0-only`；Draft PR `#21` 的运行 `29911337652` 已用 Rust `1.97.1` 在 Linux、Windows、macOS 完成六 Job 全绿，成功运行 Artifact 数为 `0`。
 - Gate 3 实现顺序固定为“RED 治理合同 → GREEN 治理脚本 → 七成员 Workspace → 无缓存三平台 CI → 真实失败恢复 → 冷构建基线”。
 - Iced 只能直接存在于 presentation crate；最小窗口不建立 UI 设计系统，视觉与交互由 Gemini 实现或审阅。
 
 ## 下一步
 
-1. 首版 CI checkpoint `f3107dd16705dd3a25bc8c3acc540a3c6c6990a3` 已普通 push 并回写 Issue `#19` 评论 `5044470597`；下一步创建包含 `Closes #19` 的 Draft PR。
-2. 由 GitHub Actions 完成 Rust `1.97.1`、Iced/desktop 与 Linux/Windows/macOS 全量验证，任何失败先确定根因。
-3. 用后续普通提交修复真实 CI 失败，再按 Runtime Workflow 记录无缓存冷构建基线；最终 PR 合并仍需新的明确授权。
+1. Draft PR `#21` 已包含 `Closes #19`；运行 `29911337652` 是首个 Rust `1.97.1` 三平台与 `required` 全绿样本。
+2. 按 Runtime Workflow 使用普通提交分别制造并修复治理、格式、通用 Rust、Windows 条件编译和 macOS 条件编译失败，每次先确认根因。
+3. Linux、Windows、macOS 各收集至少三次无缓存成功样本并更新 `docs/reports/rust-ci-cold-baseline.md`；最终 PR 合并仍需新的明确授权。
 
 ## 项目文档
 

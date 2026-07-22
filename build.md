@@ -4,7 +4,7 @@
 
 截至 2026 年 7 月 22 日，PR `#18` 已将 Gate 3 规划 Squash Merge 到 `main`，合并提交为 `477d110a9b284e127af365f5278901bcfa69e093`；Issue `#17` 已关闭，Issue `#19` 是当前 Gate 3 Workspace 与首版三平台 CI 实现任务。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照与 `upstream/source-lock.json`；Issue `#19` 已创建七成员纯 Rust Workspace、精确工具链文件、`Cargo.lock`、最小分层源码和首版无缓存三平台 `CI` Workflow。本文件当前提供十个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照与 `upstream/source-lock.json`；Issue `#19` 已创建七成员纯 Rust Workspace、精确工具链文件、`Cargo.lock`、最小分层源码和首版无缓存三平台 `CI` Workflow。本文件当前提供十一个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -13,14 +13,15 @@
 5. Issue `#17` Gate 3 规划文档、允许路径和禁止产品表面验证。
 6. Issue `#19` Gate 3 实现控制面、批准引用、范围哈希和 RED 前置门禁验证。
 7. Issue `#19` 治理 RED 合同的 AST、非零退出码、稳定标记和实现缺失根因验证。
-8. Issue `#19` 路径分类、许可证与仓库政策脚本的 `29/29` GREEN 合同验证。
+8. Issue `#19` 路径分类、许可证、仓库政策与冷构建日志脚本的 `30/30` GREEN 合同验证。
 9. Issue `#19` 七成员 Workspace、锁文件、轻量 crate 测试和 Iced 边界验证。
 10. Issue `#19` 首版 `CI` Workflow 的 YAML、Job、权限、Action 固定 SHA、无 Cache 与 Artifact 白名单静态验证。
+11. Issue `#19` 首轮三平台全绿运行与无缓存冷构建基线报告验证。
 
 当前禁止：
 
 - 在没有新的独立 upstream-sync Issue/PR 与项目所有者批准时修改 `upstream/` 或 `source-lock.json`。
-- 把首版 CI 的本地静态验证解释为 Rust `1.97.1`、Iced/desktop 或三平台真实编译通过。
+- 把运行 `29911337652` 的单次成功样本解释为已经满足三平台各三次无缓存样本。
 - 创建 Release Workflow、安装包、签名、更新资产、临时 UI 或 WebView。
 - 修改 Ruleset、required checks 或仓库级合并开关。
 - 修改或优化外部 AGOS。
@@ -135,7 +136,7 @@ $powerShellExecutable = (Get-Process -Id $PID).Path
 $output = @(& $powerShellExecutable -NoLogo -NoProfile -File 'scripts/ci/Test-CiScripts.ps1' 2>&1)
 $greenExitCode = $LASTEXITCODE
 $greenText = ($output | ForEach-Object { $_.ToString() }) -join "`n"
-if ($greenExitCode -ne 0 -or $greenText -notmatch 'CI_CONTRACT_GREEN passed=29') {
+if ($greenExitCode -ne 0 -or $greenText -notmatch 'CI_CONTRACT_GREEN passed=30') {
   throw "治理合同未 GREEN；exit=$greenExitCode；output=$greenText"
 }
 
@@ -143,7 +144,7 @@ git diff --check
 if ($LASTEXITCODE -ne 0) { throw 'GREEN checkpoint 存在空白错误。' }
 ```
 
-GREEN 夹具覆盖空 diff、文档/重型路径、删除/重命名、真实 Git NUL 变更收集、非法路径、`AGPL-3.0-only` Workspace 许可证、Iced 越层、`upstream/` Workspace 越界、生产脚本语言、Tauri/WebView、广告/遥测、非本仓更新源、精确依赖方向，以及 TOML 内联与表形式的依赖声明。
+GREEN 夹具覆盖空 diff、文档/重型路径、删除/重命名、真实 Git NUL 变更收集、非法路径、`AGPL-3.0-only` Workspace 许可证、Iced 越层、`upstream/` Workspace 越界、生产脚本语言、Tauri/WebView、广告/遥测、非本仓更新源、精确依赖方向、TOML 内联与表形式的依赖声明，以及三平台冷构建指标同时写入控制台日志与 Step Summary。
 
 ## Issue #19 首版 CI 本地静态验证
 

@@ -1,6 +1,6 @@
 # Issue #19 Runtime Workflow：Gate 3 纯 Rust Workspace 与首版三平台 CI
 
-workflow_status: first-ci-linux-clippy-fix-in-progress
+workflow_status: failure-semantics-and-cold-baseline-in-progress
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 session_plan_ref: docs/plans/sessions/2026-07-22-issue-19-gate-3-rust-workspace-ci.md
 implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
@@ -17,9 +17,10 @@ scope_hash: sha256:2e101627480012d57d6d0472a08cfbe03fc401f6ac74ef3ae1e6a42929ed6
 - Phase 4 复核发现依赖白名单比批准箭头更宽；四条新增 RED 已证明根因，政策已收紧并达到 `27/27` GREEN。
 - 依赖方向纠偏提交 `2d8a1466ae42d6b208258bee3d0cb6bd5647bb12` 已推送并回写 Issue。
 - Phase 4 七成员 Workspace 已完成 RED→GREEN；Phase 5 子项目文档、metadata、fmt、domain check 和六个轻量 crate 测试已完成，Workspace checkpoint `f93372fdc63cf8c628007117be4a8b222510957b` 已推送并回写 Issue。
-- Phase 6 已完成变更收集器、许可证一致性门禁和首版六 Job Workflow 的本地静态验证；当前合同为 `29/29`。CI checkpoint `f3107dd16705dd3a25bc8c3acc540a3c6c6990a3` 已普通 push 并回写 Issue 评论 `5044470597`，下一步创建关联 Draft PR 并让 GitHub Actions 执行精确工具链与三平台验证。
-- Draft PR `#21` 的首轮真实 RED 为工作流文件级失败：GitHub 在 Job 创建前拒绝 `jobs.<id>.env` 中的 `runner.temp`。当前批次只把三个平台报告目录改为运行时 `RUNNER_TEMP` + `GITHUB_ENV`，并补本地上下文门禁；修复必须以新普通提交触发新运行，禁止 rerun 旧失败。
-- 上下文修复提交触发运行 `29910847062` 后，Windows/macOS、classify、governance 均成功；Linux Clippy 因测试文件无条件导入只在 Windows/macOS 使用的 `PlatformKind` 失败，`required` 正确失败。当前批次仅 cfg 收紧该导入，再以新普通提交验证。
+- Phase 6 已完成变更收集器、许可证一致性门禁和首版六 Job Workflow；当前合同为 `30/30`。CI checkpoint `f3107dd16705dd3a25bc8c3acc540a3c6c6990a3` 已普通 push 并回写 Issue 评论 `5044470597`，Draft PR 为 `#21`。
+- Draft PR `#21` 的运行 `29910132968` 与 `29910379208` 证明 job 级 `env` 不支持 `runner.temp`；运行 `29910847062` 进一步证明 Linux 条件导入根因，`required` 对真实失败正确阻断。两类问题均用后续普通提交修复，未 rerun 旧失败。
+- 提交 `bd4610f6e98dc597bddf02c584d0f0fc616cac7b` 触发运行 `29911337652`，classify、governance、linux-quality、windows、macos、required 全绿，成功 Artifact 数为 `0`；精确 Rust `1.97.1` 与 Iced/desktop 三平台证据已成立。
+- 首个成功样本的 metrics 只写 Step Summary，当前 API 无法在完成后复取二进制字节数；已用合同 RED→GREEN 要求后续 metrics 同时写控制台日志与 Step Summary，当前转入 Phase 7。
 
 ## Phase 0：startup-baseline
 

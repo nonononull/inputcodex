@@ -1,14 +1,14 @@
 # Issue #19：Gate 3 纯 Rust Workspace 与首版三平台 CI 报告
 
-report_status: first-ci-linux-clippy-fix-in-progress
+report_status: failure-semantics-and-cold-baseline-in-progress
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 branch_ref: codex/issue-19-gate-3-rust-workspace-ci
 baseline_ref: 477d110a9b284e127af365f5278901bcfa69e093
 session_plan_ref: docs/plans/sessions/2026-07-22-issue-19-gate-3-rust-workspace-ci.md
 runtime_workflow_ref: docs/workflows/2026-07-22-issue-19-gate-3-rust-workspace-ci-runtime.md
 scope_hash: sha256:2e101627480012d57d6d0472a08cfbe03fc401f6ac74ef3ae1e6a42929ed61ba
-pr_ref: pending
-ci_ref: pending
+pr_ref: https://github.com/nonononull/inputcodex/pull/21
+ci_ref: https://github.com/nonononull/inputcodex/actions/runs/29911337652
 review_ref: pending
 merge_ref: pending
 
@@ -64,31 +64,33 @@ merge_ref: pending
 
 ## 七、本地验证与资源边界
 
-- 治理合同 `29/29` 与真实仓库政策 `ok=true`；Cargo metadata、rustfmt、domain check 和六个轻量 crate 测试通过。
+- 治理合同 `30/30` 与真实仓库政策 `ok=true`；Cargo metadata、rustfmt、domain check 和六个轻量 crate 测试通过。
 - 本机只有 Rust `1.93.1`；轻验使用 `--ignore-rust-version`，不得解释为 Rust `1.97.1` 或桌面运行时通过。
 - Rust `1.97.1` minimal 安装超过 5 分钟仍无完成证据，已精确终止本次 rustup/rustc 残留，确认工具链未安装；按 CI 卸载合同不再消耗本地机器。
 - 首次非离线多包 RED 因 registry 刷新超时并留下 Cargo 进程；终止本次 PID 后用 `--offline` 立即复现批准 API 缺失，证明网络阶段与代码 RED 已分离。
-- 离线 feature tree 因缺少 `arrayref` crate 源包失败；没有为本地取证下载或编译完整 `329` 个外部包图，精确 feature 解析和 desktop 编译等待 GitHub Actions。
+- 离线 feature tree 因缺少 `arrayref` crate 源包失败；没有为本地取证下载或编译完整 `329` 个外部包图。远端运行 `29911337652` 已完成精确 Rust `1.97.1`、Iced/desktop 与三平台编译测试。
 
 ## 八、变更收集器与首版 CI 本地证据
 
 - 变更收集器以真实临时 Git 仓库覆盖新增、修改、删除和重命名，使用无 shell 拼接的 `ProcessStartInfo` 与 NUL 解析；收集器缺失 RED、单行输出形状错误和最终 GREEN 均有可复现根因。
 - 根 `Cargo.toml` 曾误把 Iced 的 MIT 许可证沿用为本项目许可证；已与根 `LICENSE`/README 对齐为 `AGPL-3.0-only`，并用独立 RED/GREEN 合同防止再次漂移。
-- 四份 PowerShell 脚本 AST 为 `0` 个错误，完整合同输出 `CI_CONTRACT_GREEN passed=29`，真实仓库政策返回 `ok=true`、`violation_count=0`。
+- 四份 PowerShell 脚本 AST 为 `0` 个错误，完整合同输出 `CI_CONTRACT_GREEN passed=30`，真实仓库政策返回 `ok=true`、`violation_count=0`。
 - 首版 `CI` Workflow 固定 `classify`、`governance`、`linux-quality`、`windows`、`macos`、`required` 六个 Job；只读权限、并发取消、精确 Rust、无 Cache、失败白名单 Artifact 和 7 天保留期均已本地静态验证。两个官方 Action 均 Fresh 锁定到 `v7.0.1` 的 Node 24 不可变提交。
 - 本地 YAML 解析通过，但精确 Rust `1.97.1`、Iced/desktop、Linux/Windows/macOS 及 `required` 仍是远端待验证事实，不提前宣称通过。
 - Draft PR `#21` 首轮运行 `29910132968` 与 `29910379208` 均在创建 Job 前失败；GitHub 注解将根因定位到三个平台 Job 的 job 级 `env` 使用了不可用的 `runner.temp` 上下文。
 - 修复改为平台 Job 首步从 `RUNNER_TEMP` 计算报告目录并写入 `GITHUB_ENV`，不改变 Artifact 白名单、权限、超时、Runner 或构建命令；本地 YAML 门禁同步拒绝未来 job 级 `runner.*` 回归。
 - 上下文修复后的运行 `29910847062` 已证明 classify、governance、Windows 与 macOS 成功；Linux Clippy 唯一根因是 `platform_contract.rs` 无条件导入只在 Windows/macOS 条件断言使用的 `PlatformKind`，`required` 按设计阻断。
-- 当前修复只把该导入收紧到 Windows/macOS cfg；下一运行必须重新证明 Linux Clippy、Workspace 测试、desktop check 与 `required`，不以 Windows 本地 Clippy 替代 Linux 证据。
+- 条件导入修复提交 `bd4610f6e98dc597bddf02c584d0f0fc616cac7b` 触发运行 `29911337652`：六个 Job 全绿，成功 Artifact 数为 `0`；Linux、Windows、macOS Job 分别执行 `112`、`211`、`94` 秒。
+- 首个全绿样本的 Linux Clippy、Windows/macOS 桌面冷构建 metrics 只写入 Step Summary；Check Run 与 Actions API 完成后均未返回该摘要，因此二进制字节数保持“未知”，禁止按文件类型或历史值猜测。
+- 已按 TDD 增加“冷构建指标同时写入日志与摘要”合同：旧 Workflow 稳定 RED 为读取 metrics 数量 `0`、期望 `3`；最小修复后合同恢复 `CI_CONTRACT_GREEN passed=30`。后续运行可从普通 Job 日志复取精确秒数与二进制字节数。
 
 ## 九、下一合法批次
 
-1. CI checkpoint `f3107dd16705dd3a25bc8c3acc540a3c6c6990a3` 已完成 Fresh 验证、普通 push，并回写 Issue `#19` 评论 `5044470597`。
-2. 创建正文含 `Closes #19` 的 Draft PR，观察标准 GitHub-hosted runners 对 Rust `1.97.1`、Iced/desktop、Linux/Windows/macOS 与 `required` 的真实结果。
-3. 对每个失败先确定根因，再用后续普通提交修复；CI 稳定前不得修改 `main` Ruleset required checks，也不得在本地机器执行全 Workspace 或桌面重型编译。
+1. 提交当前 metrics 日志合同、状态回写和 `docs/reports/rust-ci-cold-baseline.md`，普通 push 触发新的无缓存三平台运行。
+2. 按 Runtime Workflow 用普通提交依次制造并修复治理、rustfmt、通用 Rust、Windows 条件编译和 macOS 条件编译失败；每次读取日志确认根因，禁止 rerun 旧失败。
+3. Linux、Windows、macOS 各收集至少三次无缓存成功样本后，更新 PR 正文、Issue 评论和 Review 证据；CI 稳定前不得修改 `main` Ruleset required checks，也不得在本地机器执行全 Workspace 或桌面重型编译。
 
 ## 十、收口边界
 
-- PR、CI、Review 和 merge 字段保持 `pending`，不得提前宣称通过。
+- PR 与首轮全绿 CI 已有真实引用；Review 与 merge 字段继续保持 `pending`，不得提前宣称可合并。
 - 最终 PR 必须包含 `Closes #19`，所有适用 Job 成功、Review 对话根因闭环后，再等待项目所有者新的 Squash Merge 授权。

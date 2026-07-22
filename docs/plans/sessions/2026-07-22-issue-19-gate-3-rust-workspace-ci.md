@@ -3,7 +3,7 @@
 schema_version: inputcodex.session-plan.v1
 task_id: 2026-07-22-issue-19-gate-3-rust-workspace-ci
 work_class: major
-task_status: first-ci-linux-clippy-fix-in-progress
+task_status: failure-semantics-and-cold-baseline-in-progress
 task_summary: 按已批准的 Gate 3 合同建立七成员纯 Rust Workspace、Iced 展示层隔离、最小加载/平台语义、治理脚本与首版无缓存三平台 CI，不迁移任何上游业务功能。
 project_root: C:/Users/dashuai/Documents/inputcodex
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
@@ -34,17 +34,18 @@ green_checkpoint_ref: commit:be9259f55b32014e918113936e6e6ddfdd16765f;issuecomme
 governance_alignment_status: verified
 governance_alignment_passed: 27
 governance_alignment_checkpoint_ref: commit:2d8a1466ae42d6b208258bee3d0cb6bd5647bb12;issuecomment:5043770155
-current_governance_contract_passed: 29
+current_governance_contract_passed: 30
 workspace_status: seven-members-local-light-green
 workspace_member_count: 7
 lock_package_count: 336
 lock_external_package_count: 329
 local_toolchain_evidence: rust-1.93.1-ignore-rust-version-only
-exact_toolchain_evidence: pending-github-actions
-desktop_iced_compile: pending-github-actions
+exact_toolchain_evidence: github-actions-run:29911337652-rust-1.97.1-green
+desktop_iced_compile: github-actions-run:29911337652-linux-windows-macos-green
 workspace_checkpoint_ref: commit:f93372fdc63cf8c628007117be4a8b222510957b;issuecomment:5044073911
-ci_workflow_status: local-static-green-awaiting-github-actions
+ci_workflow_status: first-full-green-failure-semantics-in-progress
 ci_checkpoint_ref: commit:f3107dd16705dd3a25bc8c3acc540a3c6c6990a3;issuecomment:5044470597
+first_full_green_ci_ref: https://github.com/nonononull/inputcodex/actions/runs/29911337652
 
 ## 一、批准决策
 
@@ -222,8 +223,8 @@ ci_policy:
 
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 review_ref: pending
-pr_ref: pending
-ci_ref: pending
+pr_ref: https://github.com/nonononull/inputcodex/pull/21
+ci_ref: https://github.com/nonononull/inputcodex/actions/runs/29911337652
 merge_ref: pending
 owner_merge_authorization_ref: pending-new-owner-authorization-required
 
@@ -258,7 +259,7 @@ owner_merge_authorization_ref: pending-new-owner-authorization-required
 - presentation 只有可选 `iced-runtime` 能直接启用 Iced `0.14.0`；desktop 仅依赖 presentation 暴露的启动入口，不直接依赖 Iced。UI 仍未建立设计系统。
 - `Cargo.lock` 包含 `336` 个 package 记录，其中 `329` 个外部包、`7` 个 Workspace 包；Iced checksum 与批准值一致；直接 feature 仅为 `wgpu`、`thread-pool`、`x11`、`wayland`，默认 features、`webgl`、`web-colors`、`crisp` 未启用。
 - 本地现有 Rust `1.93.1` 下，metadata、fmt、domain check 与六个轻量 crate 测试通过；命令使用 `--ignore-rust-version`，只作为逻辑证据。
-- 精确 Rust `1.97.1` minimal 安装超过 5 分钟未完成，残留 rustup/rustc 进程已精确终止且工具链未安装；按本地轻验/云端全量合同不再重试，精确工具链与 Iced/desktop 编译等待 GitHub Actions。
+- 精确 Rust `1.97.1` minimal 本地安装超过 5 分钟未完成，残留 rustup/rustc 进程已精确终止且工具链未安装；按本地轻验/云端全量合同不再重试。远端运行 `29911337652` 已由标准 GitHub-hosted runners 证明精确工具链与 Iced/desktop 三平台编译测试通过。
 - 离线 `cargo tree` 因未下载 `arrayref` 源包失败；未为取证下载并编译完整 `329` 个外部包图，feature 图与真实桌面编译改由 CI 验证。
 
 ## 十七、变更收集器与首版 CI 本地执行记录
@@ -266,10 +267,12 @@ owner_merge_authorization_ref: pending-new-owner-authorization-required
 - `Collect-Changes.ps1` 通过 `System.Diagnostics.ProcessStartInfo` 调用 Git，使用 `--name-status -z`、rename/copy 检测和 NUL 解析，保留新增、修改、删除及重命名新旧路径，并把 `T` 稳定映射为 `M`。
 - 收集器 RED 先稳定为唯一 `CI_COLLECTOR_RED_MISSING_IMPLEMENTATION`；实现后暴露测试辅助函数把单行 Git 输出解包成字符的根因，修复返回形状后合同转绿。
 - 许可证对账发现根 `LICENSE`/README 为 GNU AGPLv3，而 Workspace 元数据误写为 MIT；已按仓库真源纠正为 `AGPL-3.0-only`，并新增拒绝错误许可证的治理合同，Iced 自身仍按 MIT 依赖审计。
-- 当前四份 PowerShell 脚本 AST 为 `0` 个错误，完整合同为 `CI_CONTRACT_GREEN passed=29`，真实仓库政策返回 `ok=true`、`violation_count=0`。
+- 当前四份 PowerShell 脚本 AST 为 `0` 个错误，完整合同为 `CI_CONTRACT_GREEN passed=30`，真实仓库政策返回 `ok=true`、`violation_count=0`。
 - `.github/workflows/ci.yml` 已创建固定六 Job、`contents: read`、PR/main/manual 事件、并发取消、无 Cache、失败白名单 Artifact 与 `retention-days: 7`；`actions/checkout` 与 `actions/upload-artifact` 均 Fresh 固定到 `v7.0.1` 的 Node 24 不可变提交。
-- 本地 YAML 解析与 Workflow 静态合同已通过；这些证据不等于 Rust `1.97.1`、Iced/desktop 或三平台编译通过，下一步必须普通提交/push 后创建关联 PR 并观察 GitHub Actions。
+- 本地 YAML 解析与 Workflow 静态合同已通过；远端运行 `29911337652` 已进一步证明 Rust `1.97.1`、Iced/desktop、Linux/Windows/macOS 与 `required` 全绿。
 - Draft PR `#21` 创建后，GitHub 对提交 `f3107dd` 与 `96374d9` 均生成工作流文件级失败且没有 Job；运行 `29910379208` 的官方注解精确指出三处 job 级 `env` 中 `runner.temp` 不可用。
 - 根因修复不降低合同：移除三个平台 Job 的 job 级 `REPORT_DIR` 表达式，改为各 Job 首步用运行时 `RUNNER_TEMP` 创建目录并写入 `GITHUB_ENV`；本地 YAML 门禁新增禁止 job 级 `runner.*` 上下文检查。
 - 修复提交 `4a20c1e878283b2007f79bfa7f22aa8ebbee9f59` 已创建真实运行 `29910847062`：classify、governance、Windows、macOS 成功，Linux 仅在 Clippy 因 `PlatformKind` 的 Linux 未使用导入失败，`required` 正确阻断。
-- 当前只把 `PlatformKind` 导入收紧到 Windows/macOS cfg；本地 Windows 定向 Clippy 通过不替代 Linux 证据，必须由新普通提交触发后续 Linux Runner 验证。
+- `PlatformKind` 条件导入修复提交 `bd4610f6e98dc597bddf02c584d0f0fc616cac7b` 触发运行 `29911337652`；六个 Job 全绿，成功 Artifact 数为 `0`，Linux/Windows/macOS Job 分别执行 `112`、`211`、`94` 秒。
+- 首个成功样本的 metrics 只写入 Step Summary，完成后无法通过当前 API 复取二进制字节数；新增合同先稳定 RED 为“三个平台读取 metrics 数量 `0`、期望 `3`”，再要求 metrics 同时写入控制台日志与 Step Summary，合同恢复为 `30/30` GREEN。
+- 当前进入 Phase 7：按普通提交依次完成五类失败语义，并把后续无缓存运行写入 `docs/reports/rust-ci-cold-baseline.md`。
