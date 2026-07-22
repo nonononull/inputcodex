@@ -431,6 +431,15 @@
 - 验证：失败 Artifact 只有 governance 的 `contract.log`/`policy.json` 与 required 的 `required.json`；三平台成功且成功平台不上传 Artifact。修复提交 `d474c47f5ab02ef9ed9804b208a739823819c9e9` 触发运行 `29914029406`，六 Job 全绿且 Artifact 数为 `0`。
 - 关联：GitHub PR `#21`、失败运行 `29913582488`、修复运行 `29914029406`、Artifact `governance-failure-29913582488-1`、Artifact `required-failure-29913582488-1`。
 
+### 2026-07-22：受控单行格式差异验证 rustfmt 与 required 失败语义
+
+- 环境：普通提交 `743da60b81161f2c18d6db9b0a1b03f976b04cea` 只把 `DiagnosticCode::new` 改成语法有效但不符合 rustfmt 的空格形状；没有加入 `rustfmt::skip`、allow 或 Workflow 例外。
+- 现象：运行 `29914734781` 的 linux-quality 在“检查 Rust 格式”步骤退出 `1`，后续 Linux Clippy/测试被正常跳过；governance、Windows、macOS 成功，`required` 失败。
+- 根因：`fmt.log` 精确显示 `pub const fn new( value: &'static str)->Self{` 应恢复为 `pub const fn new(value: &'static str) -> Self {`；`required.json` 的唯一 failures 项为 `linux-quality=failure`。
+- 处理：恢复唯一格式行，不修改逻辑。首次本地命令复用了根 `err.md` 已记录的 rustup 固定工具链超时结论，精确终止本次残留 PID 后，直接使用已安装 `1.93.1` 工具链二进制证明“fmt RED、domain check GREEN”，未下载或编译 Iced Workspace。
+- 验证：失败 Artifact 白名单只有 `fmt.log`、`toolchain.txt` 与 `required.json`；恢复格式后的本地 fmt/domain 定向验证与 Fresh CI 仍待后续运行确认。
+- 关联：GitHub PR `#21`、运行 `29914734781`、Artifact `linux-quality-failure-29914734781-1`、Artifact `required-failure-29914734781-1`。
+
 ## 记录模板
 
 ```text
