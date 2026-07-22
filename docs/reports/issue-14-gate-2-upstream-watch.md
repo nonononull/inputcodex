@@ -1,11 +1,11 @@
 # Issue #14：Gate 2 上游变化监控交付报告
 
-report_status: local-verification-passed-pr-pending
+report_status: pr-open-final-ci-pending
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/14
 branch_ref: codex/issue-14-gate-2-upstream-watch
-pr_ref: pending
-ci_ref: pending
-review_ref: pending
+pr_ref: https://github.com/nonononull/inputcodex/pull/15
+ci_ref: https://github.com/nonononull/inputcodex/actions/runs/29889749336
+review_ref: https://github.com/nonononull/inputcodex/pull/15#issuecomment-5041714708
 merge_ref: pending
 
 ## 一、批准范围
@@ -43,5 +43,10 @@ merge_ref: pending
 
 ## 五、Review 与合并证据
 
-- PR、Head、Checks、Review 对话、Ruleset、Squash Merge、两次真实运行、Issue 关闭和签名证据待 PR 阶段按真实引用补充。
+- PR `#15` 为非 Draft、目标 `main`，首轮 Head 为 `43707034caa2e7b51ec011ce5fbbb61578a0afc3`，远端文件列表与 Session Plan 的 `11` 条允许路径完全一致。
+- 首轮 Actions `29889749336` 在该 Head 上完成：`validate=SUCCESS`、`watch=SKIPPED`；这证明 PR 事件只运行只读验证，没有进入 Issue 写入 Job。
+- Ruleset `19395456` Fresh 状态为 active、无 bypass actor、required approvals `0`、必须解决 Review 对话且只允许 Squash Merge；PR 自动合并未启用，首轮状态为 `MERGEABLE/CLEAN`。
+- 首轮 Review 对话为 `0`；Owner Review 跟踪锚点为 `https://github.com/nonononull/inputcodex/pull/15#issuecomment-5041714708`，当前明确标记为“尚未最终通过”。
+- 本次文档回写提交后必须重新核对最终 Head、最终 CI、Review 对话和 Fresh 上游基线，再把同一 Owner Review 评论原位更新为最终通过证据。
+- Squash Merge、两次真实运行、Issue 关闭和签名证据尚未发生，不得提前填充或解释为已完成。
 - 项目所有者已通过 `user-message:create-upstream-watch-full-delivery-2026-07-22` 提供执行批准和门禁满足后的条件式 Squash Merge 授权；该授权不能替代 CI、Review 对话闭环或合并前 Fresh 核对。

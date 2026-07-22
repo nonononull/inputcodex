@@ -57,8 +57,8 @@
 
 ## Task 4：PR、真实运行与合并
 
-- [ ] 普通 push 功能分支并创建关联 PR，禁止自动合并。
-- [ ] 观察 PR 上的 Workflow 语法和仓库门禁；定时 Workflow 不作为 `main` required check。
+- [x] 普通 push 功能分支并创建关联 PR，禁止自动合并。
+- [x] 观察 PR 上的 Workflow 语法和仓库门禁；定时 Workflow 不作为 `main` required check。
 - [ ] 合并前通过只读 PR `validate` Job；合并后在 `main` 连续手动运行两次，验证 Issue 写权限、状态 Issue 唯一性和重复运行幂等性。
 - [ ] 完成所有 Review 对话的根因闭环，核对 PR Head、Checks、Ruleset 和允许路径。
 - [ ] 使用 Issue `#14` 中的项目所有者条件式授权执行 Squash Merge，关闭 Issue，并回写最终合并与运行证据。

@@ -242,6 +242,15 @@
 - 验证：同一补丁入口成功更新受控文件，后续 `git diff --check` 与 Fresh 测试用于确认没有部分写入。
 - 关联：GitHub Issue `#14`、本地 Codex Windows 执行环境。
 
+### 2026-07-22：Git HTTPS 传输与 OAuth `workflow` scope 双重阻断 Workflow 分支 push
+
+- 环境：Issue `#14` 提交 `43707034caa2e7b51ec011ce5fbbb61578a0afc3` 包含 `.github/workflows/upstream-watch.yml`，需要普通 push 到公开仓库。
+- 现象：首次 HTTPS push 在 sideband 回传阶段被连接重置，GitHub API 确认远端分支尚不存在；HTTP/1.1 重试又因 443 不可达失败。Git Database API 创建 tree 返回 `404`，GitHub 随后明确拒绝 OAuth App 更新 Workflow，因为现有 Token 缺少 `workflow` scope。
+- 根因：存在两个独立问题：本机 Git smart-HTTP 路径不稳定；HTTPS 凭据来自 OAuth App，作用域只有 `repo/read:org/gist`，不具备创建或修改 Workflow 文件的 `workflow` scope。仓库对象、提交和 SSH 身份本身均无异常。
+- 处理：每次失败后先用 GitHub API确认远端分支和对象是否存在，禁止盲目重推或 Force Push；停止未完成的 OAuth 刷新流程，使用已通过 `git ls-remote` 验证的 GitHub SSH 身份执行普通 push。一次临时 URL 命令同时产生 HTTPS 拒绝与 SSH 成功输出，因此不采用其整体退出码作为成功证据，改用 GitHub API核对远端 ref。
+- 验证：远端 `refs/heads/codex/issue-14-gate-2-upstream-watch` 精确指向 `43707034caa2e7b51ec011ce5fbbb61578a0afc3`；PR `#15` 的 `headRefOid` 一致，首轮 Actions `29889749336` 的 `validate` 成功且 `watch` 跳过。
+- 关联：GitHub Issue `#14`、PR `#15`、本地 Git/GitHub 认证环境。
+
 ## 记录模板
 
 ```text

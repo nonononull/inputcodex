@@ -13,7 +13,7 @@ transition_branch_ref: codex/issue-8-gate-2-transition
 active_plan_ref: docs/plans/2026-07-22-issue-14-gate-2-upstream-watch.md
 active_session_plan_ref: docs/plans/sessions/2026-07-22-issue-14-gate-2-upstream-watch.md
 active_runtime_workflow_ref: docs/workflows/2026-07-22-issue-14-gate-2-upstream-watch-runtime.md
-active_pr_ref: pending
+active_pr_ref: https://github.com/nonononull/inputcodex/pull/15
 transition_pr_ref: https://github.com/nonononull/inputcodex/pull/10
 upstream_sync_pr_ref: https://github.com/nonononull/inputcodex/pull/11
 closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5, https://github.com/nonononull/inputcodex/pull/7, https://github.com/nonononull/inputcodex/pull/10, https://github.com/nonononull/inputcodex/pull/11, https://github.com/nonononull/inputcodex/pull/13
