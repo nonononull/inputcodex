@@ -28,7 +28,7 @@ pr_ref: pending
 - RED checkpoint 已以普通提交 `532fba89d882862438345788ed2fdd73faede507` 推送，并回写 Issue 评论 `5048079257`。
 - Phase 3 最小 Rust schema 已实现并通过 `25` 个 schema 测试与 `1` 个既有回归；格式、离线库 check 和 Clippy 严格警告门禁均通过。
 - GREEN checkpoint 已以普通提交 `8b18f0a2a37829af3338edba34454eb6690af77a` 推送，并回写 Issue 评论 `5048438316`。
-- Phase 4 source-index 与五分域功能目录已转 GREEN，当前等待普通 checkpoint、push 与 Issue 回写后进入 Phase 5。
+- Phase 4 source-index 与五分域功能目录已通过 checkpoint `87537e6e4a0e6911dd1427cc23f52dcb805a4679` 和 Issue 评论 `5048930060` 收口，当前进入 Phase 5。
 
 ## Phase 0：startup-baseline
 
@@ -94,7 +94,7 @@ pr_ref: pending
 - 锁定快照的 `84 + 45 + 4 = 133` 条公开入口全部进入 source-index；目录形成 `36` 个 feature、`3` 个显式排除和 `10` 个 `exception-pending` feature。
 - `validate_feature_repository` 同时检查 source-lock、schema、跨文件 feature 唯一性、首次状态、证据路径、真实上游入口枚举和双向 source/feature 映射。
 - 真实仓库级测试返回 `source=133`、`feature=36`、`excluded=3`、`exception-pending=10`、`coverage-gap=0`；完整合同/fixture 仓库验证保留到 Phase 5。
-- Phase 4 checkpoint 尚待普通提交、push 和 Issue 评论回写；禁止 amend 已推送历史。
+- Phase 4 checkpoint `87537e6e4a0e6911dd1427cc23f52dcb805a4679` 已普通 push，并通过 Issue 评论 `5048930060` 回写；禁止 amend 已推送历史。
 
 ## Phase 5：contracts-and-fixtures
 

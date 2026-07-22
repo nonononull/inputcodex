@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游 `v1.2.41` 审计快照与每 6 小时监控，并已通过 Issue `#19/#22`、PR `#21/#23` 完成 Gate 3 纯 Rust Workspace、五类失败语义、三平台最低冷构建基线和独立 closeout；Issue `#24` / PR `#25` 已完成 Gate 4 规划合同，Issue `#26` 的控制面、36 条范围和 scope hash 已获批准，当前进入依赖 Fresh 与 RED schema。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游 `v1.2.41` 审计快照与每 6 小时监控，并已通过 Issue `#19/#22`、PR `#21/#23` 完成 Gate 3 纯 Rust Workspace、五类失败语义、三平台最低冷构建基线和独立 closeout；Issue `#24` / PR `#25` 已完成 Gate 4 规划合同，Issue `#26` 已完成 source-index 与五域功能目录 checkpoint，当前进入行为合同与脱敏 fixture。
 
 ## 项目目标
 
@@ -49,7 +49,7 @@
 
 - 不把已导入的上游审计快照接入产品构建或运行面，也不在非 upstream-sync Issue 中修改快照。
 - 不导入半成品参考仓库源码。
-- 不在 Issue `#26` 控制面 checkpoint 中创建 `parity/`、`benchmarks/`，也不修改 Cargo、Rust、测试、CI Workflow、发布资产或上游快照。
+- 不创建 `benchmarks/`，不修改 CI Workflow、发布资产或上游快照；Issue `#26` 只继续写入已批准的 parity 合同、fixture、验证器和任务证据。
 - 不执行功能迁移、安装包构建、发布或未经项目所有者授权的 PR 合并。
 - 不让上游 Tauri/React UI、现有注入脚本和远程推荐列表进入最终运行面。
 
@@ -62,14 +62,14 @@
 - Linux、Windows、macOS 已各取得 `3/3` 次无缓存成功样本；Job 执行时间中位数分别为 `133`、`212`、`96` 秒，最低基线不包含 Cache、P95 或七天调优结论。
 - Gate 3 实现顺序固定为“RED 治理合同 → GREEN 治理脚本 → 七成员 Workspace → 无缓存三平台 CI → 真实失败恢复 → 冷构建基线”。
 - Iced 只能直接存在于 presentation crate；最小窗口不建立 UI 设计系统，视觉与交互由 Gemini 实现或审阅。
-- Gate 4 规划合同已进入 `main`；Issue `#26` 将在新批准后建立 source-index、五分域功能目录、五分域行为合同、脱敏夹具和纯 Rust parity 验证器，不迁移产品功能。
-- Issue `#26` 最大候选写集合为 36 条路径或路径模式，新范围哈希为 `sha256:e8a1cbccfc3f0026e90fcb49264de5ea69980fa2e1faa03b520d9bedaf61e772`；当前 checkpoint 只写 8 条控制面路径。
+- Gate 4 规划合同已进入 `main`；Issue `#26` 的 source-index 与五域功能目录 checkpoint `87537e6e4a0e6911dd1427cc23f52dcb805a4679` 已普通 push，Issue 评论 `5048930060` 记录 `133` 条入口、`36` 个 feature、`3` 个排除和 `0` 个覆盖缺口。
+- Issue `#26` 最大候选写集合为 36 条路径或路径模式，范围哈希为 `sha256:e8a1cbccfc3f0026e90fcb49264de5ea69980fa2e1faa03b520d9bedaf61e772`；当前进入五域合同与必要脱敏 fixture。
 - 最新正式功能真源仍为 `v1.2.41`；上游 `main` 当前变化只进入 Issue `#20` 预警，不自动改变 Gate 4 基线。
 
 ## 下一步
 
-1. Fresh 固定 Serde/YAML 依赖元数据，并先建立 catalog/contract/fixture 的根因正确 RED 测试。
-2. 按 RED schema → GREEN Rust 验证器 → source-index/功能目录 → 合同夹具的顺序执行。
+1. 按五个 domain 建立行为合同，覆盖输入、输出、持久化、副作用、错误、加载、超时、取消、隔离、可观测和双平台语义。
+2. 只为需要结构数据的场景建立合成或不可逆脱敏 fixture，并完成完整 `validate_repository`。
 3. 实现 PR 必须通过 Review/三平台 CI 并取得具体 PR 与最终 Head 的 Squash Merge 授权；功能目录收口后才创建性能基线 Issue，Gate 5 继续锁定。
 
 ## 项目文档

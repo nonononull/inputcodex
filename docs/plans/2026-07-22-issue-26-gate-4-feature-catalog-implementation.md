@@ -176,7 +176,7 @@ docs/workflows/2026-07-22-issue-26-gate-4-feature-catalog-runtime.md
 - [x] 按五个 domain 建立稳定 feature ID；首次状态只允许 `unassessed` 或 `exception-pending`。
 - [x] 为每条 feature 保存 `v1.2.41`、tag SHA、缓存证据路径、入口和双平台适用性。
 - [x] 对无法证明完整性的模块记录缺口，不宣称“全部功能已盘点”。
-- [x] 运行 source-index 覆盖与目录仓库测试，形成目录 checkpoint；commit 与 Issue 评论在普通 push 后回填。
+- [x] 运行 source-index 覆盖与目录仓库测试，形成目录 checkpoint `87537e6e4a0e6911dd1427cc23f52dcb805a4679`，并通过 Issue 评论 `5048930060` 回写。
 
 ### Task 4：行为合同与脱敏夹具
 

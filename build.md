@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 22 日，PR `#21` 已将 Gate 3 七成员 Workspace、首版无缓存三平台 CI、五类失败语义与三平台最低冷构建基线 Squash Merge 到 `main`；PR `#23` 已完成独立 closeout。Issue `#24` / PR `#25` 已将 Gate 4 两阶段规划合同 Squash Merge 为 `431682296f53e86de1184c732b0d4748857c9390`，Issue `#24` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29926710342` 六 Job 全绿且成功 Artifact 数为 `0`。Issue `#26` 的 Session Plan、Runtime Workflow、36 条最大范围和 scope hash 已获项目所有者批准，当前进入依赖 Fresh 与 RED schema；最终合并仍需独立授权。
+截至 2026 年 7 月 22 日，PR `#21` 已将 Gate 3 七成员 Workspace、首版无缓存三平台 CI、五类失败语义与三平台最低冷构建基线 Squash Merge 到 `main`；PR `#23` 已完成独立 closeout。Issue `#24` / PR `#25` 已将 Gate 4 两阶段规划合同 Squash Merge 为 `431682296f53e86de1184c732b0d4748857c9390`，Issue `#24` 已按 `COMPLETED` 关闭。Issue `#26` 的 source-index 与五域功能目录 checkpoint `87537e6e4a0e6911dd1427cc23f52dcb805a4679` 已普通 push，Issue 评论 `5048930060` 记录 `133` 条入口、`36` 个 feature、`3` 个排除和 `0` 个覆盖缺口；当前进入合同与 fixture，最终合并仍需独立授权。
 
 仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供十四个检查点：
 

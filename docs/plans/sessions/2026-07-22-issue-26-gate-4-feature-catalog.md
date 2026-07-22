@@ -1,7 +1,7 @@
 # Session Plan：Issue #26 Gate 4 功能目录、行为合同与脱敏夹具
 
 schema_version: inputcodex.session-plan.v1
-session_status: feature-catalog-green-checkpoint-pending
+session_status: feature-catalog-checkpoint-complete-contracts-in-progress
 task_id: 2026-07-22-issue-26-gate-4-feature-catalog
 work_class: major
 task_summary: 建立上游 v1.2.41 功能目录、行为合同、脱敏夹具和纯 Rust parity 验证器，不迁移产品功能，不进行性能优化。
@@ -22,7 +22,7 @@ pr_ref: pending
 control_plane_checkpoint_ref: commit:80e0ddbb734496e95e89fe57fd89ddb668c8c276;issuecomment:5047590347
 red_checkpoint_ref: commit:532fba89d882862438345788ed2fdd73faede507;issuecomment:5048079257
 green_checkpoint_ref: commit:8b18f0a2a37829af3338edba34454eb6690af77a;issuecomment:5048438316
-feature_catalog_checkpoint_ref: pending-commit-and-issue-comment
+feature_catalog_checkpoint_ref: commit:87537e6e4a0e6911dd1427cc23f52dcb805a4679;issuecomment:5048930060
 scope_hash: sha256:e8a1cbccfc3f0026e90fcb49264de5ea69980fa2e1faa03b520d9bedaf61e772
 scope_path_count: 36
 control_plane_path_count: 8

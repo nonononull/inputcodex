@@ -1,7 +1,7 @@
 # Issue #26：Gate 4 功能目录、行为合同与脱敏夹具报告
 
 schema_version: inputcodex.report.v1
-report_status: feature-catalog-green-checkpoint-pending
+report_status: feature-catalog-checkpoint-complete-contracts-in-progress
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/26
 branch_ref: codex/issue-26-gate-4-feature-catalog
 baseline_ref: 431682296f53e86de1184c732b0d4748857c9390
@@ -10,7 +10,7 @@ scope_hash: sha256:e8a1cbccfc3f0026e90fcb49264de5ea69980fa2e1faa03b520d9bedaf61e
 control_plane_checkpoint_ref: commit:80e0ddbb734496e95e89fe57fd89ddb668c8c276;issuecomment:5047590347
 implementation_decision_ref: user-message:approve-issue-26-implementation-2026-07-22
 implementation_approval_ref: issuecomment:5047650154
-feature_catalog_checkpoint_ref: pending-commit-and-issue-comment
+feature_catalog_checkpoint_ref: commit:87537e6e4a0e6911dd1427cc23f52dcb805a4679;issuecomment:5048930060
 
 ## 一、当前结论
 
@@ -97,7 +97,7 @@ feature_catalog_checkpoint_ref: pending-commit-and-issue-comment
 - Issue `#26` 评论 `5047590347` 已回写 commit、计划引用、范围哈希和实现待批准边界。
 - RED checkpoint `532fba89d882862438345788ed2fdd73faede507` 已普通 push，并通过 Issue 评论 `5048079257` 回写。
 - GREEN checkpoint `8b18f0a2a37829af3338edba34454eb6690af77a` 已普通 push，并通过 Issue 评论 `5048438316` 回写。
-- source-index 与五域功能目录已完成本地 GREEN，Phase 4 checkpoint 的 commit 与 Issue 评论将在普通 push 后回填；随后进入行为合同与脱敏 fixture。
+- source-index 与五域功能目录 checkpoint `87537e6e4a0e6911dd1427cc23f52dcb805a4679` 已普通 push，并通过 Issue 评论 `5048930060` 回写；当前进入行为合同与脱敏 fixture。
 
 ## 十一、完成状态占位
 
@@ -113,7 +113,7 @@ exception_pending_count: 10
 coverage_gap_count: 0
 red_checkpoint_ref: commit:532fba89d882862438345788ed2fdd73faede507;issuecomment:5048079257
 green_checkpoint_ref: commit:8b18f0a2a37829af3338edba34454eb6690af77a;issuecomment:5048438316
-feature_catalog_checkpoint_ref: pending-commit-and-issue-comment
+feature_catalog_checkpoint_ref: commit:87537e6e4a0e6911dd1427cc23f52dcb805a4679;issuecomment:5048930060
 pr_ref: pending-implementation
 ci_ref: pending-implementation
 merge_ref: pending-owner-authorization
