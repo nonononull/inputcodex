@@ -1,0 +1,1 @@
+export const governanceFailureProbe = true;

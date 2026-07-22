@@ -6,9 +6,9 @@ tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 pr_ref: https://github.com/nonononull/inputcodex/pull/21
 workflow_ref: .github/workflows/ci.yml
 required_success_samples_per_platform: 3
-accepted_success_samples_linux: 1
-accepted_success_samples_windows: 1
-accepted_success_samples_macos: 1
+accepted_success_samples_linux: 2
+accepted_success_samples_windows: 2
+accepted_success_samples_macos: 2
 cache_policy: disabled-and-out-of-scope-for-issue-19
 dependency_package_count: 336
 workspace_package_count: 7
@@ -46,6 +46,20 @@ external_package_count: 329
 - 本报告不猜测缺失值；样本 1 只采用 GitHub API 的 Job/步骤时间。
 - 已用合同 RED→GREEN 修改三个摘要步骤，使后续样本把同一 metrics 同时写入控制台日志与 Step Summary。
 
+### 样本 2：运行 29913139948
+
+- 时间：`2026-07-22T10:45:42Z` 至 `2026-07-22T10:49:45Z`。
+- Head：`ca6d0216115059146c8e59d4fae52d3d96d06dc4`。
+- 结果：六个 Job 全部成功；成功 Artifact 数为 `0`；三平台 metrics 均可从普通 Job 日志复取。
+
+| 平台 | 排队时间 | Job 执行时间 | Workflow 内部 metrics | 二进制字节数 | 结果 |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Linux | 17 秒 | 133 秒 | Clippy `38.732` 秒 | 不适用 | 成功 |
+| Windows | 18 秒 | 213 秒 | 桌面冷构建 `117.053` 秒 | `26,347,520` | 成功 |
+| macOS | 18 秒 | 152 秒 | 桌面冷构建 `78.163` 秒 | `53,510,976` | 成功 |
+
+辅助 Job：classify 执行 `9` 秒，governance 执行 `28` 秒，required 在前置 Job 完成后执行 `8` 秒。required 的 `234` 秒开始延迟仍是依赖等待。
+
 ## 三、失败恢复样本
 
 | 运行 | 结果 | 根因 | 处理 | 是否计入成功样本 |
@@ -58,9 +72,9 @@ external_package_count: 329
 
 | 平台 | 样本 1 | 样本 2 | 样本 3 | 当前状态 |
 | --- | --- | --- | --- | --- |
-| Linux | `29911337652` | pending | pending | `1/3` |
-| Windows | `29911337652` | pending | pending | `1/3` |
-| macOS | `29911337652` | pending | pending | `1/3` |
+| Linux | `29911337652` | `29913139948` | pending | `2/3` |
+| Windows | `29911337652` | `29913139948` | pending | `2/3` |
+| macOS | `29911337652` | `29913139948` | pending | `2/3` |
 
 后续每个样本必须补：run/Head、排队时间、Job 时间、内部 metrics、Windows/macOS 二进制字节数、Artifact 数量、结论和异常说明。
 
