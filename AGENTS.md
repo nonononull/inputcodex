@@ -52,6 +52,6 @@
 - Gate 3 七成员纯 Rust Workspace、首版三平台 CI、失败语义和冷构建最低基线已通过 Issue `#19` / PR `#21` 进入 `main`；仓库已包含最小应用骨架，但尚未迁移任何上游业务功能。
 - Gate 3 合并证据已通过 Issue `#22` / PR `#23` 完成独立 closeout；合并提交为 `f470c062037042a1f7833a29cdcf216f6c0f5601`，Issue `#22` 已按 `COMPLETED` 关闭，合并后 `main` CI 六 Job 全绿。
 - Issue `#24` / PR `#25` 已完成 Gate 4 规划合同并 Squash Merge 为 `431682296f53e86de1184c732b0d4748857c9390`；Issue `#24` 已按 `COMPLETED` 关闭。
-- Issue `#26` 是当前 Gate 4 功能目录执行任务；当前只允许建立 Session Plan、Runtime Workflow、36 条最大范围和 `sha256:e8a1cbccfc3f0026e90fcb49264de5ea69980fa2e1faa03b520d9bedaf61e772` 控制面 checkpoint。
-- 在项目所有者明确批准 Issue `#26` 控制面前，禁止创建实际 `parity/` 数据、修改 Cargo/Rust、开始功能审计、创建实现 PR 或执行合并；最终 Squash Merge 仍需具体 PR 与最终 Head 的独立授权。
+- Issue `#26` 是当前 Gate 4 功能目录执行任务；项目所有者已批准 Session Plan、Runtime Workflow、36 条最大范围和 `sha256:e8a1cbccfc3f0026e90fcb49264de5ea69980fa2e1faa03b520d9bedaf61e772`。
+- 当前按“依赖 Fresh → RED schema → GREEN Rust 验证器 → source-index/功能目录 → 合同/fixture → PR/Review/CI”执行；禁止越过批准范围。最终 Squash Merge 仍需具体 PR 与最终 Head 的独立授权。
 - 性能基线、预算与优化继续使用后续独立 Issue；功能目录收口前不得提前启动，Gate 5 保持锁定。

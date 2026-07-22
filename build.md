@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 22 日，PR `#21` 已将 Gate 3 七成员 Workspace、首版无缓存三平台 CI、五类失败语义与三平台最低冷构建基线 Squash Merge 到 `main`；PR `#23` 已完成独立 closeout。Issue `#24` / PR `#25` 已将 Gate 4 两阶段规划合同 Squash Merge 为 `431682296f53e86de1184c732b0d4748857c9390`，Issue `#24` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29926710342` 六 Job 全绿且成功 Artifact 数为 `0`。Issue `#26` 是当前功能目录执行任务，实际 Cargo、Rust 与 `parity/` 实现仍待新的项目所有者批准。
+截至 2026 年 7 月 22 日，PR `#21` 已将 Gate 3 七成员 Workspace、首版无缓存三平台 CI、五类失败语义与三平台最低冷构建基线 Squash Merge 到 `main`；PR `#23` 已完成独立 closeout。Issue `#24` / PR `#25` 已将 Gate 4 两阶段规划合同 Squash Merge 为 `431682296f53e86de1184c732b0d4748857c9390`，Issue `#24` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29926710342` 六 Job 全绿且成功 Artifact 数为 `0`。Issue `#26` 的 Session Plan、Runtime Workflow、36 条最大范围和 scope hash 已获项目所有者批准，当前进入依赖 Fresh 与 RED schema；最终合并仍需独立授权。
 
 仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供十四个检查点：
 
@@ -145,7 +145,8 @@ foreach ($required in @(
   'v1.2.41',
   '3dafffcafb2566a1e8bce4b35671656d6adb3eda',
   '91376ee3518cb5fe5ec8eead179418f706c25870',
-  'implementation_decision_ref: pending-owner-review'
+  'implementation_decision_ref: user-message:approve-issue-26-implementation-2026-07-22',
+  'issuecomment:5047650154'
 )) {
   if (-not $controlText.Contains($required)) { throw "Issue #26 控制面缺少：$required" }
 }

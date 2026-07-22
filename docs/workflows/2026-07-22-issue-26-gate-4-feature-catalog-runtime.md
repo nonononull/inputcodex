@@ -6,7 +6,8 @@ tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/26
 branch_ref: codex/issue-26-gate-4-feature-catalog
 baseline_ref: 431682296f53e86de1184c732b0d4748857c9390
 approved_decision_ref: user-message:create-issue-26-session-plan-runtime-scope-hash-2026-07-22
-implementation_decision_ref: pending-owner-review
+implementation_decision_ref: user-message:approve-issue-26-implementation-2026-07-22
+implementation_approval_ref: issuecomment:5047650154
 scope_hash: sha256:e8a1cbccfc3f0026e90fcb49264de5ea69980fa2e1faa03b520d9bedaf61e772
 scope_path_count: 36
 session_plan_ref: docs/plans/sessions/2026-07-22-issue-26-gate-4-feature-catalog.md
@@ -22,7 +23,7 @@ pr_ref: pending
 - 36 条最大范围使用 Ordinal 排序、UTF-8 无 BOM、LF 和末尾 LF 计算，哈希为 `sha256:e8a1cbccfc3f0026e90fcb49264de5ea69980fa2e1faa03b520d9bedaf61e772`。
 - AGOS default entry report-only 返回 `needs-input / unregistered`，已按项目原生合同绕过；本任务不修复或登记 AGOS。
 - control-plane checkpoint 已以普通提交 `80e0ddbb734496e95e89fe57fd89ddb668c8c276` 推送，并回写 Issue 评论 `5047590347`。
-- 当前只执行 control-plane checkpoint；Cargo、Rust、`parity/`、CI、upstream、benchmarks、产品与 AGOS 必须保持零差异。
+- 项目所有者已通过 Issue 评论 `5047650154` 批准实施；当前进入 Phase 2 依赖 Fresh 与 RED schema。
 
 ## Phase 0：startup-baseline
 

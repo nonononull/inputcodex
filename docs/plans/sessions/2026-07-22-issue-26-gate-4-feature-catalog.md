@@ -1,7 +1,7 @@
 # Session Plan：Issue #26 Gate 4 功能目录、行为合同与脱敏夹具
 
 schema_version: inputcodex.session-plan.v1
-session_status: control-plane-checkpoint-pushed-owner-review-pending
+session_status: implementation-approved-dependency-red-in-progress
 task_id: 2026-07-22-issue-26-gate-4-feature-catalog
 work_class: major
 task_summary: 建立上游 v1.2.41 功能目录、行为合同、脱敏夹具和纯 Rust parity 验证器，不迁移产品功能，不进行性能优化。
@@ -12,7 +12,8 @@ planning_pr_ref: https://github.com/nonononull/inputcodex/pull/25
 branch_ref: codex/issue-26-gate-4-feature-catalog
 baseline_ref: 431682296f53e86de1184c732b0d4748857c9390
 approved_decision_ref: user-message:create-issue-26-session-plan-runtime-scope-hash-2026-07-22
-implementation_decision_ref: pending-owner-review
+implementation_decision_ref: user-message:approve-issue-26-implementation-2026-07-22
+implementation_approval_ref: issuecomment:5047650154
 session_plan_ref: docs/plans/sessions/2026-07-22-issue-26-gate-4-feature-catalog.md
 implementation_plan_ref: docs/plans/2026-07-22-issue-26-gate-4-feature-catalog-implementation.md
 runtime_workflow_ref: docs/workflows/2026-07-22-issue-26-gate-4-feature-catalog-runtime.md
@@ -32,9 +33,8 @@ external_agos_execution: needs-input-unregistered-recorded-and-bypassed
 
 - 项目所有者已要求为 Issue `#26` 建立独立 Session Plan、Runtime Workflow、精确写入范围和新 `scope_hash`。
 - 当前批准允许：创建独立分支、写入 8 条控制面路径、本地只读/轻量验证、普通提交、普通推送和 Issue checkpoint。
-- 当前批准不允许：创建 `parity/` 数据、修改 Cargo/Rust 代码、开始上游功能审计、创建实现 PR 或执行合并。
-- 用户关于“该提交的提交、该合并的合并”只作为遵循正常交付链的指令；未知 PR、未知最终 Head 和未知 CI 不能取得空白合并授权。
-- 实现开始前必须由项目所有者明确批准本 Session Plan、Runtime Workflow、36 条范围和 `scope_hash`。
+- 项目所有者已通过 `user-message:approve-issue-26-implementation-2026-07-22` 批准本 Session Plan、Runtime Workflow、36 条范围和 `scope_hash`。
+- 当前批准允许范围内实现、验证、普通提交、普通推送和 PR 创建；未知 PR、未知最终 Head 和未知 CI 仍不能取得空白合并授权。
 - 最终 Squash Merge 前仍需对具体 PR 和最终 Head 取得新的明确授权。
 
 ## 二、Fresh 基线
@@ -180,6 +180,7 @@ parity/fixtures/**
 - Rust 固定 `1.97.1`，不得改成浮动 `stable`。
 - Serde 候选固定 `1.0.229`，MIT OR Apache-2.0；只启用 `derive`。
 - YAML 候选固定 `yaml_serde 0.10.4`，MIT OR Apache-2.0；实现开始前必须再次确认未撤回且能由 Rust `1.97.1` 构建。
+- Fresh crates.io 证据：`yaml_serde 0.10.4` 未撤回、MSRV `1.82`、checksum `08c7c1b1a6a7c8a6b2741a6c21a4f8918e51899b111cfa08d1288202656e3975`；Serde `1.0.229` 未撤回、MSRV `1.56`、checksum `4148590afebada386688f18773da617792bf2ef03ffc1e4cbd2b1d45b023e0ba`。
 - 依赖版本、feature 或包名发生变化时必须更新计划、重新计算影响并取得 owner 批准；不能因为本机下载超时静默换库。
 
 ## 八、验证矩阵

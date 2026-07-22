@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游 `v1.2.41` 审计快照与每 6 小时监控，并已通过 Issue `#19/#22`、PR `#21/#23` 完成 Gate 3 纯 Rust Workspace、五类失败语义、三平台最低冷构建基线和独立 closeout；Issue `#24` / PR `#25` 已完成 Gate 4 规划合同，Issue `#26` 正在建立功能目录执行控制面，实际 Rust 与 `parity/` 实现仍锁定。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游 `v1.2.41` 审计快照与每 6 小时监控，并已通过 Issue `#19/#22`、PR `#21/#23` 完成 Gate 3 纯 Rust Workspace、五类失败语义、三平台最低冷构建基线和独立 closeout；Issue `#24` / PR `#25` 已完成 Gate 4 规划合同，Issue `#26` 的控制面、36 条范围和 scope hash 已获批准，当前进入依赖 Fresh 与 RED schema。
 
 ## 项目目标
 
@@ -43,7 +43,7 @@
 - PR `#21` 的最终 Head 为 `9a4a4425f2fb0d8235554d3e83577111ae34efcc`；merge/head tree 均为 `4881ce609370f77181d9545474c029ab0c5d4972`，GitHub 签名 `valid`，合并后 `main` 运行 `29919596057` 六 Job 全绿且成功 Artifact 数为 `0`。
 - 通过 PR `#23` Squash Merge Gate 3 独立 closeout；合并提交为 `f470c062037042a1f7833a29cdcf216f6c0f5601`，Issue `#22` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29922385227` 六 Job 全绿且成功 Artifact 数为 `0`。
 - Issue `#24` / PR `#25` 已 Squash Merge Gate 4 两阶段规划合同；合并提交为 `431682296f53e86de1184c732b0d4748857c9390`，Issue `#24` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29926710342` 六 Job 全绿且成功 Artifact 数为 `0`。
-- 已创建 Issue `#26` 与分支 `codex/issue-26-gate-4-feature-catalog`；当前只建立 Session Plan、Runtime Workflow、36 条最大范围和新 `scope_hash`，功能目录实现仍待项目所有者批准。
+- 已创建 Issue `#26` 与分支 `codex/issue-26-gate-4-feature-catalog`；Session Plan、Runtime Workflow、36 条最大范围和新 `scope_hash` 已获项目所有者批准，最终合并仍需具体 PR 与最终 Head 的独立授权。
 
 当前明确不做：
 
@@ -68,8 +68,8 @@
 
 ## 下一步
 
-1. 为 Issue `#26` 提交任务计划、Session Plan、Runtime Workflow、初始报告、精确范围和 `scope_hash` checkpoint。
-2. 项目所有者明确批准控制面后，按 RED schema → GREEN Rust 验证器 → source-index/功能目录 → 合同夹具的顺序执行。
+1. Fresh 固定 Serde/YAML 依赖元数据，并先建立 catalog/contract/fixture 的根因正确 RED 测试。
+2. 按 RED schema → GREEN Rust 验证器 → source-index/功能目录 → 合同夹具的顺序执行。
 3. 实现 PR 必须通过 Review/三平台 CI 并取得具体 PR 与最终 Head 的 Squash Merge 授权；功能目录收口后才创建性能基线 Issue，Gate 5 继续锁定。
 
 ## 项目文档

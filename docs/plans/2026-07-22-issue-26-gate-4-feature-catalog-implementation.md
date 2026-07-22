@@ -27,7 +27,8 @@
 - 上游 Release：`v1.2.41`；tag 提交 `3dafffcafb2566a1e8bce4b35671656d6adb3eda`。
 - 上游 `main`：`91376ee3518cb5fe5ec8eead179418f706c25870`，只进入 Issue `#20`。
 - 当前批准引用：`user-message:create-issue-26-session-plan-runtime-scope-hash-2026-07-22`。
-- 当前批准只覆盖控制面落盘、普通提交、普通推送和 Issue checkpoint；实现与最终合并仍需新的明确批准。
+- 实现批准引用：`user-message:approve-issue-26-implementation-2026-07-22`；Issue 评论 `5047650154`。
+- 当前批准覆盖 36 条范围内实现、验证、普通提交、普通推送和 PR 创建；最终合并仍需具体 PR 与最终 Head 的独立授权。
 
 ## 二、精确最大写入范围
 
@@ -141,6 +142,7 @@ docs/workflows/2026-07-22-issue-26-gate-4-feature-catalog-runtime.md
 - [x] 运行规划 checkpoint 验证，确认 8/8 路径、36 条范围和治理合同通过。
 - [x] 创建普通 checkpoint 提交 `80e0ddbb734496e95e89fe57fd89ddb668c8c276` 并普通推送。
 - [x] 在 Issue `#26` 回写 checkpoint `5047590347`，进入实现批准等待状态。
+- [x] 项目所有者通过 Issue 评论 `5047650154` 批准 36 条范围和实施顺序。
 
 ### Task 1：依赖元数据与 RED schema
 

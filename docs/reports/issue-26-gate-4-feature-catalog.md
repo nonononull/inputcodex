@@ -1,20 +1,22 @@
 # Issue #26：Gate 4 功能目录、行为合同与脱敏夹具报告
 
 schema_version: inputcodex.report.v1
-report_status: control-plane-checkpoint-pushed-owner-review-pending
+report_status: implementation-approved-dependency-red-in-progress
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/26
 branch_ref: codex/issue-26-gate-4-feature-catalog
 baseline_ref: 431682296f53e86de1184c732b0d4748857c9390
 approved_decision_ref: user-message:create-issue-26-session-plan-runtime-scope-hash-2026-07-22
 scope_hash: sha256:e8a1cbccfc3f0026e90fcb49264de5ea69980fa2e1faa03b520d9bedaf61e772
 control_plane_checkpoint_ref: commit:80e0ddbb734496e95e89fe57fd89ddb668c8c276;issuecomment:5047590347
+implementation_decision_ref: user-message:approve-issue-26-implementation-2026-07-22
+implementation_approval_ref: issuecomment:5047650154
 
 ## 一、当前结论
 
 - Issue `#26` 已建立并验证为 OPEN，标签为 `type:architecture`、`gate:4`。
 - 项目所有者已要求建立独立 Session Plan、Runtime Workflow、精确范围和新 `scope_hash`。
 - 当前只建立项目原生控制面；功能目录、合同、fixture、Cargo 和 Rust 实现尚未开始。
-- 当前授权允许控制面普通提交、普通推送和 Issue checkpoint，不包含实现、PR 创建或最终合并。
+- 当前授权允许 36 条范围内实现、验证、普通提交、普通推送和 PR 创建，不包含最终合并。
 - 未知 PR 与未知最终 Head 不能取得空白合并授权；最终 Squash Merge 仍需具体 owner 决策证据。
 
 ## 二、Fresh 基线
@@ -60,8 +62,8 @@ control_plane_checkpoint_ref: commit:80e0ddbb734496e95e89fe57fd89ddb668c8c276;is
 
 - Serde 候选：`1.0.229`，MIT OR Apache-2.0，只计划启用 `derive`。
 - YAML 候选：`yaml_serde 0.10.4`，MIT OR Apache-2.0，提供 Serde YAML 序列化与反序列化。
-- 实现开始前必须再次确认版本、许可证、撤回状态、checksum 和 Rust `1.97.1` 兼容性；无法确认即停止。
-- 本次控制面 checkpoint 不修改 Cargo，因此依赖候选尚未成为仓库事实。
+- Fresh crates.io 证据确认 `yaml_serde 0.10.4` 未撤回、MSRV `1.82`、checksum `08c7c1b1a6a7c8a6b2741a6c21a4f8918e51899b111cfa08d1288202656e3975`；Serde `1.0.229` 未撤回、MSRV `1.56`、checksum `4148590afebada386688f18773da617792bf2ef03ffc1e4cbd2b1d45b023e0ba`。
+- 两个依赖均使用 `MIT OR Apache-2.0`，满足项目许可证兼容要求并低于 Rust `1.97.1`。
 
 ## 七、禁止与分流
 
@@ -76,7 +78,7 @@ control_plane_checkpoint_ref: commit:80e0ddbb734496e95e89fe57fd89ddb668c8c276;is
 - 8 条控制面路径、36 条范围、scope hash、占位符、治理合同、仓库政策和空白检查已通过。
 - 普通 control-plane checkpoint `80e0ddbb734496e95e89fe57fd89ddb668c8c276` 已 push。
 - Issue `#26` 评论 `5047590347` 已回写 commit、计划引用、范围哈希和实现待批准边界。
-- 等待项目所有者明确批准实现，再进入依赖与 RED schema 批次。
+- 项目所有者已批准实现；当前进入依赖与 RED schema 批次。
 
 ## 九、完成状态占位
 
