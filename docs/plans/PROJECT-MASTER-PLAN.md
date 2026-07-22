@@ -3,8 +3,8 @@
 schema_version: inputcodex.master-plan.v1
 active_task: 2026-07-22-issue-26-gate-4-feature-catalog
 active_gate: Gate 4：行为合同与脱敏夹具本地验证完成、PR 待创建
-last_verified_gate: Issue #26 Phase 5 本地验证完成 36 份合同、11 个 fixture manifest、133 条入口、36 个 feature、3 个排除、10 个 exception-pending 与 0 个覆盖缺口；普通 checkpoint 与 PR 尚未创建
-next_legal_gate: 普通提交并 push Phase 5 checkpoint、回写 Issue #26、最终复验后创建关联 PR
+last_verified_gate: Issue #26 Phase 5 checkpoint c50ec7b 已普通 push，Issue 评论 5049288893 已回写 36 份合同、11 个 fixture manifest、133 条入口、36 个 feature、3 个排除、10 个 exception-pending 与 0 个覆盖缺口；PR 尚未创建
+next_legal_gate: 完成独立证据回填、最终复验后创建关联 Issue #26 的非 Draft PR
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/26
 closed_gate_3_closeout_issue_ref: https://github.com/nonononull/inputcodex/issues/22
 closed_implementation_issue_ref: https://github.com/nonononull/inputcodex/issues/19
@@ -31,7 +31,7 @@ gate_2_watch_report_ref: docs/reports/issue-14-gate-2-upstream-watch.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-decision_status: gate-4-feature-catalog-phase-5-local-verification-complete-pr-pending-merge-not-authorized
+decision_status: gate-4-feature-catalog-phase-5-checkpoint-pushed-evidence-backfill-pr-pending-merge-not-authorized
 
 ## 当前状态
 
@@ -49,7 +49,7 @@ decision_status: gate-4-feature-catalog-phase-5-local-verification-complete-pr-p
 - PR `#21` 于 `2026-07-22T12:25:59Z` Squash Merge 为 `0716ec0debcd3e059cc4ca88a072232841ca73b4`；Issue `#19` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29919596057` 六 Job 全绿且成功 Artifact 数为 `0`。
 - Issue `#22` / PR `#23` 已完成 Gate 3 独立 closeout；PR `#23` 于 `2026-07-22T13:05:34Z` Squash Merge 为 `f470c062037042a1f7833a29cdcf216f6c0f5601`，Issue `#22` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29922385227` 六 Job 全绿且成功 Artifact 数为 `0`。
 - Issue `#24` / PR `#25` 已完成“两阶段拆分”规划合同；PR `#25` 于 2026 年 7 月 22 日 Squash Merge 为 `431682296f53e86de1184c732b0d4748857c9390`，Issue `#24` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29926710342` 六 Job 全绿且成功 Artifact 数为 `0`。
-- 当前活动任务为 Issue `#26`，分支为 `codex/issue-26-gate-4-feature-catalog`；Phase 4 checkpoint `87537e6e4a0e6911dd1427cc23f52dcb805a4679` 与 Issue 评论 `5048930060` 已证明 `133` 条入口、`36` 个 feature、`3` 个排除、`10` 个 `exception-pending` feature 和 `0` 个覆盖缺口；Phase 5 已在本地验证 `36` 份合同、`11` 个 fixture manifest 与完整仓库安全，等待普通 checkpoint 和 PR。
+- 当前活动任务为 Issue `#26`，分支为 `codex/issue-26-gate-4-feature-catalog`；Phase 4 checkpoint `87537e6e4a0e6911dd1427cc23f52dcb805a4679` 与 Issue 评论 `5048930060` 已证明 `133` 条入口、`36` 个 feature、`3` 个排除、`10` 个 `exception-pending` feature 和 `0` 个覆盖缺口；Phase 5 checkpoint `c50ec7b` 与 Issue 评论 `5049288893` 已记录 `36` 份合同、`11` 个 fixture manifest 与完整仓库安全，当前进入证据回填和 PR 创建。
 - 最新正式 Release 仍为 `v1.2.41`；上游 `main` 已前进到 `91376ee3518cb5fe5ec8eead179418f706c25870`，只由 Issue `#20` 预警，不改变当前缓存功能真源。
 - Issue `#8` 的过渡交付为 PR `#10`；该 PR 只包含文档与验证控制面，并按项目所有者明确授权执行 Squash Merge。
 - AGOS 仍是可选外部辅助；本仓库可用原生控制面时不运行它，不在本任务中修改或优化它。

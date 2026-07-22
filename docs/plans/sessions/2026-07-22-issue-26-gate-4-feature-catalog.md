@@ -262,4 +262,4 @@ GitHub 全量验证:
 - `validate_repository` 递归核对 fixture 目录、manifest feature ID、文件声明、符号链接逃逸、路径边界、敏感 payload、合同 domain、合同唯一性、fixture 引用和每个 feature 至少一份合同。
 - 完整真实仓库测试 `仓库功能目录通过完整引用与安全验证` 已以退出码 `0` 通过，并得到 `source=133`、`feature=36`、`contract=36`、`fixture=11`、`coverage-gap=0`。
 - 发现并确认 PowerShell 双引号把 Markdown 的 `` `e`` 写成 ESC 控制字节；新增 `parity_文本文件不包含非法控制字节` 回归后，先临时复现失败，再恢复字面量文本验证 GREEN。根因、处理和零残留扫描已记录到根 `err.md`。
-- Phase 5 的普通 checkpoint、普通 push、Issue 回写、最终本地复验和 PR 创建仍按本 Session 的 Phase 6/7 顺序执行；本段不提前宣称 PR、CI 或合并结果。
+- Phase 5 普通 checkpoint `c50ec7b` 已普通 push，Issue 评论 `5049288893` 已回写数据、验证和根因闭环；仍需独立证据回填、最终本地复验和 PR 创建。本段不提前宣称 PR、CI 或合并结果。

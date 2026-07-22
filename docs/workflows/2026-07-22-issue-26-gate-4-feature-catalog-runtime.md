@@ -111,7 +111,7 @@ pr_ref: pending
 - `validate_repository` 已扩展为完整合同/fixture 仓库验证，拒绝 fixture 目录错配、未声明文件、符号链接、路径逃逸、缺失文件、敏感 payload、跨 feature 引用、合同 domain 错配和缺少 feature 合同。
 - 真实仓库级完整验证返回 `source=133`、`feature=36`、`contract=36`、`fixture=11`、`coverage-gap=0`。
 - 发现 PowerShell 双引号把 Markdown 的 `` `e`` 转义为 ESC；根因经字节扫描确认仅影响 `parity/README.md` 两处。现已通过最小文本修复和 RED→GREEN 的 Parity 文本控制字节回归测试闭环，并记录到根 `err.md`。
-- Phase 5 尚未形成普通 Git checkpoint；禁止将以上本地 GREEN 解释为 PR、三平台 CI 或合并完成。
+- Phase 5 已形成普通 Git checkpoint `c50ec7b` 并普通 push，Issue 评论 `5049288893` 已回写；禁止将本地 GREEN 或 checkpoint 解释为 PR、三平台 CI 或合并完成。
 
 ## Phase 6：local-verification
 

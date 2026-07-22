@@ -63,7 +63,7 @@
 - Gate 3 实现顺序固定为“RED 治理合同 → GREEN 治理脚本 → 七成员 Workspace → 无缓存三平台 CI → 真实失败恢复 → 冷构建基线”。
 - Iced 只能直接存在于 presentation crate；最小窗口不建立 UI 设计系统，视觉与交互由 Gemini 实现或审阅。
 - Gate 4 规划合同已进入 `main`；Issue `#26` 的 source-index 与五域功能目录 checkpoint `87537e6e4a0e6911dd1427cc23f52dcb805a4679` 已普通 push，Issue 评论 `5048930060` 记录 `133` 条入口、`36` 个 feature、`3` 个排除和 `0` 个覆盖缺口。
-- Issue `#26` 已在同一批准范围内建立 `36` 份五域行为合同、`11` 个合成或不可逆脱敏 fixture manifest，并通过完整 `validate_repository`、路径/敏感值安全与文本控制字节回归；尚未创建 PR，最终合并仍需独立授权。
+- Issue `#26` 已在同一批准范围内建立 `36` 份五域行为合同、`11` 个合成或不可逆脱敏 fixture manifest，并通过完整 `validate_repository`、路径/敏感值安全与文本控制字节回归；普通 checkpoint `c50ec7b` 已 push，Issue 评论 `5049288893` 已回写，尚未创建 PR，最终合并仍需独立授权。
 - Issue `#26` 最大候选写集合为 36 条路径或路径模式，范围哈希为 `sha256:e8a1cbccfc3f0026e90fcb49264de5ea69980fa2e1faa03b520d9bedaf61e772`。
 - 最新正式功能真源仍为 `v1.2.41`；上游 `main` 当前变化只进入 Issue `#20` 预警，不自动改变 Gate 4 基线。
 

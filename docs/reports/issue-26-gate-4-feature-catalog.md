@@ -1,7 +1,7 @@
 # Issue #26：Gate 4 功能目录、行为合同与脱敏夹具报告
 
 schema_version: inputcodex.report.v1
-report_status: feature-catalog-local-verification-complete-pr-pending
+report_status: feature-catalog-phase5-checkpoint-pushed-pr-pending
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/26
 branch_ref: codex/issue-26-gate-4-feature-catalog
 baseline_ref: 431682296f53e86de1184c732b0d4748857c9390
@@ -121,7 +121,7 @@ coverage_gap_count: 0
 red_checkpoint_ref: commit:532fba89d882862438345788ed2fdd73faede507;issuecomment:5048079257
 green_checkpoint_ref: commit:8b18f0a2a37829af3338edba34454eb6690af77a;issuecomment:5048438316
 feature_catalog_checkpoint_ref: commit:87537e6e4a0e6911dd1427cc23f52dcb805a4679;issuecomment:5048930060
-phase5_checkpoint_ref: pending-commit-and-issue-comment
+phase5_checkpoint_ref: commit:c50ec7b911f72fa935dd033cfef4050876548c21;issuecomment:5049288893
 pr_ref: pending-creation
 ci_ref: pending-pr
 merge_ref: pending-owner-authorization
