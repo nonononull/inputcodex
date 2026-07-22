@@ -2,9 +2,9 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 22 日，PR `#21` 已将 Gate 3 七成员 Workspace、首版无缓存三平台 CI、五类失败语义与三平台最低冷构建基线 Squash Merge 到 `main`；PR `#23` 已完成独立 closeout。Issue `#24` / PR `#25` 已将 Gate 4 两阶段规划合同 Squash Merge 为 `431682296f53e86de1184c732b0d4748857c9390`，Issue `#24` 已按 `COMPLETED` 关闭。Issue `#26` 的 source-index 与五域功能目录 checkpoint `87537e6e4a0e6911dd1427cc23f52dcb805a4679` 已普通 push，Issue 评论 `5048930060` 记录 `133` 条入口、`36` 个 feature、`3` 个排除和 `0` 个覆盖缺口；当前进入合同与 fixture，最终合并仍需独立授权。
+截至 2026 年 7 月 22 日，PR `#21` 已将 Gate 3 七成员 Workspace、首版无缓存三平台 CI、五类失败语义与三平台最低冷构建基线 Squash Merge 到 `main`；PR `#23` 已完成独立 closeout。Issue `#24` / PR `#25` 已将 Gate 4 两阶段规划合同 Squash Merge 为 `431682296f53e86de1184c732b0d4748857c9390`，Issue `#24` 已按 `COMPLETED` 关闭。Issue `#26` 的功能目录与独立 Closeout 均已完成。Issue `#35` 正在以已批准的十四路径范围解耦完整上游快照与目录审计基线；本地仅执行定向验证，最终 PR 合并仍需独立授权。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供十四个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供十五个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -20,6 +20,7 @@
 12. Issue `#22` Gate 3 merge/tree/Issue/CI 证据、14 条 closeout 路径和受保护表面验证。
 13. Issue `#24` Gate 4 规划批准引用、9 条最大路径、两阶段拆分和执行锁定验证。
 14. Issue `#26` 功能目录执行控制面、8 条当前路径、36 条最大范围和新 scope hash 验证。
+15. Issue `#35` Release 审计解耦、stale PR 路径门禁、`required` 汇总依赖和定向 Rust 验证。
 
 当前禁止：
 
@@ -45,6 +46,34 @@ Set-StrictMode -Version Latest
 ```
 
 原生 `git`、`gh`、`python` 命令后必须立即检查 `$LASTEXITCODE`。只有一行输出时使用 `@(...)` 归一化，禁止把空 stdout 当成成功证据。
+
+## Issue #35 Release 审计基线解耦本地验证
+
+本节只验证 `release_audit` 的结构、目录 Release 对齐和 PR 门禁合同；不得更新 `upstream/CodexPlusPlus/`、创建 `benchmarks/`、修改产品 crate、Cargo、Release、Ruleset 或 AGOS：
+
+```powershell
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+if ($LASTEXITCODE -ne 0) { throw 'Issue #35 CI 门禁合同失败。' }
+
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw 'Issue #35 Release 审计结构失败。' }
+
+cargo test -p inputcodex-parity --test catalog_repository --offline release_audit_显式解耦快照与功能目录审计基线
+if ($LASTEXITCODE -ne 0) { throw 'Issue #35 Rust 定向审计行为失败。' }
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw 'Issue #35 仓库政策失败。' }
+
+cargo fmt --all -- --check
+if ($LASTEXITCODE -ne 0) { throw 'Issue #35 Rust 格式失败。' }
+
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'Issue #35 差异空白检查失败。' }
+
+Write-Output 'ISSUE35_RELEASE_AUDIT_LOCAL_VERIFY_OK'
+```
+
+`release_audit.status = stale-re-audit-required` 时，本命令仍可通过结构验证；PR 上的 `release-audit` Job 才读取 base/head 变更并阻断 `benchmarks/`、`apps/`、产品 crate、`Cargo.toml` 与 `Cargo.lock`。完整 Workspace、Windows/macOS 构建与发布构建仍由标准 GitHub-hosted runners 运行。
 
 ## Issue #26 Gate 4 功能目录实现本地验证
 

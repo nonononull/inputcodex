@@ -517,6 +517,24 @@
 - 验证：全仓文本文件扫描仅允许制表、换行和回车后，非法控制字节数量为 `0`；Parity 仓库级 Rust 验证继续通过。
 - 关联：Issue `#26` Phase 5，`parity/README.md`。
 
+## 2026-07-22：PowerShell 可空字符串参数把 JSON null 伪造成空字符串
+
+- 环境：Issue `#35` 的 `scripts/ci/Test-CiScripts.ps1` 使用临时 `source-lock` 夹具验证 `release_audit.status = current`。
+- 现象：即使调用方传入 `$null`，夹具仍输出 `"stale_reason":""` 与 `"re_audit_issue_ref":""`；Release 审计门因此正确拒绝本应合法的 `current` 状态。
+- 根因：PowerShell 的 `[AllowNull()][string]` 参数绑定会把 `$null` 转换为空字符串，`ConvertTo-Json` 随后输出字符串而不是 JSON `null`。
+- 处理：夹具中需要保留 JSON null 的字段改用 `[AllowNull()][object]`；生产门禁继续将任何非 null 的 stale 字段视为 `current` 状态无效。
+- 验证：最小复现显示 `[string]` 得到 `{"value":""}`、`[object]` 得到 `{"value":null}`；修正后 `Test-CiScripts.ps1` 的 `32` 项合同全部通过。
+- 关联：Issue `#35`，`scripts/ci/Test-CiScripts.ps1`。
+
+## 2026-07-22：PowerShell 管道将 JSON 空数组折叠为 null
+
+- 环境：Issue `#35` 的 Release 审计门读取 `Collect-Changes.ps1` 生成的 `[]` 变更集。
+- 现象：`[] | ConvertFrom-Json` 不向 PowerShell 管道写出元素，赋值结果为 `$null`；门禁随后把它当作一条无效变更记录并返回 `RELEASE_AUDIT_INVALID_CHANGESET`。
+- 根因：PowerShell 管道按元素枚举数组，空数组没有输出元素；这与 `Collect-Changes.ps1` 的合法空 diff 合同冲突。
+- 处理：`Get-ChangedPaths` 在输入为 `$null` 时返回零路径，不再虚构无效变更；真实 JSON 读取错误仍由前置读取函数保留稳定错误码。
+- 验证：先新增 `current-empty-change-set` RED 用例，合同按预期失败；修复后 `Test-CiScripts.ps1` 再次输出 `CI_CONTRACT_GREEN passed=32`。
+- 关联：Issue `#35`，`scripts/ci/Verify-ReleaseAuditGate.ps1`。
+
 ## 记录模板
 
 ```text

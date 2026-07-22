@@ -1,11 +1,11 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: none
-active_gate: Gate 4：功能目录与独立 Closeout 已完成，独立性能基线为下一项可启动工作
-last_verified_gate: Issue #28 已 CLOSED；PR #29 最终 Head 7ee316c 已以单父 Squash 提交 c07da0c 合入 main，tree 为 02ab8a3d，GitHub 签名有效，PR CI 成功、合并后 main CI 29948874307 六 Job 全成功、Artifact 数为 0
-next_legal_gate: 创建独立性能基线 Issue；先冻结测量对象、参考来源/许可证/可复现构建、可比环境、范围哈希与项目所有者批准，再创建 benchmarks、测量脚本和原始样本
-tracking_issue_ref: none
+active_task: 2026-07-22-issue-35-release-catalog-decoupling
+active_gate: Gate 4：功能目录与独立 Closeout 已完成；先解除上游缓存与目录审计的错误耦合，再推进缓存同步、重新审计和独立性能基线
+last_verified_gate: Issue #35 已取得十四路径范围批准；Fresh 基线为 main 939f345、上游最新正式 Release v1.2.42@657cd33，Rust 与 CI 门禁定向 GREEN 已完成，PR 尚未创建
+next_legal_gate: 完成 Issue #35 的 Review/CI/PR 后，以独立 upstream-sync Issue 缓存 v1.2.42 并显式进入 stale；完成对应目录重新审计恢复 current 后，才可执行已立项的独立性能基线 Issue #32
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/35
 source_implementation_issue_ref: https://github.com/nonononull/inputcodex/issues/26
 source_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/27
 closed_gate_3_closeout_issue_ref: https://github.com/nonononull/inputcodex/issues/22
@@ -14,26 +14,26 @@ gate_3_planning_issue_ref: https://github.com/nonononull/inputcodex/issues/17
 upstream_watch_issue_ref: https://github.com/nonononull/inputcodex/issues/14
 transition_issue_ref: https://github.com/nonononull/inputcodex/issues/8
 upstream_sync_issue_ref: https://github.com/nonononull/inputcodex/issues/9
-active_branch_ref: codex/issue-28-gate-4-feature-catalog-closeout
+active_branch_ref: codex/issue-35-release-catalog-decoupling
 transition_branch_ref: codex/issue-8-gate-2-transition
-active_plan_ref: docs/plans/2026-07-22-issue-28-gate-4-feature-catalog-closeout.md
-active_session_plan_ref: docs/plans/sessions/2026-07-22-issue-28-gate-4-feature-catalog-closeout.md
-active_runtime_workflow_ref: docs/workflows/2026-07-22-issue-28-gate-4-feature-catalog-closeout-runtime.md
-active_pr_ref: not-created-for-issue-28
+active_plan_ref: docs/plans/2026-07-22-issue-35-release-catalog-decoupling.md
+active_session_plan_ref: docs/plans/sessions/2026-07-22-issue-35-release-catalog-decoupling.md
+active_runtime_workflow_ref: docs/workflows/2026-07-22-issue-35-release-catalog-decoupling-runtime.md
+active_pr_ref: not-created-for-issue-35
 gate_3_closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/23
 gate_3_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/21
 gate_3_planning_pr_ref: https://github.com/nonononull/inputcodex/pull/18
 transition_pr_ref: https://github.com/nonononull/inputcodex/pull/10
 upstream_sync_pr_ref: https://github.com/nonononull/inputcodex/pull/11
 closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5, https://github.com/nonononull/inputcodex/pull/7, https://github.com/nonononull/inputcodex/pull/10, https://github.com/nonononull/inputcodex/pull/11, https://github.com/nonononull/inputcodex/pull/13, https://github.com/nonononull/inputcodex/pull/15, https://github.com/nonononull/inputcodex/pull/18, https://github.com/nonononull/inputcodex/pull/21, https://github.com/nonononull/inputcodex/pull/23, https://github.com/nonononull/inputcodex/pull/25, https://github.com/nonononull/inputcodex/pull/27
-active_report_ref: docs/reports/issue-28-gate-4-feature-catalog-closeout.md
+active_report_ref: docs/reports/issue-35-release-catalog-decoupling.md
 gate_3_closeout_report_ref: docs/reports/issue-22-gate-3-closeout.md
 gate_3_implementation_report_ref: docs/reports/issue-19-gate-3-rust-workspace-ci.md
 gate_2_watch_report_ref: docs/reports/issue-14-gate-2-upstream-watch.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-decision_status: gate-4-feature-catalog-source-pr-merged-independent-closeout-in-progress-performance-baseline-not-authorized
+decision_status: issue-35-release-audit-decoupling-approved-implementation-before-pr-performance-baseline-and-gate-5-blocked-until-current
 
 ## 当前状态
 
@@ -41,7 +41,7 @@ decision_status: gate-4-feature-catalog-source-pr-merged-independent-closeout-in
 - PR `#7` 合并提交为 `c74b66422ba47f96bd3eb2b2385cdfb90541808e`，由 GitHub 生成有效签名；只有一个父提交 `b7404b0c63f2d2ba65474c077182c42a01cc9a64`，tree 为 `00f0f7fe0e408a1e6f218ee8e1be0d8442ed1e65`。
 - PR `#7` 的 Review 对话总数、未解决数与 Checks 数量均为 `0`；`0 Checks` 只表示当前尚未配置 CI。
 - `main-protection` Ruleset（ID `19395456`）仍为 `active`，只命中 `main`，禁止删除与 Force Push，要求解决全部 Review 对话，只允许 Squash Merge，单人阶段 required approvals 为 `0`。
-- 上游正式 Release 基线仍为 `v1.2.41`，提交为 `3dafffcafb2566a1e8bce4b35671656d6adb3eda`，tree 为 `22e3a9c8ad15e18b972eae44a892b7980dca5ec2`。
+- 当前完整缓存和功能目录审计基线仍为 `v1.2.41`，提交为 `3dafffcafb2566a1e8bce4b35671656d6adb3eda`，tree 为 `22e3a9c8ad15e18b972eae44a892b7980dca5ec2`。
 - Issue `#9` / PR `#11` 已完成 Gate 2 上游基线导入；PR `#11` 于 `2026-07-21T19:01:02Z` Squash Merge，合并提交为 `dde08b725eb2bf4add7fbcfa955f3eaf4eb1bbc6`，Issue `#9` 已关闭。
 - `upstream/CodexPlusPlus/` 当前包含 `277` 个审计文件，`upstream/source-lock.json` 记录 `24,175,877` 字节、manifest SHA-256 `3c9b16802f49a1bcb56fda9630d97edc52c918c30d1924145244d9239801d3d4` 和 `7` 份许可证/声明。
 - Issue `#12` / PR `#13` 已完成上游基线 closeout；PR `#13` 的 Squash Merge 提交为 `5e64015075ddf2adef4bf685f50977b47b7f72e7`，Issue `#12` 已关闭。
@@ -52,7 +52,8 @@ decision_status: gate-4-feature-catalog-source-pr-merged-independent-closeout-in
 - Issue `#22` / PR `#23` 已完成 Gate 3 独立 closeout；PR `#23` 于 `2026-07-22T13:05:34Z` Squash Merge 为 `f470c062037042a1f7833a29cdcf216f6c0f5601`，Issue `#22` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29922385227` 六 Job 全绿且成功 Artifact 数为 `0`。
 - Issue `#24` / PR `#25` 已完成“两阶段拆分”规划合同；PR `#25` 于 2026 年 7 月 22 日 Squash Merge 为 `431682296f53e86de1184c732b0d4748857c9390`，Issue `#24` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29926710342` 六 Job 全绿且成功 Artifact 数为 `0`。
 - Issue `#26` / PR `#27` 已完成功能目录执行：`133` 条入口映射为 `36` 个 feature、`3` 个排除、`10` 个 `exception-pending` 与 `0` 个覆盖缺口；`36` 份合同、`11` 个 fixture manifest 和验证器已合入 main。独立 Closeout 已由 Issue `#28` / PR `#29` 完成：Squash 提交 `c07da0cad33e09b5c54e528a8a6728a048c88c0b`、单父、tree `02ab8a3d8497ebb7b990e4078122b9bf916ef454`、GitHub 签名有效、合并后 main CI `29948874307` 六 Job 全成功且 Artifact 数为 `0`。
-- 最新正式 Release 仍为 `v1.2.41`；上游 `main` 已前进到 `91376ee3518cb5fe5ec8eead179418f706c25870`，只由 Issue `#20` 预警，不改变当前缓存功能真源。
+- Issue `#33` 已发现上游最新正式 Release `v1.2.42` / `657cd33e009ad02515d30db6492cd4e669b06318`；Issue `#34` 审计确认旧验证会把“已缓存但未复审”误判为损坏，故保持 blocked，未伪造目录一致性。
+- Issue `#35` 已获十四路径范围批准，正在实现 `release_audit` 解耦、可诊断 stale 状态和 PR 路径门禁；本任务不更新 `upstream/CodexPlusPlus/` 字节、不创建性能基线或产品迁移。
 - Issue `#8` 的过渡交付为 PR `#10`；该 PR 只包含文档与验证控制面，并按项目所有者明确授权执行 Squash Merge。
 - AGOS 仍是可选外部辅助；本仓库可用原生控制面时不运行它，不在本任务中修改或优化它。
 
@@ -123,12 +124,14 @@ decision_status: gate-4-feature-catalog-source-pr-merged-independent-closeout-in
 - [x] 建立五域 `36` 份行为合同与必要的 `11` 个脱敏 fixture manifest，并完成完整本地仓库验证；产品、CI、Ruleset、Release、`upstream/`、`benchmarks/` 和 AGOS 保持零差异。
 - [x] PR `#27` 已完成 Review/CI 并按项目所有者对具体 PR 与最终 Head 的授权 Squash Merge；Issue `#26` 已关闭，来源分支本地、远端和远端跟踪引用均已清理。
 - [x] Issue `#28` / PR `#29` 已以独立 Closeout 回写来源 Issue、PR、Review、CI、Squash、签名、tree 与分支清理证据；PR `#29` 已按项目所有者授权 Squash Merge，Issue `#28` 已关闭，本任务未创建性能基线或优化。
-- [ ] 创建独立性能基线 Issue；基线与优化保持不同 Issue/PR，必须重新冻结范围哈希、可比环境与项目所有者批准。
+- [ ] Issue `#35` 将完整快照与功能目录审计基线解耦；其 PR 通过后，独立 upstream-sync PR 才可缓存 `v1.2.42` 并进入显式 stale。
+- [ ] Issue `#32` 独立性能基线已立项，但在缓存 stale 或目录重新审计未恢复 `current` 时不得实现、验证或合并；基线与优化保持不同 Issue/PR，必须重新冻结范围哈希、可比环境与项目所有者批准。
 
 ### Gate 5：分域迁移（锁定）
 
 - 按基础能力、供应商与网络、会话与数据、插件与脚本、远程集成与安装分域迁移。
 - 每个可独立验收功能使用独立 Issue 和 PR，上游同步与功能重构永远分离。
+- `release_audit` 不是 `current` 时，任何 Gate 5 产品迁移 PR 都必须被门禁阻断。
 
 ### Gate 6：首个正式版本（锁定）
 
@@ -139,6 +142,11 @@ decision_status: gate-4-feature-catalog-source-pr-merged-independent-closeout-in
 
 - 构建与当前 Gate 验证：`build.md`。
 - 排错与已知限制：`err.md`。
+- Release 审计基线解耦 ADR：`docs/adr/0003-release-snapshot-catalog-audit-decoupling.md`。
+- 当前 Issue `#35` 实施计划：`docs/plans/2026-07-22-issue-35-release-catalog-decoupling.md`。
+- 当前 Issue `#35` Session Plan：`docs/plans/sessions/2026-07-22-issue-35-release-catalog-decoupling.md`。
+- 当前 Issue `#35` Runtime Workflow：`docs/workflows/2026-07-22-issue-35-release-catalog-decoupling-runtime.md`。
+- 当前 Issue `#35` 报告：`docs/reports/issue-35-release-catalog-decoupling.md`。
 - 单一架构真源：`docs/plans/2026-07-21-architecture-governance.md`。
 - Gate 1 最终 closeout：`docs/reports/issue-6-gate-1-finalization-closeout.md`。
 - Gate 1→2 过渡计划：`docs/plans/2026-07-21-issue-8-gate-2-transition.md`。
@@ -174,8 +182,9 @@ decision_status: gate-4-feature-catalog-source-pr-merged-independent-closeout-in
 
 ## 停止条件
 
-- 上游最新正式 Release 或 `v1.2.41` 标签提交发生变化。
+- 上游最新正式 Release 或已核验的 `v1.2.42` / `657cd33e009ad02515d30db6492cd4e669b06318` 事实发生变化。
 - 需要修改 `upstream/` 或 `source-lock.json`，但没有新的独立 upstream-sync Issue/PR 与项目所有者批准。
+- `release_audit` 为 stale 时修改 `benchmarks/`、`apps/`、产品 crate、`Cargo.toml` 或 `Cargo.lock`，或在同一 PR 同时更新实际 audit 与受阻产品路径。
 - 在独立性能基线 Issue 获得范围与项目所有者批准前创建 `benchmarks/`、测量脚本、原始样本、性能预算候选，或修改 Cargo/Rust、测试、CI、upstream、Ruleset、发布资产或 AGOS。
 - 在独立性能基线 Issue 中创建性能优化、产品迁移、`parity-exception`、运行上游/半成品或填写绝对性能预算，但没有新的独立 Issue 与项目所有者批准。
 - Fresh 验证失败、Ruleset 变化、Review 对话未闭环或出现未批准的一致性差异。

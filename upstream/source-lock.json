@@ -16,6 +16,16 @@
       "reason": "unsigned"
     }
   },
+  "release_audit": {
+    "schema_version": "inputcodex.release-audit.v1",
+    "catalog_release": {
+      "tag": "v1.2.41",
+      "commit": "3dafffcafb2566a1e8bce4b35671656d6adb3eda"
+    },
+    "status": "current",
+    "stale_reason": null,
+    "re_audit_issue_ref": null
+  },
   "archive": {
     "format": "tar.gz",
     "url": "https://api.github.com/repos/BigPizzaV3/CodexPlusPlus/tarball/v1.2.41",
