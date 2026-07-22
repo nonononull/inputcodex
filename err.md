@@ -278,6 +278,15 @@
 - 验证：Fresh 读取返回 Rust `1.97.1 (8bab26f4f 2026-07-14)`、channel 日期 `2026-07-16` 和可复核 manifest SHA-256；Issue `#19` 随后使用同一证据创建。
 - 关联：GitHub Issue `#19`。
 
+### 2026-07-22：治理 RED 夹具误用反斜杠转义导致 PowerShell AST 失败
+
+- 环境：Issue `#19` 创建 `scripts/ci/Test-CiScripts.ps1`，在 Cargo 夹具字符串中写入双引号和多行 Workspace 成员。
+- 现象：首次 AST 解析返回 `5` 个错误，首个错误位于 Workspace 成员替换表达式，包含 `Missing ')' in method call` 与 `Unexpected token`；测试尚未进入治理入口缺失检查。
+- 根因：PowerShell 字符串不使用反斜杠转义双引号，三处 `\"` 沿用了其他语言的转义语义，导致解析器提前结束字符串；这属于测试夹具语法错误，不能作为治理 RED 证据。
+- 处理：简单字符串改用 PowerShell 反引号转义；多行替换值改为字符串数组后使用 `[Environment]::NewLine` 连接，避免在单个表达式中混合多层引号。
+- 验证：同一 AST 命令返回 `AST_ERROR_COUNT=0`；随后实际执行返回 `RED_EXIT_CODE=10`，唯一标记 `CI_CONTRACT_RED_MISSING_IMPLEMENTATION` 出现 `1` 次，并精确列出两个尚不存在的治理实现脚本。
+- 关联：GitHub Issue `#19`、`scripts/ci/Test-CiScripts.ps1`。
+
 ## 记录模板
 
 ```text

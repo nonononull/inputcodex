@@ -1,12 +1,18 @@
 # Issue #19 Runtime Workflow：Gate 3 纯 Rust Workspace 与首版三平台 CI
 
-workflow_status: active-control-plane
+workflow_status: governance-red-verified-awaiting-checkpoint-push
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 session_plan_ref: docs/plans/sessions/2026-07-22-issue-19-gate-3-rust-workspace-ci.md
 implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
 architecture_plan_ref: docs/plans/2026-07-22-issue-17-gate-3-rust-workspace-plan.md
 approved_decision_ref: user-message:approve-gate-3-implementation-2026-07-22
 scope_hash: sha256:2e101627480012d57d6d0472a08cfbe03fc401f6ac74ef3ae1e6a42929ed61ba
+
+## 当前执行 checkpoint
+
+- Phase 0 Fresh 基线已完成，未发现分支、Issue、Ruleset、Release/tag、Rust/Iced 元数据或 Issue `#16` 漂移。
+- Phase 2 RED 合同已通过 AST 验证并以退出码 `10`、唯一标记 `CI_CONTRACT_RED_MISSING_IMPLEMENTATION` 证明两个治理实现入口缺失。
+- 当前必须先提交、普通 push 并回写 Issue `#19`；在该证据形成远端 checkpoint 前不得进入 Phase 3，更不得创建 Cargo Workspace。
 
 ## Phase 0：startup-baseline
 

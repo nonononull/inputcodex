@@ -4,7 +4,7 @@ schema_version: inputcodex.master-plan.v1
 active_task: 2026-07-22-issue-19-gate-3-rust-workspace-ci
 active_gate: Gate 3：纯 Rust Workspace 与首版三平台 CI 实现
 last_verified_gate: Gate 3 规划：Issue #17 / PR #18 已 Squash Merge，提交 477d110a9b284e127af365f5278901bcfa69e093，Issue #17 已按 COMPLETED 关闭
-next_legal_gate: 提交并普通 push Issue #19 控制面 checkpoint；随后先建立 scripts/ci 的可信 RED 治理合同，未取得 RED 证据前不得创建 Cargo Workspace
+next_legal_gate: 提交并普通 push Issue #19 治理 RED checkpoint并回写 Issue；随后只实现 scripts/ci 的 GREEN 治理脚本，GREEN checkpoint 前不得创建 Cargo Workspace
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 planning_issue_ref: https://github.com/nonononull/inputcodex/issues/17
 upstream_watch_issue_ref: https://github.com/nonononull/inputcodex/issues/14
@@ -39,7 +39,7 @@ decision_status: gate-3-implementation-approved-control-plane-active-merge-autho
 - Issue `#12` / PR `#13` 已完成上游基线 closeout；PR `#13` 的 Squash Merge 提交为 `5e64015075ddf2adef4bf685f50977b47b7f72e7`，Issue `#12` 已关闭。
 - Issue `#14` / PR `#15` 已完成每 6 小时上游监控；最终 PR CI、两次 `main` 真实运行、唯一状态 Issue `#16`、分支清理和有效 GitHub 签名均已闭环。
 - Issue `#17` / PR `#18` 已完成 Gate 3 规划交付；PR `#18` 的 Squash Merge 提交为 `477d110a9b284e127af365f5278901bcfa69e093`，Issue `#17` 已关闭。
-- 当前活动任务为 Issue `#19`，项目所有者已批准创建七成员纯 Rust Workspace、治理脚本与首版无缓存三平台 CI；当前只完成控制面 checkpoint，尚未创建产品 Cargo/Rust/Iced 或 `.github/workflows/ci.yml`。
+- 当前活动任务为 Issue `#19`，项目所有者已批准创建七成员纯 Rust Workspace、治理脚本与首版无缓存三平台 CI；控制面 checkpoint 已推送，治理 RED 已以 AST `0` 错误、退出码 `10` 和唯一标记 `CI_CONTRACT_RED_MISSING_IMPLEMENTATION` 验证，尚未创建产品 Cargo/Rust/Iced 或 `.github/workflows/ci.yml`。
 - Issue `#19` 的执行顺序固定为 RED 治理合同、GREEN 治理脚本、最小分层 Workspace、三平台 CI、真实失败恢复与冷构建基线；最终合并仍需新的明确授权。
 - Issue `#8` 的过渡交付为 PR `#10`；该 PR 只包含文档与验证控制面，并按项目所有者明确授权执行 Squash Merge。
 - AGOS 仍是可选外部辅助；本仓库可用原生控制面时不运行它，不在本任务中修改或优化它。

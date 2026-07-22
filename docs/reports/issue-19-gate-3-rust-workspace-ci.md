@@ -1,6 +1,6 @@
 # Issue #19：Gate 3 纯 Rust Workspace 与首版三平台 CI 报告
 
-report_status: control-plane-active-implementation-not-started
+report_status: governance-red-verified-awaiting-checkpoint-push
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 branch_ref: codex/issue-19-gate-3-rust-workspace-ci
 baseline_ref: 477d110a9b284e127af365f5278901bcfa69e093
@@ -27,18 +27,21 @@ merge_ref: pending
 - Ruleset `19395456` 保持 active、无 bypass、required approvals `0`、解决 Review 对话和 Squash-only。
 - 本地 GBrain 查询无结果；AGOS report-only 返回 `needs-input/unregistered`，已按项目合同绕过且未修改外部仓库。
 
-## 三、当前 checkpoint
+## 三、控制面与 RED checkpoint
 
 - 已创建公开 Issue `#19` 与分支 `codex/issue-19-gate-3-rust-workspace-ci`。
 - Issue 正文已固定 23 条允许路径模式、RED/GREEN 合同、三平台 CI、停止条件、回滚和独立合并授权边界。
-- Session Plan 与 Runtime Workflow 已落盘；当前 checkpoint 只修改治理文档。
+- Session Plan 与 Runtime Workflow 已落盘，控制面提交 `03b68584add4e43291818376a2a85a696ea1e688` 已与远端分支精确一致。
+- `scripts/ci/Test-CiScripts.ps1` 已预置空 diff、文档、重型路径、删除、重命名、非法路径、Iced 越层、Workspace 越界、脚本语言、WebView/Tauri、广告/遥测、更新源和依赖方向夹具。
+- PowerShell AST 解析为 `0` 个错误；实际 RED 执行退出码为 `10`，稳定标记 `CI_CONTRACT_RED_MISSING_IMPLEMENTATION` 恰好出现一次。
+- RED 根因是 `scripts/ci/Classify-Changes.ps1` 与 `scripts/ci/Verify-RepositoryPolicy.ps1` 尚不存在，不是路径、拼写、解析或夹具错误。
 - 当前仍不存在产品 `Cargo.toml`、`Cargo.lock`、`rust-toolchain.toml`、`.rs`、Iced 或 `.github/workflows/ci.yml`。
 
 ## 四、下一合法批次
 
-1. 先提交并普通 push 当前控制面 checkpoint，在 Issue `#19` 回写 commit 和文档路径。
-2. 创建 `scripts/ci/Test-CiScripts.ps1`，取得“治理入口尚不存在”的可信 RED 证据。
-3. 未取得 RED checkpoint 前不得创建 Cargo Workspace。
+1. 提交并普通 push 治理 RED checkpoint，在 Issue `#19` 回写命令、AST、退出码、稳定标记、commit 与根因。
+2. 只实现 `scripts/ci/Classify-Changes.ps1` 与 `scripts/ci/Verify-RepositoryPolicy.ps1`，使同一测试合同转为 GREEN。
+3. GREEN checkpoint 提交、推送并回写 Issue 前不得创建 Cargo Workspace。
 
 ## 五、收口边界
 
