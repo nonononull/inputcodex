@@ -10,19 +10,42 @@ use crate::{ValidationCode, ValidationIssue};
 
 #[derive(Debug, Deserialize)]
 pub struct FixtureManifest {
-    #[serde(rename = "schema_version")]
-    _schema_version: String,
+    schema_version: String,
     feature_id: String,
     fixtures: Vec<FixtureDefinition>,
 }
 
+impl FixtureManifest {
+    pub(crate) fn schema_version(&self) -> &str {
+        &self.schema_version
+    }
+
+    pub(crate) fn feature_id(&self) -> &str {
+        &self.feature_id
+    }
+
+    pub(crate) fn fixtures(&self) -> &[FixtureDefinition] {
+        &self.fixtures
+    }
+}
+
 #[derive(Debug, Deserialize)]
-struct FixtureDefinition {
+pub(crate) struct FixtureDefinition {
     id: String,
     scenario: String,
     #[serde(rename = "kind")]
     _kind: FixtureKind,
     files: Vec<FixtureFile>,
+}
+
+impl FixtureDefinition {
+    pub(crate) fn id(&self) -> &str {
+        &self.id
+    }
+
+    pub(crate) fn files(&self) -> &[FixtureFile] {
+        &self.files
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -33,12 +56,18 @@ enum FixtureKind {
 }
 
 #[derive(Debug, Deserialize)]
-struct FixtureFile {
+pub(crate) struct FixtureFile {
     path: String,
     #[serde(rename = "format")]
     _format: String,
     #[serde(rename = "description")]
     _description: String,
+}
+
+impl FixtureFile {
+    pub(crate) fn path(&self) -> &str {
+        &self.path
+    }
 }
 
 pub fn parse_fixture_manifest(input: &str) -> yaml_serde::Result<FixtureManifest> {
@@ -52,6 +81,13 @@ pub fn validate_fixture_manifest(
 ) -> Vec<ValidationIssue> {
     let mut issues = Vec::new();
     let mut fixture_ids = BTreeSet::new();
+
+    if manifest_root.file_name().and_then(|name| name.to_str()) != Some(&manifest.feature_id) {
+        issues.push(ValidationIssue::new(
+            ValidationCode::FixtureDirectoryMismatch,
+            manifest_root.display().to_string(),
+        ));
+    }
 
     for fixture in &manifest.fixtures {
         if !fixture_ids.insert(fixture.id.as_str()) {

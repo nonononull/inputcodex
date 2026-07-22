@@ -9,7 +9,9 @@ use serde::Deserialize;
 
 use crate::{
     FeatureDomain, ParityStatus, SourceDisposition, SourceKind, parse_contract_catalog,
-    parse_feature_catalog, parse_source_index, validate_feature_catalog, validate_source_index,
+    parse_feature_catalog, parse_fixture_manifest, parse_source_index, validate_contract_catalog,
+    validate_contract_catalog_domain, validate_feature_catalog, validate_fixture_manifest,
+    validate_fixture_payload, validate_source_index,
 };
 
 const SOURCE_INDEX_PATH: &str = "parity/features/source-index.yml";
@@ -20,6 +22,8 @@ const CORE_LIB_PATH: &str = "upstream/CodexPlusPlus/crates/codex-plus-core/src/l
 const DATA_LIB_PATH: &str = "upstream/CodexPlusPlus/crates/codex-plus-data/src/lib.rs";
 const FEATURE_CATALOG_SCHEMA: &str = "inputcodex.feature-catalog.v1";
 const SOURCE_INDEX_SCHEMA: &str = "inputcodex.source-index.v1";
+const CONTRACT_CATALOG_SCHEMA: &str = "inputcodex.behavior-contract.v1";
+const FIXTURE_MANIFEST_SCHEMA: &str = "inputcodex.fixture-manifest.v1";
 
 const DOMAIN_FILES: [(FeatureDomain, &str); 5] = [
     (FeatureDomain::FoundationPlatform, "foundation-platform.yml"),
@@ -49,12 +53,18 @@ pub enum ValidationCode {
     InvalidInitialParityStatus,
     DuplicateContractId,
     ContractIdentityMismatch,
+    ContractDomainMismatch,
+    MissingFeatureContract,
+    FixturePolicyMismatch,
     MissingLoadingState,
     DanglingFeatureReference,
     DanglingFixtureReference,
     CrossFeatureFixtureReference,
     DuplicateFixtureId,
     FixtureFeatureMismatch,
+    FixtureDirectoryMismatch,
+    MissingFixtureFile,
+    UnexpectedFixtureFile,
     InvalidFixturePath,
     InvalidFixturePayload,
     PrivateAbsolutePath,
@@ -193,6 +203,12 @@ struct ExpectedSource {
 
 struct FeatureRepositoryState {
     summary: RepositorySummary,
+    feature_ids: BTreeSet<String>,
+}
+
+struct FixtureRepositoryState {
+    fixture_ids: BTreeSet<String>,
+    fixture_count: usize,
 }
 
 pub fn validate_feature_repository(
@@ -205,10 +221,14 @@ pub fn validate_repository(
     repository_root: &Path,
 ) -> Result<RepositorySummary, RepositoryValidationError> {
     let mut state = load_feature_repository(repository_root)?;
+    let fixture_state = load_fixture_repository(repository_root, &state.feature_ids)?;
     let contracts_root = repository_root.join("parity/contracts");
     let mut contract_count = 0;
+    let mut contract_ids = BTreeSet::new();
+    let mut contracted_feature_ids = BTreeSet::new();
+    let mut issues = Vec::new();
 
-    for (_, file_name) in DOMAIN_FILES {
+    for (expected_domain, file_name) in DOMAIN_FILES {
         let contract_path = contracts_root.join(file_name);
         let contract_text = read_utf8(&contract_path)?;
         let contracts = parse_contract_catalog(&contract_text).map_err(|error| {
@@ -217,17 +237,282 @@ pub fn validate_repository(
                 contract_path.display()
             ))
         })?;
+
+        if contracts.schema_version() != CONTRACT_CATALOG_SCHEMA {
+            issues.push(ValidationIssue::new(
+                ValidationCode::SchemaVersionMismatch,
+                contract_path.display().to_string(),
+            ));
+        }
+        issues.extend(validate_contract_catalog_domain(
+            &contracts,
+            expected_domain,
+        ));
+        issues.extend(validate_contract_catalog(
+            &contracts,
+            &state.feature_ids,
+            &fixture_state.fixture_ids,
+        ));
+
+        let expected_feature_prefix = format!("feature.{}.", expected_domain.as_str());
+        for contract in contracts.contracts() {
+            if !contract_ids.insert(contract.id().to_owned()) {
+                issues.push(ValidationIssue::new(
+                    ValidationCode::DuplicateContractId,
+                    contract.id(),
+                ));
+            }
+            if !contract.feature_id().starts_with(&expected_feature_prefix) {
+                issues.push(ValidationIssue::new(
+                    ValidationCode::ContractDomainMismatch,
+                    format!("{}:{}", contract.id(), expected_domain.as_str()),
+                ));
+            }
+            contracted_feature_ids.insert(contract.feature_id().to_owned());
+            for fixture_id in contract.fixture_refs() {
+                if !fixture_state.fixture_ids.contains(fixture_id) {
+                    issues.push(ValidationIssue::new(
+                        ValidationCode::DanglingFixtureReference,
+                        format!("{}:{fixture_id}", contract.id()),
+                    ));
+                }
+            }
+        }
         contract_count += contracts.contracts().len();
     }
 
-    if contract_count == 0 {
-        return Err(RepositoryValidationError::message(
-            "parity/contracts 尚未包含行为合同",
-        ));
+    for feature_id in &state.feature_ids {
+        if !contracted_feature_ids.contains(feature_id) {
+            issues.push(ValidationIssue::new(
+                ValidationCode::MissingFeatureContract,
+                feature_id,
+            ));
+        }
+    }
+
+    if !issues.is_empty() {
+        return Err(RepositoryValidationError::validation(issues));
     }
 
     state.summary.contract_count = contract_count;
+    state.summary.fixture_count = fixture_state.fixture_count;
     Ok(state.summary)
+}
+
+fn load_fixture_repository(
+    repository_root: &Path,
+    feature_ids: &BTreeSet<String>,
+) -> Result<FixtureRepositoryState, RepositoryValidationError> {
+    let fixtures_root = repository_root.join("parity/fixtures");
+    let mut fixture_directories = fs::read_dir(&fixtures_root)
+        .map_err(|error| {
+            RepositoryValidationError::message(format!(
+                "无法读取 {}：{error}",
+                fixtures_root.display()
+            ))
+        })?
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|error| {
+            RepositoryValidationError::message(format!(
+                "无法枚举 {}：{error}",
+                fixtures_root.display()
+            ))
+        })?;
+    fixture_directories.sort_by_key(std::fs::DirEntry::file_name);
+
+    let mut fixture_ids = BTreeSet::new();
+    let mut fixture_count = 0;
+    let mut issues = Vec::new();
+
+    for directory in fixture_directories {
+        let metadata = directory.metadata().map_err(|error| {
+            RepositoryValidationError::message(format!(
+                "无法读取 fixture 元数据 {}：{error}",
+                directory.path().display()
+            ))
+        })?;
+        if !metadata.is_dir() || directory.file_type().is_ok_and(|kind| kind.is_symlink()) {
+            issues.push(ValidationIssue::new(
+                ValidationCode::InvalidFixturePath,
+                directory.path().display().to_string(),
+            ));
+            continue;
+        }
+
+        let manifest_root = directory.path();
+        let manifest_path = manifest_root.join("manifest.yml");
+        let manifest_text = read_utf8(&manifest_path)?;
+        let manifest = parse_fixture_manifest(&manifest_text).map_err(|error| {
+            RepositoryValidationError::message(format!(
+                "无法解析 {}：{error}",
+                manifest_path.display()
+            ))
+        })?;
+
+        if manifest.schema_version() != FIXTURE_MANIFEST_SCHEMA {
+            issues.push(ValidationIssue::new(
+                ValidationCode::SchemaVersionMismatch,
+                manifest_path.display().to_string(),
+            ));
+        }
+        if !feature_ids.contains(manifest.feature_id()) {
+            issues.push(ValidationIssue::new(
+                ValidationCode::DanglingFeatureReference,
+                manifest.feature_id(),
+            ));
+        }
+        issues.extend(validate_fixture_manifest(&manifest, &manifest_root));
+
+        let mut declared_files = BTreeSet::new();
+        for fixture in manifest.fixtures() {
+            fixture_count += 1;
+            if !fixture_ids.insert(fixture.id().to_owned()) {
+                issues.push(ValidationIssue::new(
+                    ValidationCode::DuplicateFixtureId,
+                    fixture.id(),
+                ));
+            }
+
+            for fixture_file in fixture.files() {
+                declared_files.insert(fixture_file.path().to_owned());
+                let payload_path = manifest_root.join(fixture_file.path());
+                let payload_metadata = match fs::symlink_metadata(&payload_path) {
+                    Ok(metadata) if metadata.is_file() && !metadata.file_type().is_symlink() => {
+                        metadata
+                    }
+                    Ok(_) => {
+                        issues.push(ValidationIssue::new(
+                            ValidationCode::InvalidFixturePath,
+                            payload_path.display().to_string(),
+                        ));
+                        continue;
+                    }
+                    Err(_) => {
+                        issues.push(ValidationIssue::new(
+                            ValidationCode::MissingFixtureFile,
+                            payload_path.display().to_string(),
+                        ));
+                        continue;
+                    }
+                };
+                if payload_metadata.len() == 0 {
+                    issues.push(ValidationIssue::new(
+                        ValidationCode::InvalidFixturePayload,
+                        payload_path.display().to_string(),
+                    ));
+                    continue;
+                }
+
+                let canonical_root = fs::canonicalize(&manifest_root).map_err(|error| {
+                    RepositoryValidationError::message(format!(
+                        "无法规范化 {}：{error}",
+                        manifest_root.display()
+                    ))
+                })?;
+                let canonical_payload = fs::canonicalize(&payload_path).map_err(|error| {
+                    RepositoryValidationError::message(format!(
+                        "无法规范化 {}：{error}",
+                        payload_path.display()
+                    ))
+                })?;
+                if !canonical_payload.starts_with(&canonical_root) {
+                    issues.push(ValidationIssue::new(
+                        ValidationCode::InvalidFixturePath,
+                        payload_path.display().to_string(),
+                    ));
+                    continue;
+                }
+
+                let payload = fs::read(&payload_path).map_err(|error| {
+                    RepositoryValidationError::message(format!(
+                        "无法读取 {}：{error}",
+                        payload_path.display()
+                    ))
+                })?;
+                issues.extend(validate_fixture_payload(
+                    &payload_path.display().to_string(),
+                    &payload,
+                ));
+            }
+        }
+
+        for relative_file in collect_fixture_files(&manifest_root)? {
+            if relative_file != "manifest.yml" && !declared_files.contains(&relative_file) {
+                issues.push(ValidationIssue::new(
+                    ValidationCode::UnexpectedFixtureFile,
+                    format!("{}:{relative_file}", manifest_root.display()),
+                ));
+            }
+        }
+    }
+
+    if !issues.is_empty() {
+        return Err(RepositoryValidationError::validation(issues));
+    }
+
+    Ok(FixtureRepositoryState {
+        fixture_ids,
+        fixture_count,
+    })
+}
+
+fn collect_fixture_files(
+    fixture_root: &Path,
+) -> Result<BTreeSet<String>, RepositoryValidationError> {
+    let mut pending = vec![fixture_root.to_path_buf()];
+    let mut files = BTreeSet::new();
+
+    while let Some(directory) = pending.pop() {
+        let entries = fs::read_dir(&directory)
+            .map_err(|error| {
+                RepositoryValidationError::message(format!(
+                    "无法枚举 {}：{error}",
+                    directory.display()
+                ))
+            })?
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|error| {
+                RepositoryValidationError::message(format!(
+                    "无法读取 {}：{error}",
+                    directory.display()
+                ))
+            })?;
+
+        for entry in entries {
+            let file_type = entry.file_type().map_err(|error| {
+                RepositoryValidationError::message(format!(
+                    "无法读取 fixture 类型 {}：{error}",
+                    entry.path().display()
+                ))
+            })?;
+            if file_type.is_symlink() {
+                return Err(RepositoryValidationError::validation(vec![
+                    ValidationIssue::new(
+                        ValidationCode::InvalidFixturePath,
+                        entry.path().display().to_string(),
+                    ),
+                ]));
+            }
+            if file_type.is_dir() {
+                pending.push(entry.path());
+            } else if file_type.is_file() {
+                let relative = entry
+                    .path()
+                    .strip_prefix(fixture_root)
+                    .map_err(|error| {
+                        RepositoryValidationError::message(format!(
+                            "无法计算 fixture 相对路径 {}：{error}",
+                            entry.path().display()
+                        ))
+                    })?
+                    .to_string_lossy()
+                    .replace('\\', "/");
+                files.insert(relative);
+            }
+        }
+    }
+
+    Ok(files)
 }
 
 fn load_feature_repository(
@@ -454,6 +739,7 @@ fn load_feature_repository(
             exception_pending_count,
             coverage_gap_count: 0,
         },
+        feature_ids,
     })
 }
 

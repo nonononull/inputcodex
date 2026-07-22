@@ -1,4 +1,4 @@
-use std::{collections::BTreeSet, path::PathBuf};
+use std::{collections::BTreeSet, fs, path::PathBuf};
 
 use inputcodex_parity::{
     ValidationCode, parse_source_index, validate_feature_repository, validate_repository,
@@ -159,7 +159,46 @@ fn 仓库source_index_覆盖锁定上游公开入口() {
 fn 仓库功能目录通过完整引用与安全验证() {
     let summary = validate_repository(&repository_root()).expect("仓库功能目录应通过验证");
 
-    assert!(summary.source_entry_count() > 0);
-    assert!(summary.feature_count() > 0);
-    assert!(summary.contract_count() > 0);
+    assert_eq!(summary.source_entry_count(), 133);
+    assert_eq!(summary.feature_count(), 36);
+    assert_eq!(summary.contract_count(), 36);
+    assert_eq!(summary.fixture_count(), 11);
+    assert_eq!(summary.coverage_gap_count(), 0);
+}
+
+#[test]
+fn parity_文本文件不包含非法控制字节() {
+    let mut pending = vec![repository_root().join("parity")];
+
+    while let Some(directory) = pending.pop() {
+        for entry in fs::read_dir(&directory).expect("应能枚举 parity 目录") {
+            let entry = entry.expect("应能读取 parity 目录项");
+            let file_type = entry.file_type().expect("应能读取 parity 文件类型");
+            if file_type.is_dir() {
+                pending.push(entry.path());
+                continue;
+            }
+            if !file_type.is_file()
+                || !matches!(
+                    entry
+                        .path()
+                        .extension()
+                        .and_then(|extension| extension.to_str()),
+                    Some("md" | "yml" | "yaml")
+                )
+            {
+                continue;
+            }
+
+            let path = entry.path();
+            let bytes = fs::read(&path).expect("应能读取 parity 文本文件");
+            assert!(
+                bytes.iter().all(|byte| {
+                    !((*byte < 0x20 && !matches!(*byte, b'\t' | b'\n' | b'\r')) || *byte == 0x7f)
+                }),
+                "{} 包含非法控制字节",
+                path.display()
+            );
+        }
+    }
 }

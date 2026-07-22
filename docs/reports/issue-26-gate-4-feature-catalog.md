@@ -1,7 +1,7 @@
 # Issue #26：Gate 4 功能目录、行为合同与脱敏夹具报告
 
 schema_version: inputcodex.report.v1
-report_status: feature-catalog-checkpoint-complete-contracts-in-progress
+report_status: feature-catalog-local-verification-complete-pr-pending
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/26
 branch_ref: codex/issue-26-gate-4-feature-catalog
 baseline_ref: 431682296f53e86de1184c732b0d4748857c9390
@@ -18,6 +18,7 @@ feature_catalog_checkpoint_ref: commit:87537e6e4a0e6911dd1427cc23f52dcb805a4679;
 - 项目所有者已要求建立独立 Session Plan、Runtime Workflow、精确范围和新 `scope_hash`。
 - 依赖、RED schema 与最小 Rust GREEN 已执行：纯内存 catalog/contract/fixture 类型和验证器已实现，不进入桌面产品运行面。
 - source-index 与五域功能目录已转 GREEN：`133` 条锁定上游公开入口映射为 `36` 个 feature、`3` 个显式排除，覆盖缺口为 `0`。
+- 五域行为合同与脱敏 fixture 已完成本地验证：`36` 份合同、`11` 个 fixture manifest、`11` 个合成 baseline payload，完整仓库验证无覆盖缺口。
 - 当前授权允许 36 条范围内实现、验证、普通提交、普通推送和 PR 创建，不包含最终合并。
 - 未知 PR 与未知最终 Head 不能取得空白合并授权；最终 Squash Merge 仍需具体 owner 决策证据。
 
@@ -90,23 +91,29 @@ feature_catalog_checkpoint_ref: commit:87537e6e4a0e6911dd1427cc23f52dcb805a4679;
 - 四个定向测试目标共 `26` 个测试通过；格式、离线库 check 与 Clippy `-D warnings` 均通过。
 - Phase 4 数据面已由真实 source-lock 和上游入口枚举验证为 `133/133`；尚未把缺失合同/fixture 伪造成完整仓库 GREEN。
 
-## 十、待完成
+## 十、Phase 5 本地验证证据
 
 - 8 条控制面路径、36 条范围、scope hash、占位符、治理合同、仓库政策和空白检查已通过。
 - 普通 control-plane checkpoint `80e0ddbb734496e95e89fe57fd89ddb668c8c276` 已 push。
 - Issue `#26` 评论 `5047590347` 已回写 commit、计划引用、范围哈希和实现待批准边界。
 - RED checkpoint `532fba89d882862438345788ed2fdd73faede507` 已普通 push，并通过 Issue 评论 `5048079257` 回写。
 - GREEN checkpoint `8b18f0a2a37829af3338edba34454eb6690af77a` 已普通 push，并通过 Issue 评论 `5048438316` 回写。
-- source-index 与五域功能目录 checkpoint `87537e6e4a0e6911dd1427cc23f52dcb805a4679` 已普通 push，并通过 Issue 评论 `5048930060` 回写；当前进入行为合同与脱敏 fixture。
+- source-index 与五域功能目录 checkpoint `87537e6e4a0e6911dd1427cc23f52dcb805a4679` 已普通 push，并通过 Issue 评论 `5048930060` 回写。
+- 五个 contract 文件通过 domain、stable ID、fixture policy、引用完整性和每 feature 合同覆盖验证；合同总数为 `36`。
+- fixture 目录与 manifest feature ID 一致，`11` 个 manifest 的所有 payload 都是声明文件、非符号链接、非空、仓库内路径且不含真实敏感值或私人绝对路径。
+- `仓库功能目录通过完整引用与安全验证`、完整 parity 包测试、格式、离线 check 和 Clippy 严格门禁均已取得本地 GREEN；项目级 CI 合同 `30/30`、仓库政策 `0` 违规和 `git diff --check` 也已通过。
+- 文本控制字节扫描确认仅发现 Phase 4 提交遗留的两处 ESC；PowerShell 双引号反引号转义是根因。已修复、在 `err.md` 记录，并通过先 RED 后 GREEN 的 `parity_文本文件不包含非法控制字节` 回归覆盖。
+- 下一步仅为普通 checkpoint、普通 push、Issue 回写、最终复验和关联 PR；本地 GREEN 不构成 PR、CI 或合并证据。
 
-## 十一、完成状态占位
+## 十一、完成状态
 
 以下字段只在真实证据产生后填写，当前不得伪造：
 
 ```text
 feature_count: 36
-contract_count: pending-implementation
-fixture_count: pending-implementation
+contract_count: 36
+fixture_count: 11
+fixture_manifest_count: 11
 source_entry_count: 133
 excluded_entry_count: 3
 exception_pending_count: 10
@@ -114,7 +121,8 @@ coverage_gap_count: 0
 red_checkpoint_ref: commit:532fba89d882862438345788ed2fdd73faede507;issuecomment:5048079257
 green_checkpoint_ref: commit:8b18f0a2a37829af3338edba34454eb6690af77a;issuecomment:5048438316
 feature_catalog_checkpoint_ref: commit:87537e6e4a0e6911dd1427cc23f52dcb805a4679;issuecomment:5048930060
-pr_ref: pending-implementation
-ci_ref: pending-implementation
+phase5_checkpoint_ref: pending-commit-and-issue-comment
+pr_ref: pending-creation
+ci_ref: pending-pr
 merge_ref: pending-owner-authorization
 ```

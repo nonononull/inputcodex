@@ -508,6 +508,15 @@
 - 验证：最终 source-index 可解析，`133` 条入口、`36` 个 feature、`3` 个显式排除、`10` 个 `exception-pending` feature 与 `0` 个覆盖缺口通过 `validate_feature_repository` 真实仓库对账。
 - 关联：Issue `#26` Phase 4，`crates/inputcodex-parity/tests/catalog_repository.rs`。
 
+## 2026-07-22：PowerShell 生成 Markdown 时把反引号 e 转成 ESC
+
+- 环境：Issue `#26` Phase 5 数据面完成后，对 Parity 文档执行文本控制字节扫描。
+- 现象：`parity/README.md` 两处 `exception-pending` 被写成 `0x1B` 加 `xception-pending`，终端显示为不可见控制字符；Rust 数据验证未覆盖该 Markdown 字节层。
+- 根因：使用 PowerShell 双引号字符串生成 Markdown 时，`` `e`` 被解释为 ESC 转义，而不是保留 Markdown 代码标记和字母 `e`。
+- 处理：通过 apply-patch 将两处文本恢复为字面量 `` `exception-pending` ``；不修改已推送提交历史，并增加本批次文本控制字节扫描作为验证证据。
+- 验证：全仓文本文件扫描仅允许制表、换行和回车后，非法控制字节数量为 `0`；Parity 仓库级 Rust 验证继续通过。
+- 关联：Issue `#26` Phase 5，`parity/README.md`。
+
 ## 记录模板
 
 ```text

@@ -29,6 +29,21 @@ fn 合成夹具_manifest_使用仓库相对路径() {
 }
 
 #[test]
+fn fixture_目录必须与_manifest_feature_一致() {
+    let manifest = parse_fixture_manifest(VALID_MANIFEST).expect("合法 manifest 应可解析");
+    let issues = validate_fixture_manifest(
+        &manifest,
+        Path::new("parity/fixtures/feature.provider-network.other"),
+    );
+
+    assert!(
+        issues
+            .iter()
+            .any(|issue| issue.code() == ValidationCode::FixtureDirectoryMismatch)
+    );
+}
+
+#[test]
 fn 路径穿越与绝对路径被拒绝() {
     let traversal = VALID_MANIFEST.replace("path: page.yml", "path: ../private.yml");
     let manifest = parse_fixture_manifest(&traversal).expect("结构仍应可解析");

@@ -1,0 +1,7 @@
+schema_version: inputcodex.synthetic.relay-profile.v1
+profile:
+  id: synthetic-relay
+  base_url: https://relay.example.invalid/v1
+  api_token: synthetic-redacted-token
+  protocol: responses
+  models: [gpt-synthetic]

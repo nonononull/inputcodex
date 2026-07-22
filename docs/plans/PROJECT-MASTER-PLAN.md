@@ -2,9 +2,9 @@
 
 schema_version: inputcodex.master-plan.v1
 active_task: 2026-07-22-issue-26-gate-4-feature-catalog
-active_gate: Gate 4：行为合同与脱敏夹具活动
-last_verified_gate: Issue #26 Phase 4 source-index 与五域功能目录 checkpoint 87537e6 已普通 push；Issue 评论 5048930060 记录 133 条入口、36 个 feature、3 个排除、10 个 exception-pending 与 0 个覆盖缺口
-next_legal_gate: 在已批准范围内建立五域行为合同与必要脱敏 fixture，完成完整 validate_repository 后创建关联 PR
+active_gate: Gate 4：行为合同与脱敏夹具本地验证完成、PR 待创建
+last_verified_gate: Issue #26 Phase 5 本地验证完成 36 份合同、11 个 fixture manifest、133 条入口、36 个 feature、3 个排除、10 个 exception-pending 与 0 个覆盖缺口；普通 checkpoint 与 PR 尚未创建
+next_legal_gate: 普通提交并 push Phase 5 checkpoint、回写 Issue #26、最终复验后创建关联 PR
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/26
 closed_gate_3_closeout_issue_ref: https://github.com/nonononull/inputcodex/issues/22
 closed_implementation_issue_ref: https://github.com/nonononull/inputcodex/issues/19
@@ -31,7 +31,7 @@ gate_2_watch_report_ref: docs/reports/issue-14-gate-2-upstream-watch.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-decision_status: gate-4-feature-catalog-phase-4-complete-phase-5-active-merge-not-authorized
+decision_status: gate-4-feature-catalog-phase-5-local-verification-complete-pr-pending-merge-not-authorized
 
 ## 当前状态
 
@@ -49,7 +49,7 @@ decision_status: gate-4-feature-catalog-phase-4-complete-phase-5-active-merge-no
 - PR `#21` 于 `2026-07-22T12:25:59Z` Squash Merge 为 `0716ec0debcd3e059cc4ca88a072232841ca73b4`；Issue `#19` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29919596057` 六 Job 全绿且成功 Artifact 数为 `0`。
 - Issue `#22` / PR `#23` 已完成 Gate 3 独立 closeout；PR `#23` 于 `2026-07-22T13:05:34Z` Squash Merge 为 `f470c062037042a1f7833a29cdcf216f6c0f5601`，Issue `#22` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29922385227` 六 Job 全绿且成功 Artifact 数为 `0`。
 - Issue `#24` / PR `#25` 已完成“两阶段拆分”规划合同；PR `#25` 于 2026 年 7 月 22 日 Squash Merge 为 `431682296f53e86de1184c732b0d4748857c9390`，Issue `#24` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29926710342` 六 Job 全绿且成功 Artifact 数为 `0`。
-- 当前活动任务为 Issue `#26`，分支为 `codex/issue-26-gate-4-feature-catalog`；Phase 4 checkpoint `87537e6e4a0e6911dd1427cc23f52dcb805a4679` 与 Issue 评论 `5048930060` 已证明 `133` 条入口、`36` 个 feature、`3` 个排除、`10` 个 `exception-pending` feature 和 `0` 个覆盖缺口，当前进入合同与 fixture。
+- 当前活动任务为 Issue `#26`，分支为 `codex/issue-26-gate-4-feature-catalog`；Phase 4 checkpoint `87537e6e4a0e6911dd1427cc23f52dcb805a4679` 与 Issue 评论 `5048930060` 已证明 `133` 条入口、`36` 个 feature、`3` 个排除、`10` 个 `exception-pending` feature 和 `0` 个覆盖缺口；Phase 5 已在本地验证 `36` 份合同、`11` 个 fixture manifest 与完整仓库安全，等待普通 checkpoint 和 PR。
 - 最新正式 Release 仍为 `v1.2.41`；上游 `main` 已前进到 `91376ee3518cb5fe5ec8eead179418f706c25870`，只由 Issue `#20` 预警，不改变当前缓存功能真源。
 - Issue `#8` 的过渡交付为 PR `#10`；该 PR 只包含文档与验证控制面，并按项目所有者明确授权执行 Squash Merge。
 - AGOS 仍是可选外部辅助；本仓库可用原生控制面时不运行它，不在本任务中修改或优化它。
@@ -108,7 +108,7 @@ decision_status: gate-4-feature-catalog-phase-4-complete-phase-5-active-merge-no
 - [x] Issue `#22` / PR `#23` 已完成独立 closeout，merge/tree/签名/Issue/CI/Review/Ruleset 和分支删除证据均已闭环。
 - 不迁移业务功能，不创建临时 UI 事实标准；最小窗口的视觉和交互默认由 Gemini 实现或审阅。
 
-### Gate 4：功能目录与性能基线（功能目录控制面活动）
+### Gate 4：功能目录与性能基线（功能目录实现活动）
 
 - [x] 创建 Issue `#24`，批准采用“规划合同 → 两个独立执行 Issue”的拆分方案。
 - [x] 冻结功能矩阵的稳定标识、证据路径、行为字段、既有一致性状态和决策引用。
@@ -118,7 +118,8 @@ decision_status: gate-4-feature-catalog-phase-4-complete-phase-5-active-merge-no
 - [x] 创建功能目录执行 Issue `#26` 与独立分支。
 - [x] 提交 Issue `#26` 任务计划、Session Plan、Runtime Workflow、36 条范围和新 scope hash checkpoint，并取得项目所有者实现批准。
 - [x] 完成 RED schema、GREEN Rust 验证器与 source-index/五域功能目录 checkpoint；不得迁移产品功能。
-- [ ] 建立五域行为合同与必要脱敏 fixture，完成完整仓库验证、PR、Review/CI 和 owner merge gate。
+- [x] 建立五域 `36` 份行为合同与必要的 `11` 个脱敏 fixture manifest，并完成完整本地仓库验证；产品、CI、Ruleset、Release、`upstream/`、`benchmarks/` 和 AGOS 保持零差异。
+- [ ] 为 Issue `#26` 创建关联 PR，完成 Review/CI 和项目所有者对具体 PR 与最终 Head 的 Squash Merge gate。
 - [ ] 功能目录收口后创建独立性能基线 Issue；基线与优化保持不同 Issue/PR。
 
 ### Gate 5：分域迁移（锁定）

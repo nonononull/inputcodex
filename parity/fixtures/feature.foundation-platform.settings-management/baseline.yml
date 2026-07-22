@@ -1,0 +1,5 @@
+schema_version: inputcodex.synthetic.settings.v1
+settings:
+  watcher_enabled: true
+  provider_mode: official
+  locale: zh-CN

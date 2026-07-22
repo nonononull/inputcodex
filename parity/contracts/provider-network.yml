@@ -1,0 +1,419 @@
+schema_version: inputcodex.behavior-contract.v1
+domain: provider-network
+contracts:
+  - id: contract.feature.provider-network.aggregate-routing.baseline
+    feature_id: feature.provider-network.aggregate-routing
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: aggregate-routing-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: aggregate-routing-result
+        description: '聚合供应商路由的稳定结果或明确空结果。'
+    side_effects:
+      - filesystem-read
+      - filesystem-write
+    persistence: '文件写入原子化，失败不得留下半成品或凭据日志。'
+    errors:
+      - code: AGGREGATE_ROUTING_FAILED
+        kind: feature
+        semantics: '聚合供应商路由失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次聚合供应商路由请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '聚合供应商路由单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '支持故障转移、会话轮转、请求轮转和权重轮转并留证。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '基线只约束状态、副作用和错误语义，不需要结构样本。'
+    fixture_refs: []
+  - id: contract.feature.provider-network.context-entry-management.baseline
+    feature_id: feature.provider-network.context-entry-management
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: context-entry-management-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: context-entry-management-result
+        description: '上下文能力选择的稳定结果或明确空结果。'
+    side_effects:
+      - filesystem-read
+      - filesystem-write
+    persistence: '文件写入原子化，失败不得留下半成品或凭据日志。'
+    errors:
+      - code: CONTEXT_ENTRY_MANAGEMENT_FAILED
+        kind: feature
+        semantics: '上下文能力选择失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次上下文能力选择请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '上下文能力选择单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '管理供应商关联的 MCP、Skill 与 Plugin 并与实时配置同步。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '基线只约束状态、副作用和错误语义，不需要结构样本。'
+    fixture_refs: []
+  - id: contract.feature.provider-network.model-catalog.baseline
+    feature_id: feature.provider-network.model-catalog
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: model-catalog-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: model-catalog-result
+        description: '模型目录与上下文的稳定结果或明确空结果。'
+    side_effects:
+      - filesystem-write
+      - network-read
+    persistence: '文件写入原子化，失败不得留下半成品或凭据日志。'
+    errors:
+      - code: MODEL_CATALOG_FAILED
+        kind: feature
+        semantics: '模型目录与上下文失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次模型目录与上下文请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '模型目录与上下文单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '维护模型列表、上下文窗口、自动压缩阈值与 model_catalog_json。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: required
+      reason: '使用合成 fixture 固定结构字段、边界值与引用关系。'
+    fixture_refs:
+      - fixture.feature.provider-network.model-catalog.baseline
+  - id: contract.feature.provider-network.network-environment.baseline
+    feature_id: feature.provider-network.network-environment
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: network-environment-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: network-environment-result
+        description: '网络环境诊断的稳定结果或明确空结果。'
+    side_effects:
+      - environment-read
+      - network-read
+    persistence: '不持久化网络凭据，只保存脱敏诊断分类。'
+    errors:
+      - code: NETWORK_ENVIRONMENT_FAILED
+        kind: feature
+        semantics: '网络环境诊断失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次网络环境诊断请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '网络环境诊断单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '检查系统代理、环境变量与 Relay 前置条件，默认不修改环境。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '基线只约束状态、副作用和错误语义，不需要结构样本。'
+    fixture_refs: []
+  - id: contract.feature.provider-network.protocol-proxy.baseline
+    feature_id: feature.provider-network.protocol-proxy
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: protocol-proxy-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: protocol-proxy-result
+        description: '协议代理的稳定结果或明确空结果。'
+    side_effects:
+      - network-listen
+      - network-read
+    persistence: '不持久化网络凭据，只保存脱敏诊断分类。'
+    errors:
+      - code: PROTOCOL_PROXY_FAILED
+        kind: feature
+        semantics: '协议代理失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次协议代理请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '协议代理单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '转换 Responses 与 Chat Completions，请求隔离且不污染语义。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '基线只约束状态、副作用和错误语义，不需要结构样本。'
+    fixture_refs: []
+  - id: contract.feature.provider-network.provider-configuration-application.baseline
+    feature_id: feature.provider-network.provider-configuration-application
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: provider-configuration-application-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: provider-configuration-application-result
+        description: '供应商配置应用的稳定结果或明确空结果。'
+    side_effects:
+      - filesystem-write
+      - process-control
+    persistence: '文件写入原子化，失败不得留下半成品或凭据日志。'
+    errors:
+      - code: PROVIDER_CONFIGURATION_APPLICATION_FAILED
+        kind: feature
+        semantics: '供应商配置应用失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次供应商配置应用请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '供应商配置应用单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '以纯 Rust 配置写入实现供应商切换，不复用注入脚本。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '基线只约束状态、副作用和错误语义，不需要结构样本。'
+    fixture_refs: []
+  - id: contract.feature.provider-network.provider-diagnostics.baseline
+    feature_id: feature.provider-network.provider-diagnostics
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: provider-diagnostics-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: provider-diagnostics-result
+        description: '供应商测试与诊断的稳定结果或明确空结果。'
+    side_effects:
+      - network-read
+    persistence: '不持久化网络凭据，只保存脱敏诊断分类。'
+    errors:
+      - code: PROVIDER_DIAGNOSTICS_FAILED
+        kind: feature
+        semantics: '供应商测试与诊断失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次供应商测试与诊断请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '供应商测试与诊断单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '测试连接并生成 Provider Doctor 证据，网络失败可超时取消。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '基线只约束状态、副作用和错误语义，不需要结构样本。'
+    fixture_refs: []
+  - id: contract.feature.provider-network.provider-import.baseline
+    feature_id: feature.provider-network.provider-import
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: provider-import-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: provider-import-result
+        description: '供应商导入的稳定结果或明确空结果。'
+    side_effects:
+      - filesystem-read
+      - filesystem-write
+    persistence: '文件写入原子化，失败不得留下半成品或凭据日志。'
+    errors:
+      - code: PROVIDER_IMPORT_FAILED
+        kind: feature
+        semantics: '供应商导入失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次供应商导入请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '供应商导入单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '读取供应商配置，预览后再确认写入并禁止泄漏凭据。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: required
+      reason: '使用合成 fixture 固定结构字段、边界值与引用关系。'
+    fixture_refs:
+      - fixture.feature.provider-network.provider-import.baseline
+  - id: contract.feature.provider-network.relay-profile-management.baseline
+    feature_id: feature.provider-network.relay-profile-management
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: relay-profile-management-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: relay-profile-management-result
+        description: 'Relay 配置管理的稳定结果或明确空结果。'
+    side_effects:
+      - filesystem-read
+      - filesystem-write
+    persistence: '文件写入原子化，失败不得留下半成品或凭据日志。'
+    errors:
+      - code: RELAY_PROFILE_MANAGEMENT_FAILED
+        kind: feature
+        semantics: 'Relay 配置管理失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次Relay 配置管理请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: 'Relay 配置管理单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '读取、保存、切换和回填 Relay 配置，切换前保存当前状态。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: required
+      reason: '使用合成 fixture 固定结构字段、边界值与引用关系。'
+    fixture_refs:
+      - fixture.feature.provider-network.relay-profile-management.baseline

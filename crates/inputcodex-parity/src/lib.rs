@@ -15,7 +15,7 @@ pub use catalog::{
 };
 pub use contract::{
     BehaviorContract, ContractCatalog, LoadingContract, LoadingState, parse_contract_catalog,
-    validate_contract_catalog,
+    validate_contract_catalog, validate_contract_catalog_domain,
 };
 pub use fixture::{
     FixtureManifest, parse_fixture_manifest, validate_fixture_manifest, validate_fixture_payload,

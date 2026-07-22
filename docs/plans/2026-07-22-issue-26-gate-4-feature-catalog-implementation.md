@@ -182,20 +182,20 @@ docs/workflows/2026-07-22-issue-26-gate-4-feature-catalog-runtime.md
 
 **文件：** 五个 contract 文件、`parity/fixtures/**`、合同与夹具测试。
 
-- [ ] 为每个可描述场景建立 contract ID，覆盖输入、输出、持久化、副作用、错误、加载、超时、取消、隔离和可观测证据。
-- [ ] 明确 Windows/macOS 共同语义；差异只能作为显式平台字段或 `exception-pending`。
-- [ ] 只在场景需要结构数据时建立 fixture；纯状态/无数据场景必须明确声明无需 fixture。
-- [ ] 夹具只使用合成或不可逆脱敏数据，并保留类型、长度等级、边界值和关联关系。
-- [ ] 运行 fixture 安全、引用完整性和全仓目录验证，形成合同 checkpoint。
+- [x] 为每个可描述场景建立 contract ID，覆盖输入、输出、持久化、副作用、错误、加载、超时、取消、隔离和可观测证据。
+- [x] 明确 Windows/macOS 共同语义；差异只能作为显式平台字段或 `exception-pending`。
+- [x] 只在场景需要结构数据时建立 fixture；纯状态/无数据场景必须明确声明无需 fixture。
+- [x] 夹具只使用合成或不可逆脱敏数据，并保留类型、长度等级、边界值和关联关系。
+- [x] 运行 fixture 安全、引用完整性和全仓目录验证；普通合同 checkpoint 与 Issue 回写进入 Task 5。
 
 ### Task 5：文档、验证与 PR
 
 **文件：** AGENTS、README、build、两个 err、Master Plan、Session Plan、Runtime Workflow 和报告。
 
-- [ ] 更新 `build.md` 与 parity crate `build.md`，写明本地轻量命令和 GitHub 全量验证边界。
-- [ ] 仅在真实新根因出现时更新对应 `err.md`；重复 Windows 沙箱错误引用既有记录。
-- [ ] 更新报告中的功能数量、合同数量、fixture 数、排除项、exception-pending 和未覆盖缺口。
-- [ ] 运行允许范围检查、`cargo fmt`、parity 定向测试、治理合同、仓库政策和 `git diff --check`。
+- [x] 更新 `build.md` 与 parity crate `build.md`，写明本地轻量命令和 GitHub 全量验证边界。
+- [x] 仅在真实新根因出现时更新对应 `err.md`；重复 Windows 沙箱错误引用既有记录。
+- [x] 更新报告中的功能数量、合同数量、fixture 数、排除项、exception-pending 和未覆盖缺口。
+- [x] 运行允许范围检查、`cargo fmt`、parity 定向测试、治理合同、仓库政策和 `git diff --check`。
 - [ ] 创建关联 Issue `#26` 的非 Draft PR，正文包含 `Closes #26`、范围哈希、RED/GREEN 和未决缺口。
 - [ ] 所有 Review 对话完成根因闭环，最终 Head CI 全绿后停止，等待项目所有者按 PR 号明确授权 Squash Merge。
 

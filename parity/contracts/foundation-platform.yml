@@ -1,0 +1,415 @@
+schema_version: inputcodex.behavior-contract.v1
+domain: foundation-platform
+contracts:
+  - id: contract.feature.foundation-platform.advertising.baseline
+    feature_id: feature.foundation-platform.advertising
+    scenario: baseline
+    preconditions:
+      - '独立 parity-exception 尚未获得项目所有者决定。'
+    inputs:
+      - name: decision_ref
+        data_type: decision-reference
+        required: false
+        description: '可选的一致性例外决定引用；缺失时保持 pending。'
+    outputs:
+      - name: exception_status
+        data_type: parity-exception-status
+        description: '只返回待决策状态，不执行上游实现。'
+    side_effects:
+      - none
+    persistence: '只保存审计决定引用，不加载、下载或执行上游实现。'
+    errors:
+      - code: PARITY_EXCEPTION_PENDING
+        kind: policy
+        semantics: '没有 owner 决定时明确失败，禁止静默启用。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次广告与推广内容请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '广告与推广内容单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '项目禁止广告、推广位和付费导流，仅保留上游证据。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '只记录待决策状态，禁止执行上游实现。'
+    fixture_refs: []
+  - id: contract.feature.foundation-platform.application-lifecycle.baseline
+    feature_id: feature.foundation-platform.application-lifecycle
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: application-lifecycle-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: application-lifecycle-result
+        description: '应用生命周期的稳定结果或明确空结果。'
+    side_effects:
+      - process-control
+    persistence: '只保存可恢复状态，不持久化进程句柄或私人路径。'
+    errors:
+      - code: APPLICATION_LIFECYCLE_FAILED
+        kind: feature
+        semantics: '应用生命周期失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次应用生命周期请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '应用生命周期单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '启动或重启受管 Codex 进程，明确超时、取消和进程隔离。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '基线只约束状态、副作用和错误语义，不需要结构样本。'
+    fixture_refs: []
+  - id: contract.feature.foundation-platform.application-overview.baseline
+    feature_id: feature.foundation-platform.application-overview
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: application-overview-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: application-overview-result
+        description: '应用概览与检测的稳定结果或明确空结果。'
+    side_effects:
+      - filesystem-read
+      - process-read
+    persistence: '不持久化私人路径、凭据或真实会话内容。'
+    errors:
+      - code: APPLICATION_OVERVIEW_FAILED
+        kind: feature
+        semantics: '应用概览与检测失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次应用概览与检测请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '应用概览与检测单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '检测本机 Codex 应用、运行状态与必要路径，失败必须隔离并可诊断。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '基线只约束状态、副作用和错误语义，不需要结构样本。'
+    fixture_refs: []
+  - id: contract.feature.foundation-platform.diagnostics.baseline
+    feature_id: feature.foundation-platform.diagnostics
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: diagnostics-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: diagnostics-result
+        description: '日志与诊断的稳定结果或明确空结果。'
+    side_effects:
+      - clipboard-write
+      - filesystem-read
+      - filesystem-write
+    persistence: '文件写入原子化，失败不得留下半成品或凭据日志。'
+    errors:
+      - code: DIAGNOSTICS_FAILED
+        kind: feature
+        semantics: '日志与诊断失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次日志与诊断请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '日志与诊断单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '读取、清理和复制诊断材料，必须脱敏并限制数据边界。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '基线只约束状态、副作用和错误语义，不需要结构样本。'
+    fixture_refs: []
+  - id: contract.feature.foundation-platform.environment-conflicts.baseline
+    feature_id: feature.foundation-platform.environment-conflicts
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: environment-conflicts-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: environment-conflicts-result
+        description: '环境冲突检查的稳定结果或明确空结果。'
+    side_effects:
+      - environment-read
+      - environment-write
+    persistence: '明确确认后才修改环境，修改前保存可恢复证据。'
+    errors:
+      - code: ENVIRONMENT_CONFLICTS_FAILED
+        kind: feature
+        semantics: '环境冲突检查失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次环境冲突检查请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '环境冲突检查单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '检测并按明确授权清理冲突环境配置，默认只读并保留证据。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '基线只约束状态、副作用和错误语义，不需要结构样本。'
+    fixture_refs: []
+  - id: contract.feature.foundation-platform.platform-paths.baseline
+    feature_id: feature.foundation-platform.platform-paths
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: platform-paths-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: platform-paths-result
+        description: '平台路径解析的稳定结果或明确空结果。'
+    side_effects:
+      - filesystem-read
+    persistence: '不持久化私人路径、凭据或真实会话内容。'
+    errors:
+      - code: PLATFORM_PATHS_FAILED
+        kind: feature
+        semantics: '平台路径解析失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次平台路径解析请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '平台路径解析单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '在 Windows 与 macOS 上解析等价路径，不暴露私人绝对路径。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '基线只约束状态、副作用和错误语义，不需要结构样本。'
+    fixture_refs: []
+  - id: contract.feature.foundation-platform.settings-management.baseline
+    feature_id: feature.foundation-platform.settings-management
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: settings-management-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: settings-management-result
+        description: '设置管理的稳定结果或明确空结果。'
+    side_effects:
+      - filesystem-read
+      - filesystem-write
+    persistence: '文件写入原子化，失败不得留下半成品或凭据日志。'
+    errors:
+      - code: SETTINGS_MANAGEMENT_FAILED
+        kind: feature
+        semantics: '设置管理失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次设置管理请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '设置管理单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '加载、保存和重置本地设置，写入必须原子化并可恢复。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: required
+      reason: '使用合成 fixture 固定结构字段、边界值与引用关系。'
+    fixture_refs:
+      - fixture.feature.foundation-platform.settings-management.baseline
+  - id: contract.feature.foundation-platform.version-and-startup.baseline
+    feature_id: feature.foundation-platform.version-and-startup
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: version-and-startup-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: version-and-startup-result
+        description: '版本与启动参数的稳定结果或明确空结果。'
+    side_effects:
+      - process-read
+    persistence: '不持久化私人路径、凭据或真实会话内容。'
+    errors:
+      - code: VERSION_AND_STARTUP_FAILED
+        kind: feature
+        semantics: '版本与启动参数失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次版本与启动参数请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '版本与启动参数单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '读取版本与启动参数，结果稳定且不触发隐式网络或写入。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '基线只约束状态、副作用和错误语义，不需要结构样本。'
+    fixture_refs: []
+  - id: contract.feature.foundation-platform.watcher.baseline
+    feature_id: feature.foundation-platform.watcher
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: watcher-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: watcher-result
+        description: 'Watcher 管理的稳定结果或明确空结果。'
+    side_effects:
+      - filesystem-write
+      - process-control
+    persistence: '文件写入原子化，失败不得留下半成品或凭据日志。'
+    errors:
+      - code: WATCHER_FAILED
+        kind: feature
+        semantics: 'Watcher 管理失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次Watcher 管理请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: 'Watcher 管理单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '安装、启停和查询 Watcher，进程与持久化状态必须可诊断。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '基线只约束状态、副作用和错误语义，不需要结构样本。'
+    fixture_refs: []

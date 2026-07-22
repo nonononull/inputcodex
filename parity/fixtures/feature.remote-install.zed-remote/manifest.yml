@@ -1,0 +1,10 @@
+schema_version: inputcodex.fixture-manifest.v1
+feature_id: feature.remote-install.zed-remote
+fixtures:
+  - id: fixture.feature.remote-install.zed-remote.baseline
+    scenario: baseline
+    kind: synthetic
+    files:
+      - path: baseline.yml
+        format: yaml
+        description: '合成 Zed Remote 目标，不含真实主机或私人路径。'

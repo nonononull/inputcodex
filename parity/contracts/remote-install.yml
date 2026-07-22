@@ -1,0 +1,190 @@
+schema_version: inputcodex.behavior-contract.v1
+domain: remote-install
+contracts:
+  - id: contract.feature.remote-install.application-update.baseline
+    feature_id: feature.remote-install.application-update
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: application-update-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: application-update-result
+        description: '应用更新的稳定结果或明确空结果。'
+    side_effects:
+      - filesystem-write
+      - network-read
+      - process-control
+    persistence: '文件写入原子化，失败不得留下半成品或凭据日志。'
+    errors:
+      - code: APPLICATION_UPDATE_FAILED
+        kind: feature
+        semantics: '应用更新失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次应用更新请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '应用更新单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '只检查、下载和安装 nonononull/inputcodex 发布物。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: required
+      reason: '使用合成 fixture 固定结构字段、边界值与引用关系。'
+    fixture_refs:
+      - fixture.feature.remote-install.application-update.baseline
+  - id: contract.feature.remote-install.entrypoint-installation.baseline
+    feature_id: feature.remote-install.entrypoint-installation
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: entrypoint-installation-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: entrypoint-installation-result
+        description: '入口与快捷方式维护的稳定结果或明确空结果。'
+    side_effects:
+      - filesystem-write
+      - process-control
+    persistence: '文件写入原子化，失败不得留下半成品或凭据日志。'
+    errors:
+      - code: ENTRYPOINT_INSTALLATION_FAILED
+        kind: feature
+        semantics: '入口与快捷方式维护失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次入口与快捷方式维护请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '入口与快捷方式维护单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '安装、卸载和修复双平台启动入口，禁止越权写入。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '基线只约束状态、副作用和错误语义，不需要结构样本。'
+    fixture_refs: []
+  - id: contract.feature.remote-install.upstream-worktree.baseline
+    feature_id: feature.remote-install.upstream-worktree
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: upstream-worktree-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: upstream-worktree-result
+        description: 'Upstream worktree 工作流的稳定结果或明确空结果。'
+    side_effects:
+      - filesystem-read
+      - process-control
+    persistence: '只保存可恢复状态，不持久化进程句柄或私人路径。'
+    errors:
+      - code: UPSTREAM_WORKTREE_FAILED
+        kind: feature
+        semantics: 'Upstream worktree 工作流失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次Upstream worktree 工作流请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: 'Upstream worktree 工作流单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '识别并打开受控 worktree，不改写上游缓存。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '基线只约束状态、副作用和错误语义，不需要结构样本。'
+    fixture_refs: []
+  - id: contract.feature.remote-install.zed-remote.baseline
+    feature_id: feature.remote-install.zed-remote
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+    inputs:
+      - name: request
+        data_type: zed-remote-request
+        required: false
+        description: '结构化请求；无参数时为空对象。'
+    outputs:
+      - name: result
+        data_type: zed-remote-result
+        description: 'Zed Remote 工作流的稳定结果或明确空结果。'
+    side_effects:
+      - filesystem-read
+      - process-control
+    persistence: '只保存可恢复状态，不持久化进程句柄或私人路径。'
+    errors:
+      - code: ZED_REMOTE_FAILED
+        kind: feature
+        semantics: 'Zed Remote 工作流失败时返回稳定错误分类，不伪造空成功。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次Zed Remote 工作流请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: 'Zed Remote 工作流单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '识别远程项目并用校验后的目标在 Zed 打开。'
+      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
+      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: required
+      reason: '使用合成 fixture 固定结构字段、边界值与引用关系。'
+    fixture_refs:
+      - fixture.feature.remote-install.zed-remote.baseline

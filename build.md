@@ -46,23 +46,13 @@ Set-StrictMode -Version Latest
 
 原生 `git`、`gh`、`python` 命令后必须立即检查 `$LASTEXITCODE`。只有一行输出时使用 `@(...)` 归一化，禁止把空 stdout 当成成功证据。
 
-## Issue #26 Gate 4 功能目录控制面本地验证
+## Issue #26 Gate 4 功能目录实现本地验证
 
-本节只验证 Issue `#26` 的计划、Session Plan、Runtime Workflow、初始报告、8 条当前路径和 36 条最大范围；不得创建 Cargo、Rust、`parity/` 或产品变更：
+本节验证 Issue `#26` 的完整 36 条最大写入范围、Parity 行为合同与脱敏 fixture；不得修改产品、CI、Ruleset、Release、`upstream/`、`benchmarks/` 或 AGOS：
 
 ```powershell
 $baseline = '431682296f53e86de1184c732b0d4748857c9390'
 $expectedBranch = 'codex/issue-26-gate-4-feature-catalog'
-$expectedPaths = @(
-  'AGENTS.md',
-  'README.md',
-  'build.md',
-  'docs/plans/PROJECT-MASTER-PLAN.md',
-  'docs/plans/2026-07-22-issue-26-gate-4-feature-catalog-implementation.md',
-  'docs/plans/sessions/2026-07-22-issue-26-gate-4-feature-catalog.md',
-  'docs/workflows/2026-07-22-issue-26-gate-4-feature-catalog-runtime.md',
-  'docs/reports/issue-26-gate-4-feature-catalog.md'
-)
 $scopePaths = [string[]]@(
   'AGENTS.md',
   'Cargo.lock',
@@ -107,15 +97,26 @@ $branch = (git branch --show-current).Trim()
 if ($LASTEXITCODE -ne 0 -or $branch -ne $expectedBranch) {
   throw "Issue #26 当前分支不正确：$branch"
 }
-$changed = @(
-  git -c core.quotePath=false diff --name-only $baseline
-  git -c core.quotePath=false ls-files --others --exclude-standard
-) | Where-Object { $_ } | Sort-Object -Unique
-if ($LASTEXITCODE -ne 0) { throw '读取 Issue #26 变更路径失败。' }
-$unexpected = @($changed | Where-Object { $_ -notin $expectedPaths })
-$missing = @($expectedPaths | Where-Object { $_ -notin $changed })
-if ($unexpected.Count -ne 0 -or $missing.Count -ne 0 -or $changed.Count -ne 8) {
-  throw "Issue #26 checkpoint 路径不一致；越界=$($unexpected -join ',')；缺失=$($missing -join ',')；总数=$($changed.Count)"
+$committedChanges = @(git -c core.quotePath=false diff --name-only "$baseline...HEAD")
+if ($LASTEXITCODE -ne 0) { throw '读取 Issue #26 已提交变更路径失败。' }
+$workingChanges = @(git -c core.quotePath=false diff --name-only)
+if ($LASTEXITCODE -ne 0) { throw '读取 Issue #26 工作树变更路径失败。' }
+$stagedChanges = @(git -c core.quotePath=false diff --cached --name-only)
+if ($LASTEXITCODE -ne 0) { throw '读取 Issue #26 暂存变更路径失败。' }
+$untrackedChanges = @(git -c core.quotePath=false ls-files --others --exclude-standard)
+if ($LASTEXITCODE -ne 0) { throw '读取 Issue #26 未跟踪变更路径失败。' }
+$changed = @($committedChanges + $workingChanges + $stagedChanges + $untrackedChanges) |
+  Where-Object { $_ } |
+  Sort-Object -Unique
+$unexpected = @(
+  foreach ($path in $changed) {
+    $isAllowed = $scopePaths -contains $path -or
+      $path.StartsWith('parity/fixtures/', [StringComparison]::Ordinal)
+    if (-not $isAllowed) { $path }
+  }
+)
+if ($unexpected.Count -ne 0) {
+  throw "Issue #26 变更越过批准范围：$($unexpected -join ',')"
 }
 
 [Array]::Sort($scopePaths, [StringComparer]::Ordinal)
@@ -163,13 +164,24 @@ if ($statusText -match 'active_task:\s*2026-07-22-issue-24-gate-4-feature-perfor
   throw 'Issue #26 未清除 Gate 4 规划的陈旧活动状态。'
 }
 
+$env:RUSTUP_TOOLCHAIN = '1.93.1-x86_64-pc-windows-msvc'
+cargo metadata --locked --offline --no-deps --format-version 1 | Out-Null
+if ($LASTEXITCODE -ne 0) { throw 'Issue #26 Cargo metadata 失败。' }
+cargo fmt --all -- --check
+if ($LASTEXITCODE -ne 0) { throw 'Issue #26 rustfmt 失败。' }
+cargo check --locked --offline --ignore-rust-version -p inputcodex-parity
+if ($LASTEXITCODE -ne 0) { throw 'Issue #26 parity check 失败。' }
+cargo clippy --locked --offline --ignore-rust-version -p inputcodex-parity -- -D warnings
+if ($LASTEXITCODE -ne 0) { throw 'Issue #26 Clippy 严格门禁失败。' }
+cargo test --locked --offline --ignore-rust-version -p inputcodex-parity
+if ($LASTEXITCODE -ne 0) { throw 'Issue #26 parity 测试失败。' }
 & .\scripts\ci\Test-CiScripts.ps1
 if ($LASTEXITCODE -ne 0) { throw 'Issue #26 治理合同失败。' }
 & .\scripts\ci\Verify-RepositoryPolicy.ps1 -RepositoryRoot .
 if ($LASTEXITCODE -ne 0) { throw 'Issue #26 真实仓库政策失败。' }
 git diff --check
 if ($LASTEXITCODE -ne 0) { throw 'Issue #26 工作树存在空白错误。' }
-Write-Output 'ISSUE26_GATE4_FEATURE_CATALOG_CONTROL_PLANE_OK'
+Write-Output 'ISSUE26_GATE4_FEATURE_CATALOG_IMPLEMENTATION_OK'
 ```
 
 ## Issue #24 Gate 4 规划本地验证

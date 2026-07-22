@@ -105,6 +105,14 @@ pr_ref: pending
 5. 真实秘密、私人路径、签名材料、生产数据库、路径逃逸或跨 feature 引用必须由测试拒绝。
 6. 争议项只转为 `exception-pending` 并候选创建独立 parity-exception；禁止在本 PR 偷偷批准。
 
+执行结果：
+
+- 五域合同文件共 `36` 份合同，所有 `36` 个 feature 均有至少一份合同；`11` 个 feature 使用合成或不可逆脱敏 fixture，另由 `fixture_policy: none` 显式说明纯状态场景。
+- `validate_repository` 已扩展为完整合同/fixture 仓库验证，拒绝 fixture 目录错配、未声明文件、符号链接、路径逃逸、缺失文件、敏感 payload、跨 feature 引用、合同 domain 错配和缺少 feature 合同。
+- 真实仓库级完整验证返回 `source=133`、`feature=36`、`contract=36`、`fixture=11`、`coverage-gap=0`。
+- 发现 PowerShell 双引号把 Markdown 的 `` `e`` 转义为 ESC；根因经字节扫描确认仅影响 `parity/README.md` 两处。现已通过最小文本修复和 RED→GREEN 的 Parity 文本控制字节回归测试闭环，并记录到根 `err.md`。
+- Phase 5 尚未形成普通 Git checkpoint；禁止将以上本地 GREEN 解释为 PR、三平台 CI 或合并完成。
+
 ## Phase 6：local-verification
 
 1. 核对实际变更全部位于 36 条最大范围，产品、CI、Ruleset、Release、upstream、benchmarks 和 AGOS 零差异。
@@ -113,6 +121,12 @@ pr_ref: pending
 4. 本机缺少 Rust `1.97.1` 时，只允许用既有 `1.93.1 --ignore-rust-version` 执行 parity 定向 check/test；结果不能替代精确工具链证据。
 5. 运行治理合同、仓库政策和 `git diff --check`。
 6. 更新报告中的 feature、contract、fixture、排除项、exception-pending 和缺口数量。
+
+执行结果：
+
+- 已直接执行 `build.md` 的 Issue `#26` 实现验证块，返回 `ISSUE26_GATE4_FEATURE_CATALOG_IMPLEMENTATION_OK`。
+- 本地 Rust `1.93.1` 配合 `--ignore-rust-version` 的 metadata、rustfmt、parity check、Clippy 严格门禁和完整 `38` 个 Parity 测试均通过；精确 Rust `1.97.1` 与三平台全量证据仍保留给关联 PR 的 GitHub-hosted runners。
+- 当前 diff 相对 Gate 4 baseline 与工作树/暂存/未跟踪文件的合并路径集均在 36 条批准范围内；项目级 CI 合同 `30/30`、仓库政策 `0` 违规与 `git diff --check` 均通过。
 
 ## Phase 7：pr-review-ci
 

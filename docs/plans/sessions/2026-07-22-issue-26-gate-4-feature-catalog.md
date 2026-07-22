@@ -254,3 +254,12 @@ GitHub 全量验证:
 - 五域目录共登记 `36` 个 feature：正常能力为 `unassessed`，`10` 个广告、远程推荐或注入依赖能力为 `exception-pending`；另有 `3` 个旧适配入口显式排除。
 - `validate_feature_repository` 从真实 `source-lock.json`、上游模块入口和 feature 文件逐条对账，结果为 `source=133`、`feature=36`、`excluded=3`、`exception-pending=10`、`coverage-gap=0`。
 - `cargo +1.93.1-x86_64-pc-windows-msvc test --locked --offline --ignore-rust-version -p inputcodex-parity --test catalog_repository 仓库source_index_覆盖锁定上游公开入口 -- --exact`：退出码 `0`，真实仓库级 source-index 测试 `1/1` 通过。
+
+## 十四、Phase 5 行为合同与脱敏 fixture 本地证据
+
+- 五个 `parity/contracts/<domain>.yml` 共登记 `36` 份行为合同；每份都绑定稳定 feature ID，记录输入、输出、持久化、副作用、错误、六加载状态、超时、取消、隔离、可观测和 Windows/macOS 语义。
+- `fixture_policy` 现在强制为 `required` 或 `none` 且说明原因；其模式必须与 `fixture_refs` 一致。只为 `11` 个需要结构数据的 feature 建立 `11` 个 manifest 和 `11` 个合成 baseline payload。
+- `validate_repository` 递归核对 fixture 目录、manifest feature ID、文件声明、符号链接逃逸、路径边界、敏感 payload、合同 domain、合同唯一性、fixture 引用和每个 feature 至少一份合同。
+- 完整真实仓库测试 `仓库功能目录通过完整引用与安全验证` 已以退出码 `0` 通过，并得到 `source=133`、`feature=36`、`contract=36`、`fixture=11`、`coverage-gap=0`。
+- 发现并确认 PowerShell 双引号把 Markdown 的 `` `e`` 写成 ESC 控制字节；新增 `parity_文本文件不包含非法控制字节` 回归后，先临时复现失败，再恢复字面量文本验证 GREEN。根因、处理和零残留扫描已记录到根 `err.md`。
+- Phase 5 的普通 checkpoint、普通 push、Issue 回写、最终本地复验和 PR 创建仍按本 Session 的 Phase 6/7 顺序执行；本段不提前宣称 PR、CI 或合并结果。

@@ -1,0 +1,10 @@
+schema_version: inputcodex.fixture-manifest.v1
+feature_id: feature.session-data.markdown-export
+fixtures:
+  - id: fixture.feature.session-data.markdown-export.baseline
+    scenario: baseline
+    kind: synthetic
+    files:
+      - path: baseline.yml
+        format: yaml
+        description: '合成 Markdown 导出期望值。'

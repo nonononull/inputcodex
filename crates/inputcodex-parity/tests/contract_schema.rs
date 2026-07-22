@@ -1,7 +1,8 @@
 use std::collections::BTreeSet;
 
 use inputcodex_parity::{
-    LoadingState, ValidationCode, parse_contract_catalog, validate_contract_catalog,
+    FeatureDomain, LoadingState, ValidationCode, parse_contract_catalog, validate_contract_catalog,
+    validate_contract_catalog_domain,
 };
 
 const VALID_CONTRACT: &str = r#"
@@ -49,6 +50,9 @@ contracts:
       windows: 使用 Windows 平台适配器读取安装事实。
       macos: 使用 macOS 平台适配器读取安装事实。
       differences: []
+    fixture_policy:
+      mode: none
+      reason: 应用扫描由平台适配器产生，不需要结构化 fixture。
     fixture_refs: []
 "#;
 
@@ -71,6 +75,31 @@ fn 合同覆盖六种加载状态和请求失效语义() {
         ]
     );
     assert!(validate_contract_catalog(&contracts, &feature_ids, &fixture_ids).is_empty());
+}
+
+#[test]
+fn 合同文件_domain_必须与目标领域一致() {
+    let contracts = parse_contract_catalog(VALID_CONTRACT).expect("合法合同应可解析");
+
+    assert!(
+        validate_contract_catalog_domain(&contracts, FeatureDomain::ProviderNetwork)
+            .iter()
+            .any(|issue| issue.code() == ValidationCode::ContractDomainMismatch)
+    );
+}
+
+#[test]
+fn fixture_policy_必须与引用状态一致() {
+    let invalid = VALID_CONTRACT.replace("      mode: none", "      mode: required");
+    let contracts = parse_contract_catalog(&invalid).expect("结构仍应可解析");
+    let feature_ids =
+        BTreeSet::from(["feature.foundation-platform.application-detection".to_owned()]);
+
+    assert!(
+        validate_contract_catalog(&contracts, &feature_ids, &BTreeSet::new())
+            .iter()
+            .any(|issue| issue.code() == ValidationCode::FixturePolicyMismatch)
+    );
 }
 
 #[test]
@@ -234,6 +263,10 @@ fn 行为合同必填段不可缺失() {
         (
             "observability",
             "    observability:\n      - 请求标识\n      - 扫描总数\n      - 失败分类\n",
+        ),
+        (
+            "fixture_policy",
+            "    fixture_policy:\n      mode: none\n      reason: 应用扫描由平台适配器产生，不需要结构化 fixture。\n",
         ),
         ("fixture_refs", "    fixture_refs: []\n"),
     ];

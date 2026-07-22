@@ -16,10 +16,8 @@ pub enum LoadingState {
 
 #[derive(Debug, Deserialize)]
 pub struct ContractCatalog {
-    #[serde(rename = "schema_version")]
-    _schema_version: String,
-    #[serde(rename = "domain")]
-    _domain: String,
+    schema_version: String,
+    domain: String,
     contracts: Vec<BehaviorContract>,
 }
 
@@ -27,6 +25,10 @@ impl ContractCatalog {
     #[must_use]
     pub fn contracts(&self) -> &[BehaviorContract] {
         &self.contracts
+    }
+
+    pub(crate) fn schema_version(&self) -> &str {
+        &self.schema_version
     }
 }
 
@@ -59,6 +61,20 @@ pub struct BehaviorContract {
     fixture_refs: Vec<String>,
     #[serde(rename = "platforms")]
     _platforms: ContractPlatforms,
+    fixture_policy: FixturePolicy,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+enum FixturePolicyMode {
+    Required,
+    None,
+}
+
+#[derive(Debug, Deserialize)]
+struct FixturePolicy {
+    mode: FixturePolicyMode,
+    reason: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -118,6 +134,18 @@ impl BehaviorContract {
     pub const fn loading(&self) -> &LoadingContract {
         &self.loading
     }
+
+    pub(crate) fn id(&self) -> &str {
+        &self.id
+    }
+
+    pub(crate) fn feature_id(&self) -> &str {
+        &self.feature_id
+    }
+
+    pub(crate) fn fixture_refs(&self) -> &[String] {
+        &self.fixture_refs
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -138,6 +166,21 @@ impl LoadingContract {
 
 pub fn parse_contract_catalog(input: &str) -> yaml_serde::Result<ContractCatalog> {
     yaml_serde::from_str(input)
+}
+
+#[must_use]
+pub fn validate_contract_catalog_domain(
+    catalog: &ContractCatalog,
+    expected_domain: crate::FeatureDomain,
+) -> Vec<ValidationIssue> {
+    if catalog.domain == expected_domain.as_str() {
+        Vec::new()
+    } else {
+        vec![ValidationIssue::new(
+            ValidationCode::ContractDomainMismatch,
+            format!("{}:{}", catalog.domain, expected_domain.as_str()),
+        )]
+    }
 }
 
 #[must_use]
@@ -203,6 +246,17 @@ pub fn validate_contract_catalog(
                     fixture_id.clone(),
                 ));
             }
+        }
+
+        let fixture_policy_matches = match contract.fixture_policy.mode {
+            FixturePolicyMode::Required => !contract.fixture_refs.is_empty(),
+            FixturePolicyMode::None => contract.fixture_refs.is_empty(),
+        };
+        if !fixture_policy_matches || contract.fixture_policy.reason.trim().is_empty() {
+            issues.push(ValidationIssue::new(
+                ValidationCode::FixturePolicyMismatch,
+                contract.id.clone(),
+            ));
         }
     }
 
