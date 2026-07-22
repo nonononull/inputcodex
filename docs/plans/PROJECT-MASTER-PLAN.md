@@ -3,8 +3,8 @@
 schema_version: inputcodex.master-plan.v1
 active_task: 2026-07-22-issue-19-gate-3-rust-workspace-ci
 active_gate: Gate 3：纯 Rust Workspace 与首版三平台 CI 实现
-last_verified_gate: Gate 3 首轮三平台 CI：PR #21 运行 29911337652 六 Job 全绿，Rust 1.97.1、Linux/Windows/macOS 与 required 已取得真实证据
-next_legal_gate: 在 PR #21 使用普通提交完成五类失败语义闭环并收集三平台各三次无缓存成功样本；CI 稳定前不得修改 main Ruleset required checks
+last_verified_gate: Gate 3 实现证据：PR #21 五类失败语义 5/5、Linux/Windows/macOS 各 3/3 次无缓存成功样本，最新修复运行 29917649550 六 Job 全绿
+next_legal_gate: 提交最终控制面 checkpoint，等待最终 PR Head 的 Review/CI 收口并转为 Ready for review；取得项目所有者新的明确授权前不得 Squash Merge 或关闭 Issue #19
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 planning_issue_ref: https://github.com/nonononull/inputcodex/issues/17
 upstream_watch_issue_ref: https://github.com/nonononull/inputcodex/issues/14
@@ -39,8 +39,8 @@ decision_status: gate-3-implementation-approved-control-plane-active-merge-autho
 - Issue `#12` / PR `#13` 已完成上游基线 closeout；PR `#13` 的 Squash Merge 提交为 `5e64015075ddf2adef4bf685f50977b47b7f72e7`，Issue `#12` 已关闭。
 - Issue `#14` / PR `#15` 已完成每 6 小时上游监控；最终 PR CI、两次 `main` 真实运行、唯一状态 Issue `#16`、分支清理和有效 GitHub 签名均已闭环。
 - Issue `#17` / PR `#18` 已完成 Gate 3 规划交付；PR `#18` 的 Squash Merge 提交为 `477d110a9b284e127af365f5278901bcfa69e093`，Issue `#17` 已关闭。
-- 当前活动任务为 Issue `#19` / Draft PR `#21`；治理 RED、GREEN、依赖方向纠偏、七成员 Workspace 与首版 CI checkpoint 均已普通 push 并回写 Issue。当前治理合同为 `30/30`，运行 `29911337652` 已证明 Rust `1.97.1`、Iced/desktop、Linux/Windows/macOS 与 `required` 全绿；当前进入失败语义与冷构建基线阶段。
-- Issue `#19` 的执行顺序固定为 RED 治理合同、GREEN 治理脚本、最小分层 Workspace、三平台 CI、真实失败恢复与冷构建基线；最终合并仍需新的明确授权。
+- 当前活动任务为 Issue `#19` / Draft PR `#21`；治理合同为 `30/30`，七成员 Workspace、首版无缓存三平台 CI、五类失败语义与三平台各 `3/3` 次最低冷构建基线均已完成。最新修复运行 `29917649550` 六 Job 全绿且成功 Artifact 数为 `0`，当前进入最终 PR Review/CI 收口。
+- Issue `#19` 的实现顺序已完整执行：RED 治理合同、GREEN 治理脚本、最小分层 Workspace、三平台 CI、真实失败恢复与冷构建基线；最终合并仍需新的明确授权。
 - Issue `#8` 的过渡交付为 PR `#10`；该 PR 只包含文档与验证控制面，并按项目所有者明确授权执行 Squash Merge。
 - AGOS 仍是可选外部辅助；本仓库可用原生控制面时不运行它，不在本任务中修改或优化它。
 
@@ -93,7 +93,8 @@ decision_status: gate-3-implementation-approved-control-plane-active-merge-autho
 - [x] 通过 Issue `#17` / PR `#18` 冻结分层 Workspace、Iced 隔离、平台端口、加载状态、性能诊断和三平台 CI 合同。
 - [x] 创建实现 Issue `#19`、独立分支、Session Plan、Runtime Workflow 与初始报告，并取得项目所有者实现批准。
 - [x] 先建立 `scripts/ci` 的可信 RED/GREEN 治理合同，再创建七成员 Workspace；当前合同为 `30/30`，七成员 Workspace checkpoint 已推送。
-- [ ] 在同一实现 PR 中通过标准 Linux、Windows、macOS Runner、`required` 汇总、真实失败恢复和无缓存冷构建基线。
+- [x] 在同一实现 PR 中通过标准 Linux、Windows、macOS Runner、`required` 汇总、五类真实失败恢复和三平台各 `3/3` 次无缓存冷构建基线。
+- [ ] 完成 PR `#21` 最终 Head 的 Review/CI 收口，取得项目所有者新的明确 Squash Merge 授权后合并并关闭 Issue `#19`。
 - 不迁移业务功能，不创建临时 UI 事实标准；最小窗口的视觉和交互默认由 Gemini 实现或审阅。
 
 ### Gate 4：功能目录与性能基线（锁定）

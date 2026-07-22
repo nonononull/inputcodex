@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 22 日，PR `#18` 已将 Gate 3 规划 Squash Merge 到 `main`，合并提交为 `477d110a9b284e127af365f5278901bcfa69e093`；Issue `#17` 已关闭，Issue `#19` 是当前 Gate 3 Workspace 与首版三平台 CI 实现任务。
+截至 2026 年 7 月 22 日，PR `#18` 已将 Gate 3 规划 Squash Merge 到 `main`，合并提交为 `477d110a9b284e127af365f5278901bcfa69e093`；Issue `#17` 已关闭，Issue `#19` 已完成 Gate 3 Workspace、首版三平台 CI、五类失败语义与三平台最低冷构建基线，当前进入 PR Review/CI 收口。
 
 仓库当前有 `upstream/CodexPlusPlus/` 审计快照与 `upstream/source-lock.json`；Issue `#19` 已创建七成员纯 Rust Workspace、精确工具链文件、`Cargo.lock`、最小分层源码和首版无缓存三平台 `CI` Workflow。本文件当前提供十一个检查点：
 
@@ -16,12 +16,12 @@
 8. Issue `#19` 路径分类、许可证、仓库政策与冷构建日志脚本的 `30/30` GREEN 合同验证。
 9. Issue `#19` 七成员 Workspace、锁文件、轻量 crate 测试和 Iced 边界验证。
 10. Issue `#19` 首版 `CI` Workflow 的 YAML、Job、权限、Action 固定 SHA、无 Cache 与 Artifact 白名单静态验证。
-11. Issue `#19` 首轮三平台全绿运行与无缓存冷构建基线报告验证。
+11. Issue `#19` 五类真实失败语义、三平台各 `3/3` 次无缓存成功样本、最终修复全绿运行与冷构建基线报告验证。
 
 当前禁止：
 
 - 在没有新的独立 upstream-sync Issue/PR 与项目所有者批准时修改 `upstream/` 或 `source-lock.json`。
-- 把运行 `29911337652` 的单次成功样本解释为已经满足三平台各三次无缓存样本。
+- 把三平台各 `3/3` 次最低冷构建基线解释为已经完成 Cache、P95、七天观测或最终性能预算。
 - 创建 Release Workflow、安装包、签名、更新资产、临时 UI 或 WebView。
 - 修改 Ruleset、required checks 或仓库级合并开关。
 - 修改或优化外部 AGOS。
@@ -189,6 +189,10 @@ if ($LASTEXITCODE -ne 0) { throw 'CI checkpoint 存在空白错误。' }
 ```
 
 真实 Rust `1.97.1`、Linux Clippy/Workspace 测试、Windows/macOS 桌面构建、`required` 汇总和失败 Artifact 只能由关联 PR 的标准 GitHub-hosted runners 证明。CI 稳定前不得把 `CI / required` 写入 `main` Ruleset。
+
+截至本轮收口，治理、rustfmt、通用 Rust 编译、Windows 条件编译、macOS 条件编译五类失败语义均已通过普通提交完成 RED→GREEN；最新修复运行 `29917649550` 六 Job 全绿且成功 Artifact 数为 `0`。Linux、Windows、macOS 已分别接受运行 `29911337652`、`29913139948`、`29914029406`，达到各 `3/3` 次无缓存成功样本；完整测量与失败运行引用见 `docs/reports/rust-ci-cold-baseline.md`。
+
+正式合并前仍需在最终 PR Head 上重新确认所有适用 Job 成功、Review 对话为 `0`、自动合并关闭、Ruleset 无漂移，并取得项目所有者新的明确 Squash Merge 授权。
 
 ## Issue #19 Gate 3 实现控制面 checkpoint 验证
 

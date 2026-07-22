@@ -3,7 +3,7 @@
 schema_version: inputcodex.session-plan.v1
 task_id: 2026-07-22-issue-19-gate-3-rust-workspace-ci
 work_class: major
-task_status: failure-semantics-and-cold-baseline-in-progress
+task_status: pr-review-ready-owner-merge-authorization-pending
 task_summary: 按已批准的 Gate 3 合同建立七成员纯 Rust Workspace、Iced 展示层隔离、最小加载/平台语义、治理脚本与首版无缓存三平台 CI，不迁移任何上游业务功能。
 project_root: C:/Users/dashuai/Documents/inputcodex
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
@@ -43,9 +43,12 @@ local_toolchain_evidence: rust-1.93.1-ignore-rust-version-only
 exact_toolchain_evidence: github-actions-run:29911337652-rust-1.97.1-green
 desktop_iced_compile: github-actions-run:29911337652-linux-windows-macos-green
 workspace_checkpoint_ref: commit:f93372fdc63cf8c628007117be4a8b222510957b;issuecomment:5044073911
-ci_workflow_status: first-full-green-failure-semantics-in-progress
+ci_workflow_status: failure-semantics-and-baseline-verified
 ci_checkpoint_ref: commit:f3107dd16705dd3a25bc8c3acc540a3c6c6990a3;issuecomment:5044470597
 first_full_green_ci_ref: https://github.com/nonononull/inputcodex/actions/runs/29911337652
+failure_semantics_status: verified-5-of-5
+cold_baseline_status: verified-3-per-platform
+latest_full_green_ci_ref: https://github.com/nonononull/inputcodex/actions/runs/29917649550
 
 ## 一、批准决策
 
@@ -222,9 +225,9 @@ ci_policy:
 ## 十二、交付证据
 
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
-review_ref: pending
+review_ref: github-pr-21-review-threads-0-owner-decision-pending
 pr_ref: https://github.com/nonononull/inputcodex/pull/21
-ci_ref: https://github.com/nonononull/inputcodex/actions/runs/29911337652
+ci_ref: https://github.com/nonononull/inputcodex/actions/runs/29917649550
 merge_ref: pending
 owner_merge_authorization_ref: pending-new-owner-authorization-required
 
@@ -275,4 +278,6 @@ owner_merge_authorization_ref: pending-new-owner-authorization-required
 - 修复提交 `4a20c1e878283b2007f79bfa7f22aa8ebbee9f59` 已创建真实运行 `29910847062`：classify、governance、Windows、macOS 成功，Linux 仅在 Clippy 因 `PlatformKind` 的 Linux 未使用导入失败，`required` 正确阻断。
 - `PlatformKind` 条件导入修复提交 `bd4610f6e98dc597bddf02c584d0f0fc616cac7b` 触发运行 `29911337652`；六个 Job 全绿，成功 Artifact 数为 `0`，Linux/Windows/macOS Job 分别执行 `112`、`211`、`94` 秒。
 - 首个成功样本的 metrics 只写入 Step Summary，完成后无法通过当前 API 复取二进制字节数；新增合同先稳定 RED 为“三个平台读取 metrics 数量 `0`、期望 `3`”，再要求 metrics 同时写入控制台日志与 Step Summary，合同恢复为 `30/30` GREEN。
-- 当前进入 Phase 7：按普通提交依次完成五类失败语义，并把后续无缓存运行写入 `docs/reports/rust-ci-cold-baseline.md`。
+- Phase 7 已完成：治理、rustfmt、通用 Rust、Windows 条件编译、macOS 条件编译五类失败语义均以普通提交完成 RED→GREEN；修复运行依次为 `29914029406`、`29915134906`、`29915879951`、`29916670916`、`29917649550`。
+- Linux、Windows、macOS 已分别接受运行 `29911337652`、`29913139948`、`29914029406`，均达到最低 `3/3` 次无缓存成功样本；Job 执行时间中位数为 `133`、`212`、`96` 秒。
+- 最新产品源码修复提交 `41c0cc2924a45f3d8e2a5fe2e47e2e254a9dbb3b` 的运行 `29917649550` 六 Job 全绿且成功 Artifact 数为 `0`；当前只允许完成最终控制面 checkpoint、Review/CI 收口与 Ready 转换，等待新的 Squash Merge 授权。

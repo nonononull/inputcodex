@@ -1,6 +1,6 @@
 # Issue #19：Gate 3 纯 Rust Workspace 与首版三平台 CI 报告
 
-report_status: failure-semantics-and-cold-baseline-in-progress
+report_status: pr-review-ready-owner-merge-authorization-pending
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 branch_ref: codex/issue-19-gate-3-rust-workspace-ci
 baseline_ref: 477d110a9b284e127af365f5278901bcfa69e093
@@ -8,8 +8,8 @@ session_plan_ref: docs/plans/sessions/2026-07-22-issue-19-gate-3-rust-workspace-
 runtime_workflow_ref: docs/workflows/2026-07-22-issue-19-gate-3-rust-workspace-ci-runtime.md
 scope_hash: sha256:2e101627480012d57d6d0472a08cfbe03fc401f6ac74ef3ae1e6a42929ed61ba
 pr_ref: https://github.com/nonononull/inputcodex/pull/21
-ci_ref: https://github.com/nonononull/inputcodex/actions/runs/29911337652
-review_ref: pending
+ci_ref: https://github.com/nonononull/inputcodex/actions/runs/29917649550
+review_ref: github-pr-21-review-threads-0-owner-decision-pending
 merge_ref: pending
 
 ## 一、批准范围
@@ -98,14 +98,16 @@ merge_ref: pending
 - Windows 修复提交 `436f7273b589f0dcca0c574aae611bf919d687f8` 触发运行 `29916670916`，六 Job 全绿且成功 Artifact 数为 `0`。
 - macOS 条件编译失败提交 `01a99167c3729c2e1269b289433ee310a4ebaa8c` 只在 platform crate 加入 macOS cfg `compile_error!`；运行 `29917061781` 中 macOS 桌面冷构建报告 `GATE3_MACOS_CONDITIONAL_COMPILE_FAILURE`，Linux/Windows 与治理成功。
 - `required` 的唯一 failure 为 `macos=failure`；失败 Artifact 只有 macOS `desktop-build.log`/`toolchain.txt` 与 `required.json`。当前修复删除探针，不修改 Windows/macOS 平台语义。
+- macOS 修复提交 `41c0cc2924a45f3d8e2a5fe2e47e2e254a9dbb3b` 触发运行 `29917649550`，六 Job 全绿且成功 Artifact 数为 `0`；五类受控失败语义全部完成普通提交 RED→GREEN 闭环。
+- Fresh 收口确认 PR `#21` Head 与远端分支均为 `41c0cc2924a45f3d8e2a5fe2e47e2e254a9dbb3b`，Review 对话为 `0`、自动合并为空、Issue `#19` 仍 OPEN；Ruleset `19395456` active、无 bypass、审批数 `0`、必须解决对话、Squash-only，具备合并权限的人类维护者仍只有 `nonononull`。
 
 ## 九、下一合法批次
 
-1. 提交当前 metrics 日志合同、状态回写和 `docs/reports/rust-ci-cold-baseline.md`，普通 push 触发新的无缓存三平台运行。
-2. 按 Runtime Workflow 用普通提交依次制造并修复治理、rustfmt、通用 Rust、Windows 条件编译和 macOS 条件编译失败；每次读取日志确认根因，禁止 rerun 旧失败。
-3. Linux、Windows、macOS 各收集至少三次无缓存成功样本后，更新 PR 正文、Issue 评论和 Review 证据；CI 稳定前不得修改 `main` Ruleset required checks，也不得在本地机器执行全 Workspace 或桌面重型编译。
+1. 提交最终控制面 checkpoint 并执行 Fresh 本地轻量验证；该提交不得修改产品语义、Ruleset、`upstream/` 或外部 AGOS。
+2. 普通 push 后确认最终 Head 的 `CI / required` 与所有适用 Job 成功，更新 PR 正文、Issue 评论和 Review 证据，并将 Draft PR 转为 Ready for review。
+3. 等待项目所有者新的明确 Squash Merge 授权；未授权前不得合并或关闭 Issue `#19`。
 
 ## 十、收口边界
 
-- PR 与首轮全绿 CI 已有真实引用；Review 与 merge 字段继续保持 `pending`，不得提前宣称可合并。
+- PR、CI、失败语义、冷构建与 Review 对话数量已有真实证据；merge 与项目所有者最终授权继续保持 `pending`，不得提前合并。
 - 最终 PR 必须包含 `Closes #19`，所有适用 Job 成功、Review 对话根因闭环后，再等待项目所有者新的 Squash Merge 授权。

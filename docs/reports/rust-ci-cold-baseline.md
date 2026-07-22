@@ -1,7 +1,7 @@
 # Rust CI 无缓存冷构建基线
 
 schema_version: inputcodex.rust-ci-cold-baseline.v1
-report_status: minimum-samples-collected-failure-semantics-in-progress
+report_status: minimum-baseline-complete
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 pr_ref: https://github.com/nonononull/inputcodex/pull/21
 workflow_ref: .github/workflows/ci.yml
@@ -13,6 +13,8 @@ cache_policy: disabled-and-out-of-scope-for-issue-19
 dependency_package_count: 336
 workspace_package_count: 7
 external_package_count: 329
+failure_semantics_status: verified-5-of-5
+latest_full_green_ci_ref: https://github.com/nonononull/inputcodex/actions/runs/29917649550
 
 ## 一、测量边界
 
@@ -81,11 +83,11 @@ external_package_count: 329
 | `29910132968` | Workflow 文件级失败，0 Job | job 级 `env` 使用不可用的 `runner.temp` | 后续普通提交改为 `RUNNER_TEMP` + `GITHUB_ENV` | 否 |
 | `29910379208` | Workflow 文件级失败，0 Job | 同上；用于取得官方行级注解 | 不 rerun，继续由修复提交触发新运行 | 否 |
 | `29910847062` | Linux Clippy 与 required 失败 | Linux 下无条件导入仅供 Windows/macOS 使用的 `PlatformKind` | 后续普通提交按 cfg 收紧导入 | 否 |
-| `29913582488` | governance 与 required 失败，三平台成功 | 受控 `.ts` 探针触发 `SCRIPT_LANGUAGE_FORBIDDEN` | 删除探针并由后续普通提交重新验证 | 否 |
+| `29913582488` | governance 与 required 失败，三平台成功 | 受控 `.ts` 探针触发 `SCRIPT_LANGUAGE_FORBIDDEN` | `d474c47` 删除探针，运行 `29914029406` 六 Job 全绿 | 否 |
 | `29914734781` | linux-quality 与 required 失败，Windows/macOS 成功 | 受控单行格式差异使 `cargo fmt --check` 失败 | `71be06a` 恢复格式，运行 `29915134906` 六 Job 全绿 | 否 |
 | `29915537702` | Linux、Windows、macOS 与 required 失败 | 全平台 `compile_error!` 探针触发稳定标记 `GATE3_GENERIC_RUST_COMPILE_FAILURE` | `3ca5866` 删除探针，运行 `29915879951` 六 Job 全绿 | 否 |
 | `29916309635` | Windows 与 required 失败，Linux/macOS 成功 | Windows cfg `compile_error!` 探针触发 `GATE3_WINDOWS_CONDITIONAL_COMPILE_FAILURE` | `436f727` 删除探针，运行 `29916670916` 六 Job 全绿 | 否 |
-| `29917061781` | macOS 与 required 失败，Linux/Windows 成功 | macOS cfg `compile_error!` 探针触发 `GATE3_MACOS_CONDITIONAL_COMPILE_FAILURE` | 删除探针并由后续普通提交重新验证 | 否 |
+| `29917061781` | macOS 与 required 失败，Linux/Windows 成功 | macOS cfg `compile_error!` 探针触发 `GATE3_MACOS_CONDITIONAL_COMPILE_FAILURE` | `41c0cc2` 删除探针，运行 `29917649550` 六 Job 全绿 | 否 |
 
 ## 四、样本槽位
 
@@ -95,13 +97,13 @@ external_package_count: 329
 | Windows | `29911337652` | `29913139948` | `29914029406` | `3/3` |
 | macOS | `29911337652` | `29913139948` | `29914029406` | `3/3` |
 
-后续每个样本必须补：run/Head、排队时间、Job 时间、内部 metrics、Windows/macOS 二进制字节数、Artifact 数量、结论和异常说明。
+后续附加样本仍必须补：run/Head、排队时间、Job 时间、内部 metrics、Windows/macOS 二进制字节数、Artifact 数量、结论和异常说明。
 
 ## 五、当前超时依据
 
 | Job | Workflow 超时 | 三样本中位数 | 三样本范围 | 当前结论 |
 | --- | ---: | ---: | ---: | --- |
-| linux-quality | 30 分钟 | 133 秒 | 112–141 秒 | 保持；失败语义尚未全部完成 |
+| linux-quality | 30 分钟 | 133 秒 | 112–141 秒 | 保持；最低基线与失败语义均已完成 |
 | windows | 45 分钟 | 212 秒 | 211–213 秒 | 保持；Windows 为稳定最慢平台 |
 | macos | 45 分钟 | 96 秒 | 94–152 秒 | 保持；样本 2 存在明显但未超时的波动 |
 

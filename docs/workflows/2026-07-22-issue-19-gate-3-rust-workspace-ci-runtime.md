@@ -1,6 +1,6 @@
 # Issue #19 Runtime Workflow：Gate 3 纯 Rust Workspace 与首版三平台 CI
 
-workflow_status: failure-semantics-and-cold-baseline-in-progress
+workflow_status: pr-review-ready-owner-merge-authorization-pending
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 session_plan_ref: docs/plans/sessions/2026-07-22-issue-19-gate-3-rust-workspace-ci.md
 implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
@@ -20,7 +20,10 @@ scope_hash: sha256:2e101627480012d57d6d0472a08cfbe03fc401f6ac74ef3ae1e6a42929ed6
 - Phase 6 已完成变更收集器、许可证一致性门禁和首版六 Job Workflow；当前合同为 `30/30`。CI checkpoint `f3107dd16705dd3a25bc8c3acc540a3c6c6990a3` 已普通 push 并回写 Issue 评论 `5044470597`，Draft PR 为 `#21`。
 - Draft PR `#21` 的运行 `29910132968` 与 `29910379208` 证明 job 级 `env` 不支持 `runner.temp`；运行 `29910847062` 进一步证明 Linux 条件导入根因，`required` 对真实失败正确阻断。两类问题均用后续普通提交修复，未 rerun 旧失败。
 - 提交 `bd4610f6e98dc597bddf02c584d0f0fc616cac7b` 触发运行 `29911337652`，classify、governance、linux-quality、windows、macos、required 全绿，成功 Artifact 数为 `0`；精确 Rust `1.97.1` 与 Iced/desktop 三平台证据已成立。
-- 首个成功样本的 metrics 只写 Step Summary，当前 API 无法在完成后复取二进制字节数；已用合同 RED→GREEN 要求后续 metrics 同时写控制台日志与 Step Summary，当前转入 Phase 7。
+- 首个成功样本的 metrics 只写 Step Summary，当前 API 无法在完成后复取二进制字节数；已用合同 RED→GREEN 要求后续 metrics 同时写控制台日志与 Step Summary。
+- Phase 7 已完成：治理、rustfmt、通用 Rust、Windows 条件编译、macOS 条件编译五类失败语义均由普通修复提交恢复全绿，未 rerun 旧失败、未 Force Push、未关闭平台 Job。
+- Linux、Windows、macOS 已各取得 `3/3` 次无缓存成功样本；最新产品源码修复运行 `29917649550` 六 Job 全绿且成功 Artifact 数为 `0`。
+- 当前进入 Phase 8：提交最终控制面 checkpoint，等待最终 PR Head 的六 Job 与 Fresh Review 证据，转为 Ready for review 后停在新的项目所有者 Squash Merge 授权前。
 
 ## Phase 0：startup-baseline
 
