@@ -150,7 +150,7 @@ GREEN 夹具覆盖空 diff、文档/重型路径、删除/重命名、真实 Git
 本地只验证 Workflow 语法和治理合同，不执行三平台 Rust 全量编译：
 
 ```powershell
-python -c "from pathlib import Path; import yaml; yaml.safe_load(Path('.github/workflows/ci.yml').read_text(encoding='utf-8')); print('CI_YAML_PARSE_OK')"
+python -c "from pathlib import Path; import yaml; data=yaml.safe_load(Path('.github/workflows/ci.yml').read_text(encoding='utf-8')); jobs=data['jobs']; invalid=[name for name,job in jobs.items() if any('runner.' in str(value) for value in (job.get('env') or {}).values())]; assert not invalid, f'runner context is unavailable in job-level env: {invalid}'; print('CI_YAML_PARSE_OK')"
 if ($LASTEXITCODE -ne 0) { throw 'CI Workflow YAML 解析失败。' }
 
 $workflow = Get-Content -LiteralPath '.github/workflows/ci.yml' -Raw -Encoding utf8

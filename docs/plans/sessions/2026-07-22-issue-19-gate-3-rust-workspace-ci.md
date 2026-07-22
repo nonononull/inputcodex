@@ -3,7 +3,7 @@
 schema_version: inputcodex.session-plan.v1
 task_id: 2026-07-22-issue-19-gate-3-rust-workspace-ci
 work_class: major
-task_status: first-ci-checkpoint-pushed-awaiting-pr
+task_status: first-ci-real-red-root-cause-fix-in-progress
 task_summary: 按已批准的 Gate 3 合同建立七成员纯 Rust Workspace、Iced 展示层隔离、最小加载/平台语义、治理脚本与首版无缓存三平台 CI，不迁移任何上游业务功能。
 project_root: C:/Users/dashuai/Documents/inputcodex
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
@@ -269,3 +269,5 @@ owner_merge_authorization_ref: pending-new-owner-authorization-required
 - 当前四份 PowerShell 脚本 AST 为 `0` 个错误，完整合同为 `CI_CONTRACT_GREEN passed=29`，真实仓库政策返回 `ok=true`、`violation_count=0`。
 - `.github/workflows/ci.yml` 已创建固定六 Job、`contents: read`、PR/main/manual 事件、并发取消、无 Cache、失败白名单 Artifact 与 `retention-days: 7`；`actions/checkout` 与 `actions/upload-artifact` 均 Fresh 固定到 `v7.0.1` 的 Node 24 不可变提交。
 - 本地 YAML 解析与 Workflow 静态合同已通过；这些证据不等于 Rust `1.97.1`、Iced/desktop 或三平台编译通过，下一步必须普通提交/push 后创建关联 PR 并观察 GitHub Actions。
+- Draft PR `#21` 创建后，GitHub 对提交 `f3107dd` 与 `96374d9` 均生成工作流文件级失败且没有 Job；运行 `29910379208` 的官方注解精确指出三处 job 级 `env` 中 `runner.temp` 不可用。
+- 根因修复不降低合同：移除三个平台 Job 的 job 级 `REPORT_DIR` 表达式，改为各 Job 首步用运行时 `RUNNER_TEMP` 创建目录并写入 `GITHUB_ENV`；本地 YAML 门禁新增禁止 job 级 `runner.*` 上下文检查。

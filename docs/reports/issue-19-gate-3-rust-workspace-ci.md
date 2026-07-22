@@ -1,6 +1,6 @@
 # Issue #19：Gate 3 纯 Rust Workspace 与首版三平台 CI 报告
 
-report_status: first-ci-checkpoint-pushed-awaiting-pr
+report_status: first-ci-real-red-root-cause-fix-in-progress
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 branch_ref: codex/issue-19-gate-3-rust-workspace-ci
 baseline_ref: 477d110a9b284e127af365f5278901bcfa69e093
@@ -77,6 +77,8 @@ merge_ref: pending
 - 四份 PowerShell 脚本 AST 为 `0` 个错误，完整合同输出 `CI_CONTRACT_GREEN passed=29`，真实仓库政策返回 `ok=true`、`violation_count=0`。
 - 首版 `CI` Workflow 固定 `classify`、`governance`、`linux-quality`、`windows`、`macos`、`required` 六个 Job；只读权限、并发取消、精确 Rust、无 Cache、失败白名单 Artifact 和 7 天保留期均已本地静态验证。两个官方 Action 均 Fresh 锁定到 `v7.0.1` 的 Node 24 不可变提交。
 - 本地 YAML 解析通过，但精确 Rust `1.97.1`、Iced/desktop、Linux/Windows/macOS 及 `required` 仍是远端待验证事实，不提前宣称通过。
+- Draft PR `#21` 首轮运行 `29910132968` 与 `29910379208` 均在创建 Job 前失败；GitHub 注解将根因定位到三个平台 Job 的 job 级 `env` 使用了不可用的 `runner.temp` 上下文。
+- 修复改为平台 Job 首步从 `RUNNER_TEMP` 计算报告目录并写入 `GITHUB_ENV`，不改变 Artifact 白名单、权限、超时、Runner 或构建命令；本地 YAML 门禁同步拒绝未来 job 级 `runner.*` 回归。
 
 ## 九、下一合法批次
 

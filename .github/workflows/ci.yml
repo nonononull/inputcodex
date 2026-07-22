@@ -229,13 +229,18 @@ jobs:
     if: ${{ needs.classify.outputs.heavy == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    env:
-      REPORT_DIR: ${{ runner.temp }}/inputcodex-ci/linux-quality
     steps:
       - name: 检出仓库
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
+
+      - name: 初始化 Linux 报告目录
+        shell: pwsh
+        run: |
+          $reportDir = Join-Path $env:RUNNER_TEMP 'inputcodex-ci/linux-quality'
+          New-Item -ItemType Directory -Path $reportDir -Force | Out-Null
+          "REPORT_DIR=$reportDir" | Add-Content -LiteralPath $env:GITHUB_ENV -Encoding utf8
 
       - name: 安装 Linux 展示层构建依赖
         shell: bash
@@ -326,13 +331,18 @@ jobs:
     if: ${{ needs.classify.outputs.heavy == 'true' }}
     runs-on: windows-latest
     timeout-minutes: 45
-    env:
-      REPORT_DIR: ${{ runner.temp }}/inputcodex-ci/windows
     steps:
       - name: 检出仓库
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
+
+      - name: 初始化 Windows 报告目录
+        shell: pwsh
+        run: |
+          $reportDir = Join-Path $env:RUNNER_TEMP 'inputcodex-ci/windows'
+          New-Item -ItemType Directory -Path $reportDir -Force | Out-Null
+          "REPORT_DIR=$reportDir" | Add-Content -LiteralPath $env:GITHUB_ENV -Encoding utf8
 
       - name: 安装并核验 Rust 1.97.1
         shell: pwsh
@@ -410,13 +420,18 @@ jobs:
     if: ${{ needs.classify.outputs.heavy == 'true' }}
     runs-on: macos-latest
     timeout-minutes: 45
-    env:
-      REPORT_DIR: ${{ runner.temp }}/inputcodex-ci/macos
     steps:
       - name: 检出仓库
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
+
+      - name: 初始化 macOS 报告目录
+        shell: pwsh
+        run: |
+          $reportDir = Join-Path $env:RUNNER_TEMP 'inputcodex-ci/macos'
+          New-Item -ItemType Directory -Path $reportDir -Force | Out-Null
+          "REPORT_DIR=$reportDir" | Add-Content -LiteralPath $env:GITHUB_ENV -Encoding utf8
 
       - name: 安装并核验 Rust 1.97.1
         shell: pwsh

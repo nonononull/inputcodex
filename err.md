@@ -395,6 +395,15 @@
 - 验证：Issue 评论 `5044470597` 当前精确包含 tree `1dc0caf58276d67731600a157adc4abd1a1f9e6e`，且不再包含 `System.Object[]`；commit 与 parent 也分别匹配本地提交和其单一父提交。
 - 关联：GitHub Issue `#19`、评论 `5044470597`、提交 `f3107dd16705dd3a25bc8c3acc540a3c6c6990a3`。
 
+### 2026-07-22：GitHub Actions job 级 env 不支持 runner.temp 上下文
+
+- 环境：Draft PR `#21` 创建后，首版 `.github/workflows/ci.yml` 尝试在 `linux-quality`、`windows`、`macos` 的 job 级 `env` 设置 `${{ runner.temp }}/inputcodex-ci/...`。
+- 现象：运行 `29910132968` 与 `29910379208` 均为工作流文件级 failure、Job 数为 `0`；GitHub UI 注解报告第 `233`、`330`、`414` 行 `Unrecognized named-value: 'runner'`。
+- 根因：`runner` 上下文只在 Runner 已分配后的步骤上下文可用，不能在 `jobs.<job_id>.env` 的调度前求值阶段使用；本地通用 YAML 解析无法验证 GitHub 上下文可用性。
+- 处理：删除三个 job 级 `REPORT_DIR`，在各平台 Job 的第一个 PowerShell 步骤用 `$env:RUNNER_TEMP` 计算目录并写入 `$env:GITHUB_ENV`；Artifact 仍只引用步骤上下文允许的 `${{ runner.temp }}` 白名单路径。
+- 验证：本地 PyYAML 门禁新增遍历所有 job 级 `env` 并拒绝 `runner.*`；修复后必须通过新普通提交触发 PR synchronize 运行，不 rerun 旧失败。
+- 关联：GitHub PR `#21`、运行 `29910132968`、运行 `29910379208`、`.github/workflows/ci.yml`、`build.md`。
+
 ## 记录模板
 
 ```text
