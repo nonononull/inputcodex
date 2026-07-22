@@ -23,7 +23,9 @@ pr_ref: pending
 - 36 条最大范围使用 Ordinal 排序、UTF-8 无 BOM、LF 和末尾 LF 计算，哈希为 `sha256:e8a1cbccfc3f0026e90fcb49264de5ea69980fa2e1faa03b520d9bedaf61e772`。
 - AGOS default entry report-only 返回 `needs-input / unregistered`，已按项目原生合同绕过；本任务不修复或登记 AGOS。
 - control-plane checkpoint 已以普通提交 `80e0ddbb734496e95e89fe57fd89ddb668c8c276` 推送，并回写 Issue 评论 `5047590347`。
-- 项目所有者已通过 Issue 评论 `5047650154` 批准实施；当前进入 Phase 2 依赖 Fresh 与 RED schema。
+- 项目所有者已通过 Issue 评论 `5047650154` 批准实施。
+- Phase 2 已完成依赖锁定和三组 RED 定向编译：`catalog_schema`、`contract_schema`、`fixture_safety` 均以退出码 `1` 失败在 crate root 缺少预期 API；`E0282` 为未解析返回类型的级联诊断，未发现依赖、YAML、fixture 或测试语法错误。
+- 当前只允许形成普通 RED checkpoint 并回写 Issue；生产实现仍为零，尚未进入 Phase 3。
 
 ## Phase 0：startup-baseline
 
@@ -50,6 +52,13 @@ pr_ref: pending
 3. 先创建 catalog、contract、fixture 的失败测试；RED 必须来自目标类型/验证能力缺失。
 4. RED 覆盖：非法 feature/contract/fixture ID、未知 domain/status、缺失字段、重复 ID、悬空引用、非法加载状态、路径穿越、绝对路径、敏感值和跨 feature fixture 引用。
 5. 保存精确命令、退出码和根因，形成普通 RED checkpoint 并回写 Issue。
+
+执行结果：
+
+- `catalog_schema --no-run`：退出码 `1`，根因 `E0432`，缺少 catalog 稳定类型、解析与验证 API。
+- `contract_schema --no-run`：退出码 `1`，根因 `E0432`，缺少 contract 加载状态、解析与验证 API。
+- `fixture_safety --no-run`：退出码 `1`，根因 `E0432`，缺少 fixture manifest、载荷安全与验证 API。
+- 三组测试均已通过依赖解析和测试文件语法阶段；`catalog_repository` 延后到 Phase 4 数据面建立后执行。
 
 ## Phase 3：rust-schema-green
 

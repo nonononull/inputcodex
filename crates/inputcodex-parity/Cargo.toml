@@ -10,6 +10,8 @@ publish = false
 [dependencies]
 inputcodex-domain.workspace = true
 inputcodex-application.workspace = true
+serde.workspace = true
+yaml_serde.workspace = true
 
 [lints]
 workspace = true

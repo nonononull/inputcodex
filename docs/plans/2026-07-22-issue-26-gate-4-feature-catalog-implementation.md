@@ -148,12 +148,12 @@ docs/workflows/2026-07-22-issue-26-gate-4-feature-catalog-runtime.md
 
 **文件：** `Cargo.toml`、`Cargo.lock`、`crates/inputcodex-parity/Cargo.toml`、四个测试文件。
 
-- [ ] Fresh 核对 `serde 1.0.229` 与 `yaml_serde 0.10.4` 的版本、许可证、撤回状态和 Rust `1.97.1` 兼容性。
-- [ ] 在根 Workspace 固定依赖版本，在 parity crate 只启用必要 feature。
-- [ ] 先编写目录 ID/domain/status 的失败测试，证明当前 crate 不具备解析与验证能力。
-- [ ] 编写合同必填字段、六状态加载机、请求标识和 fixture 引用失败测试。
-- [ ] 编写路径穿越、真实秘密、私人绝对路径和跨 feature fixture 引用失败测试。
-- [ ] 保存 RED 命令、退出码和根因；RED 不能由 YAML 拼写或测试夹具错误造成。
+- [x] Fresh 核对 `serde 1.0.229` 与 `yaml_serde 0.10.4` 的版本、许可证、撤回状态和 Rust `1.97.1` 兼容性。
+- [x] 在根 Workspace 固定依赖版本，在 parity crate 只启用必要 feature。
+- [x] 先编写目录 ID/domain/status 的失败测试，证明当前 crate 不具备解析与验证能力。
+- [x] 编写合同必填字段、六状态加载机、请求标识和 fixture 引用失败测试。
+- [x] 编写路径穿越、真实秘密、私人绝对路径和跨 feature fixture 引用失败测试。
+- [x] 保存 RED 命令、退出码和根因；三组定向编译均以退出码 `1` 失败在 crate root 缺少预期 API，`E0282` 仅为未解析返回类型导致的级联错误，依赖下载、YAML 文本和测试语法均已通过此前编译阶段。
 - [ ] 形成独立 RED checkpoint 提交并回写 Issue。
 
 ### Task 2：最小 Rust 类型与解析 GREEN

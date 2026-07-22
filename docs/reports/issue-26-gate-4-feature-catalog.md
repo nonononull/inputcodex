@@ -1,7 +1,7 @@
 # Issue #26：Gate 4 功能目录、行为合同与脱敏夹具报告
 
 schema_version: inputcodex.report.v1
-report_status: implementation-approved-dependency-red-in-progress
+report_status: red-schema-verified-checkpoint-pending
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/26
 branch_ref: codex/issue-26-gate-4-feature-catalog
 baseline_ref: 431682296f53e86de1184c732b0d4748857c9390
@@ -15,7 +15,7 @@ implementation_approval_ref: issuecomment:5047650154
 
 - Issue `#26` 已建立并验证为 OPEN，标签为 `type:architecture`、`gate:4`。
 - 项目所有者已要求建立独立 Session Plan、Runtime Workflow、精确范围和新 `scope_hash`。
-- 当前只建立项目原生控制面；功能目录、合同、fixture、Cargo 和 Rust 实现尚未开始。
+- 依赖与 RED schema 批次已执行：Cargo 依赖已固定，四个测试文件已建立，生产 Rust 实现仍为零。
 - 当前授权允许 36 条范围内实现、验证、普通提交、普通推送和 PR 创建，不包含最终合并。
 - 未知 PR 与未知最终 Head 不能取得空白合并授权；最终 Squash Merge 仍需具体 owner 决策证据。
 
@@ -73,14 +73,21 @@ implementation_approval_ref: issuecomment:5047650154
 - 未经 owner 决定，不得把条目标记为 `exception-approved` 或 `retired`。
 - 证据不足时必须记录缺口，不能宣称目录完整。
 
-## 八、待完成
+## 八、RED schema 证据
+
+- `catalog_schema --no-run`、`contract_schema --no-run` 与 `fixture_safety --no-run` 均使用既有 Rust `1.93.1` 加 `--ignore-rust-version` 进行本地定向编译，退出码均为 `1`。
+- 三组首要诊断均为 `E0432`，分别证明 catalog、contract 和 fixture 的预期公开 API 尚不存在，符合 TDD RED 根因。
+- 输出中的 `E0282` 是目标函数未解析后返回类型未知的级联诊断；依赖下载、Cargo 锁定、YAML 测试文本和测试语法未产生错误。
+- `catalog_repository` 已建立但未运行；它必须等 source-index、五分域目录、合同和 fixture 数据存在后才能提供有效仓库级证据。
+
+## 九、待完成
 
 - 8 条控制面路径、36 条范围、scope hash、占位符、治理合同、仓库政策和空白检查已通过。
 - 普通 control-plane checkpoint `80e0ddbb734496e95e89fe57fd89ddb668c8c276` 已 push。
 - Issue `#26` 评论 `5047590347` 已回写 commit、计划引用、范围哈希和实现待批准边界。
-- 项目所有者已批准实现；当前进入依赖与 RED schema 批次。
+- 项目所有者已批准实现；当前正在形成并回写独立 RED checkpoint，之后才可进入最小 Rust schema GREEN。
 
-## 九、完成状态占位
+## 十、完成状态占位
 
 以下字段只在真实证据产生后填写，当前不得伪造：
 
@@ -92,7 +99,7 @@ source_entry_count: pending-implementation
 excluded_entry_count: pending-implementation
 exception_pending_count: pending-implementation
 coverage_gap_count: pending-implementation
-red_checkpoint_ref: pending-implementation
+red_checkpoint_ref: pending-current-red-checkpoint
 green_checkpoint_ref: pending-implementation
 pr_ref: pending-implementation
 ci_ref: pending-implementation

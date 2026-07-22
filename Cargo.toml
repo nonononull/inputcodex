@@ -24,6 +24,8 @@ inputcodex-infrastructure = { path = "crates/inputcodex-infrastructure" }
 inputcodex-platform = { path = "crates/inputcodex-platform" }
 inputcodex-presentation = { path = "crates/inputcodex-presentation" }
 inputcodex-parity = { path = "crates/inputcodex-parity" }
+serde = { version = "=1.0.229", features = ["derive"] }
+yaml_serde = "=0.10.4"
 iced = { version = "=0.14.0", default-features = false, features = [
     "wgpu",
     "thread-pool",

@@ -1,7 +1,7 @@
 # Session Plan：Issue #26 Gate 4 功能目录、行为合同与脱敏夹具
 
 schema_version: inputcodex.session-plan.v1
-session_status: implementation-approved-dependency-red-in-progress
+session_status: red-schema-verified-checkpoint-pending
 task_id: 2026-07-22-issue-26-gate-4-feature-catalog
 work_class: major
 task_summary: 建立上游 v1.2.41 功能目录、行为合同、脱敏夹具和纯 Rust parity 验证器，不迁移产品功能，不进行性能优化。
@@ -20,6 +20,7 @@ runtime_workflow_ref: docs/workflows/2026-07-22-issue-26-gate-4-feature-catalog-
 report_ref: docs/reports/issue-26-gate-4-feature-catalog.md
 pr_ref: pending
 control_plane_checkpoint_ref: commit:80e0ddbb734496e95e89fe57fd89ddb668c8c276;issuecomment:5047590347
+red_checkpoint_ref: pending-current-red-checkpoint
 scope_hash: sha256:e8a1cbccfc3f0026e90fcb49264de5ea69980fa2e1faa03b520d9bedaf61e772
 scope_path_count: 36
 control_plane_path_count: 8
@@ -226,3 +227,11 @@ GitHub 全量验证:
 - 依赖元数据无法确认，RED/GREEN 根因不成立，或目录完整性无法证明却准备宣称完成。
 - 出现无效功能、副作用、错误语义或双平台冲突，但没有独立 `parity-exception` 与 owner 决定。
 - PR Head 漂移、适用 CI 失败、Review 根因未解决或缺少具体 PR 的 Squash Merge 授权。
+
+## 十一、RED schema 执行证据
+
+- `cargo +1.93.1-x86_64-pc-windows-msvc test --ignore-rust-version -p inputcodex-parity --test catalog_schema --no-run`：退出码 `1`；依赖下载与 parity crate 编译完成后，`E0432` 明确指出 `FeatureDomain`、`ParityStatus`、`ValidationCode`、`parse_feature_catalog` 和 `validate_feature_catalog` 尚不存在。
+- `cargo +1.93.1-x86_64-pc-windows-msvc test --ignore-rust-version -p inputcodex-parity --test contract_schema --no-run`：退出码 `1`；`E0432` 明确指出 `LoadingState`、`ValidationCode`、`parse_contract_catalog` 和 `validate_contract_catalog` 尚不存在。
+- `cargo +1.93.1-x86_64-pc-windows-msvc test --ignore-rust-version -p inputcodex-parity --test fixture_safety --no-run`：退出码 `1`；`E0432` 明确指出 `ValidationCode`、`parse_fixture_manifest`、`validate_fixture_manifest` 和 `validate_fixture_payload` 尚不存在。
+- 三组输出中的 `E0282` 都是目标函数未解析后返回类型未知的级联诊断，不是独立根因；没有 YAML 拼写、fixture 内容、依赖下载或测试语法错误。
+- `catalog_repository` 已先写入，但按计划保留到 source-index 与目录数据建立后运行，不能用空仓库数据伪造 RED。
