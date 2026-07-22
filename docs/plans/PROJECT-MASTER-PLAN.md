@@ -1,34 +1,37 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: 2026-07-22-issue-22-gate-3-closeout
-active_gate: Gate 3：合并证据 closeout，Gate 4 锁定
-last_verified_gate: Gate 3 已通过 PR #21 Squash Merge；merge 0716ec0 单父、tree 与最终 Head 等价、签名 valid，Issue #19 COMPLETED，main 运行 29919596057 六 Job 全绿
-next_legal_gate: 完成 Issue #22 独立 closeout PR；合并后保持 Gate 4 锁定，功能目录、性能预算或业务迁移必须由项目所有者批准新的独立 Issue
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/22
+active_task: 2026-07-22-issue-24-gate-4-feature-performance-plan
+active_gate: Gate 4：功能目录与性能基线规划活动，执行锁定
+last_verified_gate: Gate 3 已通过 PR #21 实现与 PR #23 独立 closeout；closeout merge f470c06 单父、tree 与最终 Head 等价、签名 valid，Issue #22 COMPLETED，main 运行 29922385227 六 Job 全绿
+next_legal_gate: 完成 Issue #24 规划 PR；合并后分别创建功能矩阵/合同夹具与性能基线/预算执行 Issue，并取得项目所有者新的明确批准
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/24
+closed_gate_3_closeout_issue_ref: https://github.com/nonononull/inputcodex/issues/22
 closed_implementation_issue_ref: https://github.com/nonononull/inputcodex/issues/19
-planning_issue_ref: https://github.com/nonononull/inputcodex/issues/17
+gate_3_planning_issue_ref: https://github.com/nonononull/inputcodex/issues/17
 upstream_watch_issue_ref: https://github.com/nonononull/inputcodex/issues/14
 transition_issue_ref: https://github.com/nonononull/inputcodex/issues/8
 upstream_sync_issue_ref: https://github.com/nonononull/inputcodex/issues/9
-active_branch_ref: codex/issue-22-gate-3-closeout
+active_branch_ref: codex/issue-24-gate-4-planning
 transition_branch_ref: codex/issue-8-gate-2-transition
-active_plan_ref: docs/plans/2026-07-22-issue-22-gate-3-closeout.md
-active_session_plan_ref: docs/plans/sessions/2026-07-22-issue-22-gate-3-closeout.md
-active_runtime_workflow_ref: docs/workflows/2026-07-22-issue-22-gate-3-closeout-runtime.md
-active_pr_ref: https://github.com/nonononull/inputcodex/pull/23
+active_plan_ref: docs/plans/2026-07-22-issue-24-gate-4-feature-performance-plan.md
+active_session_plan_ref: docs/plans/sessions/2026-07-22-issue-24-gate-4-feature-performance-plan.md
+active_runtime_workflow_ref: docs/workflows/2026-07-22-issue-24-gate-4-feature-performance-runtime.md
+active_pr_ref: pending-gate-4-planning-pr
+gate_3_closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/23
 gate_3_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/21
-planning_pr_ref: https://github.com/nonononull/inputcodex/pull/18
+gate_3_planning_pr_ref: https://github.com/nonononull/inputcodex/pull/18
 transition_pr_ref: https://github.com/nonononull/inputcodex/pull/10
 upstream_sync_pr_ref: https://github.com/nonononull/inputcodex/pull/11
-closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5, https://github.com/nonononull/inputcodex/pull/7, https://github.com/nonononull/inputcodex/pull/10, https://github.com/nonononull/inputcodex/pull/11, https://github.com/nonononull/inputcodex/pull/13, https://github.com/nonononull/inputcodex/pull/15, https://github.com/nonononull/inputcodex/pull/18, https://github.com/nonononull/inputcodex/pull/21
-active_report_ref: docs/reports/issue-22-gate-3-closeout.md
+closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5, https://github.com/nonononull/inputcodex/pull/7, https://github.com/nonononull/inputcodex/pull/10, https://github.com/nonononull/inputcodex/pull/11, https://github.com/nonononull/inputcodex/pull/13, https://github.com/nonononull/inputcodex/pull/15, https://github.com/nonononull/inputcodex/pull/18, https://github.com/nonononull/inputcodex/pull/21, https://github.com/nonononull/inputcodex/pull/23
+active_report_ref: docs/reports/issue-24-gate-4-feature-performance-plan.md
+gate_3_closeout_report_ref: docs/reports/issue-22-gate-3-closeout.md
 gate_3_implementation_report_ref: docs/reports/issue-19-gate-3-rust-workspace-ci.md
 gate_2_watch_report_ref: docs/reports/issue-14-gate-2-upstream-watch.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-decision_status: gate-3-closeout-approved-and-squash-merge-authorized-gate-4-locked
+decision_status: gate-4-option-2-planning-approved-pr-creation-authorized-execution-locked
 
 ## 当前状态
 
@@ -44,7 +47,9 @@ decision_status: gate-3-closeout-approved-and-squash-merge-authorized-gate-4-loc
 - Issue `#17` / PR `#18` 已完成 Gate 3 规划交付；PR `#18` 的 Squash Merge 提交为 `477d110a9b284e127af365f5278901bcfa69e093`，Issue `#17` 已关闭。
 - Issue `#19` / PR `#21` 已完成 Gate 3 实现：治理合同 `30/30`、七成员 Workspace、首版无缓存三平台 CI、五类失败语义与三平台各 `3/3` 次最低冷构建基线均已进入 `main`。
 - PR `#21` 于 `2026-07-22T12:25:59Z` Squash Merge 为 `0716ec0debcd3e059cc4ca88a072232841ca73b4`；Issue `#19` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29919596057` 六 Job 全绿且成功 Artifact 数为 `0`。
-- 当前活动任务为 Issue `#22`，只通过独立 closeout PR 持久化 merge/tree/签名/Issue/CI/Review/Ruleset 证据并修正陈旧控制面；项目所有者已授权该冻结范围的最终 Squash Merge。
+- Issue `#22` / PR `#23` 已完成 Gate 3 独立 closeout；PR `#23` 于 `2026-07-22T13:05:34Z` Squash Merge 为 `f470c062037042a1f7833a29cdcf216f6c0f5601`，Issue `#22` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29922385227` 六 Job 全绿且成功 Artifact 数为 `0`。
+- 当前活动任务为 Issue `#24`，项目所有者已批准“两阶段拆分”；本任务只冻结 Gate 4 规划合同和后续执行 Issue 边界，授权覆盖规划 PR 创建但不覆盖合并或实际执行。
+- 最新正式 Release 仍为 `v1.2.41`；上游 `main` 已前进到 `91376ee3518cb5fe5ec8eead179418f706c25870`，只由 Issue `#20` 预警，不改变当前缓存功能真源。
 - Issue `#8` 的过渡交付为 PR `#10`；该 PR 只包含文档与验证控制面，并按项目所有者明确授权执行 Squash Merge。
 - AGOS 仍是可选外部辅助；本仓库可用原生控制面时不运行它，不在本任务中修改或优化它。
 
@@ -92,19 +97,23 @@ decision_status: gate-3-closeout-approved-and-squash-merge-authorized-gate-4-loc
 - [x] 通过 Issue `#12` / PR `#13` 回写 merge ref、`build.md`、`err.md` 和最新控制面。
 - [x] 通过 Issue `#14` / PR `#15` 建立每 6 小时只管理 Issue 的上游监控，并完成两次真实 Actions 幂等验证。
 
-### Gate 3：纯 Rust 工作区骨架（实现完成，closeout 活动）
+### Gate 3：纯 Rust 工作区骨架（已完成）
 
 - [x] 通过 Issue `#17` / PR `#18` 冻结分层 Workspace、Iced 隔离、平台端口、加载状态、性能诊断和三平台 CI 合同。
 - [x] 创建实现 Issue `#19`、独立分支、Session Plan、Runtime Workflow 与初始报告，并取得项目所有者实现批准。
 - [x] 先建立 `scripts/ci` 的可信 RED/GREEN 治理合同，再创建七成员 Workspace；当前合同为 `30/30`，七成员 Workspace checkpoint 已推送。
 - [x] 在同一实现 PR 中通过标准 Linux、Windows、macOS Runner、`required` 汇总、五类真实失败恢复和三平台各 `3/3` 次无缓存冷构建基线。
 - [x] PR `#21` 最终 Head 六 Job 全绿、Review 对话为 `0`，已按明确授权 Squash Merge；Issue `#19` 已关闭，合并后主干 CI 全绿。
-- [x] 已建立 Issue `#22` / PR `#23` 独立 closeout 控制面，正在等待最终 Head 的 Review/CI 与已授权 Squash Merge。
+- [x] Issue `#22` / PR `#23` 已完成独立 closeout，merge/tree/签名/Issue/CI/Review/Ruleset 和分支删除证据均已闭环。
 - 不迁移业务功能，不创建临时 UI 事实标准；最小窗口的视觉和交互默认由 Gemini 实现或审阅。
 
-### Gate 4：功能目录与性能基线（锁定）
+### Gate 4：功能目录与性能基线（规划活动，执行锁定）
 
-- 从上游快照生成首版功能矩阵、行为合同、脱敏夹具和性能预算。
+- [x] 创建 Issue `#24`，批准采用“规划合同 → 两个独立执行 Issue”的拆分方案。
+- [x] 冻结功能矩阵的稳定标识、证据路径、行为字段、既有一致性状态和决策引用。
+- [x] 冻结行为合同、脱敏夹具规则、性能测量协议和可比环境要求，不填写未经实测的预算。
+- [x] 定义“功能矩阵/行为合同/脱敏夹具”执行 Issue 与“性能基线/预算批准”执行 Issue 的互斥边界。
+- [ ] 规划 PR 通过 Review/CI 后，等待项目所有者单独授权 Squash Merge；合并前不得创建实际 `parity/`、`benchmarks/` 或产品实现。
 
 ### Gate 5：分域迁移（锁定）
 
@@ -140,10 +149,15 @@ decision_status: gate-3-closeout-approved-and-squash-merge-authorized-gate-4-loc
 - 当前 Gate 3 closeout Session Plan：`docs/plans/sessions/2026-07-22-issue-22-gate-3-closeout.md`。
 - 当前 Gate 3 closeout Runtime Workflow：`docs/workflows/2026-07-22-issue-22-gate-3-closeout-runtime.md`。
 - 当前 Gate 3 closeout 报告：`docs/reports/issue-22-gate-3-closeout.md`。
+- 当前 Gate 4 规划：`docs/plans/2026-07-22-issue-24-gate-4-feature-performance-plan.md`。
+- 当前 Gate 4 Session Plan：`docs/plans/sessions/2026-07-22-issue-24-gate-4-feature-performance-plan.md`。
+- 当前 Gate 4 Runtime Workflow：`docs/workflows/2026-07-22-issue-24-gate-4-feature-performance-runtime.md`。
+- 当前 Gate 4 初始报告：`docs/reports/issue-24-gate-4-feature-performance-plan.md`。
 
 ## 停止条件
 
 - 上游最新正式 Release 或 `v1.2.41` 标签提交发生变化。
 - 需要修改 `upstream/` 或 `source-lock.json`，但没有新的独立 upstream-sync Issue/PR 与项目所有者批准。
-- 在 Issue `#22` closeout PR 中需要修改 Cargo、Rust 产品、测试、CI、upstream、Ruleset、发布资产、Gate 4 功能或 AGOS。
+- 在 Issue `#24` 规划 PR 中需要创建 `parity/`、`benchmarks/`，或修改 Cargo、Rust 产品、测试、CI、upstream、Ruleset、发布资产或 AGOS。
+- 需要决定 `parity-exception`、运行上游/半成品、填写绝对性能预算或启动 Gate 4 执行，但没有新的独立 Issue 与项目所有者批准。
 - Fresh 验证失败、Ruleset 变化、Review 对话未闭环或出现未批准的一致性差异。

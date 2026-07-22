@@ -50,5 +50,6 @@
 ## 当前 Gate 边界
 
 - Gate 3 七成员纯 Rust Workspace、首版三平台 CI、失败语义和冷构建最低基线已通过 Issue `#19` / PR `#21` 进入 `main`；仓库已包含最小应用骨架，但尚未迁移任何上游业务功能。
-- Gate 3 合并证据由 Issue `#22` 的独立 closeout Issue/PR 持久化；该任务只允许治理与文档变更，不得修改产品源码、CI、`upstream/`、Ruleset 或 AGOS。
-- Gate 4 功能目录与性能预算仍处于锁定状态；开始功能映射、业务迁移或性能优化前，必须创建新的独立 Issue、Session Plan、Runtime Workflow，并取得项目所有者明确批准。
+- Gate 3 合并证据已通过 Issue `#22` / PR `#23` 完成独立 closeout；合并提交为 `f470c062037042a1f7833a29cdcf216f6c0f5601`，Issue `#22` 已按 `COMPLETED` 关闭，合并后 `main` CI 六 Job 全绿。
+- Issue `#24` 是当前 Gate 4 规划任务，只允许冻结功能矩阵、行为合同、脱敏夹具、性能测量协议和后续执行 Issue 边界；不得创建实际 `parity/` 数据、`benchmarks/`、产品实现或性能预算数值。
+- Gate 4 执行仍锁定；规划 PR 合并后，功能矩阵/合同夹具与性能基线/预算必须分别使用新的独立 Issue、Session Plan、Runtime Workflow，并再次取得项目所有者明确批准。
