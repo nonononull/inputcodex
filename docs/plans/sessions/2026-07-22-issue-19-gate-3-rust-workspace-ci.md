@@ -3,7 +3,7 @@
 schema_version: inputcodex.session-plan.v1
 task_id: 2026-07-22-issue-19-gate-3-rust-workspace-ci
 work_class: major
-task_status: workspace-local-light-verified-awaiting-checkpoint-push
+task_status: first-ci-local-static-green-awaiting-checkpoint-push
 task_summary: 按已批准的 Gate 3 合同建立七成员纯 Rust Workspace、Iced 展示层隔离、最小加载/平台语义、治理脚本与首版无缓存三平台 CI，不迁移任何上游业务功能。
 project_root: C:/Users/dashuai/Documents/inputcodex
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
@@ -29,10 +29,12 @@ red_contract_exit_code: 10
 red_contract_marker: CI_CONTRACT_RED_MISSING_IMPLEMENTATION
 red_checkpoint_ref: commit:67fe99457e1aa2717cc29c70d51114028d68dafd;issuecomment:5043557146
 green_contract_status: verified
-green_contract_passed: 27
+green_contract_passed: 23
 green_checkpoint_ref: commit:be9259f55b32014e918113936e6e6ddfdd16765f;issuecomment:5043682396
 governance_alignment_status: verified
+governance_alignment_passed: 27
 governance_alignment_checkpoint_ref: commit:2d8a1466ae42d6b208258bee3d0cb6bd5647bb12;issuecomment:5043770155
+current_governance_contract_passed: 29
 workspace_status: seven-members-local-light-green
 workspace_member_count: 7
 lock_package_count: 336
@@ -40,7 +42,9 @@ lock_external_package_count: 329
 local_toolchain_evidence: rust-1.93.1-ignore-rust-version-only
 exact_toolchain_evidence: pending-github-actions
 desktop_iced_compile: pending-github-actions
-workspace_checkpoint_ref: pending-push
+workspace_checkpoint_ref: commit:f93372fdc63cf8c628007117be4a8b222510957b;issuecomment:5044073911
+ci_workflow_status: local-static-green-awaiting-github-actions
+ci_checkpoint_ref: pending-push
 
 ## 一、批准决策
 
@@ -248,7 +252,7 @@ owner_merge_authorization_ref: pending-new-owner-authorization-required
 
 ## 十六、最小 Workspace 执行记录
 
-- 已创建七个显式成员、resolver `3`、统一 edition `2024`、Rust `1.97.1`、MIT、仓库地址和 `Cargo.lock`；`upstream/` 未进入 Workspace。
+- 已创建七个显式成员、resolver `3`、统一 edition `2024`、Rust `1.97.1`、与根 `LICENSE` 一致的 `AGPL-3.0-only`、仓库地址和 `Cargo.lock`；`upstream/` 未进入 Workspace。
 - domain/application 先以缺失 `DiagnosticCode`、`LoadCoordinator` 等符号取得编译 RED，再实现稳定诊断码、请求标识、六状态加载机、过期结果和取消后结果失效语义。
 - infrastructure/platform/parity/presentation 分别先以缺失端口类型取得 RED，再实现未配置数据源明确失败、Windows/macOS 统一平台语义、非发布目标 unsupported、稳定错误签名和展示层消息映射。
 - presentation 只有可选 `iced-runtime` 能直接启用 Iced `0.14.0`；desktop 仅依赖 presentation 暴露的启动入口，不直接依赖 Iced。UI 仍未建立设计系统。
@@ -256,3 +260,12 @@ owner_merge_authorization_ref: pending-new-owner-authorization-required
 - 本地现有 Rust `1.93.1` 下，metadata、fmt、domain check 与六个轻量 crate 测试通过；命令使用 `--ignore-rust-version`，只作为逻辑证据。
 - 精确 Rust `1.97.1` minimal 安装超过 5 分钟未完成，残留 rustup/rustc 进程已精确终止且工具链未安装；按本地轻验/云端全量合同不再重试，精确工具链与 Iced/desktop 编译等待 GitHub Actions。
 - 离线 `cargo tree` 因未下载 `arrayref` 源包失败；未为取证下载并编译完整 `329` 个外部包图，feature 图与真实桌面编译改由 CI 验证。
+
+## 十七、变更收集器与首版 CI 本地执行记录
+
+- `Collect-Changes.ps1` 通过 `System.Diagnostics.ProcessStartInfo` 调用 Git，使用 `--name-status -z`、rename/copy 检测和 NUL 解析，保留新增、修改、删除及重命名新旧路径，并把 `T` 稳定映射为 `M`。
+- 收集器 RED 先稳定为唯一 `CI_COLLECTOR_RED_MISSING_IMPLEMENTATION`；实现后暴露测试辅助函数把单行 Git 输出解包成字符的根因，修复返回形状后合同转绿。
+- 许可证对账发现根 `LICENSE`/README 为 GNU AGPLv3，而 Workspace 元数据误写为 MIT；已按仓库真源纠正为 `AGPL-3.0-only`，并新增拒绝错误许可证的治理合同，Iced 自身仍按 MIT 依赖审计。
+- 当前四份 PowerShell 脚本 AST 为 `0` 个错误，完整合同为 `CI_CONTRACT_GREEN passed=29`，真实仓库政策返回 `ok=true`、`violation_count=0`。
+- `.github/workflows/ci.yml` 已创建固定六 Job、`contents: read`、PR/main/manual 事件、并发取消、无 Cache、失败白名单 Artifact 与 `retention-days: 7`；`actions/checkout` 与 `actions/upload-artifact` 均 Fresh 固定到 `v7.0.1` 的 Node 24 不可变提交。
+- 本地 YAML 解析与 Workflow 静态合同已通过；这些证据不等于 Rust `1.97.1`、Iced/desktop 或三平台编译通过，下一步必须普通提交/push 后创建关联 PR 并观察 GitHub Actions。

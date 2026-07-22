@@ -1,6 +1,6 @@
 # Issue #19：Gate 3 纯 Rust Workspace 与首版三平台 CI 报告
 
-report_status: workspace-local-light-verified-awaiting-checkpoint-push
+report_status: first-ci-local-static-green-awaiting-checkpoint-push
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 branch_ref: codex/issue-19-gate-3-rust-workspace-ci
 baseline_ref: 477d110a9b284e127af365f5278901bcfa69e093
@@ -54,7 +54,7 @@ merge_ref: pending
 
 ## 六、最小 Workspace 证据
 
-- 七成员路径与批准合同一致，根清单使用 resolver `3`、edition `2024`、Rust `1.97.1`、MIT 和本仓 repository；每个 app/crate 均有独立 `build.md` 与 `err.md`。
+- 七成员路径与批准合同一致，根清单使用 resolver `3`、edition `2024`、Rust `1.97.1`、与根 `LICENSE` 一致的 `AGPL-3.0-only` 和本仓 repository；每个 app/crate 均有独立 `build.md` 与 `err.md`。
 - domain/application 的编译 RED 分别由缺失 `DiagnosticCode` 与加载状态 API 触发；最终 domain `1` 项、application `3` 项集成测试通过。
 - infrastructure、platform、parity、presentation 的编译 RED 分别由缺失批准类型触发；最终四个包各 `1` 项集成测试通过。
 - application 固化 `Idle / Loading / Ready / Empty / Failed / Cancelling`；新请求使旧结果过期，取消后结果失效，取消完成需要匹配请求标识。
@@ -64,19 +64,27 @@ merge_ref: pending
 
 ## 七、本地验证与资源边界
 
-- 治理合同 `27/27` 与真实仓库政策 `ok=true`；Cargo metadata、rustfmt、domain check 和六个轻量 crate 测试通过。
+- 治理合同 `29/29` 与真实仓库政策 `ok=true`；Cargo metadata、rustfmt、domain check 和六个轻量 crate 测试通过。
 - 本机只有 Rust `1.93.1`；轻验使用 `--ignore-rust-version`，不得解释为 Rust `1.97.1` 或桌面运行时通过。
 - Rust `1.97.1` minimal 安装超过 5 分钟仍无完成证据，已精确终止本次 rustup/rustc 残留，确认工具链未安装；按 CI 卸载合同不再消耗本地机器。
 - 首次非离线多包 RED 因 registry 刷新超时并留下 Cargo 进程；终止本次 PID 后用 `--offline` 立即复现批准 API 缺失，证明网络阶段与代码 RED 已分离。
 - 离线 feature tree 因缺少 `arrayref` crate 源包失败；没有为本地取证下载或编译完整 `329` 个外部包图，精确 feature 解析和 desktop 编译等待 GitHub Actions。
 
-## 八、下一合法批次
+## 八、变更收集器与首版 CI 本地证据
 
-1. 提交并普通 push Workspace checkpoint，在 Issue `#19` 回写七成员图、RED/GREEN、锁文件、本地轻验与云端待验证边界。
-2. 创建 `.github/workflows/ci.yml`，使用标准 GitHub-hosted runners 完成 Rust `1.97.1`、Iced/desktop、Linux/Windows/macOS 全量验证。
-3. CI 稳定前不得修改 `main` Ruleset required checks，不得在本地机器执行全 Workspace 或桌面重型编译。
+- 变更收集器以真实临时 Git 仓库覆盖新增、修改、删除和重命名，使用无 shell 拼接的 `ProcessStartInfo` 与 NUL 解析；收集器缺失 RED、单行输出形状错误和最终 GREEN 均有可复现根因。
+- 根 `Cargo.toml` 曾误把 Iced 的 MIT 许可证沿用为本项目许可证；已与根 `LICENSE`/README 对齐为 `AGPL-3.0-only`，并用独立 RED/GREEN 合同防止再次漂移。
+- 四份 PowerShell 脚本 AST 为 `0` 个错误，完整合同输出 `CI_CONTRACT_GREEN passed=29`，真实仓库政策返回 `ok=true`、`violation_count=0`。
+- 首版 `CI` Workflow 固定 `classify`、`governance`、`linux-quality`、`windows`、`macos`、`required` 六个 Job；只读权限、并发取消、精确 Rust、无 Cache、失败白名单 Artifact 和 7 天保留期均已本地静态验证。两个官方 Action 均 Fresh 锁定到 `v7.0.1` 的 Node 24 不可变提交。
+- 本地 YAML 解析通过，但精确 Rust `1.97.1`、Iced/desktop、Linux/Windows/macOS 及 `required` 仍是远端待验证事实，不提前宣称通过。
 
-## 九、收口边界
+## 九、下一合法批次
+
+1. 对当前 Workflow、治理 `29/29`、许可证一致性、允许路径和 Git diff 进行 Fresh 验证，形成普通提交并普通 push，在 Issue `#19` 回写 CI checkpoint。
+2. 创建正文含 `Closes #19` 的关联 PR，观察标准 GitHub-hosted runners 对 Rust `1.97.1`、Iced/desktop、Linux/Windows/macOS 与 `required` 的真实结果。
+3. 对每个失败先确定根因，再用后续普通提交修复；CI 稳定前不得修改 `main` Ruleset required checks，也不得在本地机器执行全 Workspace 或桌面重型编译。
+
+## 十、收口边界
 
 - PR、CI、Review 和 merge 字段保持 `pending`，不得提前宣称通过。
 - 最终 PR 必须包含 `Closes #19`，所有适用 Job 成功、Review 对话根因闭环后，再等待项目所有者新的 Squash Merge 授权。

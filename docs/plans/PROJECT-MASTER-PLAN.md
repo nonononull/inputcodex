@@ -39,7 +39,7 @@ decision_status: gate-3-implementation-approved-control-plane-active-merge-autho
 - Issue `#12` / PR `#13` 已完成上游基线 closeout；PR `#13` 的 Squash Merge 提交为 `5e64015075ddf2adef4bf685f50977b47b7f72e7`，Issue `#12` 已关闭。
 - Issue `#14` / PR `#15` 已完成每 6 小时上游监控；最终 PR CI、两次 `main` 真实运行、唯一状态 Issue `#16`、分支清理和有效 GitHub 签名均已闭环。
 - Issue `#17` / PR `#18` 已完成 Gate 3 规划交付；PR `#18` 的 Squash Merge 提交为 `477d110a9b284e127af365f5278901bcfa69e093`，Issue `#17` 已关闭。
-- 当前活动任务为 Issue `#19`；治理 RED、GREEN 与依赖方向纠偏 checkpoint 均已推送并回写 Issue。七成员 Workspace、Rust `1.97.1` 工具链文件、`Cargo.lock`、状态/取消语义、平台 unsupported 合同和 Iced 展示层隔离已落盘，本地六个轻量 crate 通过，精确工具链、Iced/desktop 与三平台全量编译等待 GitHub Actions。
+- 当前活动任务为 Issue `#19`；治理 RED、GREEN、依赖方向纠偏与七成员 Workspace checkpoint 均已推送并回写 Issue。当前治理合同为 `29/29`，Workspace 许可证已纠正为与根 `LICENSE` 一致的 `AGPL-3.0-only`，首版无缓存三平台 `CI` Workflow 已本地静态通过；精确工具链、Iced/desktop 与三平台全量编译等待关联 PR 的 GitHub Actions。
 - Issue `#19` 的执行顺序固定为 RED 治理合同、GREEN 治理脚本、最小分层 Workspace、三平台 CI、真实失败恢复与冷构建基线；最终合并仍需新的明确授权。
 - Issue `#8` 的过渡交付为 PR `#10`；该 PR 只包含文档与验证控制面，并按项目所有者明确授权执行 Squash Merge。
 - AGOS 仍是可选外部辅助；本仓库可用原生控制面时不运行它，不在本任务中修改或优化它。
@@ -92,7 +92,7 @@ decision_status: gate-3-implementation-approved-control-plane-active-merge-autho
 
 - [x] 通过 Issue `#17` / PR `#18` 冻结分层 Workspace、Iced 隔离、平台端口、加载状态、性能诊断和三平台 CI 合同。
 - [x] 创建实现 Issue `#19`、独立分支、Session Plan、Runtime Workflow 与初始报告，并取得项目所有者实现批准。
-- [ ] 先建立 `scripts/ci` 的可信 RED/GREEN 治理合同，再创建七成员 Workspace；未取得 RED 证据前禁止提前脚手架。
+- [x] 先建立 `scripts/ci` 的可信 RED/GREEN 治理合同，再创建七成员 Workspace；当前合同为 `29/29`，七成员 Workspace checkpoint 已推送。
 - [ ] 在同一实现 PR 中通过标准 Linux、Windows、macOS Runner、`required` 汇总、真实失败恢复和无缓存冷构建基线。
 - 不迁移业务功能，不创建临时 UI 事实标准；最小窗口的视觉和交互默认由 Gemini 实现或审阅。
 
@@ -126,9 +126,9 @@ decision_status: gate-3-implementation-approved-control-plane-active-merge-autho
 - 已完成上游监控计划：`docs/plans/2026-07-22-issue-14-gate-2-upstream-watch.md`。
 - Gate 2 上游监控报告：`docs/reports/issue-14-gate-2-upstream-watch.md`。
 - 当前 Gate 3 规划：`docs/plans/2026-07-22-issue-17-gate-3-rust-workspace-plan.md`。
-- 当前 Session Plan：`docs/plans/sessions/2026-07-22-issue-17-gate-3-rust-workspace-plan.md`。
-- 当前 Runtime Workflow：`docs/workflows/2026-07-22-issue-17-gate-3-rust-workspace-plan-runtime.md`。
-- 当前规划报告：`docs/reports/issue-17-gate-3-rust-workspace-plan.md`。
+- 当前实现 Session Plan：`docs/plans/sessions/2026-07-22-issue-19-gate-3-rust-workspace-ci.md`。
+- 当前实现 Runtime Workflow：`docs/workflows/2026-07-22-issue-19-gate-3-rust-workspace-ci-runtime.md`。
+- 当前实现报告：`docs/reports/issue-19-gate-3-rust-workspace-ci.md`。
 
 ## 停止条件
 

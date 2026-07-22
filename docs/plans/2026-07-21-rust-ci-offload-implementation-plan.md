@@ -148,7 +148,7 @@ Issue `#17` 的规划 PR 不包含 Workspace。规划合并后，Gate 3 的 Work
 
   Issue `#17` / PR `#18` 已完成规划 Squash Merge；项目所有者以 `user-message:approve-gate-3-implementation-2026-07-22` 批准实现。Issue `#19`、分支 `codex/issue-19-gate-3-rust-workspace-ci`、Session Plan、Runtime Workflow 和初始报告已建立。Fresh 候选固定为 Rust `1.97.1` 与 Iced `0.14.0`，Iced checksum、MIT、MSRV `1.88` 和未撤回状态已复核；本地资源边界仍为轻量定向验证。禁止使用浮动 `stable`、通配依赖版本或未锁定依赖。Iced 展示文件由 Gemini 负责实现或审阅，当前执行者不得自行确立视觉设计系统。
 
-- [ ] **步骤 2：先写分层和治理失败测试**
+- [x] **步骤 2：先写分层和治理失败测试**
 
   `scripts/ci/Test-CiScripts.ps1` 先构造违规夹具，证明以下情况会失败：领域层依赖 Iced、生产目录出现 `.ts/.js` 业务文件、Cargo 依赖包含 WebView/Tauri、更新地址不属于 `nonononull/inputcodex`、`upstream/` 被加入 Workspace、广告或遥测依赖进入生产清单。
 
@@ -156,19 +156,19 @@ Issue `#17` 的规划 PR 不包含 Workspace。规划合并后，Gate 3 的 Work
 
   预期：治理脚本尚未实现时退出非零。
 
-- [ ] **步骤 3：创建最小分层 Workspace**
+- [x] **步骤 3：创建最小分层 Workspace**
 
   每个 crate 只建立其职责所需的最小公开接口和单元测试，不迁移上游功能、不引入数据库、网络、更新、广告、注入或远程推荐实现。`apps/inputcodex-desktop` 只组装依赖并打开最小 Iced 窗口；窗口之外不确立视觉规范。
 
-- [ ] **步骤 4：补齐所有子项目构建与排错文档**
+- [x] **步骤 4：补齐所有子项目构建与排错文档**
 
   每个可单独构建的 app/crate 根目录创建 `build.md` 与 `err.md`，写明定向 `cargo check -p 包名`、单元测试和已知平台依赖；根 `build.md` 记录本地轻量命令与云端全量命令的责任边界。
 
-- [ ] **步骤 5：实现分类与仓库治理脚本**
+- [x] **步骤 5：实现分类与仓库治理脚本**
 
   `Classify-Changes.ps1` 只解析 Git diff 路径并输出布尔结果，不执行构建；`Verify-RepositoryPolicy.ps1` 解析 Workspace 清单和受控源目录。脚本必须对路径穿越、空 diff、重命名和删除场景有确定结果。
 
-- [ ] **步骤 6：运行本地轻量验证**
+- [x] **步骤 6：运行本地轻量验证**
 
   运行：
 
@@ -181,7 +181,7 @@ Issue `#17` 的规划 PR 不包含 Workspace。规划合并后，Gate 3 的 Work
 
   预期：本地只验证最小领域包和 CI 脚本，不运行全 Workspace 或双平台安装包构建。
 
-- [ ] **步骤 7：创建无缓存首版 CI**
+- [x] **步骤 7：创建无缓存首版 CI**
 
   `.github/workflows/ci.yml` 只监听目标为 `main` 的 `pull_request`、`main` 的 `push` 与 `workflow_dispatch`，避免同一功能分支同时由 push 和 PR 重复跑全量。顶层权限固定 `contents: read`；并发键按 PR 编号或 ref 隔离，`cancel-in-progress: true`。
 
@@ -198,7 +198,7 @@ Issue `#17` 的规划 PR 不包含 Workspace。规划合并后，Gate 3 的 Work
 
   PR 的非重型文档改动可以跳过三个编译 Job，但 `governance` 与 `required` 必须始终运行；`main` push 与手动运行必须执行全部 Job。首版禁止 Cargo Cache，用真实冷构建数据填写 `docs/reports/rust-ci-cold-baseline.md`。
 
-- [ ] **步骤 8：约束 Artifact 与日志**
+- [x] **步骤 8：约束 Artifact 与日志**
 
   成功运行默认不上传 Artifact。失败时只允许上传测试报告、治理报告和经过脱敏的命令日志，`retention-days: 7`；上传路径必须显式列举，禁止 `target/`、Cargo registry、Git 凭据、环境转储和整个工作区。
 

@@ -258,6 +258,24 @@ if (-not (Test-Path -LiteralPath $rootManifestPath -PathType Leaf)) {
 }
 else {
     $rootManifestText = Get-Content -LiteralPath $rootManifestPath -Raw -Encoding utf8
+    $workspacePackageMatch = [regex]::Match(
+        $rootManifestText,
+        '(?ms)^\s*\[workspace\.package\]\s*(?<body>.*?)(?=^\s*\[|\z)'
+    )
+    $workspaceLicenseMatch = if ($workspacePackageMatch.Success) {
+        [regex]::Match(
+            $workspacePackageMatch.Groups['body'].Value,
+            '(?m)^\s*license\s*=\s*"(?<license>[^"]+)"\s*(?:#.*)?$'
+        )
+    }
+    else {
+        [System.Text.RegularExpressions.Match]::Empty
+    }
+
+    if (-not $workspaceLicenseMatch.Success -or $workspaceLicenseMatch.Groups['license'].Value -ne 'AGPL-3.0-only') {
+        Add-PolicyViolation -Code 'WORKSPACE_LICENSE_INVALID' -Path 'Cargo.toml' -Message 'Workspace 许可证必须与仓库 LICENSE 一致并固定为 AGPL-3.0-only。'
+    }
+
     $membersMatch = [regex]::Match(
         $rootManifestText,
         '(?ms)^\s*members\s*=\s*\[(?<body>.*?)\]'

@@ -1,6 +1,6 @@
 # Issue #19 Runtime Workflow：Gate 3 纯 Rust Workspace 与首版三平台 CI
 
-workflow_status: workspace-local-light-verified-awaiting-checkpoint-push
+workflow_status: first-ci-local-static-green-awaiting-checkpoint-push
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 session_plan_ref: docs/plans/sessions/2026-07-22-issue-19-gate-3-rust-workspace-ci.md
 implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
@@ -14,10 +14,10 @@ scope_hash: sha256:2e101627480012d57d6d0472a08cfbe03fc401f6ac74ef3ae1e6a42929ed6
 - Phase 2 RED 合同已通过 AST 验证并以退出码 `10`、唯一标记 `CI_CONTRACT_RED_MISSING_IMPLEMENTATION` 证明两个治理实现入口缺失。
 - RED checkpoint 已以提交 `67fe99457e1aa2717cc29c70d51114028d68dafd` 推送并回写 Issue `#19`。
 - Phase 3 首个 GREEN 提交 `be9259f55b32014e918113936e6e6ddfdd16765f` 已推送并回写 Issue。
-- Phase 4 复核发现依赖白名单比批准箭头更宽；四条新增 RED 已证明根因，政策已收紧并达到 `27/27` GREEN。当前必须先推送纠偏 checkpoint，再创建 Cargo Workspace。
+- Phase 4 复核发现依赖白名单比批准箭头更宽；四条新增 RED 已证明根因，政策已收紧并达到 `27/27` GREEN。
 - 依赖方向纠偏提交 `2d8a1466ae42d6b208258bee3d0cb6bd5647bb12` 已推送并回写 Issue。
-- Phase 4 七成员 Workspace 已完成 RED→GREEN；Phase 5 子项目文档、metadata、fmt、domain check 和六个轻量 crate 测试已完成。
-- 精确 Rust `1.97.1`、Iced runtime、desktop 以及 Windows/macOS 只进入 GitHub Actions；当前必须先推送 Workspace checkpoint，再进入 Phase 6 创建 CI Workflow。
+- Phase 4 七成员 Workspace 已完成 RED→GREEN；Phase 5 子项目文档、metadata、fmt、domain check 和六个轻量 crate 测试已完成，Workspace checkpoint `f93372fdc63cf8c628007117be4a8b222510957b` 已推送并回写 Issue。
+- Phase 6 已完成变更收集器、许可证一致性门禁和首版六 Job Workflow 的本地静态验证；当前合同为 `29/29`，下一步是形成普通 CI checkpoint、普通 push、创建关联 PR 并让 GitHub Actions 执行精确工具链与三平台验证。
 
 ## Phase 0：startup-baseline
 

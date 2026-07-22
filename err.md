@@ -350,6 +350,42 @@
 - 验证：本地清单只声明 `wgpu`、`thread-pool`、`x11`、`wayland`，未声明 `webgl`、`web-colors`、`crisp`；治理脚本对真实仓库返回 `ok=true`，轻量 crate 全部通过。
 - 关联：GitHub Issue `#19`、`Cargo.toml`、`Cargo.lock`、首版三平台 CI 待办。
 
+### 2026-07-22：单行 Git 输出被 PowerShell 解包后索引成字符
+
+- 环境：Issue `#19` 为变更收集器补充真实临时 Git 仓库合同，收集器实现落盘后首次运行完整 `Test-CiScripts.ps1`。
+- 现象：既有 `27` 项通过，新增测试在解析 `git rev-parse HEAD` 时报告 `System.Char` 不存在 `Trim`；收集器进程尚未启动。
+- 根因：`Invoke-TestGit` 用 `@($output)` 返回单行结果时，PowerShell 函数输出管道仍会把单元素数组解包为字符串；调用方的 `[0]` 因而取得首字符，不是首行字符串。
+- 处理：只把测试辅助函数返回改为一元逗号 `,$output`，强制把结果数组作为单个管道对象返回；不修改收集器合同或生产实现。
+- 验证：最小形状实验显示旧返回类型为 `System.String`、索引类型为 `System.Char`，新返回类型为 `System.Object[]`、索引类型为 `System.String`；四份脚本 AST 为 `0` 个错误，完整合同输出 `CI_CONTRACT_GREEN passed=29`。
+- 关联：GitHub Issue `#19`、`scripts/ci/Test-CiScripts.ps1`、`scripts/ci/Collect-Changes.ps1`。
+
+### 2026-07-22：Workspace 许可证元数据与仓库 LICENSE 冲突
+
+- 环境：Issue `#19` 创建首版 `governance` Job 时，对账“许可证检查”职责、根 `Cargo.toml`、README 和仓库 `LICENSE`。
+- 现象：根 `LICENSE` 与 README 明确声明 GNU AGPLv3，但 Workspace 元数据及实现报告误写为 `MIT`；Iced 依赖本身才是 MIT。
+- 根因：创建 Workspace 时把 Iced 的依赖许可证错误沿用为本项目包许可证，既有政策脚本又没有根许可证一致性测试，导致错误元数据通过 `27/27` 旧合同。
+- 处理：将 Workspace 元数据改为 SPDX `AGPL-3.0-only`，成员继续继承 workspace license；治理合同拒绝任何非 `AGPL-3.0-only` 值，并保留 Iced `0.14.0` 的 MIT 审计结论。
+- 验证：许可证 RED 先稳定复现旧政策对错误值返回 `ok=true`；修复后完整合同输出 `CI_CONTRACT_GREEN passed=29`，真实仓库政策返回 `ok=true`、`violation_count=0`，CI YAML/静态合同通过。
+- 关联：GitHub Issue `#19`、`Cargo.toml`、`LICENSE`、`README.md`、`scripts/ci/Test-CiScripts.ps1`、`scripts/ci/Verify-RepositoryPolicy.ps1`。
+
+### 2026-07-22：计划中的 GitHub Action 固定版本在实现前发生时效漂移
+
+- 环境：Issue `#19` 首版 CI 本地静态通过后执行提交前供应链安全复核，向 GitHub 官方 API Fresh 查询 `actions/checkout` 与 `actions/upload-artifact`。
+- 现象：早期计划记录的 checkout `v4.2.2` 与 upload-artifact `v4.6.2` 均使用 Node 20；截至 2026-07-22，两仓最新稳定 Release 已是 `v7.0.1`，Action 运行时均为 Node 24。
+- 根因：Action 固定提交是在规划阶段核验，执行阶段跨过了官方大版本更新；不可变 SHA 能防篡改，但不会自动解决依赖时效漂移。
+- 处理：改用官方最新稳定补丁的不可变提交：checkout `3d3c42e5aac5ba805825da76410c181273ba90b1`、upload-artifact `043fb46d1a93c77aae656e7c1c64a875d1fc6a0a`；仍禁止浮动 major tag。
+- 验证：官方 Release API 分别返回 `v7.0.1`（checkout 发布于 `2026-07-20`，upload-artifact 发布于 `2026-04-10`）；tag ref 与上述 40 位提交一致，两份 `action.yml` 均声明 `using: node24`。
+- 关联：GitHub Issue `#19`、`.github/workflows/ci.yml`、`build.md`。
+
+### 2026-07-22：Windows PowerShell 5.1 错误读取 UTF-8 无 BOM 合同脚本
+
+- 环境：变更收集器 RED 复现时误用 `powershell -File scripts/ci/Test-CiScripts.ps1`，而项目构建入口明确要求 PowerShell 7 `pwsh`。
+- 现象：脚本在进入测试前出现大量 `Unexpected token`、乱码字符串和 `&` 解析错误，看似源文件语法损坏。
+- 根因：Windows PowerShell 5.1 默认没有按 UTF-8 读取无 BOM 中文脚本；同一文件由当前 `pwsh 7.6.3` AST 解析为 `0` 个错误。
+- 处理：不修改脚本编码和语法；统一通过 `pwsh -NoProfile -File` 或当前 PowerShell 7 可执行文件运行合同，Windows PowerShell 5.1 不属于支持入口。
+- 验证：PowerShell 7 fresh 执行完整合同输出 `CI_CONTRACT_GREEN passed=29`，证明最初解析错误只来自错误宿主。
+- 关联：GitHub Issue `#19`、`build.md`、`scripts/ci/Test-CiScripts.ps1`。
+
 ## 记录模板
 
 ```text

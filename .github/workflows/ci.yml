@@ -1,0 +1,590 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  RUSTUP_TOOLCHAIN: 1.97.1
+  CARGO_INCREMENTAL: '0'
+  CARGO_TERM_COLOR: never
+  RUST_BACKTRACE: '1'
+
+jobs:
+  classify:
+    name: classify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      has_changes: ${{ steps.changes.outputs.has_changes }}
+      docs_only: ${{ steps.changes.outputs.docs_only }}
+      heavy: ${{ steps.changes.outputs.heavy }}
+    steps:
+      - name: 检出仓库与完整差异历史
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: 收集并分类变更
+        id: changes
+        shell: pwsh
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REPORT_DIR: ${{ runner.temp }}/inputcodex-ci/classify
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Path $env:REPORT_DIR -Force | Out-Null
+
+          if ($env:EVENT_NAME -eq 'pull_request') {
+            if ($env:BASE_SHA -notmatch '^[0-9a-fA-F]{40}$' -or $env:HEAD_SHA -notmatch '^[0-9a-fA-F]{40}$') {
+              throw 'Pull Request 缺少可验证的 40 位 base/head SHA。'
+            }
+
+            $powerShellExecutable = (Get-Process -Id $PID).Path
+            $changesFile = Join-Path $env:REPORT_DIR 'changes.json'
+            $collectorOutput = @(
+              & $powerShellExecutable -NoLogo -NoProfile -File 'scripts/ci/Collect-Changes.ps1' `
+                -RepositoryRoot '.' `
+                -Base $env:BASE_SHA `
+                -Head $env:HEAD_SHA `
+                -OutputFile $changesFile 2>&1 |
+                ForEach-Object { $_.ToString() }
+            )
+            $collectorExitCode = $LASTEXITCODE
+            [System.IO.File]::WriteAllText(
+              (Join-Path $env:REPORT_DIR 'collector.log'),
+              (($collectorOutput -join [Environment]::NewLine) + [Environment]::NewLine),
+              [System.Text.UTF8Encoding]::new($false)
+            )
+            if ($collectorExitCode -ne 0) {
+              throw "变更收集失败，退出码=$collectorExitCode。"
+            }
+
+            $classifierOutput = @(
+              & $powerShellExecutable -NoLogo -NoProfile -File 'scripts/ci/Classify-Changes.ps1' `
+                -InputFile $changesFile 2>&1 |
+                ForEach-Object { $_.ToString() }
+            )
+            $classifierExitCode = $LASTEXITCODE
+            $classificationText = $classifierOutput -join [Environment]::NewLine
+            [System.IO.File]::WriteAllText(
+              (Join-Path $env:REPORT_DIR 'classification.json'),
+              ($classificationText + [Environment]::NewLine),
+              [System.Text.UTF8Encoding]::new($false)
+            )
+            if ($classifierExitCode -ne 0) {
+              throw "变更分类失败，退出码=$classifierExitCode。"
+            }
+
+            $classification = $classificationText | ConvertFrom-Json -Depth 20
+          }
+          else {
+            $classification = [pscustomobject]@{
+              schema_version = 1
+              ok = $true
+              has_changes = $true
+              docs_only = $false
+              heavy = $true
+              change_count = 0
+              changed_paths = @()
+              docs_paths = @()
+              heavy_paths = @()
+              forced_full_run = $true
+              event_name = $env:EVENT_NAME
+              errors = @()
+            }
+            $classification | ConvertTo-Json -Depth 20 | Set-Content `
+              -LiteralPath (Join-Path $env:REPORT_DIR 'classification.json') `
+              -Encoding utf8NoBOM
+          }
+
+          if ($classification.ok -ne $true) {
+            throw '变更分类结果未通过输入验证。'
+          }
+
+          @(
+            "has_changes=$(([string]$classification.has_changes).ToLowerInvariant())"
+            "docs_only=$(([string]$classification.docs_only).ToLowerInvariant())"
+            "heavy=$(([string]$classification.heavy).ToLowerInvariant())"
+          ) | Add-Content -LiteralPath $env:GITHUB_OUTPUT -Encoding utf8
+
+      - name: 上传分类失败证据
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: classify-failure-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/inputcodex-ci/classify/collector.log
+            ${{ runner.temp }}/inputcodex-ci/classify/changes.json
+            ${{ runner.temp }}/inputcodex-ci/classify/classification.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+  governance:
+    name: governance
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: 验证治理合同与真实仓库政策
+        shell: pwsh
+        env:
+          REPORT_DIR: ${{ runner.temp }}/inputcodex-ci/governance
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Path $env:REPORT_DIR -Force | Out-Null
+          $failures = [System.Collections.Generic.List[string]]::new()
+
+          $scripts = @(
+            'scripts/ci/Collect-Changes.ps1'
+            'scripts/ci/Classify-Changes.ps1'
+            'scripts/ci/Verify-RepositoryPolicy.ps1'
+            'scripts/ci/Test-CiScripts.ps1'
+          )
+          $astErrors = [System.Collections.Generic.List[string]]::new()
+          foreach ($scriptPath in $scripts) {
+            $tokens = $null
+            $parseErrors = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile(
+              (Resolve-Path -LiteralPath $scriptPath).Path,
+              [ref]$tokens,
+              [ref]$parseErrors
+            )
+            foreach ($parseError in @($parseErrors)) {
+              $astErrors.Add("$scriptPath :: $($parseError.Message)")
+            }
+          }
+          @($astErrors) | Set-Content -LiteralPath (Join-Path $env:REPORT_DIR 'ast.txt') -Encoding utf8NoBOM
+          if ($astErrors.Count -ne 0) {
+            $failures.Add("PowerShell AST 错误数=$($astErrors.Count)")
+          }
+
+          $powerShellExecutable = (Get-Process -Id $PID).Path
+          $contractOutput = @(
+            & $powerShellExecutable -NoLogo -NoProfile -File 'scripts/ci/Test-CiScripts.ps1' 2>&1 |
+              ForEach-Object { $_.ToString() }
+          )
+          $contractExitCode = $LASTEXITCODE
+          $contractOutput | Set-Content -LiteralPath (Join-Path $env:REPORT_DIR 'contract.log') -Encoding utf8NoBOM
+          if ($contractExitCode -ne 0) {
+            $failures.Add("治理合同退出码=$contractExitCode")
+          }
+
+          $policyOutput = @(
+            & $powerShellExecutable -NoLogo -NoProfile -File 'scripts/ci/Verify-RepositoryPolicy.ps1' `
+              -RepositoryRoot '.' 2>&1 |
+              ForEach-Object { $_.ToString() }
+          )
+          $policyExitCode = $LASTEXITCODE
+          $policyText = $policyOutput -join [Environment]::NewLine
+          [System.IO.File]::WriteAllText(
+            (Join-Path $env:REPORT_DIR 'policy.json'),
+            ($policyText + [Environment]::NewLine),
+            [System.Text.UTF8Encoding]::new($false)
+          )
+          if ($policyExitCode -ne 0) {
+            $failures.Add("真实仓库政策退出码=$policyExitCode")
+          }
+
+          if ($failures.Count -ne 0) {
+            throw "治理验证失败：$($failures -join '；')"
+          }
+
+      - name: 上传治理失败证据
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: governance-failure-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/inputcodex-ci/governance/ast.txt
+            ${{ runner.temp }}/inputcodex-ci/governance/contract.log
+            ${{ runner.temp }}/inputcodex-ci/governance/policy.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+  linux-quality:
+    name: linux-quality
+    needs: classify
+    if: ${{ needs.classify.outputs.heavy == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      REPORT_DIR: ${{ runner.temp }}/inputcodex-ci/linux-quality
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: 安装 Linux 展示层构建依赖
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            libwayland-dev \
+            libx11-dev \
+            libxkbcommon-dev \
+            libxkbcommon-x11-dev \
+            pkg-config
+
+      - name: 安装并核验 Rust 1.97.1
+        shell: pwsh
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Path $env:REPORT_DIR -Force | Out-Null
+          rustup toolchain install 1.97.1 --profile minimal --component clippy --component rustfmt
+          rustup default 1.97.1
+          $versions = @(
+            (& rustc --version).Trim()
+            (& cargo --version).Trim()
+            (& rustup component list --toolchain 1.97.1 --installed) -join [Environment]::NewLine
+          )
+          $versions | Set-Content -LiteralPath (Join-Path $env:REPORT_DIR 'toolchain.txt') -Encoding utf8NoBOM
+          if ($versions[0] -notmatch '^rustc 1\.97\.1 ') {
+            throw "Rust 版本不符合固定合同：$($versions[0])"
+          }
+
+      - name: 检查 Rust 格式
+        shell: pwsh
+        run: |
+          & cargo fmt --all -- --check 2>&1 |
+            Tee-Object -FilePath (Join-Path $env:REPORT_DIR 'fmt.log')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: 运行 Workspace Clippy
+        shell: pwsh
+        run: |
+          $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+          & cargo clippy --workspace --all-targets --locked -- -D warnings 2>&1 |
+            Tee-Object -FilePath (Join-Path $env:REPORT_DIR 'clippy.log')
+          $exitCode = $LASTEXITCODE
+          $stopwatch.Stop()
+          "LINUX_CLIPPY_COLD_SECONDS=$([Math]::Round($stopwatch.Elapsed.TotalSeconds, 3))" |
+            Set-Content -LiteralPath (Join-Path $env:REPORT_DIR 'metrics.txt') -Encoding utf8NoBOM
+          if ($exitCode -ne 0) { exit $exitCode }
+
+      - name: 运行 Workspace 全目标测试
+        shell: pwsh
+        run: |
+          & cargo test --workspace --all-targets --locked 2>&1 |
+            Tee-Object -FilePath (Join-Path $env:REPORT_DIR 'test.log')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: 检查桌面组装包
+        shell: pwsh
+        run: |
+          & cargo check -p inputcodex-desktop --locked 2>&1 |
+            Tee-Object -FilePath (Join-Path $env:REPORT_DIR 'desktop-check.log')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: 写入 Linux 冷构建摘要
+        shell: pwsh
+        run: |
+          Get-Content -LiteralPath (Join-Path $env:REPORT_DIR 'metrics.txt') |
+            Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Encoding utf8
+
+      - name: 上传 Linux 失败证据
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: linux-quality-failure-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/inputcodex-ci/linux-quality/toolchain.txt
+            ${{ runner.temp }}/inputcodex-ci/linux-quality/fmt.log
+            ${{ runner.temp }}/inputcodex-ci/linux-quality/clippy.log
+            ${{ runner.temp }}/inputcodex-ci/linux-quality/test.log
+            ${{ runner.temp }}/inputcodex-ci/linux-quality/desktop-check.log
+            ${{ runner.temp }}/inputcodex-ci/linux-quality/metrics.txt
+          if-no-files-found: ignore
+          retention-days: 7
+
+  windows:
+    name: windows
+    needs: classify
+    if: ${{ needs.classify.outputs.heavy == 'true' }}
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      REPORT_DIR: ${{ runner.temp }}/inputcodex-ci/windows
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: 安装并核验 Rust 1.97.1
+        shell: pwsh
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Path $env:REPORT_DIR -Force | Out-Null
+          rustup toolchain install 1.97.1 --profile minimal --component clippy --component rustfmt
+          rustup default 1.97.1
+          $versions = @(
+            (& rustc --version).Trim()
+            (& cargo --version).Trim()
+          )
+          $versions | Set-Content -LiteralPath (Join-Path $env:REPORT_DIR 'toolchain.txt') -Encoding utf8NoBOM
+          if ($versions[0] -notmatch '^rustc 1\.97\.1 ') {
+            throw "Rust 版本不符合固定合同：$($versions[0])"
+          }
+
+      - name: 冷构建 Windows 桌面包
+        shell: pwsh
+        run: |
+          $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+          & cargo build -p inputcodex-desktop --locked 2>&1 |
+            Tee-Object -FilePath (Join-Path $env:REPORT_DIR 'desktop-build.log')
+          $exitCode = $LASTEXITCODE
+          $stopwatch.Stop()
+          if ($exitCode -ne 0) { exit $exitCode }
+
+          $binaryPath = Join-Path $PWD 'target/debug/inputcodex-desktop.exe'
+          if (-not (Test-Path -LiteralPath $binaryPath -PathType Leaf)) {
+            throw "Windows 桌面二进制不存在：$binaryPath"
+          }
+          @(
+            "WINDOWS_DESKTOP_COLD_SECONDS=$([Math]::Round($stopwatch.Elapsed.TotalSeconds, 3))"
+            "WINDOWS_DESKTOP_BINARY_BYTES=$((Get-Item -LiteralPath $binaryPath).Length)"
+          ) | Set-Content -LiteralPath (Join-Path $env:REPORT_DIR 'metrics.txt') -Encoding utf8NoBOM
+
+      - name: 运行 Windows Workspace 全目标测试
+        shell: pwsh
+        run: |
+          & cargo test --workspace --all-targets --locked 2>&1 |
+            Tee-Object -FilePath (Join-Path $env:REPORT_DIR 'test.log')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: 检查 Windows 桌面组装包
+        shell: pwsh
+        run: |
+          & cargo check -p inputcodex-desktop --locked 2>&1 |
+            Tee-Object -FilePath (Join-Path $env:REPORT_DIR 'desktop-check.log')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: 写入 Windows 冷构建摘要
+        shell: pwsh
+        run: |
+          Get-Content -LiteralPath (Join-Path $env:REPORT_DIR 'metrics.txt') |
+            Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Encoding utf8
+
+      - name: 上传 Windows 失败证据
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: windows-failure-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/inputcodex-ci/windows/toolchain.txt
+            ${{ runner.temp }}/inputcodex-ci/windows/desktop-build.log
+            ${{ runner.temp }}/inputcodex-ci/windows/test.log
+            ${{ runner.temp }}/inputcodex-ci/windows/desktop-check.log
+            ${{ runner.temp }}/inputcodex-ci/windows/metrics.txt
+          if-no-files-found: ignore
+          retention-days: 7
+
+  macos:
+    name: macos
+    needs: classify
+    if: ${{ needs.classify.outputs.heavy == 'true' }}
+    runs-on: macos-latest
+    timeout-minutes: 45
+    env:
+      REPORT_DIR: ${{ runner.temp }}/inputcodex-ci/macos
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: 安装并核验 Rust 1.97.1
+        shell: pwsh
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Path $env:REPORT_DIR -Force | Out-Null
+          rustup toolchain install 1.97.1 --profile minimal --component clippy --component rustfmt
+          rustup default 1.97.1
+          $versions = @(
+            (& rustc --version).Trim()
+            (& cargo --version).Trim()
+          )
+          $versions | Set-Content -LiteralPath (Join-Path $env:REPORT_DIR 'toolchain.txt') -Encoding utf8NoBOM
+          if ($versions[0] -notmatch '^rustc 1\.97\.1 ') {
+            throw "Rust 版本不符合固定合同：$($versions[0])"
+          }
+
+      - name: 冷构建 macOS 桌面包
+        shell: pwsh
+        run: |
+          $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+          & cargo build -p inputcodex-desktop --locked 2>&1 |
+            Tee-Object -FilePath (Join-Path $env:REPORT_DIR 'desktop-build.log')
+          $exitCode = $LASTEXITCODE
+          $stopwatch.Stop()
+          if ($exitCode -ne 0) { exit $exitCode }
+
+          $binaryPath = Join-Path $PWD 'target/debug/inputcodex-desktop'
+          if (-not (Test-Path -LiteralPath $binaryPath -PathType Leaf)) {
+            throw "macOS 桌面二进制不存在：$binaryPath"
+          }
+          @(
+            "MACOS_DESKTOP_COLD_SECONDS=$([Math]::Round($stopwatch.Elapsed.TotalSeconds, 3))"
+            "MACOS_DESKTOP_BINARY_BYTES=$((Get-Item -LiteralPath $binaryPath).Length)"
+          ) | Set-Content -LiteralPath (Join-Path $env:REPORT_DIR 'metrics.txt') -Encoding utf8NoBOM
+
+      - name: 运行 macOS Workspace 全目标测试
+        shell: pwsh
+        run: |
+          & cargo test --workspace --all-targets --locked 2>&1 |
+            Tee-Object -FilePath (Join-Path $env:REPORT_DIR 'test.log')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: 检查 macOS 桌面组装包
+        shell: pwsh
+        run: |
+          & cargo check -p inputcodex-desktop --locked 2>&1 |
+            Tee-Object -FilePath (Join-Path $env:REPORT_DIR 'desktop-check.log')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: 写入 macOS 冷构建摘要
+        shell: pwsh
+        run: |
+          Get-Content -LiteralPath (Join-Path $env:REPORT_DIR 'metrics.txt') |
+            Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Encoding utf8
+
+      - name: 上传 macOS 失败证据
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: macos-failure-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/inputcodex-ci/macos/toolchain.txt
+            ${{ runner.temp }}/inputcodex-ci/macos/desktop-build.log
+            ${{ runner.temp }}/inputcodex-ci/macos/test.log
+            ${{ runner.temp }}/inputcodex-ci/macos/desktop-check.log
+            ${{ runner.temp }}/inputcodex-ci/macos/metrics.txt
+          if-no-files-found: ignore
+          retention-days: 7
+
+  required:
+    name: required
+    needs:
+      - classify
+      - governance
+      - linux-quality
+      - windows
+      - macos
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 汇总全部 CI 结果
+        shell: pwsh
+        env:
+          CLASSIFY_RESULT: ${{ needs.classify.result }}
+          GOVERNANCE_RESULT: ${{ needs.governance.result }}
+          LINUX_RESULT: ${{ needs['linux-quality'].result }}
+          WINDOWS_RESULT: ${{ needs.windows.result }}
+          MACOS_RESULT: ${{ needs.macos.result }}
+          HAS_CHANGES: ${{ needs.classify.outputs.has_changes }}
+          DOCS_ONLY: ${{ needs.classify.outputs.docs_only }}
+          HEAVY: ${{ needs.classify.outputs.heavy }}
+          REPORT_DIR: ${{ runner.temp }}/inputcodex-ci/required
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Path $env:REPORT_DIR -Force | Out-Null
+          $failures = [System.Collections.Generic.List[string]]::new()
+
+          if ($env:CLASSIFY_RESULT -ne 'success') {
+            $failures.Add("classify=$env:CLASSIFY_RESULT")
+          }
+          if ($env:GOVERNANCE_RESULT -ne 'success') {
+            $failures.Add("governance=$env:GOVERNANCE_RESULT")
+          }
+
+          if ($env:HEAVY -eq 'true') {
+            foreach ($entry in @(
+              [pscustomobject]@{ name = 'linux-quality'; result = $env:LINUX_RESULT }
+              [pscustomobject]@{ name = 'windows'; result = $env:WINDOWS_RESULT }
+              [pscustomobject]@{ name = 'macos'; result = $env:MACOS_RESULT }
+            )) {
+              if ($entry.result -ne 'success') {
+                $failures.Add("$($entry.name)=$($entry.result)")
+              }
+            }
+          }
+          elseif ($env:HEAVY -eq 'false') {
+            if ($env:HAS_CHANGES -ne 'true' -or $env:DOCS_ONLY -ne 'true') {
+              $failures.Add("非重型分类语义非法：has_changes=$env:HAS_CHANGES,docs_only=$env:DOCS_ONLY")
+            }
+            foreach ($entry in @(
+              [pscustomobject]@{ name = 'linux-quality'; result = $env:LINUX_RESULT }
+              [pscustomobject]@{ name = 'windows'; result = $env:WINDOWS_RESULT }
+              [pscustomobject]@{ name = 'macos'; result = $env:MACOS_RESULT }
+            )) {
+              if ($entry.result -ne 'skipped') {
+                $failures.Add("文档 PR 的 $($entry.name) 必须 skipped，实际=$($entry.result)")
+              }
+            }
+          }
+          else {
+            $failures.Add("heavy 输出非法：$env:HEAVY")
+          }
+
+          $report = [pscustomobject][ordered]@{
+            schema_version = 1
+            ok = $failures.Count -eq 0
+            has_changes = $env:HAS_CHANGES
+            docs_only = $env:DOCS_ONLY
+            heavy = $env:HEAVY
+            results = [pscustomobject][ordered]@{
+              classify = $env:CLASSIFY_RESULT
+              governance = $env:GOVERNANCE_RESULT
+              linux_quality = $env:LINUX_RESULT
+              windows = $env:WINDOWS_RESULT
+              macos = $env:MACOS_RESULT
+            }
+            failures = @($failures)
+          }
+          $report | ConvertTo-Json -Depth 10 | Set-Content `
+            -LiteralPath (Join-Path $env:REPORT_DIR 'required.json') `
+            -Encoding utf8NoBOM
+
+          if ($failures.Count -ne 0) {
+            throw "CI 汇总失败：$($failures -join '；')"
+          }
+
+          "CI / required 通过；heavy=$env:HEAVY；docs_only=$env:DOCS_ONLY" |
+            Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Encoding utf8
+
+      - name: 上传汇总失败证据
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: required-failure-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/inputcodex-ci/required/required.json
+          if-no-files-found: ignore
+          retention-days: 7

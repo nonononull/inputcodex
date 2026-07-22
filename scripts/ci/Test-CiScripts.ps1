@@ -7,6 +7,7 @@ $ErrorActionPreference = 'Stop'
 $scriptDirectory = Split-Path -Parent $PSCommandPath
 $classifierScript = Join-Path $scriptDirectory 'Classify-Changes.ps1'
 $policyScript = Join-Path $scriptDirectory 'Verify-RepositoryPolicy.ps1'
+$collectorScript = Join-Path $scriptDirectory 'Collect-Changes.ps1'
 $missingImplementations = @(
     @(
         $classifierScript
@@ -301,7 +302,7 @@ members = [
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.97"
-license = "MIT"
+license = "AGPL-3.0-only"
 "@
     Write-Utf8File -Path (Join-Path $Path 'Cargo.toml') -Content $workspaceManifest
 
@@ -455,6 +456,16 @@ Invoke-ContractTest -Name '合法七成员 Workspace 通过仓库政策' -Body {
     Assert-Equal -Expected 0 -Actual $result.Json.violation_count -Message '合法仓库不应含违规项'
 }
 
+Invoke-ContractTest -Name '拒绝非 AGPL-3.0-only Workspace 许可证' -Body {
+    $repository = Copy-RepositoryFixture -Source $validRepository -Name 'repository-license'
+    $manifestPath = Join-Path $repository 'Cargo.toml'
+    $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding utf8
+    $manifest = $manifest.Replace('license = "AGPL-3.0-only"', 'license = "MIT"')
+    Set-Content -LiteralPath $manifestPath -Value $manifest -Encoding utf8NoBOM
+    $result = Invoke-PolicyCase -RepositoryRoot $repository
+    Assert-PolicyFailureCode -Result $result -Code 'WORKSPACE_LICENSE_INVALID'
+}
+
 Invoke-ContractTest -Name '拒绝 Iced 越过展示层' -Body {
     $repository = Copy-RepositoryFixture -Source $validRepository -Name 'repository-iced-layer'
     Add-Content -LiteralPath (Join-Path $repository 'crates/inputcodex-domain/Cargo.toml') -Value "`n[dependencies]`niced = `"0.14.0`"" -Encoding utf8NoBOM
@@ -573,6 +584,65 @@ Invoke-ContractTest -Name '拒绝 TOML 表形式的依赖方向反转' -Body {
     Add-Content -LiteralPath (Join-Path $repository 'crates/inputcodex-domain/Cargo.toml') -Value $tableDependency -Encoding utf8NoBOM
     $result = Invoke-PolicyCase -RepositoryRoot $repository
     Assert-PolicyFailureCode -Result $result -Code 'DEPENDENCY_DIRECTION_INVALID'
+}
+
+function Invoke-TestGit {
+    param(
+        [Parameter(Mandatory)]
+        [string]$RepositoryRoot,
+
+        [Parameter(Mandatory)]
+        [string[]]$Arguments
+    )
+
+    $output = @(& git -C $RepositoryRoot @Arguments 2>&1 | ForEach-Object { $_.ToString() })
+    if ($LASTEXITCODE -ne 0) {
+        throw "测试 Git 命令失败：git -C $RepositoryRoot $($Arguments -join ' ')；输出=$($output -join [Environment]::NewLine)"
+    }
+
+    ,$output
+}
+
+Invoke-ContractTest -Name 'Git 变更收集器保留新增修改删除和重命名' -Body {
+    Assert-True -Condition (Test-Path -LiteralPath $collectorScript -PathType Leaf) -Message 'CI_COLLECTOR_RED_MISSING_IMPLEMENTATION'
+
+    $repository = Join-Path $testRoot 'collector-repository'
+    New-Item -ItemType Directory -Path $repository -Force | Out-Null
+    Invoke-TestGit -RepositoryRoot $repository -Arguments @('init', '--quiet') | Out-Null
+    Invoke-TestGit -RepositoryRoot $repository -Arguments @('config', 'user.name', 'inputcodex-ci-test') | Out-Null
+    Invoke-TestGit -RepositoryRoot $repository -Arguments @('config', 'user.email', 'ci-test@inputcodex.invalid') | Out-Null
+
+    Write-Utf8File -Path (Join-Path $repository 'README.md') -Content 'initial'
+    Write-Utf8File -Path (Join-Path $repository 'Cargo.lock') -Content 'lock'
+    Write-Utf8File -Path (Join-Path $repository 'docs/old.md') -Content 'rename-me'
+    Invoke-TestGit -RepositoryRoot $repository -Arguments @('add', '--all') | Out-Null
+    Invoke-TestGit -RepositoryRoot $repository -Arguments @('commit', '--quiet', '-m', 'initial') | Out-Null
+    $base = (Invoke-TestGit -RepositoryRoot $repository -Arguments @('rev-parse', 'HEAD'))[0].Trim()
+
+    Write-Utf8File -Path (Join-Path $repository 'README.md') -Content 'changed'
+    Remove-Item -LiteralPath (Join-Path $repository 'Cargo.lock') -Force
+    Invoke-TestGit -RepositoryRoot $repository -Arguments @('mv', 'docs/old.md', 'docs/new.md') | Out-Null
+    Write-Utf8File -Path (Join-Path $repository 'crates/inputcodex-domain/src/lib.rs') -Content '#![forbid(unsafe_code)]'
+    Invoke-TestGit -RepositoryRoot $repository -Arguments @('add', '--all') | Out-Null
+    Invoke-TestGit -RepositoryRoot $repository -Arguments @('commit', '--quiet', '-m', 'changes') | Out-Null
+    $head = (Invoke-TestGit -RepositoryRoot $repository -Arguments @('rev-parse', 'HEAD'))[0].Trim()
+
+    $outputFile = Join-Path $testRoot 'collector-output.json'
+    $result = Invoke-ChildScript -Path $collectorScript -Arguments @(
+        '-RepositoryRoot', $repository,
+        '-Base', $base,
+        '-Head', $head,
+        '-OutputFile', $outputFile
+    )
+    Assert-Equal -Expected 0 -Actual $result.ExitCode -Message "变更收集器应成功，输出=$($result.Output)"
+    Assert-True -Condition (Test-Path -LiteralPath $outputFile -PathType Leaf) -Message '变更收集器必须写出 JSON 文件'
+
+    $changes = @(Get-Content -LiteralPath $outputFile -Raw -Encoding utf8 | ConvertFrom-Json -Depth 20)
+    Assert-Equal -Expected 4 -Actual $changes.Count -Message '变更收集器记录数必须稳定'
+    Assert-Equal -Expected 1 -Actual @($changes | Where-Object { $_.status -eq 'M' -and $_.path -eq 'README.md' }).Count -Message '必须保留修改记录'
+    Assert-Equal -Expected 1 -Actual @($changes | Where-Object { $_.status -eq 'D' -and $_.path -eq 'Cargo.lock' }).Count -Message '必须保留删除记录'
+    Assert-Equal -Expected 1 -Actual @($changes | Where-Object { $_.status -eq 'A' -and $_.path -eq 'crates/inputcodex-domain/src/lib.rs' }).Count -Message '必须保留新增记录'
+    Assert-Equal -Expected 1 -Actual @($changes | Where-Object { $_.status -eq 'R' -and $_.old_path -eq 'docs/old.md' -and $_.path -eq 'docs/new.md' }).Count -Message '必须保留重命名新旧路径'
 }
 
 $resolvedTestRoot = [System.IO.Path]::GetFullPath($testRoot)
