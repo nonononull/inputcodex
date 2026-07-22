@@ -386,6 +386,15 @@
 - 验证：PowerShell 7 fresh 执行完整合同输出 `CI_CONTRACT_GREEN passed=29`，证明最初解析错误只来自错误宿主。
 - 关联：GitHub Issue `#19`、`build.md`、`scripts/ci/Test-CiScripts.ps1`。
 
+### 2026-07-22：PowerShell 未引用 Git tree rev-spec 污染 Issue checkpoint 证据
+
+- 环境：CI checkpoint `f3107dd16705dd3a25bc8c3acc540a3c6c6990a3` 普通 push 后，脚本组装 Issue `#19` 评论中的 commit/tree/parent。
+- 现象：未引用的 `git rev-parse HEAD^{tree}` 被 PowerShell 参数编组误解析，Git 报告 ambiguous argument，评论中的 tree 被写成 `System.Object[]`；首次复核又对 `gh --jq '.body'` 的多行数组直接使用 `-notmatch`，产生一次误判。
+- 根因：包含花括号的 Git rev-spec 没有作为单个字符串传递；同时忘记 `gh` 多行 stdout 会被 PowerShell 枚举为字符串数组。
+- 处理：改为 `git rev-parse 'HEAD^{tree}'`，每条原生命令后立即检查退出码；复核前用 `@(...) -join "`n"` 固定评论正文形状，并通过 `gh issue comment --edit-last` 原位修正，不新增错误评论。
+- 验证：Issue 评论 `5044470597` 当前精确包含 tree `1dc0caf58276d67731600a157adc4abd1a1f9e6e`，且不再包含 `System.Object[]`；commit 与 parent 也分别匹配本地提交和其单一父提交。
+- 关联：GitHub Issue `#19`、评论 `5044470597`、提交 `f3107dd16705dd3a25bc8c3acc540a3c6c6990a3`。
+
 ## 记录模板
 
 ```text

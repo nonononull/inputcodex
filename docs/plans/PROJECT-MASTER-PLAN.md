@@ -39,7 +39,7 @@ decision_status: gate-3-implementation-approved-control-plane-active-merge-autho
 - Issue `#12` / PR `#13` 已完成上游基线 closeout；PR `#13` 的 Squash Merge 提交为 `5e64015075ddf2adef4bf685f50977b47b7f72e7`，Issue `#12` 已关闭。
 - Issue `#14` / PR `#15` 已完成每 6 小时上游监控；最终 PR CI、两次 `main` 真实运行、唯一状态 Issue `#16`、分支清理和有效 GitHub 签名均已闭环。
 - Issue `#17` / PR `#18` 已完成 Gate 3 规划交付；PR `#18` 的 Squash Merge 提交为 `477d110a9b284e127af365f5278901bcfa69e093`，Issue `#17` 已关闭。
-- 当前活动任务为 Issue `#19`；治理 RED、GREEN、依赖方向纠偏与七成员 Workspace checkpoint 均已推送并回写 Issue。当前治理合同为 `29/29`，Workspace 许可证已纠正为与根 `LICENSE` 一致的 `AGPL-3.0-only`，首版无缓存三平台 `CI` Workflow 已本地静态通过；精确工具链、Iced/desktop 与三平台全量编译等待关联 PR 的 GitHub Actions。
+- 当前活动任务为 Issue `#19`；治理 RED、GREEN、依赖方向纠偏、七成员 Workspace 与首版 CI checkpoint 均已普通 push 并回写 Issue。当前治理合同为 `29/29`，Workspace 许可证已纠正为与根 `LICENSE` 一致的 `AGPL-3.0-only`；精确工具链、Iced/desktop 与三平台全量编译等待关联 Draft PR 的 GitHub Actions。
 - Issue `#19` 的执行顺序固定为 RED 治理合同、GREEN 治理脚本、最小分层 Workspace、三平台 CI、真实失败恢复与冷构建基线；最终合并仍需新的明确授权。
 - Issue `#8` 的过渡交付为 PR `#10`；该 PR 只包含文档与验证控制面，并按项目所有者明确授权执行 Squash Merge。
 - AGOS 仍是可选外部辅助；本仓库可用原生控制面时不运行它，不在本任务中修改或优化它。

@@ -1,6 +1,6 @@
 # Issue #19：Gate 3 纯 Rust Workspace 与首版三平台 CI 报告
 
-report_status: first-ci-local-static-green-awaiting-checkpoint-push
+report_status: first-ci-checkpoint-pushed-awaiting-pr
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 branch_ref: codex/issue-19-gate-3-rust-workspace-ci
 baseline_ref: 477d110a9b284e127af365f5278901bcfa69e093
@@ -80,8 +80,8 @@ merge_ref: pending
 
 ## 九、下一合法批次
 
-1. 对当前 Workflow、治理 `29/29`、许可证一致性、允许路径和 Git diff 进行 Fresh 验证，形成普通提交并普通 push，在 Issue `#19` 回写 CI checkpoint。
-2. 创建正文含 `Closes #19` 的关联 PR，观察标准 GitHub-hosted runners 对 Rust `1.97.1`、Iced/desktop、Linux/Windows/macOS 与 `required` 的真实结果。
+1. CI checkpoint `f3107dd16705dd3a25bc8c3acc540a3c6c6990a3` 已完成 Fresh 验证、普通 push，并回写 Issue `#19` 评论 `5044470597`。
+2. 创建正文含 `Closes #19` 的 Draft PR，观察标准 GitHub-hosted runners 对 Rust `1.97.1`、Iced/desktop、Linux/Windows/macOS 与 `required` 的真实结果。
 3. 对每个失败先确定根因，再用后续普通提交修复；CI 稳定前不得修改 `main` Ruleset required checks，也不得在本地机器执行全 Workspace 或桌面重型编译。
 
 ## 十、收口边界

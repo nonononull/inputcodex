@@ -3,7 +3,7 @@
 schema_version: inputcodex.session-plan.v1
 task_id: 2026-07-22-issue-19-gate-3-rust-workspace-ci
 work_class: major
-task_status: first-ci-local-static-green-awaiting-checkpoint-push
+task_status: first-ci-checkpoint-pushed-awaiting-pr
 task_summary: 按已批准的 Gate 3 合同建立七成员纯 Rust Workspace、Iced 展示层隔离、最小加载/平台语义、治理脚本与首版无缓存三平台 CI，不迁移任何上游业务功能。
 project_root: C:/Users/dashuai/Documents/inputcodex
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
@@ -44,7 +44,7 @@ exact_toolchain_evidence: pending-github-actions
 desktop_iced_compile: pending-github-actions
 workspace_checkpoint_ref: commit:f93372fdc63cf8c628007117be4a8b222510957b;issuecomment:5044073911
 ci_workflow_status: local-static-green-awaiting-github-actions
-ci_checkpoint_ref: pending-push
+ci_checkpoint_ref: commit:f3107dd16705dd3a25bc8c3acc540a3c6c6990a3;issuecomment:5044470597
 
 ## 一、批准决策
 

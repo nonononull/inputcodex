@@ -60,9 +60,9 @@
 
 ## 下一步
 
-1. 对首版 `CI` Workflow 与治理 `29/29` 进行 Fresh 验证，形成普通提交并普通 push，在 Issue `#19` 回写 CI checkpoint。
-2. 创建包含 `Closes #19` 的关联 PR，由 GitHub Actions 完成 Rust `1.97.1`、Iced/desktop 与 Linux/Windows/macOS 全量验证。
-3. 对每个真实 CI 失败确定根因并用后续普通提交修复，再按 Runtime Workflow记录无缓存冷构建基线；最终 PR 合并仍需新的明确授权。
+1. 首版 CI checkpoint `f3107dd16705dd3a25bc8c3acc540a3c6c6990a3` 已普通 push 并回写 Issue `#19` 评论 `5044470597`；下一步创建包含 `Closes #19` 的 Draft PR。
+2. 由 GitHub Actions 完成 Rust `1.97.1`、Iced/desktop 与 Linux/Windows/macOS 全量验证，任何失败先确定根因。
+3. 用后续普通提交修复真实 CI 失败，再按 Runtime Workflow 记录无缓存冷构建基线；最终 PR 合并仍需新的明确授权。
 
 ## 项目文档
 

@@ -1,6 +1,6 @@
 # Issue #19 Runtime Workflow：Gate 3 纯 Rust Workspace 与首版三平台 CI
 
-workflow_status: first-ci-local-static-green-awaiting-checkpoint-push
+workflow_status: first-ci-checkpoint-pushed-awaiting-pr
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 session_plan_ref: docs/plans/sessions/2026-07-22-issue-19-gate-3-rust-workspace-ci.md
 implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
@@ -17,7 +17,7 @@ scope_hash: sha256:2e101627480012d57d6d0472a08cfbe03fc401f6ac74ef3ae1e6a42929ed6
 - Phase 4 复核发现依赖白名单比批准箭头更宽；四条新增 RED 已证明根因，政策已收紧并达到 `27/27` GREEN。
 - 依赖方向纠偏提交 `2d8a1466ae42d6b208258bee3d0cb6bd5647bb12` 已推送并回写 Issue。
 - Phase 4 七成员 Workspace 已完成 RED→GREEN；Phase 5 子项目文档、metadata、fmt、domain check 和六个轻量 crate 测试已完成，Workspace checkpoint `f93372fdc63cf8c628007117be4a8b222510957b` 已推送并回写 Issue。
-- Phase 6 已完成变更收集器、许可证一致性门禁和首版六 Job Workflow 的本地静态验证；当前合同为 `29/29`，下一步是形成普通 CI checkpoint、普通 push、创建关联 PR 并让 GitHub Actions 执行精确工具链与三平台验证。
+- Phase 6 已完成变更收集器、许可证一致性门禁和首版六 Job Workflow 的本地静态验证；当前合同为 `29/29`。CI checkpoint `f3107dd16705dd3a25bc8c3acc540a3c6c6990a3` 已普通 push 并回写 Issue 评论 `5044470597`，下一步创建关联 Draft PR 并让 GitHub Actions 执行精确工具链与三平台验证。
 
 ## Phase 0：startup-baseline
 
