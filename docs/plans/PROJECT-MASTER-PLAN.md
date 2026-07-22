@@ -16,7 +16,7 @@ transition_branch_ref: codex/issue-8-gate-2-transition
 active_plan_ref: docs/plans/2026-07-22-issue-22-gate-3-closeout.md
 active_session_plan_ref: docs/plans/sessions/2026-07-22-issue-22-gate-3-closeout.md
 active_runtime_workflow_ref: docs/workflows/2026-07-22-issue-22-gate-3-closeout-runtime.md
-active_pr_ref: pending-until-closeout-pr-created
+active_pr_ref: https://github.com/nonononull/inputcodex/pull/23
 gate_3_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/21
 planning_pr_ref: https://github.com/nonononull/inputcodex/pull/18
 transition_pr_ref: https://github.com/nonononull/inputcodex/pull/10
@@ -99,7 +99,7 @@ decision_status: gate-3-closeout-approved-and-squash-merge-authorized-gate-4-loc
 - [x] 先建立 `scripts/ci` 的可信 RED/GREEN 治理合同，再创建七成员 Workspace；当前合同为 `30/30`，七成员 Workspace checkpoint 已推送。
 - [x] 在同一实现 PR 中通过标准 Linux、Windows、macOS Runner、`required` 汇总、五类真实失败恢复和三平台各 `3/3` 次无缓存冷构建基线。
 - [x] PR `#21` 最终 Head 六 Job 全绿、Review 对话为 `0`，已按明确授权 Squash Merge；Issue `#19` 已关闭，合并后主干 CI 全绿。
-- [ ] 通过 Issue `#22` 的独立 closeout PR 持久化最终合并证据并清除仓库内 pending/Draft/OPEN 陈旧状态。
+- [x] 已建立 Issue `#22` / PR `#23` 独立 closeout 控制面，正在等待最终 Head 的 Review/CI 与已授权 Squash Merge。
 - 不迁移业务功能，不创建临时 UI 事实标准；最小窗口的视觉和交互默认由 Gemini 实现或审阅。
 
 ### Gate 4：功能目录与性能基线（锁定）

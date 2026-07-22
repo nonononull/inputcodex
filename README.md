@@ -41,7 +41,7 @@
 - 通过 PR `#18` Squash Merge Gate 3 Workspace、Iced 隔离、双平台抽象、性能诊断和三平台 CI 合同；合并提交为 `477d110a9b284e127af365f5278901bcfa69e093`，Issue `#17` 已关闭。
 - 通过 PR `#21` Squash Merge Gate 3 七成员 Workspace、首版无缓存三平台 CI、五类失败语义和冷构建最低基线；合并提交为 `0716ec0debcd3e059cc4ca88a072232841ca73b4`，Issue `#19` 已按 `COMPLETED` 关闭。
 - PR `#21` 的最终 Head 为 `9a4a4425f2fb0d8235554d3e83577111ae34efcc`；merge/head tree 均为 `4881ce609370f77181d9545474c029ab0c5d4972`，GitHub 签名 `valid`，合并后 `main` 运行 `29919596057` 六 Job 全绿且成功 Artifact 数为 `0`。
-- 已创建 Issue `#22` 与 `codex/issue-22-gate-3-closeout`，只用于回写 Gate 3 合并证据和修正陈旧控制面。
+- 已创建 Issue `#22`、分支 `codex/issue-22-gate-3-closeout` 与 PR `#23`，只用于回写 Gate 3 合并证据和修正陈旧控制面。
 
 当前明确不做：
 
@@ -63,7 +63,7 @@
 
 ## 下一步
 
-1. 通过 Issue `#22` 的独立 closeout PR 持久化 PR `#21` merge、Issue `#19` 关闭、主干 CI、Review、Ruleset 与签名证据。
+1. 通过 Issue `#22` / PR `#23` 的独立 closeout 交付持久化 PR `#21` merge、Issue `#19` 关闭、主干 CI、Review、Ruleset 与签名证据。
 2. closeout PR 只修改 14 条治理/文档路径；所有适用检查成功、Review 对话为 `0` 后按已记录授权执行 Squash Merge。
 3. Gate 3 closeout 完成后保持 Gate 4 锁定；开始功能目录、性能预算或业务迁移前必须取得新的独立批准。
 

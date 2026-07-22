@@ -1,18 +1,20 @@
 # Issue #22 Runtime Workflow：Gate 3 合并 closeout
 
-workflow_status: control-plane-implementation-in-progress
+workflow_status: pr-open-review-ci-in-progress
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/22
 session_plan_ref: docs/plans/sessions/2026-07-22-issue-22-gate-3-closeout.md
 task_plan_ref: docs/plans/2026-07-22-issue-22-gate-3-closeout.md
 approved_decision_ref: user-message:create-gate3-closeout-through-squash-merge-2026-07-22
 owner_merge_authorization_ref: user-message:create-gate3-closeout-through-squash-merge-2026-07-22
+closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/23
 scope_hash: sha256:16760a8ce385b171b007451a43a3acb604a7b8ffc06b098b5482b8d803115ec8
 
 ## 当前 checkpoint
 
 - Phase 0 已完成：`main`、PR `#21`、Issue `#19`、运行 `29919596057`、Ruleset 与维护者数量 Fresh 一致。
 - Phase 1 已完成：Issue `#22` 与 `codex/issue-22-gate-3-closeout` 已建立。
-- 当前进入 Phase 2：只在 14 条批准路径回写控制面。
+- Phase 2/3 已完成：14 条批准路径已回写，本地 AST、`30/30` 治理合同、仓库政策和空白门禁通过。
+- PR `#23` 已创建，当前进入 Phase 4：回写自引用并等待最终 Head 的 Review/CI。
 
 ## Phase 0：startup-baseline
 

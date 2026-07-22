@@ -1,13 +1,13 @@
 # Issue #22：Gate 3 合并 closeout 报告
 
-report_status: control-plane-implementation-in-progress
+report_status: pr-open-review-ci-in-progress
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/22
 source_issue_ref: https://github.com/nonononull/inputcodex/issues/19
 source_pr_ref: https://github.com/nonononull/inputcodex/pull/21
 closeout_branch_ref: codex/issue-22-gate-3-closeout
-closeout_pr_ref: pending-until-pr-created
-review_ref: pending-until-pr-created
-ci_ref: pending-until-pr-created
+closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/23
+review_ref: github-pr-23-review-threads-pending
+ci_ref: github-pr-23-checks-pending
 merge_ref: pending-closeout-pr
 approved_decision_ref: user-message:create-gate3-closeout-through-squash-merge-2026-07-22
 owner_merge_authorization_ref: user-message:create-gate3-closeout-through-squash-merge-2026-07-22
