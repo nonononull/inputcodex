@@ -2,9 +2,9 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 22 日，PR `#21` 已将 Gate 3 七成员 Workspace、首版无缓存三平台 CI、五类失败语义与三平台最低冷构建基线 Squash Merge 到 `main`；PR `#23` 已完成独立 closeout，合并提交为 `f470c062037042a1f7833a29cdcf216f6c0f5601`，Issue `#22` 已按 `COMPLETED` 关闭。Issue `#24` 是当前 Gate 4 规划任务，实际功能目录与性能基线执行仍锁定。
+截至 2026 年 7 月 22 日，PR `#21` 已将 Gate 3 七成员 Workspace、首版无缓存三平台 CI、五类失败语义与三平台最低冷构建基线 Squash Merge 到 `main`；PR `#23` 已完成独立 closeout。Issue `#24` / PR `#25` 已将 Gate 4 两阶段规划合同 Squash Merge 为 `431682296f53e86de1184c732b0d4748857c9390`，Issue `#24` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29926710342` 六 Job 全绿且成功 Artifact 数为 `0`。Issue `#26` 是当前功能目录执行任务，实际 Cargo、Rust 与 `parity/` 实现仍待新的项目所有者批准。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供十三个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供十四个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -19,12 +19,13 @@
 11. Issue `#19` 五类真实失败语义、三平台各 `3/3` 次无缓存成功样本、最终修复全绿运行与冷构建基线报告验证。
 12. Issue `#22` Gate 3 merge/tree/Issue/CI 证据、14 条 closeout 路径和受保护表面验证。
 13. Issue `#24` Gate 4 规划批准引用、9 条最大路径、两阶段拆分和执行锁定验证。
+14. Issue `#26` 功能目录执行控制面、8 条当前路径、36 条最大范围和新 scope hash 验证。
 
 当前禁止：
 
 - 在没有新的独立 upstream-sync Issue/PR 与项目所有者批准时修改 `upstream/` 或 `source-lock.json`。
 - 把三平台各 `3/3` 次最低冷构建基线解释为已经完成 Cache、P95、七天观测或最终性能预算。
-- 在 Issue `#24` 中创建实际 `parity/` 数据或 `benchmarks/`，或修改 Cargo、产品源码、测试、CI、`upstream/`、Ruleset 或 AGOS。
+- 在 Issue `#26` control-plane checkpoint 中创建实际 `parity/` 数据或 `benchmarks/`，或修改 Cargo、Rust、测试、CI、`upstream/`、Ruleset 或 AGOS。
 - 创建 Release Workflow、安装包、签名、更新资产、临时 UI 或 WebView。
 - 修改 Ruleset、required checks 或仓库级合并开关。
 - 修改或优化外部 AGOS。
@@ -44,6 +45,131 @@ Set-StrictMode -Version Latest
 ```
 
 原生 `git`、`gh`、`python` 命令后必须立即检查 `$LASTEXITCODE`。只有一行输出时使用 `@(...)` 归一化，禁止把空 stdout 当成成功证据。
+
+## Issue #26 Gate 4 功能目录控制面本地验证
+
+本节只验证 Issue `#26` 的计划、Session Plan、Runtime Workflow、初始报告、8 条当前路径和 36 条最大范围；不得创建 Cargo、Rust、`parity/` 或产品变更：
+
+```powershell
+$baseline = '431682296f53e86de1184c732b0d4748857c9390'
+$expectedBranch = 'codex/issue-26-gate-4-feature-catalog'
+$expectedPaths = @(
+  'AGENTS.md',
+  'README.md',
+  'build.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/2026-07-22-issue-26-gate-4-feature-catalog-implementation.md',
+  'docs/plans/sessions/2026-07-22-issue-26-gate-4-feature-catalog.md',
+  'docs/workflows/2026-07-22-issue-26-gate-4-feature-catalog-runtime.md',
+  'docs/reports/issue-26-gate-4-feature-catalog.md'
+)
+$scopePaths = [string[]]@(
+  'AGENTS.md',
+  'Cargo.lock',
+  'Cargo.toml',
+  'README.md',
+  'build.md',
+  'crates/inputcodex-parity/Cargo.toml',
+  'crates/inputcodex-parity/build.md',
+  'crates/inputcodex-parity/err.md',
+  'crates/inputcodex-parity/src/catalog.rs',
+  'crates/inputcodex-parity/src/contract.rs',
+  'crates/inputcodex-parity/src/fixture.rs',
+  'crates/inputcodex-parity/src/lib.rs',
+  'crates/inputcodex-parity/src/validation.rs',
+  'crates/inputcodex-parity/tests/catalog_repository.rs',
+  'crates/inputcodex-parity/tests/catalog_schema.rs',
+  'crates/inputcodex-parity/tests/contract_schema.rs',
+  'crates/inputcodex-parity/tests/fixture_safety.rs',
+  'docs/plans/2026-07-22-issue-26-gate-4-feature-catalog-implementation.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-07-22-issue-26-gate-4-feature-catalog.md',
+  'docs/reports/issue-26-gate-4-feature-catalog.md',
+  'docs/workflows/2026-07-22-issue-26-gate-4-feature-catalog-runtime.md',
+  'err.md',
+  'parity/README.md',
+  'parity/contracts/foundation-platform.yml',
+  'parity/contracts/plugin-script.yml',
+  'parity/contracts/provider-network.yml',
+  'parity/contracts/remote-install.yml',
+  'parity/contracts/session-data.yml',
+  'parity/features/foundation-platform.yml',
+  'parity/features/plugin-script.yml',
+  'parity/features/provider-network.yml',
+  'parity/features/remote-install.yml',
+  'parity/features/session-data.yml',
+  'parity/features/source-index.yml',
+  'parity/fixtures/**'
+)
+$expectedScopeHash = 'e8a1cbccfc3f0026e90fcb49264de5ea69980fa2e1faa03b520d9bedaf61e772'
+
+$branch = (git branch --show-current).Trim()
+if ($LASTEXITCODE -ne 0 -or $branch -ne $expectedBranch) {
+  throw "Issue #26 当前分支不正确：$branch"
+}
+$changed = @(
+  git -c core.quotePath=false diff --name-only $baseline
+  git -c core.quotePath=false ls-files --others --exclude-standard
+) | Where-Object { $_ } | Sort-Object -Unique
+if ($LASTEXITCODE -ne 0) { throw '读取 Issue #26 变更路径失败。' }
+$unexpected = @($changed | Where-Object { $_ -notin $expectedPaths })
+$missing = @($expectedPaths | Where-Object { $_ -notin $changed })
+if ($unexpected.Count -ne 0 -or $missing.Count -ne 0 -or $changed.Count -ne 8) {
+  throw "Issue #26 checkpoint 路径不一致；越界=$($unexpected -join ',')；缺失=$($missing -join ',')；总数=$($changed.Count)"
+}
+
+[Array]::Sort($scopePaths, [StringComparer]::Ordinal)
+$scopeText = ($scopePaths -join "`n") + "`n"
+$scopeBytes = [System.Text.UTF8Encoding]::new($false).GetBytes($scopeText)
+$scopeHash = ([System.BitConverter]::ToString(
+  [System.Security.Cryptography.SHA256]::HashData($scopeBytes)
+)).Replace('-', '').ToLowerInvariant()
+if ($scopePaths.Count -ne 36 -or $scopeHash -ne $expectedScopeHash) {
+  throw "Issue #26 scope hash 不一致：count=$($scopePaths.Count) hash=$scopeHash"
+}
+
+$controlFiles = @(
+  'docs/plans/2026-07-22-issue-26-gate-4-feature-catalog-implementation.md',
+  'docs/plans/sessions/2026-07-22-issue-26-gate-4-feature-catalog.md',
+  'docs/workflows/2026-07-22-issue-26-gate-4-feature-catalog-runtime.md',
+  'docs/reports/issue-26-gate-4-feature-catalog.md'
+)
+$controlText = ($controlFiles | ForEach-Object {
+  Get-Content -LiteralPath $_ -Raw -Encoding UTF8
+}) -join "`n"
+foreach ($required in @(
+  'https://github.com/nonononull/inputcodex/issues/26',
+  'user-message:create-issue-26-session-plan-runtime-scope-hash-2026-07-22',
+  'sha256:e8a1cbccfc3f0026e90fcb49264de5ea69980fa2e1faa03b520d9bedaf61e772',
+  '431682296f53e86de1184c732b0d4748857c9390',
+  'v1.2.41',
+  '3dafffcafb2566a1e8bce4b35671656d6adb3eda',
+  '91376ee3518cb5fe5ec8eead179418f706c25870',
+  'implementation_decision_ref: pending-owner-review'
+)) {
+  if (-not $controlText.Contains($required)) { throw "Issue #26 控制面缺少：$required" }
+}
+if ($controlText -match '(?i)TODO|TBD|FIXME|待补|待定') {
+  throw 'Issue #26 控制面存在未批准占位标记。'
+}
+
+$statusText = @(
+  Get-Content -LiteralPath 'AGENTS.md' -Raw -Encoding UTF8
+  Get-Content -LiteralPath 'README.md' -Raw -Encoding UTF8
+  Get-Content -LiteralPath 'docs/plans/PROJECT-MASTER-PLAN.md' -Raw -Encoding UTF8
+) -join "`n"
+if ($statusText -match 'active_task:\s*2026-07-22-issue-24-gate-4-feature-performance-plan|Issue `#24` 是当前 Gate 4 规划任务') {
+  throw 'Issue #26 未清除 Gate 4 规划的陈旧活动状态。'
+}
+
+& .\scripts\ci\Test-CiScripts.ps1
+if ($LASTEXITCODE -ne 0) { throw 'Issue #26 治理合同失败。' }
+& .\scripts\ci\Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw 'Issue #26 真实仓库政策失败。' }
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'Issue #26 工作树存在空白错误。' }
+Write-Output 'ISSUE26_GATE4_FEATURE_CATALOG_CONTROL_PLANE_OK'
+```
 
 ## Issue #24 Gate 4 规划本地验证
 

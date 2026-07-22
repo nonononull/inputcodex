@@ -1,10 +1,10 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: 2026-07-22-issue-24-gate-4-feature-performance-plan
-active_gate: Gate 4：功能目录与性能基线规划活动，执行锁定
-last_verified_gate: Gate 3 已通过 PR #21 实现与 PR #23 独立 closeout；closeout merge f470c06 单父、tree 与最终 Head 等价、签名 valid，Issue #22 COMPLETED，main 运行 29922385227 六 Job 全绿
-next_legal_gate: 完成 Issue #24 规划 PR；合并后分别创建功能矩阵/合同夹具与性能基线/预算执行 Issue，并取得项目所有者新的明确批准
+active_task: 2026-07-22-issue-26-gate-4-feature-catalog
+active_gate: Gate 4：功能目录执行控制面活动，实现锁定
+last_verified_gate: Gate 4 规划已通过 PR #25 Squash Merge 为 4316822；Issue #24 COMPLETED，merge 单父、tree 与最终 Head 等价、签名 valid，main 运行 29926710342 六 Job 全绿且 Artifact 为 0
+next_legal_gate: 提交 Issue #26 Session Plan、Runtime Workflow、36 条最大范围和 scope_hash checkpoint；项目所有者批准后才能开始 RED schema 与 Rust parity 实现
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/24
 closed_gate_3_closeout_issue_ref: https://github.com/nonononull/inputcodex/issues/22
 closed_implementation_issue_ref: https://github.com/nonononull/inputcodex/issues/19
@@ -48,7 +48,8 @@ decision_status: gate-4-planning-candidate-review-ci-green-final-seal-pending-me
 - Issue `#19` / PR `#21` 已完成 Gate 3 实现：治理合同 `30/30`、七成员 Workspace、首版无缓存三平台 CI、五类失败语义与三平台各 `3/3` 次最低冷构建基线均已进入 `main`。
 - PR `#21` 于 `2026-07-22T12:25:59Z` Squash Merge 为 `0716ec0debcd3e059cc4ca88a072232841ca73b4`；Issue `#19` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29919596057` 六 Job 全绿且成功 Artifact 数为 `0`。
 - Issue `#22` / PR `#23` 已完成 Gate 3 独立 closeout；PR `#23` 于 `2026-07-22T13:05:34Z` Squash Merge 为 `f470c062037042a1f7833a29cdcf216f6c0f5601`，Issue `#22` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29922385227` 六 Job 全绿且成功 Artifact 数为 `0`。
-- 当前活动任务为 Issue `#24`，项目所有者已批准“两阶段拆分”；本任务只冻结 Gate 4 规划合同和后续执行 Issue 边界，授权覆盖规划 PR 创建但不覆盖合并或实际执行。
+- Issue `#24` / PR `#25` 已完成“两阶段拆分”规划合同；PR `#25` 于 2026 年 7 月 22 日 Squash Merge 为 `431682296f53e86de1184c732b0d4748857c9390`，Issue `#24` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29926710342` 六 Job 全绿且成功 Artifact 数为 `0`。
+- 当前活动任务为 Issue `#26`，分支为 `codex/issue-26-gate-4-feature-catalog`；当前只建立独立 Session Plan、Runtime Workflow、36 条最大范围和 `sha256:e8a1cbccfc3f0026e90fcb49264de5ea69980fa2e1faa03b520d9bedaf61e772` checkpoint，实现仍待项目所有者批准。
 - 最新正式 Release 仍为 `v1.2.41`；上游 `main` 已前进到 `91376ee3518cb5fe5ec8eead179418f706c25870`，只由 Issue `#20` 预警，不改变当前缓存功能真源。
 - Issue `#8` 的过渡交付为 PR `#10`；该 PR 只包含文档与验证控制面，并按项目所有者明确授权执行 Squash Merge。
 - AGOS 仍是可选外部辅助；本仓库可用原生控制面时不运行它，不在本任务中修改或优化它。
@@ -107,13 +108,17 @@ decision_status: gate-4-planning-candidate-review-ci-green-final-seal-pending-me
 - [x] Issue `#22` / PR `#23` 已完成独立 closeout，merge/tree/签名/Issue/CI/Review/Ruleset 和分支删除证据均已闭环。
 - 不迁移业务功能，不创建临时 UI 事实标准；最小窗口的视觉和交互默认由 Gemini 实现或审阅。
 
-### Gate 4：功能目录与性能基线（规划活动，执行锁定）
+### Gate 4：功能目录与性能基线（功能目录控制面活动）
 
 - [x] 创建 Issue `#24`，批准采用“规划合同 → 两个独立执行 Issue”的拆分方案。
 - [x] 冻结功能矩阵的稳定标识、证据路径、行为字段、既有一致性状态和决策引用。
 - [x] 冻结行为合同、脱敏夹具规则、性能测量协议和可比环境要求，不填写未经实测的预算。
 - [x] 定义“功能矩阵/行为合同/脱敏夹具”执行 Issue 与“性能基线/预算批准”执行 Issue 的互斥边界。
-- [ ] 规划 PR 通过 Review/CI 后，等待项目所有者单独授权 Squash Merge；合并前不得创建实际 `parity/`、`benchmarks/` 或产品实现。
+- [x] PR `#25` 通过 Review/CI 并按项目所有者授权 Squash Merge；Issue `#24` 已完成独立 closeout。
+- [x] 创建功能目录执行 Issue `#26` 与独立分支。
+- [ ] 提交 Issue `#26` 任务计划、Session Plan、Runtime Workflow、36 条范围和新 scope hash checkpoint，等待项目所有者批准实现。
+- [ ] 批准后按 RED schema、GREEN Rust 验证器、source-index/功能目录、合同/fixture 顺序执行；不得迁移产品功能。
+- [ ] 功能目录收口后创建独立性能基线 Issue；基线与优化保持不同 Issue/PR。
 
 ### Gate 5：分域迁移（锁定）
 
@@ -153,11 +158,15 @@ decision_status: gate-4-planning-candidate-review-ci-green-final-seal-pending-me
 - 当前 Gate 4 Session Plan：`docs/plans/sessions/2026-07-22-issue-24-gate-4-feature-performance-plan.md`。
 - 当前 Gate 4 Runtime Workflow：`docs/workflows/2026-07-22-issue-24-gate-4-feature-performance-runtime.md`。
 - 当前 Gate 4 初始报告：`docs/reports/issue-24-gate-4-feature-performance-plan.md`。
+- 当前 Issue `#26` 实现计划：`docs/plans/2026-07-22-issue-26-gate-4-feature-catalog-implementation.md`。
+- 当前 Issue `#26` Session Plan：`docs/plans/sessions/2026-07-22-issue-26-gate-4-feature-catalog.md`。
+- 当前 Issue `#26` Runtime Workflow：`docs/workflows/2026-07-22-issue-26-gate-4-feature-catalog-runtime.md`。
+- 当前 Issue `#26` 初始报告：`docs/reports/issue-26-gate-4-feature-catalog.md`。
 
 ## 停止条件
 
 - 上游最新正式 Release 或 `v1.2.41` 标签提交发生变化。
 - 需要修改 `upstream/` 或 `source-lock.json`，但没有新的独立 upstream-sync Issue/PR 与项目所有者批准。
-- 在 Issue `#24` 规划 PR 中需要创建 `parity/`、`benchmarks/`，或修改 Cargo、Rust 产品、测试、CI、upstream、Ruleset、发布资产或 AGOS。
-- 需要决定 `parity-exception`、运行上游/半成品、填写绝对性能预算或启动 Gate 4 执行，但没有新的独立 Issue 与项目所有者批准。
+- 在 Issue `#26` control-plane checkpoint 中需要创建 `parity/`、修改 Cargo/Rust、测试、CI、upstream、benchmarks、Ruleset、发布资产或 AGOS。
+- 需要越过 Issue `#26` 的 36 条最大范围、决定 `parity-exception`、运行上游/半成品或填写绝对性能预算，但没有新的项目所有者批准。
 - Fresh 验证失败、Ruleset 变化、Review 对话未闭环或出现未批准的一致性差异。
