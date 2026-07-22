@@ -1,5 +1,8 @@
 #![forbid(unsafe_code)]
 
+#[cfg(target_os = "windows")]
+compile_error!("GATE3_WINDOWS_CONDITIONAL_COMPILE_FAILURE");
+
 use inputcodex_application::{ApplicationError, PlatformKind, PlatformPort};
 
 #[derive(Debug, Clone, Copy, Default)]
