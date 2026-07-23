@@ -24,6 +24,10 @@ const FEATURE_CATALOG_SCHEMA: &str = "inputcodex.feature-catalog.v1";
 const SOURCE_INDEX_SCHEMA: &str = "inputcodex.source-index.v1";
 const CONTRACT_CATALOG_SCHEMA: &str = "inputcodex.behavior-contract.v1";
 const FIXTURE_MANIFEST_SCHEMA: &str = "inputcodex.fixture-manifest.v1";
+const RELEASE_AUDIT_SCHEMA: &str = "inputcodex.release-audit.v1";
+const RELEASE_AUDIT_CURRENT: &str = "current";
+const RELEASE_AUDIT_STALE: &str = "stale-re-audit-required";
+const RE_AUDIT_ISSUE_URL_PREFIX: &str = "https://github.com/nonononull/inputcodex/issues/";
 
 const DOMAIN_FILES: [(FeatureDomain, &str); 5] = [
     (FeatureDomain::FoundationPlatform, "foundation-platform.yml"),
@@ -105,6 +109,7 @@ pub struct RepositorySummary {
     excluded_entry_count: usize,
     exception_pending_count: usize,
     coverage_gap_count: usize,
+    requires_reaudit: bool,
 }
 
 impl RepositorySummary {
@@ -141,6 +146,11 @@ impl RepositorySummary {
     #[must_use]
     pub const fn coverage_gap_count(&self) -> usize {
         self.coverage_gap_count
+    }
+
+    #[must_use]
+    pub const fn requires_reaudit(&self) -> bool {
+        self.requires_reaudit
     }
 }
 
@@ -186,11 +196,27 @@ impl Error for RepositoryValidationError {}
 #[derive(Debug, Deserialize)]
 struct SourceLock {
     snapshot: SourceLockSnapshot,
+    release_audit: SourceLockReleaseAudit,
 }
 
 #[derive(Debug, Deserialize)]
 struct SourceLockSnapshot {
     release_tag: String,
+    commit: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct SourceLockReleaseAudit {
+    schema_version: String,
+    catalog_release: SourceLockCatalogRelease,
+    status: String,
+    stale_reason: Option<String>,
+    re_audit_issue_ref: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct SourceLockCatalogRelease {
+    tag: String,
     commit: String,
 }
 
@@ -515,6 +541,88 @@ fn collect_fixture_files(
     Ok(files)
 }
 
+fn validate_release_audit(source_lock: &SourceLock, issues: &mut Vec<ValidationIssue>) -> bool {
+    let audit = &source_lock.release_audit;
+    let location = "upstream/source-lock.json.release_audit";
+    let mut valid = true;
+
+    if audit.schema_version != RELEASE_AUDIT_SCHEMA {
+        valid = false;
+        issues.push(ValidationIssue::new(
+            ValidationCode::SchemaVersionMismatch,
+            location,
+        ));
+    }
+
+    let snapshot_matches_catalog = source_lock.snapshot.release_tag == audit.catalog_release.tag
+        && source_lock.snapshot.commit == audit.catalog_release.commit;
+
+    match audit.status.as_str() {
+        RELEASE_AUDIT_CURRENT => {
+            if !snapshot_matches_catalog
+                || audit.stale_reason.is_some()
+                || audit.re_audit_issue_ref.is_some()
+            {
+                issues.push(ValidationIssue::new(
+                    ValidationCode::ReleaseMismatch,
+                    location,
+                ));
+            }
+            false
+        }
+        RELEASE_AUDIT_STALE => {
+            if snapshot_matches_catalog {
+                valid = false;
+                issues.push(ValidationIssue::new(
+                    ValidationCode::ReleaseMismatch,
+                    location,
+                ));
+            }
+            if !audit
+                .stale_reason
+                .as_deref()
+                .is_some_and(|reason| !reason.trim().is_empty())
+            {
+                valid = false;
+                issues.push(ValidationIssue::new(
+                    ValidationCode::ReleaseMismatch,
+                    location,
+                ));
+            }
+            if !is_valid_reaudit_issue_ref(audit.re_audit_issue_ref.as_deref()) {
+                valid = false;
+                issues.push(ValidationIssue::new(
+                    ValidationCode::ReleaseMismatch,
+                    location,
+                ));
+            }
+            valid
+        }
+        _ => {
+            issues.push(ValidationIssue::new(
+                ValidationCode::ReleaseMismatch,
+                location,
+            ));
+            false
+        }
+    }
+}
+
+fn is_valid_reaudit_issue_ref(value: Option<&str>) -> bool {
+    let Some(value) = value else {
+        return false;
+    };
+    let Some(issue_number) = value.strip_prefix(RE_AUDIT_ISSUE_URL_PREFIX) else {
+        return false;
+    };
+
+    issue_number
+        .as_bytes()
+        .first()
+        .is_some_and(|byte| *byte != b'0')
+        && issue_number.bytes().all(|byte| byte.is_ascii_digit())
+}
+
 fn load_feature_repository(
     repository_root: &Path,
 ) -> Result<FeatureRepositoryState, RepositoryValidationError> {
@@ -537,6 +645,7 @@ fn load_feature_repository(
     })?;
 
     let mut issues = Vec::new();
+    let requires_reaudit = validate_release_audit(&source_lock, &mut issues);
     let mut feature_ids = BTreeSet::new();
     let mut feature_statuses = BTreeMap::new();
     let mut feature_entry_points = BTreeMap::<String, BTreeSet<String>>::new();
@@ -572,8 +681,8 @@ fn load_feature_repository(
                 relative_path.clone(),
             ));
         }
-        if catalog.release().tag() != source_lock.snapshot.release_tag
-            || catalog.release().tag_commit() != source_lock.snapshot.commit
+        if catalog.release().tag() != source_lock.release_audit.catalog_release.tag
+            || catalog.release().tag_commit() != source_lock.release_audit.catalog_release.commit
         {
             issues.push(ValidationIssue::new(
                 ValidationCode::ReleaseMismatch,
@@ -624,8 +733,8 @@ fn load_feature_repository(
     issues.extend(validate_source_index(
         &source_index,
         &feature_ids,
-        &source_lock.snapshot.release_tag,
-        &source_lock.snapshot.commit,
+        &source_lock.release_audit.catalog_release.tag,
+        &source_lock.release_audit.catalog_release.commit,
     ));
 
     let expected_sources = enumerate_expected_sources(repository_root)?;
@@ -738,6 +847,7 @@ fn load_feature_repository(
             excluded_entry_count,
             exception_pending_count,
             coverage_gap_count: 0,
+            requires_reaudit,
         },
         feature_ids,
     })

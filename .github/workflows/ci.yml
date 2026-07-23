@@ -136,6 +136,109 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+  release-audit:
+    name: release-audit
+    needs: classify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 检出仓库与完整差异历史
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: 验证 Release 审计门
+        shell: pwsh
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REPORT_DIR: ${{ runner.temp }}/inputcodex-ci/release-audit
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Path $env:REPORT_DIR -Force | Out-Null
+          $powerShellExecutable = (Get-Process -Id $PID).Path
+          $gateArguments = @('-RepositoryRoot', '.')
+
+          if ($env:EVENT_NAME -eq 'pull_request') {
+            if ($env:BASE_SHA -notmatch '^[0-9a-fA-F]{40}$' -or $env:HEAD_SHA -notmatch '^[0-9a-fA-F]{40}$') {
+              throw 'Pull Request 缺少可验证的 40 位 base/head SHA。'
+            }
+
+            $changesFile = Join-Path $env:REPORT_DIR 'changes.json'
+            $collectorOutput = @(
+              & $powerShellExecutable -NoLogo -NoProfile -File 'scripts/ci/Collect-Changes.ps1' `
+                -RepositoryRoot '.' `
+                -Base $env:BASE_SHA `
+                -Head $env:HEAD_SHA `
+                -OutputFile $changesFile 2>&1 |
+                ForEach-Object { $_.ToString() }
+            )
+            $collectorExitCode = $LASTEXITCODE
+            [System.IO.File]::WriteAllText(
+              (Join-Path $env:REPORT_DIR 'collector.log'),
+              (($collectorOutput -join [Environment]::NewLine) + [Environment]::NewLine),
+              [System.Text.UTF8Encoding]::new($false)
+            )
+            if ($collectorExitCode -ne 0) {
+              throw "变更收集失败，退出码=$collectorExitCode。"
+            }
+
+            $baseSourceLockPath = Join-Path $env:REPORT_DIR 'base-source-lock.json'
+            $baseSourceLockOutput = @(
+              & git show "$($env:BASE_SHA):upstream/source-lock.json" 2>&1 |
+                ForEach-Object { $_.ToString() }
+            )
+            $baseSourceLockExitCode = $LASTEXITCODE
+            if ($baseSourceLockExitCode -ne 0) {
+              throw "无法读取 PR 基线 source-lock，退出码=$baseSourceLockExitCode。"
+            }
+            [System.IO.File]::WriteAllText(
+              $baseSourceLockPath,
+              (($baseSourceLockOutput -join [Environment]::NewLine) + [Environment]::NewLine),
+              [System.Text.UTF8Encoding]::new($false)
+            )
+            $gateArguments += @('-InputFile', $changesFile, '-BaseSourceLockPath', $baseSourceLockPath)
+          }
+
+          $gateOutput = @(
+            & $powerShellExecutable -NoLogo -NoProfile -File 'scripts/ci/Verify-ReleaseAuditGate.ps1' `
+              @gateArguments 2>&1 |
+              ForEach-Object { $_.ToString() }
+          )
+          $gateExitCode = $LASTEXITCODE
+          $gateText = $gateOutput -join [Environment]::NewLine
+          [System.IO.File]::WriteAllText(
+            (Join-Path $env:REPORT_DIR 'release-audit.json'),
+            ($gateText + [Environment]::NewLine),
+            [System.Text.UTF8Encoding]::new($false)
+          )
+          if ($gateExitCode -ne 0) {
+            throw "Release 审计门失败，退出码=$gateExitCode。"
+          }
+
+          $gate = $gateText | ConvertFrom-Json -Depth 20
+          if ($gate.ok -ne $true) {
+            throw 'Release 审计门未返回通过状态。'
+          }
+          "Release 审计状态：$($gate.status)；requires_reaudit=$($gate.requires_reaudit)" |
+            Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Encoding utf8
+
+      - name: 上传 Release 审计失败证据
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: release-audit-failure-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/inputcodex-ci/release-audit/collector.log
+            ${{ runner.temp }}/inputcodex-ci/release-audit/changes.json
+            ${{ runner.temp }}/inputcodex-ci/release-audit/base-source-lock.json
+            ${{ runner.temp }}/inputcodex-ci/release-audit/release-audit.json
+          if-no-files-found: ignore
+          retention-days: 7
+
   governance:
     name: governance
     runs-on: ubuntu-latest
@@ -159,6 +262,7 @@ jobs:
           $scripts = @(
             'scripts/ci/Collect-Changes.ps1'
             'scripts/ci/Classify-Changes.ps1'
+            'scripts/ci/Verify-ReleaseAuditGate.ps1'
             'scripts/ci/Verify-RepositoryPolicy.ps1'
             'scripts/ci/Test-CiScripts.ps1'
           )
@@ -510,6 +614,7 @@ jobs:
     name: required
     needs:
       - classify
+      - release-audit
       - governance
       - linux-quality
       - windows
@@ -522,6 +627,7 @@ jobs:
         shell: pwsh
         env:
           CLASSIFY_RESULT: ${{ needs.classify.result }}
+          RELEASE_AUDIT_RESULT: ${{ needs.release-audit.result }}
           GOVERNANCE_RESULT: ${{ needs.governance.result }}
           LINUX_RESULT: ${{ needs['linux-quality'].result }}
           WINDOWS_RESULT: ${{ needs.windows.result }}
@@ -538,6 +644,9 @@ jobs:
 
           if ($env:CLASSIFY_RESULT -ne 'success') {
             $failures.Add("classify=$env:CLASSIFY_RESULT")
+          }
+          if ($env:RELEASE_AUDIT_RESULT -ne 'success') {
+            $failures.Add("release-audit=$env:RELEASE_AUDIT_RESULT")
           }
           if ($env:GOVERNANCE_RESULT -ne 'success') {
             $failures.Add("governance=$env:GOVERNANCE_RESULT")
@@ -580,6 +689,7 @@ jobs:
             heavy = $env:HEAVY
             results = [pscustomobject][ordered]@{
               classify = $env:CLASSIFY_RESULT
+              release_audit = $env:RELEASE_AUDIT_RESULT
               governance = $env:GOVERNANCE_RESULT
               linux_quality = $env:LINUX_RESULT
               windows = $env:WINDOWS_RESULT

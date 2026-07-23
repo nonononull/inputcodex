@@ -1,4 +1,9 @@
-use std::{collections::BTreeSet, fs, path::PathBuf};
+use std::{
+    collections::BTreeSet,
+    fs,
+    path::{Path, PathBuf},
+    time::{SystemTime, UNIX_EPOCH},
+};
 
 use inputcodex_parity::{
     ValidationCode, parse_source_index, validate_feature_repository, validate_repository,
@@ -7,6 +12,9 @@ use inputcodex_parity::{
 
 const RELEASE_TAG: &str = "v1.2.41";
 const RELEASE_COMMIT: &str = "3dafffcafb2566a1e8bce4b35671656d6adb3eda";
+const RELEASE_42_TAG: &str = "v1.2.42";
+const RELEASE_42_COMMIT: &str = "657cd33e009ad02515d30db6492cd4e669b06318";
+const RE_AUDIT_ISSUE_URL: &str = "https://github.com/nonononull/inputcodex/issues/34";
 
 const VALID_SOURCE_INDEX: &str = r#"
 schema_version: inputcodex.source-index.v1
@@ -36,6 +44,114 @@ fn repository_root() -> PathBuf {
         .and_then(|path| path.parent())
         .expect("parity crate 应位于仓库 crates 目录")
         .to_path_buf()
+}
+
+struct FeatureRepositoryFixture {
+    root: PathBuf,
+}
+
+struct SourceLockState<'a> {
+    snapshot_tag: &'a str,
+    snapshot_commit: &'a str,
+    catalog_tag: &'a str,
+    catalog_commit: &'a str,
+    status: &'a str,
+    stale_reason: Option<&'a str>,
+    re_audit_issue_ref: Option<&'a str>,
+}
+
+impl FeatureRepositoryFixture {
+    fn new() -> Self {
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("系统时间必须晚于 Unix epoch")
+            .as_nanos();
+        let root = repository_root().join("target").join(format!(
+            "inputcodex-release-audit-{}-{nonce}",
+            std::process::id()
+        ));
+
+        fs::create_dir_all(&root).expect("应能创建临时功能目录夹具");
+        copy_tree(
+            &repository_root().join("parity/features"),
+            &root.join("parity/features"),
+        );
+        copy_tree(
+            &repository_root().join("upstream/CodexPlusPlus"),
+            &root.join("upstream/CodexPlusPlus"),
+        );
+
+        Self { root }
+    }
+
+    fn root(&self) -> &Path {
+        &self.root
+    }
+
+    fn write_source_lock(&self, state: SourceLockState<'_>) {
+        let stale_reason = state
+            .stale_reason
+            .map_or_else(|| "null".to_owned(), |value| format!("\"{value}\""));
+        let re_audit_issue_ref = state
+            .re_audit_issue_ref
+            .map_or_else(|| "null".to_owned(), |value| format!("\"{value}\""));
+        let source_lock = format!(
+            r#"{{
+  "snapshot": {{
+    "release_tag": "{}",
+    "commit": "{}"
+  }},
+  "release_audit": {{
+    "schema_version": "inputcodex.release-audit.v1",
+    "catalog_release": {{
+      "tag": "{}",
+      "commit": "{}"
+    }},
+    "status": "{}",
+    "stale_reason": {},
+    "re_audit_issue_ref": {}
+  }}
+}}"#,
+            state.snapshot_tag,
+            state.snapshot_commit,
+            state.catalog_tag,
+            state.catalog_commit,
+            state.status,
+            stale_reason,
+            re_audit_issue_ref,
+        );
+
+        let source_lock_path = self.root.join("upstream/source-lock.json");
+        fs::create_dir_all(
+            source_lock_path
+                .parent()
+                .expect("source-lock 必须位于上游目录"),
+        )
+        .expect("应能创建 source-lock 父目录");
+        fs::write(source_lock_path, source_lock).expect("应能写入临时 source-lock");
+    }
+}
+
+impl Drop for FeatureRepositoryFixture {
+    fn drop(&mut self) {
+        let _ = fs::remove_dir_all(&self.root);
+    }
+}
+
+fn copy_tree(source: &Path, destination: &Path) {
+    fs::create_dir_all(destination).expect("应能创建临时目录");
+
+    for entry in fs::read_dir(source).expect("应能读取源目录") {
+        let entry = entry.expect("应能读取源目录项");
+        let destination_path = destination.join(entry.file_name());
+        let file_type = entry.file_type().expect("应能读取源目录项类型");
+
+        if file_type.is_dir() {
+            copy_tree(&entry.path(), &destination_path);
+        } else if file_type.is_file() {
+            fs::copy(entry.path(), destination_path).expect("应能复制临时夹具文件");
+        }
+    }
 }
 
 #[test]
@@ -144,6 +260,91 @@ fn source_index_证据路径必须位于锁定上游快照() {
 }
 
 #[test]
+fn release_audit_显式解耦快照与功能目录审计基线() {
+    let fixture = FeatureRepositoryFixture::new();
+
+    fixture.write_source_lock(SourceLockState {
+        snapshot_tag: RELEASE_TAG,
+        snapshot_commit: RELEASE_COMMIT,
+        catalog_tag: RELEASE_TAG,
+        catalog_commit: RELEASE_COMMIT,
+        status: "current",
+        stale_reason: None,
+        re_audit_issue_ref: None,
+    });
+    let summary =
+        validate_feature_repository(fixture.root()).expect("current 审计基线必须通过功能目录验证");
+    assert!(!summary.requires_reaudit());
+
+    fixture.write_source_lock(SourceLockState {
+        snapshot_tag: RELEASE_42_TAG,
+        snapshot_commit: RELEASE_42_COMMIT,
+        catalog_tag: RELEASE_TAG,
+        catalog_commit: RELEASE_COMMIT,
+        status: "stale-re-audit-required",
+        stale_reason: Some("上游 v1.2.42 已缓存，功能目录尚未完成复审"),
+        re_audit_issue_ref: Some(RE_AUDIT_ISSUE_URL),
+    });
+    let summary = validate_feature_repository(fixture.root())
+        .expect("显式 stale 审计基线必须允许同步与目录复审继续进行");
+    assert!(summary.requires_reaudit());
+
+    fixture.write_source_lock(SourceLockState {
+        snapshot_tag: RELEASE_TAG,
+        snapshot_commit: RELEASE_COMMIT,
+        catalog_tag: RELEASE_TAG,
+        catalog_commit: RELEASE_COMMIT,
+        status: "stale-re-audit-required",
+        stale_reason: Some("快照与目录版本相同却被标记为 stale"),
+        re_audit_issue_ref: Some(RE_AUDIT_ISSUE_URL),
+    });
+    let error = validate_feature_repository(fixture.root())
+        .expect_err("stale 审计状态必须对应不同的快照与目录版本");
+    assert!(
+        error
+            .issues()
+            .iter()
+            .any(|issue| issue.code() == ValidationCode::ReleaseMismatch)
+    );
+
+    fixture.write_source_lock(SourceLockState {
+        snapshot_tag: RELEASE_42_TAG,
+        snapshot_commit: RELEASE_42_COMMIT,
+        catalog_tag: RELEASE_TAG,
+        catalog_commit: RELEASE_COMMIT,
+        status: "stale-re-audit-required",
+        stale_reason: None,
+        re_audit_issue_ref: Some(RE_AUDIT_ISSUE_URL),
+    });
+    let error = validate_feature_repository(fixture.root())
+        .expect_err("stale 审计状态必须说明重新审计根因");
+    assert!(
+        error
+            .issues()
+            .iter()
+            .any(|issue| issue.code() == ValidationCode::ReleaseMismatch)
+    );
+
+    fixture.write_source_lock(SourceLockState {
+        snapshot_tag: RELEASE_42_TAG,
+        snapshot_commit: RELEASE_42_COMMIT,
+        catalog_tag: RELEASE_TAG,
+        catalog_commit: RELEASE_COMMIT,
+        status: "stale-re-audit-required",
+        stale_reason: Some("上游 v1.2.42 已缓存，功能目录尚未完成复审"),
+        re_audit_issue_ref: Some("https://github.com/nonononull/inputcodex/pull/34"),
+    });
+    let error = validate_feature_repository(fixture.root())
+        .expect_err("stale 审计状态必须关联 inputcodex 的重新审计 Issue");
+    assert!(
+        error
+            .issues()
+            .iter()
+            .any(|issue| issue.code() == ValidationCode::ReleaseMismatch)
+    );
+}
+
+#[test]
 fn 仓库source_index_覆盖锁定上游公开入口() {
     let summary =
         validate_feature_repository(&repository_root()).expect("功能目录应通过仓库级验证");
@@ -164,6 +365,7 @@ fn 仓库功能目录通过完整引用与安全验证() {
     assert_eq!(summary.contract_count(), 36);
     assert_eq!(summary.fixture_count(), 11);
     assert_eq!(summary.coverage_gap_count(), 0);
+    assert!(!summary.requires_reaudit());
 }
 
 #[test]

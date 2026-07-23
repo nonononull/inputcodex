@@ -9,11 +9,13 @@ $repositoryRoot = (Resolve-Path -LiteralPath (Join-Path $scriptDirectory '../..'
 $classifierScript = Join-Path $scriptDirectory 'Classify-Changes.ps1'
 $policyScript = Join-Path $scriptDirectory 'Verify-RepositoryPolicy.ps1'
 $collectorScript = Join-Path $scriptDirectory 'Collect-Changes.ps1'
+$releaseAuditGateScript = Join-Path $scriptDirectory 'Verify-ReleaseAuditGate.ps1'
 $workflowPath = Join-Path $repositoryRoot '.github/workflows/ci.yml'
 $missingImplementations = @(
     @(
         $classifierScript
         $policyScript
+        $releaseAuditGateScript
     ) | Where-Object { -not (Test-Path -LiteralPath $_ -PathType Leaf) }
 )
 
@@ -143,6 +145,132 @@ function Write-JsonFile {
     Set-Content -LiteralPath $Path -Value $json -Encoding utf8NoBOM
 }
 
+function New-ReleaseAuditSourceLock {
+    param(
+        [Parameter(Mandatory)]
+        [string]$SnapshotTag,
+
+        [Parameter(Mandatory)]
+        [string]$SnapshotCommit,
+
+        [Parameter(Mandatory)]
+        [string]$CatalogTag,
+
+        [Parameter(Mandatory)]
+        [string]$CatalogCommit,
+
+        [Parameter(Mandatory)]
+        [string]$Status,
+
+        [AllowNull()]
+        [object]$StaleReason,
+
+        [AllowNull()]
+        [object]$ReAuditIssueRef
+    )
+
+    [pscustomobject][ordered]@{
+        snapshot = [pscustomobject][ordered]@{
+            release_tag = $SnapshotTag
+            commit = $SnapshotCommit
+        }
+        release_audit = [pscustomobject][ordered]@{
+            schema_version = 'inputcodex.release-audit.v1'
+            catalog_release = [pscustomobject][ordered]@{
+                tag = $CatalogTag
+                commit = $CatalogCommit
+            }
+            status = $Status
+            stale_reason = $StaleReason
+            re_audit_issue_ref = $ReAuditIssueRef
+        }
+    }
+}
+
+function New-LegacySourceLock {
+    param(
+        [Parameter(Mandatory)]
+        [string]$SnapshotTag,
+
+        [Parameter(Mandatory)]
+        [string]$SnapshotCommit
+    )
+
+    [pscustomobject][ordered]@{
+        snapshot = [pscustomobject][ordered]@{
+            release_tag = $SnapshotTag
+            commit = $SnapshotCommit
+        }
+    }
+}
+
+function Invoke-ReleaseAuditGateCase {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name,
+
+        [Parameter(Mandatory)]
+        $BaseSourceLock,
+
+        [Parameter(Mandatory)]
+        $HeadSourceLock,
+
+        [Parameter(Mandatory)]
+        [AllowEmptyCollection()]
+        [object[]]$Changes
+    )
+
+    $caseRoot = Join-Path $testRoot ("release-audit-{0}" -f $Name)
+    $upstreamRoot = Join-Path $caseRoot 'upstream'
+    New-Item -ItemType Directory -Path $upstreamRoot -Force | Out-Null
+
+    $baseSourceLockPath = Join-Path $caseRoot 'base-source-lock.json'
+    $headSourceLockPath = Join-Path $upstreamRoot 'source-lock.json'
+    $changesPath = Join-Path $caseRoot 'changes.json'
+    Write-JsonFile -Path $baseSourceLockPath -Value $BaseSourceLock
+    Write-JsonFile -Path $headSourceLockPath -Value $HeadSourceLock
+    Write-JsonFile -Path $changesPath -Value $Changes
+
+    Invoke-ChildScript -Path $releaseAuditGateScript -Arguments @(
+        '-RepositoryRoot', $caseRoot,
+        '-InputFile', $changesPath,
+        '-BaseSourceLockPath', $baseSourceLockPath
+    )
+}
+
+function Assert-ReleaseAuditSuccess {
+    param(
+        [Parameter(Mandatory)]
+        $Result,
+
+        [Parameter(Mandatory)]
+        [string]$ExpectedStatus,
+
+        [Parameter(Mandatory)]
+        [bool]$ExpectedReaudit
+    )
+
+    Assert-Equal -Expected 0 -Actual $Result.ExitCode -Message "Release 审计门应通过，输出=$($Result.Output)"
+    Assert-True -Condition ($null -ne $Result.Json) -Message "Release 审计门必须输出 JSON，输出=$($Result.Output)"
+    Assert-Equal -Expected $true -Actual $Result.Json.ok -Message 'Release 审计门通过时必须标记 ok'
+    Assert-Equal -Expected $ExpectedStatus -Actual $Result.Json.status -Message 'Release 审计状态必须可诊断'
+    Assert-Equal -Expected $ExpectedReaudit -Actual $Result.Json.requires_reaudit -Message '重新审计要求必须可诊断'
+}
+
+function Assert-ReleaseAuditFailureCode {
+    param(
+        [Parameter(Mandatory)]
+        $Result,
+
+        [Parameter(Mandatory)]
+        [string]$Code
+    )
+
+    Assert-True -Condition ($Result.ExitCode -ne 0) -Message 'Release 审计门拒绝路径时必须返回非零退出码'
+    Assert-True -Condition ($null -ne $Result.Json) -Message "Release 审计门失败时必须输出 JSON，输出=$($Result.Output)"
+    Assert-Contains -Collection @($Result.Json.errors.code) -Expected $Code -Message 'Release 审计门必须返回稳定错误码'
+}
+
 function Invoke-ClassifierCase {
     param(
         [Parameter(Mandatory)]
@@ -262,6 +390,110 @@ Invoke-ContractTest -Name '重命名缺失旧路径时失败' -Body {
     Assert-ClassifierFailureCode -Result $result -Code 'OLD_PATH_REQUIRED'
 }
 
+Invoke-ContractTest -Name 'Release 审计门区分 current 与 stale 并阻断产品路径' -Body {
+    $current = New-ReleaseAuditSourceLock `
+        -SnapshotTag 'v1.2.41' `
+        -SnapshotCommit '3dafffcafb2566a1e8bce4b35671656d6adb3eda' `
+        -CatalogTag 'v1.2.41' `
+        -CatalogCommit '3dafffcafb2566a1e8bce4b35671656d6adb3eda' `
+        -Status 'current' `
+        -StaleReason $null `
+        -ReAuditIssueRef $null
+    $stale = New-ReleaseAuditSourceLock `
+        -SnapshotTag 'v1.2.42' `
+        -SnapshotCommit '657cd33e009ad02515d30db6492cd4e669b06318' `
+        -CatalogTag 'v1.2.41' `
+        -CatalogCommit '3dafffcafb2566a1e8bce4b35671656d6adb3eda' `
+        -Status 'stale-re-audit-required' `
+        -StaleReason '上游 v1.2.42 已缓存，功能目录尚未完成复审' `
+        -ReAuditIssueRef 'https://github.com/nonononull/inputcodex/issues/34'
+
+    $result = Invoke-ReleaseAuditGateCase `
+        -Name 'current-product-change' `
+        -BaseSourceLock $current `
+        -HeadSourceLock $current `
+        -Changes @([pscustomobject]@{ status = 'M'; path = 'apps/inputcodex-desktop/src/main.rs' })
+    Assert-ReleaseAuditSuccess -Result $result -ExpectedStatus 'current' -ExpectedReaudit $false
+
+    $result = Invoke-ReleaseAuditGateCase `
+        -Name 'current-empty-change-set' `
+        -BaseSourceLock $current `
+        -HeadSourceLock $current `
+        -Changes @()
+    Assert-ReleaseAuditSuccess -Result $result -ExpectedStatus 'current' -ExpectedReaudit $false
+
+    $legacyBase = New-LegacySourceLock `
+        -SnapshotTag 'v1.2.41' `
+        -SnapshotCommit '3dafffcafb2566a1e8bce4b35671656d6adb3eda'
+    $result = Invoke-ReleaseAuditGateCase `
+        -Name 'current-legacy-base' `
+        -BaseSourceLock $legacyBase `
+        -HeadSourceLock $current `
+        -Changes @([pscustomobject]@{ status = 'M'; path = 'upstream/source-lock.json' })
+    Assert-ReleaseAuditSuccess -Result $result -ExpectedStatus 'current' -ExpectedReaudit $false
+
+    $result = Invoke-ReleaseAuditGateCase `
+        -Name 'stale-reaudit-only' `
+        -BaseSourceLock $current `
+        -HeadSourceLock $stale `
+        -Changes @(
+            [pscustomobject]@{ status = 'M'; path = 'upstream/source-lock.json' }
+            [pscustomobject]@{ status = 'M'; path = 'upstream/CodexPlusPlus/README.md' }
+            [pscustomobject]@{ status = 'M'; path = 'docs/reports/2026-07-22-upstream-v1.2.42-sync.md' }
+            [pscustomobject]@{ status = 'M'; path = 'parity/features/source-index.yml' }
+            [pscustomobject]@{ status = 'M'; path = 'crates/inputcodex-parity/src/validation.rs' }
+        )
+    Assert-ReleaseAuditSuccess -Result $result -ExpectedStatus 'stale-re-audit-required' -ExpectedReaudit $true
+
+    foreach ($blockedPath in @(
+        'benchmarks/cold-start.rs'
+        'apps/inputcodex-desktop/src/main.rs'
+        'crates/inputcodex-domain/src/lib.rs'
+        'Cargo.toml'
+        'Cargo.lock'
+    )) {
+        $result = Invoke-ReleaseAuditGateCase `
+            -Name ("stale-blocked-{0}" -f ($blockedPath -replace '[^A-Za-z0-9]+', '-')) `
+            -BaseSourceLock $current `
+            -HeadSourceLock $stale `
+            -Changes @([pscustomobject]@{ status = 'M'; path = $blockedPath })
+        Assert-ReleaseAuditFailureCode -Result $result -Code 'RELEASE_AUDIT_REAUDIT_REQUIRED'
+    }
+
+    $renewedCurrent = New-ReleaseAuditSourceLock `
+        -SnapshotTag 'v1.2.42' `
+        -SnapshotCommit '657cd33e009ad02515d30db6492cd4e669b06318' `
+        -CatalogTag 'v1.2.42' `
+        -CatalogCommit '657cd33e009ad02515d30db6492cd4e669b06318' `
+        -Status 'current' `
+        -StaleReason $null `
+        -ReAuditIssueRef $null
+    $result = Invoke-ReleaseAuditGateCase `
+        -Name 'audit-changed-with-product' `
+        -BaseSourceLock $current `
+        -HeadSourceLock $renewedCurrent `
+        -Changes @(
+            [pscustomobject]@{ status = 'M'; path = 'upstream/source-lock.json' }
+            [pscustomobject]@{ status = 'M'; path = 'apps/inputcodex-desktop/src/main.rs' }
+        )
+    Assert-ReleaseAuditFailureCode -Result $result -Code 'RELEASE_AUDIT_CHANGED_WITH_BLOCKED_PATH'
+
+    $invalidStale = New-ReleaseAuditSourceLock `
+        -SnapshotTag 'v1.2.42' `
+        -SnapshotCommit '657cd33e009ad02515d30db6492cd4e669b06318' `
+        -CatalogTag 'v1.2.41' `
+        -CatalogCommit '3dafffcafb2566a1e8bce4b35671656d6adb3eda' `
+        -Status 'stale-re-audit-required' `
+        -StaleReason '' `
+        -ReAuditIssueRef 'https://github.com/nonononull/inputcodex/issues/34'
+    $result = Invoke-ReleaseAuditGateCase `
+        -Name 'invalid-stale-reason' `
+        -BaseSourceLock $current `
+        -HeadSourceLock $invalidStale `
+        -Changes @([pscustomobject]@{ status = 'M'; path = 'parity/features/source-index.yml' })
+    Assert-ReleaseAuditFailureCode -Result $result -Code 'RELEASE_AUDIT_INVALID'
+}
+
 Invoke-ContractTest -Name '冷构建指标同时写入日志与摘要' -Body {
     Assert-True -Condition (Test-Path -LiteralPath $workflowPath -PathType Leaf) -Message 'CI Workflow 必须存在'
     $workflow = Get-Content -LiteralPath $workflowPath -Raw
@@ -269,6 +501,15 @@ Invoke-ContractTest -Name '冷构建指标同时写入日志与摘要' -Body {
     Assert-Equal -Expected 3 -Actual ([regex]::Matches($workflow, [regex]::Escape('$metrics = Get-Content')).Count) -Message '三个平台都必须显式读取冷构建指标'
     Assert-Equal -Expected 3 -Actual ([regex]::Matches($workflow, [regex]::Escape('$metrics | Write-Output')).Count) -Message '三个平台都必须把冷构建指标写入控制台日志'
     Assert-Equal -Expected 3 -Actual ([regex]::Matches($workflow, [regex]::Escape('$metrics | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY')).Count) -Message '三个平台都必须把冷构建指标写入 Step Summary'
+}
+
+Invoke-ContractTest -Name 'Release 审计门接入 PR 与 required 汇总' -Body {
+    Assert-True -Condition (Test-Path -LiteralPath $workflowPath -PathType Leaf) -Message 'CI Workflow 必须存在'
+    $workflow = Get-Content -LiteralPath $workflowPath -Raw
+
+    Assert-True -Condition ($workflow -match '(?m)^  release-audit:$') -Message 'CI 必须存在独立 release-audit Job'
+    Assert-True -Condition ($workflow -match 'Verify-ReleaseAuditGate\.ps1') -Message 'release-audit Job 必须执行审计门脚本'
+    Assert-True -Condition ($workflow -match '(?s)required:.*?needs:.*?- release-audit') -Message 'required Job 必须依赖 release-audit Job'
 }
 
 function Write-Utf8File {

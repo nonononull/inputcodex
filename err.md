@@ -517,6 +517,69 @@
 - 验证：全仓文本文件扫描仅允许制表、换行和回车后，非法控制字节数量为 `0`；Parity 仓库级 Rust 验证继续通过。
 - 关联：Issue `#26` Phase 5，`parity/README.md`。
 
+## 2026-07-22：PowerShell 可空字符串参数把 JSON null 伪造成空字符串
+
+- 环境：Issue `#35` 的 `scripts/ci/Test-CiScripts.ps1` 使用临时 `source-lock` 夹具验证 `release_audit.status = current`。
+- 现象：即使调用方传入 `$null`，夹具仍输出 `"stale_reason":""` 与 `"re_audit_issue_ref":""`；Release 审计门因此正确拒绝本应合法的 `current` 状态。
+- 根因：PowerShell 的 `[AllowNull()][string]` 参数绑定会把 `$null` 转换为空字符串，`ConvertTo-Json` 随后输出字符串而不是 JSON `null`。
+- 处理：夹具中需要保留 JSON null 的字段改用 `[AllowNull()][object]`；生产门禁继续将任何非 null 的 stale 字段视为 `current` 状态无效。
+- 验证：最小复现显示 `[string]` 得到 `{"value":""}`、`[object]` 得到 `{"value":null}`；修正后 `Test-CiScripts.ps1` 的 `32` 项合同全部通过。
+- 关联：Issue `#35`，`scripts/ci/Test-CiScripts.ps1`。
+
+## 2026-07-22：PowerShell 管道将 JSON 空数组折叠为 null
+
+- 环境：Issue `#35` 的 Release 审计门读取 `Collect-Changes.ps1` 生成的 `[]` 变更集。
+- 现象：`[] | ConvertFrom-Json` 不向 PowerShell 管道写出元素，赋值结果为 `$null`；门禁随后把它当作一条无效变更记录并返回 `RELEASE_AUDIT_INVALID_CHANGESET`。
+- 根因：PowerShell 管道按元素枚举数组，空数组没有输出元素；这与 `Collect-Changes.ps1` 的合法空 diff 合同冲突。
+- 处理：`Get-ChangedPaths` 在输入为 `$null` 时返回零路径，不再虚构无效变更；真实 JSON 读取错误仍由前置读取函数保留稳定错误码。
+- 验证：先新增 `current-empty-change-set` RED 用例，合同按预期失败；修复后 `Test-CiScripts.ps1` 再次输出 `CI_CONTRACT_GREEN passed=32`。
+- 关联：Issue `#35`，`scripts/ci/Verify-ReleaseAuditGate.ps1`。
+
+## 2026-07-22：PR 基线仍为旧 source-lock schema 时误做新 schema 校验
+
+- 环境：Issue `#35` 的 PR `#36` 首轮 GitHub-hosted CI，Release 审计门同时读取 base `939f3454b34e0faa42897be7489b344f2bec1d4c` 与 Head 的 `upstream/source-lock.json`。
+- 现象：base 尚未引入 `release_audit`，门禁却将其按 Head 的新 schema 解析，`release-audit` Job 因三条 `RELEASE_AUDIT_INVALID` 失败；`required` 随依赖失败而拒绝。
+- 根因：schema 迁移本身发生在 PR Head，base 只能提供“迁移前后是否发生目录审计状态变化”的比较事实，不能满足 Head 的新字段合同。
+- 处理：仅校验 Head 的新 schema；base 只用于生成 release_audit fingerprint。新增 `current-legacy-base` RED/GREEN 合同，明确允许 legacy base 与合法 current Head 的首次迁移。
+- 验证：`pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1` 输出 `CI_CONTRACT_GREEN passed=32`；修复提交推送后必须等待新的 GitHub-hosted CI 作为全量证据。
+- 关联：Issue `#35`、PR `#36`、run `29957699187`、`scripts/ci/Verify-ReleaseAuditGate.ps1`、`scripts/ci/Test-CiScripts.ps1`。
+
+## 2026-07-22：Linux Clippy 拒绝测试夹具的八参数 helper
+
+- 环境：Issue `#35` 的 PR `#36` 首轮 Linux `cargo clippy -p inputcodex-parity --tests --locked -- -D warnings`。
+- 现象：`FeatureRepositoryFixture::write_source_lock` 随 Release 审计状态增加为七个业务参数加 `&self`，触发 `clippy::too_many_arguments`（`8/7`），Linux quality Job 失败。
+- 根因：夹具把一组属于同一 source-lock 状态的字段继续保持为位置参数；这既违反 lint 预算，也使后续用例调用难以辨识。
+- 处理：使用仅限测试的 `SourceLockState` 聚合快照、目录基线和 stale 状态；保留相同 fixture 行为，不添加 lint allow。
+- 验证：`cargo test -p inputcodex-parity --test catalog_repository --offline` 通过 `10/10`；`cargo clippy -p inputcodex-parity --tests --locked --offline -- -D warnings` 通过。
+- 关联：Issue `#35`、PR `#36`、run `29957699187`、`crates/inputcodex-parity/tests/catalog_repository.rs`。
+
+## 2026-07-22：多文件 apply_patch 在后续上下文失败后可能保留前段写入
+
+- 环境：Issue `#35` 使用 `codex.ps1 --codex-run-as-apply-patch` 对 Rust、CI 脚本和控制文档执行多文件补丁。
+- 现象：后半段 hunk 的上下文不匹配会让补丁命令报告失败，但前面已成功匹配的文件或 hunk 可能已经写入工作树，不能把退出非零误当作整批原子回滚。
+- 根因：补丁执行按目标文件和 hunk 顺序处理，不提供事务性跨文件回滚。
+- 处理：把写入拆为小补丁；每次失败后立即执行 `git status --short`、读取受影响文件并按真实状态继续，禁止基于“失败即未写入”的假设重试。
+- 验证：本次修复在提交前以 `git diff --check`、精确 14 路径集合和受影响文件复核为准；不依赖补丁命令退出码推断文件状态。
+- 关联：Issue `#35`、`err.md`、`C:\Users\dashuai\AppData\Roaming\npm\codex.ps1`。
+
+## 2026-07-22：GitHub Release 元数据与 tag 类型不能直接代表审计提交
+
+- 环境：Issue `#35` 提交前 Fresh 核验上游 `BigPizzaV3/CodexPlusPlus` 最新正式 Release 与其 `v1.2.42` 提交。
+- 现象：GitHub Releases API 的 `target_commitish` 返回创建 Release 时的分支名 `main`，而 `git ls-remote --tags` 对 `v1.2.42` 只返回直接 ref，没有 annotated tag 才有的 `^{}` peeled ref。
+- 根因：Release 元数据的 `target_commitish` 不是不可变 commit 证明，且 Git tag 既可以是 annotated tag，也可以是 lightweight tag；两种 tag 的 ref 形状不同。
+- 处理：先由 Releases API 确认最新正式 tag，再通过 SSH 读取该 tag ref；存在唯一 `^{}` 时使用 peeled commit，否则使用唯一直接 ref。禁止把分支名或“必须有 peeled ref”当作提交核验。
+- 验证：2026 年 7 月 22 日，API 返回最新正式 Release 为 `v1.2.42`；SSH 将 lightweight tag 直接解析为 `657cd33e009ad02515d30db6492cd4e669b06318`。
+- 关联：Issue `#35`、`BigPizzaV3/CodexPlusPlus` Release `v1.2.42`、上游监控流程。
+
+## 2026-07-22：助手元数据不应覆写项目所有者本机 Git 时间
+
+- 环境：Issue `#35` 修复提交前，项目所有者要求 Git 时间以 Windows 本机时间为准；本机 `Get-Date` 读数与会话外部日期标记不一致。
+- 现象：修复提交曾通过 `GIT_AUTHOR_DATE` 与 `GIT_COMMITTER_DATE` 采用会话日期，而不是 Git 默认读取的本机时间。
+- 根因：项目控制面此前没有明确 Git 时间源，执行中错误地把助手或外部时间元数据当作可覆写本机 Git 时间的依据。
+- 处理：项目所有者明确要求后，将 Windows 本机 `Get-Date` 写入 `AGENTS.md` 作为 Git 与本地审计的唯一时间源；未经所有者明确批准禁止设置 `GIT_AUTHOR_DATE` 或 `GIT_COMMITTER_DATE`。已推送提交不 amend、不 rebase、不 force push，后续以普通提交修正流程。
+- 验证：`AGENTS.md` 已包含时间源和服务端事件分离规则；本次范围扩展为十五路径并重新计算 `scope_hash`。
+- 关联：Issue `#35`、PR `#36`、提交 `b4b3c3c37e0194521b651cf4b700b4e09801ac85`。
+
 ## 记录模板
 
 ```text
