@@ -9,6 +9,7 @@ session_plan_ref: docs/plans/sessions/2026-07-23-issue-37-ci-crlf-contract-fix.m
 owner_execution_intent_ref: user-message:complete-and-squash-merge-issue-37-then-enter-issue-34-cache-sync-2026-07-23
 scope_approval_status: approved
 scope_approval_ref: https://github.com/nonononull/inputcodex/issues/37#issuecomment-5062599616
+pr_ref: https://github.com/nonononull/inputcodex/pull/39
 scope_hash: sha256:dea8803625e26050281443ed0d0a5021c58c272d1e8887b55578f588b3def2a3
 ```
 

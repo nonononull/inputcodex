@@ -8,6 +8,7 @@
 - 本机计划时间：`2026-07-23 13:40:40 +08:00`，来自 Windows `Get-Date`
 - 所有者执行意图：`user-message:complete-and-squash-merge-issue-37-then-enter-issue-34-cache-sync-2026-07-23`
 - 精确范围批准：`https://github.com/nonononull/inputcodex/issues/37#issuecomment-5062599616`
+- PR：`https://github.com/nonononull/inputcodex/pull/39`
 
 ## 根因
 

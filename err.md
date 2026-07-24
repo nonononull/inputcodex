@@ -587,7 +587,7 @@
 - 根因：Job 行断言使用 `(?m)^  release-audit:$`；CRLF 行尾的 `\r` 位于冒号与 `\n` 之间，使严格 `$` 匹配失败。临时 LF 检出通过只证明 EOL 假设错误，不能作为永久绕过。
 - 处理：在同一 Contract Test 中确定性构造 LF 与 CRLF 两个 Workflow 变体，将 Job 行正则最小改为 `(?m)^  release-audit:\r?$`，并让两个变体都验证 Job、门脚本与 `required.needs`；不修改 Workflow 拓扑，不全局规范化输入。Windows 空白门禁使用正常 Git 过滤器和精确暂存后的 `git diff --cached --check`，禁止强制 `core.autocrlf=false` 直接检查 CRLF 工作树。
 - 验证：旧正则对 CRLF 变体稳定 RED，退出码 `1`，失败消息为“CRLF Workflow 必须存在独立 release-audit Job”；修复后 `Test-CiScripts.ps1` 输出 `CI_CONTRACT_GREEN passed=32`，Release Audit Gate 为 `ok=true/status=current/requires_reaudit=false`，仓库政策为 `ok=true/violation_count=0`，六路径 `scope_hash` 与 cached diff 检查均通过。强制 `core.autocrlf=false` 会产生整文件 CRLF 尾随空白假阳性，默认过滤器下退出码为 `0`。
-- 关联：Issue `#37`、`scripts/ci/Test-CiScripts.ps1`、`docs/reports/issue-37-ci-crlf-contract-fix.md`。
+- 关联：Issue `#37`、PR `#39`、`scripts/ci/Test-CiScripts.ps1`、`docs/reports/issue-37-ci-crlf-contract-fix.md`。
 
 ## 记录模板
 

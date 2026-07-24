@@ -5,10 +5,11 @@
 - Issue：`https://github.com/nonononull/inputcodex/issues/37`
 - 基线：`d7438a0f2c43b7fbd2b159b3759aacea4ef1999e`
 - 分支：`codex/issue-37-ci-crlf-contract-fix`
+- PR：`https://github.com/nonononull/inputcodex/pull/39`
 - 范围批准：`https://github.com/nonononull/inputcodex/issues/37#issuecomment-5062599616`
 - `scope_hash`：`sha256:dea8803625e26050281443ed0d0a5021c58c272d1e8887b55578f588b3def2a3`
 - 本地完整验证时间：`2026-07-24 12:28:45 +08:00`，来自 Windows `Get-Date`
-- 当前阶段：本地六路径门禁已通过，等待提交、PR 与 GitHub-hosted CI
+- 当前阶段：PR `#39` 已创建，本地六路径门禁已通过，等待最终 Head 的 GitHub-hosted CI 与 Review
 
 ## 根因
 
@@ -68,7 +69,6 @@ scripts/ci/Test-CiScripts.ps1
 
 ## 未完成门禁
 
-- 普通提交、推送与非 Draft PR；
 - 最终 PR Head 的 GitHub-hosted CI；
 - Review 对话、mergeability 和最终 Head 所有者授权复核；
 - Squash Merge 与合并后 `main` 验证。
