@@ -506,10 +506,16 @@ Invoke-ContractTest -Name '冷构建指标同时写入日志与摘要' -Body {
 Invoke-ContractTest -Name 'Release 审计门接入 PR 与 required 汇总' -Body {
     Assert-True -Condition (Test-Path -LiteralPath $workflowPath -PathType Leaf) -Message 'CI Workflow 必须存在'
     $workflow = Get-Content -LiteralPath $workflowPath -Raw
+    $workflowVariants = [ordered]@{
+        LF = [regex]::Replace($workflow, '\r?\n', "`n")
+        CRLF = [regex]::Replace($workflow, '\r?\n', "`r`n")
+    }
 
-    Assert-True -Condition ($workflow -match '(?m)^  release-audit:$') -Message 'CI 必须存在独立 release-audit Job'
-    Assert-True -Condition ($workflow -match 'Verify-ReleaseAuditGate\.ps1') -Message 'release-audit Job 必须执行审计门脚本'
-    Assert-True -Condition ($workflow -match '(?s)required:.*?needs:.*?- release-audit') -Message 'required Job 必须依赖 release-audit Job'
+    foreach ($variant in $workflowVariants.GetEnumerator()) {
+        Assert-True -Condition ($variant.Value -match '(?m)^  release-audit:\r?$') -Message "$($variant.Key) Workflow 必须存在独立 release-audit Job"
+        Assert-True -Condition ($variant.Value -match 'Verify-ReleaseAuditGate\.ps1') -Message "$($variant.Key) release-audit Job 必须执行审计门脚本"
+        Assert-True -Condition ($variant.Value -match '(?s)required:.*?needs:.*?- release-audit') -Message "$($variant.Key) required Job 必须依赖 release-audit Job"
+    }
 }
 
 function Write-Utf8File {
