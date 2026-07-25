@@ -179,6 +179,7 @@ function Test-PlatformResult {
             Assert-Condition -Condition (@($scenario.warmups).Count -eq [int]$scenarioConfig.warmup_runs) -Code 'SCENARIO_WARMUP_COUNT_INVALID' -Path $relativePath -Message "$($scenarioConfig.name) 预热数不符合配置。"
             Assert-Condition -Condition (@($scenario.samples).Count -eq [int]$scenarioConfig.sample_count) -Code 'SCENARIO_SAMPLE_COUNT_INVALID' -Path $relativePath -Message "$($scenarioConfig.name) 样本数不符合配置。"
             Assert-Condition -Condition (@($scenario.samples | Where-Object { [uint64]$_.iterations -ne [uint64]$scenarioConfig.iterations }).Count -eq 0) -Code 'SCENARIO_ITERATIONS_INVALID' -Path $relativePath -Message "$($scenarioConfig.name) 迭代数不符合配置。"
+            Assert-Condition -Condition (@($scenario.samples | Where-Object { [decimal]$_.nanoseconds_per_operation -le 0 }).Count -eq 0) -Code 'SCENARIO_PRECISION_INVALID' -Path $relativePath -Message "$($scenarioConfig.name) 每操作耗时必须大于零，禁止整数截断后的零值。"
             Assert-Condition -Condition (@($scenario.samples | Where-Object { [uint64]$_.checksum -eq 0 }).Count -eq 0) -Code 'SCENARIO_CHECKSUM_INVALID' -Path $relativePath -Message "$($scenarioConfig.name) checksum 不得为零。"
         }
 

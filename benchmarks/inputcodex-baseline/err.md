@@ -31,3 +31,11 @@
 - 根因：把场景名称中的 `stale` 错误解释为陈旧取消，而不是取消已生效后的陈旧完成。
 - 处理：每次迭代固定执行 `begin → cancel 当前请求 → complete 同一请求`，要求取消返回 `Applied`、完成返回 `Stale`，最终状态仍为 `Cancelling`。
 - 验证：合同测试 `keeps_cancellation_state_when_stale_completion_arrives` 先以旧实现 RED，再以精确 checksum `3488675146315662320` 转为 GREEN；隔离工程 6 个测试全部通过。
+
+## macOS 微场景 `ns/op` 被整数除法截断为零
+
+- 现象：首次 hosted Run `30168904725` 虽然四 Job 全绿，但 macOS 的 `application-load-complete` 与 `application-cancel-stale` 多个原始样本显示 `nanoseconds_per_operation=0`。
+- 根因：`ScenarioMeasurement` 使用 `u128` 保存 `total_nanoseconds / iterations`；当真实平均值小于 1 纳秒时，整数除法直接截断为零，导致结果失去精度。
+- 处理：保留总纳秒整数与 checksum 不变，把每操作耗时改为 `f64`，CSV 固定输出六位小数；证据验证器新增 `SCENARIO_PRECISION_INVALID`，拒绝任何零或负的每操作耗时。
+- 验证：回归测试固定 `1 ns / 2 ops = 0.5 ns/op` 与 CSV `0.500000`，先 RED 后 GREEN；隔离工程现为 7 个测试通过，本地 100000 次场景输出非零小数。
+- 处置：Run `30168904725` 的成功 Artifact 只保留为临时根因证据，不写入固定结果；新 Head 必须重新采集两平台结果。

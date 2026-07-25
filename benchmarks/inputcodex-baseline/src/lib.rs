@@ -43,12 +43,12 @@ impl Display for BaselineError {
 
 impl Error for BaselineError {}
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ScenarioMeasurement {
     name: &'static str,
     iterations: u64,
     total_nanoseconds: u128,
-    nanoseconds_per_operation: u128,
+    nanoseconds_per_operation: f64,
     checksum: u64,
 }
 
@@ -69,7 +69,7 @@ impl ScenarioMeasurement {
     }
 
     #[must_use]
-    pub const fn nanoseconds_per_operation(&self) -> u128 {
+    pub const fn nanoseconds_per_operation(&self) -> f64 {
         self.nanoseconds_per_operation
     }
 
@@ -81,7 +81,7 @@ impl ScenarioMeasurement {
     #[must_use]
     pub fn to_csv(&self) -> String {
         format!(
-            "{},{},{},{},{}",
+            "{},{},{},{:.6},{}",
             self.name,
             self.iterations,
             self.total_nanoseconds,
@@ -204,9 +204,16 @@ fn finish_measurement(
         name,
         iterations,
         total_nanoseconds,
-        nanoseconds_per_operation: total_nanoseconds / u128::from(iterations),
+        nanoseconds_per_operation: calculate_nanoseconds_per_operation(
+            total_nanoseconds,
+            iterations,
+        ),
         checksum,
     }
+}
+
+fn calculate_nanoseconds_per_operation(total_nanoseconds: u128, iterations: u64) -> f64 {
+    total_nanoseconds as f64 / iterations as f64
 }
 
 const fn checksum_seed() -> u64 {
@@ -221,5 +228,24 @@ const fn outcome_value(outcome: TransitionOutcome) -> u64 {
     match outcome {
         TransitionOutcome::Applied => 1,
         TransitionOutcome::Stale => 2,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{ScenarioMeasurement, calculate_nanoseconds_per_operation};
+
+    #[test]
+    fn per_operation_time_preserves_fractional_nanoseconds() {
+        assert_eq!(calculate_nanoseconds_per_operation(1, 2), 0.5);
+
+        let measurement = ScenarioMeasurement {
+            name: "fractional",
+            iterations: 2,
+            total_nanoseconds: 1,
+            nanoseconds_per_operation: 0.5,
+            checksum: 1,
+        };
+        assert_eq!(measurement.to_csv(), "fractional,2,1,0.500000,1");
     }
 }
