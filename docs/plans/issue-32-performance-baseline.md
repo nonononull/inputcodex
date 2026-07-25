@@ -80,10 +80,10 @@
 - stdout 标记：`INPUTCODEX_PERFORMANCE_READY_V1`。
 - 标记最多输出一次；未启用时零输出、零文件、零网络副作用。
 
-- [ ] 先在展示层单元测试中固定 opt-in 与单次输出判定。
-- [ ] 运行无默认特性测试确认 RED。
-- [ ] 实现最小探针状态与首次 `view` 调用。
-- [ ] 运行无默认特性测试确认 GREEN；Iced runtime 编译留给云端。
+- [x] 先在展示层单元测试中固定 opt-in 与单次输出判定。
+- [x] 运行无默认特性测试确认 RED。
+- [x] 实现最小探针状态与首次 `view` 调用。
+- [x] 运行无默认特性测试确认 GREEN 且无编译警告；Iced runtime 编译留给云端。
 
 ## Task 4：建立 PowerShell 测量与 CI 合同
 
