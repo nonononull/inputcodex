@@ -56,4 +56,8 @@
 - Issue `#24` / PR `#25` 已完成 Gate 4 规划合同并 Squash Merge 为 `431682296f53e86de1184c732b0d4748857c9390`；Issue `#24` 已按 `COMPLETED` 关闭。
 - Issue `#26` / PR `#27` 已完成 Gate 4 功能目录执行、Review/CI 与 Squash Merge；来源事实只能通过独立 Closeout 回写，不得改写来源提交。
 - Issue `#28` / PR `#29` 已完成 Gate 4 独立 Closeout；PR `#29` 以单父 Squash 提交 `c07da0cad33e09b5c54e528a8a6728a048c88c0b` 进入 `main`，Issue `#28` 已关闭，合并后主干 CI 六 Job 全绿且 Artifact 数为 `0`。
-- 下一项可启动工作是独立性能基线 Issue：必须重新冻结测量对象、可比环境、范围哈希与项目所有者批准；性能基线、预算与优化继续使用不同 Issue/PR，Gate 5 保持锁定。
+- Issue `#35` / PR `#36` 已将活动上游快照与功能目录审计基线解耦，并以 Squash 提交 `d7438a0f2c43b7fbd2b159b3759aacea4ef1999e` 进入 `main`。
+- Issue `#34` / PR `#40` 已将最新正式 Release `v1.2.42` 缓存为只读审计输入；PR `#40` 以 Squash 提交 `353391424db5514d022473ba97f601486a190869` 合并，合并后主干 CI Run `30147841226` 七 Job 全绿。
+- Issue `#41` / PR `#42` 已修复快照值与 CI 基线断言的错误耦合，并以 Squash 提交 `8aa1d4c96b0543e766b477b1b8e9652968b55f92` 合并；合并后主干 CI Run `30147071062` 七 Job 全绿。
+- 当前 `release_audit.status` 必须保持 `stale-re-audit-required`，直到独立 Issue `#38` 重新审计功能目录；不得把未复审目录伪造为 `current`，也不得以该状态为由混入产品迁移。
+- 下一项可启动工作是已立项的独立性能基线 Issue `#32`：必须重新冻结测量对象、可比环境、范围哈希与项目所有者批准；性能基线、预算与优化继续使用不同 Issue/PR，Gate 5 保持锁定。

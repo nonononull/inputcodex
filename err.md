@@ -607,6 +607,15 @@
 - 验证：项目所有者 Windows 本机时间 `2026-07-25 13:45:32 +08:00` 复核七路径 `scope_hash`、状态字段、Session Plan `SESSION_PLAN_VERIFY_OK`、仓库政策 `ok=true/violation_count=0` 与 `git diff --check` 均通过；新 Head 仍须重新执行双 reviewer 和 GitHub-hosted CI。
 - 关联：Issue `#41`、PR `#42`、`docs/plans/sessions/2026-07-24-issue-41-ci-contract-decoupling.md`、`docs/reports/issue-41-ci-contract-decoupling.md`。
 
+## 2026-07-25：`main` 基线更新不会自动生成既有 PR 的 `pull_request` Run
+
+- 环境：PR `#40` 的 Head `86d48ad261669daaf14666556372a12f9b908726` 已在旧基线上完成检查；PR `#42` 合并后，`main` 前进到 `8aa1d4c96b0543e766b477b1b8e9652968b55f92`。
+- 现象：PR `#40` 没有因为基线分支推进而自动获得新的 `pull_request` 工作流；旧失败若不重新验证，不能被误判为新基线的结果。
+- 根因：基线分支变更本身没有为既有 PR 触发新的 GitHub Actions `pull_request` 事件；这不是上游缓存、`source-lock`、CI 合同或 Runner 的失败。
+- 处理：经项目所有者明确授权，只关闭并立即重新打开 PR `#40`，没有改变 Head、文件或提交，也没有 force push、rebase 或删除分支；由重新打开事件创建新的 Run。
+- 验证：PR `#40` 的 Run `30147559602` 在原 Head 上七 Job 全绿；随后 PR 于 `2026-07-25T06:38:00Z` Squash Merge 为 `353391424db5514d022473ba97f601486a190869`，合并后 `main` Run `30147841226` 七 Job 全绿，Issue `#34` 于 `2026-07-25T06:38:01Z` 关闭。
+- 关联：Issue `#34`、PR `#40`、Issue `#41`、PR `#42`、`docs/reports/2026-07-23-upstream-v1.2.42-sync.md`。
+
 ## 记录模板
 
 ```text
