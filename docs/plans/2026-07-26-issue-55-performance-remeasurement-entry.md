@@ -13,11 +13,14 @@
 
 ## 精确范围
 
-以下排序后的十一条路径是唯一允许写集合，`scope_hash` 为 `sha256:89a9a40c76e98d573d4f55ca7d0aa140f325c9eb908e908f9e8731c55aaf03df`：
+以下排序后的十四条路径是唯一允许写集合，`scope_hash` 为 `sha256:372c8c3942d492a9372603f5bc6bbae42ae8013c7603a092c294d24be4edb1be`。新增三条 Evidence 路径仅可由本 Issue 显式 GitHub-hosted `measure` Run 的成功 Artifact 刷新，以闭环 `implementation_sha256` 漂移：
 
 ```text
 .github/workflows/performance-baseline.yml
 AGENTS.md
+benchmarks/results/issue-32/macos.json
+benchmarks/results/issue-32/manifest.json
+benchmarks/results/issue-32/windows.json
 build.md
 docs/plans/2026-07-26-issue-55-performance-remeasurement-entry.md
 docs/plans/PROJECT-MASTER-PLAN.md
@@ -79,7 +82,8 @@ scripts/ci/Test-CiScripts.ps1
 1. 记录 Issue `#55` 是 Issue `#54` 的前置合同修复，而不是预算 CI 或预算数值批准。
 2. 在 `err.md` 记录“证据存在导致手工 Workflow 永远 evidence”的根因、处理和验证，避免未来通过删除证据绕过。
 3. 在 `build.md` 增加十一路径范围、scope hash、三条本地轻量验证和一次 hosted dispatch 验收命令；禁止在本机运行完整 Rust Workspace 或真实性能采集。
-4. 在报告中仅记录可复核的 Issue、commit、Workflow Run、Artifact 保留、验证和后续交接事实。
+4. 在显式 `measure` Run 成功后，下载 Windows/macOS Artifact，使用真实 run、artifact 与归一化哈希刷新 Issue `#32` 的三份 Evidence；不得删除旧 Git 历史或改写测量指标、schema、配置和采集器。
+5. 在报告中仅记录可复核的 Issue、commit、Workflow Run、Artifact 保留、验证和后续交接事实。
 
 ### 任务 5：验证、提交、PR 与 hosted 验收
 
@@ -90,12 +94,13 @@ scripts/ci/Test-CiScripts.ps1
 1. 本地依次运行 `Test-InputcodexBaseline.ps1 -Mode Evidence`、`Test-CiScripts.ps1`、`Verify-RepositoryPolicy.ps1`、scope audit 与 `git diff --check`。
 2. 使用普通提交和 SSH push 推送 `codex/issue-55-performance-remeasurement-entry`；禁止 Force Push。
 3. 创建关联 `Closes #55` 的非 Draft PR。PR CI 必须保持 Evidence 语义。
-4. 在已推送分支上显式 dispatch `mode=measure` 一次，等待 Windows 与 macOS 均成功，并只核验临时 Artifact 名称、1 天保留期和无 `target/` 上传；该 Run 不写预算数值、不写入 Issue `#32` 证据。
-5. 回写 Issue/PR 的根因、处理、验证、hosted Run 与后续 Issue `#54` 消费关系。所有 Review 对话根因闭环后，等待项目所有者针对最终 PR Head 的单独 Squash Merge 授权。
+4. 在已推送分支上显式 dispatch `mode=measure` 一次，等待 Windows 与 macOS 均成功，核验临时 Artifact 名称、1 天保留期和无 `target/` 上传。
+5. 仅使用该 Run 的成功 Artifact 刷新 `benchmarks/results/issue-32/{windows,macos,manifest}.json`，使既有 Evidence 对当前实现哈希重新通过；预算数值与预算 CI 均不得写入。
+6. 回写 Issue/PR 的根因、处理、验证、hosted Run 与后续 Issue `#54` 消费关系。所有 Review 对话根因闭环后，等待项目所有者针对最终 PR Head 的单独 Squash Merge 授权。
 
 ## 停止条件
 
-- 实际差异超出十一条路径或 scope hash 漂移。
-- 需要触及采集器、验证器、结果 schema、基线配置、已入库证据、预算数值、预算 CI、Ruleset、上游、Release、优化或 Gate 5。
+- 实际差异超出十四条路径或 scope hash 漂移。
+- 需要触及采集器、验证器、结果 schema、基线配置、预算数值、预算 CI、Ruleset、上游、Release、优化或 Gate 5，或需要修改三条许可 Evidence 路径以外的已入库结果。
 - 手工 `measure` 入口不能与默认 `evidence`、PR 或 push 语义清晰隔离。
 - 任意本地验证、hosted Run、Review 或 CI 失败但根因未闭环。

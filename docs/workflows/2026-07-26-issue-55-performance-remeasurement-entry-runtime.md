@@ -2,9 +2,9 @@
 
 ```yaml
 task_id: issue-55-performance-remeasurement-entry
-scope_hash: sha256:89a9a40c76e98d573d4f55ca7d0aa140f325c9eb908e908f9e8731c55aaf03df
+scope_hash: sha256:372c8c3942d492a9372603f5bc6bbae42ae8013c7603a092c294d24be4edb1be
 execution_mode: single-executor, no-subagents, local-light-validation, github-hosted-manual-measure-validation
-mutation_intent: explicit-workflow-dispatch-mode-without-budget-ci-or-performance-implementation-change
+mutation_intent: explicit-workflow-dispatch-mode-and-success-artifact-evidence-refresh-without-budget-ci-or-performance-implementation-change
 agos_status: bypassed-report-only-unregistered-needs-input-owner-scope-required-no-cross-repo-mutation
 ```
 
@@ -54,7 +54,8 @@ pwsh -NoProfile -File D:\Android_source\ai-growth-os\components\rules\scripts\in
    - 手工 `evidence` 要求完整的三份入库证据；
    - PR/push 保持原有文件存在性驱动模式。
 3. 在 `Test-CiScripts.ps1` 中固定输入定义与事件分流的静态合同，不改变已有权限、并发、Runner、Action SHA、Artifact 保留或 `target/` 禁止规则。
-4. 同步十一路径项目原生文档；记录根因、禁止面、验证和 Issue `#54` 的消费关系。
+4. 在已推送 Head 上运行一次显式 `mode=measure`；只用双平台成功 Artifact 刷新 Issue `#32` 的 Windows、macOS 与 manifest，使当前 `implementation_sha256` 的 Evidence 重新可验证。
+5. 同步十四路径项目原生文档；记录根因、禁止面、验证和 Issue `#54` 的消费关系。
 
 ## 5. 本地验证门
 
@@ -72,6 +73,9 @@ $baseline = '0678d03981ac0aef2051eb2d3711221ac2a50d29'
 $approvedPaths = @(
   '.github/workflows/performance-baseline.yml'
   'AGENTS.md'
+  'benchmarks/results/issue-32/macos.json'
+  'benchmarks/results/issue-32/manifest.json'
+  'benchmarks/results/issue-32/windows.json'
   'build.md'
   'docs/plans/2026-07-26-issue-55-performance-remeasurement-entry.md'
   'docs/plans/PROJECT-MASTER-PLAN.md'
@@ -88,11 +92,11 @@ $staged = @(git diff --cached --name-only)
 $untracked = @(git ls-files --others --exclude-standard)
 $actualPaths = @($committed + $unstaged + $staged + $untracked | Where-Object { $_ } | Sort-Object -Unique)
 $pathDiff = @(Compare-Object -ReferenceObject $approvedPaths -DifferenceObject $actualPaths)
-if ($pathDiff.Count -ne 0) { $pathDiff | Format-Table -AutoSize; throw 'Issue #55 实际差异不是批准的十一条路径。' }
+if ($pathDiff.Count -ne 0) { $pathDiff | Format-Table -AutoSize; throw 'Issue #55 实际差异不是批准的十四条路径。' }
 $scopeText = ($approvedPaths -join "`n") + "`n"
 $scopeBytes = [System.Text.UTF8Encoding]::new($false).GetBytes($scopeText)
 $scopeHash = [Convert]::ToHexString([System.Security.Cryptography.SHA256]::HashData($scopeBytes)).ToLowerInvariant()
-if ($scopeHash -ne '89a9a40c76e98d573d4f55ca7d0aa140f325c9eb908e908f9e8731c55aaf03df') { throw "Issue #55 scope_hash 漂移：$scopeHash" }
+if ($scopeHash -ne '372c8c3942d492a9372603f5bc6bbae42ae8013c7603a092c294d24be4edb1be') { throw "Issue #55 scope_hash 漂移：$scopeHash" }
 Write-Output 'ISSUE_55_SCOPE_GREEN'
 ```
 
@@ -101,11 +105,11 @@ Write-Output 'ISSUE_55_SCOPE_GREEN'
 1. 普通提交、普通 SSH push，创建 `Closes #55` 的非 Draft PR；禁止 Force Push、Rebase Merge、Merge Commit 与删除 `main`。
 2. PR CI 必须通过 Evidence 路径，并保持 Artifact 为 `0`。
 3. 对已推送分支执行一次 `gh workflow run "Performance Baseline" --ref codex/issue-55-performance-remeasurement-entry -f mode=measure`；等待 contract、Windows、macOS、required 全部成功。
-4. 核验临时成功 Artifact 仅为 Windows/macOS 结果、保留期为 1 天，失败诊断最长 7 天，且不存在 `target/` 上传。
+4. 核验临时成功 Artifact 仅为 Windows/macOS 结果、保留期为 1 天，失败诊断最长 7 天，且不存在 `target/` 上传；下载两份成功 Artifact 后刷新三份 Issue `#32` Evidence 文件并重跑本地 Evidence。
 5. 把 Issue、PR、CI、hosted Run、Review 根因闭环和 Issue `#54` 接续证据写入报告与 GitHub 评论；最终 Merge 仅在项目所有者对最终 Head 单独授权后执行 Squash Merge。
 
 ## 7. 停止条件
 
-- 十一路径或 scope hash 漂移。
-- 需要修改采集器、验证器、schema、配置、已入库证据、预算数值、预算 CI、Ruleset、上游、Release、优化或 Gate 5。
+- 十四路径或 scope hash 漂移。
+- 需要修改采集器、验证器、schema、配置、预算数值、预算 CI、Ruleset、上游、Release、优化或 Gate 5，或修改三条许可 Evidence 路径以外的已入库结果。
 - 本地或 hosted 验证失败且根因未闭环。

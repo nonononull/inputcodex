@@ -1,11 +1,12 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: none-awaiting-performance-remeasurement-and-budget-approval
-active_gate: Gate 4 后置性能预算 Discovery 已稳定完成：Issue #50 / PR #51 已进入 main，release_audit=current；预算数值、预算 CI、性能优化与 Gate 5 产品迁移继续锁定
+active_task: issue-54-performance-remeasurement-and-budget-approval-after-explicit-entry
+active_gate: Gate 4 后置性能预算 Discovery 已稳定完成，Issue #55 已提供显式手工复测入口；release_audit=current，预算 CI、性能优化与 Gate 5 产品迁移继续锁定
 last_verified_gate: Issue #50 / PR #51 已以单父 Squash 提交 fea8824c652665df710a7e6ef941854060eb6e1f 完成性能预算方法冻结；tree 为 9fb518cda8b35a9388fb9fce0a1ff6ba976d80cb，GitHub 签名 valid，合并后 main CI Run 30175592979 七 Job 全绿且 Artifact 为 0，Issue #50 已按 COMPLETED 关闭
-next_legal_gate: 创建独立性能复测与数值批准 Issue；每个平台至少收集五次可比 Run 并由项目所有者批准 warning/blocking 数值，预算 CI、性能优化和 Gate 5 产品迁移不得混入该 Issue
-tracking_issue_ref: none-awaiting-performance-remeasurement-and-budget-approval-issue
+next_legal_gate: 在 Issue #55 合并后继续 Issue #54；每个平台至少收集五次全新可比 Run，并依据 Issue #54 记录的项目所有者预授权明确落盘 warning/blocking 数值，预算 CI、性能优化和 Gate 5 产品迁移不得混入该 Issue
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/54
+performance_remeasurement_entry_issue_ref: https://github.com/nonononull/inputcodex/issues/55
 performance_budget_discovery_issue_ref: https://github.com/nonononull/inputcodex/issues/50
 performance_budget_discovery_pr_ref: https://github.com/nonononull/inputcodex/pull/51
 performance_budget_discovery_merge_ref: fea8824c652665df710a7e6ef941854060eb6e1f
@@ -155,7 +156,8 @@ decision_status: performance-budget-discovery-completed-budget-values-ci-optimiz
 - [x] Issue `#50` 已冻结九路径、`sha256:af1c248c46d54741f9c77ab3621cd66ccd40e3fa50698d377c788fcb0b93205f` 和 ADR `0004`：每个平台至少五次独立可比 Run，采用 run-level 稳健汇总并从观察阶段逐步升级门禁。
 - [x] PR `#51` Final Head `e0154c61d8b05835db10437c79f029909516eac1` 已完成 Review/CI、全部对话闭环和项目所有者独立授权，并以单父 Squash 提交 `fea8824c652665df710a7e6ef941854060eb6e1f` 进入 `main`；tree 为 `9fb518cda8b35a9388fb9fce0a1ff6ba976d80cb`，GitHub 签名 `valid`。
 - [x] PR `#51` 合并后主干 CI Run `30175592979` 七 Job 全绿且 Artifact 为 `0`，Issue `#50` 已按 `COMPLETED` 关闭；稳定语义仍是“预算方法已批准、预算数值未批准”。
-- [ ] 下一独立性能复测与数值批准 Issue 尚未创建；预算 CI 实施、性能优化和 Gate 5 产品迁移继续保持互斥。
+- [x] Issue `#55` 为已有证据锁定 `evidence` 的 Workflow 合同增加显式手工 `measure` 入口，并以同一 Issue 成功 Artifact 刷新因实现哈希漂移而失效的三份 Evidence；该最小前置修复不改变采集器、结果 schema、预算数值、预算 CI、优化或 Gate 5。
+- [x] Issue `#54` 已建立五次全新独立可比 Run 与数值批准的正式范围，并记录项目所有者预授权；它只在 Issue `#55` 合并后继续，预算 CI 实施、性能优化和 Gate 5 产品迁移继续保持互斥。
 
 ### Gate 5：分域迁移（锁定）
 

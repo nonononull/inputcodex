@@ -1,0 +1,35 @@
+# Issue #55：显式性能复测入口报告
+
+## 结论
+
+Issue `#55` 修复了“已入库 Evidence 存在时，手工 `Performance Baseline` 无法再次测量”的合同缺口。手工触发现在必须声明 `mode`：默认 `evidence`，只有显式 `measure` 才使用既有 Windows/macOS 采集路径；自动 PR/push 继续采用原有的文件存在性语义。
+
+本 Issue 是 Issue `#54` 五次独立采样的前置入口修复，不是预算数值、预算 CI、性能优化或 Gate 5 迁移。
+
+## 所有者决策与范围
+
+- 来源 Issue：`https://github.com/nonononull/inputcodex/issues/55`。
+- 后续消费者：`https://github.com/nonononull/inputcodex/issues/54`。
+- 所有者预授权：Issue `#55` 中记录的 `2026-07-26 06:19:35 +08:00` 本机时间决策“按你推荐来 不用我二次批准 直接安排后续”。
+- 写集合：十四条固定路径，`scope_hash=sha256:372c8c3942d492a9372603f5bc6bbae42ae8013c7603a092c294d24be4edb1be`；新增的三条 Issue `#32` Evidence 路径只能使用本 Issue 显式 GitHub-hosted `measure` Run 的成功 Artifact 刷新。
+
+## 根因闭环
+
+1. 旧 Workflow 只有空的 `workflow_dispatch`，contract Job 仅以 Issue `#32` 三份 Evidence 文件的存在性选择模式。
+2. `3/3` Evidence 存在时，任何手工 dispatch 都进入 `evidence`；删除证据以触发测量会制造隐式副作用，不能作为可审计复测入口。
+3. 新合同为手工事件增加必填 choice `mode`：`measure` 直接选择既有测量路径，`evidence` 只在三份 Evidence 完整时通过，其他自动事件保留原逻辑。
+
+## 本地验证证据
+
+- RED：新增静态合同后，`pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1` 以“性能基线手工触发必须声明默认 evidence 的受约束 mode 输入”稳定失败，证明测试覆盖缺失能力而非环境错误。
+- GREEN：最小 Workflow 修复后，同一命令输出 `CI_CONTRACT_GREEN passed=34`。
+- 实现哈希：`.github/workflows/performance-baseline.yml` 与 `scripts/ci/Test-CiScripts.ps1` 是 `implementation_sha256` 输入，因此旧 Evidence 对新 Head 正确产生 `HASH_MISMATCH`；未修改 `main` 的同一命令为绿。不能弱化哈希合同，必须用新的成功 Artifact 刷新三份 Evidence。
+- 当前代码不修改采集器、验证器、结果 schema、基线配置的业务语义、预算数值、预算 CI、Ruleset、上游、Release、优化或 Gate 5。
+
+## 外部治理探测
+
+AGOS ReportOnly 返回任务登记 `unregistered`、总体 `needs-input`、doctor/所有者直接写入 `blocked`，同时项目 Git 基础、入口文档、source edit admission 和本地知识查询为 `ready`。按项目规则已记录并绕过；没有修改任何 AGOS 文件。
+
+## GitHub 验收边界
+
+在本报告的当前本地快照中，尚未创建远端分支、PR 或 hosted manual Run。提交并推送后必须完成一次 `workflow_dispatch mode=measure` 的 Windows/macOS 成功验收，核验临时 Artifact 合同，并用两份成功 Artifact 刷新 Issue `#32` 的 Windows、macOS 与 manifest Evidence。之后重跑本地 Evidence，并把真实 Run、PR、CI、Review 与最终合并事实回写到 GitHub Issue/PR；本报告在创建 PR 前更新为这些已发生事实。
