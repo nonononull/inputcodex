@@ -134,5 +134,5 @@
 - [x] 用 `core.autocrlf=true/false` fresh checkout 证明 LF 结果分别被改写为 CRLF 或保持原字节；失败只来自工作树换行转换，不来自样本、配置、实现输入或 JSON 语义。
 - [x] 先增加“性能 Evidence 对 Git 换行转换保持稳定”回归合同并取得精确 RED，再把结果哈希改为换行归一化文本哈希，CI 合同达到 `34/34` GREEN。
 - [x] 旧样本绑定旧 `implementation_sha256`，拒绝直接改写元数据；删除三份固定结果，使下一 Head 自动进入 `measure` 模式。
-- [ ] 下载并核验新 Run 的 Windows/macOS Artifact，重建 manifest、报告摘要与当前实现哈希。
+- [x] 下载并核验新 Run 的 Windows/macOS Artifact，重建 manifest、报告摘要与当前实现哈希。
 - [ ] 推送最终 Evidence Head，要求四个性能 Job 全绿、最终成功 Run Artifact 数为 `0`，再继续 Review/CI 收口。

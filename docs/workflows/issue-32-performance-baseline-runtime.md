@@ -134,15 +134,17 @@ git diff --check
 - `static_workflow_refs`: 本 Runtime Workflow、Issue #24 性能协议、Gate 3 冷构建报告
 - `dynamic_workflow_gap_summary`: 标准 hosted runner 只能形成严格指纹下的同平台趋势，不能形成跨平台或跨实现排名
 - `reusable_lesson`: `measure` 与 `evidence` 双模式必须用测量 commit/tree、配置/实现/输入哈希和结果文件哈希闭环；IQR 只标记异常值，不得删除样本
-- `rollout_status`: project-native-crlf-root-cause-fixed-remeasurement-pending
+- `rollout_status`: project-native-evidence-imported-awaiting-final-pr-verification
 
 ## 10. 已执行远端证据
 
 - Run `30168805192` 在 Workflow 装载阶段零 Job 失败；根因为 Job 级 `env` 非法引用 `runner.temp`，修复后未再复现。
 - Run `30168904725` 暴露 `u128` 整数除法把亚纳秒批量结果截断为 `0` 的精度缺陷；结果未入库，修复为 `f64` 并增加 `SCENARIO_PRECISION_INVALID` 后重新测量。
-- 有效 Run `30169262247` Attempt `1` 在提交 `1974577837de97a74d7b980e8106d5e2f4a4de2e` 上四 Job 全绿；Windows/macOS 原始结果已按 manifest 导入固定路径。
+- 初始完整 Run `30169262247` Attempt `1` 在提交 `1974577837de97a74d7b980e8106d5e2f4a4de2e` 上四 Job 全绿；Windows/macOS 原始结果曾按 manifest 导入固定路径。
 - 四个临时成功 Artifact 均已删除；Run `30168904725` 与 `30169262247` 当前 Artifact 数均为 `0`。失败根因和无效结果均保留在 GitHub Run、提交历史与 `err.md`，没有通过删除样本或改写语义掩盖问题。
-- 结果入库后的本地 Fresh 门已通过：隔离基准测试 `7/7`、展示层定向测试 `3/3`、Evidence 零违规、CI 合同 `33/33`、Repository Policy 零违规、PowerShell/YAML/JSON 解析和差异空白检查均成功；批准范围并集为 `28/28`，scope hash 保持批准值。
+- 初始结果入库后的本地 Fresh 门已通过：隔离基准测试 `7/7`、展示层定向测试 `3/3`、Evidence 零违规、CI 合同 `33/33`、Repository Policy 零违规、PowerShell/YAML/JSON 解析和差异空白检查均成功；批准范围并集为 `28/28`，scope hash 保持批准值。
 - 最终 Head `e679eee64442f0ae4db97b4e9cdbfab6780ea1de` 的 Run `30170128309` 在 Windows Evidence 暴露两份结果原始工作树哈希失配；失败诊断 Artifact `8622687822` 按 7 天合同保留，macOS Evidence 成功，同 Head 主 CI Run `30170128326` 七 Job 全绿。
 - fresh checkout 对照已确认根因是 Windows Git `core.autocrlf=true` 把 LF JSON 改写为 CRLF，而验证器使用 `Get-FileHash` 读取改写后的工作树字节；配置、实现、输入哈希与 JSON 内容均未失配。
 - TDD 修复把两平台结果校验切换为 `Get-NormalizedTextHash` 并删除原始文本哈希入口，新增合同取得预期 RED 后达到 `34/34` GREEN。由于验证器属于 `implementation_sha256`，旧结果必须删除并重新 measure，禁止直接替换元数据。
+- 修复提交 `42bc2e9ce7cf2e88d0602ebdc638213854793f96` 的 Run `30170535534` 已进入 `measure` 模式并四 Job 全绿；同 Head 主 CI Run `30170535538` 七 Job 全绿。
+- 新结果已绑定 tree `94fc484124d1557ece1d76f27abc5ea1bc5ea592` 与实现哈希 `sha256:c20d5299bed4dc14af1b8b7257b206b8a7e7a02a02835265183bf4479468da6d`，本地 Evidence 零违规。两个成功 Artifact 已删除且该 Run Artifact 数为 `0`；失败 Artifact `8622687822` 保留。

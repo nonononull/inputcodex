@@ -65,4 +65,5 @@
 - Issue `#47` 被指定为上述稳定事实的微型五路径 Closeout；其 GitHub Issue/PR 保存自身动态 Review、CI 与合并证据，不得再为本次状态回写创建二次 Closeout，也不得借机修改产品、缓存、CI 或历史任务快照。
 - Issue `#32` 的 28 路径实施范围与 `sha256:857f6a8a2070d5ddcb43eaf237448d30302d59e39e1dbb910724cfac2fc81505` 已获项目所有者批准；PR `#49` 已建立隔离 Rust 测量工程、opt-in 首次 view 探针、PowerShell 证据验证器与 Windows/macOS hosted Workflow。
 - 初始 Performance Run `30169262247` Attempt `1` 已生成两平台样本；最终 Head `e679eee64442f0ae4db97b4e9cdbfab6780ea1de` 的 Run `30170128309` 随后证明 Windows 新鲜检出会因 `core.autocrlf=true` 改写 JSON 工作树字节，导致原始文件哈希误报，而同 Run macOS Evidence 与主 CI Run `30170128326` 均成功。
-- CRLF 根因已通过 fresh checkout 复现，并以 TDD 将结果校验改为换行归一化文本哈希；旧结果绑定旧 `implementation_sha256`，不得篡改元数据冒充当前实现，固定结果已移除以触发新一轮 hosted 重测。最终样本仍只能用于同平台、同环境指纹趋势；禁止跨平台排名、数值预算、性能优化、功能迁移、上游/半成品运行和范围外修改，Gate 5 保持锁定。
+- CRLF 根因已通过 fresh checkout 复现，并以 TDD 将结果校验改为换行归一化文本哈希；修复提交 `42bc2e9ce7cf2e88d0602ebdc638213854793f96` 的 Performance Run `30170535534` 与主 CI Run `30170535538` 已分别四 Job、七 Job 全绿，新两平台结果与 manifest 已按当前 `implementation_sha256` 入库，临时成功 Artifact 已删除且 Run Artifact 数为 `0`。
+- 最终样本只能用于同平台、同环境指纹趋势；禁止跨平台排名、数值预算、性能优化、功能迁移、上游/半成品运行和范围外修改。PR `#49` 最终 Head 仍需 Evidence/Review/CI/对话闭环和项目所有者单独 Squash Merge 授权，Gate 5 保持锁定。

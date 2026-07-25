@@ -113,14 +113,17 @@ scripts/performance/Test-InputcodexBaseline.ps1
 ## 八、实施与测量证据
 
 - 非 Draft PR：`https://github.com/nonononull/inputcodex/pull/49`，自动合并保持关闭。
-- 有效测量提交：`1974577837de97a74d7b980e8106d5e2f4a4de2e`；tree：`0efa97728a3e8d0e8bf11a8bed75b4886cdce91a`。
-- Performance Run：`30169262247`，Attempt `1`；`contract`、`windows`、`macos`、`required` 四 Job 全部成功。
-- 同一测量提交的主 CI Run：`30169262250`，七 Job 全部成功。
-- Windows 与 macOS 临时成功 Artifact 分别为 `8622503841`、`8622478720`；下载后按文件 SHA-256 与 manifest 核验，固定结果入库后已删除，Run 当前 Artifact 数为 `0`。
-- 配置、实现、输入哈希分别为 `sha256:b9ed601016ececc735634aeb143965c78fbfc61819d37c7f9e584bc971642b53`、`sha256:3d69735d1d02b3cd09316e892e104a55c9e3b605035ef155861cbc3c12705d21`、`sha256:c5b507d219ff49975c13805a2a6e036ade6c61a33a184bfffb74219ce01784b5`。
-- `windows.json` 与 `macos.json` SHA-256 分别为 `652d913ac29453acd4ce0a00cd5a7b3ab39d47f88e4ec0146d30f72e56df4952`、`068165593728b81a5c8c089b09bbd6bb6c931d63d3a4f0d791d3b02e3d10a22e`。
+- 初始测量提交：`1974577837de97a74d7b980e8106d5e2f4a4de2e`；tree：`0efa97728a3e8d0e8bf11a8bed75b4886cdce91a`。
+- 初始 Performance Run：`30169262247`，Attempt `1`；`contract`、`windows`、`macos`、`required` 四 Job 全部成功。
+- 初始测量提交的主 CI Run：`30169262250`，七 Job 全部成功。
+- 初始 Windows 与 macOS 临时成功 Artifact 分别为 `8622503841`、`8622478720`；下载后按文件 SHA-256 与 manifest 核验，固定结果入库后已删除，Run 当前 Artifact 数为 `0`。
+- 初始配置、实现、输入哈希分别为 `sha256:b9ed601016ececc735634aeb143965c78fbfc61819d37c7f9e584bc971642b53`、`sha256:3d69735d1d02b3cd09316e892e104a55c9e3b605035ef155861cbc3c12705d21`、`sha256:c5b507d219ff49975c13805a2a6e036ade6c61a33a184bfffb74219ce01784b5`。
+- 初始 `windows.json` 与 `macos.json` SHA-256 分别为 `652d913ac29453acd4ce0a00cd5a7b3ab39d47f88e4ec0146d30f72e56df4952`、`068165593728b81a5c8c089b09bbd6bb6c931d63d3a4f0d791d3b02e3d10a22e`。
 - 样本只允许在同平台、同环境指纹下形成趋势输入；跨平台排名和预算数值均不属于本 Session 批准范围。
-- 结果入库后的本地 Fresh 门：隔离基准测试 `7/7`、展示层定向测试 `3/3`、Evidence `violation_count=0`、CI 合同 `33/33`、Repository Policy `violation_count=0`、PowerShell/YAML/JSON 解析和 `git diff --check` 全部通过；实际差异精确为批准 28 路径。
+- 初始结果入库后的本地 Fresh 门：隔离基准测试 `7/7`、展示层定向测试 `3/3`、Evidence `violation_count=0`、CI 合同 `33/33`、Repository Policy `violation_count=0`、PowerShell/YAML/JSON 解析和 `git diff --check` 全部通过；实际差异精确为批准 28 路径。
 - 最终 Head `e679eee64442f0ae4db97b4e9cdbfab6780ea1de` 的 Performance Run `30170128309` 在 macOS Evidence 成功、Windows Evidence 失败；失败码只包含 `WINDOWS_RESULT_HASH_INVALID` 与 `MACOS_RESULT_HASH_INVALID`，同 Head 主 CI Run `30170128326` 七 Job 全绿。
 - fresh checkout 对照证明 `core.autocrlf=true` 会把两份 LF JSON 分别改写为哈希 `sha256:37f01530997b76be034c57909b0935b9c35ebe111d343ca57cd4d2536f1b833e`、`sha256:c33fb6b07e7a09b8812d94b98818c97a153c4e2812f7a404afa0131f2200e62e`，而 `core.autocrlf=false` 保持 manifest 哈希并通过 Evidence。
 - TDD 修复将结果文件校验切换为已有换行归一化文本哈希，回归合同从精确 RED 进入 `CI_CONTRACT_GREEN passed=34`；旧结果不改写 `implementation_sha256`，下一批准动作是移除三文件并重新 hosted 测量。
+- 修复提交 `42bc2e9ce7cf2e88d0602ebdc638213854793f96`、tree `94fc484124d1557ece1d76f27abc5ea1bc5ea592` 已由 Performance Run `30170535534` Attempt `1` 重测；四 Job 全绿，同 Head 主 CI Run `30170535538` 七 Job 全绿。
+- 新 Windows/macOS 结果 SHA-256 分别为 `c8461e942da9e49ad6a62783cad2bd88076546779f22252bafe74d4af346b55a`、`1abd6bd0181afae9f7381049902cc35b21bbca9bd77533324c7c469ca16d4829`；实现哈希为 `sha256:c20d5299bed4dc14af1b8b7257b206b8a7e7a02a02835265183bf4479468da6d`。
+- 临时成功 Artifact `8622843440`、`8622830369` 已在入库后删除，Run `30170535534` Artifact 数为 `0`；失败诊断 Artifact `8622687822` 继续按 7 天合同保留。

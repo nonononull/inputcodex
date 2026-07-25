@@ -668,7 +668,7 @@
 - 现象：Windows Evidence 只报告 `WINDOWS_RESULT_HASH_INVALID` 与 `MACOS_RESULT_HASH_INVALID`；配置、实现、输入哈希完全匹配。失败诊断 Artifact `8622687822` 已按 7 天合同保留。
 - 根因：仓库没有结果 JSON 的固定 EOL 属性，Windows Git 使用 `core.autocrlf=true`。fresh checkout 将 `windows.json`、`macos.json` 的 LF 字节分别转换为 CRLF 哈希 `sha256:37f01530997b76be034c57909b0935b9c35ebe111d343ca57cd4d2536f1b833e`、`sha256:c33fb6b07e7a09b8812d94b98818c97a153c4e2812f7a404afa0131f2200e62e`；`core.autocrlf=false` 保持 manifest 哈希并通过 Evidence。验证器只对结果文件使用 `Get-FileHash` 原始工作树字节，导致 Git 合法文本转换被误判为证据损坏。
 - 处理：先新增“性能 Evidence 对 Git 换行转换保持稳定”合同，确认精确 RED `期望=2，实际=0`；再把 Windows/macOS 结果校验切换为现有 `Get-NormalizedTextHash`，删除原始文本哈希入口，CI 合同达到 `34/34` GREEN。
-- 验证：双 fresh checkout 对照已稳定复现根因；修复后的静态回归合同通过。由于验证器本身属于 `implementation_sha256`，旧 Run 结果不能直接改写元数据冒充当前实现，三份固定结果必须删除并重新 hosted 测量；最终 Evidence 验证待新 Run 入库后完成。
+- 验证：双 fresh checkout 对照已稳定复现根因；修复后的回归合同达到 `CI_CONTRACT_GREEN passed=34`。旧 Run 结果未改写元数据，三份固定结果删除后由提交 `42bc2e9ce7cf2e88d0602ebdc638213854793f96` 触发 Performance Run `30170535534` 重新 measure，四 Job 全绿；新结果本地 Evidence 零违规，两个临时成功 Artifact 已删除且该 Run Artifact 数为 `0`。最终 hosted Evidence 仍由下一 Head 验证。
 - 关联：Issue `#32`、PR `#49`、Run `30170128309`、Artifact `8622687822`、`scripts/performance/Test-InputcodexBaseline.ps1`、`scripts/ci/Test-CiScripts.ps1`。
 
 ## 记录模板

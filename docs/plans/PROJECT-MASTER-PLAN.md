@@ -2,9 +2,9 @@
 
 schema_version: inputcodex.master-plan.v1
 active_task: issue-32-performance-baseline-implementation
-active_gate: Gate 4：v1.2.42 功能目录重新审计已完成并保持 release_audit=current；Issue #32 / PR #49 已完成隔离性能实现，Windows final Evidence 的 core.autocrlf 原始哈希根因已修复，正在重新 hosted 测量与入库当前实现样本
+active_gate: Gate 4：v1.2.42 功能目录重新审计已完成并保持 release_audit=current；Issue #32 / PR #49 已完成 core.autocrlf 根因修复、当前实现 hosted 重测与新样本入库，正在收口最终 Evidence/Review/CI
 last_verified_gate: Issue #38 / PR #45 已以单父 Squash 提交 5fd337fb7ceb9b0ef53e2e694cc5ddd81ea0a98c 完成二十六路径重新审计；PR CI 与 main CI Run 30158058627 Attempt 3 均七 Job 全绿且 Artifact 为 0，Issue #46 已完成外部事故收口
-next_legal_gate: 只允许在 PR #49 已批准 28 路径内触发新 measure Run、导入当前 implementation_sha256 的 Windows/macOS 结果、完成最终 Evidence/Review/CI 与所有者 Squash Merge 决策
+next_legal_gate: 只允许在 PR #49 已批准 28 路径内完成最终 Evidence、Review/CI、对话闭环和项目所有者单独 Squash Merge 决策；性能预算、优化、功能迁移与 Gate 5 继续锁定
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/32
 performance_baseline_issue_ref: https://github.com/nonononull/inputcodex/issues/32
 performance_baseline_pr_ref: https://github.com/nonononull/inputcodex/pull/49
@@ -145,7 +145,8 @@ decision_status: gate-4-catalog-current-performance-baseline-implementation-appr
 - [x] Issue `#32` 已完成 Discovery，并冻结 28 路径、测量对象、可比环境与 `sha256:857f6a8a2070d5ddcb43eaf237448d30302d59e39e1dbb910724cfac2fc81505`；项目所有者已授权进入分支、Session Plan、Runtime Workflow、实现、验证与 PR。
 - [x] Issue `#32` / PR `#49` 已在隔离工作树中实现性能测量入口、opt-in 首次 view 探针与证据验证器；初始 Run `30169262247` 已产生两平台样本。
 - [x] 最终 Evidence Run `30170128309` 已证明 Windows `core.autocrlf=true` 会使原始工作树 JSON 哈希失配；fresh checkout 可重复，TDD 回归合同已从 RED 转为 `34/34` GREEN，主 CI Run `30170128326` 七 Job 全绿。
-- [ ] 删除绑定旧实现哈希的固定结果后重新 hosted 测量，入库当前实现样本，再完成最终 Evidence、全部 Review 对话根因闭环和项目所有者单独 Squash Merge 授权；不得顺带制定预算、优化产品或推进 Gate 5。
+- [x] 删除绑定旧实现哈希的固定结果后，修复 Head `42bc2e9ce7cf2e88d0602ebdc638213854793f96` 已由 Performance Run `30170535534` 重新 hosted 测量并入库当前实现样本；同 Head 主 CI Run `30170535538` 七 Job 全绿，成功 Run Artifact 数为 `0`。
+- [ ] PR `#49` 最终 Head 仍需完成 Evidence、全部 Review 对话根因闭环和项目所有者单独 Squash Merge 授权；不得顺带制定预算、优化产品或推进 Gate 5。
 
 ### Gate 5：分域迁移（锁定）
 

@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 25 日，Gate 3 七成员 Workspace、Gate 4 `v1.2.42` 功能目录重新审计与 Closeout 均已进入 `main`。Issue `#32` 已冻结 28 路径与 `sha256:857f6a8a2070d5ddcb43eaf237448d30302d59e39e1dbb910724cfac2fc81505`；最终 Evidence Run `30170128309` 已定位 Windows `core.autocrlf` 原始哈希误报，修复后旧固定结果因绑定旧实现哈希而移除。当前本地使用 Contract 与定向验证，新的 Windows/macOS 实测继续交给 GitHub-hosted runner。
+截至 2026 年 7 月 25 日，Gate 3 七成员 Workspace、Gate 4 `v1.2.42` 功能目录重新审计与 Closeout 均已进入 `main`。Issue `#32` 已冻结 28 路径与 `sha256:857f6a8a2070d5ddcb43eaf237448d30302d59e39e1dbb910724cfac2fc81505`；Windows `core.autocrlf` 原始哈希根因已修复，Performance Run `30170535534` 已完成当前实现的 Windows/macOS 重测并将核验结果写入固定路径。当前本地使用 Evidence 与定向验证，最终 PR 合并仍由项目所有者独立决策。
 
 仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供十六个检查点：
 
@@ -40,8 +40,8 @@ Issue `#32` 只允许验证隔离测量合同和原始样本结构；Windows/mac
 cargo test --manifest-path benchmarks/inputcodex-baseline/Cargo.toml --locked --offline
 if ($LASTEXITCODE -ne 0) { throw 'Issue #32 隔离测量工程测试失败。' }
 
-pwsh -NoProfile -File scripts/performance/Test-InputcodexBaseline.ps1 -RepositoryRoot . -Mode Contract
-if ($LASTEXITCODE -ne 0) { throw 'Issue #32 性能合同验证失败。' }
+pwsh -NoProfile -File scripts/performance/Test-InputcodexBaseline.ps1 -RepositoryRoot . -Mode Evidence
+if ($LASTEXITCODE -ne 0) { throw 'Issue #32 性能证据验证失败。' }
 
 pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
 if ($LASTEXITCODE -ne 0) { throw 'Issue #32 CI 合同验证失败。' }
@@ -53,7 +53,7 @@ git diff --check
 if ($LASTEXITCODE -ne 0) { throw 'Issue #32 差异空白检查失败。' }
 ```
 
-`benchmarks/results/issue-32/` 当前必须保持三文件全部缺失，以触发修复后的 hosted `measure` 模式。初始 Run `30169262247` 的结果继续保留在提交 `e679eee64442f0ae4db97b4e9cdbfab6780ea1de` 历史中，不得改写其 `implementation_sha256`；新 Run 成功 Artifact 仍只作临时交接，失败 Artifact 最长保留 7 天，禁止上传 `target/`。
+`benchmarks/results/issue-32/` 当前固定引用 Performance Run `30170535534` Attempt `1`、测量提交 `42bc2e9ce7cf2e88d0602ebdc638213854793f96` 与 tree `94fc484124d1557ece1d76f27abc5ea1bc5ea592`。两个临时成功 Artifact 已在结果入库后删除且该 Run Artifact 数为 `0`；失败 Run `30170128309` 的诊断 Artifact `8622687822` 按 7 天合同保留，禁止上传 `target/`。
 
 ## 环境要求
 
