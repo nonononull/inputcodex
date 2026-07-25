@@ -32,8 +32,9 @@ AGOS ReportOnly 返回任务登记 `unregistered`、总体 `needs-input`、docto
 
 ## GitHub 验收证据
 
-- 已在分支 `codex/issue-55-performance-remeasurement-entry` 的精确 Head `c15a9bc74c979f3de447e5b28d0ff70ff0d047c3` 触发 `workflow_dispatch mode=measure`。Run `30178268889` 的 `contract`、`windows`、`macos` 与 `required` 四个 Job 均为 `success`；该手工 Run 没有关联 PR。
+- 已在分支 `codex/issue-55-performance-remeasurement-entry` 的精确 Head `c15a9bc74c979f3de447e5b28d0ff70ff0d047c3` 触发 `workflow_dispatch mode=measure`。Run `30178268889` 的 `contract`、`windows`、`macos` 与 `required` 四个 Job 均为 `success`；触发事件没有 PR 上下文，组合 manifest 的 `pull_request` 为 `null`，GitHub 之后可能在界面中关联该分支创建的 PR。
 - Windows Artifact 为 `8624873440`（`performance-windows-30178268889-1`），下载后归一化 SHA-256 为 `sha256:441d29e67749390ab2e6484810390518111b848fedac8d8a520a98978e95fc46`；macOS Artifact 为 `8624854730`（`performance-macos-30178268889-1`），归一化 SHA-256 为 `sha256:50cbb9c5deaa72b9762fb6cab01a6c934c9fed813d564e54e0a012afaf710dd4`。
 - 两份 Artifact 的 `source.commit`、`source.tree`、配置、实现和输入哈希一致，分别为 `c15a9bc74c979f3de447e5b28d0ff70ff0d047c3`、`cc1e153e09cc5b73cbd5457ae502e947c5ac9210`、`sha256:b9ed601016ececc735634aeb143965c78fbfc61819d37c7f9e584bc971642b53`、`sha256:c3293b7382061cfab9734f1b393d9f7572095eb2efca7d52bb0aad478e2710e7` 与 `sha256:c5b507d219ff49975c13805a2a6e036ade6c61a33a184bfffb74219ce01784b5`。
 - 已以这两份成功 Artifact 刷新 `benchmarks/results/issue-32/{windows,macos,manifest}.json`；结果文件与 Artifact 逐字归一化一致。临时 Artifact 保留到 GitHub 给出的到期时间，之后由平台自动清理。
+- 独立审查补强 `Test-CiScripts.ps1` 的完整决策表断言后，该脚本的内容按既有合同进入 `implementation_sha256`；因此上述旧 Run 仍是其精确 Head 的有效审计事实，却不能继续充当新 Head 的最终 Evidence。后续必须用新 Head 的显式 `measure` Run 再次刷新同一三份 Evidence，不能放宽哈希验证。
 - 下一步只剩本地 Evidence、CI 合同、仓库策略和范围审计；全部通过后提交、推送、创建关联 Issue `#55` 的非 Draft PR，并在 Review/CI 闭环后按项目合并规则处理。
