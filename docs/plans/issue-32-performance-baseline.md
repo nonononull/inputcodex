@@ -42,8 +42,8 @@
 - [x] 回写 Issue #32 所有者实施授权与 Fresh 基线。
 - [x] 创建 `codex/issue-32-performance-baseline` 隔离工作树。
 - [x] 运行起点定向验证：Parity `12/12`、CI 合同 `32/32`、仓库政策零违规。
-- [ ] 运行 Session Plan 与范围哈希验证。
-- [ ] 形成首个普通提交：`docs: 建立 Issue 32 性能基线控制面`。
+- [x] 运行 Session Plan 与范围哈希验证。
+- [x] 形成首个普通提交：`docs: 建立 Issue 32 性能基线控制面`。
 
 ## Task 2：用 TDD 建立隔离 Rust 测量核心
 
@@ -63,11 +63,11 @@
 - 支持 `application-load-complete`、`application-cancel-stale`、`parity-repository-validation`。
 - CLI 输出稳定 CSV 行，PowerShell 负责 JSON 封装；Rust 端不引入统计或 JSON 新依赖。
 
-- [ ] 先写合同测试，断言未知场景、零迭代和无效仓库根失败。
-- [ ] 运行 `cargo test --manifest-path benchmarks/inputcodex-baseline/Cargo.toml`，确认 RED。
-- [ ] 实现最小场景与 checksum，使用 `std::hint::black_box` 防止优化删除。
-- [ ] 运行隔离工程测试，确认 GREEN。
-- [ ] 生成并提交独立 `Cargo.lock`，确认根 Cargo 文件零差异。
+- [x] 先写合同测试，断言未知场景、零迭代和无效仓库根失败。
+- [x] 运行 `cargo test --manifest-path benchmarks/inputcodex-baseline/Cargo.toml`，确认 RED。
+- [x] 实现最小场景与 checksum，使用 `std::hint::black_box` 防止优化删除。
+- [x] 运行隔离工程测试，确认 GREEN。
+- [x] 生成独立 `Cargo.lock`，确认根 Cargo 文件零差异；随本批次快照提交。
 
 ## Task 3：用 TDD 增加 opt-in 首次 view 标记
 

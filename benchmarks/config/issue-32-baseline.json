@@ -1,0 +1,42 @@
+{
+  "schema_version": "inputcodex.performance-baseline.v1",
+  "issue_number": 32,
+  "rust_toolchain": "1.97.1",
+  "probe": {
+    "environment_variable": "INPUTCODEX_PERFORMANCE_PROBE",
+    "enabled_value": "1",
+    "ready_marker": "INPUTCODEX_PERFORMANCE_READY_V1",
+    "minimum_successful_samples": 5,
+    "maximum_attempts": 7,
+    "timeout_seconds": 15
+  },
+  "idle_resources": {
+    "settle_seconds": 30,
+    "sample_interval_seconds": 1,
+    "sample_count": 60
+  },
+  "rust_scenarios": [
+    {
+      "name": "application-load-complete",
+      "warmup_runs": 3,
+      "sample_count": 20,
+      "iterations": 100000
+    },
+    {
+      "name": "application-cancel-stale",
+      "warmup_runs": 3,
+      "sample_count": 20,
+      "iterations": 100000
+    },
+    {
+      "name": "parity-repository-validation",
+      "warmup_runs": 3,
+      "sample_count": 20,
+      "iterations": 1
+    }
+  ],
+  "artifacts": {
+    "success_retention_days": 1,
+    "failure_retention_days": 7
+  }
+}

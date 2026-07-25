@@ -1,0 +1,18 @@
+[package]
+name = "inputcodex-baseline"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.97.1"
+license = "AGPL-3.0-only"
+repository = "https://github.com/nonononull/inputcodex"
+publish = false
+
+[workspace]
+resolver = "3"
+
+[dependencies]
+inputcodex-application = { path = "../../crates/inputcodex-application" }
+inputcodex-parity = { path = "../../crates/inputcodex-parity" }
+
+[lints.rust]
+unsafe_code = "forbid"
