@@ -635,6 +635,17 @@
 - 验证：API 返回远端 `main=f81f457f615bed3d0f177aae52516824651abd12`，与本地 HEAD 一致；Issue `#32` OPEN、Ruleset 仅允许 Squash、维护者数量为 1、Release 仍为 `v1.2.42`。
 - 关联：Issue `#32`、`docs/plans/sessions/issue-32-performance-baseline.md`。
 
+## 2026-07-25：性能采集预验证中的默认 Runner 变量与空 stdout
+
+- 现象一：初版 Workflow 显式写入 `RUNNER_ENVIRONMENT=${{ runner.environment }}`；该名称属于 GitHub 提供的默认 `RUNNER_*` 变量，不应由 Workflow 重复定义。
+- 根因一：把只读 runner context 与可自定义环境变量混为一谈。
+- 处理一：删除 Workflow 中的同名 `env`，采集脚本只读取 GitHub 自动提供的 `RUNNER_ENVIRONMENT` 并要求值为 `github-hosted`。
+- 现象二：探针轮询刚创建但尚无内容的 stdout 文件时，`Get-Content -Raw` 返回 `$null`，直接调用 `.Contains()` 会在 hosted 首次轮询崩溃。
+- 根因二：错误假设空文件总会返回空字符串。
+- 处理二：读取后先把 `$null` 归一化为空字符串，再检查 ready marker；通过 AST 抽取真实函数，以隐藏空输出进程验证返回 `timeout` 或 `process-exited`，不再抛空值异常。
+- 验证：性能 Contract 通过；CI 合同 `33/33`；临时 Evidence 正例通过，篡改 Windows 文件哈希后稳定返回 `WINDOWS_RESULT_HASH_INVALID`；本机直接调用完整采集器被拒绝且不生成结果。
+- 关联：Issue `#32`、`.github/workflows/performance-baseline.yml`、`scripts/performance/Invoke-InputcodexBaseline.ps1`、`scripts/performance/Test-InputcodexBaseline.ps1`。
+
 ## 记录模板
 
 ```text

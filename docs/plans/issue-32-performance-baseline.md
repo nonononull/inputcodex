@@ -99,11 +99,11 @@
 - `Test-InputcodexBaseline.ps1 -RepositoryRoot -Mode Contract|Evidence`。
 - Workflow 初次运行在结果文件缺失时测量并上传 1 天 Artifact；结果入库后只验证证据，成功不再上传 Artifact。
 
-- [ ] 先扩展 CI 合同测试，要求 pinned actions、只读权限、concurrency、超时、无 Cache、成功 Artifact 1 天和失败 Artifact 7 天。
-- [ ] 运行 `scripts/ci/Test-CiScripts.ps1` 确认 RED。
-- [ ] 实现配置/结果验证器与测量脚本。
-- [ ] 实现 Windows/macOS Workflow 与 required 汇总。
-- [ ] 运行合同测试确认 GREEN。
+- [x] 先扩展 CI 合同测试，要求 pinned actions、只读权限、concurrency、超时、无 Cache、成功 Artifact 1 天和失败 Artifact 7 天。
+- [x] 运行 `scripts/ci/Test-CiScripts.ps1` 确认 RED。
+- [x] 实现配置/结果验证器与测量脚本。
+- [x] 实现 Windows/macOS Workflow 与 required 汇总。
+- [x] 运行性能 Contract、33 项 CI 合同、Evidence 正例与篡改反例确认 GREEN。
 
 ## Task 5：采集、核验并入库真实样本
 
