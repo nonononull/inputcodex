@@ -134,7 +134,7 @@ git diff --check
 - `static_workflow_refs`: 本 Runtime Workflow、Issue #24 性能协议、Gate 3 冷构建报告
 - `dynamic_workflow_gap_summary`: 标准 hosted runner 只能形成严格指纹下的同平台趋势，不能形成跨平台或跨实现排名
 - `reusable_lesson`: `measure` 与 `evidence` 双模式必须用测量 commit/tree、配置/实现/输入哈希和结果文件哈希闭环；IQR 只标记异常值，不得删除样本
-- `rollout_status`: project-native-evidence-imported-awaiting-final-pr-verification
+- `rollout_status`: project-native-crlf-root-cause-fixed-remeasurement-pending
 
 ## 10. 已执行远端证据
 
@@ -143,3 +143,6 @@ git diff --check
 - 有效 Run `30169262247` Attempt `1` 在提交 `1974577837de97a74d7b980e8106d5e2f4a4de2e` 上四 Job 全绿；Windows/macOS 原始结果已按 manifest 导入固定路径。
 - 四个临时成功 Artifact 均已删除；Run `30168904725` 与 `30169262247` 当前 Artifact 数均为 `0`。失败根因和无效结果均保留在 GitHub Run、提交历史与 `err.md`，没有通过删除样本或改写语义掩盖问题。
 - 结果入库后的本地 Fresh 门已通过：隔离基准测试 `7/7`、展示层定向测试 `3/3`、Evidence 零违规、CI 合同 `33/33`、Repository Policy 零违规、PowerShell/YAML/JSON 解析和差异空白检查均成功；批准范围并集为 `28/28`，scope hash 保持批准值。
+- 最终 Head `e679eee64442f0ae4db97b4e9cdbfab6780ea1de` 的 Run `30170128309` 在 Windows Evidence 暴露两份结果原始工作树哈希失配；失败诊断 Artifact `8622687822` 按 7 天合同保留，macOS Evidence 成功，同 Head 主 CI Run `30170128326` 七 Job 全绿。
+- fresh checkout 对照已确认根因是 Windows Git `core.autocrlf=true` 把 LF JSON 改写为 CRLF，而验证器使用 `Get-FileHash` 读取改写后的工作树字节；配置、实现、输入哈希与 JSON 内容均未失配。
+- TDD 修复把两平台结果校验切换为 `Get-NormalizedTextHash` 并删除原始文本哈希入口，新增合同取得预期 RED 后达到 `34/34` GREEN。由于验证器属于 `implementation_sha256`，旧结果必须删除并重新 measure，禁止直接替换元数据。

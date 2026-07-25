@@ -2,9 +2,9 @@
 
 schema_version: inputcodex.master-plan.v1
 active_task: issue-32-performance-baseline-implementation
-active_gate: Gate 4：v1.2.42 功能目录重新审计已完成并保持 release_audit=current；Issue #32 / PR #49 已完成隔离性能实现、hosted 两平台测量与原始样本入库，正在收口最终 Head 的 Evidence、Review/CI 与所有者合并决策
+active_gate: Gate 4：v1.2.42 功能目录重新审计已完成并保持 release_audit=current；Issue #32 / PR #49 已完成隔离性能实现，Windows final Evidence 的 core.autocrlf 原始哈希根因已修复，正在重新 hosted 测量与入库当前实现样本
 last_verified_gate: Issue #38 / PR #45 已以单父 Squash 提交 5fd337fb7ceb9b0ef53e2e694cc5ddd81ea0a98c 完成二十六路径重新审计；PR CI 与 main CI Run 30158058627 Attempt 3 均七 Job 全绿且 Artifact 为 0，Issue #46 已完成外部事故收口
-next_legal_gate: 只允许完成 PR #49 最终 Head 的 Evidence、Review/CI、对话闭环和项目所有者单独 Squash Merge 决策；性能预算、优化、功能迁移与 Gate 5 产品迁移必须使用新的独立 Issue/PR
+next_legal_gate: 只允许在 PR #49 已批准 28 路径内触发新 measure Run、导入当前 implementation_sha256 的 Windows/macOS 结果、完成最终 Evidence/Review/CI 与所有者 Squash Merge 决策
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/32
 performance_baseline_issue_ref: https://github.com/nonononull/inputcodex/issues/32
 performance_baseline_pr_ref: https://github.com/nonononull/inputcodex/pull/49
@@ -143,8 +143,9 @@ decision_status: gate-4-catalog-current-performance-baseline-implementation-appr
 - [x] Issue `#46` 已证明主干 Run `30158058627` Attempt `1/2` 为 GitHub Actions 外部事故；同一 Run Attempt `3` 七 Job 全绿且 Artifact 为 `0`，事故已按 `COMPLETED` 关闭。
 - [x] Issue `#47` 已冻结五路径 Closeout、范围哈希、禁止面和所有者批准；其报告进入长期控制面，动态 PR/CI/合并证据只保留在 GitHub，不再递归创建 Closeout。
 - [x] Issue `#32` 已完成 Discovery，并冻结 28 路径、测量对象、可比环境与 `sha256:857f6a8a2070d5ddcb43eaf237448d30302d59e39e1dbb910724cfac2fc81505`；项目所有者已授权进入分支、Session Plan、Runtime Workflow、实现、验证与 PR。
-- [x] Issue `#32` / PR `#49` 已在隔离工作树中实现性能测量入口、opt-in 首次 view 探针与证据验证器；Performance Run `30169262247` Attempt `1` 已产生并核验 Windows/macOS 原始样本，临时成功 Artifact 已删除且 Run Artifact 数为 `0`。
-- [ ] PR `#49` 最终 Head 仍需通过 Evidence 模式、主 CI、全部 Review 对话根因闭环，并取得项目所有者单独 Squash Merge 授权；不得顺带制定预算、优化产品或推进 Gate 5。
+- [x] Issue `#32` / PR `#49` 已在隔离工作树中实现性能测量入口、opt-in 首次 view 探针与证据验证器；初始 Run `30169262247` 已产生两平台样本。
+- [x] 最终 Evidence Run `30170128309` 已证明 Windows `core.autocrlf=true` 会使原始工作树 JSON 哈希失配；fresh checkout 可重复，TDD 回归合同已从 RED 转为 `34/34` GREEN，主 CI Run `30170128326` 七 Job 全绿。
+- [ ] 删除绑定旧实现哈希的固定结果后重新 hosted 测量，入库当前实现样本，再完成最终 Evidence、全部 Review 对话根因闭环和项目所有者单独 Squash Merge 授权；不得顺带制定预算、优化产品或推进 Gate 5。
 
 ### Gate 5：分域迁移（锁定）
 

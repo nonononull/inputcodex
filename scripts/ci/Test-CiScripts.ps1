@@ -543,6 +543,14 @@ Invoke-ContractTest -Name '性能基线 Workflow 固定治理与测量合同' -B
     Assert-True -Condition ($workflow -notmatch '(?im)uses:\s*[^\s@]+@(?![0-9a-f]{40}\b)') -Message '性能基线 Workflow 的 Action 必须固定到 40 位 SHA'
 }
 
+Invoke-ContractTest -Name '性能 Evidence 对 Git 换行转换保持稳定' -Body {
+    $validator = Get-Content -LiteralPath $performanceTestScript -Raw -Encoding utf8
+    $normalizedResultHashPattern = '\$manifest\.results\.(windows|macos)\.sha256 -eq \(Get-NormalizedTextHash -Path \$(windows|macos)Path\)'
+
+    Assert-Equal -Expected 2 -Actual ([regex]::Matches($validator, $normalizedResultHashPattern).Count) -Message 'Windows/macOS 结果哈希必须统一使用换行归一化文本哈希'
+    Assert-True -Condition ($validator -notmatch '(?m)^function Get-RawFileHash\s*\{') -Message '验证器不得保留会受 core.autocrlf 影响的原始工作树文本哈希入口'
+}
+
 function Write-Utf8File {
     param(
         [Parameter(Mandatory)]

@@ -2,9 +2,9 @@
 
 ## 一、结论
 
-Issue `#32` / PR `#49` 已建立与根七成员 Workspace 隔离的 Rust 测量工程、opt-in 首次 view 探针、PowerShell 采集/证据验证器和 GitHub-hosted Windows/macOS 专用 Workflow。有效 Performance Run `30169262247` Attempt `1` 已产生两平台真实原始样本，下载后按 commit、tree、配置、实现、输入和文件 SHA-256 核验并写入固定结果路径。
+Issue `#32` / PR `#49` 已建立与根七成员 Workspace 隔离的 Rust 测量工程、opt-in 首次 view 探针、PowerShell 采集/证据验证器和 GitHub-hosted Windows/macOS 专用 Workflow。初始 Performance Run `30169262247` Attempt `1` 已产生两平台真实原始样本；最终 Evidence Run `30170128309` 随后暴露 Windows Git 换行转换会让原始工作树文件哈希误报。
 
-本报告结论为 `ready-for-separate-budget-discovery`，不是预算批准。现有样本可作为同平台、同环境指纹下的后续趋势输入；禁止把 Windows 与 macOS 数值做排名、比例换算或统一阈值，也禁止由本报告直接填写性能预算。
+当前阶段结论为 `remeasure-required-before-budget-discovery`，不是预算批准。下列数值保留为初始 Run 的历史审计证据，但绑定旧 `implementation_sha256`，不得作为当前实现的最终基线；修复后必须重新 hosted 测量。禁止把 Windows 与 macOS 数值做排名、比例换算或统一阈值，也禁止由本报告直接填写性能预算。
 
 ## 二、范围与证据身份
 
@@ -107,7 +107,7 @@ Issue `#32` / PR `#49` 已建立与根七成员 Workspace 隔离的 Rust 测量�
 
 ## 九、预算就绪性
 
-当前证据已具备独立预算 Discovery 所需的最小输入：稳定测量对象、唯一配置、完整环境指纹、原始样本、异常标记、失败保留、实现/输入哈希和双平台 hosted 执行链。下一独立性能预算 Issue 可基于这些输入决定同平台重复次数、可比 Runner 类别、统计窗口、回归阈值和所有者批准方式。
+初始证据已经证明测量对象、唯一配置、完整环境指纹、原始样本、异常标记、失败保留和双平台 hosted 执行链可工作，但最终 Evidence 的 Windows 换行根因改变了验证器 `implementation_sha256`。在新 Run 结果入库前，预算就绪性保持暂停；不得把旧样本重新标记为当前实现。
 
 本 Issue 不给出任何绝对预算数值。PR `#49` 合并前仍必须完成最终 Head 的 Evidence 模式、主 CI、全部 Review 对话根因闭环，并取得项目所有者针对最终 Head 的单独 Squash Merge 授权；Gate 5 在此之前继续锁定。
 
@@ -125,3 +125,13 @@ Issue `#32` / PR `#49` 已建立与根七成员 Workspace 隔离的 Rust 测量�
 - `git diff --check` 通过。
 
 本地没有运行完整 Workspace、Iced 桌面 Release、真实性能采集、上游/半成品或任何收费/self-hosted runner。最终 Head 的跨平台 Evidence 与主 CI 继续由公开 GitHub-hosted runner 执行。
+
+## 十一、Windows Evidence 换行根因与重测
+
+- 失败 Run：`30170128309`，Head `e679eee64442f0ae4db97b4e9cdbfab6780ea1de`。
+- 结果：`contract` 与 `macos` 成功；`windows` 因 `WINDOWS_RESULT_HASH_INVALID`、`MACOS_RESULT_HASH_INVALID` 失败，`required` 正确阻断。
+- 失败诊断 Artifact：`8622687822`，按 7 天合同保留，不删除以掩盖失败。
+- 同 Head 主 CI：Run `30170128326` 七 Job 全绿，证明产品构建、Workspace 测试和仓库治理没有同步失败。
+- 可重复根因：仓库没有结果 JSON 的 `eol=lf` 属性，Windows Git 配置为 `core.autocrlf=true`；fresh checkout 会把两份 LF JSON 改写为 CRLF。验证器的配置、实现和输入哈希已归一化换行，只有结果文件仍使用 `Get-FileHash` 原始工作树字节，因此同时误报两平台文件哈希。
+- TDD：新增“性能 Evidence 对 Git 换行转换保持稳定”合同后得到期望 RED `2 -> 0`；生产修复改用 `Get-NormalizedTextHash` 并删除原始文本哈希入口，合同达到 `34/34` GREEN。
+- 证据纪律：验证器属于 `implementation_sha256`，修复后旧结果不再代表当前实现。三份固定结果已删除以触发下一 Head 的 `measure` 模式；禁止直接改写旧 JSON/manifest 的实现哈希。

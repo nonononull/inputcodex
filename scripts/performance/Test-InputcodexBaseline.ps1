@@ -65,12 +65,6 @@ function Get-NormalizedTextHash {
     Get-Sha256Text -Text ([regex]::Replace($text, '\r\n?', "`n"))
 }
 
-function Get-RawFileHash {
-    param([Parameter(Mandatory)][string]$Path)
-
-    'sha256:' + (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
-}
-
 function Get-CombinedTextHash {
     param(
         [Parameter(Mandatory)][string]$Root,
@@ -303,8 +297,8 @@ try {
                 Assert-Hash -Actual $manifest.config_sha256 -Expected $script:ConfigHash -Path 'benchmarks/results/issue-32/manifest.json' -Field 'config_sha256'
                 Assert-Hash -Actual $manifest.implementation_sha256 -Expected $script:ImplementationHash -Path 'benchmarks/results/issue-32/manifest.json' -Field 'implementation_sha256'
                 Assert-Hash -Actual $manifest.input_sha256 -Expected $script:InputHash -Path 'benchmarks/results/issue-32/manifest.json' -Field 'input_sha256'
-                Assert-Condition -Condition ($manifest.results.windows.sha256 -eq (Get-RawFileHash -Path $windowsPath)) -Code 'WINDOWS_RESULT_HASH_INVALID' -Path 'benchmarks/results/issue-32/manifest.json' -Message 'Windows 结果文件哈希不匹配。'
-                Assert-Condition -Condition ($manifest.results.macos.sha256 -eq (Get-RawFileHash -Path $macosPath)) -Code 'MACOS_RESULT_HASH_INVALID' -Path 'benchmarks/results/issue-32/manifest.json' -Message 'macOS 结果文件哈希不匹配。'
+                Assert-Condition -Condition ($manifest.results.windows.sha256 -eq (Get-NormalizedTextHash -Path $windowsPath)) -Code 'WINDOWS_RESULT_HASH_INVALID' -Path 'benchmarks/results/issue-32/manifest.json' -Message 'Windows 结果文件哈希不匹配。'
+                Assert-Condition -Condition ($manifest.results.macos.sha256 -eq (Get-NormalizedTextHash -Path $macosPath)) -Code 'MACOS_RESULT_HASH_INVALID' -Path 'benchmarks/results/issue-32/manifest.json' -Message 'macOS 结果文件哈希不匹配。'
                 Assert-Condition -Condition ([string]$manifest.github.run_id -match '^\d+$') -Code 'MANIFEST_RUN_ID_INVALID' -Path 'benchmarks/results/issue-32/manifest.json' -Message '组合 manifest 缺少 run_id。'
                 Assert-Condition -Condition ([long]$manifest.artifacts.windows.id -gt 0) -Code 'WINDOWS_ARTIFACT_ID_INVALID' -Path 'benchmarks/results/issue-32/manifest.json' -Message '组合 manifest 缺少 Windows Artifact ID。'
                 Assert-Condition -Condition ([long]$manifest.artifacts.macos.id -gt 0) -Code 'MACOS_ARTIFACT_ID_INVALID' -Path 'benchmarks/results/issue-32/manifest.json' -Message '组合 manifest 缺少 macOS Artifact ID。'
