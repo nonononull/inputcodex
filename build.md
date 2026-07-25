@@ -47,6 +47,74 @@ Set-StrictMode -Version Latest
 
 原生 `git`、`gh`、`python` 命令后必须立即检查 `$LASTEXITCODE`。只有一行输出时使用 `@(...)` 归一化，禁止把空 stdout 当成成功证据。
 
+## Issue #38 `v1.2.42` 目录重新审计规划 checkpoint
+
+本节只验证当前八路径 Discovery/Plan 控制面；项目所有者批准二十六路径实施范围前，不得修改 `parity/`、`upstream/source-lock.json`、Rust 测试或创建实现 PR：
+
+```powershell
+$expectedPaths = [string[]]@(
+  'AGENTS.md',
+  'build.md',
+  'docs/plans/2026-07-25-issue-38-v1.2.42-catalog-reaudit.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-07-25-issue-38-v1.2.42-catalog-reaudit.md',
+  'docs/reports/issue-38-v1.2.42-catalog-reaudit-discovery.md',
+  'docs/workflows/2026-07-25-issue-38-v1.2.42-catalog-reaudit-runtime.md',
+  'README.md'
+)
+
+$unstaged = @(git diff --name-only --relative)
+if ($LASTEXITCODE -ne 0) { throw '读取 Issue #38 未暂存路径失败。' }
+$staged = @(git diff --cached --name-only --relative)
+if ($LASTEXITCODE -ne 0) { throw '读取 Issue #38 已暂存路径失败。' }
+$untracked = @(git ls-files --others --exclude-standard)
+if ($LASTEXITCODE -ne 0) { throw '读取 Issue #38 未跟踪路径失败。' }
+
+$actualPaths = @(
+  $unstaged + $staged + $untracked |
+    Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+    Sort-Object -Unique
+)
+$scopeDiff = @(Compare-Object -ReferenceObject ($expectedPaths | Sort-Object) -DifferenceObject $actualPaths)
+if ($scopeDiff.Count -ne 0) {
+  $scopeDiff | Format-Table | Out-String | Write-Host
+  throw 'Issue #38 当前变更并集不等于八路径规划范围。'
+}
+
+$payload = (($expectedPaths | Sort-Object) -join "`n") + "`n"
+$bytes = [System.Text.UTF8Encoding]::new($false).GetBytes($payload)
+$scopeHash = [Convert]::ToHexString([System.Security.Cryptography.SHA256]::HashData($bytes)).ToLowerInvariant()
+if ($scopeHash -ne 'c7c32b7d07f5f1b04acba9c465e1bc4bc5021228b18c438e85b40d7db5f56add') {
+  throw "Issue #38 八路径 scope_hash 漂移：$scopeHash"
+}
+
+pwsh -NoProfile -File D:\Android_source\ai-growth-os\components\rules\scripts\verify-session-plan.ps1 -Path docs/plans/sessions/2026-07-25-issue-38-v1.2.42-catalog-reaudit.md
+if ($LASTEXITCODE -ne 0) { throw 'Issue #38 Session Plan 验证失败。' }
+
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw 'Issue #38 规划阶段 Release Audit 验证失败。' }
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw 'Issue #38 仓库政策验证失败。' }
+
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'Issue #38 差异空白检查失败。' }
+
+Write-Output "ISSUE38_PLANNING_CHECKPOINT_OK scope_hash=sha256:$scopeHash"
+```
+
+规划阶段的 `Verify-ReleaseAuditGate.ps1` 必须继续确认 `status=stale-re-audit-required`。若状态提前变为 `current`，说明越过实施批准门，必须恢复未批准差异。
+
+项目所有者明确批准二十六路径与 `sha256:a384353e947bcb9d95b51ac5ccce49ef9558ca34580c130307a64b6d868819af` 后，实施阶段才增加以下本地轻量命令；完整 Workspace 与三平台编译测试继续交给公开仓库的标准 GitHub-hosted runners：
+
+```powershell
+cargo test -p inputcodex-parity --test catalog_repository --offline
+if ($LASTEXITCODE -ne 0) { throw 'Issue #38 Parity 定向测试失败。' }
+
+cargo fmt --all -- --check
+if ($LASTEXITCODE -ne 0) { throw 'Issue #38 Rust 格式检查失败。' }
+```
+
 ## Issue #35 Release 审计基线解耦本地验证
 
 本节只验证 `release_audit` 的结构、目录 Release 对齐和 PR 门禁合同；不得更新 `upstream/CodexPlusPlus/`、创建 `benchmarks/`、修改产品 crate、Cargo、Release、Ruleset 或 AGOS：

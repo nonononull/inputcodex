@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace 与 Gate 4 功能目录及其独立 closeout。最新正式 Release `v1.2.42` 已通过 Issue `#34` / PR `#40` 作为只读审计缓存同步，Issue `#41` / PR `#42` 已解耦快照值与 CI 基线断言；功能目录仍按合同处于 `stale-re-audit-required`，必须由独立 Issue `#38` 重新审计。下一项可启动工作是独立性能基线 Issue `#32`；基线、预算与优化继续分离，Gate 5 保持锁定。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace 与 Gate 4 初始功能目录及其独立 closeout。最新正式 Release `v1.2.42` 已通过 Issue `#34` / PR `#40` 作为只读审计缓存同步，Issue `#41` / PR `#42` 已解耦快照值与 CI 基线断言，Issue `#43` / PR `#44` 已完成状态收口。当前活动任务是 Issue `#38` 的八路径 Discovery/Plan checkpoint；功能目录仍按合同处于 `stale-re-audit-required`，二十六路径实施范围必须取得项目所有者明确批准。性能基线 Issue `#32` 继续独立排队，Gate 5 保持锁定。
 
 ## 项目目标
 
@@ -46,6 +46,8 @@
 - Issue `#35` / PR `#36` 已将活动 Release 快照与功能目录审计基线解耦；Squash 提交为 `d7438a0f2c43b7fbd2b159b3759aacea4ef1999e`。
 - Issue `#34` / PR `#40` 已完成 `v1.2.42` 纯缓存同步；PR `#40` 以 Squash 提交 `353391424db5514d022473ba97f601486a190869` 合并，合并后主干 CI Run `30147841226` 七 Job 全绿。
 - Issue `#41` / PR `#42` 已完成 CI 合同解耦；PR `#42` 以 Squash 提交 `8aa1d4c96b0543e766b477b1b8e9652968b55f92` 合并，合并后主干 CI Run `30147071062` 七 Job 全绿。
+- Issue `#43` / PR `#44` 已完成缓存与 CI 合同状态收口；PR `#44` 以单父 Squash 提交 `fdb2f98c701800969fc478f95cd2539be598faaa` 合并，合并后主干 CI Run `30152001233` 成功。
+- Issue `#38` 已进入八路径 Discovery/Plan checkpoint：规划哈希为 `sha256:c7c32b7d07f5f1b04acba9c465e1bc4bc5021228b18c438e85b40d7db5f56add`，待批准二十六路径实施哈希为 `sha256:a384353e947bcb9d95b51ac5ccce49ef9558ca34580c130307a64b6d868819af`。
 - Issue `#26` / PR `#27` 已完成 Gate 4 功能目录执行：最终 Head `1d1bf32cdc4edc45e2d28f1047604222ebdb51e4` 以 Squash 提交 `a9b20f00ae069aedd42c8124d2789b230187258c` 进入 `main`；merge/head tree 均为 `205c24e05e0451a3aa39af4f43f0d9853cc7a6a2`，GitHub 签名 `valid`，PR 与合并后主干 CI 均六 Job 全绿且成功 Artifact 数为 `0`。
 - Issue `#28` / PR `#29` 已完成 Gate 4 独立 Closeout：最终 Head `7ee316c6bf4d9ca44f3475283ae1aee9c83f8577` 以单父 Squash 提交 `c07da0cad33e09b5c54e528a8a6728a048c88c0b` 合入 `main`，tree 为 `02ab8a3d8497ebb7b990e4078122b9bf916ef454`，GitHub 签名有效；Issue `#28` 已关闭，合并后主干 CI `29948874307` 六 Job 全部成功且 Artifact 数为 `0`。
 
@@ -54,6 +56,7 @@
 - 不把已导入的上游审计快照接入产品构建或运行面，也不在非 upstream-sync Issue 中修改快照。
 - 不导入半成品参考仓库源码。
 - 未经独立性能基线 Issue 的范围冻结与项目所有者批准，不创建 `benchmarks/`、测量脚本、性能预算或优化，也不修改 CI Workflow、发布资产或上游快照。
+- 未经项目所有者明确批准 Issue `#38` 的二十六路径与对应 `scope_hash`，不修改 `parity/`、`upstream/source-lock.json` 或 Rust 测试，不创建实现 PR。
 - 不执行功能迁移、安装包构建、发布或未经项目所有者授权的 PR 合并。
 - 不让上游 Tauri/React UI、现有注入脚本和远程推荐列表进入最终运行面。
 
@@ -68,14 +71,14 @@
 - Iced 只能直接存在于 presentation crate；最小窗口不建立 UI 设计系统，视觉与交互由 Gemini 实现或审阅。
 - Gate 4 规划合同已进入 `main`；Issue `#26` 的 source-index 与五域功能目录 checkpoint `87537e6e4a0e6911dd1427cc23f52dcb805a4679` 已记录 `133` 条入口、`36` 个 feature、`3` 个排除和 `0` 个覆盖缺口。
 - Issue `#26` / PR `#27` 已将 `36` 份五域行为合同、`11` 个合成或不可逆脱敏 fixture manifest 与验证器合入 `main`；来源 PR 的 `classify`、`governance`、`linux-quality`、`windows`、`macos`、`required` 均成功，Issue 已关闭，来源功能分支的远端、本地与远端跟踪引用均已清理。
-- Gate 4 功能目录与独立 Closeout 已完成；功能目录、性能基线与优化继续保持不同 Issue/PR，Gate 5 仍锁定。
+- Gate 4 初始功能目录与独立 Closeout 已完成；`v1.2.42` 的独立重新审计正在 Issue `#38` 的规划批准门，功能目录、性能基线与优化继续保持不同 Issue/PR，Gate 5 仍锁定。
 - 最新正式功能真源为 `v1.2.42`；活动审计缓存已同步至该 Release，而功能目录审计基线保留在 `v1.2.41` 并明确标为 `stale-re-audit-required`，上游 `main` 的变化仍只进入 Issue `#20` 预警。
 
 ## 下一步
 
-1. 在 Issue `#32` 的独立发现阶段重新冻结测量对象、固定参考来源/许可证/构建方式、可比环境、范围哈希与项目所有者批准。
-2. Issue `#38` 仅负责功能目录重新审计并恢复 `release_audit` 的有效状态；不得与性能基线、优化或产品迁移混入同一 PR。
-3. 性能基线只建立场景、测量脚本、原始样本、统计摘要与预算候选；在结论和预算候选经批准前，Gate 5 继续锁定，优化和分域迁移各自使用新的独立 Issue/PR。
+1. 项目所有者先审议 Issue `#38` 的二十六路径实施范围与 `sha256:a384353e947bcb9d95b51ac5ccce49ef9558ca34580c130307a64b6d868819af`；未批准前保持规划 checkpoint。
+2. 获批后 Issue `#38` 只负责功能目录重新审计并恢复 `release_audit` 的有效状态；不得与性能基线、优化或产品迁移混入同一 PR，最终 Squash Merge 仍需单独授权。
+3. Issue `#32` 在独立发现阶段重新冻结测量对象、参考来源、可比环境与范围哈希；性能基线只建立测量证据和预算候选，优化和分域迁移继续使用新的独立 Issue/PR。
 
 ## 项目文档
 
@@ -90,6 +93,10 @@
 - Issue `#26` Session Plan：`docs/plans/sessions/2026-07-22-issue-26-gate-4-feature-catalog.md`
 - Issue `#26` Runtime Workflow：`docs/workflows/2026-07-22-issue-26-gate-4-feature-catalog-runtime.md`
 - Issue `#26` 初始报告：`docs/reports/issue-26-gate-4-feature-catalog.md`
+- Issue `#38` 重新审计计划：`docs/plans/2026-07-25-issue-38-v1.2.42-catalog-reaudit.md`
+- Issue `#38` Session Plan：`docs/plans/sessions/2026-07-25-issue-38-v1.2.42-catalog-reaudit.md`
+- Issue `#38` Runtime Workflow：`docs/workflows/2026-07-25-issue-38-v1.2.42-catalog-reaudit-runtime.md`
+- Issue `#38` 发现报告：`docs/reports/issue-38-v1.2.42-catalog-reaudit-discovery.md`
 - 本次筹备计划：`docs/plans/2026-07-21-bootstrap.md`
 - 筹备会话计划：`docs/plans/sessions/2026-07-21-inputcodex-bootstrap.md`
 - 筹备运行工作流：`docs/workflows/2026-07-21-inputcodex-bootstrap-runtime.md`

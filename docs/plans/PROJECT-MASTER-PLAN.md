@@ -1,11 +1,12 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-32-performance-baseline-discovery-pending-rescope
-active_gate: Gate 4：功能目录、Release 缓存同步与 CI 合同解耦已完成；功能目录保持 stale-re-audit-required，性能基线仅可作为独立发现与测量合同启动
-last_verified_gate: Issue #34 / PR #40 已将 v1.2.42 缓存为审计输入并在 main CI Run 30147841226 七 Job 全绿；Issue #41 / PR #42 已解耦固定 Release 与 stale 断言并在 main CI Run 30147071062 七 Job 全绿
-next_legal_gate: 由 Issue #32 独立重新冻结性能测量对象、参考来源、可比环境、范围哈希和项目所有者批准；Issue #38 另行完成目录重新审计，任何预算、优化或 Gate 5 产品迁移仍需新的独立 Issue/PR
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/32
+active_task: issue-38-v1.2.42-catalog-reaudit-planning-awaiting-owner-scope
+active_gate: Gate 4：Issue #38 正在执行八路径功能目录重新审计 Discovery/Plan checkpoint；release_audit 保持 stale-re-audit-required，二十六路径实施仍等待项目所有者批准
+last_verified_gate: Issue #43 / PR #44 已收口 v1.2.42 缓存与 CI 合同状态，Squash 提交为 fdb2f98c701800969fc478f95cd2539be598faaa，合并后 main CI Run 30152001233 成功
+next_legal_gate: 项目所有者批准 Issue #38 二十六路径与 scope_hash 后实施目录重新审计、Review/CI；Issue #32 性能基线保持独立待重新冻结，任何优化或 Gate 5 产品迁移仍需新的 Issue/PR
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/38
+performance_baseline_issue_ref: https://github.com/nonononull/inputcodex/issues/32
 release_audit_reaudit_issue_ref: https://github.com/nonononull/inputcodex/issues/38
 source_implementation_issue_ref: https://github.com/nonononull/inputcodex/issues/26
 source_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/27
@@ -15,26 +16,26 @@ gate_3_planning_issue_ref: https://github.com/nonononull/inputcodex/issues/17
 upstream_watch_issue_ref: https://github.com/nonononull/inputcodex/issues/14
 transition_issue_ref: https://github.com/nonononull/inputcodex/issues/8
 upstream_sync_issue_ref: https://github.com/nonononull/inputcodex/issues/9
-active_branch_ref: none
+active_branch_ref: codex/issue-38-v1.2.42-catalog-reaudit
 transition_branch_ref: codex/issue-8-gate-2-transition
-active_plan_ref: none-pending-issue-32-discovery
-active_session_plan_ref: none-pending-issue-32-discovery
-active_runtime_workflow_ref: none-pending-issue-32-discovery
-active_pr_ref: none
+active_plan_ref: docs/plans/2026-07-25-issue-38-v1.2.42-catalog-reaudit.md
+active_session_plan_ref: docs/plans/sessions/2026-07-25-issue-38-v1.2.42-catalog-reaudit.md
+active_runtime_workflow_ref: docs/workflows/2026-07-25-issue-38-v1.2.42-catalog-reaudit-runtime.md
+active_pr_ref: none-awaiting-owner-implementation-scope
 gate_3_closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/23
 gate_3_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/21
 gate_3_planning_pr_ref: https://github.com/nonononull/inputcodex/pull/18
 transition_pr_ref: https://github.com/nonononull/inputcodex/pull/10
 upstream_sync_pr_ref: https://github.com/nonononull/inputcodex/pull/11
-closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5, https://github.com/nonononull/inputcodex/pull/7, https://github.com/nonononull/inputcodex/pull/10, https://github.com/nonononull/inputcodex/pull/11, https://github.com/nonononull/inputcodex/pull/13, https://github.com/nonononull/inputcodex/pull/15, https://github.com/nonononull/inputcodex/pull/18, https://github.com/nonononull/inputcodex/pull/21, https://github.com/nonononull/inputcodex/pull/23, https://github.com/nonononull/inputcodex/pull/25, https://github.com/nonononull/inputcodex/pull/27, https://github.com/nonononull/inputcodex/pull/36, https://github.com/nonononull/inputcodex/pull/40, https://github.com/nonononull/inputcodex/pull/42
-active_report_ref: docs/reports/issue-43-v1.2.42-cache-ci-closeout.md
+closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5, https://github.com/nonononull/inputcodex/pull/7, https://github.com/nonononull/inputcodex/pull/10, https://github.com/nonononull/inputcodex/pull/11, https://github.com/nonononull/inputcodex/pull/13, https://github.com/nonononull/inputcodex/pull/15, https://github.com/nonononull/inputcodex/pull/18, https://github.com/nonononull/inputcodex/pull/21, https://github.com/nonononull/inputcodex/pull/23, https://github.com/nonononull/inputcodex/pull/25, https://github.com/nonononull/inputcodex/pull/27, https://github.com/nonononull/inputcodex/pull/36, https://github.com/nonononull/inputcodex/pull/40, https://github.com/nonononull/inputcodex/pull/42, https://github.com/nonononull/inputcodex/pull/44
+active_report_ref: docs/reports/issue-38-v1.2.42-catalog-reaudit-discovery.md
 gate_3_closeout_report_ref: docs/reports/issue-22-gate-3-closeout.md
 gate_3_implementation_report_ref: docs/reports/issue-19-gate-3-rust-workspace-ci.md
 gate_2_watch_report_ref: docs/reports/issue-14-gate-2-upstream-watch.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-decision_status: v1.2.42-cache-and-ci-contract-closed-performance-baseline-discovery-pending-owner-scope-gate-5-blocked
+decision_status: issue-38-planning-checkpoint-approved-implementation-scope-pending-gate-5-blocked
 
 ## 当前状态
 
@@ -56,6 +57,8 @@ decision_status: v1.2.42-cache-and-ci-contract-closed-performance-baseline-disco
 - Issue `#35` / PR `#36` 已解耦 Release 快照与目录审计基线，Squash 提交为 `d7438a0f2c43b7fbd2b159b3759aacea4ef1999e`；因此后续缓存可以合法进入显式 stale，而不伪造目录一致性。
 - Issue `#34` / PR `#40` 已完成 `v1.2.42` 纯缓存同步，Squash 提交为 `353391424db5514d022473ba97f601486a190869`；PR 基线更新不会自动生成新的 `pull_request` Run，故经所有者授权关闭并立即重开且未改 Head、文件或提交，Run `30147559602` 全绿后才合并，合并后 main Run `30147841226` 七 Job 全绿。
 - Issue `#41` / PR `#42` 已修复固定 Release 与 stale 语义的错误耦合，Squash 提交为 `8aa1d4c96b0543e766b477b1b8e9652968b55f92`；合并后 main Run `30147071062` 七 Job 全绿，Issue 已关闭。
+- Issue `#43` / PR `#44` 已完成 `v1.2.42` 缓存与 CI 合同状态收口，PR `#44` 以单父 Squash 提交 `fdb2f98c701800969fc478f95cd2539be598faaa` 合并；合并后 main Run `30152001233` 成功。
+- Issue `#38` 当前处于八路径 Discovery/Plan checkpoint；规划哈希为 `sha256:c7c32b7d07f5f1b04acba9c465e1bc4bc5021228b18c438e85b40d7db5f56add`，二十六路径实施候选哈希为 `sha256:a384353e947bcb9d95b51ac5ccce49ef9558ca34580c130307a64b6d868819af`，后者尚未获得项目所有者明确批准。
 - Issue `#8` 的过渡交付为 PR `#10`；该 PR 只包含文档与验证控制面，并按项目所有者明确授权执行 Squash Merge。
 - AGOS 仍是可选外部辅助；本仓库可用原生控制面时不运行它，不在本任务中修改或优化它。
 
@@ -128,8 +131,9 @@ decision_status: v1.2.42-cache-and-ci-contract-closed-performance-baseline-disco
 - [x] Issue `#28` / PR `#29` 已以独立 Closeout 回写来源 Issue、PR、Review、CI、Squash、签名、tree 与分支清理证据；PR `#29` 已按项目所有者授权 Squash Merge，Issue `#28` 已关闭，本任务未创建性能基线或优化。
 - [x] Issue `#35` / PR `#36` 已将完整快照与功能目录审计基线解耦。
 - [x] Issue `#34` / PR `#40` 已缓存 `v1.2.42` 并保持显式 `stale-re-audit-required`；Issue `#41` / PR `#42` 已使该合法状态通过 CI 合同验证。
+- [x] Issue `#43` / PR `#44` 已将缓存、CI 合同与下一合法工作状态收口到 `main`。
+- [ ] Issue `#38` 已完成发现并正在固化八路径规划 checkpoint；项目所有者批准二十六路径与对应 `scope_hash` 后，才可实施目录重新审计并恢复 `release_audit` 的有效状态。
 - [ ] Issue `#32` 独立性能基线已立项，开始前必须重新冻结范围哈希、测量对象、可比环境与项目所有者批准；它不得顺带优化产品或推进 Gate 5。
-- [ ] Issue `#38` 独立重新审计功能目录并恢复 `release_audit` 的有效状态；它不得与性能基线、缓存同步或产品迁移混入同一 PR。
 
 ### Gate 5：分域迁移（锁定）
 
@@ -153,10 +157,14 @@ decision_status: v1.2.42-cache-and-ci-contract-closed-performance-baseline-disco
 - 已完成 Issue `#35` 报告：`docs/reports/issue-35-release-catalog-decoupling.md`。
 - `v1.2.42` 缓存同步报告：`docs/reports/2026-07-23-upstream-v1.2.42-sync.md`。
 - 已完成 Issue `#41` CI 合同报告：`docs/reports/issue-41-ci-contract-decoupling.md`。
-- 最新状态收口计划：`docs/plans/2026-07-25-issue-43-v1.2.42-cache-ci-closeout.md`。
-- 最新状态收口 Session Plan：`docs/plans/sessions/2026-07-25-issue-43-v1.2.42-cache-ci-closeout.md`。
-- 最新状态收口 Runtime Workflow：`docs/workflows/2026-07-25-issue-43-v1.2.42-cache-ci-closeout-runtime.md`。
-- 最新状态收口报告：`docs/reports/issue-43-v1.2.42-cache-ci-closeout.md`。
+- 已完成状态收口计划：`docs/plans/2026-07-25-issue-43-v1.2.42-cache-ci-closeout.md`。
+- 已完成状态收口 Session Plan：`docs/plans/sessions/2026-07-25-issue-43-v1.2.42-cache-ci-closeout.md`。
+- 已完成状态收口 Runtime Workflow：`docs/workflows/2026-07-25-issue-43-v1.2.42-cache-ci-closeout-runtime.md`。
+- 已完成状态收口报告：`docs/reports/issue-43-v1.2.42-cache-ci-closeout.md`。
+- 当前 Issue `#38` 重新审计计划：`docs/plans/2026-07-25-issue-38-v1.2.42-catalog-reaudit.md`。
+- 当前 Issue `#38` Session Plan：`docs/plans/sessions/2026-07-25-issue-38-v1.2.42-catalog-reaudit.md`。
+- 当前 Issue `#38` Runtime Workflow：`docs/workflows/2026-07-25-issue-38-v1.2.42-catalog-reaudit-runtime.md`。
+- 当前 Issue `#38` 发现报告：`docs/reports/issue-38-v1.2.42-catalog-reaudit-discovery.md`。
 - 单一架构真源：`docs/plans/2026-07-21-architecture-governance.md`。
 - Gate 1 最终 closeout：`docs/reports/issue-6-gate-1-finalization-closeout.md`。
 - Gate 1→2 过渡计划：`docs/plans/2026-07-21-issue-8-gate-2-transition.md`。
@@ -193,8 +201,9 @@ decision_status: v1.2.42-cache-and-ci-contract-closed-performance-baseline-disco
 ## 停止条件
 
 - 上游最新正式 Release 或已核验的 `v1.2.42` / `657cd33e009ad02515d30db6492cd4e669b06318` 事实发生变化。
-- 需要修改 `upstream/` 或 `source-lock.json`，但没有新的独立 upstream-sync Issue/PR 与项目所有者批准。
+- 需要修改 `upstream/CodexPlusPlus/` 或 `source-lock.json` 的来源快照字段，但没有新的独立 upstream-sync Issue/PR 与项目所有者批准；Issue `#38` 只能在批准的目录复审范围内修改 `source-lock.release_audit`。
 - `release_audit` 为 stale 时修改 `benchmarks/`、`apps/`、产品 crate、`Cargo.toml` 或 `Cargo.lock`，或在同一 PR 同时更新实际 audit 与受阻产品路径。
+- 在项目所有者批准 Issue `#38` 二十六路径与 `sha256:a384353e947bcb9d95b51ac5ccce49ef9558ca34580c130307a64b6d868819af` 前修改 `parity/`、`upstream/source-lock.json`、Rust 测试或创建实现 PR。
 - 在独立性能基线 Issue 获得范围与项目所有者批准前创建 `benchmarks/`、测量脚本、原始样本、性能预算候选，或修改 Cargo/Rust、测试、CI、upstream、Ruleset、发布资产或 AGOS。
 - 在独立性能基线 Issue 中创建性能优化、产品迁移、`parity-exception`、运行上游/半成品或填写绝对性能预算，但没有新的独立 Issue 与项目所有者批准。
 - Fresh 验证失败、Ruleset 变化、Review 对话未闭环或出现未批准的一致性差异。
