@@ -82,13 +82,13 @@ verification_commands:
 - Issue #41 已回写方案 A、拒绝方案 B/C、RED 证据、七路径与哈希。
 - 项目所有者在范围未变化后回复“继续”，批准引用为 `https://github.com/nonononull/inputcodex/issues/41#issuecomment-5067938336`；授权不包含最终 Squash Merge。
 
-### 批次 3：TDD GREEN（仅在批准后）
+### 批次 3：TDD GREEN（已完成）
 
 - 先保留 RED 输出，再仅修改两个测试文件，使仓库输入跨合法 Release/stale 状态可通过。
 - 记录根因、处理和验证到 `err.md` 与执行报告。
 - 运行项目定义的本地轻量定向命令；不执行本地 Workspace 全量 Rust 构建。
 
-### 批次 4：合并模拟与交付（仅在批准后）
+### 批次 4：合并模拟与交付（进行中）
 
 - 用临时 detached 工作树无提交合入 #40 Head，复验 Python、Rust 与 Release Audit Gate，再完整清理临时状态。
 - 普通提交、正常推送、创建关联 `Closes #41` 的非 Draft PR；禁止 force push。
@@ -152,31 +152,31 @@ change_contract:
       command_or_evidence_ref: 临时 detached 合并模拟
       expected_result: v1.2.42 stale 输入下 Python/Rust/Release Audit Gate 通过
   sibling_regression_guard:
-    status: pending
+    status: passed
     closeout_rule: passed-or-blocked-before-done
     exception_ref: none
   protected_feature_replay:
-    status: planned
+    status: passed
     not_applicable_reason: null
     known_good_features:
       - feature: 上游监控失败关闭
         owner: .github/scripts/upstream_watch.py
         baseline_evidence_ref: test_invalid_source_lock_fails_closed
         post_change_replay_plan_ref: Python 全量单测
-        post_change_replay_ref: pending
+        post_change_replay_ref: 主干与 PR #40 叠加的 Python 28/28 测试以及 --validate-only
         expected_result: 非法 source-lock 仍抛出 MonitorError
-        actual_result: pending
-        owner_visible_status: pending
-        regression_status: pending
+        actual_result: 非法输入测试通过；v1.2.41 与 v1.2.42 均完成动态全对象映射和失败关闭验证。
+        owner_visible_status: passed
+        regression_status: passed
       - feature: stale 目录审计复审提醒
         owner: crates/inputcodex-parity
         baseline_evidence_ref: release_audit_显式解耦快照与功能目录审计基线
         post_change_replay_plan_ref: Rust 定向测试与 #40 合并模拟
-        post_change_replay_ref: pending
+        post_change_replay_ref: 主干与 PR #40 叠加的 catalog_repository 10/10 和 Release Audit Gate
         expected_result: 合法 stale 为 true，非法 stale 为 ReleaseMismatch
-        actual_result: pending
-        owner_visible_status: pending
-        regression_status: pending
+        actual_result: current 为 false、PR #40 合法 stale 为 true、非法 stale 专项测试继续通过。
+        owner_visible_status: passed
+        regression_status: passed
     forbidden_ops_until_replay:
       - commit
       - pr

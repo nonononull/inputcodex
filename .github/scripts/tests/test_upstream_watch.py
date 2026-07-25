@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import re
 import sys
 import unittest
@@ -369,8 +370,20 @@ class WorkflowContractTests(unittest.TestCase):
 
 class SourceLockTests(unittest.TestCase):
     def test_repository_source_lock_loads_as_baseline(self):
-        loaded = watch.load_baseline(ROOT / "upstream" / "source-lock.json")
-        self.assertEqual(loaded, baseline())
+        source_lock_path = ROOT / "upstream" / "source-lock.json"
+        source_lock = json.loads(source_lock_path.read_text(encoding="utf-8"))
+        snapshot = source_lock["snapshot"]
+        loaded = watch.load_baseline(source_lock_path)
+        self.assertEqual(
+            loaded,
+            watch.Baseline(
+                upstream_repository=snapshot["repository"],
+                release_tag=snapshot["release_tag"],
+                release_published_at=snapshot["release_published_at"],
+                release_url=snapshot["release_url"],
+                release_commit=snapshot["commit"],
+            ),
+        )
 
     def test_invalid_source_lock_fails_closed(self):
         with self.assertRaises(watch.MonitorError):

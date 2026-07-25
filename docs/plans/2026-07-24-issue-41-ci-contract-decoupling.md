@@ -22,7 +22,7 @@
 
 ### 方案 A：改为稳定字段与状态语义合同（采用）
 
-- Python 仓库 `source-lock` 测试继续调用 `load_baseline`，但只验证固定上游仓库、动态 tag 与 Release URL 的内部关系、UTC 时间格式和提交 SHA 形状；不再比较某个具体 Release 的完整对象。
+- Python 仓库 `source-lock` 测试继续调用 `load_baseline`，并与文件中动态读取的 snapshot 字段构造出的 `Baseline` 做全对象对账；不再比较某个固定 Release 的完整对象。
 - Rust 仓库总体验证继续要求 `validate_repository` 成功和所有计数不变量成立，删除唯一将合法 stale 状态视为失败的断言；保留现有 current/stale 专项测试作为状态语义证据。
 - 优点：根因处解除“快照值”和“状态值”的错误耦合，不降低 `Baseline`、Release URL、SHA、目录审计或三平台验证强度。
 
@@ -62,21 +62,26 @@ scope_hash: sha256:ada2baa0a524b2c8f0831d946236197b056513981c30b4530d903114b709c
 
 ### Python 合同
 
-保留 `baseline()` 为合成观测测试的固定输入；只替换仓库 `source-lock` 测试的全对象相等比较为稳定字段关系：
+保留 `baseline()` 为合成观测测试的固定输入；仓库 `source-lock` 测试继续全对象对账，但期望值改为从文件 snapshot 动态构造：
 
 ```python
-loaded = watch.load_baseline(ROOT / "upstream" / "source-lock.json")
-self.assertEqual(loaded.upstream_repository, watch.EXPECTED_UPSTREAM_REPOSITORY)
-self.assertRegex(loaded.release_tag, watch.TAG_PATTERN)
+source_lock_path = ROOT / "upstream" / "source-lock.json"
+source_lock = json.loads(source_lock_path.read_text(encoding="utf-8"))
+snapshot = source_lock["snapshot"]
+loaded = watch.load_baseline(source_lock_path)
 self.assertEqual(
-    loaded.release_url,
-    f"https://github.com/{loaded.upstream_repository}/releases/tag/{loaded.release_tag}",
+    loaded,
+    watch.Baseline(
+        upstream_repository=snapshot["repository"],
+        release_tag=snapshot["release_tag"],
+        release_published_at=snapshot["release_published_at"],
+        release_url=snapshot["release_url"],
+        release_commit=snapshot["commit"],
+    ),
 )
-self.assertTrue(loaded.release_published_at.endswith("Z"))
-self.assertRegex(loaded.release_commit, watch.SHA_PATTERN)
 ```
 
-`Baseline.__post_init__` 仍实际执行仓库、tag、UTC RFC3339、Release URL 和 SHA 的失败关闭验证；本测试不引入网络请求。
+`Baseline.__post_init__` 仍实际执行仓库、tag、UTC RFC3339、Release URL 和 SHA 的失败关闭验证；动态全对象对账还保留了 loader 字段映射强度，本测试不引入网络请求。
 
 ### Rust 合同
 

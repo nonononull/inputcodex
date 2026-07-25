@@ -17,7 +17,7 @@ local_time_source: Windows Get-Date
 
 ## 工作流节点
 
-1. `startup-baseline`：确认 `main`、远端 `main`、发现分支和 Git 状态；运行 `verify-git-snapshot-governance.ps1 -Checkpoint -ReportOnly`。
+1. `startup-baseline`：确认 `main`、远端 `main`、实现分支和 Git 状态；运行 `verify-git-snapshot-governance.ps1 -Checkpoint -ReportOnly`。
 2. `root-cause`：只读查看 PR #40 CI 日志、两个失败断言、`Baseline` 验证链、Rust stale 专项合同、Git 历史和 #40 路径差异。
 3. `red`：在 #40 未修改工作树运行 Python 上游监控全量单测和 Rust 精确失败测试，记录退出码与失败文本。
 4. `scope-proposal`：写入发现计划、Session Plan、Runtime Workflow，按七条路径重算 `scope_hash`，在 Issue #41 请求项目所有者明确批准。

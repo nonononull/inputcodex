@@ -365,7 +365,6 @@ fn 仓库功能目录通过完整引用与安全验证() {
     assert_eq!(summary.contract_count(), 36);
     assert_eq!(summary.fixture_count(), 11);
     assert_eq!(summary.coverage_gap_count(), 0);
-    assert!(!summary.requires_reaudit());
 }
 
 #[test]
