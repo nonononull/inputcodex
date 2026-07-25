@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游 `v1.2.41` 审计快照与每 6 小时监控，并已通过 Issue `#19/#22`、PR `#21/#23` 完成 Gate 3 纯 Rust Workspace、五类失败语义、三平台最低冷构建基线和独立 closeout；Issue `#24` / PR `#25` 已完成 Gate 4 规划合同，Issue `#26` / PR `#27` 已完成 source-index、五域功能目录、行为合同与脱敏 fixture 的实现、Review/CI 与 Squash Merge，Issue `#28` / PR `#29` 已完成独立 Closeout。下一项可启动工作是独立性能基线 Issue；基线、预算与优化继续分离，Gate 5 保持锁定。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace 与 Gate 4 功能目录及其独立 closeout。最新正式 Release `v1.2.42` 已通过 Issue `#34` / PR `#40` 作为只读审计缓存同步，Issue `#41` / PR `#42` 已解耦快照值与 CI 基线断言；功能目录仍按合同处于 `stale-re-audit-required`，必须由独立 Issue `#38` 重新审计。下一项可启动工作是独立性能基线 Issue `#32`；基线、预算与优化继续分离，Gate 5 保持锁定。
 
 ## 项目目标
 
@@ -17,11 +17,11 @@
 - 上游项目：`BigPizzaV3/CodexPlusPlus`
 - 半成品参考：`zsr131550/CodexPlusPlus`
 
-两份参考项目均采用 GNU AGPLv3。当前仓库同样采用 GNU AGPLv3；`BigPizzaV3/CodexPlusPlus` 正式 Release `v1.2.41` 已以完整只读审计快照导入 `upstream/CodexPlusPlus/`，半成品参考仓库尚未导入。
+两份参考项目均采用 GNU AGPLv3。当前仓库同样采用 GNU AGPLv3；`BigPizzaV3/CodexPlusPlus` 正式 Release `v1.2.42` 已以完整只读审计快照导入 `upstream/CodexPlusPlus/`，半成品参考仓库尚未导入。
 
 ## 当前阶段
 
-截至 2026 年 7 月 22 日，已完成：
+截至 2026 年 7 月 25 日，已完成：
 
 - 建立本地 Git 仓库与 GitHub 公开仓库。
 - 固定项目名称、无广告原则和性能优先目标。
@@ -43,6 +43,9 @@
 - PR `#21` 的最终 Head 为 `9a4a4425f2fb0d8235554d3e83577111ae34efcc`；merge/head tree 均为 `4881ce609370f77181d9545474c029ab0c5d4972`，GitHub 签名 `valid`，合并后 `main` 运行 `29919596057` 六 Job 全绿且成功 Artifact 数为 `0`。
 - 通过 PR `#23` Squash Merge Gate 3 独立 closeout；合并提交为 `f470c062037042a1f7833a29cdcf216f6c0f5601`，Issue `#22` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29922385227` 六 Job 全绿且成功 Artifact 数为 `0`。
 - Issue `#24` / PR `#25` 已 Squash Merge Gate 4 两阶段规划合同；合并提交为 `431682296f53e86de1184c732b0d4748857c9390`，Issue `#24` 已按 `COMPLETED` 关闭，合并后 `main` 运行 `29926710342` 六 Job 全绿且成功 Artifact 数为 `0`。
+- Issue `#35` / PR `#36` 已将活动 Release 快照与功能目录审计基线解耦；Squash 提交为 `d7438a0f2c43b7fbd2b159b3759aacea4ef1999e`。
+- Issue `#34` / PR `#40` 已完成 `v1.2.42` 纯缓存同步；PR `#40` 以 Squash 提交 `353391424db5514d022473ba97f601486a190869` 合并，合并后主干 CI Run `30147841226` 七 Job 全绿。
+- Issue `#41` / PR `#42` 已完成 CI 合同解耦；PR `#42` 以 Squash 提交 `8aa1d4c96b0543e766b477b1b8e9652968b55f92` 合并，合并后主干 CI Run `30147071062` 七 Job 全绿。
 - Issue `#26` / PR `#27` 已完成 Gate 4 功能目录执行：最终 Head `1d1bf32cdc4edc45e2d28f1047604222ebdb51e4` 以 Squash 提交 `a9b20f00ae069aedd42c8124d2789b230187258c` 进入 `main`；merge/head tree 均为 `205c24e05e0451a3aa39af4f43f0d9853cc7a6a2`，GitHub 签名 `valid`，PR 与合并后主干 CI 均六 Job 全绿且成功 Artifact 数为 `0`。
 - Issue `#28` / PR `#29` 已完成 Gate 4 独立 Closeout：最终 Head `7ee316c6bf4d9ca44f3475283ae1aee9c83f8577` 以单父 Squash 提交 `c07da0cad33e09b5c54e528a8a6728a048c88c0b` 合入 `main`，tree 为 `02ab8a3d8497ebb7b990e4078122b9bf916ef454`，GitHub 签名有效；Issue `#28` 已关闭，合并后主干 CI `29948874307` 六 Job 全部成功且 Artifact 数为 `0`。
 
@@ -57,7 +60,7 @@
 ## 当前 Gate 4 功能目录边界
 
 - Gate 2 的 Issue `#9/#12/#14` 与 PR `#11/#13/#15` 均已完成；上游监控 Workflow 持续运行，Issue `#16` 只由机器维护。
-- `upstream/CodexPlusPlus/` 含 `v1.2.41` 的 `277` 个只读审计文件，`upstream/source-lock.json` 记录来源、tree、逐文件 blob/SHA-256、许可证和生成工具证据。
+- `upstream/CodexPlusPlus/` 含 `v1.2.42` 的 `277` 个只读审计文件，`upstream/source-lock.json` 记录活动来源、tree、逐文件 blob/SHA-256、许可证、生成工具证据，以及仍固定在 `v1.2.41` 的功能目录审计基线与 `stale-re-audit-required` 状态。
 - Issue `#19` / PR `#21` 已将七成员纯 Rust Workspace、Rust `1.97.1` 工具链文件、`Cargo.lock`、最小分层源码与首版无缓存三平台 `CI` Workflow 合入 `main`；仍没有 Release、安装包、签名、更新资产或上游业务功能迁移。
 - 当前治理合同为 `30/30`，Workspace 许可证元数据已与根 `LICENSE` 对齐为 `AGPL-3.0-only`；五类受控失败语义已全部完成普通提交 RED→GREEN，最终 PR 运行 `29918843397` 与合并后主干运行 `29919596057` 均六 Job 全绿。
 - Linux、Windows、macOS 已各取得 `3/3` 次无缓存成功样本；Job 执行时间中位数分别为 `133`、`212`、`96` 秒，最低基线不包含 Cache、P95 或七天调优结论。
@@ -66,13 +69,13 @@
 - Gate 4 规划合同已进入 `main`；Issue `#26` 的 source-index 与五域功能目录 checkpoint `87537e6e4a0e6911dd1427cc23f52dcb805a4679` 已记录 `133` 条入口、`36` 个 feature、`3` 个排除和 `0` 个覆盖缺口。
 - Issue `#26` / PR `#27` 已将 `36` 份五域行为合同、`11` 个合成或不可逆脱敏 fixture manifest 与验证器合入 `main`；来源 PR 的 `classify`、`governance`、`linux-quality`、`windows`、`macos`、`required` 均成功，Issue 已关闭，来源功能分支的远端、本地与远端跟踪引用均已清理。
 - Gate 4 功能目录与独立 Closeout 已完成；功能目录、性能基线与优化继续保持不同 Issue/PR，Gate 5 仍锁定。
-- 最新正式功能真源仍为 `v1.2.41`；上游 `main` 当前变化只进入 Issue `#20` 预警，不自动改变 Gate 4 基线。
+- 最新正式功能真源为 `v1.2.42`；活动审计缓存已同步至该 Release，而功能目录审计基线保留在 `v1.2.41` 并明确标为 `stale-re-audit-required`，上游 `main` 的变化仍只进入 Issue `#20` 预警。
 
 ## 下一步
 
-1. 创建独立性能基线 Issue，冻结测量对象、固定参考来源/许可证/构建方式、可比环境、范围哈希与项目所有者批准。
-2. 在性能基线 Issue 中只建立场景、测量脚本、原始样本、统计摘要与预算候选；不得顺带优化产品。
-3. 在性能基线结论与预算候选经批准前，Gate 5 继续锁定；优化和分域迁移各自使用新的独立 Issue/PR。
+1. 在 Issue `#32` 的独立发现阶段重新冻结测量对象、固定参考来源/许可证/构建方式、可比环境、范围哈希与项目所有者批准。
+2. Issue `#38` 仅负责功能目录重新审计并恢复 `release_audit` 的有效状态；不得与性能基线、优化或产品迁移混入同一 PR。
+3. 性能基线只建立场景、测量脚本、原始样本、统计摘要与预算候选；在结论和预算候选经批准前，Gate 5 继续锁定，优化和分域迁移各自使用新的独立 Issue/PR。
 
 ## 项目文档
 
