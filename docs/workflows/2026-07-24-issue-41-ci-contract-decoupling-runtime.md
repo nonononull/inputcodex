@@ -13,6 +13,9 @@ scope_hash: sha256:ada2baa0a524b2c8f0831d946236197b056513981c30b4530d903114b709c
 scope_status: approved
 scope_approval_ref: https://github.com/nonononull/inputcodex/issues/41#issuecomment-5067938336
 local_time_source: Windows Get-Date
+pr_ref: https://github.com/nonononull/inputcodex/pull/42
+first_pr_head: af866b6fabb41de3a9ea42b44859ef73d7a1549b
+first_ci_ref: https://github.com/nonononull/inputcodex/actions/runs/30145266589
 ```
 
 ## 工作流节点
@@ -24,7 +27,7 @@ local_time_source: Windows Get-Date
 5. `owner-gate`：项目所有者已通过 `https://github.com/nonononull/inputcodex/issues/41#issuecomment-5067938336` 批准七路径和 `scope_hash`；最终 Squash Merge仍需单独授权。
 6. `green`：修改两个测试合同、`err.md` 和报告；运行本地轻量验证、路径/哈希检查和 Git checkpoint。
 7. `merge-simulation`：用临时 detached 工作树无提交合入 #40 Head，复验合并后的 stale 输入，再完整 abort/remove。
-8. `delivery`：普通提交、正常推送、创建非 Draft PR、处理所有 Review 对话、等待 GitHub-hosted CI；最终 Head 全绿后请求 Squash Merge 授权。
+8. `delivery`：实现提交已正常推送，PR `#42` 已创建，首轮 CI 对 `af866b6` 全绿；控制面纠正提交会产生新 Head，必须重新处理双 reviewer、所有 Review 对话与 GitHub-hosted CI，最终 Head 全绿后请求 Squash Merge 授权。
 9. `closeout`：独立回写 Issue #41、主计划和执行报告；确认 #40 使用新 `main` 自动重跑。不得顺手合并或改写 #40。
 
 ## 允许与禁止

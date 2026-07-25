@@ -10,7 +10,10 @@
 - `scope_hash`：`sha256:ada2baa0a524b2c8f0831d946236197b056513981c30b4530d903114b709c1b8`
 - 本地验证时间：`2026-07-24 16:55:47 +08:00`，来自 Windows `Get-Date`
 - 最终本地门禁时间：`2026-07-25 13:03:50 +08:00`，来自 Windows `Get-Date`
-- 当前阶段：最终本地验证已通过；等待精确暂存、提交、双 reviewer 审查、非 Draft PR 与 GitHub-hosted CI。
+- 实现提交：`af866b6fabb41de3a9ea42b44859ef73d7a1549b`，项目所有者本机提交时间为 `2026-07-25 13:04:15 +08:00`。
+- PR：`https://github.com/nonononull/inputcodex/pull/42`，非 Draft；`af866b6` 的首轮 GitHub-hosted CI 已全绿。
+- 控制面更正时间：`2026-07-25 13:20:33 +08:00`，来自 Windows `Get-Date`。
+- 当前阶段：首轮治理审查发现文档阶段滞后，本更正提交正在修复；更正后的最终 Head 必须重新完成双 reviewer、Review 对话检查和 GitHub-hosted CI，随后单独请求 Squash Merge 授权。
 
 ## 根因
 
@@ -145,8 +148,15 @@ err.md
 
 ## 未完成门禁
 
-- 精确暂存后的七路径、`scope_hash` 与 `git diff --cached --check`；
-- 最后一处实现变更后的双 reviewer 审查；
-- 普通提交、正常推送、非 Draft PR；
-- 最终 PR Head 的 GitHub-hosted Upstream Watch 与三平台 CI；
+- 本控制面更正提交的精确七路径、`scope_hash`、Session Plan、仓库政策与 `git diff --cached --check`；
+- 更正后的最终 Head 双 reviewer 审查；
+- 更正后的最终 PR Head GitHub-hosted Upstream Watch、Linux、Windows、macOS、required CI；
 - 所有 Review 对话解决、最终 Squash Merge 单独授权和合并后 closeout。
+
+## 首轮审查与处理
+
+- 技术 reviewer：无 Critical、Important 或 Minor 发现；动态 `source-lock.snapshot` 映射、失败关闭与 stale 专项状态语义均保持。
+- 治理 reviewer：发现 Important——报告和 Session Plan 把已完成的暂存、提交、推送与 PR 仍列为待完成，可能误导后续 Review/Closeout。
+- 根因：实施、提交和 PR 创建后没有在同一交付阶段回写控制面状态。
+- 处理：本更正提交只更新获批范围内的计划、Runtime Workflow 与报告，保留首次 CI 仅对应旧 Head 的事实，并强制新 Head 重新审查和重新跑 CI。
+- 验证：更正提交后重新核验七路径 `scope_hash`、Session Plan、政策与空白门禁；最终 Head 的双 reviewer 和 CI 结果将在本节追加。

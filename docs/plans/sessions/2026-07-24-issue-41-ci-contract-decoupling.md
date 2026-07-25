@@ -34,13 +34,16 @@ closeout_ref: pending
 - Python `Baseline` 已在生产加载路径中验证 `source-lock` schema、固定上游仓库、tag、UTC 时间、Release URL 和 40 位 SHA；失败来源是测试比较了可变完整对象。
 - Rust stale/current 专项合同已覆盖合法与非法状态；失败来源是总体验证额外拒绝了合法 stale。
 - AGOS ReportOnly 入口的任务登记为 `unregistered`、总体为 `needs-input`；项目规则要求记录后绕过，不允许改动外部控制面。
+- 实现提交 `af866b6fabb41de3a9ea42b44859ef73d7a1549b` 已于项目所有者本机时间 `2026-07-25 13:04:15 +08:00` 创建；PR `#42` 已以该 Head 创建为非 Draft，首轮 GitHub-hosted CI 全绿。
+- 双 reviewer 的首轮审查中，技术审查无发现；治理审查发现报告/计划仍把已完成的暂存、提交、推送和 PR 写成待完成。
+- 本次控制面纠正提交只修复上述状态滞后；最终 Head 仍必须重新完成双 reviewer、Review 对话检查和 GitHub-hosted CI。
 
 ## Brainstorming
 
 ```yaml
 brainstorming:
   superpowers_skill: superpowers:brainstorming
-  user_decision: 项目所有者已批准建立独立 CI 合同 Issue/PR；本轮只获得发现授权，精确实现范围仍待批准。
+  user_decision: 项目所有者先批准建立独立 CI 合同 Issue/PR，后在范围不变时以“继续”继承批准七路径 scope_hash，允许实施、提交、推送、PR、Review/CI；最终 Squash Merge 保留单独授权门。
   selected_business_path: inputcodex.ci-contract-decoupling
   approved_decision_evidence:
     - user-message:批准独立-CI-合同-Issue-PR-2026-07-24
@@ -91,8 +94,9 @@ verification_commands:
 ### 批次 4：合并模拟与交付（进行中）
 
 - 用临时 detached 工作树无提交合入 #40 Head，复验 Python、Rust 与 Release Audit Gate，再完整清理临时状态。
-- 普通提交、正常推送、创建关联 `Closes #41` 的非 Draft PR；禁止 force push。
-- 全部 Review 对话写明根因、处理与验证；最终 Head CI 全绿后，只允许 Squash Merge。
+- 实现提交 `af866b6fabb41de3a9ea42b44859ef73d7a1549b` 已普通推送，PR `#42` 已创建为非 Draft；首轮 CI 全绿。
+- 首轮治理审查发现控制面阶段滞后；本次更正提交后，必须以最终 Head 重新执行双 reviewer、Review 对话检查与 GitHub-hosted CI。
+- 全部 Review 对话写明根因、处理与验证；最终 Head CI 全绿且项目所有者单独授权后，才允许 Squash Merge。
 - 合并后重新检查 #40 的自动重跑、关闭 Issue #41 并建立独立 closeout 证据。
 
 ## 停止条件
@@ -253,9 +257,9 @@ superpowers_method_discipline:
     docs_superpowers_boundary: docs/superpowers remains archive-only, not the active control plane
 delivery_evidence:
   tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/41
-  review_ref: pending
-  pr_ref: pending
-  ci_ref: pending
+  review_ref: first-pass technical=no-findings; governance=control-plane-state-drift-fixed-by-follow-up-doc-commit; final-head-review=pending
+  pr_ref: https://github.com/nonononull/inputcodex/pull/42
+  ci_ref: https://github.com/nonononull/inputcodex/actions/runs/30145266589 (af866b6 first Head green; final Head rerun pending)
   merge_ref: pending
 master_plan:
   path: docs/plans/PROJECT-MASTER-PLAN.md
