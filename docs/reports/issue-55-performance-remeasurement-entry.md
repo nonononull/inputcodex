@@ -30,6 +30,10 @@ Issue `#55` 修复了“已入库 Evidence 存在时，手工 `Performance Basel
 
 AGOS ReportOnly 返回任务登记 `unregistered`、总体 `needs-input`、doctor/所有者直接写入 `blocked`，同时项目 Git 基础、入口文档、source edit admission 和本地知识查询为 `ready`。按项目规则已记录并绕过；没有修改任何 AGOS 文件。
 
-## GitHub 验收边界
+## GitHub 验收证据
 
-在本报告的当前本地快照中，尚未创建远端分支、PR 或 hosted manual Run。提交并推送后必须完成一次 `workflow_dispatch mode=measure` 的 Windows/macOS 成功验收，核验临时 Artifact 合同，并用两份成功 Artifact 刷新 Issue `#32` 的 Windows、macOS 与 manifest Evidence。之后重跑本地 Evidence，并把真实 Run、PR、CI、Review 与最终合并事实回写到 GitHub Issue/PR；本报告在创建 PR 前更新为这些已发生事实。
+- 已在分支 `codex/issue-55-performance-remeasurement-entry` 的精确 Head `c15a9bc74c979f3de447e5b28d0ff70ff0d047c3` 触发 `workflow_dispatch mode=measure`。Run `30178268889` 的 `contract`、`windows`、`macos` 与 `required` 四个 Job 均为 `success`；该手工 Run 没有关联 PR。
+- Windows Artifact 为 `8624873440`（`performance-windows-30178268889-1`），下载后归一化 SHA-256 为 `sha256:441d29e67749390ab2e6484810390518111b848fedac8d8a520a98978e95fc46`；macOS Artifact 为 `8624854730`（`performance-macos-30178268889-1`），归一化 SHA-256 为 `sha256:50cbb9c5deaa72b9762fb6cab01a6c934c9fed813d564e54e0a012afaf710dd4`。
+- 两份 Artifact 的 `source.commit`、`source.tree`、配置、实现和输入哈希一致，分别为 `c15a9bc74c979f3de447e5b28d0ff70ff0d047c3`、`cc1e153e09cc5b73cbd5457ae502e947c5ac9210`、`sha256:b9ed601016ececc735634aeb143965c78fbfc61819d37c7f9e584bc971642b53`、`sha256:c3293b7382061cfab9734f1b393d9f7572095eb2efca7d52bb0aad478e2710e7` 与 `sha256:c5b507d219ff49975c13805a2a6e036ade6c61a33a184bfffb74219ce01784b5`。
+- 已以这两份成功 Artifact 刷新 `benchmarks/results/issue-32/{windows,macos,manifest}.json`；结果文件与 Artifact 逐字归一化一致。临时 Artifact 保留到 GitHub 给出的到期时间，之后由平台自动清理。
+- 下一步只剩本地 Evidence、CI 合同、仓库策略和范围审计；全部通过后提交、推送、创建关联 Issue `#55` 的非 Draft PR，并在 Review/CI 闭环后按项目合并规则处理。

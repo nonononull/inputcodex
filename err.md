@@ -677,7 +677,7 @@
 - 现象：`Performance Baseline` 的 `workflow_dispatch` 没有输入，contract Job 仅以三份文件的 `0/3`、`3/3` 或部分存在状态选择模式；当前 `3/3` 时任何手工 dispatch 都只能进入 `evidence`，无法产生新的临时 Artifact。
 - 根因：Workflow 把初次基线的“证据是否存在”同时当成了手工复测的唯一意图来源；采集器和验证器又明确固定 Issue `#32`，所以通过删除已入库证据强行触发 `measure` 会产生隐式副作用和不可审计来源 tree。
 - 处理：建立独立 Issue `#55`，为 `workflow_dispatch` 增加必填 choice `mode`，默认 `evidence`、仅允许 `evidence`/`measure`。手工 `measure` 明确进入既有双平台采集路径；手工 `evidence` 要求完整证据；PR/push 保持原有自动语义。Workflow 与 CI 合同本身属于 `implementation_sha256`，所以本 Issue 的成功 hosted Artifact 必须刷新 Issue `#32` 的 Windows、macOS 与 manifest Evidence；未改采集器、验证器、schema、基线配置的业务语义、预算数值、预算 CI 或 Ruleset。
-- 验证：TDD RED 先由 `Test-CiScripts.ps1` 稳定报告“性能基线手工触发必须声明默认 evidence 的受约束 mode 输入”；最小修复后同一脚本达到 `CI_CONTRACT_GREEN passed=34`。未修改 `main` 的 Evidence 为绿，而本 Issue Head 的旧 Evidence 正确报告实现哈希漂移；最终 hosted `mode=measure` Run、三份刷新 Evidence、临时 Artifact 保留期与 PR CI 证据必须在 Issue `#55` / PR 评论中闭环。
+- 验证：TDD RED 先由 `Test-CiScripts.ps1` 稳定报告“性能基线手工触发必须声明默认 evidence 的受约束 mode 输入”；最小修复后同一脚本达到 `CI_CONTRACT_GREEN passed=34`。未修改 `main` 的 Evidence 为绿，而本 Issue Head 的旧 Evidence 正确报告实现哈希漂移；`workflow_dispatch mode=measure` Run `30178268889` 在 `contract`、`windows`、`macos`、`required` 四 Job 成功后产生 Windows Artifact `8624873440` 与 macOS Artifact `8624854730`。两份下载结果已逐字归一化复核，并刷新 Issue `#32` 三份 Evidence；本地 Evidence、PR CI 与 Review 仍须在 Issue `#55` / PR 中闭环。
 - 关联：Issue `#54`、Issue `#55`、`.github/workflows/performance-baseline.yml`、`scripts/ci/Test-CiScripts.ps1`、`docs/adr/0004-performance-budget-policy.md`。
 
 ## 记录模板
