@@ -1,0 +1,252 @@
+name: Performance Baseline
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/performance-baseline.yml'
+      - 'apps/inputcodex-desktop/**'
+      - 'benchmarks/**'
+      - 'crates/inputcodex-application/**'
+      - 'crates/inputcodex-domain/**'
+      - 'crates/inputcodex-infrastructure/**'
+      - 'crates/inputcodex-parity/**'
+      - 'crates/inputcodex-platform/**'
+      - 'crates/inputcodex-presentation/**'
+      - 'parity/**'
+      - 'scripts/ci/Test-CiScripts.ps1'
+      - 'scripts/performance/**'
+      - 'Cargo.lock'
+      - 'Cargo.toml'
+      - 'rust-toolchain.toml'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/performance-baseline.yml'
+      - 'apps/inputcodex-desktop/**'
+      - 'benchmarks/**'
+      - 'crates/inputcodex-application/**'
+      - 'crates/inputcodex-domain/**'
+      - 'crates/inputcodex-infrastructure/**'
+      - 'crates/inputcodex-parity/**'
+      - 'crates/inputcodex-platform/**'
+      - 'crates/inputcodex-presentation/**'
+      - 'parity/**'
+      - 'scripts/ci/Test-CiScripts.ps1'
+      - 'scripts/performance/**'
+      - 'Cargo.lock'
+      - 'Cargo.toml'
+      - 'rust-toolchain.toml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: performance-baseline-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  RUSTUP_TOOLCHAIN: 1.97.1
+  CARGO_INCREMENTAL: '0'
+  CARGO_TERM_COLOR: never
+  RUST_BACKTRACE: '1'
+
+jobs:
+  contract:
+    name: contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      mode: ${{ steps.mode.outputs.mode }}
+    steps:
+      - name: 检出精确 Head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: 验证合同并选择模式
+        id: mode
+        shell: pwsh
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+          pwsh -NoProfile -File scripts/performance/Test-InputcodexBaseline.ps1 -RepositoryRoot . -Mode Contract
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          $evidencePaths = @(
+            'benchmarks/results/issue-32/windows.json',
+            'benchmarks/results/issue-32/macos.json',
+            'benchmarks/results/issue-32/manifest.json'
+          )
+          $presentCount = @($evidencePaths | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf }).Count
+          if ($presentCount -eq 0) {
+            $mode = 'measure'
+          }
+          elseif ($presentCount -eq $evidencePaths.Count) {
+            $mode = 'evidence'
+          }
+          else {
+            throw "性能证据必须全部缺失或全部存在，当前为 $presentCount/$($evidencePaths.Count)。"
+          }
+          "mode=$mode" | Add-Content -LiteralPath $env:GITHUB_OUTPUT -Encoding utf8
+          "mode=$mode" | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Encoding utf8
+
+      - name: 上传合同失败证据
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: performance-contract-failure-${{ github.run_id }}-${{ github.run_attempt }}
+          path: benchmarks/config/issue-32-baseline.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+  windows:
+    name: windows
+    needs: contract
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - name: 检出精确 Head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: 安装固定 Rust 工具链
+        if: ${{ needs.contract.outputs.mode == 'measure' }}
+        shell: pwsh
+        run: rustup toolchain install 1.97.1 --profile minimal --no-self-update
+
+      - name: 采集 Windows 原始结果
+        if: ${{ needs.contract.outputs.mode == 'measure' }}
+        shell: pwsh
+        run: |
+          $reportDir = Join-Path $env:RUNNER_TEMP 'inputcodex-performance/windows'
+          New-Item -ItemType Directory -Path (Join-Path $reportDir 'result') -Force | Out-Null
+          pwsh -NoProfile -File scripts/performance/Invoke-InputcodexBaseline.ps1 `
+            -RepositoryRoot . `
+            -Platform windows `
+            -OutputPath (Join-Path $reportDir 'result/windows.json')
+
+      - name: 验证已入库证据
+        if: ${{ needs.contract.outputs.mode == 'evidence' }}
+        shell: pwsh
+        run: |
+          $reportDir = Join-Path $env:RUNNER_TEMP 'inputcodex-performance/windows'
+          New-Item -ItemType Directory -Path $reportDir -Force | Out-Null
+          pwsh -NoProfile -File scripts/performance/Test-InputcodexBaseline.ps1 -RepositoryRoot . -Mode Evidence 2>&1 |
+            Tee-Object -FilePath (Join-Path $reportDir 'evidence.log')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: 上传 Windows 临时成功结果
+        if: ${{ needs.contract.outputs.mode == 'measure' && success() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: performance-windows-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/inputcodex-performance/windows/result/windows.json
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: 上传 Windows 失败诊断
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: performance-windows-failure-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/inputcodex-performance/windows
+          if-no-files-found: ignore
+          retention-days: 7
+
+  macos:
+    name: macos
+    needs: contract
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - name: 检出精确 Head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: 安装固定 Rust 工具链
+        if: ${{ needs.contract.outputs.mode == 'measure' }}
+        shell: pwsh
+        run: rustup toolchain install 1.97.1 --profile minimal --no-self-update
+
+      - name: 采集 macOS 原始结果
+        if: ${{ needs.contract.outputs.mode == 'measure' }}
+        shell: pwsh
+        run: |
+          $reportDir = Join-Path $env:RUNNER_TEMP 'inputcodex-performance/macos'
+          New-Item -ItemType Directory -Path (Join-Path $reportDir 'result') -Force | Out-Null
+          pwsh -NoProfile -File scripts/performance/Invoke-InputcodexBaseline.ps1 `
+            -RepositoryRoot . `
+            -Platform macos `
+            -OutputPath (Join-Path $reportDir 'result/macos.json')
+
+      - name: 验证已入库证据
+        if: ${{ needs.contract.outputs.mode == 'evidence' }}
+        shell: pwsh
+        run: |
+          $reportDir = Join-Path $env:RUNNER_TEMP 'inputcodex-performance/macos'
+          New-Item -ItemType Directory -Path $reportDir -Force | Out-Null
+          pwsh -NoProfile -File scripts/performance/Test-InputcodexBaseline.ps1 -RepositoryRoot . -Mode Evidence 2>&1 |
+            Tee-Object -FilePath (Join-Path $reportDir 'evidence.log')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: 上传 macOS 临时成功结果
+        if: ${{ needs.contract.outputs.mode == 'measure' && success() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: performance-macos-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/inputcodex-performance/macos/result/macos.json
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: 上传 macOS 失败诊断
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: performance-macos-failure-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/inputcodex-performance/macos
+          if-no-files-found: ignore
+          retention-days: 7
+
+  required:
+    name: required
+    needs:
+      - contract
+      - windows
+      - macos
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 汇总性能基线结果
+        shell: pwsh
+        env:
+          CONTRACT_RESULT: ${{ needs.contract.result }}
+          WINDOWS_RESULT: ${{ needs.windows.result }}
+          MACOS_RESULT: ${{ needs.macos.result }}
+          MODE: ${{ needs.contract.outputs.mode }}
+        run: |
+          $results = [ordered]@{
+            contract = $env:CONTRACT_RESULT
+            windows = $env:WINDOWS_RESULT
+            macos = $env:MACOS_RESULT
+          }
+          $results.GetEnumerator() | ForEach-Object {
+            "{0}={1}" -f $_.Key, $_.Value
+          } | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Encoding utf8
+          "mode=$env:MODE" | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Encoding utf8
+          $failed = @($results.GetEnumerator() | Where-Object { $_.Value -ne 'success' })
+          if ($failed.Count -gt 0) {
+            throw "性能基线 Job 未全部成功：$($failed.Key -join ', ')"
+          }

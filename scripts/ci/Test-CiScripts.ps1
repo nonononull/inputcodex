@@ -11,6 +11,9 @@ $policyScript = Join-Path $scriptDirectory 'Verify-RepositoryPolicy.ps1'
 $collectorScript = Join-Path $scriptDirectory 'Collect-Changes.ps1'
 $releaseAuditGateScript = Join-Path $scriptDirectory 'Verify-ReleaseAuditGate.ps1'
 $workflowPath = Join-Path $repositoryRoot '.github/workflows/ci.yml'
+$performanceWorkflowPath = Join-Path $repositoryRoot '.github/workflows/performance-baseline.yml'
+$performanceInvokeScript = Join-Path $repositoryRoot 'scripts/performance/Invoke-InputcodexBaseline.ps1'
+$performanceTestScript = Join-Path $repositoryRoot 'scripts/performance/Test-InputcodexBaseline.ps1'
 $missingImplementations = @(
     @(
         $classifierScript
@@ -516,6 +519,36 @@ Invoke-ContractTest -Name 'Release 审计门接入 PR 与 required 汇总' -Body
         Assert-True -Condition ($variant.Value -match 'Verify-ReleaseAuditGate\.ps1') -Message "$($variant.Key) release-audit Job 必须执行审计门脚本"
         Assert-True -Condition ($variant.Value -match '(?s)required:.*?needs:.*?- release-audit') -Message "$($variant.Key) required Job 必须依赖 release-audit Job"
     }
+}
+
+Invoke-ContractTest -Name '性能基线 Workflow 固定治理与测量合同' -Body {
+    Assert-True -Condition (Test-Path -LiteralPath $performanceWorkflowPath -PathType Leaf) -Message '性能基线 Workflow 必须存在'
+    Assert-True -Condition (Test-Path -LiteralPath $performanceInvokeScript -PathType Leaf) -Message '性能基线测量脚本必须存在'
+    Assert-True -Condition (Test-Path -LiteralPath $performanceTestScript -PathType Leaf) -Message '性能基线验证脚本必须存在'
+
+    $workflow = Get-Content -LiteralPath $performanceWorkflowPath -Raw -Encoding utf8
+    Assert-True -Condition ($workflow -match '(?m)^permissions:\r?\n  contents: read\r?$') -Message '性能基线 Workflow 只能读取仓库内容'
+    Assert-True -Condition ($workflow -match '(?m)^concurrency:\r?$') -Message '性能基线 Workflow 必须限制重复运行'
+    Assert-True -Condition ($workflow -match '(?m)^  cancel-in-progress: true\r?$') -Message '性能基线 Workflow 必须取消同组旧运行'
+    Assert-Equal -Expected 1 -Actual ([regex]::Matches($workflow, '(?m)^    runs-on: windows-latest\r?$').Count) -Message '性能基线必须且只能包含一个 Windows hosted Job'
+    Assert-Equal -Expected 1 -Actual ([regex]::Matches($workflow, '(?m)^    runs-on: macos-latest\r?$').Count) -Message '性能基线必须且只能包含一个 macOS hosted Job'
+    Assert-True -Condition ([regex]::Matches($workflow, '(?m)^    timeout-minutes: \d+\r?$').Count -ge 4) -Message '所有性能 Job 都必须设置超时'
+    Assert-True -Condition ($workflow.Contains('scripts/performance/Invoke-InputcodexBaseline.ps1')) -Message '两平台测量必须调用统一测量脚本'
+    Assert-True -Condition ($workflow.Contains('scripts/performance/Test-InputcodexBaseline.ps1')) -Message 'Workflow 必须调用统一证据验证脚本'
+    Assert-True -Condition ($workflow -match '(?m)^          retention-days: 1\r?$') -Message '成功临时 Artifact 必须只保留 1 天'
+    Assert-True -Condition ($workflow -match '(?m)^          retention-days: 7\r?$') -Message '失败诊断 Artifact 最长保留 7 天'
+    Assert-True -Condition ($workflow -match '(?ms)^  required:.*?needs:.*?- windows.*?- macos') -Message 'required Job 必须依赖 Windows 与 macOS'
+    Assert-True -Condition ($workflow -notmatch '(?im)uses:\s*actions/cache|^\s*cache:') -Message '性能基线 Workflow 禁止 Cache'
+    Assert-True -Condition ($workflow -notmatch '(?im)path:.*target|^\s*target[/\\]') -Message '性能基线 Workflow 禁止上传 target'
+    Assert-True -Condition ($workflow -notmatch '(?im)uses:\s*[^\s@]+@(?![0-9a-f]{40}\b)') -Message '性能基线 Workflow 的 Action 必须固定到 40 位 SHA'
+}
+
+Invoke-ContractTest -Name '性能 Evidence 对 Git 换行转换保持稳定' -Body {
+    $validator = Get-Content -LiteralPath $performanceTestScript -Raw -Encoding utf8
+    $normalizedResultHashPattern = '\$manifest\.results\.(windows|macos)\.sha256 -eq \(Get-NormalizedTextHash -Path \$(windows|macos)Path\)'
+
+    Assert-Equal -Expected 2 -Actual ([regex]::Matches($validator, $normalizedResultHashPattern).Count) -Message 'Windows/macOS 结果哈希必须统一使用换行归一化文本哈希'
+    Assert-True -Condition ($validator -notmatch '(?m)^function Get-RawFileHash\s*\{') -Message '验证器不得保留会受 core.autocrlf 影响的原始工作树文本哈希入口'
 }
 
 function Write-Utf8File {

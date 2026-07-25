@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 初始功能目录、`v1.2.42` 缓存与目录重新审计。Issue `#38` / PR `#45` 已将五域功能目录、合同、source-index 与 `release_audit` 对齐最新正式 Release `v1.2.42`；Squash 提交为 `5fd337fb7ceb9b0ef53e2e694cc5ddd81ea0a98c`，PR CI 与 GitHub Actions 外部事故恢复后的主干 CI 均七 Job 全绿且 Artifact 数为 `0`。Issue `#47` 仅负责本次稳定状态回写；下一项可启动工作是 Issue `#32` 的独立性能基线范围冻结，Gate 5 保持锁定。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 初始功能目录、`v1.2.42` 缓存与目录重新审计。Issue `#38` / PR `#45` 已将五域功能目录、合同、source-index 与 `release_audit` 对齐最新正式 Release `v1.2.42`；Squash 提交为 `5fd337fb7ceb9b0ef53e2e694cc5ddd81ea0a98c`，PR CI 与 GitHub Actions 外部事故恢复后的主干 CI 均七 Job 全绿且 Artifact 数为 `0`。Issue `#32` / PR `#49` 已完成隔离性能测量实现并修复 Windows `core.autocrlf` 原始哈希误报；修复 Head `42bc2e9` 的 Performance Run `30170535534` 与主 CI Run `30170535538` 已全绿，新 Windows/macOS 样本已入库且成功 Run Artifact 数为 `0`，当前只允许最终 Evidence、Review/CI 与所有者合并决策。
 
 ## 项目目标
 
@@ -56,7 +56,7 @@
 
 - 不把已导入的上游审计快照接入产品构建或运行面，也不在非 upstream-sync Issue 中修改快照。
 - 不导入半成品参考仓库源码。
-- 未经独立性能基线 Issue 的范围冻结与项目所有者批准，不创建 `benchmarks/`、测量脚本、性能预算或优化，也不修改 CI Workflow、发布资产或上游快照。
+- Issue `#32` 只允许在已批准 28 路径内维护隔离 `benchmarks/`、测量脚本、专用 Workflow、原始样本与预算就绪性报告；两平台数据禁止跨平台排名，禁止数值预算、性能优化、发布资产或上游快照修改。
 - 不改写 Issue `#38` 的历史 Plan、Session Plan、Runtime Workflow 或来源提交；其阶段性叙述与最终 GitHub 事实的差异只通过 Issue `#47` Closeout 报告和长期控制面更正收口。
 - 不执行功能迁移、安装包构建、发布或未经项目所有者授权的 PR 合并。
 - 不让上游 Tauri/React UI、现有注入脚本和远程推荐列表进入最终运行面。
@@ -77,9 +77,9 @@
 
 ## 下一步
 
-1. 在 Issue `#32` 中重新冻结性能基线的测量对象、参考来源与许可证、可比环境、精确路径和范围哈希。
-2. 取得项目所有者对 Issue `#32` 精确范围的新批准后，才允许创建实现分支并交付真实性能基线；性能预算和性能优化继续使用不同 Issue/PR。
-3. 性能基线完成独立 Review/CI 与 Closeout 前，不创建 Gate 5 产品迁移 Issue；Gate 5 继续锁定。
+1. 推送包含新固定结果与 manifest 的最终 Evidence Head，确认 Performance 四 Job、主 CI 七 Job 全部成功，最终成功 Run Artifact 数为 `0`。
+2. 完成全部 Review 对话的根因闭环，将最终 Head、CI、Artifact、样本哈希和 Review 证据回写 Issue `#32` / PR `#49`，停在项目所有者单独授权 Squash Merge 前。
+3. 性能预算、性能优化和 Gate 5 产品迁移继续使用不同 Issue/PR；本基线报告不得被解释为预算批准或跨平台排名。
 
 ## 项目文档
 
@@ -99,6 +99,10 @@
 - Issue `#38` Runtime Workflow：`docs/workflows/2026-07-25-issue-38-v1.2.42-catalog-reaudit-runtime.md`
 - Issue `#38` 发现报告：`docs/reports/issue-38-v1.2.42-catalog-reaudit-discovery.md`
 - Issue `#47` 重新审计 Closeout 报告：`docs/reports/issue-47-v1.2.42-catalog-reaudit-closeout.md`
+- Issue `#32` 性能基线实施计划：`docs/plans/issue-32-performance-baseline.md`
+- Issue `#32` Session Plan：`docs/plans/sessions/issue-32-performance-baseline.md`
+- Issue `#32` Runtime Workflow：`docs/workflows/issue-32-performance-baseline-runtime.md`
+- Issue `#32` 性能基线报告：`docs/reports/issue-32-performance-baseline.md`
 - 本次筹备计划：`docs/plans/2026-07-21-bootstrap.md`
 - 筹备会话计划：`docs/plans/sessions/2026-07-21-inputcodex-bootstrap.md`
 - 筹备运行工作流：`docs/workflows/2026-07-21-inputcodex-bootstrap-runtime.md`

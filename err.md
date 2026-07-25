@@ -626,6 +626,51 @@
 - 复用：遇到“零 Job + 零日志 + 平台内部错误”时，先核验 GitHub Status、Run/Attempt、Head SHA、Workflow blob 与 Check Run 数；平台事故未恢复前只登记并等待，恢复后重跑同一 Run，禁止用代码改动掩盖外部故障。
 - 关联：Issue `#46`、Issue `#38`、PR `#45`、CI Run `30158058627`、`docs/reports/issue-47-v1.2.42-catalog-reaudit-closeout.md`。
 
+## 2026-07-25：Git smart-HTTP Fetch 超时，使用 GitHub API 完成只读 Fresh 核验
+
+- 环境：Issue `#32` 性能基线实施启动，尝试在干净 `main` 基线上执行 `git fetch origin main`。
+- 现象：Fetch 在 30 秒内未完成并被执行环境超时终止；本地 `main` 与 `origin/main` 仍指向 `f81f457f615bed3d0f177aae52516824651abd12`。
+- 根因：与本文件既有 Git smart-HTTP timeout/reset 家族一致，故障位于本机 Git 传输链路；不是远端 `main`、Issue 授权、Ruleset 或上游 Release 漂移。
+- 处理：不盲目重试、不修改 Git 配置、不 Force Push；改用认证后的 GitHub REST API 读取远端 `main` ref、Issue、Ruleset、维护者和最新正式 Release。
+- 验证：API 返回远端 `main=f81f457f615bed3d0f177aae52516824651abd12`，与本地 HEAD 一致；Issue `#32` OPEN、Ruleset 仅允许 Squash、维护者数量为 1、Release 仍为 `v1.2.42`。
+- 关联：Issue `#32`、`docs/plans/sessions/issue-32-performance-baseline.md`。
+
+## 2026-07-25：性能采集预验证中的默认 Runner 变量与空 stdout
+
+- 现象一：初版 Workflow 显式写入 `RUNNER_ENVIRONMENT=${{ runner.environment }}`；该名称属于 GitHub 提供的默认 `RUNNER_*` 变量，不应由 Workflow 重复定义。
+- 根因一：把只读 runner context 与可自定义环境变量混为一谈。
+- 处理一：删除 Workflow 中的同名 `env`，采集脚本只读取 GitHub 自动提供的 `RUNNER_ENVIRONMENT` 并要求值为 `github-hosted`。
+- 现象二：探针轮询刚创建但尚无内容的 stdout 文件时，`Get-Content -Raw` 返回 `$null`，直接调用 `.Contains()` 会在 hosted 首次轮询崩溃。
+- 根因二：错误假设空文件总会返回空字符串。
+- 处理二：读取后先把 `$null` 归一化为空字符串，再检查 ready marker；通过 AST 抽取真实函数，以隐藏空输出进程验证返回 `timeout` 或 `process-exited`，不再抛空值异常。
+- 验证：性能 Contract 通过；CI 合同 `33/33`；临时 Evidence 正例通过，篡改 Windows 文件哈希后稳定返回 `WINDOWS_RESULT_HASH_INVALID`；本机直接调用完整采集器被拒绝且不生成结果。
+- 关联：Issue `#32`、`.github/workflows/performance-baseline.yml`、`scripts/performance/Invoke-InputcodexBaseline.ps1`、`scripts/performance/Test-InputcodexBaseline.ps1`。
+
+## 2026-07-25：HTTPS OAuth 缺少 `workflow` scope，改用既有 SSH 推送通道
+
+- 现象：普通 `git push -u origin codex/issue-32-performance-baseline` 被 GitHub 拒绝，提示 OAuth App 无权创建或更新 `.github/workflows/performance-baseline.yml`。
+- 根因：当前 GitHub CLI HTTPS OAuth token 只有 `gist`、`read:org`、`repo`，缺少写入 Workflow 所需的 `workflow` scope；不是网络、分支、Ruleset、代码或远端仓库故障。
+- 处理：不删除 Workflow、不绕过 Review/CI、不 Force Push；复核本机既有 SSH key 对 `nonononull` 认证成功后，只把 `origin` 的 push URL 切换为 `git@github.com:nonononull/inputcodex.git`，fetch URL 继续保留 HTTPS。
+- 验证：使用 SSH 对同一功能分支执行普通推送，随后核对远端分支 SHA 与本地 HEAD 一致。
+- 关联：Issue `#32`、分支 `codex/issue-32-performance-baseline`。
+
+## 2026-07-25：`runner.temp` 不能用于 Job 级 `env`
+
+- 现象：`Performance Baseline` 在 GitHub Actions 装载阶段零 Job 瞬时失败，Workflow 名退化为文件路径；注解指出 Windows/macOS Job 的 `runner.temp` 是未识别 named-value。
+- 根因：runner context 只有在 runner 已分配后的 step 范围可用，不能用于 `jobs.<job_id>.env`。
+- 处理：删除两个 Job 级 `REPORT_DIR`，在测量/证据 step 内从 GitHub 默认 `RUNNER_TEMP` 环境变量计算报告目录；Artifact 的 step `with.path` 继续使用合法的 `${{ runner.temp }}`。
+- 验证：本地重新通过 YAML 解析、性能 Contract 和 CI 合同；普通推送后必须出现四 Job `Performance Baseline` run，不得再是零 Job 装载失败。
+- 关联：PR `#49`、失败 Run `30168805192`、`.github/workflows/performance-baseline.yml`。
+
+## 2026-07-25：Windows Evidence 原始哈希受 `core.autocrlf` 改写
+
+- 环境：PR `#49`，Head `e679eee64442f0ae4db97b4e9cdbfab6780ea1de`，Performance Run `30170128309`，Windows hosted runner；同 Run macOS Evidence 成功，同 Head 主 CI Run `30170128326` 七 Job 全绿。
+- 现象：Windows Evidence 只报告 `WINDOWS_RESULT_HASH_INVALID` 与 `MACOS_RESULT_HASH_INVALID`；配置、实现、输入哈希完全匹配。失败诊断 Artifact `8622687822` 已按 7 天合同保留。
+- 根因：仓库没有结果 JSON 的固定 EOL 属性，Windows Git 使用 `core.autocrlf=true`。fresh checkout 将 `windows.json`、`macos.json` 的 LF 字节分别转换为 CRLF 哈希 `sha256:37f01530997b76be034c57909b0935b9c35ebe111d343ca57cd4d2536f1b833e`、`sha256:c33fb6b07e7a09b8812d94b98818c97a153c4e2812f7a404afa0131f2200e62e`；`core.autocrlf=false` 保持 manifest 哈希并通过 Evidence。验证器只对结果文件使用 `Get-FileHash` 原始工作树字节，导致 Git 合法文本转换被误判为证据损坏。
+- 处理：先新增“性能 Evidence 对 Git 换行转换保持稳定”合同，确认精确 RED `期望=2，实际=0`；再把 Windows/macOS 结果校验切换为现有 `Get-NormalizedTextHash`，删除原始文本哈希入口，CI 合同达到 `34/34` GREEN。
+- 验证：双 fresh checkout 对照已稳定复现根因；修复后的回归合同达到 `CI_CONTRACT_GREEN passed=34`。旧 Run 结果未改写元数据，三份固定结果删除后由提交 `42bc2e9ce7cf2e88d0602ebdc638213854793f96` 触发 Performance Run `30170535534` 重新 measure，四 Job 全绿；新结果本地 Evidence 零违规，两个临时成功 Artifact 已删除且该 Run Artifact 数为 `0`。结果提交 `151011de62c36cf6b9af1bbdc81c9b7a7422abfc` 在 fresh `core.autocrlf=true/false` 两种检出策略下均通过真实 Evidence；最终 hosted Evidence 仍由下一 Head 验证。
+- 关联：Issue `#32`、PR `#49`、Run `30170128309`、Artifact `8622687822`、`scripts/performance/Test-InputcodexBaseline.ps1`、`scripts/ci/Test-CiScripts.ps1`。
+
 ## 记录模板
 
 ```text
