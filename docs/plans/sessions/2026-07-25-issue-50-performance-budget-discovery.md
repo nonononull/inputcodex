@@ -4,7 +4,7 @@ schema_version: inputcodex.session-plan.v1
 task_id: issue-50-performance-budget-discovery
 task_summary: 冻结性能预算方法、失败语义和 Gate 5 解锁前置条件，并同步 PR #49 合并后的长期状态；不填写预算、不实施优化或 CI。
 task_class: Standard
-decision_status: approved-approach-a-scope-approval-pending
+decision_status: approved-scope-discovery-implementation
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/50
 baseline_ref: fd9db9ca1c150b7db34dda8acc09b6f0cc357a17
 baseline_tree_ref: 3fc4a5a7697850f048edcedf6a9ec5e4f76c847c
@@ -15,9 +15,10 @@ runtime_workflow_ref: docs/workflows/2026-07-25-issue-50-performance-budget-disc
 report_ref: docs/reports/issue-50-performance-budget-discovery.md
 adr_ref: docs/adr/0004-performance-budget-policy.md
 approved_decision_ref: user-message:按A方案开始-2026-07-25
+owner_scope_approval_ref: https://github.com/nonononull/inputcodex/issues/50#issuecomment-5080410894
 scope_hash: sha256:af1c248c46d54741f9c77ab3621cd66ccd40e3fa50698d377c788fcb0b93205f
-planning_write_authority: task-plan-session-plan-runtime-workflow-only
-implementation_status: blocked-on-owner-scope-approval
+planning_write_authority: exact-nine-path-set-approved
+implementation_status: discovery-documentation-complete-local-green-pr-pending
 mutation_intent: planning-and-documentation-only; no-budget-values; no-ci-or-product-mutation
 executor_enforcement: exact-nine-path-set, owner-scope-approval-before-adr-or-long-term-state, no-subagents, local-light-validation, normal-push-only, squash-merge-only, no-force-push, review-root-cause-closure-required
 time_source: Windows Get-Date for Git operations; GitHub timestamps remain service-side evidence
@@ -26,9 +27,9 @@ agos_status: bypassed-report-only-unregistered-needs-input-no-cross-repo-mutatio
 ## 一、批准状态
 
 - 项目所有者已批准方案 A，并授权创建 Issue、隔离分支、工作树和规划控制面。
-- 九路径与 `scope_hash` 尚待项目所有者单独批准。
-- 范围批准前只允许写本任务计划、Session Plan 和 Runtime Workflow；禁止写 ADR、Discovery 报告和长期入口。
-- 当前授权不包含提交最终 Discovery 结果、创建预算数值、修改 CI、实施优化、解锁 Gate 5 或合并 PR。
+- 九路径与 `scope_hash` 已由项目所有者通过 `owner_scope_approval_ref` 单独批准。
+- 当前允许创建 ADR、Discovery 报告并同步四个长期入口，随后执行轻量验证、普通提交、普通推送、非 Draft PR 和 Review/CI。
+- 当前授权不包含创建预算数值、修改 CI、实施优化、解锁 Gate 5 或最终 Squash Merge。
 
 ## 二、Fresh 事实
 
@@ -80,7 +81,7 @@ docs/workflows/2026-07-25-issue-50-performance-budget-discovery-runtime.md
 
 ## 六、allowed_operations
 
-范围批准前：
+规划检查点已完成：
 
 ```text
 github.issue.create: Issue #50
@@ -90,7 +91,7 @@ validation.read_only: GitHub/API、现有性能证据、规则、维护者和仓
 github.issue.comment: 回写九路径、scope_hash 和批准请求
 ```
 
-范围批准后才可增加：
+当前已批准：
 
 ```text
 docs.write: 精确九路径

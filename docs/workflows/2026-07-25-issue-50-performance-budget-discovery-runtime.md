@@ -9,7 +9,7 @@ approved_decision_ref: user-message:按A方案开始-2026-07-25
 branch_ref: codex/issue-50-performance-budget-discovery
 baseline_ref: fd9db9ca1c150b7db34dda8acc09b6f0cc357a17
 scope_hash: sha256:af1c248c46d54741f9c77ab3621cd66ccd40e3fa50698d377c788fcb0b93205f
-workflow_status: planning-checkpoint-owner-scope-approval-pending
+workflow_status: discovery-local-green-pr-pending
 execution_mode: single-executor, no-subagents, documentation-only, local-light-validation
 mutation_intent: freeze-budget-method-and-gate-5-preconditions; no-budget-values-or-implementation
 agos_status: bypassed-report-only-unregistered-needs-input-no-cross-repo-mutation
@@ -27,6 +27,8 @@ agos_status: bypassed-report-only-unregistered-needs-input-no-cross-repo-mutatio
 2. 固定候选九路径，并按 Windows `Sort-Object`、UTF-8 无 BOM、LF 和末尾 LF 计算 `scope_hash`。
 3. 范围批准前只允许三份规划文件存在差异。
 4. 将九路径、hash、禁止面和下一批次回写 Issue `#50`，等待项目所有者明确批准。
+
+项目所有者已通过 `https://github.com/nonononull/inputcodex/issues/50#issuecomment-5080410894` 批准精确九路径与 `scope_hash`；允许进入第 4 节 Discovery 实施，不包含最终 Squash Merge。
 
 ## 3. AGOS 可选入口
 

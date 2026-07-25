@@ -17,6 +17,8 @@
 
 批准引用：`user-message:按A方案开始-2026-07-25`。
 
+九路径批准证据：`https://github.com/nonononull/inputcodex/issues/50#issuecomment-5080410894`。
+
 ## Fresh 基线
 
 - 跟踪 Issue：`https://github.com/nonononull/inputcodex/issues/50`。
@@ -36,14 +38,14 @@
 5. 预算从观察模式升级为阻断模式前，必须满足最小可比运行数量、稳定窗口和项目所有者数值批准。
 6. Master Plan 中硬编码的 `v1.2.41-inputcodex.1` 与当前上游 Release 存在潜在冲突。本 Issue 只记录风险和分流条件；实际发布策略修改必须进入独立 `type:release` Issue。
 
-## 候选交付物
+## 交付物
 
 - `docs/adr/0004-performance-budget-policy.md`：长期性能预算决策合同。
 - `docs/reports/issue-50-performance-budget-discovery.md`：证据盘点、方法选择、拒绝方案和后续 Issue 边界。
 - `AGENTS.md`、`README.md`、`build.md`、Master Plan：同步 PR `#49` 已合并、Issue `#32` 未批准预算、Issue `#50` 正在 Discovery 的稳定状态。
 - 本计划、Session Plan 与 Runtime Workflow：记录批准、精确范围、执行批次和停止条件。
 
-## 候选写集合
+## 已批准写集合
 
 ```text
 AGENTS.md
@@ -68,7 +70,7 @@ docs/workflows/2026-07-25-issue-50-performance-budget-discovery-runtime.md
 - 创建 Issue、隔离分支和工作树。
 - 读取项目长期入口、Issue `#32` 报告、原始结果结构、既有 ADR 和排错记录。
 - 形成任务计划、Session Plan、Runtime Workflow、候选九路径和 `scope_hash`。
-- 在项目所有者批准九路径前停止，不写 ADR、报告或长期入口。
+- 项目所有者已批准九路径与 `scope_hash`，允许进入 Discovery 文档实施。
 
 ### Task 2：性能预算 ADR
 

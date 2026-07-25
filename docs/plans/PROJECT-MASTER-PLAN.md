@@ -146,24 +146,33 @@ decision_status: gate-4-catalog-current-performance-baseline-implementation-appr
 - [x] Issue `#32` / PR `#49` 已在隔离工作树中实现性能测量入口、opt-in 首次 view 探针与证据验证器；初始 Run `30169262247` 已产生两平台样本。
 - [x] 最终 Evidence Run `30170128309` 已证明 Windows `core.autocrlf=true` 会使原始工作树 JSON 哈希失配；fresh checkout 可重复，TDD 回归合同已从 RED 转为 `34/34` GREEN，主 CI Run `30170128326` 七 Job 全绿。
 - [x] 删除绑定旧实现哈希的固定结果后，修复 Head `42bc2e9ce7cf2e88d0602ebdc638213854793f96` 已由 Performance Run `30170535534` 重新 hosted 测量并入库当前实现样本；同 Head 主 CI Run `30170535538` 七 Job 全绿，成功 Run Artifact 数为 `0`。
-- [ ] PR `#49` 最终 Head 仍需完成 Evidence、全部 Review 对话根因闭环和项目所有者单独 Squash Merge 授权；不得顺带制定预算、优化产品或推进 Gate 5。
+- [x] PR `#49` 最终 Head `78f8eec2fdea0ae33b02c7478923e1cbaf223d69` 已完成 Evidence、Review/CI、全部对话闭环和项目所有者独立授权，并以单父 Squash 提交 `fd9db9ca1c150b7db34dda8acc09b6f0cc357a17` 进入 `main`；Issue `#32` 已按 `COMPLETED` 关闭，合并后主 CI 七 Job 与 Performance Evidence 四 Job 全绿且 Artifact 数均为 `0`。
+- [x] Issue `#32` 的稳定语义是“性能基线完成、预算未批准”；现有 Windows/macOS 样本只能用于同平台、同可比环境趋势，不能跨平台排名或直接生成 required budget。
+- [x] Issue `#50` 已冻结九路径、`sha256:af1c248c46d54741f9c77ab3621cd66ccd40e3fa50698d377c788fcb0b93205f` 和 ADR `0004`：每个平台至少五次独立可比 Run，采用 run-level 稳健汇总并从观察阶段逐步升级门禁。
+- [ ] 下一独立性能复测与数值批准 Issue 尚未创建；预算 CI 实施、性能优化和 Gate 5 产品迁移继续保持互斥。
 
 ### Gate 5：分域迁移（锁定）
 
 - 按基础能力、供应商与网络、会话与数据、插件与脚本、远程集成与安装分域迁移。
 - 每个可独立验收功能使用独立 Issue 和 PR，上游同步与功能重构永远分离。
 - `release_audit` 不是 `current` 时，任何 Gate 5 产品迁移 PR 都必须被门禁阻断。
+- 首个 Gate 5 Issue 还要求：预算复测与数值批准完成，预算 CI 以 `approved-observation` 进入 `main`，Windows/macOS 均至少成功执行一次。
 
 ### Gate 6：首个正式版本（锁定）
 
 - 完成功能矩阵、双平台、性能预算、差异批准、签名、安装、升级、回滚和自主更新源。
-- 首个目标版本为 `v1.2.41-inputcodex.1`。
+- 首个目标版本不硬编码旧上游版本；遵循 ADR `0002` 的 `v<获批上游版本>-inputcodex.<修订号>`，具体版本、签名和资产由独立 `type:release` Issue 冻结。
 
 ## 当前验证入口
 
 - 构建与当前 Gate 验证：`build.md`。
 - 排错与已知限制：`err.md`。
 - Release 审计基线解耦 ADR：`docs/adr/0003-release-snapshot-catalog-audit-decoupling.md`。
+- 性能预算 ADR：`docs/adr/0004-performance-budget-policy.md`。
+- Issue `#50` Discovery 计划：`docs/plans/2026-07-25-issue-50-performance-budget-discovery.md`。
+- Issue `#50` Session Plan：`docs/plans/sessions/2026-07-25-issue-50-performance-budget-discovery.md`。
+- Issue `#50` Runtime Workflow：`docs/workflows/2026-07-25-issue-50-performance-budget-discovery-runtime.md`。
+- Issue `#50` Discovery 报告：`docs/reports/issue-50-performance-budget-discovery.md`。
 - 已完成 Issue `#35` 实施计划：`docs/plans/2026-07-22-issue-35-release-catalog-decoupling.md`。
 - 已完成 Issue `#35` Session Plan：`docs/plans/sessions/2026-07-22-issue-35-release-catalog-decoupling.md`。
 - 已完成 Issue `#35` Runtime Workflow：`docs/workflows/2026-07-22-issue-35-release-catalog-decoupling-runtime.md`。
