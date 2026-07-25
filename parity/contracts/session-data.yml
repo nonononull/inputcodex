@@ -5,25 +5,38 @@ contracts:
     feature_id: feature.session-data.local-session-management
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: local-session-management-request
         required: false
-        description: '结构化请求；无参数时为空对象。'
+        description: '结构化请求；可包含合法 CODEX_SQLITE_HOME、候选数据库集合、会话标识与删除或撤销操作。'
+      - name: candidate_databases
+        data_type: database-path-list
+        required: false
+        description: '按平台发现的受支持 SQLite 路径集合；只允许现存、已批准的本地数据库。'
     outputs:
       - name: result
         data_type: local-session-management-result
-        description: '本地会话与项目管理的稳定结果或明确空结果。'
+        description: '返回跨库命中数、稳定状态与可选 grouped-undo-token；无会话时返回明确空结果。'
+      - name: undo_window
+        data_type: undo-window-state
+        description: '删除期间保持可撤销窗口；撤销成功后刷新并关闭已消费窗口。'
     side_effects:
       - database-read
       - database-write
       - filesystem-write
-    persistence: '数据库写入事务化，失败回滚且不删除原始数据。'
+    persistence: '删除先为每个来源数据库和关联文件建立恢复证据；撤销对全部数据库预检成功后才写回，任何失败都不得形成部分恢复。'
     errors:
       - code: LOCAL_SESSION_MANAGEMENT_FAILED
         kind: feature
         semantics: '本地会话与项目管理失败时返回稳定错误分类，不伪造空成功。'
+      - code: LOCAL_SESSION_UNDO_PREFLIGHT_FAILED
+        kind: validation
+        semantics: '任一数据库 schema、行或文件恢复预检失败时，全部数据库保持未恢复状态。'
+      - code: LOCAL_SESSION_UNDO_PATH_REJECTED
+        kind: policy
+        semantics: 'grouped-undo-token 引用的来源数据库不在 allowed-db-paths 时拒绝写回。'
     loading:
       states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
       request_identity: '每次本地会话与项目管理请求使用唯一递增标识。'
@@ -40,20 +53,20 @@ contracts:
       - duration_ms
       - outcome_class
     platforms:
-      shared_semantics: '扫描、删除和移动本地会话或项目数据，删除保留可恢复证据。'
+      shared_semantics: '支持合法 CODEX_SQLITE_HOME 和多数据库扫描；跨库删除生成 grouped-undo-token，撤销先全库预检、只写回 allowed-db-paths，并保持一致撤销窗口语义。'
       windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
       macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
       differences: []
     fixture_policy:
       mode: required
-      reason: '使用合成 fixture 固定结构字段、边界值与引用关系。'
+      reason: '使用合成 fixture 固定双数据库、全库预检、允许路径和撤销窗口语义，不包含真实会话或私人绝对路径。'
     fixture_refs:
       - fixture.feature.session-data.local-session-management.baseline
   - id: contract.feature.session-data.markdown-export.baseline
     feature_id: feature.session-data.markdown-export
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: markdown-export-request
@@ -100,7 +113,7 @@ contracts:
     feature_id: feature.session-data.provider-metadata-maintenance
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: provider-metadata-maintenance-request
@@ -148,7 +161,7 @@ contracts:
     feature_id: feature.session-data.token-usage-history
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: token-usage-history-request

@@ -7,4 +7,4 @@ fixtures:
     files:
       - path: baseline.yml
         format: yaml
-        description: '合成本地主题元数据，不包含真实图片。'
+        description: '合成本地主题与受限 companion data URL/布局参数，不包含真实图片、远程 URL 或用户路径。'

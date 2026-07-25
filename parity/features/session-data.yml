@@ -1,7 +1,7 @@
 schema_version: inputcodex.feature-catalog.v1
 release:
-  tag: v1.2.41
-  tag_commit: 3dafffcafb2566a1e8bce4b35671656d6adb3eda
+  tag: v1.2.42
+  tag_commit: 657cd33e009ad02515d30db6492cd4e669b06318
 domain: session-data
 features:
   - id: feature.session-data.local-session-management
@@ -12,6 +12,10 @@ features:
         symbol: codex_sqlite
       - path: upstream/CodexPlusPlus/crates/codex-plus-data/src/storage.rs
         symbol: storage
+      - path: upstream/CodexPlusPlus/apps/codex-plus-launcher/src/main.rs
+        symbol: LauncherDataService::storage_adapter
+      - path: upstream/CodexPlusPlus/crates/codex-plus-data/tests/storage_adapter.rs
+        symbol: grouped_delete_and_undo
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: delete_local_session
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
@@ -24,12 +28,13 @@ features:
     platforms:
       windows:
         applicability: supported
-        semantics: '扫描、删除和移动本地会话或项目数据，删除保留可恢复证据。'
+        semantics: '支持合法 CODEX_SQLITE_HOME，扫描多个候选数据库；跨库删除生成 grouped-undo-token，撤销先全库预检并只写回允许路径，删除期间保留撤销窗口。'
       macos:
         applicability: supported
-        semantics: '扫描、删除和移动本地会话或项目数据，删除保留可恢复证据。'
+        semantics: '支持合法 CODEX_SQLITE_HOME，扫描多个候选数据库；跨库删除生成 grouped-undo-token，撤销先全库预检并只写回允许路径，删除期间保留撤销窗口。'
     decision_refs:
       - issue:26
+      - issue:38
   - id: feature.session-data.markdown-export
     name: 'Markdown 导出'
     status: unassessed

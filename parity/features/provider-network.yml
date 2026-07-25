@@ -1,7 +1,7 @@
 schema_version: inputcodex.feature-catalog.v1
 release:
-  tag: v1.2.41
-  tag_commit: 3dafffcafb2566a1e8bce4b35671656d6adb3eda
+  tag: v1.2.42
+  tag_commit: 657cd33e009ad02515d30db6492cd4e669b06318
 domain: provider-network
 features:
   - id: feature.provider-network.aggregate-routing

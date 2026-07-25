@@ -1,7 +1,7 @@
 schema_version: inputcodex.feature-catalog.v1
 release:
-  tag: v1.2.41
-  tag_commit: 3dafffcafb2566a1e8bce4b35671656d6adb3eda
+  tag: v1.2.42
+  tag_commit: 657cd33e009ad02515d30db6492cd4e669b06318
 domain: foundation-platform
 features:
   - id: feature.foundation-platform.advertising
@@ -134,12 +134,13 @@ features:
     platforms:
       windows:
         applicability: supported
-        semantics: '在 Windows 与 macOS 上解析等价路径，不暴露私人绝对路径。'
+        semantics: '识别 OpenAI.Codex 与 OpenAI.ChatGPT-Desktop Windows 包身份并解析等价路径，不暴露私人绝对路径。'
       macos:
         applicability: supported
-        semantics: '在 Windows 与 macOS 上解析等价路径，不暴露私人绝对路径。'
+        semantics: '解析与 Windows 等价的应用和数据路径，不依赖 Windows 包身份且不暴露私人绝对路径。'
     decision_refs:
       - issue:26
+      - issue:38
   - id: feature.foundation-platform.settings-management
     name: '设置管理'
     status: unassessed

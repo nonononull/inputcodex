@@ -5,24 +5,31 @@ contracts:
     feature_id: feature.plugin-script.dream-skin-library
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: dream-skin-library-request
         required: false
-        description: '结构化请求；无参数时为空对象。'
+        description: '结构化请求；可包含本地主题元数据、图片引用与可选 companion 配置。'
+      - name: companion
+        data_type: optional-dream-skin-companion
+        required: false
+        description: 'data URL 仅允许 data:image/png;base64、data:image/jpeg;base64、data:image/webp;base64 或 data:image/gif;base64，并可声明宽度、侧边与偏移。'
     outputs:
       - name: result
         data_type: dream-skin-library-result
-        description: 'Dream Skin 本地主题库的稳定结果或明确空结果。'
+        description: '返回可持久化的本地主题与受限 companion 配置；不返回或执行注入式显示状态。'
     side_effects:
       - filesystem-read
       - filesystem-write
-    persistence: '文件写入原子化，失败不得留下半成品或凭据日志。'
+    persistence: '主题与受限 companion 配置原子写入本地库；失败不得留下半成品、外部 URL、凭据或注入脚本。'
     errors:
       - code: DREAM_SKIN_LIBRARY_FAILED
         kind: feature
         semantics: 'Dream Skin 本地主题库失败时返回稳定错误分类，不伪造空成功。'
+      - code: DREAM_SKIN_COMPANION_INVALID
+        kind: validation
+        semantics: 'companion 缺少 data URL、MIME/base64 不受支持、宽度或偏移非法时拒绝保存，不降级为可执行 HTML 或远程 URL。'
     loading:
       states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
       request_identity: '每次Dream Skin 本地主题库请求使用唯一递增标识。'
@@ -39,13 +46,13 @@ contracts:
       - duration_ms
       - outcome_class
     platforms:
-      shared_semantics: '审计本地图片导入、主题保存与选择，不预设注入式应用。'
+      shared_semantics: '两端等价保存本地图片、主题与受限 companion 配置；companion 显示仍依赖 renderer 注入，因此不在本合同执行。'
       windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
       macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
       differences: []
     fixture_policy:
       mode: required
-      reason: '使用合成 fixture 固定结构字段、边界值与引用关系。'
+      reason: '使用合成 data URL 和布局参数固定 companion 配置结构，不包含真实图片、远程 URL 或用户路径。'
     fixture_refs:
       - fixture.feature.plugin-script.dream-skin-library.baseline
   - id: contract.feature.plugin-script.dream-skin-marketplace.baseline
@@ -68,7 +75,7 @@ contracts:
     errors:
       - code: PARITY_EXCEPTION_PENDING
         kind: policy
-        semantics: '没有 owner 决定时明确失败，禁止静默启用。'
+        semantics: 'companion 显示仍依赖 renderer 注入；没有 owner 决定时明确失败，禁止静默启用。'
     loading:
       states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
       request_identity: '每次Dream Skin 市场请求使用唯一递增标识。'
@@ -130,7 +137,7 @@ contracts:
       - duration_ms
       - outcome_class
     platforms:
-      shared_semantics: '现有运行时依赖 renderer 注入，需决定无注入等价语义。'
+      shared_semantics: 'companion 显示仍依赖 renderer 注入、DOM 定位和变更监听，需决定 Rust/Iced 无注入等价语义。'
       windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
       macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
       differences: []
@@ -158,7 +165,7 @@ contracts:
     errors:
       - code: PARITY_EXCEPTION_PENDING
         kind: policy
-        semantics: '没有 owner 决定时明确失败，禁止静默启用。'
+        semantics: 'companion 显示仍依赖 renderer 注入；没有 owner 决定时明确失败，禁止静默启用。'
     loading:
       states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
       request_identity: '每次图片分析增强请求使用唯一递增标识。'
@@ -310,7 +317,7 @@ contracts:
       - duration_ms
       - outcome_class
     platforms:
-      shared_semantics: '粘贴修复、中文化、Goals 与覆盖层依赖 renderer 注入。'
+      shared_semantics: '粘贴修复、中文化、Goals、覆盖层与 companion 显示仍依赖 renderer 注入，不进入 Rust/Iced 运行面。'
       windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
       macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
       differences: []

@@ -10,17 +10,17 @@ use inputcodex_parity::{
     validate_source_index,
 };
 
-const RELEASE_TAG: &str = "v1.2.41";
-const RELEASE_COMMIT: &str = "3dafffcafb2566a1e8bce4b35671656d6adb3eda";
-const RELEASE_42_TAG: &str = "v1.2.42";
-const RELEASE_42_COMMIT: &str = "657cd33e009ad02515d30db6492cd4e669b06318";
-const RE_AUDIT_ISSUE_URL: &str = "https://github.com/nonononull/inputcodex/issues/34";
+const RELEASE_TAG: &str = "v1.2.42";
+const RELEASE_COMMIT: &str = "657cd33e009ad02515d30db6492cd4e669b06318";
+const PREVIOUS_RELEASE_TAG: &str = "v1.2.41";
+const PREVIOUS_RELEASE_COMMIT: &str = "3dafffcafb2566a1e8bce4b35671656d6adb3eda";
+const RE_AUDIT_ISSUE_URL: &str = "https://github.com/nonononull/inputcodex/issues/38";
 
 const VALID_SOURCE_INDEX: &str = r#"
 schema_version: inputcodex.source-index.v1
 release:
-  tag: v1.2.41
-  tag_commit: 3dafffcafb2566a1e8bce4b35671656d6adb3eda
+  tag: v1.2.42
+  tag_commit: 657cd33e009ad02515d30db6492cd4e669b06318
 sources:
   - id: tauri-command:load_overview
     kind: tauri-command
@@ -44,6 +44,21 @@ fn repository_root() -> PathBuf {
         .and_then(|path| path.parent())
         .expect("parity crate 应位于仓库 crates 目录")
         .to_path_buf()
+}
+
+fn read_repository_text(relative_path: &str) -> String {
+    fs::read_to_string(repository_root().join(relative_path))
+        .unwrap_or_else(|error| panic!("应能读取 {relative_path}: {error}"))
+}
+
+fn assert_repository_text_contains(relative_path: &str, expected: &[&str]) {
+    let text = read_repository_text(relative_path);
+    for value in expected {
+        assert!(
+            text.contains(value),
+            "{relative_path} 应包含目录重新审计证据：{value}"
+        );
+    }
 }
 
 struct FeatureRepositoryFixture {
@@ -130,6 +145,33 @@ impl FeatureRepositoryFixture {
         .expect("应能创建 source-lock 父目录");
         fs::write(source_lock_path, source_lock).expect("应能写入临时 source-lock");
     }
+
+    fn write_catalog_release(&self, tag: &str, commit: &str) {
+        let feature_directory = self.root.join("parity/features");
+        for entry in fs::read_dir(feature_directory).expect("应能枚举临时功能目录") {
+            let path = entry.expect("应能读取临时功能目录项").path();
+            if path.extension().and_then(|extension| extension.to_str()) != Some("yml") {
+                continue;
+            }
+
+            let text = fs::read_to_string(&path).expect("应能读取临时功能目录文件");
+            let updated = text
+                .replace(&format!("  tag: {RELEASE_TAG}"), &format!("  tag: {tag}"))
+                .replace(
+                    &format!("  tag: {PREVIOUS_RELEASE_TAG}"),
+                    &format!("  tag: {tag}"),
+                )
+                .replace(
+                    &format!("  tag_commit: {RELEASE_COMMIT}"),
+                    &format!("  tag_commit: {commit}"),
+                )
+                .replace(
+                    &format!("  tag_commit: {PREVIOUS_RELEASE_COMMIT}"),
+                    &format!("  tag_commit: {commit}"),
+                );
+            fs::write(path, updated).expect("应能更新临时功能目录 Release");
+        }
+    }
 }
 
 impl Drop for FeatureRepositoryFixture {
@@ -213,7 +255,7 @@ fn 重复_source_id_被拒绝() {
 
 #[test]
 fn source_index_release_必须与锁定版本一致() {
-    let invalid = VALID_SOURCE_INDEX.replace("tag: v1.2.41", "tag: v1.2.42");
+    let invalid = VALID_SOURCE_INDEX.replace("tag: v1.2.42", "tag: v1.2.41");
     let source_index = parse_source_index(&invalid).expect("结构仍应可解析");
 
     assert!(
@@ -276,11 +318,12 @@ fn release_audit_显式解耦快照与功能目录审计基线() {
         validate_feature_repository(fixture.root()).expect("current 审计基线必须通过功能目录验证");
     assert!(!summary.requires_reaudit());
 
+    fixture.write_catalog_release(PREVIOUS_RELEASE_TAG, PREVIOUS_RELEASE_COMMIT);
     fixture.write_source_lock(SourceLockState {
-        snapshot_tag: RELEASE_42_TAG,
-        snapshot_commit: RELEASE_42_COMMIT,
-        catalog_tag: RELEASE_TAG,
-        catalog_commit: RELEASE_COMMIT,
+        snapshot_tag: RELEASE_TAG,
+        snapshot_commit: RELEASE_COMMIT,
+        catalog_tag: PREVIOUS_RELEASE_TAG,
+        catalog_commit: PREVIOUS_RELEASE_COMMIT,
         status: "stale-re-audit-required",
         stale_reason: Some("上游 v1.2.42 已缓存，功能目录尚未完成复审"),
         re_audit_issue_ref: Some(RE_AUDIT_ISSUE_URL),
@@ -289,6 +332,7 @@ fn release_audit_显式解耦快照与功能目录审计基线() {
         .expect("显式 stale 审计基线必须允许同步与目录复审继续进行");
     assert!(summary.requires_reaudit());
 
+    fixture.write_catalog_release(RELEASE_TAG, RELEASE_COMMIT);
     fixture.write_source_lock(SourceLockState {
         snapshot_tag: RELEASE_TAG,
         snapshot_commit: RELEASE_COMMIT,
@@ -307,11 +351,12 @@ fn release_audit_显式解耦快照与功能目录审计基线() {
             .any(|issue| issue.code() == ValidationCode::ReleaseMismatch)
     );
 
+    fixture.write_catalog_release(PREVIOUS_RELEASE_TAG, PREVIOUS_RELEASE_COMMIT);
     fixture.write_source_lock(SourceLockState {
-        snapshot_tag: RELEASE_42_TAG,
-        snapshot_commit: RELEASE_42_COMMIT,
-        catalog_tag: RELEASE_TAG,
-        catalog_commit: RELEASE_COMMIT,
+        snapshot_tag: RELEASE_TAG,
+        snapshot_commit: RELEASE_COMMIT,
+        catalog_tag: PREVIOUS_RELEASE_TAG,
+        catalog_commit: PREVIOUS_RELEASE_COMMIT,
         status: "stale-re-audit-required",
         stale_reason: None,
         re_audit_issue_ref: Some(RE_AUDIT_ISSUE_URL),
@@ -326,10 +371,10 @@ fn release_audit_显式解耦快照与功能目录审计基线() {
     );
 
     fixture.write_source_lock(SourceLockState {
-        snapshot_tag: RELEASE_42_TAG,
-        snapshot_commit: RELEASE_42_COMMIT,
-        catalog_tag: RELEASE_TAG,
-        catalog_commit: RELEASE_COMMIT,
+        snapshot_tag: RELEASE_TAG,
+        snapshot_commit: RELEASE_COMMIT,
+        catalog_tag: PREVIOUS_RELEASE_TAG,
+        catalog_commit: PREVIOUS_RELEASE_COMMIT,
         status: "stale-re-audit-required",
         stale_reason: Some("上游 v1.2.42 已缓存，功能目录尚未完成复审"),
         re_audit_issue_ref: Some("https://github.com/nonononull/inputcodex/pull/34"),
@@ -341,6 +386,112 @@ fn release_audit_显式解耦快照与功能目录审计基线() {
             .issues()
             .iter()
             .any(|issue| issue.code() == ValidationCode::ReleaseMismatch)
+    );
+}
+
+#[test]
+fn 仓库v1_2_42目录重新审计恢复current() {
+    let summary = validate_repository(&repository_root()).expect("v1.2.42 功能目录应通过完整验证");
+    assert!(
+        !summary.requires_reaudit(),
+        "完成重新审计后不得继续标记 stale"
+    );
+
+    for relative_path in [
+        "parity/features/foundation-platform.yml",
+        "parity/features/plugin-script.yml",
+        "parity/features/provider-network.yml",
+        "parity/features/remote-install.yml",
+        "parity/features/session-data.yml",
+        "parity/features/source-index.yml",
+    ] {
+        assert_repository_text_contains(relative_path, &[RELEASE_TAG, RELEASE_COMMIT]);
+        assert!(
+            !read_repository_text(relative_path).contains(PREVIOUS_RELEASE_TAG),
+            "{relative_path} 不得保留 v1.2.41 Release 元数据"
+        );
+    }
+
+    for relative_path in [
+        "parity/contracts/foundation-platform.yml",
+        "parity/contracts/plugin-script.yml",
+        "parity/contracts/provider-network.yml",
+        "parity/contracts/remote-install.yml",
+        "parity/contracts/session-data.yml",
+        "parity/README.md",
+    ] {
+        assert_repository_text_contains(relative_path, &[RELEASE_TAG]);
+        assert!(
+            !read_repository_text(relative_path).contains(PREVIOUS_RELEASE_TAG),
+            "{relative_path} 不得保留 v1.2.41 合同描述"
+        );
+    }
+
+    assert_repository_text_contains(
+        "upstream/source-lock.json",
+        &[
+            r#""tag": "v1.2.42""#,
+            r#""commit": "657cd33e009ad02515d30db6492cd4e669b06318""#,
+            r#""status": "current""#,
+            r#""stale_reason": null"#,
+            r#""re_audit_issue_ref": null"#,
+        ],
+    );
+}
+
+#[test]
+fn 仓库v1_2_42受影响行为证据被固定() {
+    assert_repository_text_contains(
+        "parity/features/foundation-platform.yml",
+        &["OpenAI.ChatGPT-Desktop", "issue:38"],
+    );
+    assert_repository_text_contains(
+        "parity/contracts/foundation-platform.yml",
+        &["OpenAI.ChatGPT-Desktop"],
+    );
+
+    assert_repository_text_contains(
+        "parity/features/session-data.yml",
+        &["CODEX_SQLITE_HOME", "grouped-undo-token", "issue:38"],
+    );
+    assert_repository_text_contains(
+        "parity/contracts/session-data.yml",
+        &[
+            "CODEX_SQLITE_HOME",
+            "grouped-undo-token",
+            "LOCAL_SESSION_UNDO_PREFLIGHT_FAILED",
+            "LOCAL_SESSION_UNDO_PATH_REJECTED",
+        ],
+    );
+    assert_repository_text_contains(
+        "parity/fixtures/feature.session-data.local-session-management/baseline.yml",
+        &[
+            "database_count: 2",
+            "all_databases_checked: true",
+            "allowed_paths_only: true",
+            "undo_window_retained: true",
+        ],
+    );
+
+    assert_repository_text_contains(
+        "parity/features/plugin-script.yml",
+        &["companion", "renderer-inject.js", "issue:38"],
+    );
+    assert_repository_text_contains(
+        "parity/contracts/plugin-script.yml",
+        &[
+            "data:image/png;base64",
+            "DREAM_SKIN_COMPANION_INVALID",
+            "companion 显示仍依赖 renderer 注入",
+        ],
+    );
+    assert_repository_text_contains(
+        "parity/fixtures/feature.plugin-script.dream-skin-library/baseline.yml",
+        &[
+            "data_url: data:image/webp;base64,UklGRg==",
+            "width: 96",
+            "side: right",
+        ],
     );
 }
 
