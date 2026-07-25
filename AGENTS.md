@@ -60,6 +60,6 @@
 - Issue `#34` / PR `#40` 已将最新正式 Release `v1.2.42` 缓存为只读审计输入；PR `#40` 以 Squash 提交 `353391424db5514d022473ba97f601486a190869` 合并，合并后主干 CI Run `30147841226` 七 Job 全绿。
 - Issue `#41` / PR `#42` 已修复快照值与 CI 基线断言的错误耦合，并以 Squash 提交 `8aa1d4c96b0543e766b477b1b8e9652968b55f92` 合并；合并后主干 CI Run `30147071062` 七 Job 全绿。
 - Issue `#43` / PR `#44` 已完成 `v1.2.42` 缓存与 CI 合同状态收口；PR `#44` 以单父 Squash 提交 `fdb2f98c701800969fc478f95cd2539be598faaa` 合并，合并后主干 CI Run `30152001233` 成功。
-- 当前 `release_audit.status` 必须保持 `stale-re-audit-required`，直到独立 Issue `#38` 重新审计功能目录；不得把未复审目录伪造为 `current`，也不得以该状态为由混入产品迁移。
-- Issue `#38` 当前只允许八路径 Discovery/Plan 控制面，`scope_hash` 为 `sha256:c7c32b7d07f5f1b04acba9c465e1bc4bc5021228b18c438e85b40d7db5f56add`；二十六路径实施候选 `sha256:a384353e947bcb9d95b51ac5ccce49ef9558ca34580c130307a64b6d868819af` 必须获得项目所有者明确批准后才能修改 `parity/`、`upstream/source-lock.json` 或 Rust 测试。
+- Issue `#38` 的二十六路径与 `sha256:a384353e947bcb9d95b51ac5ccce49ef9558ca34580c130307a64b6d868819af` 已获得项目所有者批准；本地重新审计已将五域目录、合同、source-index 与 `release_audit` 对齐 `v1.2.42`，状态为 `current`，定向 `catalog_repository` 为 `12/12`。
+- Issue `#38` 当前只允许完成二十六路径提交、非 Draft PR、Review/CI 与对话闭环；最终 Squash Merge 仍需项目所有者对最终 PR Head 单独授权，不能把实施批准扩大为合并授权。
 - 独立性能基线 Issue `#32` 继续保持已立项待重新冻结状态；目录重新审计、性能基线、预算、优化和 Gate 5 产品迁移必须使用不同 Issue/PR，Gate 5 保持锁定。

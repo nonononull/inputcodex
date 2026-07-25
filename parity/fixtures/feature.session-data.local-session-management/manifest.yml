@@ -7,4 +7,4 @@ fixtures:
     files:
       - path: baseline.yml
         format: yaml
-        description: '合成本地会话分页记录，不含真实会话内容或私人路径。'
+        description: '合成 CODEX_SQLITE_HOME、双数据库删除、组合撤销、全库预检与撤销窗口，不含真实会话或私人绝对路径。'

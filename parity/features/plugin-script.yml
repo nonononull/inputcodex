@@ -1,7 +1,7 @@
 schema_version: inputcodex.feature-catalog.v1
 release:
-  tag: v1.2.41
-  tag_commit: 3dafffcafb2566a1e8bce4b35671656d6adb3eda
+  tag: v1.2.42
+  tag_commit: 657cd33e009ad02515d30db6492cd4e669b06318
 domain: plugin-script
 features:
   - id: feature.plugin-script.dream-skin-library
@@ -12,6 +12,10 @@ features:
         symbol: dream_skin
       - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/dream_skin_library.rs
         symbol: dream_skin_library
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src/dream-skin.ts
+        symbol: DreamSkinThemeConfig::companion
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src/dream-skin.test.ts
+        symbol: optional_image_companion
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: activate_dream_skin_theme
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
@@ -48,12 +52,13 @@ features:
     platforms:
       windows:
         applicability: supported
-        semantics: '审计本地图片导入、主题保存与选择，不预设注入式应用。'
+        semantics: '审计本地图片导入、主题保存与选择；允许保存受限 companion 图片配置，但不预设或执行注入式显示。'
       macos:
         applicability: supported
-        semantics: '审计本地图片导入、主题保存与选择，不预设注入式应用。'
+        semantics: '审计本地图片导入、主题保存与选择；允许保存受限 companion 图片配置，但不预设或执行注入式显示。'
     decision_refs:
       - issue:26
+      - issue:38
   - id: feature.plugin-script.dream-skin-marketplace
     name: 'Dream Skin 市场'
     status: exception-pending
@@ -84,6 +89,8 @@ features:
     evidence:
       - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/dream_skin_runtime.rs
         symbol: dream_skin_runtime
+      - path: upstream/CodexPlusPlus/assets/inject/renderer-inject.js
+        symbol: dreamSkinCompanionConfig
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: apply_dream_skin
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
@@ -101,12 +108,13 @@ features:
     platforms:
       windows:
         applicability: exception-pending
-        semantics: '现有运行时依赖 renderer 注入，需决定无注入等价语义。'
+        semantics: 'companion 显示仍依赖 renderer 注入和 DOM 定位，需另行决定 Rust/Iced 无注入等价语义。'
       macos:
         applicability: exception-pending
-        semantics: '现有运行时依赖 renderer 注入，需决定无注入等价语义。'
+        semantics: 'companion 显示仍依赖 renderer 注入和 DOM 定位，需另行决定 Rust/Iced 无注入等价语义。'
     decision_refs:
       - issue:26
+      - issue:38
       - rule:AGENTS-product-constraints
   - id: feature.plugin-script.image-analysis
     name: '图片分析增强'
@@ -184,6 +192,10 @@ features:
         symbol: bridge
       - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/cdp.rs
         symbol: cdp
+      - path: upstream/CodexPlusPlus/assets/inject/renderer-inject.js
+        symbol: codex-dream-skin-companion
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/tests/cdp_bridge.rs
+        symbol: dream_skin_companion
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: reset_image_overlay_settings
     entry_points:
@@ -194,12 +206,13 @@ features:
     platforms:
       windows:
         applicability: exception-pending
-        semantics: '粘贴修复、中文化、Goals 与覆盖层依赖 renderer 注入。'
+        semantics: '粘贴修复、中文化、Goals、覆盖层与 companion 显示依赖 renderer 注入，不进入 Rust/Iced 运行面。'
       macos:
         applicability: exception-pending
-        semantics: '粘贴修复、中文化、Goals 与覆盖层依赖 renderer 注入。'
+        semantics: '粘贴修复、中文化、Goals、覆盖层与 companion 显示依赖 renderer 注入，不进入 Rust/Iced 运行面。'
     decision_refs:
       - issue:26
+      - issue:38
       - rule:AGENTS-product-constraints
   - id: feature.plugin-script.script-marketplace
     name: '脚本市场'

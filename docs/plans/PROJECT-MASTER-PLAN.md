@@ -1,10 +1,10 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-38-v1.2.42-catalog-reaudit-planning-awaiting-owner-scope
-active_gate: Gate 4：Issue #38 正在执行八路径功能目录重新审计 Discovery/Plan checkpoint；release_audit 保持 stale-re-audit-required，二十六路径实施仍等待项目所有者批准
+active_task: issue-38-v1.2.42-catalog-reaudit-green-awaiting-pr-review-ci
+active_gate: Gate 4：Issue #38 二十六路径功能目录重新审计已完成本地 GREEN；release_audit 已恢复 current，正在等待非 Draft PR、Review/CI 与全部对话闭环
 last_verified_gate: Issue #43 / PR #44 已收口 v1.2.42 缓存与 CI 合同状态，Squash 提交为 fdb2f98c701800969fc478f95cd2539be598faaa，合并后 main CI Run 30152001233 成功
-next_legal_gate: 项目所有者批准 Issue #38 二十六路径与 scope_hash 后实施目录重新审计、Review/CI；Issue #32 性能基线保持独立待重新冻结，任何优化或 Gate 5 产品迁移仍需新的 Issue/PR
+next_legal_gate: 为 Issue #38 创建非 Draft PR并完成 Review/CI；最终 Squash Merge 仍需项目所有者对最终 Head 单独授权，Issue #32 性能基线保持独立待重新冻结，任何优化或 Gate 5 产品迁移仍需新的 Issue/PR
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/38
 performance_baseline_issue_ref: https://github.com/nonononull/inputcodex/issues/32
 release_audit_reaudit_issue_ref: https://github.com/nonononull/inputcodex/issues/38
@@ -21,7 +21,7 @@ transition_branch_ref: codex/issue-8-gate-2-transition
 active_plan_ref: docs/plans/2026-07-25-issue-38-v1.2.42-catalog-reaudit.md
 active_session_plan_ref: docs/plans/sessions/2026-07-25-issue-38-v1.2.42-catalog-reaudit.md
 active_runtime_workflow_ref: docs/workflows/2026-07-25-issue-38-v1.2.42-catalog-reaudit-runtime.md
-active_pr_ref: none-awaiting-owner-implementation-scope
+active_pr_ref: none-awaiting-pr-creation
 gate_3_closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/23
 gate_3_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/21
 gate_3_planning_pr_ref: https://github.com/nonononull/inputcodex/pull/18
@@ -35,7 +35,7 @@ gate_2_watch_report_ref: docs/reports/issue-14-gate-2-upstream-watch.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-decision_status: issue-38-planning-checkpoint-approved-implementation-scope-pending-gate-5-blocked
+decision_status: issue-38-implementation-approved-local-green-awaiting-pr-review-ci-gate-5-blocked
 
 ## 当前状态
 
@@ -43,7 +43,7 @@ decision_status: issue-38-planning-checkpoint-approved-implementation-scope-pend
 - PR `#7` 合并提交为 `c74b66422ba47f96bd3eb2b2385cdfb90541808e`，由 GitHub 生成有效签名；只有一个父提交 `b7404b0c63f2d2ba65474c077182c42a01cc9a64`，tree 为 `00f0f7fe0e408a1e6f218ee8e1be0d8442ed1e65`。
 - PR `#7` 的 Review 对话总数、未解决数与 Checks 数量均为 `0`；`0 Checks` 只表示当前尚未配置 CI。
 - `main-protection` Ruleset（ID `19395456`）仍为 `active`，只命中 `main`，禁止删除与 Force Push，要求解决全部 Review 对话，只允许 Squash Merge，单人阶段 required approvals 为 `0`。
-- 当前完整审计缓存为 `v1.2.42`，提交为 `657cd33e009ad02515d30db6492cd4e669b06318`，tree 为 `be938b3cfa7db919c6c17322f4617ab286f280d2`；功能目录审计基线保留为 `v1.2.41` / `3dafffcafb2566a1e8bce4b35671656d6adb3eda`，状态为 `stale-re-audit-required`。
+- 当前完整审计缓存与功能目录审计基线均为 `v1.2.42`，提交为 `657cd33e009ad02515d30db6492cd4e669b06318`，tree 为 `be938b3cfa7db919c6c17322f4617ab286f280d2`；`release_audit` 状态为 `current`。
 - Issue `#9` / PR `#11` 已完成 Gate 2 上游基线导入；PR `#11` 于 `2026-07-21T19:01:02Z` Squash Merge，合并提交为 `dde08b725eb2bf4add7fbcfa955f3eaf4eb1bbc6`，Issue `#9` 已关闭。
 - `upstream/CodexPlusPlus/` 当前包含 `277` 个审计文件，`upstream/source-lock.json` 记录 `24,196,123` 字节、manifest SHA-256 `330bee0284837c4c3a463d73ea79383cd3d01924b62f669def79276b60f21628` 和 `7` 份许可证/声明。
 - Issue `#12` / PR `#13` 已完成上游基线 closeout；PR `#13` 的 Squash Merge 提交为 `5e64015075ddf2adef4bf685f50977b47b7f72e7`，Issue `#12` 已关闭。
@@ -58,7 +58,7 @@ decision_status: issue-38-planning-checkpoint-approved-implementation-scope-pend
 - Issue `#34` / PR `#40` 已完成 `v1.2.42` 纯缓存同步，Squash 提交为 `353391424db5514d022473ba97f601486a190869`；PR 基线更新不会自动生成新的 `pull_request` Run，故经所有者授权关闭并立即重开且未改 Head、文件或提交，Run `30147559602` 全绿后才合并，合并后 main Run `30147841226` 七 Job 全绿。
 - Issue `#41` / PR `#42` 已修复固定 Release 与 stale 语义的错误耦合，Squash 提交为 `8aa1d4c96b0543e766b477b1b8e9652968b55f92`；合并后 main Run `30147071062` 七 Job 全绿，Issue 已关闭。
 - Issue `#43` / PR `#44` 已完成 `v1.2.42` 缓存与 CI 合同状态收口，PR `#44` 以单父 Squash 提交 `fdb2f98c701800969fc478f95cd2539be598faaa` 合并；合并后 main Run `30152001233` 成功。
-- Issue `#38` 当前处于八路径 Discovery/Plan checkpoint；规划哈希为 `sha256:c7c32b7d07f5f1b04acba9c465e1bc4bc5021228b18c438e85b40d7db5f56add`，二十六路径实施候选哈希为 `sha256:a384353e947bcb9d95b51ac5ccce49ef9558ca34580c130307a64b6d868819af`，后者尚未获得项目所有者明确批准。
+- Issue `#38` 的八路径 Discovery/Plan checkpoint 已由提交 `1ec07928ea100fb9dfcc4948688154eb2e020198` 固化；项目所有者已批准二十六路径与 `sha256:a384353e947bcb9d95b51ac5ccce49ef9558ca34580c130307a64b6d868819af`，RED 提交为 `4206ef66076a4c9e9a19ce014a20f78cb3b73163`，本地 GREEN 已得到 `catalog_repository 12/12`、`release_audit=current` 与 Repository Policy `0` 违规，当前等待 PR、Review/CI。
 - Issue `#8` 的过渡交付为 PR `#10`；该 PR 只包含文档与验证控制面，并按项目所有者明确授权执行 Squash Merge。
 - AGOS 仍是可选外部辅助；本仓库可用原生控制面时不运行它，不在本任务中修改或优化它。
 
@@ -132,7 +132,7 @@ decision_status: issue-38-planning-checkpoint-approved-implementation-scope-pend
 - [x] Issue `#35` / PR `#36` 已将完整快照与功能目录审计基线解耦。
 - [x] Issue `#34` / PR `#40` 已缓存 `v1.2.42` 并保持显式 `stale-re-audit-required`；Issue `#41` / PR `#42` 已使该合法状态通过 CI 合同验证。
 - [x] Issue `#43` / PR `#44` 已将缓存、CI 合同与下一合法工作状态收口到 `main`。
-- [ ] Issue `#38` 已完成发现并正在固化八路径规划 checkpoint；项目所有者批准二十六路径与对应 `scope_hash` 后，才可实施目录重新审计并恢复 `release_audit` 的有效状态。
+- [ ] Issue `#38` 已完成八路径规划 checkpoint、二十六路径批准、RED 与本地 GREEN；当前等待非 Draft PR、Review/CI 和全部对话闭环，最终 Squash Merge 必须取得项目所有者对最终 Head 的单独授权。
 - [ ] Issue `#32` 独立性能基线已立项，开始前必须重新冻结范围哈希、测量对象、可比环境与项目所有者批准；它不得顺带优化产品或推进 Gate 5。
 
 ### Gate 5：分域迁移（锁定）
@@ -203,7 +203,7 @@ decision_status: issue-38-planning-checkpoint-approved-implementation-scope-pend
 - 上游最新正式 Release 或已核验的 `v1.2.42` / `657cd33e009ad02515d30db6492cd4e669b06318` 事实发生变化。
 - 需要修改 `upstream/CodexPlusPlus/` 或 `source-lock.json` 的来源快照字段，但没有新的独立 upstream-sync Issue/PR 与项目所有者批准；Issue `#38` 只能在批准的目录复审范围内修改 `source-lock.release_audit`。
 - `release_audit` 为 stale 时修改 `benchmarks/`、`apps/`、产品 crate、`Cargo.toml` 或 `Cargo.lock`，或在同一 PR 同时更新实际 audit 与受阻产品路径。
-- 在项目所有者批准 Issue `#38` 二十六路径与 `sha256:a384353e947bcb9d95b51ac5ccce49ef9558ca34580c130307a64b6d868819af` 前修改 `parity/`、`upstream/source-lock.json`、Rust 测试或创建实现 PR。
+- Issue `#38` 出现二十六路径或 `sha256:a384353e947bcb9d95b51ac5ccce49ef9558ca34580c130307a64b6d868819af` 之外的新增、删除或重命名路径，或在最终 Head 的 Review、CI 和全部对话闭环前请求 Squash Merge。
 - 在独立性能基线 Issue 获得范围与项目所有者批准前创建 `benchmarks/`、测量脚本、原始样本、性能预算候选，或修改 Cargo/Rust、测试、CI、upstream、Ruleset、发布资产或 AGOS。
 - 在独立性能基线 Issue 中创建性能优化、产品迁移、`parity-exception`、运行上游/半成品或填写绝对性能预算，但没有新的独立 Issue 与项目所有者批准。
 - Fresh 验证失败、Ruleset 变化、Review 对话未闭环或出现未批准的一致性差异。

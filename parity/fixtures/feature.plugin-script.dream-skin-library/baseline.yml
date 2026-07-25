@@ -4,3 +4,9 @@ theme:
   display_name: Synthetic Theme
   image_ref: synthetic-image.png
   accent: synthetic-accent-336699
+  companion:
+    data_url: data:image/webp;base64,UklGRg==
+    width: 96
+    side: right
+    offset_x: 8
+    offset_y: -4

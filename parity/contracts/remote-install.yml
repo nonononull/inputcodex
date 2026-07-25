@@ -5,7 +5,7 @@ contracts:
     feature_id: feature.remote-install.application-update
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: application-update-request
@@ -53,7 +53,7 @@ contracts:
     feature_id: feature.remote-install.entrypoint-installation
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: entrypoint-installation-request
@@ -99,7 +99,7 @@ contracts:
     feature_id: feature.remote-install.upstream-worktree
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: upstream-worktree-request
@@ -145,7 +145,7 @@ contracts:
     feature_id: feature.remote-install.zed-remote
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: zed-remote-request

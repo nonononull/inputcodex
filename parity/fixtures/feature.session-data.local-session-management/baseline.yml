@@ -1,6 +1,23 @@
 schema_version: inputcodex.synthetic.sessions.v1
+sqlite_home:
+  source: CODEX_SQLITE_HOME
+  path: synthetic-codex-home
+databases:
+  - id: synthetic-db-legacy
+    path: synthetic-codex-home/sqlite/state_5.sqlite
+  - id: synthetic-db-current
+    path: synthetic-codex-home/state_5.sqlite
 sessions:
   - id: synthetic-session-001
     project: synthetic-project
     updated_at: 2026-01-01T00:00:00Z
     token_total: 42
+delete_result:
+  database_count: 2
+  grouped_undo_token:
+    - synthetic-redacted-undo-legacy
+    - synthetic-redacted-undo-current
+  preflight:
+    all_databases_checked: true
+    allowed_paths_only: true
+  undo_window_retained: true

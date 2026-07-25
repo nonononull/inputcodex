@@ -1,15 +1,16 @@
 # Issue #38：`v1.2.42` 功能目录重新审计发现报告
 
 ```yaml
-report_status: planning-checkpoint-awaiting-owner-implementation-scope
+report_status: implementation-green-awaiting-pr-review-ci
 issue_ref: https://github.com/nonononull/inputcodex/issues/38
 baseline_ref: fdb2f98c701800969fc478f95cd2539be598faaa
 branch_ref: codex/issue-38-v1.2.42-catalog-reaudit
 local_discovery_time: 2026-07-25 18:35:54 +08:00
 planning_scope_hash: sha256:c7c32b7d07f5f1b04acba9c465e1bc4bc5021228b18c438e85b40d7db5f56add
-candidate_implementation_scope_hash: sha256:a384353e947bcb9d95b51ac5ccce49ef9558ca34580c130307a64b6d868819af
-implementation_approval_status: pending-owner-decision
-pr_ref: pending-after-owner-scope-approval
+implementation_scope_hash: sha256:a384353e947bcb9d95b51ac5ccce49ef9558ca34580c130307a64b6d868819af
+implementation_approval_status: approved
+approval_ref: https://github.com/nonononull/inputcodex/issues/38#issuecomment-5078279459
+pr_ref: pending-creation
 merge_ref: pending-separate-owner-authorization
 ```
 
@@ -17,7 +18,7 @@ merge_ref: pending-separate-owner-authorization
 
 Issue `#38` 的硬前置已全部解除。正式 Release `v1.2.42` 相对当前功能目录基线 `v1.2.41` 的真实差异可收敛为四个行为复审域；其余变化属于版本元数据、上游 UI 布局或非功能图片。
 
-推荐并已形成的实施方案是“**全目录 Release 对齐 + 受影响行为定向复审**”。当前只提交八路径规划控制面，`parity/`、`upstream/source-lock.json` 和 Rust 测试尚未修改；项目所有者批准二十六路径和对应哈希前必须停止。
+“**全目录 Release 对齐 + 受影响行为定向复审**”已经按获批二十六路径实施：五域目录、五域合同和 source-index 对齐 `v1.2.42`，两组 fixture 固定受影响语义，`release_audit` 已恢复 `current`。产品运行面、缓存文件、Cargo、CI Workflow、性能、UI 与 AGOS 保持零差异；当前等待提交、PR、Review/CI。
 
 ## 输入与前置证据
 
@@ -30,7 +31,7 @@ Issue `#38` 的硬前置已全部解除。正式 Release `v1.2.42` 相对当前�
 | 正式 Release | `v1.2.42 @ 657cd33e009ad02515d30db6492cd4e669b06318`。 |
 | Git tree | `be938b3cfa7db919c6c17322f4617ab286f280d2`。 |
 | Release 差异 | 17 个提交、18 个修改文件、0 个新增、0 个删除。 |
-| 当前目录基线 | `v1.2.41 @ 3dafffcafb2566a1e8bce4b35671656d6adb3eda`，状态 `stale-re-audit-required`。 |
+| 当前目录基线 | `v1.2.42 @ 657cd33e009ad02515d30db6492cd4e669b06318`，状态 `current`。 |
 
 发现使用仓库锁定报告、只读缓存、GitHub Compare API 和现有目录/合同/fixture 完成；没有运行上游 Tauri、React、JavaScript 或 Rust 产品代码。GitNexus 当前没有已索引仓库，项目根也不存在 `.codegraph`，因此没有擅自初始化代码图谱。
 
@@ -103,18 +104,27 @@ README.md
 scope_hash: sha256:c7c32b7d07f5f1b04acba9c465e1bc4bc5021228b18c438e85b40d7db5f56add
 ```
 
-## 待批准实施范围
+## 已批准实施范围
 
 候选实施范围共 26 条：八条控制面路径、`catalog_repository.rs`、Parity README、五份 domain contract、五份 feature 目录、source-index、Dream Skin library 与 local-session-management 各两份 fixture，以及 `upstream/source-lock.json`。
 
 ```text
-candidate_implementation_scope_hash: sha256:a384353e947bcb9d95b51ac5ccce49ef9558ca34580c130307a64b6d868819af
-approval_status: pending-owner-decision
+scope_hash: sha256:a384353e947bcb9d95b51ac5ccce49ef9558ca34580c130307a64b6d868819af
+approval_status: approved
+approval_ref: user-message:批准-Issue-38-二十六路径实施范围与-scope_hash-2026-07-25
 ```
 
-完整路径清单位于实现计划与 Runtime Workflow。实施批准前，以上 18 条新增目标路径保持只读。
+完整路径清单位于实现计划与 Runtime Workflow；本次实际变更并集必须严格等于该二十六路径集合。
 
-## 未来验收标准
+## 实施与验证证据
+
+- RED：提交 `4206ef66076a4c9e9a19ce014a20f78cb3b73163` 中两条真实仓库测试均失败；失败原因为目录仍 stale、平台路径缺少 `OpenAI.ChatGPT-Desktop`。
+- GREEN：`cargo test -p inputcodex-parity --test catalog_repository --offline -- --nocapture` 输出 `12 passed; 0 failed`。
+- 目录计数保持 `133` 条来源、`36` 个 feature、`36` 份合同、`11` 个 fixture、`0` 个覆盖缺口和 `10` 个 `exception-pending`。
+- Release Audit 输出 `status=current`、`requires_reaudit=false`；Repository Policy 输出 `violation_count=0`。
+- 本地仅运行定向轻量 Rust；完整 Workspace 与 Windows/macOS/Linux 验证留给标准 GitHub-hosted runners。
+
+## 剩余验收标准
 
 1. 五域 feature、五域 contract 与 source-index 全部对齐 `v1.2.42`，不存在混合 Release。
 2. 四个受影响行为域的输入、输出、副作用、错误语义和 Windows/macOS 结论可逐项复核。
@@ -123,10 +133,10 @@ approval_status: pending-owner-decision
 5. `catalog_repository`、Release Audit、仓库政策、格式和空白门禁通过；`release_audit.status = current` 且 stale 字段合法清空。
 6. 最终 PR Head 的 GitHub-hosted CI 全绿、全部 Review 对话解决，并取得项目所有者单独 Squash Merge 授权。
 
-## 当前决策请求
+## 当前交付状态
 
-下一步只请求项目所有者批准二十六路径实施范围与哈希；不请求自动合并或最终 Squash Merge：
+二十六路径实施授权已经满足。下一步创建关联 Issue `#38` 的非 Draft PR，完成最终 Head Review、GitHub-hosted CI 和全部 Review 对话闭环。
 
 ```text
-批准 Issue #38 二十六路径实施范围与 scope_hash sha256:a384353e947bcb9d95b51ac5ccce49ef9558ca34580c130307a64b6d868819af，允许修改、轻量验证、提交、推送、PR、Review/CI。
+最终 Squash Merge 尚未授权；必须在 PR Review/CI 全部通过后由项目所有者单独批准。
 ```

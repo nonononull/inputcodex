@@ -50,7 +50,7 @@ contracts:
     feature_id: feature.foundation-platform.application-lifecycle
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: application-lifecycle-request
@@ -95,7 +95,7 @@ contracts:
     feature_id: feature.foundation-platform.application-overview
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: application-overview-request
@@ -141,7 +141,7 @@ contracts:
     feature_id: feature.foundation-platform.diagnostics
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: diagnostics-request
@@ -188,7 +188,7 @@ contracts:
     feature_id: feature.foundation-platform.environment-conflicts
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: environment-conflicts-request
@@ -234,16 +234,16 @@ contracts:
     feature_id: feature.foundation-platform.platform-paths
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: platform-paths-request
         required: false
-        description: '结构化请求；无参数时为空对象。'
+        description: '结构化请求；Windows 检测覆盖 OpenAI.Codex 与 OpenAI.ChatGPT-Desktop 包身份，无参数时为空对象。'
     outputs:
       - name: result
         data_type: platform-paths-result
-        description: '平台路径解析的稳定结果或明确空结果。'
+        description: '返回平台等价的应用和数据路径；未发现受支持安装时返回明确空结果。'
     side_effects:
       - filesystem-read
     persistence: '不持久化私人路径、凭据或真实会话内容。'
@@ -267,7 +267,7 @@ contracts:
       - duration_ms
       - outcome_class
     platforms:
-      shared_semantics: '在 Windows 与 macOS 上解析等价路径，不暴露私人绝对路径。'
+      shared_semantics: 'Windows 识别 OpenAI.Codex 与 OpenAI.ChatGPT-Desktop 包身份，macOS 使用原生位置；两端返回等价路径语义且不持久化私人绝对路径。'
       windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
       macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
       differences: []
@@ -279,7 +279,7 @@ contracts:
     feature_id: feature.foundation-platform.settings-management
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: settings-management-request
@@ -326,7 +326,7 @@ contracts:
     feature_id: feature.foundation-platform.version-and-startup
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: version-and-startup-request
@@ -371,7 +371,7 @@ contracts:
     feature_id: feature.foundation-platform.watcher
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.41 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: watcher-request
