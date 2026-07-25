@@ -60,6 +60,7 @@
 - Issue `#34` / PR `#40` 已将最新正式 Release `v1.2.42` 缓存为只读审计输入；PR `#40` 以 Squash 提交 `353391424db5514d022473ba97f601486a190869` 合并，合并后主干 CI Run `30147841226` 七 Job 全绿。
 - Issue `#41` / PR `#42` 已修复快照值与 CI 基线断言的错误耦合，并以 Squash 提交 `8aa1d4c96b0543e766b477b1b8e9652968b55f92` 合并；合并后主干 CI Run `30147071062` 七 Job 全绿。
 - Issue `#43` / PR `#44` 已完成 `v1.2.42` 缓存与 CI 合同状态收口；PR `#44` 以单父 Squash 提交 `fdb2f98c701800969fc478f95cd2539be598faaa` 合并，合并后主干 CI Run `30152001233` 成功。
-- Issue `#38` 的二十六路径与 `sha256:a384353e947bcb9d95b51ac5ccce49ef9558ca34580c130307a64b6d868819af` 已获得项目所有者批准；本地重新审计已将五域目录、合同、source-index 与 `release_audit` 对齐 `v1.2.42`，状态为 `current`，定向 `catalog_repository` 为 `12/12`。
-- Issue `#38` 当前只允许完成二十六路径提交、非 Draft PR、Review/CI 与对话闭环；最终 Squash Merge 仍需项目所有者对最终 PR Head 单独授权，不能把实施批准扩大为合并授权。
-- 独立性能基线 Issue `#32` 继续保持已立项待重新冻结状态；目录重新审计、性能基线、预算、优化和 Gate 5 产品迁移必须使用不同 Issue/PR，Gate 5 保持锁定。
+- Issue `#38` / PR `#45` 已完成 `v1.2.42` 二十六路径功能目录重新审计；最终 Head `d3df8759bdb9c6378497a3a0c8f409c3968f4d4f` 以单父 Squash 提交 `5fd337fb7ceb9b0ef53e2e694cc5ddd81ea0a98c` 进入 `main`，tree 为 `5273d0e42483bbb5c629a2243fc24f0a892b3db3`，GitHub 签名 `valid`，Issue `#38` 已按 `COMPLETED` 关闭。
+- PR `#45` 的最终 Head CI Run `30157623932` 与合并后 `main` CI Run `30158058627` Attempt `3` 均为七 Job 全绿且 Artifact 数为 `0`；Attempt `1/2` 的零 Job 失败已由 Issue `#46` 证明为 GitHub Actions 外部事故，Issue `#46` 已按 `COMPLETED` 关闭。
+- Issue `#47` 被指定为上述稳定事实的微型五路径 Closeout；其 GitHub Issue/PR 保存自身动态 Review、CI 与合并证据，不得再为本次状态回写创建二次 Closeout，也不得借机修改产品、缓存、CI 或历史任务快照。
+- 下一项可启动工作是独立性能基线 Issue `#32` 的范围冻结；测量对象、可比环境、范围哈希和项目所有者批准完成前，不得创建性能实现分支、测量、预算、优化或 Gate 5 产品迁移，Gate 5 保持锁定。
