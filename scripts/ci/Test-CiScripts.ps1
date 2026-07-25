@@ -527,6 +527,11 @@ Invoke-ContractTest -Name '性能基线 Workflow 固定治理与测量合同' -B
     Assert-True -Condition (Test-Path -LiteralPath $performanceTestScript -PathType Leaf) -Message '性能基线验证脚本必须存在'
 
     $workflow = Get-Content -LiteralPath $performanceWorkflowPath -Raw -Encoding utf8
+    $manualModeInputPattern = '(?ms)^  workflow_dispatch:\r?\n    inputs:\r?\n      mode:\r?\n        description: .+\r?\n        required: true\r?\n        default: evidence\r?\n        type: choice\r?\n        options:\r?\n          - evidence\r?\n          - measure\r?$'
+    Assert-True -Condition ($workflow -match $manualModeInputPattern) -Message '性能基线手工触发必须声明默认 evidence 的受约束 mode 输入'
+    Assert-True -Condition ($workflow.Contains('$eventName = ''${{ github.event_name }}''')) -Message '性能基线必须显式区分手工 dispatch 与自动事件'
+    Assert-True -Condition ($workflow.Contains('$manualMode = ''${{ github.event.inputs.mode }}''')) -Message '性能基线必须读取手工 mode 输入'
+    Assert-True -Condition ($workflow.Contains('if ($manualMode -eq ''measure'') {')) -Message '性能基线只有显式 measure 输入才能进入测量路径'
     Assert-True -Condition ($workflow -match '(?m)^permissions:\r?\n  contents: read\r?$') -Message '性能基线 Workflow 只能读取仓库内容'
     Assert-True -Condition ($workflow -match '(?m)^concurrency:\r?$') -Message '性能基线 Workflow 必须限制重复运行'
     Assert-True -Condition ($workflow -match '(?m)^  cancel-in-progress: true\r?$') -Message '性能基线 Workflow 必须取消同组旧运行'
