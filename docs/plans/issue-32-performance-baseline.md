@@ -113,16 +113,16 @@
 - 创建：`benchmarks/results/issue-32/manifest.json`
 - 创建：`docs/reports/issue-32-performance-baseline.md`
 
-- [ ] 普通提交并推送测量实现，创建非 Draft PR 触发初次 hosted 测量。
-- [ ] 下载 Windows/macOS 成功 Artifact，核对 run、Head、平台、配置哈希和文件哈希。
-- [ ] 生成组合 manifest；原始样本、失败尝试与异常值标记全部保留。
-- [ ] 删除已入库的临时成功 Artifact，再普通提交结果与报告。
-- [ ] 运行最终证据模式验证，确认结果文件与当前测量实现哈希一致。
+- [x] 普通提交并推送测量实现，创建非 Draft PR 触发初次 hosted 测量。
+- [x] 下载 Windows/macOS 成功 Artifact，核对 run、Head、平台、配置哈希和文件哈希。
+- [x] 生成组合 manifest；原始样本、失败尝试与异常值标记全部保留。
+- [x] 删除已入库的临时成功 Artifact，再普通提交结果与报告。
+- [x] 运行最终证据模式验证，确认结果文件与当前测量实现哈希一致。
 
 ## Task 6：验证、Review 与 PR 收口
 
-- [ ] 本地执行 `build.md` 的 Issue #32 轻量验证和 `git diff --check`。
-- [ ] 核对实际差异严格等于批准 28 路径，范围外零差异。
+- [x] 本地执行 `build.md` 的 Issue #32 轻量验证和 `git diff --check`。
+- [x] 核对实际差异严格等于批准 28 路径，范围外零差异。
 - [ ] 推送最终 Head，等待主 CI 与性能 Workflow 全绿。
 - [ ] 检查 Review 对话；逐条记录根因、处理与验证证据。
 - [ ] 在 Issue/PR 回写 Head、CI、Artifact、样本和 Review 证据。

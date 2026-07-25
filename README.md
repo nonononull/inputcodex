@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 初始功能目录、`v1.2.42` 缓存与目录重新审计。Issue `#38` / PR `#45` 已将五域功能目录、合同、source-index 与 `release_audit` 对齐最新正式 Release `v1.2.42`；Squash 提交为 `5fd337fb7ceb9b0ef53e2e694cc5ddd81ea0a98c`，PR CI 与 GitHub Actions 外部事故恢复后的主干 CI 均七 Job 全绿且 Artifact 数为 `0`。Issue `#32` 已完成 Discovery、28 路径范围冻结并获实施授权，当前只建立隔离性能基线和预算就绪性结论；数值预算、优化和 Gate 5 产品迁移继续锁定为独立后续 Issue。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 初始功能目录、`v1.2.42` 缓存与目录重新审计。Issue `#38` / PR `#45` 已将五域功能目录、合同、source-index 与 `release_audit` 对齐最新正式 Release `v1.2.42`；Squash 提交为 `5fd337fb7ceb9b0ef53e2e694cc5ddd81ea0a98c`，PR CI 与 GitHub Actions 外部事故恢复后的主干 CI 均七 Job 全绿且 Artifact 数为 `0`。Issue `#32` / PR `#49` 已完成隔离性能测量实现并从 Performance Run `30169262247` 导入 Windows/macOS 原始样本；当前只允许完成最终 Head 的 Evidence、Review/CI 与所有者合并决策，数值预算、优化和 Gate 5 产品迁移继续锁定为独立后续 Issue。
 
 ## 项目目标
 
@@ -56,7 +56,7 @@
 
 - 不把已导入的上游审计快照接入产品构建或运行面，也不在非 upstream-sync Issue 中修改快照。
 - 不导入半成品参考仓库源码。
-- Issue `#32` 只允许在已批准 28 路径内创建隔离 `benchmarks/`、测量脚本、专用 Workflow 和原始样本；禁止数值预算、性能优化、发布资产或上游快照修改。
+- Issue `#32` 只允许在已批准 28 路径内维护隔离 `benchmarks/`、测量脚本、专用 Workflow、原始样本与预算就绪性报告；两平台数据禁止跨平台排名，禁止数值预算、性能优化、发布资产或上游快照修改。
 - 不改写 Issue `#38` 的历史 Plan、Session Plan、Runtime Workflow 或来源提交；其阶段性叙述与最终 GitHub 事实的差异只通过 Issue `#47` Closeout 报告和长期控制面更正收口。
 - 不执行功能迁移、安装包构建、发布或未经项目所有者授权的 PR 合并。
 - 不让上游 Tauri/React UI、现有注入脚本和远程推荐列表进入最终运行面。
@@ -77,9 +77,9 @@
 
 ## 下一步
 
-1. 在 `codex/issue-32-performance-baseline` 中完成 Session Plan、Runtime Workflow、隔离测量工程和 opt-in 首次 view 探针。
-2. 由公开 GitHub-hosted Windows/macOS runner 采集并核验真实原始样本，创建关联 Issue `#32` 的非 Draft PR，完成 Review/CI 与全部对话闭环。
-3. 最终 Squash Merge 必须由项目所有者单独授权；性能预算、性能优化和 Gate 5 产品迁移继续使用不同 Issue/PR。
+1. 在 PR `#49` 最终 Head 上运行 Evidence 模式与主 CI，确认全部 Job 成功、成功 Artifact 数为 `0`，并完成全部 Review 对话的根因闭环。
+2. 将最终 Head、CI、Artifact、样本哈希和 Review 证据回写 Issue `#32` / PR `#49`，停在项目所有者单独授权 Squash Merge 前。
+3. 性能预算、性能优化和 Gate 5 产品迁移继续使用不同 Issue/PR；本基线报告不得被解释为预算批准或跨平台排名。
 
 ## 项目文档
 
@@ -99,6 +99,10 @@
 - Issue `#38` Runtime Workflow：`docs/workflows/2026-07-25-issue-38-v1.2.42-catalog-reaudit-runtime.md`
 - Issue `#38` 发现报告：`docs/reports/issue-38-v1.2.42-catalog-reaudit-discovery.md`
 - Issue `#47` 重新审计 Closeout 报告：`docs/reports/issue-47-v1.2.42-catalog-reaudit-closeout.md`
+- Issue `#32` 性能基线实施计划：`docs/plans/issue-32-performance-baseline.md`
+- Issue `#32` Session Plan：`docs/plans/sessions/issue-32-performance-baseline.md`
+- Issue `#32` Runtime Workflow：`docs/workflows/issue-32-performance-baseline-runtime.md`
+- Issue `#32` 性能基线报告：`docs/reports/issue-32-performance-baseline.md`
 - 本次筹备计划：`docs/plans/2026-07-21-bootstrap.md`
 - 筹备会话计划：`docs/plans/sessions/2026-07-21-inputcodex-bootstrap.md`
 - 筹备运行工作流：`docs/workflows/2026-07-21-inputcodex-bootstrap-runtime.md`

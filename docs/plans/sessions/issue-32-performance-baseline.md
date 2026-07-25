@@ -109,3 +109,15 @@ scripts/performance/Test-InputcodexBaseline.ps1
 - GitHub-hosted GUI 环境无法产生可解释样本，结果缺少环境指纹/输入哈希，或需要删除异常值才能形成结论。
 - 本地或 CI 测试失败且根因未闭环、Review 对话未解决、Artifact 未核验入库。
 - 最终 PR Head 尚未取得项目所有者单独 Squash Merge 授权。
+
+## 八、实施与测量证据
+
+- 非 Draft PR：`https://github.com/nonononull/inputcodex/pull/49`，自动合并保持关闭。
+- 有效测量提交：`1974577837de97a74d7b980e8106d5e2f4a4de2e`；tree：`0efa97728a3e8d0e8bf11a8bed75b4886cdce91a`。
+- Performance Run：`30169262247`，Attempt `1`；`contract`、`windows`、`macos`、`required` 四 Job 全部成功。
+- 同一测量提交的主 CI Run：`30169262250`，七 Job 全部成功。
+- Windows 与 macOS 临时成功 Artifact 分别为 `8622503841`、`8622478720`；下载后按文件 SHA-256 与 manifest 核验，固定结果入库后已删除，Run 当前 Artifact 数为 `0`。
+- 配置、实现、输入哈希分别为 `sha256:b9ed601016ececc735634aeb143965c78fbfc61819d37c7f9e584bc971642b53`、`sha256:3d69735d1d02b3cd09316e892e104a55c9e3b605035ef155861cbc3c12705d21`、`sha256:c5b507d219ff49975c13805a2a6e036ade6c61a33a184bfffb74219ce01784b5`。
+- `windows.json` 与 `macos.json` SHA-256 分别为 `652d913ac29453acd4ce0a00cd5a7b3ab39d47f88e4ec0146d30f72e56df4952`、`068165593728b81a5c8c089b09bbd6bb6c931d63d3a4f0d791d3b02e3d10a22e`。
+- 样本只允许在同平台、同环境指纹下形成趋势输入；跨平台排名和预算数值均不属于本 Session 批准范围。
+- 结果入库后的本地 Fresh 门：隔离基准测试 `7/7`、展示层定向测试 `3/3`、Evidence `violation_count=0`、CI 合同 `33/33`、Repository Policy `violation_count=0`、PowerShell/YAML/JSON 解析和 `git diff --check` 全部通过；实际差异精确为批准 28 路径。

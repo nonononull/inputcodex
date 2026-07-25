@@ -2,11 +2,12 @@
 
 schema_version: inputcodex.master-plan.v1
 active_task: issue-32-performance-baseline-implementation
-active_gate: Gate 4：v1.2.42 功能目录重新审计已完成并保持 release_audit=current；独立性能基线已冻结测量对象、可比环境、28 路径与 scope_hash，正在受批准范围内实施
+active_gate: Gate 4：v1.2.42 功能目录重新审计已完成并保持 release_audit=current；Issue #32 / PR #49 已完成隔离性能实现、hosted 两平台测量与原始样本入库，正在收口最终 Head 的 Evidence、Review/CI 与所有者合并决策
 last_verified_gate: Issue #38 / PR #45 已以单父 Squash 提交 5fd337fb7ceb9b0ef53e2e694cc5ddd81ea0a98c 完成二十六路径重新审计；PR CI 与 main CI Run 30158058627 Attempt 3 均七 Job 全绿且 Artifact 为 0，Issue #46 已完成外部事故收口
-next_legal_gate: 只允许在 Issue #32 的已批准 28 路径内完成隔离性能基线、GitHub-hosted Windows/macOS 原始样本与预算就绪性结论；不得制定数值预算、优化、功能迁移或 Gate 5 产品迁移
+next_legal_gate: 只允许完成 PR #49 最终 Head 的 Evidence、Review/CI、对话闭环和项目所有者单独 Squash Merge 决策；性能预算、优化、功能迁移与 Gate 5 产品迁移必须使用新的独立 Issue/PR
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/32
 performance_baseline_issue_ref: https://github.com/nonononull/inputcodex/issues/32
+performance_baseline_pr_ref: https://github.com/nonononull/inputcodex/pull/49
 release_audit_reaudit_issue_ref: https://github.com/nonononull/inputcodex/issues/38
 release_audit_reaudit_pr_ref: https://github.com/nonononull/inputcodex/pull/45
 catalog_reaudit_closeout_issue_ref: https://github.com/nonononull/inputcodex/issues/47
@@ -122,7 +123,7 @@ decision_status: gate-4-catalog-current-performance-baseline-implementation-appr
 - [x] Issue `#22` / PR `#23` 已完成独立 closeout，merge/tree/签名/Issue/CI/Review/Ruleset 和分支删除证据均已闭环。
 - 不迁移业务功能，不创建临时 UI 事实标准；最小窗口的视觉和交互默认由 Gemini 实现或审阅。
 
-### Gate 4：功能目录已收口，性能基线待独立执行
+### Gate 4：功能目录已收口，性能基线正在 PR 收口
 
 - [x] 创建 Issue `#24`，批准采用“规划合同 → 两个独立执行 Issue”的拆分方案。
 - [x] 冻结功能矩阵的稳定标识、证据路径、行为字段、既有一致性状态和决策引用。
@@ -142,7 +143,8 @@ decision_status: gate-4-catalog-current-performance-baseline-implementation-appr
 - [x] Issue `#46` 已证明主干 Run `30158058627` Attempt `1/2` 为 GitHub Actions 外部事故；同一 Run Attempt `3` 七 Job 全绿且 Artifact 为 `0`，事故已按 `COMPLETED` 关闭。
 - [x] Issue `#47` 已冻结五路径 Closeout、范围哈希、禁止面和所有者批准；其报告进入长期控制面，动态 PR/CI/合并证据只保留在 GitHub，不再递归创建 Closeout。
 - [x] Issue `#32` 已完成 Discovery，并冻结 28 路径、测量对象、可比环境与 `sha256:857f6a8a2070d5ddcb43eaf237448d30302d59e39e1dbb910724cfac2fc81505`；项目所有者已授权进入分支、Session Plan、Runtime Workflow、实现、验证与 PR。
-- [ ] Issue `#32` 在隔离工作树中实现性能测量入口、GitHub-hosted Windows/macOS 原始样本和预算就绪性报告；不得顺带优化产品或推进 Gate 5。
+- [x] Issue `#32` / PR `#49` 已在隔离工作树中实现性能测量入口、opt-in 首次 view 探针与证据验证器；Performance Run `30169262247` Attempt `1` 已产生并核验 Windows/macOS 原始样本，临时成功 Artifact 已删除且 Run Artifact 数为 `0`。
+- [ ] PR `#49` 最终 Head 仍需通过 Evidence 模式、主 CI、全部 Review 对话根因闭环，并取得项目所有者单独 Squash Merge 授权；不得顺带制定预算、优化产品或推进 Gate 5。
 
 ### Gate 5：分域迁移（锁定）
 

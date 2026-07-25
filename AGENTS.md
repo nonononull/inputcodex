@@ -63,5 +63,6 @@
 - Issue `#38` / PR `#45` 已完成 `v1.2.42` 二十六路径功能目录重新审计；最终 Head `d3df8759bdb9c6378497a3a0c8f409c3968f4d4f` 以单父 Squash 提交 `5fd337fb7ceb9b0ef53e2e694cc5ddd81ea0a98c` 进入 `main`，tree 为 `5273d0e42483bbb5c629a2243fc24f0a892b3db3`，GitHub 签名 `valid`，Issue `#38` 已按 `COMPLETED` 关闭。
 - PR `#45` 的最终 Head CI Run `30157623932` 与合并后 `main` CI Run `30158058627` Attempt `3` 均为七 Job 全绿且 Artifact 数为 `0`；Attempt `1/2` 的零 Job 失败已由 Issue `#46` 证明为 GitHub Actions 外部事故，Issue `#46` 已按 `COMPLETED` 关闭。
 - Issue `#47` 被指定为上述稳定事实的微型五路径 Closeout；其 GitHub Issue/PR 保存自身动态 Review、CI 与合并证据，不得再为本次状态回写创建二次 Closeout，也不得借机修改产品、缓存、CI 或历史任务快照。
-- Issue `#32` 的 28 路径实施范围与 `sha256:857f6a8a2070d5ddcb43eaf237448d30302d59e39e1dbb910724cfac2fc81505` 已获项目所有者批准；当前分支为 `codex/issue-32-performance-baseline`，只允许建立隔离性能基线、真实样本与预算就绪性结论。
-- Issue `#32` 禁止数值预算、性能优化、功能迁移、上游/半成品运行和范围外修改；最终 Squash Merge 仍需最终 PR Head 的 Review/CI/对话闭环后由项目所有者单独授权，Gate 5 保持锁定。
+- Issue `#32` 的 28 路径实施范围与 `sha256:857f6a8a2070d5ddcb43eaf237448d30302d59e39e1dbb910724cfac2fc81505` 已获项目所有者批准；PR `#49` 已建立隔离 Rust 测量工程、opt-in 首次 view 探针、PowerShell 证据验证器与 Windows/macOS hosted Workflow。
+- Performance Run `30169262247` Attempt `1` 已在测量提交 `1974577837de97a74d7b980e8106d5e2f4a4de2e` 上生成两平台真实样本；固定结果与 manifest 已按配置、实现、输入和文件 SHA-256 核验入库，临时成功 Artifact 已删除且该 Run 当前 Artifact 数为 `0`。
+- Issue `#32` 的样本只能用于同平台、同环境指纹趋势；禁止跨平台排名、数值预算、性能优化、功能迁移、上游/半成品运行和范围外修改。最终 Squash Merge 仍需最终 PR Head 的 Review/CI/对话闭环后由项目所有者单独授权，Gate 5 保持锁定。

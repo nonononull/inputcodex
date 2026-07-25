@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 25 日，Gate 3 七成员 Workspace、Gate 4 `v1.2.42` 功能目录重新审计与 Closeout 均已进入 `main`。Issue `#32` 已冻结 28 路径与 `sha256:857f6a8a2070d5ddcb43eaf237448d30302d59e39e1dbb910724cfac2fc81505`，当前在隔离分支建立真实性能基线；本地仅执行定向验证，Windows/macOS 实测和最终 PR 合并分别交给 GitHub-hosted runner 与项目所有者独立决策。
+截至 2026 年 7 月 25 日，Gate 3 七成员 Workspace、Gate 4 `v1.2.42` 功能目录重新审计与 Closeout 均已进入 `main`。Issue `#32` 已冻结 28 路径与 `sha256:857f6a8a2070d5ddcb43eaf237448d30302d59e39e1dbb910724cfac2fc81505`；Performance Run `30169262247` 已完成 Windows/macOS 实测并将核验后的原始结果写入固定路径。当前本地只执行 Evidence 与定向验证，最终 PR 合并仍由项目所有者独立决策。
 
 仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供十六个检查点：
 
@@ -40,8 +40,8 @@ Issue `#32` 只允许验证隔离测量合同和原始样本结构；Windows/mac
 cargo test --manifest-path benchmarks/inputcodex-baseline/Cargo.toml --locked --offline
 if ($LASTEXITCODE -ne 0) { throw 'Issue #32 隔离测量工程测试失败。' }
 
-pwsh -NoProfile -File scripts/performance/Test-InputcodexBaseline.ps1 -RepositoryRoot . -Mode Contract
-if ($LASTEXITCODE -ne 0) { throw 'Issue #32 性能合同验证失败。' }
+pwsh -NoProfile -File scripts/performance/Test-InputcodexBaseline.ps1 -RepositoryRoot . -Mode Evidence
+if ($LASTEXITCODE -ne 0) { throw 'Issue #32 性能证据验证失败。' }
 
 pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
 if ($LASTEXITCODE -ne 0) { throw 'Issue #32 CI 合同验证失败。' }
@@ -53,7 +53,7 @@ git diff --check
 if ($LASTEXITCODE -ne 0) { throw 'Issue #32 差异空白检查失败。' }
 ```
 
-只有在 GitHub-hosted 测量 run 产生并校验 Windows/macOS 原始 JSON 后，才允许把结果写入 `benchmarks/results/issue-32/`。成功 Artifact 只作临时交接，保留 1 天并在结果入库后删除；失败 Artifact 最长保留 7 天，禁止上传 `target/`。
+`benchmarks/results/issue-32/` 当前固定引用 Performance Run `30169262247` Attempt `1`、测量提交 `1974577837de97a74d7b980e8106d5e2f4a4de2e` 与 tree `0efa97728a3e8d0e8bf11a8bed75b4886cdce91a`。成功 Artifact 只作临时交接，已在结果入库后删除且 Run Artifact 数为 `0`；失败 Artifact 最长保留 7 天，禁止上传 `target/`。
 
 ## 环境要求
 
