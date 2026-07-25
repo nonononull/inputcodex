@@ -60,7 +60,7 @@
 ## 当前 Gate 4 功能目录边界
 
 - Gate 2 的 Issue `#9/#12/#14` 与 PR `#11/#13/#15` 均已完成；上游监控 Workflow 持续运行，Issue `#16` 只由机器维护。
-- `upstream/CodexPlusPlus/` 含 `v1.2.41` 的 `277` 个只读审计文件，`upstream/source-lock.json` 记录来源、tree、逐文件 blob/SHA-256、许可证和生成工具证据。
+- `upstream/CodexPlusPlus/` 含 `v1.2.42` 的 `277` 个只读审计文件，`upstream/source-lock.json` 记录活动来源、tree、逐文件 blob/SHA-256、许可证、生成工具证据，以及仍固定在 `v1.2.41` 的功能目录审计基线与 `stale-re-audit-required` 状态。
 - Issue `#19` / PR `#21` 已将七成员纯 Rust Workspace、Rust `1.97.1` 工具链文件、`Cargo.lock`、最小分层源码与首版无缓存三平台 `CI` Workflow 合入 `main`；仍没有 Release、安装包、签名、更新资产或上游业务功能迁移。
 - 当前治理合同为 `30/30`，Workspace 许可证元数据已与根 `LICENSE` 对齐为 `AGPL-3.0-only`；五类受控失败语义已全部完成普通提交 RED→GREEN，最终 PR 运行 `29918843397` 与合并后主干运行 `29919596057` 均六 Job 全绿。
 - Linux、Windows、macOS 已各取得 `3/3` 次无缓存成功样本；Job 执行时间中位数分别为 `133`、`212`、`96` 秒，最低基线不包含 Cache、P95 或七天调优结论。

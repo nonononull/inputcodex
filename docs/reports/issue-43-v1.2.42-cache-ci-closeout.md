@@ -48,6 +48,14 @@ PR `#40` 的 Head `86d48ad261669daaf14666556372a12f9b908726` 在 PR `#42` 合并
 - 长期状态字段审计已覆盖 `AGENTS.md`、README、Master Plan、两份来源报告和 `err.md`；`git diff --check` 通过。
 - 首轮范围审计曾只使用 `git diff --name-only`，未列出四个未跟踪的新文档；已复现并将本任务的审计口径修正为三类路径并集，未修改任何项目文件来掩盖该问题。
 
-## 六、后续合法工作
+## 六、最终 Head Review 发现与处理
+
+- 文档一致性 reviewer 对提交 `f21120ee5e57073f6f25ff46ed8d7036a376d675` 提出两项 Important：README 的 Gate 4 边界仍把活动缓存写成 `v1.2.41`；同步报告把可由 Issue `#38` 恢复 `current` 的状态误写为“永久” stale。
+- 第一项根因：顶部 Release 状态已更新为 `v1.2.42`，但 Gate 4 边界段落没有纳入同一状态字段审计。处理：将活动缓存明确写为 `v1.2.42`，同时保留功能目录审计基线 `v1.2.41` 与 `stale-re-audit-required` 的区别。
+- 第二项根因：本意是说明“本次缓存同步和 closeout 不会自行恢复状态”，措辞却把生命周期扩大成永远不恢复。处理：收窄为“在 Issue `#38` 完成独立重新审计前保持 stale”，保留后续恢复 `current` 的合法路径。
+- 项目所有者 Windows 本机时间 `2026-07-25 16:29:25 +08:00` 完成 RED→GREEN：修复前两条静态断言精确失败，修复后失败数为 `0`；治理与交付 reviewer 无 Critical、Important 或 Minor 发现。
+- 上述修复改变了 PR Head，因此提交 `f21120ee5e57073f6f25ff46ed8d7036a376d675` 的 reviewer 与 CI 结论只作为旧 Head 历史证据；新 Head 必须重新完成两位只读 reviewer、零未解决对话和 GitHub-hosted CI。
+
+## 七、后续合法工作
 
 下一项可启动工作是 Issue `#32` 的独立性能基线发现：重新冻结测量对象、参考来源与许可证、可比环境、范围哈希和所有者批准。Issue `#38` 的目录重新审计、性能预算、性能优化、产品迁移与 Gate 5 继续保持彼此独立的 Issue/PR 边界。
