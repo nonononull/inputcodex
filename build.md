@@ -2,9 +2,9 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 22 日，PR `#21` 已将 Gate 3 七成员 Workspace、首版无缓存三平台 CI、五类失败语义与三平台最低冷构建基线 Squash Merge 到 `main`；PR `#23` 已完成独立 closeout。Issue `#24` / PR `#25` 已将 Gate 4 两阶段规划合同 Squash Merge 为 `431682296f53e86de1184c732b0d4748857c9390`，Issue `#24` 已按 `COMPLETED` 关闭。Issue `#26` 的功能目录与独立 Closeout 均已完成。Issue `#35` 正在以项目所有者批准的十五路径范围解耦完整上游快照与目录审计基线，其中 `AGENTS.md` 固化本机时间规则；本地仅执行定向验证，最终 PR 合并仍需独立授权。
+截至 2026 年 7 月 25 日，Gate 3 七成员 Workspace、Gate 4 `v1.2.42` 功能目录重新审计与 Closeout 均已进入 `main`。Issue `#32` 已冻结 28 路径与 `sha256:857f6a8a2070d5ddcb43eaf237448d30302d59e39e1dbb910724cfac2fc81505`，当前在隔离分支建立真实性能基线；本地仅执行定向验证，Windows/macOS 实测和最终 PR 合并分别交给 GitHub-hosted runner 与项目所有者独立决策。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供十五个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供十六个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -21,6 +21,7 @@
 13. Issue `#24` Gate 4 规划批准引用、9 条最大路径、两阶段拆分和执行锁定验证。
 14. Issue `#26` 功能目录执行控制面、8 条当前路径、36 条最大范围和新 scope hash 验证。
 15. Issue `#35` Release 审计解耦、stale PR 路径门禁、`required` 汇总依赖和定向 Rust 验证。
+16. Issue `#32` 隔离性能测量合同、原始样本结构、专用 Workflow 和预算/优化隔离验证。
 
 当前禁止：
 
@@ -30,6 +31,29 @@
 - 创建 Release Workflow、安装包、签名、更新资产、临时 UI 或 WebView。
 - 修改 Ruleset、required checks 或仓库级合并开关。
 - 修改或优化外部 AGOS。
+
+## Issue #32 独立性能基线本地轻量验证
+
+Issue `#32` 只允许验证隔离测量合同和原始样本结构；Windows/macOS 真实测量、Iced 桌面运行和 Release 构建只在公开 GitHub-hosted runner 上运行。不要在项目所有者本机执行完整基线、上游/半成品或全量 Workspace 编译。
+
+```powershell
+cargo test --manifest-path benchmarks/inputcodex-baseline/Cargo.toml --locked --offline
+if ($LASTEXITCODE -ne 0) { throw 'Issue #32 隔离测量工程测试失败。' }
+
+pwsh -NoProfile -File scripts/performance/Test-InputcodexBaseline.ps1 -RepositoryRoot . -Mode Contract
+if ($LASTEXITCODE -ne 0) { throw 'Issue #32 性能合同验证失败。' }
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+if ($LASTEXITCODE -ne 0) { throw 'Issue #32 CI 合同验证失败。' }
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw 'Issue #32 仓库政策验证失败。' }
+
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'Issue #32 差异空白检查失败。' }
+```
+
+只有在 GitHub-hosted 测量 run 产生并校验 Windows/macOS 原始 JSON 后，才允许把结果写入 `benchmarks/results/issue-32/`。成功 Artifact 只作临时交接，保留 1 天并在结果入库后删除；失败 Artifact 最长保留 7 天，禁止上传 `target/`。
 
 ## 环境要求
 

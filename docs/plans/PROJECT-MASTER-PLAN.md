@@ -1,10 +1,10 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-32-performance-baseline-discovery-awaiting-scope-freeze
-active_gate: Gate 4：v1.2.42 功能目录重新审计已完成并保持 release_audit=current；独立性能基线等待重新冻结测量对象、可比环境、精确路径、scope_hash 与项目所有者批准
+active_task: issue-32-performance-baseline-implementation
+active_gate: Gate 4：v1.2.42 功能目录重新审计已完成并保持 release_audit=current；独立性能基线已冻结测量对象、可比环境、28 路径与 scope_hash，正在受批准范围内实施
 last_verified_gate: Issue #38 / PR #45 已以单父 Squash 提交 5fd337fb7ceb9b0ef53e2e694cc5ddd81ea0a98c 完成二十六路径重新审计；PR CI 与 main CI Run 30158058627 Attempt 3 均七 Job 全绿且 Artifact 为 0，Issue #46 已完成外部事故收口
-next_legal_gate: 只允许在 Issue #32 中完成性能基线 Discovery 与精确范围冻结；获得项目所有者新批准前不得创建性能实现分支、写文件、测量、预算、优化或 Gate 5 产品迁移
+next_legal_gate: 只允许在 Issue #32 的已批准 28 路径内完成隔离性能基线、GitHub-hosted Windows/macOS 原始样本与预算就绪性结论；不得制定数值预算、优化、功能迁移或 Gate 5 产品迁移
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/32
 performance_baseline_issue_ref: https://github.com/nonononull/inputcodex/issues/32
 release_audit_reaudit_issue_ref: https://github.com/nonononull/inputcodex/issues/38
@@ -20,26 +20,26 @@ gate_3_planning_issue_ref: https://github.com/nonononull/inputcodex/issues/17
 upstream_watch_issue_ref: https://github.com/nonononull/inputcodex/issues/14
 transition_issue_ref: https://github.com/nonononull/inputcodex/issues/8
 upstream_sync_issue_ref: https://github.com/nonononull/inputcodex/issues/9
-active_branch_ref: none-awaiting-issue-32-scope-approval
+active_branch_ref: codex/issue-32-performance-baseline
 transition_branch_ref: codex/issue-8-gate-2-transition
-active_plan_ref: none-awaiting-issue-32-discovery
-active_session_plan_ref: none-awaiting-issue-32-scope-approval
-active_runtime_workflow_ref: none-awaiting-issue-32-scope-approval
-active_pr_ref: none-awaiting-issue-32-scope-approval
+active_plan_ref: docs/plans/issue-32-performance-baseline.md
+active_session_plan_ref: docs/plans/sessions/issue-32-performance-baseline.md
+active_runtime_workflow_ref: docs/workflows/issue-32-performance-baseline-runtime.md
+active_pr_ref: none-awaiting-issue-32-implementation-and-review
 gate_3_closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/23
 gate_3_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/21
 gate_3_planning_pr_ref: https://github.com/nonononull/inputcodex/pull/18
 transition_pr_ref: https://github.com/nonononull/inputcodex/pull/10
 upstream_sync_pr_ref: https://github.com/nonononull/inputcodex/pull/11
 closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5, https://github.com/nonononull/inputcodex/pull/7, https://github.com/nonononull/inputcodex/pull/10, https://github.com/nonononull/inputcodex/pull/11, https://github.com/nonononull/inputcodex/pull/13, https://github.com/nonononull/inputcodex/pull/15, https://github.com/nonononull/inputcodex/pull/18, https://github.com/nonononull/inputcodex/pull/21, https://github.com/nonononull/inputcodex/pull/23, https://github.com/nonononull/inputcodex/pull/25, https://github.com/nonononull/inputcodex/pull/27, https://github.com/nonononull/inputcodex/pull/36, https://github.com/nonononull/inputcodex/pull/40, https://github.com/nonononull/inputcodex/pull/42, https://github.com/nonononull/inputcodex/pull/44, https://github.com/nonononull/inputcodex/pull/45
-active_report_ref: docs/reports/issue-47-v1.2.42-catalog-reaudit-closeout.md
+active_report_ref: docs/reports/issue-32-performance-baseline.md
 gate_3_closeout_report_ref: docs/reports/issue-22-gate-3-closeout.md
 gate_3_implementation_report_ref: docs/reports/issue-19-gate-3-rust-workspace-ci.md
 gate_2_watch_report_ref: docs/reports/issue-14-gate-2-upstream-watch.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-decision_status: gate-4-catalog-current-performance-baseline-awaiting-scope-freeze-gate-5-blocked
+decision_status: gate-4-catalog-current-performance-baseline-implementation-approved-budget-and-gate-5-blocked
 
 ## 当前状态
 
@@ -141,7 +141,8 @@ decision_status: gate-4-catalog-current-performance-baseline-awaiting-scope-free
 - [x] Issue `#38` / PR `#45` 已完成二十六路径、Review/CI、全部对话闭环与授权 Squash Merge；Issue 已按 `COMPLETED` 关闭，功能目录和 `release_audit` 均对齐 `v1.2.42`。
 - [x] Issue `#46` 已证明主干 Run `30158058627` Attempt `1/2` 为 GitHub Actions 外部事故；同一 Run Attempt `3` 七 Job 全绿且 Artifact 为 `0`，事故已按 `COMPLETED` 关闭。
 - [x] Issue `#47` 已冻结五路径 Closeout、范围哈希、禁止面和所有者批准；其报告进入长期控制面，动态 PR/CI/合并证据只保留在 GitHub，不再递归创建 Closeout。
-- [ ] Issue `#32` 独立性能基线已立项，开始前必须重新冻结范围哈希、测量对象、可比环境与项目所有者批准；它不得顺带优化产品或推进 Gate 5。
+- [x] Issue `#32` 已完成 Discovery，并冻结 28 路径、测量对象、可比环境与 `sha256:857f6a8a2070d5ddcb43eaf237448d30302d59e39e1dbb910724cfac2fc81505`；项目所有者已授权进入分支、Session Plan、Runtime Workflow、实现、验证与 PR。
+- [ ] Issue `#32` 在隔离工作树中实现性能测量入口、GitHub-hosted Windows/macOS 原始样本和预算就绪性报告；不得顺带优化产品或推进 Gate 5。
 
 ### Gate 5：分域迁移（锁定）
 
@@ -213,6 +214,6 @@ decision_status: gate-4-catalog-current-performance-baseline-awaiting-scope-free
 - 需要修改 `upstream/CodexPlusPlus/` 或 `source-lock.json` 的来源快照字段，但没有新的独立 upstream-sync Issue/PR 与项目所有者批准。
 - `release_audit` 为 stale 时修改 `benchmarks/`、`apps/`、产品 crate、`Cargo.toml` 或 `Cargo.lock`，或在同一 PR 同时更新实际 audit 与受阻产品路径。
 - Issue `#47` 出现五路径或 `sha256:dd612ef0c2e5f0f830c40f161b1ef1a85bc58cd1d85458a758c3905ade8db03e` 之外的新增、删除或重命名路径，或在最终 Head 的 Review、CI 和全部对话闭环前请求 Squash Merge。
-- 在独立性能基线 Issue 获得范围与项目所有者批准前创建 `benchmarks/`、测量脚本、原始样本、性能预算候选，或修改 Cargo/Rust、测试、CI、upstream、Ruleset、发布资产或 AGOS。
+- Issue `#32` 出现已批准 28 路径或 `sha256:857f6a8a2070d5ddcb43eaf237448d30302d59e39e1dbb910724cfac2fc81505` 之外的新增、删除或重命名路径，或改动根 Cargo、`apps/`、`parity/`、`upstream/`、Ruleset、发布资产或 AGOS。
 - 在独立性能基线 Issue 中创建性能优化、产品迁移、`parity-exception`、运行上游/半成品或填写绝对性能预算，但没有新的独立 Issue 与项目所有者批准。
 - Fresh 验证失败、Ruleset 变化、Review 对话未闭环或出现未批准的一致性差异。

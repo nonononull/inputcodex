@@ -626,6 +626,15 @@
 - 复用：遇到“零 Job + 零日志 + 平台内部错误”时，先核验 GitHub Status、Run/Attempt、Head SHA、Workflow blob 与 Check Run 数；平台事故未恢复前只登记并等待，恢复后重跑同一 Run，禁止用代码改动掩盖外部故障。
 - 关联：Issue `#46`、Issue `#38`、PR `#45`、CI Run `30158058627`、`docs/reports/issue-47-v1.2.42-catalog-reaudit-closeout.md`。
 
+## 2026-07-25：Git smart-HTTP Fetch 超时，使用 GitHub API 完成只读 Fresh 核验
+
+- 环境：Issue `#32` 性能基线实施启动，尝试在干净 `main` 基线上执行 `git fetch origin main`。
+- 现象：Fetch 在 30 秒内未完成并被执行环境超时终止；本地 `main` 与 `origin/main` 仍指向 `f81f457f615bed3d0f177aae52516824651abd12`。
+- 根因：与本文件既有 Git smart-HTTP timeout/reset 家族一致，故障位于本机 Git 传输链路；不是远端 `main`、Issue 授权、Ruleset 或上游 Release 漂移。
+- 处理：不盲目重试、不修改 Git 配置、不 Force Push；改用认证后的 GitHub REST API 读取远端 `main` ref、Issue、Ruleset、维护者和最新正式 Release。
+- 验证：API 返回远端 `main=f81f457f615bed3d0f177aae52516824651abd12`，与本地 HEAD 一致；Issue `#32` OPEN、Ruleset 仅允许 Squash、维护者数量为 1、Release 仍为 `v1.2.42`。
+- 关联：Issue `#32`、`docs/plans/sessions/issue-32-performance-baseline.md`。
+
 ## 记录模板
 
 ```text
