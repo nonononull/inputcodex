@@ -2,9 +2,9 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 25 日，Gate 3 七成员 Workspace、Gate 4 `v1.2.42` 功能目录重新审计、双平台性能基线均已进入 `main`。Issue `#32` / PR `#49` 的 Squash 提交为 `fd9db9ca1c150b7db34dda8acc09b6f0cc357a17`；合并后主 CI Run `30171903289` 七 Job、Performance Run `30171903279` 四 Job 全绿且 Artifact 数均为 `0`。Issue `#50` 已获九路径与 `sha256:af1c248c46d54741f9c77ab3621cd66ccd40e3fa50698d377c788fcb0b93205f` 批准，只冻结预算方法和 Gate 5 解锁条件，不填写预算或修改实现。
+截至 2026 年 7 月 25 日，Gate 3 七成员 Workspace、Gate 4 `v1.2.42` 功能目录重新审计、双平台性能基线与性能预算 Discovery 均已进入 `main`。Issue `#50` / PR `#51` 的 Squash 提交为 `fea8824c652665df710a7e6ef941854060eb6e1f`；合并后主干 CI Run `30175592979` 七 Job 全绿且 Artifact 为 `0`，Issue `#50` 已按 `COMPLETED` 关闭。当前只批准预算方法，预算数值、预算 CI、性能优化和 Gate 5 产品迁移仍需不同 Issue/PR。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供十七个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供十八个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -23,6 +23,7 @@
 15. Issue `#35` Release 审计解耦、stale PR 路径门禁、`required` 汇总依赖和定向 Rust 验证。
 16. Issue `#32` 隔离性能测量合同、原始样本结构、专用 Workflow 和预算/优化隔离验证。
 17. Issue `#50` 性能预算 ADR、同平台可比队列、阶段门禁、九路径范围与长期状态验证。
+18. Issue `#52` 性能预算 Discovery 合并后稳定状态、八路径范围、反递归边界与主干证据验证。
 
 当前禁止：
 
@@ -33,6 +34,104 @@
 - 修改 Ruleset、required checks 或仓库级合并开关。
 - 修改或优化外部 AGOS。
 - 在 Issue `#50` 中填写预算数值、运行新 hosted 测量、修改性能实现/Workflow、实施优化或解锁 Gate 5。
+- 在 Issue `#52` 中修改代码、Cargo、`benchmarks/`、Workflow、Ruleset、Release、AGOS、预算数值、性能优化或 Gate 5 产品功能。
+
+## Issue #52 性能预算 Discovery Closeout 本地轻量验证
+
+Issue `#52` 只修改八份治理与状态文档，不运行完整 Workspace、桌面 Release 或真实性能采集。以下命令同时覆盖已提交、未暂存、已暂存和未跟踪路径：
+
+```powershell
+$baseline = 'fea8824c652665df710a7e6ef941854060eb6e1f'
+$approvedPaths = @(
+  'AGENTS.md'
+  'README.md'
+  'build.md'
+  'docs/plans/PROJECT-MASTER-PLAN.md'
+  'docs/plans/2026-07-25-issue-52-performance-budget-closeout.md'
+  'docs/plans/sessions/2026-07-25-issue-52-performance-budget-closeout.md'
+  'docs/reports/issue-52-performance-budget-closeout.md'
+  'docs/workflows/2026-07-25-issue-52-performance-budget-closeout-runtime.md'
+) | Sort-Object
+
+$branch = (git branch --show-current).Trim()
+if ($branch -ne 'codex/issue-52-performance-budget-closeout') {
+  throw "Issue #52 当前分支不正确：$branch"
+}
+
+$committed = @(git diff --name-only "$baseline...HEAD")
+$unstaged = @(git diff --name-only)
+$staged = @(git diff --cached --name-only)
+$untracked = @(git ls-files --others --exclude-standard)
+$actualPaths = @($committed + $unstaged + $staged + $untracked | Where-Object { $_ } | Sort-Object -Unique)
+
+$pathDiff = @(Compare-Object -ReferenceObject $approvedPaths -DifferenceObject $actualPaths)
+if ($pathDiff.Count -ne 0) {
+  $pathDiff | Format-Table -AutoSize
+  throw 'Issue #52 实际差异不是批准的八路径。'
+}
+
+$scopeText = ($approvedPaths -join "`n") + "`n"
+$scopeBytes = [System.Text.UTF8Encoding]::new($false).GetBytes($scopeText)
+$scopeHash = [Convert]::ToHexString([System.Security.Cryptography.SHA256]::HashData($scopeBytes)).ToLowerInvariant()
+if ($scopeHash -ne 'af1cfffe1e72b847b212874ab6348bb6f375c54a43564cc702abb24145efb513') {
+  throw "Issue #52 scope_hash 漂移：$scopeHash"
+}
+
+$requiredFacts = @{
+  'AGENTS.md' = @('Issue `#50` / PR `#51` 已完成', 'fea8824c652665df710a7e6ef941854060eb6e1f', '30175592979', '独立性能复测与数值批准 Issue')
+  'README.md' = @('Issue `#50` / PR `#51` 已以单父 Squash 提交', '30175592979', 'Issue `#50` 已按 `COMPLETED` 关闭')
+  'docs/plans/PROJECT-MASTER-PLAN.md' = @('active_task: none-awaiting-performance-remeasurement-and-budget-approval', 'fea8824c652665df710a7e6ef941854060eb6e1f', 'next_legal_gate: 创建独立性能复测与数值批准 Issue')
+  'docs/reports/issue-52-performance-budget-closeout.md' = @('30175592979', '单父', '反递归')
+}
+foreach ($entry in $requiredFacts.GetEnumerator()) {
+  $content = Get-Content -LiteralPath $entry.Key -Raw
+  foreach ($fact in $entry.Value) {
+    if (-not $content.Contains($fact)) {
+      throw "Issue #52 缺少稳定事实：$($entry.Key) -> $fact"
+    }
+  }
+}
+
+$stalePatterns = @(
+  'active_task: issue-50-performance-budget-discovery'
+  '处于九路径方法冻结、Review/CI、对话闭环和项目所有者单独 Squash Merge 决策阶段'
+  '只允许在 PR #51 已批准九路径'
+  'active_branch_ref: codex/issue-50-performance-budget-discovery'
+  'active_pr_ref: https://github.com/nonononull/inputcodex/pull/51'
+  '完成 Issue `#50` 的 ADR、Discovery 报告、长期状态同步、Review/CI 与 Squash Merge'
+)
+$longTermFiles = @('AGENTS.md', 'README.md', 'docs/plans/PROJECT-MASTER-PLAN.md')
+foreach ($pattern in $stalePatterns) {
+  $matches = @(Select-String -LiteralPath $longTermFiles -SimpleMatch -Pattern $pattern)
+  if ($matches.Count -ne 0) {
+    $matches | Format-Table Path, LineNumber, Line -AutoSize
+    throw "Issue #52 长期入口仍包含过期事实：$pattern"
+  }
+}
+
+$placeholderMatches = @(Select-String -LiteralPath 'docs/reports/issue-52-performance-budget-closeout.md' -Pattern '\b(TBD|TODO|FIXME|WIP)\b')
+if ($placeholderMatches.Count -ne 0) {
+  $placeholderMatches | Format-Table Path, LineNumber, Line -AutoSize
+  throw 'Issue #52 Closeout 报告仍含占位符。'
+}
+
+pwsh -NoProfile -File scripts/performance/Test-InputcodexBaseline.ps1 -RepositoryRoot . -Mode Evidence
+if ($LASTEXITCODE -ne 0) { throw 'Issue #52 性能 Evidence 验证失败。' }
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+if ($LASTEXITCODE -ne 0) { throw 'Issue #52 CI 合同验证失败。' }
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw 'Issue #52 仓库政策验证失败。' }
+
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'Issue #52 未暂存差异空白检查失败。' }
+
+git diff --cached --check
+if ($LASTEXITCODE -ne 0) { throw 'Issue #52 已暂存差异空白检查失败。' }
+
+Write-Output "ISSUE52_CLOSEOUT_VERIFY_OK scope_hash=sha256:$scopeHash"
+```
 
 ## Issue #50 性能预算 Discovery 本地轻量验证
 

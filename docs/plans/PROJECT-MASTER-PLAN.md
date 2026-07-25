@@ -1,11 +1,15 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-50-performance-budget-discovery
-active_gate: Gate 4 后置性能预算 Discovery：Issue #32 / PR #49 已完成双平台性能基线并保持 release_audit=current；Issue #50 / PR #51 处于九路径方法冻结、Review/CI、对话闭环和项目所有者单独 Squash Merge 决策阶段，Gate 5 继续锁定
-last_verified_gate: Issue #32 / PR #49 已以单父 Squash 提交 fd9db9ca1c150b7db34dda8acc09b6f0cc357a17 完成双平台性能基线；合并后主 CI Run 30171903289 七 Job、Performance Run 30171903279 四 Job 全绿且 Artifact 均为 0，Issue #32 已按 COMPLETED 关闭
-next_legal_gate: 只允许在 PR #51 已批准九路径与 sha256:af1c248c46d54741f9c77ab3621cd66ccd40e3fa50698d377c788fcb0b93205f 内完成 Discovery 文档修正、轻量验证、Review/CI、对话闭环和项目所有者单独 Squash Merge 决策；预算数值、预算 CI、性能优化、功能迁移与 Gate 5 继续锁定
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/50
+active_task: none-awaiting-performance-remeasurement-and-budget-approval
+active_gate: Gate 4 后置性能预算 Discovery 已稳定完成：Issue #50 / PR #51 已进入 main，release_audit=current；预算数值、预算 CI、性能优化与 Gate 5 产品迁移继续锁定
+last_verified_gate: Issue #50 / PR #51 已以单父 Squash 提交 fea8824c652665df710a7e6ef941854060eb6e1f 完成性能预算方法冻结；tree 为 9fb518cda8b35a9388fb9fce0a1ff6ba976d80cb，GitHub 签名 valid，合并后 main CI Run 30175592979 七 Job 全绿且 Artifact 为 0，Issue #50 已按 COMPLETED 关闭
+next_legal_gate: 创建独立性能复测与数值批准 Issue；每个平台至少收集五次可比 Run 并由项目所有者批准 warning/blocking 数值，预算 CI、性能优化和 Gate 5 产品迁移不得混入该 Issue
+tracking_issue_ref: none-awaiting-performance-remeasurement-and-budget-approval-issue
+performance_budget_discovery_issue_ref: https://github.com/nonononull/inputcodex/issues/50
+performance_budget_discovery_pr_ref: https://github.com/nonononull/inputcodex/pull/51
+performance_budget_discovery_merge_ref: fea8824c652665df710a7e6ef941854060eb6e1f
+performance_budget_discovery_main_ci_ref: https://github.com/nonononull/inputcodex/actions/runs/30175592979
 performance_baseline_issue_ref: https://github.com/nonononull/inputcodex/issues/32
 performance_baseline_pr_ref: https://github.com/nonononull/inputcodex/pull/49
 release_audit_reaudit_issue_ref: https://github.com/nonononull/inputcodex/issues/38
@@ -21,26 +25,26 @@ gate_3_planning_issue_ref: https://github.com/nonononull/inputcodex/issues/17
 upstream_watch_issue_ref: https://github.com/nonononull/inputcodex/issues/14
 transition_issue_ref: https://github.com/nonononull/inputcodex/issues/8
 upstream_sync_issue_ref: https://github.com/nonononull/inputcodex/issues/9
-active_branch_ref: codex/issue-50-performance-budget-discovery
+active_branch_ref: none-awaiting-performance-remeasurement-and-budget-approval-issue
 transition_branch_ref: codex/issue-8-gate-2-transition
-active_plan_ref: docs/plans/2026-07-25-issue-50-performance-budget-discovery.md
-active_session_plan_ref: docs/plans/sessions/2026-07-25-issue-50-performance-budget-discovery.md
-active_runtime_workflow_ref: docs/workflows/2026-07-25-issue-50-performance-budget-discovery-runtime.md
-active_pr_ref: https://github.com/nonononull/inputcodex/pull/51
+active_plan_ref: none-awaiting-performance-remeasurement-plan
+active_session_plan_ref: none-awaiting-performance-remeasurement-session-plan
+active_runtime_workflow_ref: none-awaiting-performance-remeasurement-runtime-workflow
+active_pr_ref: none
 gate_3_closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/23
 gate_3_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/21
 gate_3_planning_pr_ref: https://github.com/nonononull/inputcodex/pull/18
 transition_pr_ref: https://github.com/nonononull/inputcodex/pull/10
 upstream_sync_pr_ref: https://github.com/nonononull/inputcodex/pull/11
 closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5, https://github.com/nonononull/inputcodex/pull/7, https://github.com/nonononull/inputcodex/pull/10, https://github.com/nonononull/inputcodex/pull/11, https://github.com/nonononull/inputcodex/pull/13, https://github.com/nonononull/inputcodex/pull/15, https://github.com/nonononull/inputcodex/pull/18, https://github.com/nonononull/inputcodex/pull/21, https://github.com/nonononull/inputcodex/pull/23, https://github.com/nonononull/inputcodex/pull/25, https://github.com/nonononull/inputcodex/pull/27, https://github.com/nonononull/inputcodex/pull/36, https://github.com/nonononull/inputcodex/pull/40, https://github.com/nonononull/inputcodex/pull/42, https://github.com/nonononull/inputcodex/pull/44, https://github.com/nonononull/inputcodex/pull/45
-active_report_ref: docs/reports/issue-50-performance-budget-discovery.md
+active_report_ref: docs/reports/issue-52-performance-budget-closeout.md
 gate_3_closeout_report_ref: docs/reports/issue-22-gate-3-closeout.md
 gate_3_implementation_report_ref: docs/reports/issue-19-gate-3-rust-workspace-ci.md
 gate_2_watch_report_ref: docs/reports/issue-14-gate-2-upstream-watch.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-decision_status: issue-50-performance-budget-discovery-approved-gate-5-blocked
+decision_status: performance-budget-discovery-completed-budget-values-ci-optimization-gate-5-blocked
 
 ## 当前状态
 
@@ -149,6 +153,8 @@ decision_status: issue-50-performance-budget-discovery-approved-gate-5-blocked
 - [x] PR `#49` 最终 Head `78f8eec2fdea0ae33b02c7478923e1cbaf223d69` 已完成 Evidence、Review/CI、全部对话闭环和项目所有者独立授权，并以单父 Squash 提交 `fd9db9ca1c150b7db34dda8acc09b6f0cc357a17` 进入 `main`；Issue `#32` 已按 `COMPLETED` 关闭，合并后主 CI 七 Job 与 Performance Evidence 四 Job 全绿且 Artifact 数均为 `0`。
 - [x] Issue `#32` 的稳定语义是“性能基线完成、预算未批准”；现有 Windows/macOS 样本只能用于同平台、同可比环境趋势，不能跨平台排名或直接生成 required budget。
 - [x] Issue `#50` 已冻结九路径、`sha256:af1c248c46d54741f9c77ab3621cd66ccd40e3fa50698d377c788fcb0b93205f` 和 ADR `0004`：每个平台至少五次独立可比 Run，采用 run-level 稳健汇总并从观察阶段逐步升级门禁。
+- [x] PR `#51` Final Head `e0154c61d8b05835db10437c79f029909516eac1` 已完成 Review/CI、全部对话闭环和项目所有者独立授权，并以单父 Squash 提交 `fea8824c652665df710a7e6ef941854060eb6e1f` 进入 `main`；tree 为 `9fb518cda8b35a9388fb9fce0a1ff6ba976d80cb`，GitHub 签名 `valid`。
+- [x] PR `#51` 合并后主干 CI Run `30175592979` 七 Job 全绿且 Artifact 为 `0`，Issue `#50` 已按 `COMPLETED` 关闭；稳定语义仍是“预算方法已批准、预算数值未批准”。
 - [ ] 下一独立性能复测与数值批准 Issue 尚未创建；预算 CI 实施、性能优化和 Gate 5 产品迁移继续保持互斥。
 
 ### Gate 5：分域迁移（锁定）
