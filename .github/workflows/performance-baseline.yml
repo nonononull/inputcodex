@@ -110,8 +110,6 @@ jobs:
     needs: contract
     runs-on: windows-latest
     timeout-minutes: 45
-    env:
-      REPORT_DIR: ${{ runner.temp }}/inputcodex-performance/windows
     steps:
       - name: 检出精确 Head
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -129,19 +127,21 @@ jobs:
         if: ${{ needs.contract.outputs.mode == 'measure' }}
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Path (Join-Path $env:REPORT_DIR 'result') -Force | Out-Null
+          $reportDir = Join-Path $env:RUNNER_TEMP 'inputcodex-performance/windows'
+          New-Item -ItemType Directory -Path (Join-Path $reportDir 'result') -Force | Out-Null
           pwsh -NoProfile -File scripts/performance/Invoke-InputcodexBaseline.ps1 `
             -RepositoryRoot . `
             -Platform windows `
-            -OutputPath (Join-Path $env:REPORT_DIR 'result/windows.json')
+            -OutputPath (Join-Path $reportDir 'result/windows.json')
 
       - name: 验证已入库证据
         if: ${{ needs.contract.outputs.mode == 'evidence' }}
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Path $env:REPORT_DIR -Force | Out-Null
+          $reportDir = Join-Path $env:RUNNER_TEMP 'inputcodex-performance/windows'
+          New-Item -ItemType Directory -Path $reportDir -Force | Out-Null
           pwsh -NoProfile -File scripts/performance/Test-InputcodexBaseline.ps1 -RepositoryRoot . -Mode Evidence 2>&1 |
-            Tee-Object -FilePath (Join-Path $env:REPORT_DIR 'evidence.log')
+            Tee-Object -FilePath (Join-Path $reportDir 'evidence.log')
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: 上传 Windows 临时成功结果
@@ -167,8 +167,6 @@ jobs:
     needs: contract
     runs-on: macos-latest
     timeout-minutes: 45
-    env:
-      REPORT_DIR: ${{ runner.temp }}/inputcodex-performance/macos
     steps:
       - name: 检出精确 Head
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -186,19 +184,21 @@ jobs:
         if: ${{ needs.contract.outputs.mode == 'measure' }}
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Path (Join-Path $env:REPORT_DIR 'result') -Force | Out-Null
+          $reportDir = Join-Path $env:RUNNER_TEMP 'inputcodex-performance/macos'
+          New-Item -ItemType Directory -Path (Join-Path $reportDir 'result') -Force | Out-Null
           pwsh -NoProfile -File scripts/performance/Invoke-InputcodexBaseline.ps1 `
             -RepositoryRoot . `
             -Platform macos `
-            -OutputPath (Join-Path $env:REPORT_DIR 'result/macos.json')
+            -OutputPath (Join-Path $reportDir 'result/macos.json')
 
       - name: 验证已入库证据
         if: ${{ needs.contract.outputs.mode == 'evidence' }}
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Path $env:REPORT_DIR -Force | Out-Null
+          $reportDir = Join-Path $env:RUNNER_TEMP 'inputcodex-performance/macos'
+          New-Item -ItemType Directory -Path $reportDir -Force | Out-Null
           pwsh -NoProfile -File scripts/performance/Test-InputcodexBaseline.ps1 -RepositoryRoot . -Mode Evidence 2>&1 |
-            Tee-Object -FilePath (Join-Path $env:REPORT_DIR 'evidence.log')
+            Tee-Object -FilePath (Join-Path $reportDir 'evidence.log')
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: 上传 macOS 临时成功结果

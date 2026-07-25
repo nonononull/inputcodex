@@ -654,6 +654,14 @@
 - 验证：使用 SSH 对同一功能分支执行普通推送，随后核对远端分支 SHA 与本地 HEAD 一致。
 - 关联：Issue `#32`、分支 `codex/issue-32-performance-baseline`。
 
+## 2026-07-25：`runner.temp` 不能用于 Job 级 `env`
+
+- 现象：`Performance Baseline` 在 GitHub Actions 装载阶段零 Job 瞬时失败，Workflow 名退化为文件路径；注解指出 Windows/macOS Job 的 `runner.temp` 是未识别 named-value。
+- 根因：runner context 只有在 runner 已分配后的 step 范围可用，不能用于 `jobs.<job_id>.env`。
+- 处理：删除两个 Job 级 `REPORT_DIR`，在测量/证据 step 内从 GitHub 默认 `RUNNER_TEMP` 环境变量计算报告目录；Artifact 的 step `with.path` 继续使用合法的 `${{ runner.temp }}`。
+- 验证：本地重新通过 YAML 解析、性能 Contract 和 CI 合同；普通推送后必须出现四 Job `Performance Baseline` run，不得再是零 Job 装载失败。
+- 关联：PR `#49`、失败 Run `30168805192`、`.github/workflows/performance-baseline.yml`。
+
 ## 记录模板
 
 ```text
