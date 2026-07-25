@@ -46,6 +46,21 @@ fn repository_root() -> PathBuf {
         .to_path_buf()
 }
 
+fn read_repository_text(relative_path: &str) -> String {
+    fs::read_to_string(repository_root().join(relative_path))
+        .unwrap_or_else(|error| panic!("应能读取 {relative_path}: {error}"))
+}
+
+fn assert_repository_text_contains(relative_path: &str, expected: &[&str]) {
+    let text = read_repository_text(relative_path);
+    for value in expected {
+        assert!(
+            text.contains(value),
+            "{relative_path} 应包含目录重新审计证据：{value}"
+        );
+    }
+}
+
 struct FeatureRepositoryFixture {
     root: PathBuf,
 }
@@ -341,6 +356,112 @@ fn release_audit_显式解耦快照与功能目录审计基线() {
             .issues()
             .iter()
             .any(|issue| issue.code() == ValidationCode::ReleaseMismatch)
+    );
+}
+
+#[test]
+fn 仓库v1_2_42目录重新审计恢复current() {
+    let summary = validate_repository(&repository_root()).expect("v1.2.42 功能目录应通过完整验证");
+    assert!(
+        !summary.requires_reaudit(),
+        "完成重新审计后不得继续标记 stale"
+    );
+
+    for relative_path in [
+        "parity/features/foundation-platform.yml",
+        "parity/features/plugin-script.yml",
+        "parity/features/provider-network.yml",
+        "parity/features/remote-install.yml",
+        "parity/features/session-data.yml",
+        "parity/features/source-index.yml",
+    ] {
+        assert_repository_text_contains(relative_path, &[RELEASE_42_TAG, RELEASE_42_COMMIT]);
+        assert!(
+            !read_repository_text(relative_path).contains(RELEASE_TAG),
+            "{relative_path} 不得保留 v1.2.41 Release 元数据"
+        );
+    }
+
+    for relative_path in [
+        "parity/contracts/foundation-platform.yml",
+        "parity/contracts/plugin-script.yml",
+        "parity/contracts/provider-network.yml",
+        "parity/contracts/remote-install.yml",
+        "parity/contracts/session-data.yml",
+        "parity/README.md",
+    ] {
+        assert_repository_text_contains(relative_path, &[RELEASE_42_TAG]);
+        assert!(
+            !read_repository_text(relative_path).contains(RELEASE_TAG),
+            "{relative_path} 不得保留 v1.2.41 合同描述"
+        );
+    }
+
+    assert_repository_text_contains(
+        "upstream/source-lock.json",
+        &[
+            r#""tag": "v1.2.42""#,
+            r#""commit": "657cd33e009ad02515d30db6492cd4e669b06318""#,
+            r#""status": "current""#,
+            r#""stale_reason": null"#,
+            r#""re_audit_issue_ref": null"#,
+        ],
+    );
+}
+
+#[test]
+fn 仓库v1_2_42受影响行为证据被固定() {
+    assert_repository_text_contains(
+        "parity/features/foundation-platform.yml",
+        &["OpenAI.ChatGPT-Desktop", "issue:38"],
+    );
+    assert_repository_text_contains(
+        "parity/contracts/foundation-platform.yml",
+        &["OpenAI.ChatGPT-Desktop"],
+    );
+
+    assert_repository_text_contains(
+        "parity/features/session-data.yml",
+        &["CODEX_SQLITE_HOME", "grouped-undo-token", "issue:38"],
+    );
+    assert_repository_text_contains(
+        "parity/contracts/session-data.yml",
+        &[
+            "CODEX_SQLITE_HOME",
+            "grouped-undo-token",
+            "LOCAL_SESSION_UNDO_PREFLIGHT_FAILED",
+            "LOCAL_SESSION_UNDO_PATH_REJECTED",
+        ],
+    );
+    assert_repository_text_contains(
+        "parity/fixtures/feature.session-data.local-session-management/baseline.yml",
+        &[
+            "database_count: 2",
+            "all_databases_checked: true",
+            "allowed_paths_only: true",
+            "undo_window_retained: true",
+        ],
+    );
+
+    assert_repository_text_contains(
+        "parity/features/plugin-script.yml",
+        &["companion", "renderer-inject.js", "issue:38"],
+    );
+    assert_repository_text_contains(
+        "parity/contracts/plugin-script.yml",
+        &[
+            "data:image/png;base64",
+            "DREAM_SKIN_COMPANION_INVALID",
+            "companion 显示仍依赖 renderer 注入",
+        ],
+    );
+    assert_repository_text_contains(
+        "parity/fixtures/feature.plugin-script.dream-skin-library/baseline.yml",
+        &[
+            "data_url: data:image/webp;base64,UklGRg==",
+            "width: 96",
+            "side: right",
+        ],
     );
 }
 
