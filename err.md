@@ -589,6 +589,24 @@
 - 验证：旧正则对 CRLF 变体稳定 RED，退出码 `1`，失败消息为“CRLF Workflow 必须存在独立 release-audit Job”；修复后 `Test-CiScripts.ps1` 输出 `CI_CONTRACT_GREEN passed=32`，Release Audit Gate 为 `ok=true/status=current/requires_reaudit=false`，仓库政策为 `ok=true/violation_count=0`，六路径 `scope_hash` 与 cached diff 检查均通过。强制 `core.autocrlf=false` 会产生整文件 CRLF 尾随空白假阳性，默认过滤器下退出码为 `0`。
 - 关联：Issue `#37`、PR `#39`、`scripts/ci/Test-CiScripts.ps1`、`docs/reports/issue-37-ci-crlf-contract-fix.md`。
 
+## 2026-07-24：上游缓存同步被固定 Release 与错误 stale 断言阻断
+
+- 环境：PR `#40` 以获批二十路径把完整上游快照从 `v1.2.41` 同步到 `v1.2.42`，功能目录审计按合同保留 `v1.2.41` 并进入 `stale-re-audit-required`；CI 合同修复必须使用独立 Issue `#41` / PR，不能混入缓存同步范围。
+- 现象：`Upstream Watch / validate` 的 `test_repository_source_lock_loads_as_baseline` 把仓库 `source-lock` 与固定 `v1.2.41` 的测试辅助对象做全对象相等比较，退出码 `1`；Linux、Windows、macOS 的 `仓库功能目录通过完整引用与安全验证` 无条件断言 `!summary.requires_reaudit()`，退出码 `101`。两类失败都能在未修改的 PR `#40` 工作树稳定复现。
+- 根因：Python 测试混淆了“合成监控观测的固定夹具”和“仓库当前锁定 Release”，把合法可变值当成不变量；Rust 总体验证又与同文件已存在的 current/stale 专项语义合同相矛盾，把合法 stale 状态当成仓库失败。错误不在 `source-lock`、上游缓存、目录审计门或三平台构建。
+- 处理：Python 仍执行动态全对象对账，但期望 `Baseline` 由 `source-lock.snapshot` 的仓库、tag、发布时间、Release URL 与 commit 字段构造，继续经过 `Baseline.__post_init__` 的固定上游、tag、UTC RFC3339、URL 和 SHA 失败关闭校验；Rust 总体验证只删除与专项合同冲突的 `!summary.requires_reaudit()`，保留所有计数不变量和 current/stale 合法/非法组合测试。禁止把固定值简单更新为 `v1.2.42`，也不修改 PR `#40`、Workflow、Cargo、产品代码或上游缓存。
+- 验证：主干基线的 Python `28/28`、`--validate-only`、Rust `10/10`、Release Audit `status=current/requires_reaudit=false` 与仓库政策 `violation_count=0` 全部通过；临时 detached 工作树以 PR `#40` Head `86d48ad261669daaf14666556372a12f9b908726` 叠加两处测试补丁后，Python `28/28`、Rust `10/10`、v1.2.42 `--validate-only`、Release Audit `status=stale-re-audit-required/requires_reaudit=true` 和仓库政策全部通过。临时工作树已强制清理，未创建提交或远端分支。
+- 关联：Issue `#41`、PR `#40`、`.github/scripts/tests/test_upstream_watch.py`、`crates/inputcodex-parity/tests/catalog_repository.rs`、`docs/reports/issue-41-ci-contract-decoupling.md`。
+
+## 2026-07-25：控制面更正遗漏状态字段导致交付证据自相矛盾
+
+- 环境：Issue `#41`、PR `#42` 的最终 Head 审查；首轮控制面更正提交已回写批次叙述、PR 与旧 Head CI 状态。
+- 现象：Session Plan 的 TDD 证据仍称 GREEN 和临时合并模拟待批准，执行报告的“未完成门禁”仍把已完成的范围、哈希、计划、政策与缓存空白检查列为待决。
+- 根因：首轮文档更正只修改了部分状态段落，未对同一控制面内的历史提案措辞和待决清单做全量状态审计。
+- 处理：在既批准的 Issue `#41` 七路径内，将历史措辞改为已完成事实，仅保留最终 Head Review、CI、对话解决、所有者 Squash 授权和 closeout 为待决门禁；不修改实现、缓存、Workflow、Cargo 或产品运行面。
+- 验证：项目所有者 Windows 本机时间 `2026-07-25 13:45:32 +08:00` 复核七路径 `scope_hash`、状态字段、Session Plan `SESSION_PLAN_VERIFY_OK`、仓库政策 `ok=true/violation_count=0` 与 `git diff --check` 均通过；新 Head 仍须重新执行双 reviewer 和 GitHub-hosted CI。
+- 关联：Issue `#41`、PR `#42`、`docs/plans/sessions/2026-07-24-issue-41-ci-contract-decoupling.md`、`docs/reports/issue-41-ci-contract-decoupling.md`。
+
 ## 记录模板
 
 ```text
