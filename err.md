@@ -680,6 +680,7 @@
 - 验证：TDD RED 先由 `Test-CiScripts.ps1` 稳定报告“性能基线手工触发必须声明默认 evidence 的受约束 mode 输入”；最小修复后同一脚本达到 `CI_CONTRACT_GREEN passed=34`。未修改 `main` 的 Evidence 为绿，而本 Issue Head 的旧 Evidence 正确报告实现哈希漂移；`workflow_dispatch mode=measure` Run `30178268889` 在 `contract`、`windows`、`macos`、`required` 四 Job 成功后产生 Windows Artifact `8624873440` 与 macOS Artifact `8624854730`。两份下载结果已逐字归一化复核，并刷新 Issue `#32` 三份 Evidence；本地 Evidence、PR CI 与 Review 仍须在 Issue `#55` / PR 中闭环。
 - 独立审查反馈：原静态合同仅锁定 `mode` 输入、事件变量与 `measure` 分支，未锁定手工 `evidence` 的三证据完整性和自动事件的 `0/3`、`3/3`、部分缺失决策表。根因是测试覆盖了入口形状而非完整分流；处理是在同一合同测试中补齐五项分支与明确失败断言。负向变异把手工 evidence 条件改为不可达值后，测试按预期以“性能基线必须保留手工 evidence 分支”失败；恢复后必须重跑完整本地门禁和 PR CI。
 - 后续 Evidence 失效根因：`scripts/ci/Test-CiScripts.ps1` 是 `implementation_sha256` 输入，审查修复即使不改变 Workflow 运行语义，也会令先前双平台 Artifact 的实现哈希过期。处理：保留严格哈希比较，先推送审查修复的精确 Head，再以同一 `workflow_dispatch mode=measure` 合同取得新的双平台 Artifact，最后刷新 Windows、macOS 与 manifest；禁止手工改写哈希或忽略红色 Evidence。
+- 最终复测验证：精确 Head `427a1c6306f90cb60510200312c66ea25fa74d7a` 的 Run `30179598622` 在 `contract`、`windows`、`macos`、`required` 四 Job 全部成功后产生 Windows Artifact `8625217348` 与 macOS Artifact `8625198125`。两份 JSON 先与 source commit、tree、Run 元数据和归一化哈希交叉核验，再经 `apply_patch` 刷新三份 Evidence；最终仍必须运行本地 Evidence、CI 合同、仓库策略、范围与 PR CI，不能以 Artifact 成功替代后续门禁。
 - 关联：Issue `#54`、Issue `#55`、`.github/workflows/performance-baseline.yml`、`scripts/ci/Test-CiScripts.ps1`、`docs/adr/0004-performance-budget-policy.md`。
 
 ## 记录模板
