@@ -148,3 +148,4 @@ git diff --check
 - TDD 修复把两平台结果校验切换为 `Get-NormalizedTextHash` 并删除原始文本哈希入口，新增合同取得预期 RED 后达到 `34/34` GREEN。由于验证器属于 `implementation_sha256`，旧结果必须删除并重新 measure，禁止直接替换元数据。
 - 修复提交 `42bc2e9ce7cf2e88d0602ebdc638213854793f96` 的 Run `30170535534` 已进入 `measure` 模式并四 Job 全绿；同 Head 主 CI Run `30170535538` 七 Job 全绿。
 - 新结果已绑定 tree `94fc484124d1557ece1d76f27abc5ea1bc5ea592` 与实现哈希 `sha256:c20d5299bed4dc14af1b8b7257b206b8a7e7a02a02835265183bf4479468da6d`，本地 Evidence 零违规。两个成功 Artifact 已删除且该 Run Artifact 数为 `0`；失败 Artifact `8622687822` 保留。
+- 结果提交 `151011de62c36cf6b9af1bbdc81c9b7a7422abfc` 已在 fresh `core.autocrlf=true/false` 两种检出策略下分别运行真实 Evidence，均为 `ok=true`、`violation_count=0`；这构成 CRLF 根因修复的提交级回归证据。

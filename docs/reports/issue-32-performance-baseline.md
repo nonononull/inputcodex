@@ -136,4 +136,5 @@ Issue `#32` / PR `#49` 已建立与根七成员 Workspace 隔离的 Rust 测量�
 - 同 Head 主 CI：Run `30170128326` 七 Job 全绿，证明产品构建、Workspace 测试和仓库治理没有同步失败。
 - 可重复根因：仓库没有结果 JSON 的 `eol=lf` 属性，Windows Git 配置为 `core.autocrlf=true`；fresh checkout 会把两份 LF JSON 改写为 CRLF。验证器的配置、实现和输入哈希已归一化换行，只有结果文件仍使用 `Get-FileHash` 原始工作树字节，因此同时误报两平台文件哈希。
 - TDD：新增“性能 Evidence 对 Git 换行转换保持稳定”合同后得到期望 RED `2 -> 0`；生产修复改用 `Get-NormalizedTextHash` 并删除原始文本哈希入口，合同达到 `34/34` GREEN。
+- 提交级回归：结果提交 `151011de62c36cf6b9af1bbdc81c9b7a7422abfc` 在 fresh `core.autocrlf=true` 检出后，Windows/macOS 工作树原始哈希分别变为 `sha256:aa2c995cc369aa2f382dcb4efe22188ea08c5f3617a720b5e4f3a23e6d5384d3`、`sha256:7db611791054a4db3aee74420de1145cce2ff649d6ebb486c6ad7f3f62244f8e`，但 Evidence 仍零违规；`core.autocrlf=false` 保持 manifest 原始哈希并同样通过。
 - 证据纪律：验证器属于 `implementation_sha256`，修复后旧结果没有被改写元数据。三份固定结果删除后由提交 `42bc2e9ce7cf2e88d0602ebdc638213854793f96` 触发 Run `30170535534` 重新 measure；四 Job 全绿，新结果本地 Evidence 零违规，两个成功 Artifact 已删除且 Run Artifact 数为 `0`。

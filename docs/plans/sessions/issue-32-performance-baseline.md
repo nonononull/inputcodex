@@ -127,3 +127,4 @@ scripts/performance/Test-InputcodexBaseline.ps1
 - 修复提交 `42bc2e9ce7cf2e88d0602ebdc638213854793f96`、tree `94fc484124d1557ece1d76f27abc5ea1bc5ea592` 已由 Performance Run `30170535534` Attempt `1` 重测；四 Job 全绿，同 Head 主 CI Run `30170535538` 七 Job 全绿。
 - 新 Windows/macOS 结果 SHA-256 分别为 `c8461e942da9e49ad6a62783cad2bd88076546779f22252bafe74d4af346b55a`、`1abd6bd0181afae9f7381049902cc35b21bbca9bd77533324c7c469ca16d4829`；实现哈希为 `sha256:c20d5299bed4dc14af1b8b7257b206b8a7e7a02a02835265183bf4479468da6d`。
 - 临时成功 Artifact `8622843440`、`8622830369` 已在入库后删除，Run `30170535534` Artifact 数为 `0`；失败诊断 Artifact `8622687822` 继续按 7 天合同保留。
+- 提交 `151011de62c36cf6b9af1bbdc81c9b7a7422abfc` 已完成双 fresh checkout 回归：`core.autocrlf=true` 时两份工作树原始哈希变化但 Evidence 零违规，`core.autocrlf=false` 时原始哈希保持 manifest 值且 Evidence 同样零违规。
