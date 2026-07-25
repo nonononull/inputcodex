@@ -66,5 +66,8 @@
 - Issue `#32` / PR `#49` 已完成隔离 Rust 测量工程、opt-in 首次 view 探针、PowerShell 证据验证器和 Windows/macOS hosted Workflow；PR `#49` 以单父 Squash 提交 `fd9db9ca1c150b7db34dda8acc09b6f0cc357a17` 进入 `main`，tree 为 `3fc4a5a7697850f048edcedf6a9ec5e4f76c847c`，Issue `#32` 已按 `COMPLETED` 关闭。
 - PR `#49` 合并后主 CI Run `30171903289` 七 Job 全绿且 Artifact 为 `0`；Performance Run `30171903279` 在 Evidence 模式四 Job 全绿且 Artifact 为 `0`。Windows `core.autocrlf` 原始哈希误报已通过 fresh checkout 和 TDD 根因闭环，失败诊断证据按既有保留合同处理。
 - Issue `#32` 的完成只表示性能基线和可审计样本就绪，不表示任何性能预算数值已经批准；现有样本只能用于同平台、同可比环境趋势，禁止跨平台排名或把单次 Run 直接设为 required budget。
-- Issue `#50` 已冻结九路径与 `sha256:af1c248c46d54741f9c77ab3621cd66ccd40e3fa50698d377c788fcb0b93205f`，并通过 ADR `0004` 采用“同平台可比队列、至少五次独立 Run、先观察后阻断”的预算合同。本任务不修改预算数值、代码、Workflow、Ruleset、Release、AGOS 或产品功能。
+- Issue `#50` / PR `#51` 已完成九路径性能预算 Discovery；最终 Head `e0154c61d8b05835db10437c79f029909516eac1` 以单父 Squash 提交 `fea8824c652665df710a7e6ef941854060eb6e1f` 进入 `main`，tree 为 `9fb518cda8b35a9388fb9fce0a1ff6ba976d80cb`，GitHub 签名 `valid`，Issue `#50` 已按 `COMPLETED` 关闭。
+- PR `#51` Final Head CI Run `30174131581` 的七个预期 Job 均为成功或合同性跳过，`required` 成功且 Artifact 为 `0`；合并后主干 CI Run `30175592979` 七 Job 全绿且 Artifact 为 `0`。
+- 性能预算 Discovery 的稳定结论是“方法已批准、预算数值未批准”：Windows/macOS 必须分别收集至少五次独立可比 Run，下一合法工作只能是独立性能复测与数值批准 Issue；预算 CI、性能优化和 Gate 5 产品迁移必须继续使用不同 Issue/PR。
+- 合并后稳定状态由 `docs/reports/issue-52-performance-budget-closeout.md` 固化；本 Closeout 自身的动态 Head、CI、Review、授权与合并证据只保留在 GitHub Issue/PR 评论，不得递归创建同类状态 Closeout。
 - Gate 5 继续锁定；只有独立预算复测与数值批准完成、预算 CI 以 `approved-observation` 进入 `main` 且双平台成功执行、`release_audit=current` 后，才能建立首个 Gate 5 产品迁移 Issue。

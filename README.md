@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 功能目录、`v1.2.42` 缓存与重新审计、双平台性能基线。Issue `#32` / PR `#49` 已以单父 Squash 提交 `fd9db9ca1c150b7db34dda8acc09b6f0cc357a17` 进入 `main`，合并后主 CI 七 Job 与 Performance Evidence 四 Job 全绿且 Artifact 数均为 `0`。Issue `#50` 进一步冻结同平台可比队列、至少五次独立 Run、先观察后阻断的性能预算方法；当前没有预算数值，也尚未迁移任何上游业务功能，Gate 5 继续锁定。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 功能目录、`v1.2.42` 缓存与重新审计、双平台性能基线和性能预算 Discovery。Issue `#50` / PR `#51` 已以单父 Squash 提交 `fea8824c652665df710a7e6ef941854060eb6e1f` 进入 `main`，tree 为 `9fb518cda8b35a9388fb9fce0a1ff6ba976d80cb`，GitHub 签名 `valid`；合并后主干 CI Run `30175592979` 七 Job 全绿且 Artifact 为 `0`，Issue `#50` 已按 `COMPLETED` 关闭。当前只有性能预算方法，没有预算数值，也尚未迁移任何上游业务功能，Gate 5 继续锁定。
 
 ## 项目目标
 
@@ -57,7 +57,7 @@
 - 不把已导入的上游审计快照接入产品构建或运行面，也不在非 upstream-sync Issue 中修改快照。
 - 不导入半成品参考仓库源码。
 - Issue `#32` 已完成隔离性能基线，但没有批准预算；两平台数据禁止跨平台排名，单次有效 Run 不得被解释为 required budget。
-- Issue `#50` 只允许在批准九路径内冻结性能预算方法和长期状态；禁止填写预算数值、修改性能实现/Workflow、实施优化或解锁 Gate 5。
+- Issue `#50` / PR `#51` 已在批准九路径内冻结性能预算方法和长期状态；该交付没有填写预算数值、修改性能实现/Workflow、实施优化或解锁 Gate 5。
 - 不改写 Issue `#38` 的历史 Plan、Session Plan、Runtime Workflow 或来源提交；其阶段性叙述与最终 GitHub 事实的差异只通过 Issue `#47` Closeout 报告和长期控制面更正收口。
 - 不执行功能迁移、安装包构建、发布或未经项目所有者授权的 PR 合并。
 - 不让上游 Tauri/React UI、现有注入脚本和远程推荐列表进入最终运行面。
@@ -76,13 +76,13 @@
 - Gate 4 初始功能目录、独立 Closeout、`v1.2.42` 缓存与二十六路径重新审计均已完成；Issue `#47` 只负责把 PR `#45`、主干 CI 恢复与 Issue `#46` 的稳定证据回写到长期控制面，不迁移产品功能。
 - 最新正式功能真源为 `v1.2.42`；活动审计缓存与功能目录审计基线均已对齐该 Release，`release_audit` 为 `current`，上游 `main` 的变化仍只进入 Issue `#20` 预警。
 - Issue `#32` / PR `#49` 已完成 Windows/macOS 基线采集与 Evidence；该结果是预算 Discovery 输入，不是预算批准。
-- Issue `#50` 通过 ADR `0004` 冻结预算对象、可比队列、五次独立 Run、run-level 稳健统计、错误语义和阶段升级合同，Gate 5 仍未解锁。
+- Issue `#50` / PR `#51` 已通过 ADR `0004` 冻结预算对象、可比队列、五次独立 Run、run-level 稳健统计、错误语义和阶段升级合同；PR Final Head CI 与合并后主干 CI 均通过，Gate 5 仍未解锁。
 
 ## 下一步
 
-1. 完成 Issue `#50` 的 ADR、Discovery 报告、长期状态同步、Review/CI 与 Squash Merge。
-2. 创建独立性能复测与数值批准 Issue：每个平台至少收集五次可比 Run，并由项目所有者批准 warning/blocking 数值。
-3. 创建独立预算 CI 实施 Issue，使获批预算先以 `approved-observation` 进入 `main`；双平台成功执行后才允许建立首个 Gate 5 功能迁移 Issue。
+1. 创建独立性能复测与数值批准 Issue：每个平台至少收集五次可比 Run，并由项目所有者批准 warning/blocking 数值。
+2. 创建独立预算 CI 实施 Issue，使获批预算先以 `approved-observation` 进入 `main`，并在 Windows/macOS 各成功执行至少一次。
+3. 仅在预算复测、数值批准、预算 CI 双平台观察和 `release_audit=current` 全部满足后，建立首个 Gate 5 功能迁移 Issue。
 
 ## 项目文档
 
@@ -111,6 +111,7 @@
 - Issue `#50` Session Plan：`docs/plans/sessions/2026-07-25-issue-50-performance-budget-discovery.md`
 - Issue `#50` Runtime Workflow：`docs/workflows/2026-07-25-issue-50-performance-budget-discovery-runtime.md`
 - Issue `#50` Discovery 报告：`docs/reports/issue-50-performance-budget-discovery.md`
+- Issue `#52` 性能预算 Discovery Closeout 报告：`docs/reports/issue-52-performance-budget-closeout.md`
 - 本次筹备计划：`docs/plans/2026-07-21-bootstrap.md`
 - 筹备会话计划：`docs/plans/sessions/2026-07-21-inputcodex-bootstrap.md`
 - 筹备运行工作流：`docs/workflows/2026-07-21-inputcodex-bootstrap-runtime.md`
