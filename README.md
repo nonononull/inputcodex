@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace 与 Gate 4 初始功能目录及其独立 closeout。最新正式 Release `v1.2.42` 已通过 Issue `#34` / PR `#40` 作为只读审计缓存同步，Issue `#41` / PR `#42` 已解耦快照值与 CI 基线断言，Issue `#43` / PR `#44` 已完成状态收口。Issue `#38` 的二十六路径已获批准并完成本地 GREEN：功能目录、合同和 source-index 对齐 `v1.2.42`，`release_audit` 为 `current`，当前等待 PR、Review/CI；性能基线 Issue `#32` 继续独立排队，Gate 5 保持锁定。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 初始功能目录、`v1.2.42` 缓存与目录重新审计。Issue `#38` / PR `#45` 已将五域功能目录、合同、source-index 与 `release_audit` 对齐最新正式 Release `v1.2.42`；Squash 提交为 `5fd337fb7ceb9b0ef53e2e694cc5ddd81ea0a98c`，PR CI 与 GitHub Actions 外部事故恢复后的主干 CI 均七 Job 全绿且 Artifact 数为 `0`。Issue `#47` 仅负责本次稳定状态回写；下一项可启动工作是 Issue `#32` 的独立性能基线范围冻结，Gate 5 保持锁定。
 
 ## 项目目标
 
@@ -47,7 +47,8 @@
 - Issue `#34` / PR `#40` 已完成 `v1.2.42` 纯缓存同步；PR `#40` 以 Squash 提交 `353391424db5514d022473ba97f601486a190869` 合并，合并后主干 CI Run `30147841226` 七 Job 全绿。
 - Issue `#41` / PR `#42` 已完成 CI 合同解耦；PR `#42` 以 Squash 提交 `8aa1d4c96b0543e766b477b1b8e9652968b55f92` 合并，合并后主干 CI Run `30147071062` 七 Job 全绿。
 - Issue `#43` / PR `#44` 已完成缓存与 CI 合同状态收口；PR `#44` 以单父 Squash 提交 `fdb2f98c701800969fc478f95cd2539be598faaa` 合并，合并后主干 CI Run `30152001233` 成功。
-- Issue `#38` 二十六路径实施哈希 `sha256:a384353e947bcb9d95b51ac5ccce49ef9558ca34580c130307a64b6d868819af` 已获批准；RED 提交为 `4206ef66076a4c9e9a19ce014a20f78cb3b73163`，GREEN 后 `catalog_repository` 为 `12/12`，Release Audit 为 `current`。
+- Issue `#38` 二十六路径实施哈希 `sha256:a384353e947bcb9d95b51ac5ccce49ef9558ca34580c130307a64b6d868819af` 已获批准；RED 提交为 `4206ef66076a4c9e9a19ce014a20f78cb3b73163`，最终 Head `d3df8759bdb9c6378497a3a0c8f409c3968f4d4f` 的 `catalog_repository` 为 `12/12`、Release Audit 为 `current`，并通过 PR `#45` Squash Merge 为 `5fd337fb7ceb9b0ef53e2e694cc5ddd81ea0a98c`。
+- PR `#45` CI Run `30157623932` 七 Job 全绿且 Artifact 为 `0`；合并后主干 Run `30158058627` 的 Attempt `1/2` 因 GitHub Actions major outage 未创建任何 Job，服务恢复后的同一 Run Attempt `3` 在未修改仓库的情况下七 Job 全绿且 Artifact 为 `0`，Issue `#46` 已按 `COMPLETED` 关闭。
 - Issue `#26` / PR `#27` 已完成 Gate 4 功能目录执行：最终 Head `1d1bf32cdc4edc45e2d28f1047604222ebdb51e4` 以 Squash 提交 `a9b20f00ae069aedd42c8124d2789b230187258c` 进入 `main`；merge/head tree 均为 `205c24e05e0451a3aa39af4f43f0d9853cc7a6a2`，GitHub 签名 `valid`，PR 与合并后主干 CI 均六 Job 全绿且成功 Artifact 数为 `0`。
 - Issue `#28` / PR `#29` 已完成 Gate 4 独立 Closeout：最终 Head `7ee316c6bf4d9ca44f3475283ae1aee9c83f8577` 以单父 Squash 提交 `c07da0cad33e09b5c54e528a8a6728a048c88c0b` 合入 `main`，tree 为 `02ab8a3d8497ebb7b990e4078122b9bf916ef454`，GitHub 签名有效；Issue `#28` 已关闭，合并后主干 CI `29948874307` 六 Job 全部成功且 Artifact 数为 `0`。
 
@@ -56,7 +57,7 @@
 - 不把已导入的上游审计快照接入产品构建或运行面，也不在非 upstream-sync Issue 中修改快照。
 - 不导入半成品参考仓库源码。
 - 未经独立性能基线 Issue 的范围冻结与项目所有者批准，不创建 `benchmarks/`、测量脚本、性能预算或优化，也不修改 CI Workflow、发布资产或上游快照。
-- Issue `#38` 不得超出已批准二十六路径，不得修改上游缓存、产品 crate、Cargo、CI Workflow、Ruleset、Release、UI、性能或 AGOS；最终 Squash Merge 仍需项目所有者单独授权。
+- 不改写 Issue `#38` 的历史 Plan、Session Plan、Runtime Workflow 或来源提交；其阶段性叙述与最终 GitHub 事实的差异只通过 Issue `#47` Closeout 报告和长期控制面更正收口。
 - 不执行功能迁移、安装包构建、发布或未经项目所有者授权的 PR 合并。
 - 不让上游 Tauri/React UI、现有注入脚本和远程推荐列表进入最终运行面。
 
@@ -71,14 +72,14 @@
 - Iced 只能直接存在于 presentation crate；最小窗口不建立 UI 设计系统，视觉与交互由 Gemini 实现或审阅。
 - Gate 4 规划合同已进入 `main`；Issue `#26` 的 source-index 与五域功能目录 checkpoint `87537e6e4a0e6911dd1427cc23f52dcb805a4679` 已记录 `133` 条入口、`36` 个 feature、`3` 个排除和 `0` 个覆盖缺口。
 - Issue `#26` / PR `#27` 已将 `36` 份五域行为合同、`11` 个合成或不可逆脱敏 fixture manifest 与验证器合入 `main`；来源 PR 的 `classify`、`governance`、`linux-quality`、`windows`、`macos`、`required` 均成功，Issue 已关闭，来源功能分支的远端、本地与远端跟踪引用均已清理。
-- Gate 4 初始功能目录与独立 Closeout 已完成；`v1.2.42` 的独立重新审计正在 Issue `#38` 的规划批准门，功能目录、性能基线与优化继续保持不同 Issue/PR，Gate 5 仍锁定。
+- Gate 4 初始功能目录、独立 Closeout、`v1.2.42` 缓存与二十六路径重新审计均已完成；Issue `#47` 只负责把 PR `#45`、主干 CI 恢复与 Issue `#46` 的稳定证据回写到长期控制面，不迁移产品功能。
 - 最新正式功能真源为 `v1.2.42`；活动审计缓存与功能目录审计基线均已对齐该 Release，`release_audit` 为 `current`，上游 `main` 的变化仍只进入 Issue `#20` 预警。
 
 ## 下一步
 
-1. 为 Issue `#38` 的最终 GREEN 提交创建非 Draft PR，复核二十六路径、四个受影响行为域、fixture 安全和 `release_audit=current`。
-2. 等待最终 Head 的 GitHub-hosted CI 全绿并解决全部 Review 对话；随后停在项目所有者单独 Squash Merge 授权门。
-3. Issue `#32` 继续在独立发现阶段重新冻结测量对象、参考来源、可比环境与范围哈希；性能基线、优化和分域迁移各自使用新的独立 Issue/PR。
+1. 在 Issue `#32` 中重新冻结性能基线的测量对象、参考来源与许可证、可比环境、精确路径和范围哈希。
+2. 取得项目所有者对 Issue `#32` 精确范围的新批准后，才允许创建实现分支并交付真实性能基线；性能预算和性能优化继续使用不同 Issue/PR。
+3. 性能基线完成独立 Review/CI 与 Closeout 前，不创建 Gate 5 产品迁移 Issue；Gate 5 继续锁定。
 
 ## 项目文档
 
@@ -97,6 +98,7 @@
 - Issue `#38` Session Plan：`docs/plans/sessions/2026-07-25-issue-38-v1.2.42-catalog-reaudit.md`
 - Issue `#38` Runtime Workflow：`docs/workflows/2026-07-25-issue-38-v1.2.42-catalog-reaudit-runtime.md`
 - Issue `#38` 发现报告：`docs/reports/issue-38-v1.2.42-catalog-reaudit-discovery.md`
+- Issue `#47` 重新审计 Closeout 报告：`docs/reports/issue-47-v1.2.42-catalog-reaudit-closeout.md`
 - 本次筹备计划：`docs/plans/2026-07-21-bootstrap.md`
 - 筹备会话计划：`docs/plans/sessions/2026-07-21-inputcodex-bootstrap.md`
 - 筹备运行工作流：`docs/workflows/2026-07-21-inputcodex-bootstrap-runtime.md`

@@ -616,6 +616,16 @@
 - 验证：PR `#40` 的 Run `30147559602` 在原 Head 上七 Job 全绿；随后 PR 于 `2026-07-25T06:38:00Z` Squash Merge 为 `353391424db5514d022473ba97f601486a190869`，合并后 `main` Run `30147841226` 七 Job 全绿，Issue `#34` 于 `2026-07-25T06:38:01Z` 关闭。
 - 关联：Issue `#34`、PR `#40`、Issue `#41`、PR `#42`、`docs/reports/2026-07-23-upstream-v1.2.42-sync.md`。
 
+## 2026-07-25：GitHub Actions major outage 导致主干 CI 在创建 Job 前失败
+
+- 环境：Issue `#38` / PR `#45` 已以 Squash 提交 `5fd337fb7ceb9b0ef53e2e694cc5ddd81ea0a98c` 合入 `main`；合并后触发 CI Run `30158058627`。
+- 现象：Run Attempt `1/2` 均为 Job `0`、Check Run `0`、日志 `0`、Artifact `0`，Actions 页面显示 `Internal server error` 与 Correlation ID `c5f5fd38-d868-4f2a-bd19-4452000f21c6`；GitHub Status 同期报告 Actions `major_outage` 和运行失败、延迟。
+- 根因：GitHub Actions 平台内部服务在 Workflow 创建 Job 前故障；仓库代码、CI 脚本和 Runner 均未执行。零 Job、零日志且与官方事故时间重合时，不能把启动失败归因于产品、Parity、Cargo、Workflow 或 Ruleset。
+- 处理：建立独立事故 Issue `#46`，在官方状态恢复前停止盲目重跑；不修改仓库、Workflow、Ruleset 或 `main` 历史。官方状态恢复为 operational 后，只对同一 Run 执行受控 Attempt `3`。
+- 验证：Attempt `3` 仍绑定 `5fd337fb7ceb9b0ef53e2e694cc5ddd81ea0a98c`，精确创建 `7` 个 Job 并全部成功，Artifact 为 `0`；同一提交、同一 Workflow 在零代码变更下恢复，证明仓库实现与 CI 合同不是启动故障根因，Issue `#46` 已按 `COMPLETED` 关闭。
+- 复用：遇到“零 Job + 零日志 + 平台内部错误”时，先核验 GitHub Status、Run/Attempt、Head SHA、Workflow blob 与 Check Run 数；平台事故未恢复前只登记并等待，恢复后重跑同一 Run，禁止用代码改动掩盖外部故障。
+- 关联：Issue `#46`、Issue `#38`、PR `#45`、CI Run `30158058627`、`docs/reports/issue-47-v1.2.42-catalog-reaudit-closeout.md`。
+
 ## 记录模板
 
 ```text

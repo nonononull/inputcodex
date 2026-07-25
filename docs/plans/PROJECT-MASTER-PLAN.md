@@ -1,13 +1,17 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-38-v1.2.42-catalog-reaudit-green-awaiting-pr-review-ci
-active_gate: Gate 4：Issue #38 二十六路径功能目录重新审计已完成本地 GREEN；release_audit 已恢复 current，正在等待非 Draft PR、Review/CI 与全部对话闭环
-last_verified_gate: Issue #43 / PR #44 已收口 v1.2.42 缓存与 CI 合同状态，Squash 提交为 fdb2f98c701800969fc478f95cd2539be598faaa，合并后 main CI Run 30152001233 成功
-next_legal_gate: 为 Issue #38 创建非 Draft PR并完成 Review/CI；最终 Squash Merge 仍需项目所有者对最终 Head 单独授权，Issue #32 性能基线保持独立待重新冻结，任何优化或 Gate 5 产品迁移仍需新的 Issue/PR
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/38
+active_task: issue-32-performance-baseline-discovery-awaiting-scope-freeze
+active_gate: Gate 4：v1.2.42 功能目录重新审计已完成并保持 release_audit=current；独立性能基线等待重新冻结测量对象、可比环境、精确路径、scope_hash 与项目所有者批准
+last_verified_gate: Issue #38 / PR #45 已以单父 Squash 提交 5fd337fb7ceb9b0ef53e2e694cc5ddd81ea0a98c 完成二十六路径重新审计；PR CI 与 main CI Run 30158058627 Attempt 3 均七 Job 全绿且 Artifact 为 0，Issue #46 已完成外部事故收口
+next_legal_gate: 只允许在 Issue #32 中完成性能基线 Discovery 与精确范围冻结；获得项目所有者新批准前不得创建性能实现分支、写文件、测量、预算、优化或 Gate 5 产品迁移
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/32
 performance_baseline_issue_ref: https://github.com/nonononull/inputcodex/issues/32
 release_audit_reaudit_issue_ref: https://github.com/nonononull/inputcodex/issues/38
+release_audit_reaudit_pr_ref: https://github.com/nonononull/inputcodex/pull/45
+catalog_reaudit_closeout_issue_ref: https://github.com/nonononull/inputcodex/issues/47
+ci_incident_issue_ref: https://github.com/nonononull/inputcodex/issues/46
+release_watch_issue_ref: https://github.com/nonononull/inputcodex/issues/33
 source_implementation_issue_ref: https://github.com/nonononull/inputcodex/issues/26
 source_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/27
 closed_gate_3_closeout_issue_ref: https://github.com/nonononull/inputcodex/issues/22
@@ -16,26 +20,26 @@ gate_3_planning_issue_ref: https://github.com/nonononull/inputcodex/issues/17
 upstream_watch_issue_ref: https://github.com/nonononull/inputcodex/issues/14
 transition_issue_ref: https://github.com/nonononull/inputcodex/issues/8
 upstream_sync_issue_ref: https://github.com/nonononull/inputcodex/issues/9
-active_branch_ref: codex/issue-38-v1.2.42-catalog-reaudit
+active_branch_ref: none-awaiting-issue-32-scope-approval
 transition_branch_ref: codex/issue-8-gate-2-transition
-active_plan_ref: docs/plans/2026-07-25-issue-38-v1.2.42-catalog-reaudit.md
-active_session_plan_ref: docs/plans/sessions/2026-07-25-issue-38-v1.2.42-catalog-reaudit.md
-active_runtime_workflow_ref: docs/workflows/2026-07-25-issue-38-v1.2.42-catalog-reaudit-runtime.md
-active_pr_ref: none-awaiting-pr-creation
+active_plan_ref: none-awaiting-issue-32-discovery
+active_session_plan_ref: none-awaiting-issue-32-scope-approval
+active_runtime_workflow_ref: none-awaiting-issue-32-scope-approval
+active_pr_ref: none-awaiting-issue-32-scope-approval
 gate_3_closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/23
 gate_3_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/21
 gate_3_planning_pr_ref: https://github.com/nonononull/inputcodex/pull/18
 transition_pr_ref: https://github.com/nonononull/inputcodex/pull/10
 upstream_sync_pr_ref: https://github.com/nonononull/inputcodex/pull/11
-closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5, https://github.com/nonononull/inputcodex/pull/7, https://github.com/nonononull/inputcodex/pull/10, https://github.com/nonononull/inputcodex/pull/11, https://github.com/nonononull/inputcodex/pull/13, https://github.com/nonononull/inputcodex/pull/15, https://github.com/nonononull/inputcodex/pull/18, https://github.com/nonononull/inputcodex/pull/21, https://github.com/nonononull/inputcodex/pull/23, https://github.com/nonononull/inputcodex/pull/25, https://github.com/nonononull/inputcodex/pull/27, https://github.com/nonononull/inputcodex/pull/36, https://github.com/nonononull/inputcodex/pull/40, https://github.com/nonononull/inputcodex/pull/42, https://github.com/nonononull/inputcodex/pull/44
-active_report_ref: docs/reports/issue-38-v1.2.42-catalog-reaudit-discovery.md
+closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5, https://github.com/nonononull/inputcodex/pull/7, https://github.com/nonononull/inputcodex/pull/10, https://github.com/nonononull/inputcodex/pull/11, https://github.com/nonononull/inputcodex/pull/13, https://github.com/nonononull/inputcodex/pull/15, https://github.com/nonononull/inputcodex/pull/18, https://github.com/nonononull/inputcodex/pull/21, https://github.com/nonononull/inputcodex/pull/23, https://github.com/nonononull/inputcodex/pull/25, https://github.com/nonononull/inputcodex/pull/27, https://github.com/nonononull/inputcodex/pull/36, https://github.com/nonononull/inputcodex/pull/40, https://github.com/nonononull/inputcodex/pull/42, https://github.com/nonononull/inputcodex/pull/44, https://github.com/nonononull/inputcodex/pull/45
+active_report_ref: docs/reports/issue-47-v1.2.42-catalog-reaudit-closeout.md
 gate_3_closeout_report_ref: docs/reports/issue-22-gate-3-closeout.md
 gate_3_implementation_report_ref: docs/reports/issue-19-gate-3-rust-workspace-ci.md
 gate_2_watch_report_ref: docs/reports/issue-14-gate-2-upstream-watch.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-decision_status: issue-38-implementation-approved-local-green-awaiting-pr-review-ci-gate-5-blocked
+decision_status: gate-4-catalog-current-performance-baseline-awaiting-scope-freeze-gate-5-blocked
 
 ## 当前状态
 
@@ -58,7 +62,9 @@ decision_status: issue-38-implementation-approved-local-green-awaiting-pr-review
 - Issue `#34` / PR `#40` 已完成 `v1.2.42` 纯缓存同步，Squash 提交为 `353391424db5514d022473ba97f601486a190869`；PR 基线更新不会自动生成新的 `pull_request` Run，故经所有者授权关闭并立即重开且未改 Head、文件或提交，Run `30147559602` 全绿后才合并，合并后 main Run `30147841226` 七 Job 全绿。
 - Issue `#41` / PR `#42` 已修复固定 Release 与 stale 语义的错误耦合，Squash 提交为 `8aa1d4c96b0543e766b477b1b8e9652968b55f92`；合并后 main Run `30147071062` 七 Job 全绿，Issue 已关闭。
 - Issue `#43` / PR `#44` 已完成 `v1.2.42` 缓存与 CI 合同状态收口，PR `#44` 以单父 Squash 提交 `fdb2f98c701800969fc478f95cd2539be598faaa` 合并；合并后 main Run `30152001233` 成功。
-- Issue `#38` 的八路径 Discovery/Plan checkpoint 已由提交 `1ec07928ea100fb9dfcc4948688154eb2e020198` 固化；项目所有者已批准二十六路径与 `sha256:a384353e947bcb9d95b51ac5ccce49ef9558ca34580c130307a64b6d868819af`，RED 提交为 `4206ef66076a4c9e9a19ce014a20f78cb3b73163`，本地 GREEN 已得到 `catalog_repository 12/12`、`release_audit=current` 与 Repository Policy `0` 违规，当前等待 PR、Review/CI。
+- Issue `#38` / PR `#45` 已完成二十六路径重新审计：最终 Head `d3df8759bdb9c6378497a3a0c8f409c3968f4d4f` 精确包含 `26` 路径，CI Run `30157623932` 七 Job 全绿且 Artifact 为 `0`；单父 Squash 提交 `5fd337fb7ceb9b0ef53e2e694cc5ddd81ea0a98c` 的 tree 为 `5273d0e42483bbb5c629a2243fc24f0a892b3db3`、GitHub 签名 `valid`，Issue `#38` 已按 `COMPLETED` 关闭。
+- 合并后 main CI Run `30158058627` 的 Attempt `1/2` 因 GitHub Actions major outage 在创建 Job 前失败；服务恢复后的同一 Run Attempt `3` 绑定同一提交并七 Job 全绿、Artifact 为 `0`，Issue `#46` 已按 `COMPLETED` 关闭，仓库代码与 CI 合同无需为该外部事故修改。
+- Issue `#47` 以 `sha256:dd612ef0c2e5f0f830c40f161b1ef1a85bc58cd1d85458a758c3905ade8db03e` 冻结微型五路径 Closeout；本报告只收口长期状态与事故复用知识，其自身动态 Review、CI 与合并证据保留在 GitHub Issue/PR，不再创建二次 Closeout。
 - Issue `#8` 的过渡交付为 PR `#10`；该 PR 只包含文档与验证控制面，并按项目所有者明确授权执行 Squash Merge。
 - AGOS 仍是可选外部辅助；本仓库可用原生控制面时不运行它，不在本任务中修改或优化它。
 
@@ -132,7 +138,9 @@ decision_status: issue-38-implementation-approved-local-green-awaiting-pr-review
 - [x] Issue `#35` / PR `#36` 已将完整快照与功能目录审计基线解耦。
 - [x] Issue `#34` / PR `#40` 已缓存 `v1.2.42` 并保持显式 `stale-re-audit-required`；Issue `#41` / PR `#42` 已使该合法状态通过 CI 合同验证。
 - [x] Issue `#43` / PR `#44` 已将缓存、CI 合同与下一合法工作状态收口到 `main`。
-- [ ] Issue `#38` 已完成八路径规划 checkpoint、二十六路径批准、RED 与本地 GREEN；当前等待非 Draft PR、Review/CI 和全部对话闭环，最终 Squash Merge 必须取得项目所有者对最终 Head 的单独授权。
+- [x] Issue `#38` / PR `#45` 已完成二十六路径、Review/CI、全部对话闭环与授权 Squash Merge；Issue 已按 `COMPLETED` 关闭，功能目录和 `release_audit` 均对齐 `v1.2.42`。
+- [x] Issue `#46` 已证明主干 Run `30158058627` Attempt `1/2` 为 GitHub Actions 外部事故；同一 Run Attempt `3` 七 Job 全绿且 Artifact 为 `0`，事故已按 `COMPLETED` 关闭。
+- [x] Issue `#47` 已冻结五路径 Closeout、范围哈希、禁止面和所有者批准；其报告进入长期控制面，动态 PR/CI/合并证据只保留在 GitHub，不再递归创建 Closeout。
 - [ ] Issue `#32` 独立性能基线已立项，开始前必须重新冻结范围哈希、测量对象、可比环境与项目所有者批准；它不得顺带优化产品或推进 Gate 5。
 
 ### Gate 5：分域迁移（锁定）
@@ -161,10 +169,11 @@ decision_status: issue-38-implementation-approved-local-green-awaiting-pr-review
 - 已完成状态收口 Session Plan：`docs/plans/sessions/2026-07-25-issue-43-v1.2.42-cache-ci-closeout.md`。
 - 已完成状态收口 Runtime Workflow：`docs/workflows/2026-07-25-issue-43-v1.2.42-cache-ci-closeout-runtime.md`。
 - 已完成状态收口报告：`docs/reports/issue-43-v1.2.42-cache-ci-closeout.md`。
-- 当前 Issue `#38` 重新审计计划：`docs/plans/2026-07-25-issue-38-v1.2.42-catalog-reaudit.md`。
-- 当前 Issue `#38` Session Plan：`docs/plans/sessions/2026-07-25-issue-38-v1.2.42-catalog-reaudit.md`。
-- 当前 Issue `#38` Runtime Workflow：`docs/workflows/2026-07-25-issue-38-v1.2.42-catalog-reaudit-runtime.md`。
-- 当前 Issue `#38` 发现报告：`docs/reports/issue-38-v1.2.42-catalog-reaudit-discovery.md`。
+- 已完成 Issue `#38` 重新审计计划：`docs/plans/2026-07-25-issue-38-v1.2.42-catalog-reaudit.md`。
+- 已完成 Issue `#38` Session Plan：`docs/plans/sessions/2026-07-25-issue-38-v1.2.42-catalog-reaudit.md`。
+- 已完成 Issue `#38` Runtime Workflow：`docs/workflows/2026-07-25-issue-38-v1.2.42-catalog-reaudit-runtime.md`。
+- 已完成 Issue `#38` 发现报告：`docs/reports/issue-38-v1.2.42-catalog-reaudit-discovery.md`。
+- Gate 4 `v1.2.42` 重新审计 Closeout：`docs/reports/issue-47-v1.2.42-catalog-reaudit-closeout.md`。
 - 单一架构真源：`docs/plans/2026-07-21-architecture-governance.md`。
 - Gate 1 最终 closeout：`docs/reports/issue-6-gate-1-finalization-closeout.md`。
 - Gate 1→2 过渡计划：`docs/plans/2026-07-21-issue-8-gate-2-transition.md`。
@@ -201,9 +210,9 @@ decision_status: issue-38-implementation-approved-local-green-awaiting-pr-review
 ## 停止条件
 
 - 上游最新正式 Release 或已核验的 `v1.2.42` / `657cd33e009ad02515d30db6492cd4e669b06318` 事实发生变化。
-- 需要修改 `upstream/CodexPlusPlus/` 或 `source-lock.json` 的来源快照字段，但没有新的独立 upstream-sync Issue/PR 与项目所有者批准；Issue `#38` 只能在批准的目录复审范围内修改 `source-lock.release_audit`。
+- 需要修改 `upstream/CodexPlusPlus/` 或 `source-lock.json` 的来源快照字段，但没有新的独立 upstream-sync Issue/PR 与项目所有者批准。
 - `release_audit` 为 stale 时修改 `benchmarks/`、`apps/`、产品 crate、`Cargo.toml` 或 `Cargo.lock`，或在同一 PR 同时更新实际 audit 与受阻产品路径。
-- Issue `#38` 出现二十六路径或 `sha256:a384353e947bcb9d95b51ac5ccce49ef9558ca34580c130307a64b6d868819af` 之外的新增、删除或重命名路径，或在最终 Head 的 Review、CI 和全部对话闭环前请求 Squash Merge。
+- Issue `#47` 出现五路径或 `sha256:dd612ef0c2e5f0f830c40f161b1ef1a85bc58cd1d85458a758c3905ade8db03e` 之外的新增、删除或重命名路径，或在最终 Head 的 Review、CI 和全部对话闭环前请求 Squash Merge。
 - 在独立性能基线 Issue 获得范围与项目所有者批准前创建 `benchmarks/`、测量脚本、原始样本、性能预算候选，或修改 Cargo/Rust、测试、CI、upstream、Ruleset、发布资产或 AGOS。
 - 在独立性能基线 Issue 中创建性能优化、产品迁移、`parity-exception`、运行上游/半成品或填写绝对性能预算，但没有新的独立 Issue 与项目所有者批准。
 - Fresh 验证失败、Ruleset 变化、Review 对话未闭环或出现未批准的一致性差异。
