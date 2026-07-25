@@ -233,7 +233,7 @@ superpowers_method_discipline:
   test_driven_development:
     skill: superpowers:test-driven-development
     cycle: RED/GREEN/REFACTOR
-    evidence: #40 未修改工作树的 Python 退出 1、Rust 退出 101；Green 和临时合并模拟待精确范围批准后执行。
+    evidence: #40 未修改工作树的 Python 退出 1、Rust 退出 101；范围批准后，GREEN 与临时合并模拟已完成，证据见执行报告；每次最后变更仍需新鲜 Review 与最终 Head CI。
   verification_before_completion:
     skill: superpowers:verification-before-completion
     evidence: 提交、PR、Merge 或完成声明前必须取得新鲜本地验证、合并模拟、Review 和最终 Head CI 证据。

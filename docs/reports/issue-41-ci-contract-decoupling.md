@@ -13,7 +13,7 @@
 - 实现提交：`af866b6fabb41de3a9ea42b44859ef73d7a1549b`，项目所有者本机提交时间为 `2026-07-25 13:04:15 +08:00`。
 - PR：`https://github.com/nonononull/inputcodex/pull/42`，非 Draft；`af866b6` 的首轮 GitHub-hosted CI 已全绿。
 - 控制面更正时间：`2026-07-25 13:20:33 +08:00`，来自 Windows `Get-Date`。
-- 当前阶段：首轮治理审查发现文档阶段滞后，本更正提交正在修复；更正后的最终 Head 必须重新完成双 reviewer、Review 对话检查和 GitHub-hosted CI，随后单独请求 Squash Merge 授权。
+- 当前阶段：最终 Head 审查复核发现两处历史交付状态未同步；本次最小文档回写后，必须以新 Head 重新完成双 reviewer、Review 对话检查和 GitHub-hosted CI，随后单独请求 Squash Merge 授权。
 
 ## 根因
 
@@ -148,15 +148,23 @@ err.md
 
 ## 未完成门禁
 
-- 本控制面更正提交的精确七路径、`scope_hash`、Session Plan、仓库政策与 `git diff --cached --check`；
-- 更正后的最终 Head 双 reviewer 审查；
-- 更正后的最终 PR Head GitHub-hosted Upstream Watch、Linux、Windows、macOS、required CI；
+- 本次文档回写后的最终 Head 双 reviewer 审查；
+- 本次文档回写后的最终 PR Head GitHub-hosted Upstream Watch、Linux、Windows、macOS、required CI；
 - 所有 Review 对话解决、最终 Squash Merge 单独授权和合并后 closeout。
 
-## 首轮审查与处理
+## 审查发现与处理
+
+### 首轮审查
 
 - 技术 reviewer：无 Critical、Important 或 Minor 发现；动态 `source-lock.snapshot` 映射、失败关闭与 stale 专项状态语义均保持。
 - 治理 reviewer：发现 Important——报告和 Session Plan 把已完成的暂存、提交、推送与 PR 仍列为待完成，可能误导后续 Review/Closeout。
 - 根因：实施、提交和 PR 创建后没有在同一交付阶段回写控制面状态。
 - 处理：本更正提交只更新获批范围内的计划、Runtime Workflow 与报告，保留首次 CI 仅对应旧 Head 的事实，并强制新 Head 重新审查和重新跑 CI。
-- 验证：更正提交后重新核验七路径 `scope_hash`、Session Plan、政策与空白门禁；最终 Head 的双 reviewer 和 CI 结果将在本节追加。
+- 验证：首轮更正提交后已重新核验七路径 `scope_hash`、Session Plan、政策与空白门禁；最终 Head 的双 reviewer 和 CI 结果将在本节追加。
+
+### 最终 Head 复核中的残余状态漂移
+
+- 发现：Session Plan 的 TDD 证据仍称 GREEN 和临时合并模拟“待精确范围批准后执行”，执行报告的“未完成门禁”仍把已完成的范围、哈希、计划、政策与缓存空白检查列为待决。
+- 根因：首轮文档更正只更新了批次叙述和部分报告段落，未完成全量状态字段审计，导致历史提案措辞与当前交付阶段并存。
+- 处理：本次仅将上述历史状态改为已完成事实，并只保留实际仍待决的最终 Head Review、CI、对话解决、所有者 Squash 授权与 closeout。
+- 验证：项目所有者 Windows 本机时间 `2026-07-25 13:45:32 +08:00` 复核通过：七路径 `scope_hash=sha256:ada2baa0a524b2c8f0831d946236197b056513981c30b4530d903114b709c1b8`、状态字段审计、Session Plan `SESSION_PLAN_VERIFY_OK`、仓库政策 `ok=true/violation_count=0` 与 `git diff --check` 均通过；新 Head 仍必须重新完成双 reviewer 和 GitHub-hosted CI。

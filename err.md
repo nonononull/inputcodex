@@ -598,6 +598,15 @@
 - 验证：主干基线的 Python `28/28`、`--validate-only`、Rust `10/10`、Release Audit `status=current/requires_reaudit=false` 与仓库政策 `violation_count=0` 全部通过；临时 detached 工作树以 PR `#40` Head `86d48ad261669daaf14666556372a12f9b908726` 叠加两处测试补丁后，Python `28/28`、Rust `10/10`、v1.2.42 `--validate-only`、Release Audit `status=stale-re-audit-required/requires_reaudit=true` 和仓库政策全部通过。临时工作树已强制清理，未创建提交或远端分支。
 - 关联：Issue `#41`、PR `#40`、`.github/scripts/tests/test_upstream_watch.py`、`crates/inputcodex-parity/tests/catalog_repository.rs`、`docs/reports/issue-41-ci-contract-decoupling.md`。
 
+## 2026-07-25：控制面更正遗漏状态字段导致交付证据自相矛盾
+
+- 环境：Issue `#41`、PR `#42` 的最终 Head 审查；首轮控制面更正提交已回写批次叙述、PR 与旧 Head CI 状态。
+- 现象：Session Plan 的 TDD 证据仍称 GREEN 和临时合并模拟待批准，执行报告的“未完成门禁”仍把已完成的范围、哈希、计划、政策与缓存空白检查列为待决。
+- 根因：首轮文档更正只修改了部分状态段落，未对同一控制面内的历史提案措辞和待决清单做全量状态审计。
+- 处理：在既批准的 Issue `#41` 七路径内，将历史措辞改为已完成事实，仅保留最终 Head Review、CI、对话解决、所有者 Squash 授权和 closeout 为待决门禁；不修改实现、缓存、Workflow、Cargo 或产品运行面。
+- 验证：项目所有者 Windows 本机时间 `2026-07-25 13:45:32 +08:00` 复核七路径 `scope_hash`、状态字段、Session Plan `SESSION_PLAN_VERIFY_OK`、仓库政策 `ok=true/violation_count=0` 与 `git diff --check` 均通过；新 Head 仍须重新执行双 reviewer 和 GitHub-hosted CI。
+- 关联：Issue `#41`、PR `#42`、`docs/plans/sessions/2026-07-24-issue-41-ci-contract-decoupling.md`、`docs/reports/issue-41-ci-contract-decoupling.md`。
+
 ## 记录模板
 
 ```text
