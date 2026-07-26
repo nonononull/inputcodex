@@ -73,7 +73,10 @@
 - Issue `#54` 已在 Issue `#55` 合并后完成八次严格串行 GitHub-hosted 复测；Windows 仅得到 `2` 次初始可比队列与 `4` 次次级队列，未满足五次硬约束，数值预授权未触发。该 Issue 保持 `STOPPED_AT_EIGHT_RUN_CAP`，不得创建 `run-09`、预算值、预算 CI、优化或 Gate 5 工作。
 - Issue `#57` / PR `#58` 已完成 Hosted Windows CPU 队列异构性 Discovery；PR `#58` 以 Squash 提交 `d9d1ed77b9796ac6a99e250d1547217a39426aa9` 进入 `main`，合并后主干 CI Run `30185092327` 七 Job 全绿且 Artifact 为 `0`，Issue `#57` 已在所有者选择方案 A 后按 `COMPLETED` 关闭。
 - Issue `#59` 已完成四次固定串行复测：`run-02` 与 `run-04` 精确命中 AMD EPYC 7763 完整环境指纹 `sha256:f3954543f3cec519568345d9f40341ddeb8991a7d93b3a274cc324b047fb00cb`，Windows 严格目标队列为历史 `3` + 新命中 `2` = `5`，macOS 同队列为 `12`；四个 Run 的成功 Artifact 均已删除并复核为 `0`，不存在 `run-05`。
-- Issue `#59` 已按 Issue `#54` 所有者预授权公式生成 `benchmarks/budgets/issue-59-approved-observation.json`，归一化 SHA-256 为 `sha256:be07138908cd411925db963718b71062060f4fd4a50b910ab5d5f25f88d4ebe5`；离线构建器与验证器 TDD 合同为 `10/10` GREEN。该状态仍待 Issue `#59` 的 PR、Review/CI 与 Squash Merge，不授权预算 CI、Ruleset、性能优化或 Gate 5。
+- Issue `#59` / PR `#60` 已完成预算数值交付；Final Head `61c088d74d61a329fbe67e14b8280dfa9701c6b2` 以单父 Squash 提交 `e225144831a0928bfa3aaa0d169a054779005812` 进入 `main`，tree 为 `56eb1e8d95dfce22726c1aef1bdde1c353af055e`，GitHub 签名 `valid`，Issue `#59` 已按 `COMPLETED` 关闭。
+- PR `#60` Final Head CI Run `30194465259` 七 Job、Performance Baseline Run `30194465231` 四 Job均全绿；合并后主干 CI Run `30194897171` 七 Job、Performance Baseline Run `30194897166` 四 Job均全绿，四个成功 Run 的 Artifact 数均为 `0`。
+- `benchmarks/budgets/issue-59-approved-observation.json` 已进入 `main`，归一化 SHA-256 为 `sha256:be07138908cd411925db963718b71062060f4fd4a50b910ab5d5f25f88d4ebe5`，离线构建与复算合同为 `BUDGET_APPROVAL_GREEN passed=10`；`budget_ci_enabled=false`、`gate_5_unlocked=false` 继续保持。
 - Issue `#54` 的十六份原始 JSON 与 manifest 在 Issue `#59` 中只能作为只读历史证据缓存；不得修改其原始 `new-cohort-valid` 分类、来源 Run、哈希或任何样本内容。
 - 合并后稳定状态由 `docs/reports/issue-52-performance-budget-closeout.md` 固化；本 Closeout 自身的动态 Head、CI、Review、授权与合并证据只保留在 GitHub Issue/PR 评论，不得递归创建同类状态 Closeout。
-- Gate 5 继续锁定；只有独立预算复测与数值批准完成、预算 CI 以 `approved-observation` 进入 `main` 且双平台成功执行、`release_audit=current` 后，才能建立首个 Gate 5 产品迁移 Issue。
+- Issue `#61` 是 Issue `#59` / PR `#60` 稳定事实的八路径反递归 Closeout；其自身动态 Head、CI、Review、授权与合并证据只保留在 GitHub Issue/PR 评论，合并后不得再次创建同类 Closeout。
+- Gate 5 继续锁定；下一合法工作只能是独立预算 CI 观察 Issue，以非 required 的 `approved-observation` 模式在 Windows/macOS 成功执行且 `release_audit=current` 后，才能建立首个 Gate 5 产品迁移 Issue。

@@ -1,14 +1,19 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-59-epyc-7763-fixed-remeasurement
-active_gate: Issue #59 四次固定串行复测与离线数值生成已完成，Windows AMD EPYC 7763 严格队列为 5，macOS 同队列为 12；预算 JSON 与 TDD 复算器已落盘，当前等待非 Draft PR、Review/CI 与 Squash Merge，预算 CI、性能优化与 Gate 5 产品迁移继续锁定
-last_verified_gate: Issue #57 / PR #58 已以单父 Squash 提交 d9d1ed77b9796ac6a99e250d1547217a39426aa9 完成 Hosted 队列异构性 Discovery；合并后 main CI Run 30185092327 七 Job 全绿且 Artifact 为 0，Issue #57 已按 COMPLETED 关闭
-next_legal_gate: 完成 Issue #59 的 Fresh 验证、非 Draft PR、Review/CI、全部对话闭环和项目所有者 Final Head Squash Merge 授权；合并后再建立独立预算 CI Issue，以非 required 的 approved-observation 模式执行
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/59
+active_task: none-awaiting-performance-budget-ci-observation
+active_gate: Gate 4 性能预算数值已稳定进入 main：Windows AMD EPYC 7763 严格队列为 5，macOS 同队列为 12，approved-observation JSON 与 10/10 离线复算合同已通过；预算 CI、性能优化与 Gate 5 产品迁移继续锁定
+last_verified_gate: Issue #59 / PR #60 已以单父 Squash 提交 e225144831a0928bfa3aaa0d169a054779005812 完成性能预算数值批准；tree 为 56eb1e8d95dfce22726c1aef1bdde1c353af055e，GitHub 签名 valid，合并后 main CI Run 30194897171 七 Job与 Performance Run 30194897166 四 Job全绿且 Artifact 均为 0，Issue #59 已按 COMPLETED 关闭
+next_legal_gate: 创建独立预算 CI 观察 Issue；只能以非 required 的 approved-observation 模式消费已批准 JSON，禁止修改数值、公式、量子、队列或 Ruleset，双平台成功执行且 release_audit=current 后再决定 Gate 5
+tracking_issue_ref: none-awaiting-performance-budget-ci-observation-issue
 performance_remeasurement_issue_ref: https://github.com/nonononull/inputcodex/issues/54
 performance_queue_discovery_issue_ref: https://github.com/nonononull/inputcodex/issues/57
 performance_fixed_remeasurement_issue_ref: https://github.com/nonononull/inputcodex/issues/59
+performance_budget_values_pr_ref: https://github.com/nonononull/inputcodex/pull/60
+performance_budget_values_merge_ref: e225144831a0928bfa3aaa0d169a054779005812
+performance_budget_values_main_ci_ref: https://github.com/nonononull/inputcodex/actions/runs/30194897171
+performance_budget_values_main_performance_ref: https://github.com/nonononull/inputcodex/actions/runs/30194897166
+performance_budget_values_closeout_issue_ref: https://github.com/nonononull/inputcodex/issues/61
 performance_remeasurement_entry_issue_ref: https://github.com/nonononull/inputcodex/issues/55
 performance_budget_discovery_issue_ref: https://github.com/nonononull/inputcodex/issues/50
 performance_budget_discovery_pr_ref: https://github.com/nonononull/inputcodex/pull/51
@@ -29,26 +34,26 @@ gate_3_planning_issue_ref: https://github.com/nonononull/inputcodex/issues/17
 upstream_watch_issue_ref: https://github.com/nonononull/inputcodex/issues/14
 transition_issue_ref: https://github.com/nonononull/inputcodex/issues/8
 upstream_sync_issue_ref: https://github.com/nonononull/inputcodex/issues/9
-active_branch_ref: codex/issue-59-epyc-7763-fixed-remeasurement
+active_branch_ref: none-awaiting-performance-budget-ci-observation-issue
 transition_branch_ref: codex/issue-8-gate-2-transition
-active_plan_ref: docs/plans/2026-07-26-issue-59-epyc-7763-fixed-remeasurement.md
-active_session_plan_ref: docs/plans/sessions/2026-07-26-issue-59-epyc-7763-fixed-remeasurement.md
-active_runtime_workflow_ref: docs/workflows/2026-07-26-issue-59-epyc-7763-fixed-remeasurement-runtime.md
-active_pr_ref: none-awaiting-issue-59-measurement-pr
+active_plan_ref: none-awaiting-performance-budget-ci-plan
+active_session_plan_ref: none-awaiting-performance-budget-ci-session-plan
+active_runtime_workflow_ref: none-awaiting-performance-budget-ci-runtime-workflow
+active_pr_ref: none
 gate_3_closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/23
 gate_3_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/21
 gate_3_planning_pr_ref: https://github.com/nonononull/inputcodex/pull/18
 transition_pr_ref: https://github.com/nonononull/inputcodex/pull/10
 upstream_sync_pr_ref: https://github.com/nonononull/inputcodex/pull/11
 closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5, https://github.com/nonononull/inputcodex/pull/7, https://github.com/nonononull/inputcodex/pull/10, https://github.com/nonononull/inputcodex/pull/11, https://github.com/nonononull/inputcodex/pull/13, https://github.com/nonononull/inputcodex/pull/15, https://github.com/nonononull/inputcodex/pull/18, https://github.com/nonononull/inputcodex/pull/21, https://github.com/nonononull/inputcodex/pull/23, https://github.com/nonononull/inputcodex/pull/25, https://github.com/nonononull/inputcodex/pull/27, https://github.com/nonononull/inputcodex/pull/36, https://github.com/nonononull/inputcodex/pull/40, https://github.com/nonononull/inputcodex/pull/42, https://github.com/nonononull/inputcodex/pull/44, https://github.com/nonononull/inputcodex/pull/45
-active_report_ref: docs/reports/issue-59-epyc-7763-fixed-remeasurement.md
+active_report_ref: docs/reports/issue-61-performance-budget-closeout.md
 gate_3_closeout_report_ref: docs/reports/issue-22-gate-3-closeout.md
 gate_3_implementation_report_ref: docs/reports/issue-19-gate-3-rust-workspace-ci.md
 gate_2_watch_report_ref: docs/reports/issue-14-gate-2-upstream-watch.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-decision_status: hosted-queue-heterogeneity-discovery-in-progress-no-path-selected-budget-values-ci-optimization-gate-5-blocked
+decision_status: performance-budget-values-completed-budget-ci-observation-required-check-optimization-gate-5-blocked
 
 ## 当前状态
 
@@ -162,7 +167,9 @@ decision_status: hosted-queue-heterogeneity-discovery-in-progress-no-path-select
 - [x] Issue `#55` 为已有证据锁定 `evidence` 的 Workflow 合同增加显式手工 `measure` 入口，并以同一 Issue 成功 Artifact 刷新因实现哈希漂移而失效的三份 Evidence；该最小前置修复不改变采集器、结果 schema、预算数值、预算 CI、优化或 Gate 5。
 - [x] Issue `#54` 已在 Issue `#55` 合并后完成八次严格串行 GitHub-hosted Run；Windows 的初始 AMD EPYC 9V74 队列只有 `2` 次、次级 AMD EPYC 7763 队列只有 `4` 次，macOS 为 `8` 次可比样本。五次硬约束未满足，数值预授权未触发，Issue 保持 `STOPPED_AT_EIGHT_RUN_CAP`，不得创建 `run-09`。
 - [x] Issue `#57` / PR `#58` 已产出 Hosted Windows CPU 队列异构性的决策材料并以 Squash 提交 `d9d1ed77b9796ac6a99e250d1547217a39426aa9` 进入 `main`；项目所有者选择方案 A 后，Issue `#57` 已按 `COMPLETED` 关闭。
-- [ ] Issue `#59` 已在 38 路径与 `sha256:d0577e546d2209d10373eccdf335bbcf3cd4caad7906163838c88b461da0b570` 内完成四次固定串行槽位，Windows 严格目标队列达到 `5`、macOS 达到 `12`；预算 JSON 与离线构建/验证脚本已生成且 `10/10` GREEN，当前仅余 PR、Review/CI、Final Head 授权与 Squash Merge，不存在 `run-05`。
+- [x] Issue `#59` 已在 38 路径与 `sha256:d0577e546d2209d10373eccdf335bbcf3cd4caad7906163838c88b461da0b570` 内完成四次固定串行槽位，Windows 严格目标队列达到 `5`、macOS 达到 `12`；预算 JSON 与离线构建/验证脚本为 `10/10` GREEN，不存在 `run-05`。
+- [x] PR `#60` Final Head `61c088d74d61a329fbe67e14b8280dfa9701c6b2` 已完成 Review/CI 和项目所有者独立授权，并以单父 Squash 提交 `e225144831a0928bfa3aaa0d169a054779005812` 进入 `main`；tree 为 `56eb1e8d95dfce22726c1aef1bdde1c353af055e`，GitHub 签名 `valid`，Issue `#59` 已按 `COMPLETED` 关闭。
+- [x] PR `#60` Final Head CI/Performance Run `30194465259` / `30194465231` 与合并后主干 Run `30194897171` / `30194897166` 均全绿且 Artifact 为 `0`；Issue `#61` 仅以反递归 Closeout 固化该稳定事实，其自身动态交付证据只保留在 GitHub。
 
 ### Gate 5：分域迁移（锁定）
 

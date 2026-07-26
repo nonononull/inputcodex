@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 功能目录、`v1.2.42` 缓存与重新审计、双平台性能基线和性能预算 Discovery。Issue `#59` 的四次固定串行复测已全部结束：Windows AMD EPYC 7763 严格目标队列达到 `5` 次，macOS 同队列达到 `12` 次；离线预算 JSON、构建器和验证器已生成，TDD 合同 `10/10` GREEN。当前仍待 Issue `#59` 的 PR、Review/CI 与 Squash Merge；预算 CI、性能优化、上游功能迁移和 Gate 5 继续锁定。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 功能目录、`v1.2.42` 缓存与重新审计、双平台性能基线和性能预算数值批准。Issue `#59` / PR `#60` 已以单父 Squash 提交 `e225144831a0928bfa3aaa0d169a054779005812` 进入 `main`：Windows AMD EPYC 7763 严格目标队列为 `5`，macOS 同队列为 `12`，预算 JSON 与离线复算合同 `10/10` GREEN。预算 CI、性能优化、上游功能迁移和 Gate 5 继续锁定。
 
 ## 项目目标
 
@@ -78,13 +78,12 @@
 - Issue `#32` / PR `#49` 已完成 Windows/macOS 基线采集与 Evidence；该结果是预算 Discovery 输入，不是预算批准。
 - Issue `#50` / PR `#51` 已通过 ADR `0004` 冻结预算对象、可比队列、五次独立 Run、run-level 稳健统计、错误语义和阶段升级合同；PR Final Head CI 与合并后主干 CI 均通过，Gate 5 仍未解锁。
 - Issue `#55` 使 `Performance Baseline` 的手工 trigger 必须显式选择 `evidence` 或 `measure`，默认值为 `evidence`；它不改变自动 PR/push 行为，也不实施预算 CI。Issue `#54` 已以八次严格串行 hosted Run 验证该入口，但 Windows 的 CPU 队列分裂为四类，未产生五次同队列样本；预算数值预授权因此没有触发。
-- Issue `#59` 已在固定四次上限内新增两份严格目标 Windows 样本，最终 Windows/macOS 队列数为 `5/12`；`benchmarks/budgets/issue-59-approved-observation.json` 使用所有者预授权公式离线生成，预算 CI 与 Gate 5 均保持关闭。
+- Issue `#59` / PR `#60` 已在固定四次上限内新增两份严格目标 Windows 样本，最终 Windows/macOS 队列数为 `5/12`；`benchmarks/budgets/issue-59-approved-observation.json` 使用所有者预授权公式离线生成并进入 `main`。PR Final Head 与合并后主干的 CI/Performance 共四个 Run 均全绿且 Artifact 为 `0`，预算 CI 与 Gate 5 仍保持关闭。
 
 ## 下一步
 
-1. 完成 Issue `#59` 的 Fresh 验证、非 Draft PR、Review/CI 和全部对话根因闭环；最终 Head 仍需项目所有者单独授权 Squash Merge。
-2. Issue `#59` 数值进入 `main` 后，建立独立预算 CI Issue，以非 required 的 `approved-observation` 模式完成 Windows/macOS 观察；不得在该任务修改数值公式或启用 Ruleset。
-3. 预算 CI 双平台成功执行、`release_audit=current` 且后续所有者决策完成后，才建立首个 Gate 5 功能迁移 Issue。
+1. 建立独立预算 CI Issue，以非 required 的 `approved-observation` 模式完成 Windows/macOS 观察；只能消费已批准 JSON，不得修改数值、公式、量子、队列或启用 Ruleset。
+2. 预算 CI 双平台成功执行、`release_audit=current` 且后续所有者决策完成后，才建立首个 Gate 5 功能迁移 Issue；性能优化继续使用独立 Issue/PR。
 
 ## 项目文档
 
@@ -126,6 +125,10 @@
 - Issue `#59` Session Plan：`docs/plans/sessions/2026-07-26-issue-59-epyc-7763-fixed-remeasurement.md`
 - Issue `#59` Runtime Workflow：`docs/workflows/2026-07-26-issue-59-epyc-7763-fixed-remeasurement-runtime.md`
 - Issue `#59` 复测报告：`docs/reports/issue-59-epyc-7763-fixed-remeasurement.md`
+- Issue `#61` 性能预算数值 Closeout 计划：`docs/plans/2026-07-26-issue-61-performance-budget-closeout.md`
+- Issue `#61` Session Plan：`docs/plans/sessions/2026-07-26-issue-61-performance-budget-closeout.md`
+- Issue `#61` Runtime Workflow：`docs/workflows/2026-07-26-issue-61-performance-budget-closeout-runtime.md`
+- Issue `#61` Closeout 报告：`docs/reports/issue-61-performance-budget-closeout.md`
 - 本次筹备计划：`docs/plans/2026-07-21-bootstrap.md`
 - 筹备会话计划：`docs/plans/sessions/2026-07-21-inputcodex-bootstrap.md`
 - 筹备运行工作流：`docs/workflows/2026-07-21-inputcodex-bootstrap-runtime.md`
