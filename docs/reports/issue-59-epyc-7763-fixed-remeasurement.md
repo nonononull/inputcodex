@@ -1,6 +1,6 @@
 # Issue #59：EPYC 7763 四次固定串行复测报告
 
-status: RUNS_IN_PROGRESS_1_OF_4
+status: RUNS_IN_PROGRESS_2_OF_4
 
 ## 当前结论
 
@@ -18,7 +18,7 @@ status: RUNS_IN_PROGRESS_1_OF_4
 | 槽位 | GitHub Run | Windows CPU / 分类 | macOS 分类 | 状态 |
 | --- | --- | --- | --- | --- |
 | `run-01` | [`30190401855`](https://github.com/nonononull/inputcodex/actions/runs/30190401855) | Intel Xeon 8370C / `new-cohort-valid` | `comparable-valid` | completed |
-| `run-02` | 待执行 | 待执行 | 待执行 | pending |
+| `run-02` | [`30190945477`](https://github.com/nonononull/inputcodex/actions/runs/30190945477) | AMD EPYC 7763 / `comparable-valid` | `comparable-valid` | completed |
 | `run-03` | 待执行 | 待执行 | 待执行 | pending |
 | `run-04` | 待执行 | 待执行 | 待执行 | pending |
 
@@ -34,6 +34,14 @@ status: RUNS_IN_PROGRESS_1_OF_4
 - `contract`、`windows`、`macos`、`required` 全部成功。
 - Windows Artifact `8628415357`，归一化 SHA-256 `sha256:51aef5b03c97ce334c8fb60322cbbd6f13703709d6e325a053ffba5fe759ea79`，环境指纹 `sha256:e3900b38d3689b617e7b92891add66d62b05eefdb8bb0f87d0ec955cd72d8ebc`。
 - macOS Artifact `8628392131`，归一化 SHA-256 `sha256:a44579973458d33bf8365526c5a108d5ebc3a3ff819f16b180f77ac28a45c324`，环境指纹 `sha256:e95c8f57f22013020911c87b7ddf74af763daf461d124cf4ae3f9f1e30805efa`。
+
+## run-02 证据
+
+- 测量 Head：`7bd79df652081be6ed3e4b4c41c528cdfdc4df84`；tree：`970aad82df28441050741841297f5ee4dc495976`。
+- Run `30190945477` 的 `contract`、`windows`、`macos`、`required` 全部成功。
+- Windows Artifact `8628595174`，归一化 SHA-256 `sha256:0c179768bdd5c6df2cf51bf675854584f21e769fd5c4f6d0a83cfd23505eb0b6`，环境指纹精确命中目标 `sha256:f3954543f3cec519568345d9f40341ddeb8991a7d93b3a274cc324b047fb00cb`。
+- macOS Artifact `8628571759`，归一化 SHA-256 `sha256:c1b6f9823d4dd6d01b1a37c6c193abb75ecd129cdd9f308b4937d34438a48bbd`，环境指纹继续匹配历史队列。
+- Windows 严格目标队列当前为历史 `3` + 新命中 `1` = `4`；按固定合同继续执行 `run-03`、`run-04`。
 
 ## 控制面证据
 
