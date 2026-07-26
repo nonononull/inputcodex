@@ -2,9 +2,9 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 25 日，Gate 3 七成员 Workspace、Gate 4 `v1.2.42` 功能目录重新审计、双平台性能基线与性能预算 Discovery 均已进入 `main`。Issue `#50` / PR `#51` 的 Squash 提交为 `fea8824c652665df710a7e6ef941854060eb6e1f`；合并后主干 CI Run `30175592979` 七 Job 全绿且 Artifact 为 `0`，Issue `#50` 已按 `COMPLETED` 关闭。当前只批准预算方法，预算数值、预算 CI、性能优化和 Gate 5 产品迁移仍需不同 Issue/PR。
+截至 2026 年 7 月 26 日，Gate 3 七成员 Workspace、Gate 4 `v1.2.42` 功能目录重新审计、双平台性能基线、性能预算 Discovery 与预算数值均已进入 `main`。Issue `#59` / PR `#60` 的单父 Squash 提交为 `e225144831a0928bfa3aaa0d169a054779005812`；合并后主干 CI Run `30194897171` 七 Job与 Performance Baseline Run `30194897166` 四 Job全绿且 Artifact 均为 `0`，Issue `#59` 已按 `COMPLETED` 关闭。当前只批准 `approved-observation` 数值证据，预算 CI、required check、性能优化和 Gate 5 产品迁移仍需不同 Issue/PR。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供十八个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供十九个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -24,6 +24,7 @@
 16. Issue `#32` 隔离性能测量合同、原始样本结构、专用 Workflow 和预算/优化隔离验证。
 17. Issue `#50` 性能预算 ADR、同平台可比队列、阶段门禁、九路径范围与长期状态验证。
 18. Issue `#52` 性能预算 Discovery 合并后稳定状态、八路径范围、反递归边界与主干证据验证。
+19. Issue `#61` 性能预算数值合并后稳定状态、八路径范围、反递归边界、预算复算与双套主干证据验证。
 
 当前禁止：
 
@@ -35,6 +36,156 @@
 - 修改或优化外部 AGOS。
 - 在 Issue `#50` 中填写预算数值、运行新 hosted 测量、修改性能实现/Workflow、实施优化或解锁 Gate 5。
 - 在 Issue `#52` 中修改代码、Cargo、`benchmarks/`、Workflow、Ruleset、Release、AGOS、预算数值、性能优化或 Gate 5 产品功能。
+- 在 Issue `#61` 中修改预算数值、公式、量子、队列、样本、`benchmarks/`、代码、Cargo、Workflow、Ruleset、Release、AGOS、性能优化或 Gate 5 产品功能。
+
+## Issue #61 性能预算数值 Closeout 本地轻量验证
+
+Issue `#61` 只修改八份治理与状态文档，不运行完整 Workspace、桌面 Release 或真实性能采集。以下命令同时覆盖已提交、未暂存、已暂存和未跟踪路径：
+
+```powershell
+$baseline = 'e225144831a0928bfa3aaa0d169a054779005812'
+$approvedPaths = @(
+  'AGENTS.md'
+  'build.md'
+  'docs/plans/2026-07-26-issue-61-performance-budget-closeout.md'
+  'docs/plans/PROJECT-MASTER-PLAN.md'
+  'docs/plans/sessions/2026-07-26-issue-61-performance-budget-closeout.md'
+  'docs/reports/issue-61-performance-budget-closeout.md'
+  'docs/workflows/2026-07-26-issue-61-performance-budget-closeout-runtime.md'
+  'README.md'
+) | Sort-Object
+
+$branch = (git branch --show-current).Trim()
+if ($branch -ne 'codex/issue-61-performance-budget-closeout') {
+  throw "Issue #61 当前分支不正确：$branch"
+}
+
+$committed = @(git diff --name-only "$baseline...HEAD")
+$unstaged = @(git diff --name-only)
+$staged = @(git diff --cached --name-only)
+$untracked = @(git ls-files --others --exclude-standard)
+$actualPaths = @($committed + $unstaged + $staged + $untracked | Where-Object { $_ } | Sort-Object -Unique)
+$unexpectedPaths = @($actualPaths | Where-Object { $_ -notin $approvedPaths })
+$missingPaths = @($approvedPaths | Where-Object { $_ -notin $actualPaths })
+if ($unexpectedPaths.Count -ne 0 -or $missingPaths.Count -ne 0 -or $actualPaths.Count -ne 8) {
+  [pscustomobject]@{
+    actual = $actualPaths -join ', '
+    unexpected = $unexpectedPaths -join ', '
+    missing = $missingPaths -join ', '
+  } | Format-List
+  throw 'Issue #61 实际差异不是批准的精确八路径。'
+}
+
+$scopeText = ($approvedPaths -join "`n") + "`n"
+$scopeBytes = [System.Text.UTF8Encoding]::new($false).GetBytes($scopeText)
+$scopeHash = [Convert]::ToHexString([System.Security.Cryptography.SHA256]::HashData($scopeBytes)).ToLowerInvariant()
+if ($scopeHash -ne 'dafe55bfc38c38782558c1577215d227ac8c83b7110735c4ddd58b48d66264b5') {
+  throw "Issue #61 scope_hash 漂移：$scopeHash"
+}
+
+$requiredContent = @{
+  'AGENTS.md' = @(
+    'Issue `#59` / PR `#60` 已完成预算数值交付'
+    'e225144831a0928bfa3aaa0d169a054779005812'
+    '30194897171'
+    'Issue `#61` 是 Issue `#59` / PR `#60` 稳定事实的八路径反递归 Closeout'
+  )
+  'README.md' = @(
+    'e225144831a0928bfa3aaa0d169a054779005812'
+    '建立独立预算 CI Issue'
+    'docs/reports/issue-61-performance-budget-closeout.md'
+  )
+  'build.md' = @(
+    '十九个检查点'
+    '截至 2026 年 7 月 26 日'
+    'e225144831a0928bfa3aaa0d169a054779005812'
+    'Issue #61 性能预算数值 Closeout 本地轻量验证'
+    'BUDGET_APPROVAL_GREEN passed=10'
+  )
+  'docs/plans/PROJECT-MASTER-PLAN.md' = @(
+    'active_task: none-awaiting-performance-budget-ci-observation'
+    'performance_budget_values_merge_ref: e225144831a0928bfa3aaa0d169a054779005812'
+    'performance_budget_values_closeout_issue_ref: https://github.com/nonononull/inputcodex/issues/61'
+    '30194897166'
+  )
+  'docs/plans/2026-07-26-issue-61-performance-budget-closeout.md' = @(
+    'scope_hash: sha256:dafe55bfc38c38782558c1577215d227ac8c83b7110735c4ddd58b48d66264b5'
+    '本 Closeout PR 合并后不得再为同一状态创建二次 Closeout'
+  )
+  'docs/plans/sessions/2026-07-26-issue-61-performance-budget-closeout.md' = @(
+    'approved_scope_ref: https://github.com/nonononull/inputcodex/issues/61#issuecomment-5082819125'
+    'merge_ref: owner-authorization-required-for-final-head'
+  )
+  'docs/reports/issue-61-performance-budget-closeout.md' = @(
+    'BUDGET_APPROVAL_GREEN passed=10'
+    'budget_ci_enabled=false'
+    '本 Closeout 合并后不需要再创建同类 Closeout'
+  )
+  'docs/workflows/2026-07-26-issue-61-performance-budget-closeout-runtime.md' = @(
+    'workflow_status: immutable-execution-contract'
+    '最终 Squash Merge 必须由项目所有者针对最终 Head 单独授权'
+  )
+}
+
+foreach ($entry in $requiredContent.GetEnumerator()) {
+  $text = Get-Content -LiteralPath $entry.Key -Raw
+  foreach ($required in $entry.Value) {
+    if (-not $text.Contains($required)) {
+      throw "Issue #61 稳定事实缺失：$($entry.Key) -> $required"
+    }
+  }
+}
+
+$longTermFiles = @('AGENTS.md', 'README.md', 'docs/plans/PROJECT-MASTER-PLAN.md')
+$forbiddenPatterns = @(
+  '当前仍待 Issue `#59` 的 PR、Review/CI 与 Squash Merge'
+  '完成 Issue `#59` 的 Fresh 验证、非 Draft PR、Review/CI'
+  'active_task: issue-59-epyc-7763-fixed-remeasurement'
+  'active_pr_ref: none-awaiting-issue-59-measurement-pr'
+  '当前仅余 PR、Review/CI、Final Head 授权与 Squash Merge'
+)
+foreach ($file in $longTermFiles) {
+  $text = Get-Content -LiteralPath $file -Raw
+  foreach ($pattern in $forbiddenPatterns) {
+    if ($text.Contains($pattern)) {
+      throw "Issue #61 仍含过期待合并状态：$file -> $pattern"
+    }
+  }
+}
+
+$placeholderFiles = @($approvedPaths | Where-Object { $_ -ne 'build.md' })
+foreach ($file in $placeholderFiles) {
+  $text = Get-Content -LiteralPath $file -Raw
+  if ($text -match '<pending>|\bTBD\b|__[A-Z0-9_]+__') {
+    throw "Issue #61 文件仍含占位符：$file"
+  }
+}
+
+function Get-NormalizedTextSha256 {
+  param([Parameter(Mandatory = $true)][string]$Path)
+  $text = [System.IO.File]::ReadAllText((Resolve-Path -LiteralPath $Path).Path)
+  $normalized = $text.Replace("`r`n", "`n").Replace("`r", "`n")
+  $bytes = [System.Text.UTF8Encoding]::new($false).GetBytes($normalized)
+  return 'sha256:' + [Convert]::ToHexString([System.Security.Cryptography.SHA256]::HashData($bytes)).ToLowerInvariant()
+}
+
+$budgetHash = Get-NormalizedTextSha256 -Path 'benchmarks/budgets/issue-59-approved-observation.json'
+if ($budgetHash -ne 'sha256:be07138908cd411925db963718b71062060f4fd4a50b910ab5d5f25f88d4ebe5') {
+  throw "Issue #59 已批准预算 JSON 漂移：$budgetHash"
+}
+
+pwsh -NoProfile -File scripts/performance/Test-InputcodexBaseline.ps1 -RepositoryRoot . -Mode Evidence
+if ($LASTEXITCODE -ne 0) { throw '性能 Evidence 验证失败。' }
+pwsh -NoProfile -File scripts/performance/Test-InputcodexBudgetApproval.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw '性能预算数值验证失败。' }
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+if ($LASTEXITCODE -ne 0) { throw 'CI 合同验证失败。' }
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw '仓库政策验证失败。' }
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'git diff --check 失败。' }
+Write-Output "ISSUE_61_CLOSEOUT_GREEN paths=$($actualPaths.Count) scope_hash=sha256:$scopeHash"
+```
 
 ## Issue #52 性能预算 Discovery Closeout 本地轻量验证
 
