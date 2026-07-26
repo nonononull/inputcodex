@@ -1,0 +1,51 @@
+{
+  "schema_version": "inputcodex.performance-remeasurement-manifest.v1",
+  "issue_number": 59,
+  "base": {
+    "main_commit": "d9d1ed77b9796ac6a99e250d1547217a39426aa9",
+    "branch": "codex/issue-59-epyc-7763-fixed-remeasurement",
+    "scope_hash": "sha256:d0577e546d2209d10373eccdf335bbcf3cd4caad7906163838c88b461da0b570",
+    "max_serial_runs": 4
+  },
+  "policy": {
+    "allowed_classifications": [
+      "comparable-valid",
+      "new-cohort-valid",
+      "evidence-invalid",
+      "external-incident"
+    ],
+    "budget_ci_enabled": false,
+    "observation_stage": true,
+    "raw_result_issue_number": 32,
+    "target_windows_processor": "AMD EPYC 7763 64-Core Processor",
+    "required_target_cohort_runs": 5,
+    "fixed_all_slots_required": true,
+    "hard_stop_after_run_04": true
+  },
+  "historical_evidence": {
+    "issue_number": 54,
+    "manifest_path": "benchmarks/results/issue-54/manifest.json",
+    "source_branch": "codex/issue-54-performance-remeasurement-budget-approval",
+    "source_commit": "fef75c3c6a8ca0b561c0215e6ae41280d62ba048",
+    "source_tree": "85194d95e2efb8e6eea75937d9c953a5a4ad58ad",
+    "manifest_normalized_sha256": "sha256:72567fe96f61d19d4eca8a5347e3d3fcea7df823975946ec3f464a43d229f1ae",
+    "immutable": true,
+    "windows_target_candidate_slots": [
+      "run-03",
+      "run-04",
+      "run-05",
+      "run-08"
+    ],
+    "macos_comparable_slots": [
+      "run-01",
+      "run-02",
+      "run-03",
+      "run-04",
+      "run-05",
+      "run-06",
+      "run-07",
+      "run-08"
+    ]
+  },
+  "runs": []
+}

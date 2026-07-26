@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 功能目录、`v1.2.42` 缓存与重新审计、双平台性能基线和性能预算 Discovery。Issue `#50` / PR `#51` 已以单父 Squash 提交 `fea8824c652665df710a7e6ef941854060eb6e1f` 进入 `main`，tree 为 `9fb518cda8b35a9388fb9fce0a1ff6ba976d80cb`，GitHub 签名 `valid`；合并后主干 CI Run `30175592979` 七 Job 全绿且 Artifact 为 `0`，Issue `#50` 已按 `COMPLETED` 关闭。Issue `#55` 已提供显式、非阻断的手工 `measure` 入口；Issue `#54` 的八次 hosted 复测因 Windows CPU 队列异构而按硬上限停止，当前仍没有预算数值，也尚未迁移任何上游业务功能，Gate 5 继续锁定。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 功能目录、`v1.2.42` 缓存与重新审计、双平台性能基线和性能预算 Discovery。Issue `#57` / PR `#58` 已证明预算阻塞根因是 GitHub-hosted Windows CPU 队列异构，不是产品回归或采集失败；项目所有者已选择方案 A。当前 Issue `#59` 以 `AMD EPYC 7763 64-Core Processor` 为目标队列执行四次固定串行复测，四次后不足五份同队列样本即硬停止。预算 CI、性能优化、上游功能迁移和 Gate 5 继续锁定。
 
 ## 项目目标
 
@@ -81,9 +81,9 @@
 
 ## 下一步
 
-1. 完成 Issue `#57` 的 Hosted 队列异构性 Discovery；只有项目所有者明确选择后续路径后，才能建立新的受控复测、ADR 一致性例外或 Runner 决策 Issue。
-2. 若选择新复测路径，必须在新 Issue 中冻结新的有限槽位上限与停止规则；禁止恢复或扩展 Issue `#54`，禁止自动创建 `run-09`。
-3. 仅在预算复测、数值批准、预算 CI 双平台观察和 `release_audit=current` 全部满足后，建立首个 Gate 5 功能迁移 Issue。
+1. 在 Issue `#59` 中缓存 Issue `#54` 的只读历史证据，并严格串行执行四个新测量槽位；禁止恢复 Issue `#54`、创建其 `run-09` 或创建 Issue `#59` 的 `run-05`。
+2. 四次结束后，若 AMD EPYC 7763 总样本达到至少五次，则按 ADR `0004` 落盘可复算的 warning/blocking 数值；若不足五次则硬停止并返回一致性例外或 Runner 决策。
+3. 数值进入 `main` 后再建立独立预算 CI Issue，以 `approved-observation` 模式完成 Windows/macOS 观察；满足全部条件后才建立首个 Gate 5 功能迁移 Issue。
 
 ## 项目文档
 
@@ -121,6 +121,10 @@
 - Issue `#57` Session Plan：`docs/plans/sessions/2026-07-26-issue-57-hosted-queue-heterogeneity-discovery.md`
 - Issue `#57` Runtime Workflow：`docs/workflows/2026-07-26-issue-57-hosted-queue-heterogeneity-discovery-runtime.md`
 - Issue `#57` Discovery 报告：`docs/reports/issue-57-hosted-queue-heterogeneity-discovery.md`
+- Issue `#59` 固定复测计划：`docs/plans/2026-07-26-issue-59-epyc-7763-fixed-remeasurement.md`
+- Issue `#59` Session Plan：`docs/plans/sessions/2026-07-26-issue-59-epyc-7763-fixed-remeasurement.md`
+- Issue `#59` Runtime Workflow：`docs/workflows/2026-07-26-issue-59-epyc-7763-fixed-remeasurement-runtime.md`
+- Issue `#59` 复测报告：`docs/reports/issue-59-epyc-7763-fixed-remeasurement.md`
 - 本次筹备计划：`docs/plans/2026-07-21-bootstrap.md`
 - 筹备会话计划：`docs/plans/sessions/2026-07-21-inputcodex-bootstrap.md`
 - 筹备运行工作流：`docs/workflows/2026-07-21-inputcodex-bootstrap-runtime.md`

@@ -1,13 +1,14 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-57-hosted-queue-heterogeneity-discovery
-active_gate: Gate 4 性能预算方法保持稳定；Issue #54 的八次 hosted 复测已在 Windows CPU 队列异构下耗尽上限，Issue #57 只做后续路径 Discovery；release_audit=current，预算 CI、性能优化与 Gate 5 产品迁移继续锁定
+active_task: issue-59-epyc-7763-fixed-remeasurement
+active_gate: Gate 4 性能预算方法保持稳定；项目所有者已选择方案 A，Issue #59 以 AMD EPYC 7763 为目标 Windows 队列执行四次固定串行复测；release_audit=current，预算 CI、性能优化与 Gate 5 产品迁移继续锁定
 last_verified_gate: Issue #50 / PR #51 已以单父 Squash 提交 fea8824c652665df710a7e6ef941854060eb6e1f 完成性能预算方法冻结；tree 为 9fb518cda8b35a9388fb9fce0a1ff6ba976d80cb，GitHub 签名 valid，合并后 main CI Run 30175592979 七 Job 全绿且 Artifact 为 0，Issue #50 已按 COMPLETED 关闭
-next_legal_gate: 完成 Issue #57 的证据与决策材料；只有项目所有者明确选择“新限额复测”“一致性例外修订”或“独立 Runner 决策”之一后，才能创建下一独立 Issue。禁止恢复 Issue #54、创建 run-09、落盘预算数值或启用预算 CI
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/57
+next_legal_gate: 完成 Issue #59 的四次固定串行复测；AMD EPYC 7763 总样本达到至少五次时落盘数值但不实施预算 CI，不足五次时硬停止并返回新决策。禁止恢复 Issue #54、创建其 run-09 或 Issue #59 的 run-05
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/59
 performance_remeasurement_issue_ref: https://github.com/nonononull/inputcodex/issues/54
 performance_queue_discovery_issue_ref: https://github.com/nonononull/inputcodex/issues/57
+performance_fixed_remeasurement_issue_ref: https://github.com/nonononull/inputcodex/issues/59
 performance_remeasurement_entry_issue_ref: https://github.com/nonononull/inputcodex/issues/55
 performance_budget_discovery_issue_ref: https://github.com/nonononull/inputcodex/issues/50
 performance_budget_discovery_pr_ref: https://github.com/nonononull/inputcodex/pull/51
@@ -28,19 +29,19 @@ gate_3_planning_issue_ref: https://github.com/nonononull/inputcodex/issues/17
 upstream_watch_issue_ref: https://github.com/nonononull/inputcodex/issues/14
 transition_issue_ref: https://github.com/nonononull/inputcodex/issues/8
 upstream_sync_issue_ref: https://github.com/nonononull/inputcodex/issues/9
-active_branch_ref: codex/issue-57-hosted-queue-heterogeneity-discovery
+active_branch_ref: codex/issue-59-epyc-7763-fixed-remeasurement
 transition_branch_ref: codex/issue-8-gate-2-transition
-active_plan_ref: docs/plans/2026-07-26-issue-57-hosted-queue-heterogeneity-discovery.md
-active_session_plan_ref: docs/plans/sessions/2026-07-26-issue-57-hosted-queue-heterogeneity-discovery.md
-active_runtime_workflow_ref: docs/workflows/2026-07-26-issue-57-hosted-queue-heterogeneity-discovery-runtime.md
-active_pr_ref: none-awaiting-issue-57-documentation-pr
+active_plan_ref: docs/plans/2026-07-26-issue-59-epyc-7763-fixed-remeasurement.md
+active_session_plan_ref: docs/plans/sessions/2026-07-26-issue-59-epyc-7763-fixed-remeasurement.md
+active_runtime_workflow_ref: docs/workflows/2026-07-26-issue-59-epyc-7763-fixed-remeasurement-runtime.md
+active_pr_ref: none-awaiting-issue-59-measurement-pr
 gate_3_closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/23
 gate_3_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/21
 gate_3_planning_pr_ref: https://github.com/nonononull/inputcodex/pull/18
 transition_pr_ref: https://github.com/nonononull/inputcodex/pull/10
 upstream_sync_pr_ref: https://github.com/nonononull/inputcodex/pull/11
 closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5, https://github.com/nonononull/inputcodex/pull/7, https://github.com/nonononull/inputcodex/pull/10, https://github.com/nonononull/inputcodex/pull/11, https://github.com/nonononull/inputcodex/pull/13, https://github.com/nonononull/inputcodex/pull/15, https://github.com/nonononull/inputcodex/pull/18, https://github.com/nonononull/inputcodex/pull/21, https://github.com/nonononull/inputcodex/pull/23, https://github.com/nonononull/inputcodex/pull/25, https://github.com/nonononull/inputcodex/pull/27, https://github.com/nonononull/inputcodex/pull/36, https://github.com/nonononull/inputcodex/pull/40, https://github.com/nonononull/inputcodex/pull/42, https://github.com/nonononull/inputcodex/pull/44, https://github.com/nonononull/inputcodex/pull/45
-active_report_ref: docs/reports/issue-57-hosted-queue-heterogeneity-discovery.md
+active_report_ref: docs/reports/issue-59-epyc-7763-fixed-remeasurement.md
 gate_3_closeout_report_ref: docs/reports/issue-22-gate-3-closeout.md
 gate_3_implementation_report_ref: docs/reports/issue-19-gate-3-rust-workspace-ci.md
 gate_2_watch_report_ref: docs/reports/issue-14-gate-2-upstream-watch.md
@@ -160,7 +161,8 @@ decision_status: hosted-queue-heterogeneity-discovery-in-progress-no-path-select
 - [x] PR `#51` 合并后主干 CI Run `30175592979` 七 Job 全绿且 Artifact 为 `0`，Issue `#50` 已按 `COMPLETED` 关闭；稳定语义仍是“预算方法已批准、预算数值未批准”。
 - [x] Issue `#55` 为已有证据锁定 `evidence` 的 Workflow 合同增加显式手工 `measure` 入口，并以同一 Issue 成功 Artifact 刷新因实现哈希漂移而失效的三份 Evidence；该最小前置修复不改变采集器、结果 schema、预算数值、预算 CI、优化或 Gate 5。
 - [x] Issue `#54` 已在 Issue `#55` 合并后完成八次严格串行 GitHub-hosted Run；Windows 的初始 AMD EPYC 9V74 队列只有 `2` 次、次级 AMD EPYC 7763 队列只有 `4` 次，macOS 为 `8` 次可比样本。五次硬约束未满足，数值预授权未触发，Issue 保持 `STOPPED_AT_EIGHT_RUN_CAP`，不得创建 `run-09`。
-- [ ] Issue `#57` 只产出 Hosted Windows CPU 队列异构性的决策材料：比较保持硬队列并限额复测、经一致性例外修订语义、独立 Runner 决策三条路径；当前没有路径被选择，不能进入采样、ADR/合同变更、付费或 self-hosted Runner、预算 CI、优化或 Gate 5。
+- [x] Issue `#57` / PR `#58` 已产出 Hosted Windows CPU 队列异构性的决策材料并以 Squash 提交 `d9d1ed77b9796ac6a99e250d1547217a39426aa9` 进入 `main`；项目所有者选择方案 A 后，Issue `#57` 已按 `COMPLETED` 关闭。
+- [ ] Issue `#59` 已冻结 38 路径、`sha256:d0577e546d2209d10373eccdf335bbcf3cd4caad7906163838c88b461da0b570`、AMD EPYC 7763 目标队列和四次固定串行槽位；四次后不足五份目标队列样本即硬停止，不得创建 `run-05`。
 
 ### Gate 5：分域迁移（锁定）
 

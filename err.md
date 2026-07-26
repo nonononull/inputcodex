@@ -701,6 +701,33 @@
 - 验证：最小 Add File 补丁成功，随后八路径补丁成功；范围审计、性能 Evidence、CI 合同、仓库政策和 `git diff --check` 均通过。
 - 关联：Issue `#57`、`docs/plans/sessions/2026-07-26-issue-57-hosted-queue-heterogeneity-discovery.md`。
 
+### 2026-07-26：性能复测历史证据只在停止分支，预算无法从 main 独立复算
+
+- 环境：Issue `#59` 获批复用 Issue `#54` 的四个 AMD EPYC 7763 历史候选和八个 macOS 同队列样本；当前 `main@d9d1ed77b9796ac6a99e250d1547217a39426aa9` 只有 Discovery 报告，没有 `benchmarks/results/issue-54/` 原始文件。
+- 现象：若只在新 manifest 中引用旧分支或 GitHub Artifact，分支清理或 Artifact 过期后将无法复算历史样本、分类与预算数值。
+- 根因：Issue `#54` 在八次上限处停止，没有形成可合并预算 PR；原始样本因此保留在 `codex/issue-54-performance-remeasurement-budget-approval`，未进入长期 `main`。
+- 处理：Issue `#59` 的精确范围显式包含旧 manifest 与十六份 JSON，以 Git 对象为来源通过 `apply_patch` 内容不变地缓存；原始分类保持不变，新目标队列只在汇总层引用 EPYC 7763 槽位。
+- 验证：固定历史 manifest 归一化 SHA-256 为 `sha256:72567fe96f61d19d4eca8a5347e3d3fcea7df823975946ec3f464a43d229f1ae`；`build.md` 逐份复算 manifest 所记录的结果哈希和 JSON 解析。
+- 关联：Issue `#54`、Issue `#57`、Issue `#59`、`benchmarks/results/issue-54/manifest.json`。
+
+### 2026-07-26：PowerShell 续行语法与 Windows 参数长度阻断大文件补丁
+
+- 环境：Issue `#59` 在 Windows PowerShell 中通过 npm Codex 的 `--codex-run-as-apply-patch` 兼容入口缓存十七份历史 JSON。
+- 现象：Bash 风格反斜杠续行触发 PowerShell `ParserError`；把全部历史文件拼成单一补丁参数又触发“文件名或扩展名太长”，两次失败均发生在写入前。
+- 根因：PowerShell 不使用反斜杠续行；Windows 进程命令行长度不足以承载约 600 KiB 的单参数补丁，且单个结果文件也接近安全上限。
+- 处理：使用 PowerShell 数组代替 Bash 续行；每个历史文件再按唯一临时标记拆为小于 12,000 字符的连续 `apply_patch` Add/Update 批次，最终移除标记。
+- 验证：十七个目标文件全部由官方兼容入口成功返回 `Success`；后续范围、JSON、固定 manifest 哈希和逐结果归一化哈希验证负责证明没有截断或残留标记。
+- 关联：Issue `#59`、`docs/workflows/2026-07-26-issue-59-epyc-7763-fixed-remeasurement-runtime.md`。
+
+### 2026-07-26：跨运行时排序导致 scope_hash 初值漂移
+
+- 环境：Issue `#59` 的三十八路径先在 Node.js 中使用默认字符串排序计算哈希，Fresh 验证按项目既有 Windows PowerShell `Sort-Object` 合同复算。
+- 现象：Node.js 初值为 `sha256:f5c265b9f69be791e815c571b4e4fb4e4c0f601062a4b1206b43f22746f17e93`，PowerShell Fresh 值为 `sha256:d0577e546d2209d10373eccdf335bbcf3cd4caad7906163838c88b461da0b570`。
+- 根因：JavaScript 默认 Unicode 排序与 PowerShell 当前区域排序对大写路径 `README.md` 的位置不同；scope hash 不只依赖集合，也依赖排序算法。
+- 处理：项目控制面统一以 Windows PowerShell `Sort-Object`、UTF-8 无 BOM、LF 拼接和末尾换行为准；修正计划、Session、Runtime、报告、Master Plan、manifest 与 `build.md` 的哈希和路径顺序。
+- 验证：Fresh 命令对三十八路径复算得到唯一正确值 `sha256:d0577e546d2209d10373eccdf335bbcf3cd4caad7906163838c88b461da0b570`；旧值全仓搜索必须为零。
+- 关联：Issue `#59`、`build.md`、`docs/plans/2026-07-26-issue-59-epyc-7763-fixed-remeasurement.md`。
+
 ## 记录模板
 
 ```text
