@@ -40,6 +40,15 @@ on:
       - 'Cargo.toml'
       - 'rust-toolchain.toml'
   workflow_dispatch:
+    inputs:
+      mode:
+        description: '选择 evidence 复核既有证据或 measure 生成新的临时样本'
+        required: true
+        default: evidence
+        type: choice
+        options:
+          - evidence
+          - measure
 
 permissions:
   contents: read
@@ -84,7 +93,23 @@ jobs:
             'benchmarks/results/issue-32/manifest.json'
           )
           $presentCount = @($evidencePaths | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf }).Count
-          if ($presentCount -eq 0) {
+          $eventName = '${{ github.event_name }}'
+          $manualMode = '${{ github.event.inputs.mode }}'
+          if ($eventName -eq 'workflow_dispatch') {
+            if ($manualMode -eq 'measure') {
+              $mode = 'measure'
+            }
+            elseif ($manualMode -eq 'evidence') {
+              if ($presentCount -ne $evidencePaths.Count) {
+                throw "手工 evidence 模式要求三份已入库性能证据同时存在，当前为 $presentCount/$($evidencePaths.Count)。"
+              }
+              $mode = 'evidence'
+            }
+            else {
+              throw "不支持的 workflow_dispatch mode：$manualMode"
+            }
+          }
+          elseif ($presentCount -eq 0) {
             $mode = 'measure'
           }
           elseif ($presentCount -eq $evidencePaths.Count) {

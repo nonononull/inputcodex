@@ -1682,6 +1682,57 @@ if ($LASTEXITCODE -ne 0) { throw '读取 cached diff 统计失败。' }
 git status --short --branch
 ```
 
+## Issue #55 显式性能复测入口本地轻量验证
+
+Issue `#55` 只允许修改十四条路径，`scope_hash` 固定为 `sha256:372c8c3942d492a9372603f5bc6bbae42ae8013c7603a092c294d24be4edb1be`。本机不得运行完整 Workspace、桌面 Release 或真实性能采集；测量行为只在推送后由 GitHub-hosted Runner 的显式 `workflow_dispatch mode=measure` 验收。三条 Issue `#32` Evidence 路径只能使用该 Run 的成功 Artifact 刷新，不能删除或伪造历史样本。
+
+```powershell
+$baseline = '0678d03981ac0aef2051eb2d3711221ac2a50d29'
+$approvedPaths = @(
+  '.github/workflows/performance-baseline.yml'
+  'AGENTS.md'
+  'benchmarks/results/issue-32/macos.json'
+  'benchmarks/results/issue-32/manifest.json'
+  'benchmarks/results/issue-32/windows.json'
+  'build.md'
+  'docs/plans/2026-07-26-issue-55-performance-remeasurement-entry.md'
+  'docs/plans/PROJECT-MASTER-PLAN.md'
+  'docs/plans/sessions/2026-07-26-issue-55-performance-remeasurement-entry.md'
+  'docs/reports/issue-55-performance-remeasurement-entry.md'
+  'docs/workflows/2026-07-26-issue-55-performance-remeasurement-entry-runtime.md'
+  'err.md'
+  'README.md'
+  'scripts/ci/Test-CiScripts.ps1'
+) | Sort-Object
+$committed = @(git diff --name-only "$baseline...HEAD")
+$unstaged = @(git diff --name-only)
+$staged = @(git diff --cached --name-only)
+$untracked = @(git ls-files --others --exclude-standard)
+$actualPaths = @($committed + $unstaged + $staged + $untracked | Where-Object { $_ } | Sort-Object -Unique)
+$pathDiff = @(Compare-Object -ReferenceObject $approvedPaths -DifferenceObject $actualPaths)
+if ($pathDiff.Count -ne 0) { $pathDiff | Format-Table -AutoSize; throw 'Issue #55 实际差异不是批准的十四条路径。' }
+$scopeText = ($approvedPaths -join "`n") + "`n"
+$scopeBytes = [System.Text.UTF8Encoding]::new($false).GetBytes($scopeText)
+$scopeHash = [Convert]::ToHexString([System.Security.Cryptography.SHA256]::HashData($scopeBytes)).ToLowerInvariant()
+if ($scopeHash -ne '372c8c3942d492a9372603f5bc6bbae42ae8013c7603a092c294d24be4edb1be') { throw "Issue #55 scope_hash 漂移：$scopeHash" }
+
+pwsh -NoProfile -File scripts/performance/Test-InputcodexBaseline.ps1 -RepositoryRoot . -Mode Evidence
+if ($LASTEXITCODE -ne 0) { throw '性能 Evidence 验证失败。' }
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+if ($LASTEXITCODE -ne 0) { throw 'CI 合同验证失败。' }
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw '仓库政策验证失败。' }
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'git diff --check 失败。' }
+Write-Output 'ISSUE_55_LOCAL_GREEN'
+```
+
+推送后使用以下命令进行唯一一次 hosted 行为验收；必须在 Windows/macOS 都成功后才允许进入 PR 收口：
+
+```powershell
+gh workflow run 'Performance Baseline' --repo nonononull/inputcodex --ref codex/issue-55-performance-remeasurement-entry -f mode=measure
+```
+
 ## 外部 AGOS 使用边界
 
 Issue `#17` 曾以 report-only 运行 AGOS 默认入口，结果为 `needs-input/unregistered`；已按项目规则记录并绕过。AGOS 不属于环境要求或合并门禁；不得在本规划 PR 中修改、修复或优化其 Registry、脚本、规则、Workflow 或 Vault。

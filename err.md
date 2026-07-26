@@ -671,6 +671,18 @@
 - 验证：双 fresh checkout 对照已稳定复现根因；修复后的回归合同达到 `CI_CONTRACT_GREEN passed=34`。旧 Run 结果未改写元数据，三份固定结果删除后由提交 `42bc2e9ce7cf2e88d0602ebdc638213854793f96` 触发 Performance Run `30170535534` 重新 measure，四 Job 全绿；新结果本地 Evidence 零违规，两个临时成功 Artifact 已删除且该 Run Artifact 数为 `0`。结果提交 `151011de62c36cf6b9af1bbdc81c9b7a7422abfc` 在 fresh `core.autocrlf=true/false` 两种检出策略下均通过真实 Evidence；最终 hosted Evidence 仍由下一 Head 验证。
 - 关联：Issue `#32`、PR `#49`、Run `30170128309`、Artifact `8622687822`、`scripts/performance/Test-InputcodexBaseline.ps1`、`scripts/ci/Test-CiScripts.ps1`。
 
+## 2026-07-26：已有性能证据使手工 Workflow dispatch 永远进入 Evidence
+
+- 环境：Issue `#54` 需要 Windows/macOS 各五次全新 GitHub-hosted 复测；`main` 已存在 `benchmarks/results/issue-32/{windows,macos,manifest}.json` 三份 Evidence。
+- 现象：`Performance Baseline` 的 `workflow_dispatch` 没有输入，contract Job 仅以三份文件的 `0/3`、`3/3` 或部分存在状态选择模式；当前 `3/3` 时任何手工 dispatch 都只能进入 `evidence`，无法产生新的临时 Artifact。
+- 根因：Workflow 把初次基线的“证据是否存在”同时当成了手工复测的唯一意图来源；采集器和验证器又明确固定 Issue `#32`，所以通过删除已入库证据强行触发 `measure` 会产生隐式副作用和不可审计来源 tree。
+- 处理：建立独立 Issue `#55`，为 `workflow_dispatch` 增加必填 choice `mode`，默认 `evidence`、仅允许 `evidence`/`measure`。手工 `measure` 明确进入既有双平台采集路径；手工 `evidence` 要求完整证据；PR/push 保持原有自动语义。Workflow 与 CI 合同本身属于 `implementation_sha256`，所以本 Issue 的成功 hosted Artifact 必须刷新 Issue `#32` 的 Windows、macOS 与 manifest Evidence；未改采集器、验证器、schema、基线配置的业务语义、预算数值、预算 CI 或 Ruleset。
+- 验证：TDD RED 先由 `Test-CiScripts.ps1` 稳定报告“性能基线手工触发必须声明默认 evidence 的受约束 mode 输入”；最小修复后同一脚本达到 `CI_CONTRACT_GREEN passed=34`。未修改 `main` 的 Evidence 为绿，而本 Issue Head 的旧 Evidence 正确报告实现哈希漂移；`workflow_dispatch mode=measure` Run `30178268889` 在 `contract`、`windows`、`macos`、`required` 四 Job 成功后产生 Windows Artifact `8624873440` 与 macOS Artifact `8624854730`。两份下载结果已逐字归一化复核，并刷新 Issue `#32` 三份 Evidence；本地 Evidence、PR CI 与 Review 仍须在 Issue `#55` / PR 中闭环。
+- 独立审查反馈：原静态合同仅锁定 `mode` 输入、事件变量与 `measure` 分支，未锁定手工 `evidence` 的三证据完整性和自动事件的 `0/3`、`3/3`、部分缺失决策表。根因是测试覆盖了入口形状而非完整分流；处理是在同一合同测试中补齐五项分支与明确失败断言。负向变异把手工 evidence 条件改为不可达值后，测试按预期以“性能基线必须保留手工 evidence 分支”失败；恢复后必须重跑完整本地门禁和 PR CI。
+- 后续 Evidence 失效根因：`scripts/ci/Test-CiScripts.ps1` 是 `implementation_sha256` 输入，审查修复即使不改变 Workflow 运行语义，也会令先前双平台 Artifact 的实现哈希过期。处理：保留严格哈希比较，先推送审查修复的精确 Head，再以同一 `workflow_dispatch mode=measure` 合同取得新的双平台 Artifact，最后刷新 Windows、macOS 与 manifest；禁止手工改写哈希或忽略红色 Evidence。
+- 最终复测验证：精确 Head `427a1c6306f90cb60510200312c66ea25fa74d7a` 的 Run `30179598622` 在 `contract`、`windows`、`macos`、`required` 四 Job 全部成功后产生 Windows Artifact `8625217348` 与 macOS Artifact `8625198125`。两份 JSON 先与 source commit、tree、Run 元数据和归一化哈希交叉核验，再经 `apply_patch` 刷新三份 Evidence；最终仍必须运行本地 Evidence、CI 合同、仓库策略、范围与 PR CI，不能以 Artifact 成功替代后续门禁。
+- 关联：Issue `#54`、Issue `#55`、`.github/workflows/performance-baseline.yml`、`scripts/ci/Test-CiScripts.ps1`、`docs/adr/0004-performance-budget-policy.md`。
+
 ## 记录模板
 
 ```text
