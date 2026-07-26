@@ -76,3 +76,7 @@ git diff --check
 - 最小 GREEN：七个产品组件改为根 `Cargo.toml + src/**/*.rs`；CI 合同 `35/35` GREEN，性能 Contract `ok=true`、零违规。
 - 当前实现哈希：`sha256:ed9a8c27972a8b99b331031af171fbf348587481079d62f05f2dc54a88536faa`。
 - Hosted 重新测量前，三份旧 Evidence 按预期稳定返回三个 `HASH_MISMATCH`；不得把该预期 RED 当作实现失败。
+- 实现检查点：提交 `3d25fafe8b9c085aaaa0069d8e5c93e6afc63eac`，Tree `733319d274a854248d7c706a74333ab8df8d2232`，普通推送。
+- Hosted 测量：Run `30205624985` Attempt `1` 的 `contract`、`windows`、`macos`、`required` 四 Job 全绿。
+- Artifact：Windows `8633022467` / `sha256:d8737f5039fd58b00f8d9d542fff3deb54b512ed0aa5ec145771726e9f79dd00`；macOS `8632997457` / `sha256:36b2d08185144617c5ea785b86731771127b9601184b8e64e4e971959944a17d`。
+- 三份 Evidence 已只从该 Run 入库，本地 Evidence 输出 `ok=true`、`violation_count=0`。

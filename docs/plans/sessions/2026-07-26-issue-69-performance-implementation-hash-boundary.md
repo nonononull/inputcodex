@@ -30,6 +30,10 @@ scope_boundary: approved ten paths only; final squash merge requires separate ow
 local_time: 2026-07-26T21:26:28+08:00
 closeout_ref: pending
 agos_status: bypassed-report-only-needs-input-unregistered
+implementation_checkpoint_ref: 3d25fafe8b9c085aaaa0069d8e5c93e6afc63eac
+measurement_run_ref: https://github.com/nonononull/inputcodex/actions/runs/30205624985
+measurement_artifact_refs: windows=8633022467, macos=8632997457
+evidence_status: imported-and-local-green
 ```
 
 ## Local Knowledge Lookup
@@ -127,7 +131,7 @@ scope_hash: sha256:6392a1b4150f2aae0c34c285e83b6870f47e3bdc57def6308d0a26ddd1589
 
 ```yaml
 protected_feature_replay:
-  status: implementation-checkpoint-ready
+  status: evidence-imported-final-verification-pending
   features:
     - feature: 普通 crate tests 不属于性能被测实现
       baseline_evidence_ref: PR #68 old-algorithm hash sha256:174f8aec273a5b7490aa833e7554e26edda996a649105ce916d9cc4873ea8bd7

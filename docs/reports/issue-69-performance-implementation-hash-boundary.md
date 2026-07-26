@@ -72,3 +72,13 @@
 - 完整 CI 合同达到 `35/35` GREEN；性能 Contract `ok=true`、`violation_count=0`，当前实现哈希为 `sha256:ed9a8c27972a8b99b331031af171fbf348587481079d62f05f2dc54a88536faa`。
 - Hosted 重新测量前，旧 Windows、macOS、manifest Evidence 按预期产生三个 `HASH_MISMATCH`，没有手工改写或删除证据。
 - 实现检查点原生门禁通过：CI 合同 `35/35`、性能 Contract 零违规、Repository Policy 零违规、精确七路径、批准十路径 `scope_hash`、非法控制字节与 `git diff --check` 均通过。
+
+## Hosted 重新测量与 Evidence 入库
+
+- 实现检查点提交为 `3d25fafe8b9c085aaaa0069d8e5c93e6afc63eac`，Tree 为 `733319d274a854248d7c706a74333ab8df8d2232`，父提交为 `a2e5e5a6728200739a4acb85042ba7831ac6295b`；普通推送后从该精确 Head 触发 Run `30205624985` Attempt `1`。
+- `contract`、`windows`、`macos`、`required` 四 Job 全绿；Windows 用时约 `6m20s`，macOS 用时约 `3m33s`。
+- Windows Artifact `8633022467`，名称 `performance-windows-30205624985-1`，结果归一化 SHA-256 为 `sha256:d8737f5039fd58b00f8d9d542fff3deb54b512ed0aa5ec145771726e9f79dd00`。
+- macOS Artifact `8632997457`，名称 `performance-macos-30205624985-1`，结果归一化 SHA-256 为 `sha256:36b2d08185144617c5ea785b86731771127b9601184b8e64e4e971959944a17d`。
+- 两平台均绑定提交 `3d25fafe8b9c085aaaa0069d8e5c93e6afc63eac`、Tree `733319d274a854248d7c706a74333ab8df8d2232`、实现哈希 `sha256:ed9a8c27972a8b99b331031af171fbf348587481079d62f05f2dc54a88536faa`、配置哈希 `sha256:b9ed601016ececc735634aeb143965c78fbfc61819d37c7f9e584bc971642b53` 与输入哈希 `sha256:c5b507d219ff49975c13805a2a6e036ade6c61a33a184bfffb74219ce01784b5`。
+- 每个平台均包含 `5` 个首次 view 成功样本、`60` 个空闲资源样本和 `3` 个 Rust 场景；下载文件与入库文件哈希完全一致。
+- Windows、macOS 与 manifest 已通过 `apply_patch` 写入；本地 Evidence 验证为 `ok=true`、`violation_count=0`，没有手工替换单一哈希字段。

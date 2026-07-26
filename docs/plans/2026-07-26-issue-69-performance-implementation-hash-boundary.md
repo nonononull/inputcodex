@@ -146,11 +146,11 @@ pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
 git diff --check
 ```
 
-- [ ] **Step 2：提交并普通推送实现检查点**
+- [x] **Step 2：提交并普通推送实现检查点**
 
 只暂存十路径中已产生的文件，不覆写本机 Git 时间，普通推送；禁止 force push。
 
-- [ ] **Step 3：从精确实现 Head 触发测量**
+- [x] **Step 3：从精确实现 Head 触发测量**
 
 ```powershell
 gh workflow run 'Performance Baseline' --repo nonononull/inputcodex --ref codex/issue-69-performance-hash-boundary -f mode=measure
@@ -158,7 +158,7 @@ gh workflow run 'Performance Baseline' --repo nonononull/inputcodex --ref codex/
 
 预期：`contract`、`windows`、`macos`、`required` 全部成功。
 
-- [ ] **Step 4：只从同一 Run Artifact 刷新 Evidence**
+- [x] **Step 4：只从同一 Run Artifact 刷新 Evidence**
 
 核对 `measurement_commit` 等于实现 Head、两平台 `implementation_sha256` 一致、配置与输入哈希不变；禁止手工替换单一哈希字段。
 
@@ -167,7 +167,7 @@ gh workflow run 'Performance Baseline' --repo nonononull/inputcodex --ref codex/
 **文件：**
 - 修改：`docs/reports/issue-69-performance-implementation-hash-boundary.md`
 
-- [ ] **Step 1：重新运行 Evidence GREEN**
+- [x] **Step 1：重新运行 Evidence GREEN**
 
 ```powershell
 pwsh -NoProfile -File scripts/performance/Test-InputcodexBaseline.ps1 -RepositoryRoot . -Mode Evidence
