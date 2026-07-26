@@ -260,10 +260,24 @@ try {
         'scripts/performance/Invoke-InputcodexBaseline.ps1', 'scripts/performance/Test-InputcodexBaseline.ps1'
     )) { $implementationPaths.Add($relativePath) }
 
+    $productImplementationRoots = @(
+        'apps/inputcodex-desktop',
+        'crates/inputcodex-domain',
+        'crates/inputcodex-application',
+        'crates/inputcodex-infrastructure',
+        'crates/inputcodex-platform',
+        'crates/inputcodex-presentation',
+        'crates/inputcodex-parity'
+    )
+    foreach ($productImplementationRoot in $productImplementationRoots) {
+        $implementationPaths.Add("$productImplementationRoot/Cargo.toml")
+    }
+
+    $productSourceDirectories = @($productImplementationRoots | ForEach-Object { "$_/src" })
     $codePaths = Get-RelativeFilePaths `
         -Root $resolvedRoot `
-        -Directories @('apps/inputcodex-desktop', 'crates/inputcodex-domain', 'crates/inputcodex-application', 'crates/inputcodex-infrastructure', 'crates/inputcodex-platform', 'crates/inputcodex-presentation', 'crates/inputcodex-parity') `
-        -Filter { param($file) $file.Extension -eq '.rs' -or $file.Name -eq 'Cargo.toml' }
+        -Directories $productSourceDirectories `
+        -Filter { param($file) $file.Extension -eq '.rs' }
     foreach ($codePath in $codePaths) { $implementationPaths.Add($codePath) }
 
     $inputPaths = [System.Collections.Generic.List[string]]::new()

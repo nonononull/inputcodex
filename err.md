@@ -764,6 +764,16 @@
 - 验证：原位修正 Issue `#59` 的 `run-02` / Final Head 评论和 PR `#60` 的 Final Head 评论；回读正文不得包含控制字符、`$head`、`$tree`、未求值日期表达式或缺失字段。
 - 关联：Issue `#59`、PR `#60`、`err.md` 第 511 行的既有 PowerShell Markdown 转义记录。
 
+### 2026-07-26：普通 crate tests 误入性能实现哈希，且路径集合迁移不能复用旧 Evidence
+
+- 环境：PR `#68` 只修改 `crates/inputcodex-parity/tests/catalog_repository.rs`；标准 CI Run `30203435576` 七 Job 全绿，但 Performance Baseline Run `30203435572` 的 Windows/macOS Evidence 均失败。
+- 现象：三份 Evidence 记录 `implementation_sha256=sha256:e4c9265396476c918112f553d846239ed21f84c7432e6a34ddc8f55293d64e48`，PR `#68` 当前计算值为 `sha256:174f8aec273a5b7490aa833e7554e26edda996a649105ce916d9cc4873ea8bd7`，稳定产生三个 `HASH_MISMATCH`。
+- 根因：`Test-InputcodexBaseline.ps1` 递归纳入七个产品组件目录的全部 `.rs`，错误包含普通 `tests/**`。进一步复算发现，仅把动态集合收窄为组件根 `Cargo.toml + src/**/*.rs` 时，main 与 PR `#68` 虽统一为 `sha256:39fcc5593ada18c4b42daf2e94556a97dda1e90385f146184178418a79b38a7e`，但该值不等于旧 Evidence；验证器和 `Test-CiScripts.ps1` 又属于固定实现输入，真实修复必然再次改变哈希。
+- 处理：拒绝直接替换三份 Evidence 的哈希或忽略实现绑定；建立 Issue `#69`，推荐收窄路径后从精确实现 Head 运行一次 GitHub-hosted `mode=measure`，只用同一成功 Run 的双平台 Artifact 刷新 Windows、macOS 与 manifest。初始七路径提案扩为十路径，`scope_hash=sha256:6392a1b4150f2aae0c34c285e83b6870f47e3bdc57def6308d0a26ddd158911d`；项目所有者已通过 Issue 评论 `5083808758` 批准实施与 Review/CI，最终 Squash Merge 仍单独授权。
+- 验证：旧算法 `main=e4c926...`、PR `#68=174f8a...`；收窄集合后两者均为 `39fcc5...`；模拟修改验证器后再次变化为 `570fd2...`，证明旧 Evidence 不可能在不迁移或不重新测量的情况下原样通过。TDD 合同先稳定 RED，再在最小路径修复后达到 CI 合同 `35/35`、性能 Contract 零违规；当前实现哈希为 `sha256:ed9a8c27972a8b99b331031af171fbf348587481079d62f05f2dc54a88536faa`，旧 Evidence 按预期保持三个 `HASH_MISMATCH`。标准 CI Artifact 为 `0`，PR Review 对话为 `0`。
+- 工具纠错：创建工作树前的分支存在性检查曾对空命令结果调用 `.Trim()` 并报错；未创建任何分支或目录，改为数组计数后从 `origin/main` 安全创建隔离工作树。内置 `apply_patch.bat` 又因 WindowsApps 执行权限返回 `Access is denied`，改用本机 npm Codex 的同一 `--codex-run-as-apply-patch` 模式完成补丁。提交前误向 `verify-session-plan.ps1` 传入不存在的 `-ReportOnly`，命中第 83 行既有“AGOS 参数漂移”记录；项目原生 CI 合同、性能 Contract 与仓库政策均已通过，因此按规则停止调用该外部校验器并绕过，不修改 AGOS。
+- 关联：Issue `#69`、PR `#68`、Run `30203435572`、`scripts/performance/Test-InputcodexBaseline.ps1`、Issue `#32` Runtime Workflow。
+
 ## 记录模板
 
 ```text
