@@ -2,7 +2,7 @@
 
 ## 当前结论
 
-本报告已建立 Issue `#54` 的原生审计面，但尚未写入任何 Issue `#54` hosted 样本、统计结果或 warning/blocking 数值。项目仍处于 `baseline-only`：Issue `#32` 的结果仅为种子证据，Issue `#55` 只修复了显式复测入口。
+本报告已缓存 Issue `#54` 的第一个双平台 hosted 样本，但尚未形成统计结果或 warning/blocking 数值。项目仍处于 `baseline-only`：Issue `#32` 的结果仅为种子证据，Issue `#55` 只修复了显式复测入口。
 
 数值形成的所有前提已冻结：Windows/macOS 分开管理、每个平台至少五个独立同队列 `comparable-valid` Run、保留全部 IQR/无效/漂移/事故证据、run-level 稳健统计和显式安全裕量。预算 CI、性能优化、Ruleset 和 Gate 5 未获本 Issue 授权。
 
@@ -25,7 +25,13 @@
 
 | 平台 | comparable-valid | new-cohort-valid | evidence-invalid | external-incident | 数值状态 |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Windows | 0 | 0 | 0 | 0 | 未生成 |
-| macOS | 0 | 0 | 0 | 0 | 未生成 |
+| Windows | 1 | 0 | 0 | 0 | 未生成 |
+| macOS | 1 | 0 | 0 | 0 | 未生成 |
+
+## 已缓存 Hosted 样本
+
+- un-01：GitHub Actions Run [30181234619](https://github.com/nonononull/inputcodex/actions/runs/30181234619)（workflow_dispatch mode=measure，attempt 1）在 contract、windows、macos、equired 四 Job 成功后产生 Windows Artifact 8625649016 与 macOS Artifact 8625629637。两份结果同属 966b311a895ecd126c51fc0a80196fd011c99e3 / tree 67c33779c3f3c62338f2854a9ed18bb39550c2a6，均为 github-hosted。
+- Windows 归一化 SHA-256 为 $(System.Collections.Specialized.OrderedDictionary.normalized_sha256)，macOS 为 $(System.Collections.Specialized.OrderedDictionary.normalized_sha256)；schema、状态、source、Run/attempt、配置/实现/输入哈希、样本数量、IQR 标记和三个 Rust 场景 checksum 已逐项核验。两平台都作为各自首个证据完整结果标记为 comparable-valid，候选队列尚未达到五个样本。
+
 
 当每个平台达到五个可比样本后，本报告将回写每个 Run、分类、队列、统计、公式、安全裕量、数值和 PR/CI/Review 证据。若八次上限仍不足，报告只记录原因，不伪造样本、不扩展路径、不填写数值。
