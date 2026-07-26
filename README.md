@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 功能目录、`v1.2.42` 缓存与重新审计、双平台性能基线和性能预算 Discovery。Issue `#50` / PR `#51` 已以单父 Squash 提交 `fea8824c652665df710a7e6ef941854060eb6e1f` 进入 `main`，tree 为 `9fb518cda8b35a9388fb9fce0a1ff6ba976d80cb`，GitHub 签名 `valid`；合并后主干 CI Run `30175592979` 七 Job 全绿且 Artifact 为 `0`，Issue `#50` 已按 `COMPLETED` 关闭。Issue `#55` 为后续复测提供显式、非阻断的手工 `measure` 入口；当前仍没有预算数值，也尚未迁移任何上游业务功能，Gate 5 继续锁定。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 功能目录、`v1.2.42` 缓存与重新审计、双平台性能基线和性能预算 Discovery。Issue `#50` / PR `#51` 已以单父 Squash 提交 `fea8824c652665df710a7e6ef941854060eb6e1f` 进入 `main`，tree 为 `9fb518cda8b35a9388fb9fce0a1ff6ba976d80cb`，GitHub 签名 `valid`；合并后主干 CI Run `30175592979` 七 Job 全绿且 Artifact 为 `0`。Issue `#54` 已完成八次 hosted 复测但 Windows 未取得五个同队列样本，因此当前仍没有预算数值；Issue `#57` 只负责队列异构性 Discovery，Gate 5 继续锁定。
 
 ## 项目目标
 
@@ -77,12 +77,12 @@
 - 最新正式功能真源为 `v1.2.42`；活动审计缓存与功能目录审计基线均已对齐该 Release，`release_audit` 为 `current`，上游 `main` 的变化仍只进入 Issue `#20` 预警。
 - Issue `#32` / PR `#49` 已完成 Windows/macOS 基线采集与 Evidence；该结果是预算 Discovery 输入，不是预算批准。
 - Issue `#50` / PR `#51` 已通过 ADR `0004` 冻结预算对象、可比队列、五次独立 Run、run-level 稳健统计、错误语义和阶段升级合同；PR Final Head CI 与合并后主干 CI 均通过，Gate 5 仍未解锁。
-- Issue `#55` / PR `#56` 已使 `Performance Baseline` 的手工 trigger 显式选择 `evidence` 或 `measure`，默认值为 `evidence`；它不改变自动 PR/push 行为，也不实施预算 CI。Issue `#54` 已在该入口进入 `main` 后启动：最多八次串行 hosted Run，Windows/macOS 各至少五个同队列可比样本后才落盘项目所有者预授权的预算数值。
+- Issue `#55` / PR `#56` 已使 `Performance Baseline` 的手工 trigger 显式选择 `evidence` 或 `measure`，默认值为 `evidence`；它不改变自动 PR/push 行为，也不实施预算 CI。Issue `#54` 已完成八次串行 hosted Run：macOS 有八个同队列可比样本，Windows 只有两个初始队列可比样本和六个有效新队列样本，故没有落盘项目所有者预授权的预算数值。
 
 ## 下一步
 
-1. 执行 Issue `#54`：每个平台至少收集五次全新可比 Run，保留所有队列/分类/原始 Artifact 证据，并按 Issue 中的项目所有者预授权明确记录 warning/blocking 数值。
-2. 创建独立预算 CI 实施 Issue，使获批预算先以 `approved-observation` 进入 `main`，并在 Windows/macOS 各成功执行至少一次。
+1. 在 Issue `#57` 中只完成 GitHub-hosted 队列异构性的 Discovery，形成保持队列语义、修订语义或选择受控 Runner 的可复核决策材料；不得先行追加采样或修改合同。
+2. 仅在项目所有者批准新的独立范围后，才执行新的采样、合同修订或 Runner 决策；预算数值仍必须满足每平台五个同队列样本。
 3. 仅在预算复测、数值批准、预算 CI 双平台观察和 `release_audit=current` 全部满足后，建立首个 Gate 5 功能迁移 Issue。
 
 ## 项目文档

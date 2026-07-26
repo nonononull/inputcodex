@@ -80,3 +80,7 @@ scripts/performance/Test-InputcodexBudgetApproval.ps1
 - 任一平台在八次独立 Run 后仍少于五个同队列 `comparable-valid` 样本；记录每个无效/漂移/事故根因，但不伪造或删除样本。
 - 需要改变性能 Workflow、采集器、验证器、结果 schema、预算 CI、Ruleset、产品代码、上游、Release、优化或 Gate 5。
 - hosted Run、Artifact、样本分类、统计、数值验证、PR CI 或 Review 无法用可复核证据闭环。
+
+## 七、实际执行结果
+
+八次固定 Run 已全部完成且证据闭环；Windows 为 `2` 个 `comparable-valid` 与 `6` 个 `new-cohort-valid`，macOS 为 `8` 个 `comparable-valid`。Windows 未满足五次同队列条件，本 Session 按停止合同结束，不创建预算脚本、预算 JSON、PR 或第九槽位。后续工作移交给 Issue `#57` 的独立 Discovery，等待新的范围与所有者决策。

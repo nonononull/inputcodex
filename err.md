@@ -694,12 +694,12 @@
 
 ## 2026-07-26：GitHub-hosted Windows Runner 的处理器队列漂移
 
-- 环境：Issue `#54` 的 `run-01` 使用 GitHub Actions Run `30181234619`，`run-02` 使用 Run `30181776729`，`run-03` 使用 Run `30182194802`；三次均来自同一工作分支、同一配置/输入哈希、相同 Windows 硬键与 `github-hosted` 环境。
-- 现象：Windows `run-01` 的处理器为 `AMD EPYC 9V74 80-Core Processor`，`run-02` 为 `Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz`，`run-03` 为 `AMD EPYC 7763 64-Core Processor`。三者硬键相同，但环境指纹均不同；macOS 三次指纹保持不变。
+- 环境：Issue `#54` 已用尽 `run-01` 至 `run-08`；八次均来自同一工作分支、相同配置/输入哈希、相同 Windows 硬键与 `github-hosted` 环境。
+- 现象：Windows 初始 AMD EPYC 9V74 队列出现在 `run-01`、`run-07`；AMD EPYC 7763 队列出现在 `run-03`、`run-04`、`run-05`、`run-08`；Intel Xeon 8370C 与 Intel Xeon 6973P-C 各出现一次。四种 CPU 指纹都不同；macOS 八次指纹保持不变。
 - 根因：GitHub-hosted Windows Runner 调度到不同物理 CPU 队列。该变化不属于输入、实现、采集错误、IQR 慢样本或 GitHub Actions 外部事故。
-- 处理：保留三份原始 Artifact 与完整 manifest；Windows `run-02`、`run-03` 均分类为 `new-cohort-valid`，不进入 `run-01` 的旧队列统计，也不删除、重跑或伪装为外部事故。macOS `run-02`、`run-03` 因硬键和环境指纹一致，正常计为 `comparable-valid`。
-- 验证：三次 Run 均通过 `contract`、`windows`、`macos`、`required`；原始 JSON、Artifact ID、归一化 SHA-256、source、Run/attempt、样本合同和 Rust checksum 已交叉核验。后续只在八次总上限内继续收集，若任何 Windows 队列均不足五个样本则停止本 Issue 的数值生成。
-- 关联：Issue `#54`、Run `30181234619`、Run `30181776729`、Run `30182194802`、`benchmarks/results/issue-54/manifest.json`。
+- 处理：保留全部十六份原始结果与完整 manifest；Windows 只有 `run-01`、`run-07` 计为初始队列 `comparable-valid`，其余六次均为 `new-cohort-valid`，不删除、重跑、混合或伪装为外部事故。AMD EPYC 7763 次级观察队列虽有四次，仍不足五次；macOS 八次均为 `comparable-valid`。
+- 验证：八次 Run 均通过 `contract`、`windows`、`macos`、`required`；原始 JSON、Artifact ID、归一化 SHA-256、source、Run/attempt、样本合同和 Rust checksum 已交叉核验。八次上限后 Windows 仍不足五个同队列样本，因此不生成数值、不创建第九槽位；后续只允许 Issue `#57` 的独立 Discovery。
+- 关联：Issue `#54`、Issue `#57`、Run `30181234619`、`30181776729`、`30182194802`、`30182672835`、`30182870392`、`30183070190`、`30183239399`、`30183422699`、`benchmarks/results/issue-54/manifest.json`。
 
 ## 记录模板
 

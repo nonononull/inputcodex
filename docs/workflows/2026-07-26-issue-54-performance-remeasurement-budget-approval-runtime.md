@@ -99,3 +99,7 @@ git diff --check
 创建 `Closes #54` 的非 Draft PR，PR 说明必须包含每个 Run 的 GitHub URL、分类、队列、统计、数值、安全裕量和预授权。Review 对话必须记录根因、处理和验证；所有 PR CI 通过后只能 Squash Merge。不得 Force Push、删除 `main`、删除分支、修改预算 CI、优化或 Gate 5。
 
 遇到第九个样本需求、队列混合、不能解释的 hosted 失败、范围漂移或任何禁止面需求时，停止并建立新的 Issue/范围，不通过删除样本、修改历史或放宽验证继续。
+
+## 8. 实际停止记录
+
+运行至 `run-08` 后，Windows 只有 `2` 个初始队列 `comparable-valid` 样本，macOS 有 `8` 个；所有八次 Artifact 完整且远端核验成功。运行时工作流已按停止分支结束：没有触发 `run-09`，没有创建预算验证器或预算 JSON，后续只建立 Issue `#57` 的 Discovery，不在本工作流中修订队列合同。

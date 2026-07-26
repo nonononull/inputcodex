@@ -1823,6 +1823,27 @@ if ($LASTEXITCODE -ne 0) { throw 'git diff --check 失败。' }
 Write-Output 'ISSUE_54_BUDGET_GREEN'
 ```
 
+### Issue #54 八次上限未达标的停止验证
+
+若八个固定槽位全部写入但任一平台仍少于五个 `comparable-valid` 样本，不创建预算 JSON 或预算脚本，也不运行上节不存在的预算验证器。当前停止状态可用以下轻量命令复核：
+
+```powershell
+$manifest = Get-Content -LiteralPath 'benchmarks/results/issue-54/manifest.json' -Raw -Encoding utf8 | ConvertFrom-Json
+$windowsComparable = @($manifest.runs | Where-Object { $_.classification.windows.value -eq 'comparable-valid' }).Count
+$macosComparable = @($manifest.runs | Where-Object { $_.classification.macos.value -eq 'comparable-valid' }).Count
+if (@($manifest.runs).Count -ne 8 -or $windowsComparable -ne 2 -or $macosComparable -ne 8) {
+  throw 'Issue #54 八次上限停止证据不匹配。'
+}
+foreach ($path in @(
+  'benchmarks/budgets/issue-54-approved-observation.json'
+  'scripts/performance/Build-InputcodexBudgetApproval.ps1'
+  'scripts/performance/Test-InputcodexBudgetApproval.ps1'
+)) {
+  if (Test-Path -LiteralPath $path) { throw "停止状态不得存在预算输出：$path" }
+}
+Write-Output 'ISSUE_54_EIGHT_RUN_STOP_CONFIRMED'
+```
+
 ## 外部 AGOS 使用边界
 
 Issue `#17` 曾以 report-only 运行 AGOS 默认入口，结果为 `needs-input/unregistered`；已按项目规则记录并绕过。AGOS 不属于环境要求或合并门禁；不得在本规划 PR 中修改、修复或优化其 Registry、脚本、规则、Workflow 或 Vault。

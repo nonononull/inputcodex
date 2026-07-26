@@ -109,6 +109,12 @@ scripts/performance/Test-InputcodexBudgetApproval.ps1
 - 执行范围审计、样本/预算验证、Issue `#32` Evidence、CI 合同、仓库政策、`git diff --check`；提交、普通 push、创建 `Closes #54` 的非 Draft PR。
 - 所有 Review 对话必须记录根因、处理和验证；PR CI 全绿后以 Squash Merge 合并。预算 CI、优化、Gate 5 与分支删除继续使用独立决策。
 
+## 实际执行结果
+
+Issue `#54` 已在 Windows 本机时间 `2026-07-26` 用尽八个固定 hosted 槽位。八次 Run 的合同与原始 Artifact 均完整：macOS 取得八个同队列 `comparable-valid` 样本，Windows 仅取得两个初始队列 `comparable-valid` 样本和六个 `new-cohort-valid` 样本；次级 AMD EPYC 7763 队列也只有四次。
+
+因此本计划的数值、离线预算脚本、预算 JSON、PR 与合并阶段均未开始。没有创建第九槽位、没有降低队列语义、没有重跑冒充样本，也没有修改 Workflow、采集器、预算 CI、优化或 Gate 5。后续只允许 Issue `#57` 按独立范围完成 hosted 队列异构性 Discovery。
+
 ## 停止条件
 
 - 二十九路径或 `scope_hash` 漂移，或八个固定 Run 槽位仍不能为任一平台提供五个同队列可比样本。

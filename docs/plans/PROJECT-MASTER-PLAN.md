@@ -1,11 +1,12 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-54-performance-remeasurement-budget-approval
-active_gate: Gate 4 后置性能预算数值批准正在 Issue #54 的二十九路径范围内执行；Issue #55 已提供显式手工复测入口，release_audit=current，预算 CI、性能优化与 Gate 5 产品迁移继续锁定
-last_verified_gate: Issue #55 / PR #56 已以单父 Squash 提交 325bb2419548bc076502065dc583f54f4fddd582 合并，合并后 main CI Run 30180436105 七 Job 与 Performance Baseline Run 30180436063 四 Job 全绿且 Artifact 均为 0；Issue #55 已关闭
-next_legal_gate: 串行缓存最多八次 Issue #54 hosted Run；Windows/macOS 各至少五个同队列 comparable-valid 样本后，依据项目所有者预授权落盘 warning/blocking 数值。预算 CI、性能优化和 Gate 5 产品迁移不得混入该 Issue
+active_task: issue-54-performance-remeasurement-budget-approval-stopped-at-eight-run-cap
+active_gate: Gate 4 后置性能预算数值批准已在 Issue #54 的二十九路径范围内触发停止条件：八次 hosted Run 全绿，但 Windows 仅有两个初始队列 comparable-valid 样本；Issue #57 尚待独立 Discovery 计划，预算 CI、性能优化与 Gate 5 产品迁移继续锁定
+last_verified_gate: Issue #54 分支 Head 44ef100ac01720e996e41557ac3133266a435fec 已完成八次 Run 的 Artifact/source/hash/队列远端复核；Windows=2 comparable-valid+6 new-cohort-valid，macOS=8 comparable-valid，所有样本完整但不满足数值前提
+next_legal_gate: 为 Issue #57 建立独立 Session Plan、Runtime Workflow、精确允许路径和 scope_hash；在项目所有者作出队列语义、受控 Runner 或新采样范围决策前，不得追加 Issue #54 样本、生成预算或修改性能合同
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/54
+performance_cohort_discovery_issue_ref: https://github.com/nonononull/inputcodex/issues/57
 performance_remeasurement_entry_issue_ref: https://github.com/nonononull/inputcodex/issues/55
 performance_remeasurement_entry_pr_ref: https://github.com/nonononull/inputcodex/pull/56
 performance_remeasurement_entry_merge_ref: 325bb2419548bc076502065dc583f54f4fddd582
@@ -160,7 +161,8 @@ decision_status: performance-budget-discovery-completed-budget-values-ci-optimiz
 - [x] PR `#51` Final Head `e0154c61d8b05835db10437c79f029909516eac1` 已完成 Review/CI、全部对话闭环和项目所有者独立授权，并以单父 Squash 提交 `fea8824c652665df710a7e6ef941854060eb6e1f` 进入 `main`；tree 为 `9fb518cda8b35a9388fb9fce0a1ff6ba976d80cb`，GitHub 签名 `valid`。
 - [x] PR `#51` 合并后主干 CI Run `30175592979` 七 Job 全绿且 Artifact 为 `0`，Issue `#50` 已按 `COMPLETED` 关闭；稳定语义仍是“预算方法已批准、预算数值未批准”。
 - [x] Issue `#55` / PR `#56` 为已有证据锁定 `evidence` 的 Workflow 合同增加显式手工 `measure` 入口，并以提交 `325bb2419548bc076502065dc583f54f4fddd582` 进入 `main`；该最小前置修复不改变采集器、结果 schema、预算数值、预算 CI、优化或 Gate 5。
-- [ ] Issue `#54` 已进入二十九路径、`sha256:32c818aaf99efe550e9afc45d5871f9dceeef50ba314aaa91b617cd76158a38e` 的执行：最多八次串行 Run，Windows/macOS 各至少五个同队列 comparable-valid 样本后形成预授权数值；预算 CI 实施、性能优化和 Gate 5 产品迁移继续保持互斥。
+- [x] Issue `#54` 已用尽二十九路径、`sha256:32c818aaf99efe550e9afc45d5871f9dceeef50ba314aaa91b617cd76158a38e` 的八次串行 Run：全部 Artifact/来源/哈希/队列闭环，macOS 为八个同队列样本，Windows 为两个初始队列样本和六个有效新队列样本；按停止条件不形成预授权数值，也不实施预算 CI、性能优化或 Gate 5。
+- [ ] Issue `#57` 只完成 hosted 队列异构性的可行性 Discovery；必须在新的所有者决策与范围冻结后，才开始新的采样、合同修订或 Runner 变更。
 
 ### Gate 5：分域迁移（锁定）
 
