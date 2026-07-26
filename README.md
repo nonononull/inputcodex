@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 功能目录、`v1.2.42` 缓存与重新审计、双平台性能基线和性能预算 Discovery。Issue `#57` / PR `#58` 已证明预算阻塞根因是 GitHub-hosted Windows CPU 队列异构，不是产品回归或采集失败；项目所有者已选择方案 A。当前 Issue `#59` 以 `AMD EPYC 7763 64-Core Processor` 为目标队列执行四次固定串行复测，四次后不足五份同队列样本即硬停止。预算 CI、性能优化、上游功能迁移和 Gate 5 继续锁定。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 功能目录、`v1.2.42` 缓存与重新审计、双平台性能基线和性能预算 Discovery。Issue `#57` / PR `#58` 已证明预算阻塞根因是 GitHub-hosted Windows CPU 队列异构，不是产品回归或采集失败；项目所有者已选择方案 A。当前 Issue `#59` 以 AMD EPYC 7763 的主导完整环境指纹 `sha256:f3954543f3cec519568345d9f40341ddeb8991a7d93b3a274cc324b047fb00cb` 为目标队列执行四次固定串行复测，历史严格可比基数为 `3`；四次后不足五份同队列样本即硬停止。预算 CI、性能优化、上游功能迁移和 Gate 5 继续锁定。
 
 ## 项目目标
 

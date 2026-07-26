@@ -27,14 +27,14 @@ gh workflow run 'Performance Baseline' --repo nonononull/inputcodex --ref codex/
 2. 使用 `gh run watch <run_id> --repo nonononull/inputcodex --exit-status` 等待终态；只有 `contract`、`windows`、`macos`、`required` 全部成功才进入 Artifact 缓存。
 3. 下载成功 Artifact 到仓库外临时目录；只把双平台原始 JSON 通过 `apply_patch` 写入当前固定槽位。
 4. 核验平台、`status=complete`、`runner_environment=github-hosted`、source commit/tree、配置/实现/输入哈希、样本合同、checksum、Artifact ID、名称、Run 和 attempt。
-5. Windows 处理器精确等于 `AMD EPYC 7763 64-Core Processor` 时分类为目标队列 `comparable-valid`；其他完整结果分类为 `new-cohort-valid`。不得改写 Issue `#54` 原始分类。
+5. Windows hard key 必须匹配，且完整环境指纹必须精确等于 `sha256:f3954543f3cec519568345d9f40341ddeb8991a7d93b3a274cc324b047fb00cb`，才分类为目标队列 `comparable-valid`；CPU 相同但镜像、OS、逻辑处理器数或总内存值不同也分类为 `new-cohort-valid`。不得改写 Issue `#54` 原始分类。
 6. macOS 与历史目标硬键和环境指纹匹配时分类为 `comparable-valid`，否则建立自己的新队列。
 7. 更新 manifest 与报告，运行轻量验证；普通提交并 push 后，删除该 Run 的成功 Artifact，再确认 Artifact 数为 `0`。
 8. 当前槽位完全闭环后才进入下一槽位；即使提前达到五份目标样本，也必须执行剩余固定槽位。
 
 ## Phase 3：四次后的确定性判定
 
-1. 汇总 Issue `#54` 的四个历史 EPYC 7763 Windows 样本与 Issue `#59` 的新命中样本；macOS 独立汇总全部同队列有效样本。
+1. 汇总 Issue `#54/run-03`、`run-05`、`run-08` 三个历史目标完整指纹 Windows 样本与 Issue `#59` 的新命中样本；同 CPU 但不同内存指纹的 `run-04` 不进入目标队列。macOS 独立汇总全部同队列有效样本。
 2. 若 Windows 目标队列和 macOS 均至少五次：按 ADR `0004` 计算 median-of-medians、median-of-P95、min、max、MAD、warning 与 blocking，创建预算 JSON、构建脚本和验证脚本。
 3. 若 Windows 目标队列仍不足五次：状态固定为 `STOPPED_AFTER_FOUR_RUNS_INSUFFICIENT_TARGET_COHORT`，不创建三个可选文件，不创建 `run-05`。
 4. 本 Issue 无论哪条分支都不修改 `.github/workflows/`，不实施预算 CI。

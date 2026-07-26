@@ -30,10 +30,13 @@ agos_status: bypassed-report-only-unregistered-needs-input-no-cross-repo-mutatio
 ## 固定参数
 
 - `target_windows_processor=AMD EPYC 7763 64-Core Processor`
+- `target_windows_environment_fingerprint_sha256=sha256:f3954543f3cec519568345d9f40341ddeb8991a7d93b3a274cc324b047fb00cb`
+- `target_windows_historical_count=3`
 - `max_serial_runs=4`
 - `required_target_cohort_runs=5`
 - `fixed_slots=run-01,run-02,run-03,run-04`
-- `historical_target_slots=issue-54/run-03,issue-54/run-04,issue-54/run-05,issue-54/run-08`
+- `historical_target_slots=issue-54/run-03,issue-54/run-05,issue-54/run-08`
+- `same_processor_other_fingerprint_slots=issue-54/run-04`
 - `hard_stop_after_run_04=true`
 - `budget_ci_enabled=false`
 

@@ -2,9 +2,9 @@
 
 schema_version: inputcodex.master-plan.v1
 active_task: issue-59-epyc-7763-fixed-remeasurement
-active_gate: Gate 4 性能预算方法保持稳定；项目所有者已选择方案 A，Issue #59 以 AMD EPYC 7763 为目标 Windows 队列执行四次固定串行复测；release_audit=current，预算 CI、性能优化与 Gate 5 产品迁移继续锁定
+active_gate: Gate 4 性能预算方法保持稳定；项目所有者已选择方案 A，Issue #59 以 AMD EPYC 7763 主导完整环境指纹为目标 Windows 队列执行四次固定串行复测，历史严格可比基数为 3；release_audit=current，预算 CI、性能优化与 Gate 5 产品迁移继续锁定
 last_verified_gate: Issue #50 / PR #51 已以单父 Squash 提交 fea8824c652665df710a7e6ef941854060eb6e1f 完成性能预算方法冻结；tree 为 9fb518cda8b35a9388fb9fce0a1ff6ba976d80cb，GitHub 签名 valid，合并后 main CI Run 30175592979 七 Job 全绿且 Artifact 为 0，Issue #50 已按 COMPLETED 关闭
-next_legal_gate: 完成 Issue #59 的四次固定串行复测；AMD EPYC 7763 总样本达到至少五次时落盘数值但不实施预算 CI，不足五次时硬停止并返回新决策。禁止恢复 Issue #54、创建其 run-09 或 Issue #59 的 run-05
+next_legal_gate: 完成 Issue #59 的四次固定串行复测；目标完整环境指纹总样本达到至少五次时落盘数值但不实施预算 CI，不足五次时硬停止并返回新决策。禁止恢复 Issue #54、创建其 run-09 或 Issue #59 的 run-05
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/59
 performance_remeasurement_issue_ref: https://github.com/nonononull/inputcodex/issues/54
 performance_queue_discovery_issue_ref: https://github.com/nonononull/inputcodex/issues/57
@@ -162,7 +162,7 @@ decision_status: hosted-queue-heterogeneity-discovery-in-progress-no-path-select
 - [x] Issue `#55` 为已有证据锁定 `evidence` 的 Workflow 合同增加显式手工 `measure` 入口，并以同一 Issue 成功 Artifact 刷新因实现哈希漂移而失效的三份 Evidence；该最小前置修复不改变采集器、结果 schema、预算数值、预算 CI、优化或 Gate 5。
 - [x] Issue `#54` 已在 Issue `#55` 合并后完成八次严格串行 GitHub-hosted Run；Windows 的初始 AMD EPYC 9V74 队列只有 `2` 次、次级 AMD EPYC 7763 队列只有 `4` 次，macOS 为 `8` 次可比样本。五次硬约束未满足，数值预授权未触发，Issue 保持 `STOPPED_AT_EIGHT_RUN_CAP`，不得创建 `run-09`。
 - [x] Issue `#57` / PR `#58` 已产出 Hosted Windows CPU 队列异构性的决策材料并以 Squash 提交 `d9d1ed77b9796ac6a99e250d1547217a39426aa9` 进入 `main`；项目所有者选择方案 A 后，Issue `#57` 已按 `COMPLETED` 关闭。
-- [ ] Issue `#59` 已冻结 38 路径、`sha256:d0577e546d2209d10373eccdf335bbcf3cd4caad7906163838c88b461da0b570`、AMD EPYC 7763 目标队列和四次固定串行槽位；四次后不足五份目标队列样本即硬停止，不得创建 `run-05`。
+- [ ] Issue `#59` 已冻结 38 路径、`sha256:d0577e546d2209d10373eccdf335bbcf3cd4caad7906163838c88b461da0b570`、AMD EPYC 7763 主导完整指纹 `sha256:f3954543f3cec519568345d9f40341ddeb8991a7d93b3a274cc324b047fb00cb` 和四次固定串行槽位；Discovery 的 CPU 型号计数已纠正为严格指纹历史基数 `3`，四次后不足五份目标队列样本即硬停止，不得创建 `run-05`。
 
 ### Gate 5：分域迁移（锁定）
 

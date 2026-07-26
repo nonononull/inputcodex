@@ -728,6 +728,15 @@
 - 验证：Fresh 命令对三十八路径复算得到唯一正确值 `sha256:d0577e546d2209d10373eccdf335bbcf3cd4caad7906163838c88b461da0b570`；旧值全仓搜索必须为零。
 - 关联：Issue `#59`、`build.md`、`docs/plans/2026-07-26-issue-59-epyc-7763-fixed-remeasurement.md`。
 
+### 2026-07-26：CPU 型号计数误当成完整可比队列计数
+
+- 环境：Issue `#57` 将 Issue `#54` 的 Windows 分布概括为 EPYC 9V74=`2`、EPYC 7763=`4`、两个 Intel 各 `1`；Issue `#59/run-01` 入库前按 ADR `0004` 重新逐字段检查完整环境指纹。
+- 现象：四个 EPYC 7763 样本中，`run-03`、`run-05`、`run-08` 的指纹为 `sha256:f3954543f3cec519568345d9f40341ddeb8991a7d93b3a274cc324b047fb00cb`，而 `run-04` 为 `sha256:e81e1b65532f2bde1db871c284c9910aa17bb0d1b681947627e3e581e5e3c2d3`；差异字段是 `total_memory_bytes`。
+- 根因：Discovery 为解释 hosted CPU 调度而按处理器型号聚合，但 ADR `0004` 的可比队列还要求镜像精确版本、OS 描述、逻辑处理器数和内存字段属于同一完整指纹；Issue `#54` 的四个样本都相对初始 9V74 队列分类为 `new-cohort-valid`，当时没有继续区分次级队列内部。
+- 处理：不降低方案 A 的硬队列语义；Issue `#59` 选择三次出现的主导完整指纹 `f3954543...` 为目标，历史基数纠正为 `3`，`run-04` 保持同 CPU 不同指纹的新队列。四个新槽位和硬停止上限不变。
+- 验证：旧 manifest 的 hard key、完整指纹对象和 SHA-256 已逐项复算；`run-01` Windows 为 Intel 8370C 指纹 `e3900b38...`，正确分类为 `new-cohort-valid`，macOS 指纹继续匹配历史队列。
+- 关联：Issue `#54`、Issue `#57`、Issue `#59`、ADR `0004` 第 18-20 行。
+
 ## 记录模板
 
 ```text

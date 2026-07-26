@@ -1834,6 +1834,9 @@ $manifest = Get-Content -LiteralPath 'benchmarks/results/issue-59/manifest.json'
 if ($manifest.issue_number -ne 59) { throw 'Issue #59 manifest issue_number 错误。' }
 if ($manifest.base.max_serial_runs -ne 4) { throw 'Issue #59 max_serial_runs 必须为 4。' }
 if ($manifest.policy.target_windows_processor -ne 'AMD EPYC 7763 64-Core Processor') { throw 'Issue #59 目标处理器漂移。' }
+if ($manifest.policy.target_windows_environment_fingerprint_sha256 -ne 'sha256:f3954543f3cec519568345d9f40341ddeb8991a7d93b3a274cc324b047fb00cb') { throw 'Issue #59 目标完整环境指纹漂移。' }
+if (@($manifest.historical_evidence.windows_target_candidate_slots).Count -ne 3) { throw 'Issue #59 历史严格目标样本数必须为 3。' }
+if ('run-04' -notin @($manifest.historical_evidence.windows_same_processor_other_fingerprint_slots)) { throw 'Issue #59 必须保留同 CPU 不同指纹的 run-04。' }
 if ($manifest.runs.Count -gt 4) { throw 'Issue #59 出现超过四个测量槽位。' }
 $expectedSlots = @('run-01', 'run-02', 'run-03', 'run-04')
 foreach ($run in $manifest.runs) {

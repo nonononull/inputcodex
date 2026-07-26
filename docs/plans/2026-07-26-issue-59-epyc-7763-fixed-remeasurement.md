@@ -20,7 +20,7 @@
 
 - 跟踪 Issue：`https://github.com/nonononull/inputcodex/issues/59`。
 - 所有者决定：`user-message:批准方案-A-EPYC-7763-四次固定串行复测-2026-07-26`。
-- 目标 Windows 处理器：`AMD EPYC 7763 64-Core Processor`。
+- 目标 Windows 完整环境指纹：`sha256:f3954543f3cec519568345d9f40341ddeb8991a7d93b3a274cc324b047fb00cb`；处理器为 `AMD EPYC 7763 64-Core Processor`，并同时要求镜像版本、OS 描述、逻辑处理器数和总内存值完全匹配。
 - 固定新槽位：`run-01`、`run-02`、`run-03`、`run-04`；四个槽位全部执行。
 - 硬停止：四次后目标队列总数仍小于 `5` 时，不创建 `run-05`，不修改队列语义，不生成预算值。
 
@@ -28,7 +28,7 @@
 
 - 只读来源：分支 `codex/issue-54-performance-remeasurement-budget-approval` 的提交 `fef75c3c6a8ca0b561c0215e6ae41280d62ba048`、tree `85194d95e2efb8e6eea75937d9c953a5a4ad58ad`。
 - 历史 manifest 归一化 SHA-256：`sha256:72567fe96f61d19d4eca8a5347e3d3fcea7df823975946ec3f464a43d229f1ae`。
-- Windows 历史目标候选槽位：Issue `#54` 的 `run-03`、`run-04`、`run-05`、`run-08`；原始分类继续保持 `new-cohort-valid`，新批准队列只在汇总层引用它们。
+- Windows 历史严格目标槽位：Issue `#54` 的 `run-03`、`run-05`、`run-08`，完整环境指纹均为 `sha256:f3954543f3cec519568345d9f40341ddeb8991a7d93b3a274cc324b047fb00cb`，历史基数为 `3`。`run-04` 虽使用同一 CPU，但 `total_memory_bytes=17178693632`，与目标的 `17174360064` 不同，因此保持独立队列；全部原始分类继续保持 `new-cohort-valid`。
 - macOS 使用 Issue `#54` 的八个同队列有效 Run 与 Issue `#59` 的四个新有效 Run；禁止跨平台统计。
 
 ## 精确范围
@@ -82,8 +82,8 @@ scripts/performance/Test-InputcodexBudgetApproval.ps1
 
 - [x] 创建 Issue `#59` 和分支 `codex/issue-59-epyc-7763-fixed-remeasurement`。
 - [x] 写入本计划、Session Plan、Runtime Workflow、初始报告和 manifest。
-- [ ] 以 `apply_patch` 缓存 Issue `#54` 的 manifest 与十六份 JSON，并验证归一化 SHA-256。
-- [ ] 运行控制面轻量验证，提交并普通 push 稳定测量基线。
+- [x] 以 `apply_patch` 缓存 Issue `#54` 的 manifest 与十六份 JSON，并验证归一化 SHA-256与 Git blob。
+- [x] 运行控制面轻量验证，提交并普通 push 稳定测量基线 `735bef8a8b305056728cde072db0874769c95e19`。
 
 ### Task 2：执行四次固定串行测量
 
@@ -94,7 +94,7 @@ scripts/performance/Test-InputcodexBudgetApproval.ps1
 
 ### Task 3：分类与最终判定
 
-- [ ] Windows 处理器精确等于目标值时计入新批准队列；其他有效处理器仅记录为 `new-cohort-valid`。
+- [ ] Windows hard key 与完整环境指纹同时等于批准目标时计入 `comparable-valid`；只有 CPU 型号相同但其他指纹字段不同也必须记录为 `new-cohort-valid`。
 - [ ] macOS 按自己的硬键与队列指纹独立分类。
 - [ ] 四次全部结束后计算目标队列总数；达到至少五次时生成预算 JSON 与离线复算器，不足五次时记录硬停止且不创建三个可选文件。
 
