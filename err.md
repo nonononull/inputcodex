@@ -755,6 +755,15 @@
 - 验证：真实预算十条双平台候选全部可独立复算；把任一 warning 增加一个完整 quantum 仍稳定触发 `BUDGET_FORMULA_INVALID`，完整合同 `10/10` GREEN。
 - 关联：Issue `#59`、`scripts/performance/Test-InputcodexBudgetApproval.ps1`。
 
+### 2026-07-26：PowerShell 拼装 GitHub Markdown 导致证据评论残缺
+
+- 环境：Issue `#59` / PR `#60` 在 Final Head 门禁完成后，通过 PowerShell 调用 `gh api` 回写运行、Artifact 与 Review 证据。
+- 现象：`run-02` 评论出现控制字符、字面量 `$head` / `$tree` 和缺失的 Artifact 数；Final Head 评论把日期表达式按字面量写入，并截断 Artifact 之后的证据。
+- 根因：Markdown 正文混用了 PowerShell 双引号插值、反引号转义和未显式替换的占位符；写入成功后又只检查 API 退出码，没有回读评论正文核对关键字段，导致传输成功被误当成证据完整。
+- 处理：使用单引号 here-string 保存 Markdown 字面量，仅对明确命名的 token 做 `.Replace()`；通过对象序列化生成 JSON 后调用 GitHub API，并在写入后按评论 ID 回读，逐项核对 Head、Run、Artifact、Review 与门禁字段。
+- 验证：原位修正 Issue `#59` 的 `run-02` / Final Head 评论和 PR `#60` 的 Final Head 评论；回读正文不得包含控制字符、`$head`、`$tree`、未求值日期表达式或缺失字段。
+- 关联：Issue `#59`、PR `#60`、`err.md` 第 511 行的既有 PowerShell Markdown 转义记录。
+
 ## 记录模板
 
 ```text
