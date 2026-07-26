@@ -579,6 +579,75 @@ function Write-Utf8File {
     Set-Content -LiteralPath $Path -Value $Content -Encoding utf8NoBOM
 }
 
+function Copy-PathToPerformanceFixture {
+    param(
+        [Parameter(Mandatory)]
+        [string]$DestinationRoot,
+
+        [Parameter(Mandatory)]
+        [string]$RelativePath
+    )
+
+    $sourcePath = Join-Path $repositoryRoot $RelativePath
+    $destinationPath = Join-Path $DestinationRoot $RelativePath
+    $destinationParent = Split-Path -Parent $destinationPath
+    New-Item -ItemType Directory -Path $destinationParent -Force | Out-Null
+    Copy-Item -LiteralPath $sourcePath -Destination $destinationPath -Recurse -Force
+}
+
+function New-PerformanceContractFixture {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Path
+    )
+
+    New-Item -ItemType Directory -Path $Path -Force | Out-Null
+    foreach ($relativePath in @(
+        '.github/workflows/performance-baseline.yml',
+        'Cargo.lock',
+        'Cargo.toml',
+        'rust-toolchain.toml',
+        'benchmarks/README.md',
+        'benchmarks/config/issue-32-baseline.json',
+        'benchmarks/inputcodex-baseline',
+        'apps/inputcodex-desktop',
+        'crates/inputcodex-domain',
+        'crates/inputcodex-application',
+        'crates/inputcodex-infrastructure',
+        'crates/inputcodex-platform',
+        'crates/inputcodex-presentation',
+        'crates/inputcodex-parity',
+        'parity',
+        'upstream/source-lock.json',
+        'scripts/ci/Test-CiScripts.ps1',
+        'scripts/performance/Invoke-InputcodexBaseline.ps1',
+        'scripts/performance/Test-InputcodexBaseline.ps1'
+    )) {
+        Copy-PathToPerformanceFixture -DestinationRoot $Path -RelativePath $relativePath
+    }
+}
+
+Invoke-ContractTest -Name '性能实现哈希只绑定被测生产面' -Body {
+    $fixtureRoot = Join-Path $testRoot 'performance-contract-boundary'
+    New-PerformanceContractFixture -Path $fixtureRoot
+    $fixtureValidator = Join-Path $fixtureRoot 'scripts/performance/Test-InputcodexBaseline.ps1'
+
+    $before = Invoke-ChildScript -Path $fixtureValidator -Arguments @('-RepositoryRoot', $fixtureRoot, '-Mode', 'Contract')
+    Assert-Equal -Expected 0 -Actual $before.ExitCode -Message "初始性能 Contract 应通过，输出=$($before.Output)"
+    Assert-True -Condition ($null -ne $before.Json) -Message "初始性能 Contract 必须输出 JSON，输出=$($before.Output)"
+
+    Write-Utf8File -Path (Join-Path $fixtureRoot 'crates/inputcodex-parity/tests/non-performance-contract.rs') -Content 'fn ordinary_contract_test() {}'
+    $afterTestChange = Invoke-ChildScript -Path $fixtureValidator -Arguments @('-RepositoryRoot', $fixtureRoot, '-Mode', 'Contract')
+    Assert-Equal -Expected 0 -Actual $afterTestChange.ExitCode -Message "普通测试变化后 Contract 应通过，输出=$($afterTestChange.Output)"
+
+    Add-Content -LiteralPath (Join-Path $fixtureRoot 'crates/inputcodex-parity/src/lib.rs') -Value "`npub const IMPLEMENTATION_HASH_SENTINEL: bool = true;" -Encoding utf8NoBOM
+    $afterSourceChange = Invoke-ChildScript -Path $fixtureValidator -Arguments @('-RepositoryRoot', $fixtureRoot, '-Mode', 'Contract')
+    Assert-Equal -Expected 0 -Actual $afterSourceChange.ExitCode -Message "产品源码变化后 Contract 应通过，输出=$($afterSourceChange.Output)"
+
+    Assert-Equal -Expected $before.Json.implementation_sha256 -Actual $afterTestChange.Json.implementation_sha256 -Message '普通 crate tests 变化不得改变性能实现哈希'
+    Assert-True -Condition ($before.Json.implementation_sha256 -ne $afterSourceChange.Json.implementation_sha256) -Message '产品 src 变化必须改变性能实现哈希'
+}
+
 function New-ValidRepositoryFixture {
     param(
         [Parameter(Mandatory)]

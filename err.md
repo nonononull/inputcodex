@@ -764,6 +764,61 @@
 - 验证：原位修正 Issue `#59` 的 `run-02` / Final Head 评论和 PR `#60` 的 Final Head 评论；回读正文不得包含控制字符、`$head`、`$tree`、未求值日期表达式或缺失字段。
 - 关联：Issue `#59`、PR `#60`、`err.md` 第 511 行的既有 PowerShell Markdown 转义记录。
 
+### 2026-07-26：目录实例测试把历史 current 状态误设为永久不变量
+
+- 环境：PR `#66` 将活动上游快照合法推进到 `v1.2.43`，功能目录仍固定在 `v1.2.42` 并以 `stale-re-audit-required` 指向 Issue `#65`。
+- 现象：Linux、Windows、macOS 均失败于 `仓库v1_2_42目录重新审计恢复current` 的 `!summary.requires_reaudit()`；后续固定 `source-lock` 为 `v1.2.42/current` 的断言也与新快照冲突。
+- 根因：Issue `#38` / PR `#45` 的仓库实例测试把“重新审计完成当时 snapshot 与 catalog 相同”提升为跨 Release 永久不变量，重复并收紧了已有 current/stale 专项状态机合同。
+- 处理：Issue `#67` 将该测试收敛为固定 `v1.2.42` 目录、合同、source-index 与行为证据；删除活动 snapshot/status 断言，不修改生产验证器或 PR `#66`。
+- 验证：干净 main/current 与临时 PR `#66`/stale 必须分别运行完整 `catalog_repository`；非法状态组合继续由 `release_audit_显式解耦快照与功能目录审计基线` 拒绝。
+- 关联：Issue `#38`、PR `#45`、Issue `#64`、PR `#66`、Issue `#67`、CI Run `30202056781`。
+
+### 2026-07-26：跨工作树旧 Rust 测试产物造成 main 假失败
+
+- 环境：Issue `#67` 根因复核期间，在主工作树运行 v1.2.42 定向测试。
+- 现象：工作树与 `HEAD` 的 `source-lock` 均为 `v1.2.42/current`，测试却报告 stale；二进制字符串检查显示主工作树 `target` 内的可执行文件嵌入了 Issue `#64` 工作树路径。
+- 根因：本地验证复用了落在错误 `target` 目录中的跨工作树测试二进制，`env!("CARGO_MANIFEST_DIR")` 因编译时路径固定而读取了 Issue `#64` 的 v1.2.43 stale 仓库。
+- 处理：执行 `cargo clean -p inputcodex-parity` 后在各自工作树重新编译；后续 main/current 与 PR `#66`/stale 证据必须在明确工作目录中分别运行，禁止共享不明来源测试二进制。一次把两段标签写在同一工具调用中的命令因固定 `workdir` 实际都运行于 Issue `#64`，该错误标签已废弃并拆为独立工作目录重跑。
+- 验证：重新编译后的 main/current 定向测试退出码 `0`；PR `#66` 工作树退出码 `101` 且稳定失败于旧永久 current 断言；修复后两个工作目录分别完成完整 `12/12`。
+- 关联：Issue `#64`、PR `#66`、Issue `#67`、`crates/inputcodex-parity/tests/catalog_repository.rs`。
+
+### 2026-07-26：Issue #67 批准评论路径占位写入 DEL 控制字节
+
+- 环境：使用 PowerShell 单引号 here-string 回写 Issue `#67` 的批准证据和 Windows 工作树路径。
+- 现象：首次评论中的路径分隔符成为 `0x7F`，API 写入成功但正文不完整；仓库文件尚未写入。
+- 根因：模板主动使用 DEL 字符作路径占位，却用 `.Replace('\\u007f', '\\')` 搜索字面转义文本，实际控制字节没有被替换；同时首次流程没有在写入后立即扫描控制字节。
+- 处理：改用单引号 here-string 直接保存反斜杠，通过 `ConvertTo-Json` 调用 GitHub API 原位修正评论，并按评论 ID 回读正文。
+- 验证：评论 `5083523560` 回读后 `CONTROL_COUNT=0`，工作树路径、Head、scope hash 和授权边界完整；后续评论继续遵循第 758 行既有传输合同。
+- 关联：Issue `#67`、评论 `5083523560`、`err.md` 第 758 行。
+
+### 2026-07-26：`pwsh -File` 不能按预期传递字符串数组参数
+
+- 环境：Issue `#67` 提交前运行 AGOS Git snapshot checkpoint，并尝试向 `AllowedUntrackedPatterns` 传入四个路径。
+- 现象：通过子进程 `pwsh -File` 调用时，第二个路径之后被当成位置参数，最终尝试把报告路径转换为 `MaxRecentCommitsPerTaskWindow` 整数；治理脚本主体尚未执行。
+- 根因：PowerShell 原生进程参数边界不会保留调用端数组对象，`-File` 后的多值参数被展平并参与位置绑定。
+- 处理：在当前 PowerShell 进程中使用调用运算符 `& $script`，直接向脚本参数传递 `@(...)` 数组；不修改 AGOS 脚本。
+- 验证：同一 checkpoint 返回 `GIT_SNAPSHOT_STATUS=ready`、`GIT_COMMIT_DISCIPLINE_STATUS=ready`、`GIT_SOURCE_EDIT_ADMISSION_STATUS=ready`，退出码 `0`。
+- 关联：Issue `#67`、`verify-git-snapshot-governance.ps1`。
+
+### 2026-07-26：替代 PR 的 Session Plan 不能把 GitHub URL 直接写入 approved_decision_ref
+
+- 环境：Issue `#67` 从当前 `main` 创建六路径等价替代分支后，运行 AGOS `verify-session-plan.ps1` 验证更新后的 Session Plan。
+- 现象：验证器在 `approved_decision_ref` 写入 Issue 评论 URL 后退出，提示该字段格式无效。
+- 根因：该 schema 只接受 `session-plan:<task>#decision` 或 `decision:<id>`；GitHub URL 属于可追溯证据，应放在 `scope_approval_ref`，不是决策标识字段。
+- 处理：恢复 `approved_decision_ref: session-plan:issue-67#decision`，保留替代授权评论 URL 作为 `scope_approval_ref` 与 GitHub Issue 证据；未修改 AGOS 规则或脚本。
+- 验证：修正后重新运行 Session Plan verifier；若外部 Default Entry 返回 `needs-input`、`unregistered` 或异常，按项目规则记录并绕过，不阻塞 inputcodex 原生流程。
+- 关联：Issue `#67`、评论 `5084412075`、`verify-session-plan.ps1`。
+
+### 2026-07-26：普通 crate tests 误入性能实现哈希，且路径集合迁移不能复用旧 Evidence
+
+- 环境：PR `#68` 只修改 `crates/inputcodex-parity/tests/catalog_repository.rs`；标准 CI Run `30203435576` 七 Job 全绿，但 Performance Baseline Run `30203435572` 的 Windows/macOS Evidence 均失败。
+- 现象：三份 Evidence 记录 `implementation_sha256=sha256:e4c9265396476c918112f553d846239ed21f84c7432e6a34ddc8f55293d64e48`，PR `#68` 当前计算值为 `sha256:174f8aec273a5b7490aa833e7554e26edda996a649105ce916d9cc4873ea8bd7`，稳定产生三个 `HASH_MISMATCH`。
+- 根因：`Test-InputcodexBaseline.ps1` 递归纳入七个产品组件目录的全部 `.rs`，错误包含普通 `tests/**`。进一步复算发现，仅把动态集合收窄为组件根 `Cargo.toml + src/**/*.rs` 时，main 与 PR `#68` 虽统一为 `sha256:39fcc5593ada18c4b42daf2e94556a97dda1e90385f146184178418a79b38a7e`，但该值不等于旧 Evidence；验证器和 `Test-CiScripts.ps1` 又属于固定实现输入，真实修复必然再次改变哈希。
+- 处理：拒绝直接替换三份 Evidence 的哈希或忽略实现绑定；建立 Issue `#69`，推荐收窄路径后从精确实现 Head 运行一次 GitHub-hosted `mode=measure`，只用同一成功 Run 的双平台 Artifact 刷新 Windows、macOS 与 manifest。初始七路径提案扩为十路径，`scope_hash=sha256:6392a1b4150f2aae0c34c285e83b6870f47e3bdc57def6308d0a26ddd158911d`；项目所有者已通过 Issue 评论 `5083808758` 批准实施与 Review/CI，最终 Squash Merge 仍单独授权。
+- 验证：旧算法 `main=e4c926...`、PR `#68=174f8a...`；收窄集合后两者均为 `39fcc5...`；模拟修改验证器后再次变化为 `570fd2...`，证明旧 Evidence 不可能在不迁移或不重新测量的情况下原样通过。TDD 合同先稳定 RED，再在最小路径修复后达到 CI 合同 `35/35`、性能 Contract 零违规；当前实现哈希为 `sha256:ed9a8c27972a8b99b331031af171fbf348587481079d62f05f2dc54a88536faa`，旧 Evidence 按预期保持三个 `HASH_MISMATCH`。标准 CI Artifact 为 `0`，PR Review 对话为 `0`。
+- 工具纠错：创建工作树前的分支存在性检查曾对空命令结果调用 `.Trim()` 并报错；未创建任何分支或目录，改为数组计数后从 `origin/main` 安全创建隔离工作树。内置 `apply_patch.bat` 又因 WindowsApps 执行权限返回 `Access is denied`，改用本机 npm Codex 的同一 `--codex-run-as-apply-patch` 模式完成补丁。提交前误向 `verify-session-plan.ps1` 传入不存在的 `-ReportOnly`，命中第 83 行既有“AGOS 参数漂移”记录；项目原生 CI 合同、性能 Contract 与仓库政策均已通过，因此按规则停止调用该外部校验器并绕过，不修改 AGOS。实现检查点读取 Tree 时未给 `HEAD^{tree}` 加引号，PowerShell 把花括号片段错误转成编码参数；提交与推送已成功，随后用 `git rev-parse 'HEAD^{tree}'` 回读正确 Tree `733319d274a854248d7c706a74333ab8df8d2232`。Artifact 预检又先后把结果身份误当作顶层 `measurement_*` 字段、把合法状态误写为 `success`；读取真实 schema 后改用 `source.*` 与 `status=complete`，未修改 Artifact 或验证器。
+- 关联：Issue `#69`、PR `#68`、Run `30203435572`、`scripts/performance/Test-InputcodexBaseline.ps1`、Issue `#32` Runtime Workflow。
+
 ## 记录模板
 
 ```text
