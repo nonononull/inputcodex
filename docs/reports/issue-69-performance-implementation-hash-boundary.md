@@ -8,7 +8,8 @@
 - 阻塞 PR：`#68`，Final Head `159abbf45dfdc29a277cb152af7368868f2f618d`
 - 失败 Run：`30203435572`
 - 十路径提案：`sha256:6392a1b4150f2aae0c34c285e83b6870f47e3bdc57def6308d0a26ddd158911d`
-- 当前状态：Discovery 与十路径范围已批准，进入 TDD 实施；最终 Squash Merge 仍单独授权。
+- PR：`https://github.com/nonononull/inputcodex/pull/70`
+- 当前状态：实现、Hosted 测量、Evidence 入库、本地最终门禁与非 Draft PR 已完成；等待最终 Head Review/CI，Squash Merge 仍单独授权。
 
 ## GitHub 事实
 
@@ -82,3 +83,10 @@
 - 两平台均绑定提交 `3d25fafe8b9c085aaaa0069d8e5c93e6afc63eac`、Tree `733319d274a854248d7c706a74333ab8df8d2232`、实现哈希 `sha256:ed9a8c27972a8b99b331031af171fbf348587481079d62f05f2dc54a88536faa`、配置哈希 `sha256:b9ed601016ececc735634aeb143965c78fbfc61819d37c7f9e584bc971642b53` 与输入哈希 `sha256:c5b507d219ff49975c13805a2a6e036ade6c61a33a184bfffb74219ce01784b5`。
 - 每个平台均包含 `5` 个首次 view 成功样本、`60` 个空闲资源样本和 `3` 个 Rust 场景；下载文件与入库文件哈希完全一致。
 - Windows、macOS 与 manifest 已通过 `apply_patch` 写入；本地 Evidence 验证为 `ok=true`、`violation_count=0`，没有手工替换单一哈希字段。
+- 两个成功 Artifact 在 Evidence 提交并普通推送后删除，Run `30205624985` Artifact 数为 `0`；本机临时下载目录已安全清理。
+
+## PR 与最终本地门禁
+
+- PR `#70` 为 OPEN、非 Draft，base 为 `main`，首次 PR Head 为 `4a5bf6747b549856315ffaa5dfb76766d36fa0e7`，变更恰好十路径。
+- 最终本地门禁：CI 合同 `35/35`、性能 Evidence 零违规、预算合同 `10/10`、Release Audit `current`、Repository Policy 零违规、十路径 `scope_hash`、JSON/Artifact 身份、PR `#68` Head 不变、差异与控制字节检查全部通过。
+- PR `#70` 最终 Head 的标准 CI、Performance Baseline、Review 对话与 Artifact 数待 GitHub 回写；这些证据只写入 Issue/PR 评论，避免为记录 Final Head 再次改变 Final Head。

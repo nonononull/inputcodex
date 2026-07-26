@@ -28,12 +28,14 @@ ci_expectation: standard GitHub-hosted CI and Performance Baseline must be green
 merge_policy: squash-only, no-force-push, never-delete-main
 scope_boundary: approved ten paths only; final squash merge requires separate owner authorization
 local_time: 2026-07-26T21:26:28+08:00
-closeout_ref: pending
+closeout_ref: https://github.com/nonononull/inputcodex/pull/70
 agos_status: bypassed-report-only-needs-input-unregistered
 implementation_checkpoint_ref: 3d25fafe8b9c085aaaa0069d8e5c93e6afc63eac
 measurement_run_ref: https://github.com/nonononull/inputcodex/actions/runs/30205624985
 measurement_artifact_refs: windows=8633022467, macos=8632997457
 evidence_status: imported-and-local-green
+pr_ref: https://github.com/nonononull/inputcodex/pull/70
+final_ci_status: pending
 ```
 
 ## Local Knowledge Lookup

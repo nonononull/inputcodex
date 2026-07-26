@@ -175,7 +175,7 @@ pwsh -NoProfile -File scripts/performance/Test-InputcodexBaseline.ps1 -Repositor
 
 预期：`ok=true`、`violation_count=0`。
 
-- [ ] **Step 2：完成最终门禁与非 Draft PR**
+- [x] **Step 2：完成最终门禁与非 Draft PR**
 
 执行 CI 合同、Evidence、仓库政策、十路径、`scope_hash`、`git diff --check` 和非法控制字节检查；普通推送最终 Head，创建关联 Issue `#69` 的非 Draft PR。
 

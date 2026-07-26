@@ -16,8 +16,8 @@ local_time_source: Windows Get-Date
 blocking_pr_ref: https://github.com/nonononull/inputcodex/pull/68
 blocking_pr_head: 159abbf45dfdc29a277cb152af7368868f2f618d
 blocking_run_ref: https://github.com/nonononull/inputcodex/actions/runs/30203435572
-pr_ref: pending
-ci_ref: pending
+pr_ref: https://github.com/nonononull/inputcodex/pull/70
+ci_ref: pending-final-head
 ```
 
 ## 工作流节点
@@ -80,3 +80,5 @@ git diff --check
 - Hosted 测量：Run `30205624985` Attempt `1` 的 `contract`、`windows`、`macos`、`required` 四 Job 全绿。
 - Artifact：Windows `8633022467` / `sha256:d8737f5039fd58b00f8d9d542fff3deb54b512ed0aa5ec145771726e9f79dd00`；macOS `8632997457` / `sha256:36b2d08185144617c5ea785b86731771127b9601184b8e64e4e971959944a17d`。
 - 三份 Evidence 已只从该 Run 入库，本地 Evidence 输出 `ok=true`、`violation_count=0`。
+- 非 Draft PR `#70` 已创建，首次 PR Head 为 `4a5bf6747b549856315ffaa5dfb76766d36fa0e7`，十路径、`1361` additions、`763` deletions；最终控制面回写后不再修改 Head。
+- Hosted Run `30205624985` 的两个成功 Artifact 已删除，Run Artifact 数为 `0`；本机下载目录已安全清理。
