@@ -1,6 +1,6 @@
 # Issue #59：EPYC 7763 四次固定串行复测报告
 
-status: RUNS_IN_PROGRESS_3_OF_4
+status: RUNS_COMPLETED_TARGET_COHORT_READY
 
 ## 当前结论
 
@@ -20,11 +20,13 @@ status: RUNS_IN_PROGRESS_3_OF_4
 | `run-01` | [`30190401855`](https://github.com/nonononull/inputcodex/actions/runs/30190401855) | Intel Xeon 8370C / `new-cohort-valid` | `comparable-valid` | completed |
 | `run-02` | [`30190945477`](https://github.com/nonononull/inputcodex/actions/runs/30190945477) | AMD EPYC 7763 / `comparable-valid` | `comparable-valid` | completed |
 | `run-03` | [`30191335211`](https://github.com/nonononull/inputcodex/actions/runs/30191335211) | AMD EPYC 9V74 / `new-cohort-valid` | `comparable-valid` | completed |
-| `run-04` | 待执行 | 待执行 | 待执行 | pending |
+| `run-04` | [`30191791435`](https://github.com/nonononull/inputcodex/actions/runs/30191791435) | AMD EPYC 7763 / `comparable-valid` | `comparable-valid` | completed |
 
 ## 数值状态
 
-- warning/blocking：未生成。
+- Windows 严格目标队列：历史 `3` + 新命中 `2` = `5`，已满足数值生成前置条件。
+- macOS 同队列：历史 `8` + 新有效 `4` = `12`，已满足数值生成前置条件。
+- warning/blocking：等待离线复算器生成并验证。
 - 预算 CI：未实施。
 - Gate 5：继续锁定。
 
@@ -50,6 +52,14 @@ status: RUNS_IN_PROGRESS_3_OF_4
 - Windows Artifact `8628704321`，归一化 SHA-256 `sha256:761d3a7ced4d03c9e50286b7859e803b9337949a7490127a6a3e0ab8208b40a7`，处理器为 AMD EPYC 9V74，环境指纹 `sha256:a3097283cfc677908818cc7b665124d2735be8ae1670deff46590d9ab24c213c`，分类 `new-cohort-valid`。
 - macOS Artifact `8628685677`，归一化 SHA-256 `sha256:022f94de2c1cd88a358a971abd710be2956002bfa89b0e341ed0ae0c6b542f31`，环境指纹继续匹配历史队列。
 - Windows 严格目标队列仍为 `4`；按固定合同继续执行最后的 `run-04`。
+
+## run-04 证据
+
+- 测量 Head：`2e75baadfb641b40314e9690e94117b1cd149b7a`；tree：`bc7917b6665bff43ba8825b54c7d8c3c8c2feea5`。
+- Run `30191791435` 的 `contract`、`windows`、`macos`、`required` 全部成功。
+- Windows Artifact `8628860710`，归一化 SHA-256 `sha256:7b65505db2a6f25fc73b34de32cc96b001f8ede05e82d072c0c11d879f381f17`，处理器为 AMD EPYC 7763，完整环境指纹精确命中 `sha256:f3954543f3cec519568345d9f40341ddeb8991a7d93b3a274cc324b047fb00cb`，分类 `comparable-valid`。
+- macOS Artifact `8628833820`，归一化 SHA-256 `sha256:b172165bdcb1a57b65c92e411759a297059f7ac9ebd06c4da234d6544ff8febe`，完整环境指纹继续匹配历史队列，分类 `comparable-valid`。
+- 四个固定新槽位已全部完成；Windows 严格目标队列达到 `5`，macOS 同队列达到 `12`，允许进入离线预算数值生成，但预算 CI 与 Gate 5 仍未获授权。
 
 ## 控制面证据
 
