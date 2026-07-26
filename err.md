@@ -683,6 +683,24 @@
 - 最终复测验证：精确 Head `427a1c6306f90cb60510200312c66ea25fa74d7a` 的 Run `30179598622` 在 `contract`、`windows`、`macos`、`required` 四 Job 全部成功后产生 Windows Artifact `8625217348` 与 macOS Artifact `8625198125`。两份 JSON 先与 source commit、tree、Run 元数据和归一化哈希交叉核验，再经 `apply_patch` 刷新三份 Evidence；最终仍必须运行本地 Evidence、CI 合同、仓库策略、范围与 PR CI，不能以 Artifact 成功替代后续门禁。
 - 关联：Issue `#54`、Issue `#55`、`.github/workflows/performance-baseline.yml`、`scripts/ci/Test-CiScripts.ps1`、`docs/adr/0004-performance-budget-policy.md`。
 
+### 2026-07-26：GitHub-hosted Windows CPU 队列异构导致五次可比复测不足
+
+- 环境：Issue `#54` 在 `main@325bb2419548bc076502065dc583f54f4fddd582` 上严格串行执行八次 `workflow_dispatch mode=measure`；每次 Windows/macOS Job 以及 `contract`、`required` Job 均成功。
+- 现象：macOS 八次均为同一可比队列；Windows 只有 `run-01`、`run-07` 属于 AMD EPYC 9V74 初始队列，AMD EPYC 7763 为四次次级队列，Intel Xeon 8370C 与 Intel Xeon 6973P-C 各一次。任一 Windows 队列都不足五次。
+- 根因：公开 GitHub-hosted Windows Runner 的 CPU 不是可选标签，调度在同一 hosted/镜像合同下返回多个处理器型号。ADR `0004` 把处理器纳入队列指纹，因此这些结果必须被分类为 `new-cohort-valid`，不能与初始队列混合。
+- 处理：达到 Issue `#54` 的八次上限后停止，不创建 `run-09`，不删除结果、不重跑伪造独立样本、不降低队列语义。建立独立 Issue `#57`，仅比较新的限额复测、一致性例外语义修订与独立 Runner 决策；在项目所有者选择前不执行任何路径。
+- 验证：`benchmarks/results/issue-54/manifest.json` 的 SHA-256 为 `72567fe96f61d8d4eca8a5347e3d3fcea7df823975946ec3f464a43d229f1ae`；八个来源 Run、十六个 Artifact、环境指纹与分类均已由 Issue `#54` 报告和 GitHub API 交叉核验，`evidence-invalid=0`、`external-incident=0`。
+- 关联：Issue `#54`（停止报告位于分支 `codex/issue-54-performance-remeasurement-budget-approval`）、Issue `#57`、`docs/adr/0004-performance-budget-policy.md`。
+
+### 2026-07-26：Codex Desktop 补丁包装器在当前会话拒绝写入
+
+- 环境：为 Issue `#57` 建立隔离分支后，Codex Desktop 自动提供的 `apply_patch.bat` 指向商店版 `codex.exe`；项目根是当前会话的可写工作区根。
+- 现象：无论补丁目标在外部 linked worktree 还是项目根，包装器都返回 `Access is denied`；外部 worktree 还缺少 `CodexSandboxUsers` 的 Modify 权限。
+- 根因：商店版包装器在当前 PowerShell 标准错误编码环境中无法启动；同机 npm `codex.cmd` 会把含换行的补丁参数拆断，不能直接替代。
+- 处理：不改项目工具栈、不改 Git 历史；清理未改动的外部 worktree 后，在 `codex/issue-57-hosted-queue-heterogeneity-discovery` 分支的可写项目根中，通过 npm 官方 `bin/codex.js --codex-run-as-apply-patch` 直连入口执行同一 `apply_patch` 协议。
+- 验证：最小 Add File 补丁成功，随后八路径补丁成功；范围审计、性能 Evidence、CI 合同、仓库政策和 `git diff --check` 均通过。
+- 关联：Issue `#57`、`docs/plans/sessions/2026-07-26-issue-57-hosted-queue-heterogeneity-discovery.md`。
+
 ## 记录模板
 
 ```text

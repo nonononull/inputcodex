@@ -70,6 +70,7 @@
 - PR `#51` Final Head CI Run `30174131581` 的七个预期 Job 均为成功或合同性跳过，`required` 成功且 Artifact 为 `0`；合并后主干 CI Run `30175592979` 七 Job 全绿且 Artifact 为 `0`。
 - 性能预算 Discovery 的稳定结论是“方法已批准、预算数值未批准”：Windows/macOS 必须分别收集至少五次独立可比 Run，下一合法工作只能是独立性能复测与数值批准 Issue；预算 CI、性能优化和 Gate 5 产品迁移必须继续使用不同 Issue/PR。
 - Issue `#55` 为 Issue `#54` 修复唯一的前置合同缺口：`Performance Baseline` 的手工触发必须显式选择 `evidence` 或 `measure`，默认 `evidence`，自动 PR/push 语义、hosted Runner、超时、并发、Artifact 保留和 `target/` 禁止保持不变；因 Workflow/CI 合同属于实现哈希，合并前只能用本 Issue 成功 Artifact 刷新三份 Issue `#32` Evidence。该入口本身不是预算 CI。
-- Issue `#54` 已记录项目所有者对“五次全新独立可比 Run 后直接形成并落盘具体数值”的预授权；它只能在 Issue `#55` 合并后继续，仍不得混入预算 CI、性能优化或 Gate 5。
+- Issue `#54` 已在 Issue `#55` 合并后完成八次严格串行 GitHub-hosted 复测；Windows 仅得到 `2` 次初始可比队列与 `4` 次次级队列，未满足五次硬约束，数值预授权未触发。该 Issue 保持 `STOPPED_AT_EIGHT_RUN_CAP`，不得创建 `run-09`、预算值、预算 CI、优化或 Gate 5 工作。
+- Issue `#57` 只负责 Hosted Windows CPU 队列异构性的 Discovery：它比较“保持硬队列并限额复测”“经一致性例外修订语义”“独立 Runner 决策”三条路径，不能自行选择任一路径、修改 ADR/合同或启动新的采样；只有项目所有者作出明确实质决定后才可建立后续独立 Issue。
 - 合并后稳定状态由 `docs/reports/issue-52-performance-budget-closeout.md` 固化；本 Closeout 自身的动态 Head、CI、Review、授权与合并证据只保留在 GitHub Issue/PR 评论，不得递归创建同类状态 Closeout。
 - Gate 5 继续锁定；只有独立预算复测与数值批准完成、预算 CI 以 `approved-observation` 进入 `main` 且双平台成功执行、`release_audit=current` 后，才能建立首个 Gate 5 产品迁移 Issue。
