@@ -683,6 +683,15 @@
 - 最终复测验证：精确 Head `427a1c6306f90cb60510200312c66ea25fa74d7a` 的 Run `30179598622` 在 `contract`、`windows`、`macos`、`required` 四 Job 全部成功后产生 Windows Artifact `8625217348` 与 macOS Artifact `8625198125`。两份 JSON 先与 source commit、tree、Run 元数据和归一化哈希交叉核验，再经 `apply_patch` 刷新三份 Evidence；最终仍必须运行本地 Evidence、CI 合同、仓库策略、范围与 PR CI，不能以 Artifact 成功替代后续门禁。
 - 关联：Issue `#54`、Issue `#55`、`.github/workflows/performance-baseline.yml`、`scripts/ci/Test-CiScripts.ps1`、`docs/adr/0004-performance-budget-policy.md`。
 
+## 2026-07-26：性能预算复测不能把既有 Evidence 冒充为新的独立样本
+
+- 环境：Issue `#54` 需要 Windows/macOS 各至少五次来自 GitHub-hosted Runner 的独立、同队列复测；基线提交为 `main@325bb2419548bc076502065dc583f54f4fddd582`，Issue `#32` 已有三份正式 Evidence。
+- 现象：如果仍沿用初次基线的 Evidence 路径，或把同一 GitHub `run_id` 的 rerun attempt 记为新样本，会在没有五次独立测量的情况下制造“样本已达标”的错误语义。
+- 根因：初次基线的结果文件用于验证既有 Evidence，不代表新复测；即使 Issue `#55` 已提供显式 `mode=measure`，唯一 `run_id`、Artifact、source、归一化哈希、环境队列和分类仍必须逐次闭环，才能证明样本独立且可比较。
+- 处理：固定 `run-01` 至 `run-08` 槽位并严格串行触发；每次只接受同一 Run 的 Windows/macOS 成功 Artifact，分类只能是 `comparable-valid`、`new-cohort-valid`、`evidence-invalid` 或有外部证据的 `external-incident`。IQR 或慢样本不得删除、重跑伪装或归类为外部事故；八次上限后仍不足五个同队列样本时必须停止。
+- 验证：Issue `#55` 的 `workflow_dispatch mode=measure` Run `30179598622` 已证明入口可用；Issue `#54` 的 `benchmarks/results/issue-54/manifest.json` 将逐项记录后续 Run、Artifact、哈希、队列、分类和处理证据，离线验证器只接受五个以上 `comparable-valid` 样本。
+- 关联：Issue `#32`、Issue `#54`、Issue `#55`、PR `#56`、`docs/adr/0004-performance-budget-policy.md`、`docs/plans/2026-07-26-issue-54-performance-remeasurement-budget-approval.md`。
+
 ## 记录模板
 
 ```text

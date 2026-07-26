@@ -2,9 +2,9 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 25 日，Gate 3 七成员 Workspace、Gate 4 `v1.2.42` 功能目录重新审计、双平台性能基线与性能预算 Discovery 均已进入 `main`。Issue `#50` / PR `#51` 的 Squash 提交为 `fea8824c652665df710a7e6ef941854060eb6e1f`；合并后主干 CI Run `30175592979` 七 Job 全绿且 Artifact 为 `0`，Issue `#50` 已按 `COMPLETED` 关闭。当前只批准预算方法，预算数值、预算 CI、性能优化和 Gate 5 产品迁移仍需不同 Issue/PR。
+截至 2026 年 7 月 26 日，Gate 3 七成员 Workspace、Gate 4 `v1.2.42` 功能目录重新审计、双平台性能基线与性能预算 Discovery 均已进入 `main`。Issue `#55` / PR `#56` 的 Squash 提交为 `325bb2419548bc076502065dc583f54f4fddd582`；合并后主干 `CI` Run `30180436105` 七 Job 与 `Performance Baseline` Run `30180436063` 四 Job 全绿，Artifact 均为 `0`。Issue `#54` 已获数值预授权，但在 Windows/macOS 各取得至少五次同队列新样本前，预算数值、预算 CI、性能优化和 Gate 5 产品迁移仍不得实施。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供十八个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供十九个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -24,6 +24,7 @@
 16. Issue `#32` 隔离性能测量合同、原始样本结构、专用 Workflow 和预算/优化隔离验证。
 17. Issue `#50` 性能预算 ADR、同平台可比队列、阶段门禁、九路径范围与长期状态验证。
 18. Issue `#52` 性能预算 Discovery 合并后稳定状态、八路径范围、反递归边界与主干证据验证。
+19. Issue `#54` 串行 hosted 复测允许集合、原始样本、离线预算数值与禁止面验证。
 
 当前禁止：
 
@@ -35,6 +36,7 @@
 - 修改或优化外部 AGOS。
 - 在 Issue `#50` 中填写预算数值、运行新 hosted 测量、修改性能实现/Workflow、实施优化或解锁 Gate 5。
 - 在 Issue `#52` 中修改代码、Cargo、`benchmarks/`、Workflow、Ruleset、Release、AGOS、预算数值、性能优化或 Gate 5 产品功能。
+- 在 Issue `#54` 中修改 Workflow、采集器、既有 Issue `#32` Evidence、Cargo、Rust 业务实现、预算 CI、Ruleset、上游、Release、性能优化或 Gate 5。
 
 ## Issue #52 性能预算 Discovery Closeout 本地轻量验证
 
@@ -1731,6 +1733,94 @@ Write-Output 'ISSUE_55_LOCAL_GREEN'
 
 ```powershell
 gh workflow run 'Performance Baseline' --repo nonononull/inputcodex --ref codex/issue-55-performance-remeasurement-entry -f mode=measure
+```
+
+## Issue #54 五次性能复测与数值批准本地轻量验证
+
+Issue `#54` 的完整允许集合固定为二十九条路径，`scope_hash` 固定为 `sha256:32c818aaf99efe550e9afc45d5871f9dceeef50ba314aaa91b617cd76158a38e`。本机只做路径、文档、Evidence、CI 合同和仓库政策验证；性能采样只通过 GitHub-hosted Runner 的显式 `workflow_dispatch mode=measure` 串行执行。`run-01` 至 `run-08` 是上限而不是必须填满的槽位，任何时刻的实际改动都必须是允许集合的子集。
+
+```powershell
+$baseline = '325bb2419548bc076502065dc583f54f4fddd582'
+$approvedPaths = @(
+  'AGENTS.md'
+  'benchmarks/budgets/issue-54-approved-observation.json'
+  'benchmarks/results/issue-54/manifest.json'
+  'benchmarks/results/issue-54/runs/run-01/macos.json'
+  'benchmarks/results/issue-54/runs/run-01/windows.json'
+  'benchmarks/results/issue-54/runs/run-02/macos.json'
+  'benchmarks/results/issue-54/runs/run-02/windows.json'
+  'benchmarks/results/issue-54/runs/run-03/macos.json'
+  'benchmarks/results/issue-54/runs/run-03/windows.json'
+  'benchmarks/results/issue-54/runs/run-04/macos.json'
+  'benchmarks/results/issue-54/runs/run-04/windows.json'
+  'benchmarks/results/issue-54/runs/run-05/macos.json'
+  'benchmarks/results/issue-54/runs/run-05/windows.json'
+  'benchmarks/results/issue-54/runs/run-06/macos.json'
+  'benchmarks/results/issue-54/runs/run-06/windows.json'
+  'benchmarks/results/issue-54/runs/run-07/macos.json'
+  'benchmarks/results/issue-54/runs/run-07/windows.json'
+  'benchmarks/results/issue-54/runs/run-08/macos.json'
+  'benchmarks/results/issue-54/runs/run-08/windows.json'
+  'build.md'
+  'docs/plans/2026-07-26-issue-54-performance-remeasurement-budget-approval.md'
+  'docs/plans/PROJECT-MASTER-PLAN.md'
+  'docs/plans/sessions/2026-07-26-issue-54-performance-remeasurement-budget-approval.md'
+  'docs/reports/issue-54-performance-remeasurement-budget-approval.md'
+  'docs/workflows/2026-07-26-issue-54-performance-remeasurement-budget-approval-runtime.md'
+  'err.md'
+  'README.md'
+  'scripts/performance/Build-InputcodexBudgetApproval.ps1'
+  'scripts/performance/Test-InputcodexBudgetApproval.ps1'
+) | Sort-Object
+
+$branch = (git branch --show-current).Trim()
+if ($branch -ne 'codex/issue-54-performance-remeasurement-budget-approval') {
+  throw "Issue #54 当前分支不正确：$branch"
+}
+
+$committed = @(git diff --name-only "$baseline...HEAD")
+$unstaged = @(git diff --name-only)
+$staged = @(git diff --cached --name-only)
+$untracked = @(git ls-files --others --exclude-standard)
+$actualPaths = @($committed + $unstaged + $staged + $untracked | Where-Object { $_ } | Sort-Object -Unique)
+$unexpectedPaths = @($actualPaths | Where-Object { $_ -notin $approvedPaths })
+if ($unexpectedPaths.Count -ne 0) {
+  $unexpectedPaths | Format-Table -AutoSize
+  throw 'Issue #54 出现批准集合外路径。'
+}
+
+$scopeText = ($approvedPaths -join "`n") + "`n"
+$scopeBytes = [System.Text.UTF8Encoding]::new($false).GetBytes($scopeText)
+$scopeHash = [Convert]::ToHexString([System.Security.Cryptography.SHA256]::HashData($scopeBytes)).ToLowerInvariant()
+if ($scopeHash -ne '32c818aaf99efe550e9afc45d5871f9dceeef50ba314aaa91b617cd76158a38e') {
+  throw "Issue #54 scope_hash 漂移：$scopeHash"
+}
+
+pwsh -NoProfile -File scripts/performance/Test-InputcodexBaseline.ps1 -RepositoryRoot . -Mode Evidence
+if ($LASTEXITCODE -ne 0) { throw '性能 Evidence 验证失败。' }
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+if ($LASTEXITCODE -ne 0) { throw 'CI 合同验证失败。' }
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw '仓库政策验证失败。' }
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'git diff --check 失败。' }
+Write-Output 'ISSUE_54_CONTROL_PLANE_GREEN'
+```
+
+全部采样、离线预算脚本和数值控制面完成后，再追加执行以下验证；首次控制面提交不得调用尚未创建的预算验证器：
+
+```powershell
+pwsh -NoProfile -File scripts/performance/Test-InputcodexBudgetApproval.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw '性能预算数值验证失败。' }
+pwsh -NoProfile -File scripts/performance/Test-InputcodexBaseline.ps1 -RepositoryRoot . -Mode Evidence
+if ($LASTEXITCODE -ne 0) { throw '性能 Evidence 验证失败。' }
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+if ($LASTEXITCODE -ne 0) { throw 'CI 合同验证失败。' }
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw '仓库政策验证失败。' }
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'git diff --check 失败。' }
+Write-Output 'ISSUE_54_BUDGET_GREEN'
 ```
 
 ## 外部 AGOS 使用边界

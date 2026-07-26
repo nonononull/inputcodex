@@ -77,11 +77,11 @@
 - 最新正式功能真源为 `v1.2.42`；活动审计缓存与功能目录审计基线均已对齐该 Release，`release_audit` 为 `current`，上游 `main` 的变化仍只进入 Issue `#20` 预警。
 - Issue `#32` / PR `#49` 已完成 Windows/macOS 基线采集与 Evidence；该结果是预算 Discovery 输入，不是预算批准。
 - Issue `#50` / PR `#51` 已通过 ADR `0004` 冻结预算对象、可比队列、五次独立 Run、run-level 稳健统计、错误语义和阶段升级合同；PR Final Head CI 与合并后主干 CI 均通过，Gate 5 仍未解锁。
-- Issue `#55` 使 `Performance Baseline` 的手工 trigger 必须显式选择 `evidence` 或 `measure`，默认值为 `evidence`；它不改变自动 PR/push 行为，也不实施预算 CI。其 Workflow/CI 合同变更须以本 Issue 成功 Artifact 刷新三份哈希绑定 Evidence。Issue `#54` 将在该入口进入 `main` 后收集五次全新可比 Run 并落盘预授权的预算数值。
+- Issue `#55` / PR `#56` 已使 `Performance Baseline` 的手工 trigger 显式选择 `evidence` 或 `measure`，默认值为 `evidence`；它不改变自动 PR/push 行为，也不实施预算 CI。Issue `#54` 已在该入口进入 `main` 后启动：最多八次串行 hosted Run，Windows/macOS 各至少五个同队列可比样本后才落盘项目所有者预授权的预算数值。
 
 ## 下一步
 
-1. 在 Issue `#55` 合并后继续 Issue `#54`：每个平台至少收集五次全新可比 Run，并按 Issue 中的项目所有者预授权明确记录 warning/blocking 数值。
+1. 执行 Issue `#54`：每个平台至少收集五次全新可比 Run，保留所有队列/分类/原始 Artifact 证据，并按 Issue 中的项目所有者预授权明确记录 warning/blocking 数值。
 2. 创建独立预算 CI 实施 Issue，使获批预算先以 `approved-observation` 进入 `main`，并在 Windows/macOS 各成功执行至少一次。
 3. 仅在预算复测、数值批准、预算 CI 双平台观察和 `release_audit=current` 全部满足后，建立首个 Gate 5 功能迁移 Issue。
 
@@ -117,6 +117,10 @@
 - Issue `#55` Session Plan：`docs/plans/sessions/2026-07-26-issue-55-performance-remeasurement-entry.md`
 - Issue `#55` Runtime Workflow：`docs/workflows/2026-07-26-issue-55-performance-remeasurement-entry-runtime.md`
 - Issue `#55` 报告：`docs/reports/issue-55-performance-remeasurement-entry.md`
+- Issue `#54` 复测与数值计划：`docs/plans/2026-07-26-issue-54-performance-remeasurement-budget-approval.md`
+- Issue `#54` Session Plan：`docs/plans/sessions/2026-07-26-issue-54-performance-remeasurement-budget-approval.md`
+- Issue `#54` Runtime Workflow：`docs/workflows/2026-07-26-issue-54-performance-remeasurement-budget-approval-runtime.md`
+- Issue `#54` 报告：`docs/reports/issue-54-performance-remeasurement-budget-approval.md`
 - 本次筹备计划：`docs/plans/2026-07-21-bootstrap.md`
 - 筹备会话计划：`docs/plans/sessions/2026-07-21-inputcodex-bootstrap.md`
 - 筹备运行工作流：`docs/workflows/2026-07-21-inputcodex-bootstrap-runtime.md`
