@@ -764,6 +764,42 @@
 - 验证：原位修正 Issue `#59` 的 `run-02` / Final Head 评论和 PR `#60` 的 Final Head 评论；回读正文不得包含控制字符、`$head`、`$tree`、未求值日期表达式或缺失字段。
 - 关联：Issue `#59`、PR `#60`、`err.md` 第 511 行的既有 PowerShell Markdown 转义记录。
 
+### 2026-07-26：目录实例测试把历史 current 状态误设为永久不变量
+
+- 环境：PR `#66` 将活动上游快照合法推进到 `v1.2.43`，功能目录仍固定在 `v1.2.42` 并以 `stale-re-audit-required` 指向 Issue `#65`。
+- 现象：Linux、Windows、macOS 均失败于 `仓库v1_2_42目录重新审计恢复current` 的 `!summary.requires_reaudit()`；后续固定 `source-lock` 为 `v1.2.42/current` 的断言也与新快照冲突。
+- 根因：Issue `#38` / PR `#45` 的仓库实例测试把“重新审计完成当时 snapshot 与 catalog 相同”提升为跨 Release 永久不变量，重复并收紧了已有 current/stale 专项状态机合同。
+- 处理：Issue `#67` 将该测试收敛为固定 `v1.2.42` 目录、合同、source-index 与行为证据；删除活动 snapshot/status 断言，不修改生产验证器或 PR `#66`。
+- 验证：干净 main/current 与临时 PR `#66`/stale 必须分别运行完整 `catalog_repository`；非法状态组合继续由 `release_audit_显式解耦快照与功能目录审计基线` 拒绝。
+- 关联：Issue `#38`、PR `#45`、Issue `#64`、PR `#66`、Issue `#67`、CI Run `30202056781`。
+
+### 2026-07-26：跨工作树旧 Rust 测试产物造成 main 假失败
+
+- 环境：Issue `#67` 根因复核期间，在主工作树运行 v1.2.42 定向测试。
+- 现象：工作树与 `HEAD` 的 `source-lock` 均为 `v1.2.42/current`，测试却报告 stale；二进制字符串检查显示主工作树 `target` 内的可执行文件嵌入了 Issue `#64` 工作树路径。
+- 根因：本地验证复用了落在错误 `target` 目录中的跨工作树测试二进制，`env!("CARGO_MANIFEST_DIR")` 因编译时路径固定而读取了 Issue `#64` 的 v1.2.43 stale 仓库。
+- 处理：执行 `cargo clean -p inputcodex-parity` 后在各自工作树重新编译；后续 main/current 与 PR `#66`/stale 证据必须在明确工作目录中分别运行，禁止共享不明来源测试二进制。一次把两段标签写在同一工具调用中的命令因固定 `workdir` 实际都运行于 Issue `#64`，该错误标签已废弃并拆为独立工作目录重跑。
+- 验证：重新编译后的 main/current 定向测试退出码 `0`；PR `#66` 工作树退出码 `101` 且稳定失败于旧永久 current 断言；修复后两个工作目录分别完成完整 `12/12`。
+- 关联：Issue `#64`、PR `#66`、Issue `#67`、`crates/inputcodex-parity/tests/catalog_repository.rs`。
+
+### 2026-07-26：Issue #67 批准评论路径占位写入 DEL 控制字节
+
+- 环境：使用 PowerShell 单引号 here-string 回写 Issue `#67` 的批准证据和 Windows 工作树路径。
+- 现象：首次评论中的路径分隔符成为 `0x7F`，API 写入成功但正文不完整；仓库文件尚未写入。
+- 根因：模板主动使用 DEL 字符作路径占位，却用 `.Replace('\\u007f', '\\')` 搜索字面转义文本，实际控制字节没有被替换；同时首次流程没有在写入后立即扫描控制字节。
+- 处理：改用单引号 here-string 直接保存反斜杠，通过 `ConvertTo-Json` 调用 GitHub API 原位修正评论，并按评论 ID 回读正文。
+- 验证：评论 `5083523560` 回读后 `CONTROL_COUNT=0`，工作树路径、Head、scope hash 和授权边界完整；后续评论继续遵循第 758 行既有传输合同。
+- 关联：Issue `#67`、评论 `5083523560`、`err.md` 第 758 行。
+
+### 2026-07-26：`pwsh -File` 不能按预期传递字符串数组参数
+
+- 环境：Issue `#67` 提交前运行 AGOS Git snapshot checkpoint，并尝试向 `AllowedUntrackedPatterns` 传入四个路径。
+- 现象：通过子进程 `pwsh -File` 调用时，第二个路径之后被当成位置参数，最终尝试把报告路径转换为 `MaxRecentCommitsPerTaskWindow` 整数；治理脚本主体尚未执行。
+- 根因：PowerShell 原生进程参数边界不会保留调用端数组对象，`-File` 后的多值参数被展平并参与位置绑定。
+- 处理：在当前 PowerShell 进程中使用调用运算符 `& $script`，直接向脚本参数传递 `@(...)` 数组；不修改 AGOS 脚本。
+- 验证：同一 checkpoint 返回 `GIT_SNAPSHOT_STATUS=ready`、`GIT_COMMIT_DISCIPLINE_STATUS=ready`、`GIT_SOURCE_EDIT_ADMISSION_STATUS=ready`，退出码 `0`。
+- 关联：Issue `#67`、`verify-git-snapshot-governance.ps1`。
+
 ## 记录模板
 
 ```text

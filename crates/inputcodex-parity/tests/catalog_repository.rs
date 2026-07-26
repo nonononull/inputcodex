@@ -390,12 +390,8 @@ fn release_audit_显式解耦快照与功能目录审计基线() {
 }
 
 #[test]
-fn 仓库v1_2_42目录重新审计恢复current() {
-    let summary = validate_repository(&repository_root()).expect("v1.2.42 功能目录应通过完整验证");
-    assert!(
-        !summary.requires_reaudit(),
-        "完成重新审计后不得继续标记 stale"
-    );
+fn 仓库v1_2_42目录重新审计证据保持固定() {
+    validate_repository(&repository_root()).expect("v1.2.42 功能目录证据应通过完整验证");
 
     for relative_path in [
         "parity/features/foundation-platform.yml",
@@ -426,17 +422,6 @@ fn 仓库v1_2_42目录重新审计恢复current() {
             "{relative_path} 不得保留 v1.2.41 合同描述"
         );
     }
-
-    assert_repository_text_contains(
-        "upstream/source-lock.json",
-        &[
-            r#""tag": "v1.2.42""#,
-            r#""commit": "657cd33e009ad02515d30db6492cd4e669b06318""#,
-            r#""status": "current""#,
-            r#""stale_reason": null"#,
-            r#""re_audit_issue_ref": null"#,
-        ],
-    );
 }
 
 #[test]
