@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 功能目录、`v1.2.42` 缓存与重新审计、双平台性能基线和性能预算 Discovery。Issue `#57` / PR `#58` 已证明预算阻塞根因是 GitHub-hosted Windows CPU 队列异构，不是产品回归或采集失败；项目所有者已选择方案 A。当前 Issue `#59` 以 AMD EPYC 7763 的主导完整环境指纹 `sha256:f3954543f3cec519568345d9f40341ddeb8991a7d93b3a274cc324b047fb00cb` 为目标队列执行四次固定串行复测，历史严格可比基数为 `3`；四次后不足五份同队列样本即硬停止。预算 CI、性能优化、上游功能迁移和 Gate 5 继续锁定。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 功能目录、`v1.2.42` 缓存与重新审计、双平台性能基线和性能预算 Discovery。Issue `#59` 的四次固定串行复测已全部结束：Windows AMD EPYC 7763 严格目标队列达到 `5` 次，macOS 同队列达到 `12` 次；离线预算 JSON、构建器和验证器已生成，TDD 合同 `10/10` GREEN。当前仍待 Issue `#59` 的 PR、Review/CI 与 Squash Merge；预算 CI、性能优化、上游功能迁移和 Gate 5 继续锁定。
 
 ## 项目目标
 
@@ -78,12 +78,13 @@
 - Issue `#32` / PR `#49` 已完成 Windows/macOS 基线采集与 Evidence；该结果是预算 Discovery 输入，不是预算批准。
 - Issue `#50` / PR `#51` 已通过 ADR `0004` 冻结预算对象、可比队列、五次独立 Run、run-level 稳健统计、错误语义和阶段升级合同；PR Final Head CI 与合并后主干 CI 均通过，Gate 5 仍未解锁。
 - Issue `#55` 使 `Performance Baseline` 的手工 trigger 必须显式选择 `evidence` 或 `measure`，默认值为 `evidence`；它不改变自动 PR/push 行为，也不实施预算 CI。Issue `#54` 已以八次严格串行 hosted Run 验证该入口，但 Windows 的 CPU 队列分裂为四类，未产生五次同队列样本；预算数值预授权因此没有触发。
+- Issue `#59` 已在固定四次上限内新增两份严格目标 Windows 样本，最终 Windows/macOS 队列数为 `5/12`；`benchmarks/budgets/issue-59-approved-observation.json` 使用所有者预授权公式离线生成，预算 CI 与 Gate 5 均保持关闭。
 
 ## 下一步
 
-1. 在 Issue `#59` 中缓存 Issue `#54` 的只读历史证据，并严格串行执行四个新测量槽位；禁止恢复 Issue `#54`、创建其 `run-09` 或创建 Issue `#59` 的 `run-05`。
-2. 四次结束后，若 AMD EPYC 7763 总样本达到至少五次，则按 ADR `0004` 落盘可复算的 warning/blocking 数值；若不足五次则硬停止并返回一致性例外或 Runner 决策。
-3. 数值进入 `main` 后再建立独立预算 CI Issue，以 `approved-observation` 模式完成 Windows/macOS 观察；满足全部条件后才建立首个 Gate 5 功能迁移 Issue。
+1. 完成 Issue `#59` 的 Fresh 验证、非 Draft PR、Review/CI 和全部对话根因闭环；最终 Head 仍需项目所有者单独授权 Squash Merge。
+2. Issue `#59` 数值进入 `main` 后，建立独立预算 CI Issue，以非 required 的 `approved-observation` 模式完成 Windows/macOS 观察；不得在该任务修改数值公式或启用 Ruleset。
+3. 预算 CI 双平台成功执行、`release_audit=current` 且后续所有者决策完成后，才建立首个 Gate 5 功能迁移 Issue。
 
 ## 项目文档
 

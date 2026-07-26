@@ -1864,9 +1864,19 @@ Write-Output "ISSUE_59_CONTROL_GREEN actual_paths=$($actualPaths.Count) runs=$($
 四个槽位全部结束且预算控制面实际生成后，再执行：
 
 ```powershell
+$budgetPreviewPath = Join-Path $env:TEMP 'inputcodex-issue59-budget-preview.json'
+pwsh -NoProfile -File scripts/performance/Build-InputcodexBudgetApproval.ps1 `
+  -RepositoryRoot . `
+  -OutputPath $budgetPreviewPath
+if ($LASTEXITCODE -ne 0) { throw '性能预算离线构建失败。' }
+
 pwsh -NoProfile -File scripts/performance/Test-InputcodexBudgetApproval.ps1 -RepositoryRoot .
 if ($LASTEXITCODE -ne 0) { throw '性能预算数值验证失败。' }
+
+Remove-Item -LiteralPath $budgetPreviewPath -Force
 ```
+
+验证器会在系统临时目录重新生成预算 JSON，与入库文档做归一化哈希比较，并独立复算 center、MAD、安全裕量和量子舍入；期望输出 `BUDGET_APPROVAL_GREEN passed=10`。预算 JSON 固定为 `approved-observation` 证据，`budget_ci_enabled=false`、`gate_5_unlocked=false`。
 
 每个槽位只允许在前一个槽位完全闭环后触发：
 

@@ -23,6 +23,7 @@
 - 目标 Windows 完整环境指纹：`sha256:f3954543f3cec519568345d9f40341ddeb8991a7d93b3a274cc324b047fb00cb`；处理器为 `AMD EPYC 7763 64-Core Processor`，并同时要求镜像版本、OS 描述、逻辑处理器数和总内存值完全匹配。
 - 固定新槽位：`run-01`、`run-02`、`run-03`、`run-04`；四个槽位全部执行。
 - 硬停止：四次后目标队列总数仍小于 `5` 时，不创建 `run-05`，不修改队列语义，不生成预算值。
+- 数值预授权继承 Issue `#54` 所有者评论 `https://github.com/nonononull/inputcodex/issues/54#issuecomment-5081207478`：`warning = round_up(center + max(3 * MAD, 10% * center), quantum)`，`blocking = round_up(center + max(5 * MAD, 20% * center), quantum)`；首次 view、Working Set、Rust 的 `quantum` 分别为 `1 ms`、`1 MiB`、`0.001 ns/op`。
 
 ## 历史证据模型
 
@@ -87,26 +88,26 @@ scripts/performance/Test-InputcodexBudgetApproval.ps1
 
 ### Task 2：执行四次固定串行测量
 
-- [ ] 对 `run-01` 至 `run-04` 逐个执行 `gh workflow run 'Performance Baseline' --repo nonononull/inputcodex --ref codex/issue-59-epyc-7763-fixed-remeasurement -f mode=measure`。
-- [ ] 每次等待 `contract`、`windows`、`macos`、`required` 全部终态后再开始下一次。
-- [ ] 下载双平台 Artifact，核验 source、Run、attempt、归一化哈希、schema、状态、hosted 环境、样本合同和 checksum。
-- [ ] 每个槽位入库后形成普通 Git 快照并 push；不得并发或跳号。
+- [x] 对 `run-01` 至 `run-04` 逐个执行 `gh workflow run 'Performance Baseline' --repo nonononull/inputcodex --ref codex/issue-59-epyc-7763-fixed-remeasurement -f mode=measure`。
+- [x] 每次等待 `contract`、`windows`、`macos`、`required` 全部终态后再开始下一次。
+- [x] 下载双平台 Artifact，核验 source、Run、attempt、归一化哈希、schema、状态、hosted 环境、样本合同和 checksum。
+- [x] 每个槽位入库后形成普通 Git 快照并 push；不得并发或跳号。
 
 ### Task 3：分类与最终判定
 
-- [ ] Windows hard key 与完整环境指纹同时等于批准目标时计入 `comparable-valid`；只有 CPU 型号相同但其他指纹字段不同也必须记录为 `new-cohort-valid`。
-- [ ] macOS 按自己的硬键与队列指纹独立分类。
-- [ ] 四次全部结束后计算目标队列总数；达到至少五次时生成预算 JSON 与离线复算器，不足五次时记录硬停止且不创建三个可选文件。
+- [x] Windows hard key 与完整环境指纹同时等于批准目标时计入 `comparable-valid`；只有 CPU 型号相同但其他指纹字段不同也必须记录为 `new-cohort-valid`。
+- [x] macOS 按自己的硬键与队列指纹独立分类。
+- [x] 四次全部结束后计算目标队列总数；Windows 达到 `5`、macOS 达到 `12`，已生成预算 JSON 与离线复算器，未触发不足五次硬停止。
 
 ### Task 4：验证和 GitHub 交付
 
-- [ ] 运行范围、历史证据、manifest、Evidence、CI 合同、Repository Policy、JSON/PowerShell 与 `git diff --check` 验证。
+- [x] 运行范围、历史证据、manifest、Evidence、CI 合同、Repository Policy、JSON/PowerShell 与 `git diff --check` 验证。
 - [ ] 创建 `Closes #59` 的非 Draft PR，逐条闭环 Review 对话并等待全部 PR CI。
 - [ ] 最终 Head 满足范围、Review、CI 与所有者合并证据后，仅使用 Squash Merge。
 
 ## 完成标准
 
-- 四个新槽位全部执行且具有不同 `run_id`；不存在 `run-05`。
-- 历史十六份 JSON 的内容、原始分类、来源和哈希没有被改写。
-- 目标队列达到至少五次时，预算值可由固定公式离线复算；否则报告明确为硬停止。
-- 本 Issue 不实施预算 CI、性能优化、产品迁移或 Runner 资源变更。
+- [x] 四个新槽位全部执行且具有不同 `run_id`；不存在 `run-05`。
+- [x] 历史十六份 JSON 的内容、原始分类、来源和哈希没有被改写。
+- [x] 目标队列达到至少五次，预算值可由固定公式离线复算；TDD 合同输出 `BUDGET_APPROVAL_GREEN passed=10`。
+- [x] 本 Issue 不实施预算 CI、性能优化、产品迁移或 Runner 资源变更。

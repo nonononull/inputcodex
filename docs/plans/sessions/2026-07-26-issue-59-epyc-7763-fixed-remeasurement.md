@@ -4,6 +4,7 @@ schema_version: inputcodex.session-plan.v1
 task_id: issue-59-epyc-7763-fixed-remeasurement
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/59
 decision_status: approved
+execution_status: implementation-complete-pending-pr
 approved_decision_ref: user-message:批准方案-A-EPYC-7763-四次固定串行复测-2026-07-26
 selected_business_path: performance-budget-fixed-remeasurement
 project_root: C:\Users\dashuai\Documents\inputcodex-worktrees\issue-59-epyc-7763-fixed-remeasurement
@@ -39,14 +40,17 @@ agos_status: bypassed-report-only-unregistered-needs-input-no-cross-repo-mutatio
 - `same_processor_other_fingerprint_slots=issue-54/run-04`
 - `hard_stop_after_run_04=true`
 - `budget_ci_enabled=false`
+- `budget_formula_version=inputcodex.performance-budget-formula.v1`
+- `owner_preauthorization_ref=https://github.com/nonononull/inputcodex/issues/54#issuecomment-5081207478`
+- `budget_json_sha256=sha256:be07138908cd411925db963718b71062060f4fd4a50b910ab5d5f25f88d4ebe5`
 
 ## 执行检查点
 
-1. **startup-baseline**：确认分支、干净工作树、本机时间、Issue、主干提交和 Git 远端；运行 Git snapshot ReportOnly。
-2. **control-plane**：写入三十八路径、scope hash、历史证据和四槽位合同；轻量验证后形成第一条普通提交并 push。
-3. **run-01 至 run-04**：每个槽位执行、等待、下载、核验、分类、入库、轻量验证、普通提交和 push；任一槽位未终态不得触发下一槽位。
-4. **final-decision**：四次后计算 AMD EPYC 7763 总数；达标生成预算控制面，不达标记录硬停止。
-5. **pr-closeout**：完成 Fresh 轻量验证、非 Draft PR、Review/CI 与全部对话闭环；最终等待项目所有者针对 Final Head 的 Squash Merge 授权。
+1. [x] **startup-baseline**：确认分支、干净工作树、本机时间、Issue、主干提交和 Git 远端；运行 Git snapshot ReportOnly。
+2. [x] **control-plane**：写入三十八路径、scope hash、历史证据和四槽位合同；轻量验证后形成第一条普通提交并 push。
+3. [x] **run-01 至 run-04**：每个槽位执行、等待、下载、核验、分类、入库、轻量验证、普通提交和 push；任一槽位未终态不得触发下一槽位。
+4. [x] **final-decision**：Windows 严格目标队列达到 `5`，macOS 达到 `12`；预算控制面、构建器和验证器已生成，TDD 为 `10/10` GREEN。
+5. [ ] **pr-closeout**：完成最终 Fresh 轻量验证、非 Draft PR、Review/CI 与全部对话闭环；最终等待项目所有者针对 Final Head 的 Squash Merge 授权。
 
 ## 停止条件
 

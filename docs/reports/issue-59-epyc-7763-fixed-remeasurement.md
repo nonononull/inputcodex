@@ -1,10 +1,10 @@
 # Issue #59：EPYC 7763 四次固定串行复测报告
 
-status: RUNS_COMPLETED_TARGET_COHORT_READY
+status: IMPLEMENTATION_COMPLETE_PENDING_PR
 
 ## 当前结论
 
-项目所有者已批准方案 A。Issue `#59` 保持 ADR `0004` 完整环境指纹语义，以 AMD EPYC 7763 主导指纹 `sha256:f3954543f3cec519568345d9f40341ddeb8991a7d93b3a274cc324b047fb00cb` 为 Windows 目标队列，固定执行四次新的 GitHub-hosted 双平台测量。四次后仍不足五份目标队列样本即硬停止，不创建 `run-05`。
+项目所有者批准的方案 A 已完成实施。四次新的 GitHub-hosted 双平台测量全部严格串行结束，Windows AMD EPYC 7763 严格目标队列达到 `5`，macOS 同队列达到 `12`，因此未触发不足五份硬停止；预算 JSON、离线构建器和验证器已按预授权公式生成，当前只等待最终 Fresh 验证、PR、Review/CI 与 Squash Merge。
 
 ## 历史证据
 
@@ -26,7 +26,7 @@ status: RUNS_COMPLETED_TARGET_COHORT_READY
 
 - Windows 严格目标队列：历史 `3` + 新命中 `2` = `5`，已满足数值生成前置条件。
 - macOS 同队列：历史 `8` + 新有效 `4` = `12`，已满足数值生成前置条件。
-- warning/blocking：等待离线复算器生成并验证。
+- warning/blocking：已按所有者预授权公式生成并通过独立复算。
 - 预算 CI：未实施。
 - Gate 5：继续锁定。
 
@@ -60,6 +60,47 @@ status: RUNS_COMPLETED_TARGET_COHORT_READY
 - Windows Artifact `8628860710`，归一化 SHA-256 `sha256:7b65505db2a6f25fc73b34de32cc96b001f8ede05e82d072c0c11d879f381f17`，处理器为 AMD EPYC 7763，完整环境指纹精确命中 `sha256:f3954543f3cec519568345d9f40341ddeb8991a7d93b3a274cc324b047fb00cb`，分类 `comparable-valid`。
 - macOS Artifact `8628833820`，归一化 SHA-256 `sha256:b172165bdcb1a57b65c92e411759a297059f7ac9ebd06c4da234d6544ff8febe`，完整环境指纹继续匹配历史队列，分类 `comparable-valid`。
 - 四个固定新槽位已全部完成；Windows 严格目标队列达到 `5`，macOS 同队列达到 `12`，允许进入离线预算数值生成，但预算 CI 与 Gate 5 仍未获授权。
+
+## 预算控制面证据
+
+- 预授权引用：`https://github.com/nonononull/inputcodex/issues/54#issuecomment-5081207478`。
+- 固定公式：`warning = round_up(center + max(3 * MAD, 10% * center), quantum)`；`blocking = round_up(center + max(5 * MAD, 20% * center), quantum)`。
+- 量子：首次 view `1 ms`；空闲 Working Set `1 MiB`；Rust 场景 `0.001 ns/op`。
+- 预算 JSON：`benchmarks/budgets/issue-59-approved-observation.json`，归一化 SHA-256 `sha256:be07138908cd411925db963718b71062060f4fd4a50b910ab5d5f25f88d4ebe5`。
+- 构建器：`scripts/performance/Build-InputcodexBudgetApproval.ps1`，归一化 SHA-256 `sha256:fad022e34b49eaceabb4022a3649221277d14eb4f8030fbe8ee807ab2e13c817`。
+- 验证器：`scripts/performance/Test-InputcodexBudgetApproval.ps1`，归一化 SHA-256 `sha256:06df6d5f08e68e5680c6d45aef7d761cd834e46ad7d70db4faa8817e70388777`。
+- TDD：先观察到 `BUDGET_BUILDER_MISSING` RED，再实现最小构建器；最终正反向合同为 `BUDGET_APPROVAL_GREEN passed=10`。
+- Windows 来源 Run：Issue `#54/run-03`、`run-05`、`run-08` 与 Issue `#59/run-02`、`run-04`；macOS 来源为 Issue `#54` 八次与 Issue `#59` 四次。
+
+### Windows warning/blocking
+
+| 指标 | lane | warning | blocking | 单位 |
+| --- | --- | ---: | ---: | --- |
+| `presentation.first_view.elapsed` | `median` | 322 | 352 | `milliseconds` |
+| `desktop.idle.working_set` | `median` | 44 | 48 | `mebibytes` |
+| `rust.application-load-complete` | `median` | 2.035 | 2.22 | `nanoseconds_per_operation` |
+| `rust.application-cancel-stale` | `median` | 2.035 | 2.22 | `nanoseconds_per_operation` |
+| `rust.parity-repository-validation` | `median` | 23743610 | 25902120 | `nanoseconds_per_operation` |
+| `presentation.first_view.elapsed` | `p95` | 688 | 751 | `milliseconds` |
+| `desktop.idle.working_set` | `p95` | 44 | 48 | `mebibytes` |
+| `rust.application-load-complete` | `p95` | 2.118 | 2.31 | `nanoseconds_per_operation` |
+| `rust.application-cancel-stale` | `p95` | 2.176 | 2.339 | `nanoseconds_per_operation` |
+| `rust.parity-repository-validation` | `p95` | 41085110 | 46046400 | `nanoseconds_per_operation` |
+
+### macOS warning/blocking
+
+| 指标 | lane | warning | blocking | 单位 |
+| --- | --- | ---: | ---: | --- |
+| `presentation.first_view.elapsed` | `median` | 270 | 306 | `milliseconds` |
+| `desktop.idle.working_set` | `median` | 91 | 100 | `mebibytes` |
+| `rust.application-load-complete` | `median` | 0.886 | 0.967 | `nanoseconds_per_operation` |
+| `rust.application-cancel-stale` | `median` | 0.861 | 0.939 | `nanoseconds_per_operation` |
+| `rust.parity-repository-validation` | `median` | 11090948.25 | 12884906.75 | `nanoseconds_per_operation` |
+| `presentation.first_view.elapsed` | `p95` | 1990 | 2457 | `milliseconds` |
+| `desktop.idle.working_set` | `p95` | 91 | 100 | `mebibytes` |
+| `rust.application-load-complete` | `p95` | 2.017 | 2.552 | `nanoseconds_per_operation` |
+| `rust.application-cancel-stale` | `p95` | 1.326 | 1.593 | `nanoseconds_per_operation` |
+| `rust.parity-repository-validation` | `p95` | 20926211.525 | 26809805.225 | `nanoseconds_per_operation` |
 
 ## 控制面证据
 

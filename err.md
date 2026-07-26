@@ -737,6 +737,24 @@
 - 验证：旧 manifest 的 hard key、完整指纹对象和 SHA-256 已逐项复算；`run-01` Windows 为 Intel 8370C 指纹 `e3900b38...`，正确分类为 `new-cohort-valid`，macOS 指纹继续匹配历史队列。
 - 关联：Issue `#54`、Issue `#57`、Issue `#59`、ADR `0004` 第 18-20 行。
 
+### 2026-07-26：Issue #59 控制面遗漏既有数值公式正文
+
+- 环境：Issue `#59/run-04` 使 Windows 严格目标队列达到五次，执行面需要生成 warning/blocking 数值。
+- 现象：Issue `#59` 计划写有“固定公式离线复算”，但正文与评论没有展开公式和量子；ADR `0004` 又禁止验证器静默决定安全裕量。
+- 根因：公式与项目所有者预授权已在 Issue `#54` 评论 `issuecomment-5081207478` 及其计划中冻结，但 Issue `#59` 初始控制面只迁移了队列与停止条件，没有把既有公式引用显式带入。
+- 处理：不新造阈值；从 Issue `#54` 权威证据恢复 `warning = round_up(center + max(3 * MAD, 10% * center), quantum)`、`blocking = round_up(center + max(5 * MAD, 20% * center), quantum)`，并把预授权 URL、公式版本和三类量子写入计划、Session、Runtime、预算 JSON 与报告。
+- 验证：离线构建器仅使用五份 Windows 与十二份 macOS 同队列证据；预算 JSON 归一化 SHA-256 为 `sha256:be07138908cd411925db963718b71062060f4fd4a50b910ab5d5f25f88d4ebe5`，验证器输出 `BUDGET_APPROVAL_GREEN passed=10`。
+- 关联：Issue `#54`、Issue `#59`、ADR `0004`、`benchmarks/budgets/issue-59-approved-observation.json`。
+
+### 2026-07-26：ConvertTo-Json 十进制有效位导致精确复算误报
+
+- 环境：Issue `#59` 的预算验证器从入库 JSON 独立复算 center、MAD、安全裕量和 warning/blocking。
+- 现象：`desktop.idle.working_set/median` 的 `7.905468750` 与 `7.90546875` 仅 scale 不同；`rust.application-cancel-stale/p95` 的期望 `0.38972000000000012` 经 `ConvertTo-Json` 读回为 `0.3897200000000001`，初始逐字或绝对 decimal 比较误报公式漂移。
+- 根因：PowerShell `ConvertTo-Json` 对 decimal 输出约十六位有效数字；数值语义和最终量子舍入没有变化，但 JSON 往返会丢失低于预算量子多个数量级的尾数。
+- 处理：文档哈希仍要求完全一致；独立公式验证改为严格数值容差 `max(quantum / 1_000_000, abs(expected) * 1e-15)`，该容差至少比最小 `0.001 ns/op` 量子小一百万倍，不能掩盖一个量子级的阈值篡改。
+- 验证：真实预算十条双平台候选全部可独立复算；把任一 warning 增加一个完整 quantum 仍稳定触发 `BUDGET_FORMULA_INVALID`，完整合同 `10/10` GREEN。
+- 关联：Issue `#59`、`scripts/performance/Test-InputcodexBudgetApproval.ps1`。
+
 ## 记录模板
 
 ```text

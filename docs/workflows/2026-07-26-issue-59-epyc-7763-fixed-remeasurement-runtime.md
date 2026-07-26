@@ -35,9 +35,16 @@ gh workflow run 'Performance Baseline' --repo nonononull/inputcodex --ref codex/
 ## Phase 3：四次后的确定性判定
 
 1. 汇总 Issue `#54/run-03`、`run-05`、`run-08` 三个历史目标完整指纹 Windows 样本与 Issue `#59` 的新命中样本；同 CPU 但不同内存指纹的 `run-04` 不进入目标队列。macOS 独立汇总全部同队列有效样本。
-2. 若 Windows 目标队列和 macOS 均至少五次：按 ADR `0004` 计算 median-of-medians、median-of-P95、min、max、MAD、warning 与 blocking，创建预算 JSON、构建脚本和验证脚本。
+2. 若 Windows 目标队列和 macOS 均至少五次：按 ADR `0004` 与 Issue `#54` 所有者预授权计算 median-of-medians、median-of-P95、min、max、MAD、warning 与 blocking；固定公式为 `warning = round_up(center + max(3 * MAD, 10% * center), quantum)`、`blocking = round_up(center + max(5 * MAD, 20% * center), quantum)`，量子为首次 view `1 ms`、Working Set `1 MiB`、Rust `0.001 ns/op`。
 3. 若 Windows 目标队列仍不足五次：状态固定为 `STOPPED_AFTER_FOUR_RUNS_INSUFFICIENT_TARGET_COHORT`，不创建三个可选文件，不创建 `run-05`。
 4. 本 Issue 无论哪条分支都不修改 `.github/workflows/`，不实施预算 CI。
+
+### 实际执行结果
+
+- `run-01` 至 `run-04` 全部严格串行完成，Run ID 分别为 `30190401855`、`30190945477`、`30191335211`、`30191791435`；四次成功 Artifact 均在缓存提交 push 后删除并复核为 `0`。
+- Windows 新命中目标完整指纹的是 `run-02`、`run-04`，与历史 `run-03`、`run-05`、`run-08` 合计 `5`；macOS 历史 `8` + 新 `4` 合计 `12`。
+- 已生成 `benchmarks/budgets/issue-59-approved-observation.json`、`Build-InputcodexBudgetApproval.ps1` 与 `Test-InputcodexBudgetApproval.ps1`；验证器独立复算统计、MAD、裕量和量子舍入，并覆盖样本不足、重复 Run、混队列、checksum、公式、IQR 与预算 CI 越权，输出 `BUDGET_APPROVAL_GREEN passed=10`。
+- 预算 JSON 归一化 SHA-256 为 `sha256:be07138908cd411925db963718b71062060f4fd4a50b910ab5d5f25f88d4ebe5`；预算 CI、Ruleset 和 Gate 5 未修改。
 
 ## Phase 4：Fresh 验证与 PR
 
