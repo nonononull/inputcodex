@@ -701,6 +701,69 @@
 - 验证：最小 Add File 补丁成功，随后八路径补丁成功；范围审计、性能 Evidence、CI 合同、仓库政策和 `git diff --check` 均通过。
 - 关联：Issue `#57`、`docs/plans/sessions/2026-07-26-issue-57-hosted-queue-heterogeneity-discovery.md`。
 
+### 2026-07-26：性能复测历史证据只在停止分支，预算无法从 main 独立复算
+
+- 环境：Issue `#59` 获批复用 Issue `#54` 的四个 AMD EPYC 7763 历史候选和八个 macOS 同队列样本；当前 `main@d9d1ed77b9796ac6a99e250d1547217a39426aa9` 只有 Discovery 报告，没有 `benchmarks/results/issue-54/` 原始文件。
+- 现象：若只在新 manifest 中引用旧分支或 GitHub Artifact，分支清理或 Artifact 过期后将无法复算历史样本、分类与预算数值。
+- 根因：Issue `#54` 在八次上限处停止，没有形成可合并预算 PR；原始样本因此保留在 `codex/issue-54-performance-remeasurement-budget-approval`，未进入长期 `main`。
+- 处理：Issue `#59` 的精确范围显式包含旧 manifest 与十六份 JSON，以 Git 对象为来源通过 `apply_patch` 内容不变地缓存；原始分类保持不变，新目标队列只在汇总层引用 EPYC 7763 槽位。
+- 验证：固定历史 manifest 归一化 SHA-256 为 `sha256:72567fe96f61d19d4eca8a5347e3d3fcea7df823975946ec3f464a43d229f1ae`；`build.md` 逐份复算 manifest 所记录的结果哈希和 JSON 解析。
+- 关联：Issue `#54`、Issue `#57`、Issue `#59`、`benchmarks/results/issue-54/manifest.json`。
+
+### 2026-07-26：PowerShell 续行语法与 Windows 参数长度阻断大文件补丁
+
+- 环境：Issue `#59` 在 Windows PowerShell 中通过 npm Codex 的 `--codex-run-as-apply-patch` 兼容入口缓存十七份历史 JSON。
+- 现象：Bash 风格反斜杠续行触发 PowerShell `ParserError`；把全部历史文件拼成单一补丁参数又触发“文件名或扩展名太长”，两次失败均发生在写入前。
+- 根因：PowerShell 不使用反斜杠续行；Windows 进程命令行长度不足以承载约 600 KiB 的单参数补丁，且单个结果文件也接近安全上限。
+- 处理：使用 PowerShell 数组代替 Bash 续行；每个历史文件再按唯一临时标记拆为小于 12,000 字符的连续 `apply_patch` Add/Update 批次，最终移除标记。
+- 验证：十七个目标文件全部由官方兼容入口成功返回 `Success`；后续范围、JSON、固定 manifest 哈希和逐结果归一化哈希验证负责证明没有截断或残留标记。
+- 关联：Issue `#59`、`docs/workflows/2026-07-26-issue-59-epyc-7763-fixed-remeasurement-runtime.md`。
+
+### 2026-07-26：跨运行时排序导致 scope_hash 初值漂移
+
+- 环境：Issue `#59` 的三十八路径先在 Node.js 中使用默认字符串排序计算哈希，Fresh 验证按项目既有 Windows PowerShell `Sort-Object` 合同复算。
+- 现象：Node.js 初值为 `sha256:f5c265b9f69be791e815c571b4e4fb4e4c0f601062a4b1206b43f22746f17e93`，PowerShell Fresh 值为 `sha256:d0577e546d2209d10373eccdf335bbcf3cd4caad7906163838c88b461da0b570`。
+- 根因：JavaScript 默认 Unicode 排序与 PowerShell 当前区域排序对大写路径 `README.md` 的位置不同；scope hash 不只依赖集合，也依赖排序算法。
+- 处理：项目控制面统一以 Windows PowerShell `Sort-Object`、UTF-8 无 BOM、LF 拼接和末尾换行为准；修正计划、Session、Runtime、报告、Master Plan、manifest 与 `build.md` 的哈希和路径顺序。
+- 验证：Fresh 命令对三十八路径复算得到唯一正确值 `sha256:d0577e546d2209d10373eccdf335bbcf3cd4caad7906163838c88b461da0b570`；旧值全仓搜索必须为零。
+- 关联：Issue `#59`、`build.md`、`docs/plans/2026-07-26-issue-59-epyc-7763-fixed-remeasurement.md`。
+
+### 2026-07-26：CPU 型号计数误当成完整可比队列计数
+
+- 环境：Issue `#57` 将 Issue `#54` 的 Windows 分布概括为 EPYC 9V74=`2`、EPYC 7763=`4`、两个 Intel 各 `1`；Issue `#59/run-01` 入库前按 ADR `0004` 重新逐字段检查完整环境指纹。
+- 现象：四个 EPYC 7763 样本中，`run-03`、`run-05`、`run-08` 的指纹为 `sha256:f3954543f3cec519568345d9f40341ddeb8991a7d93b3a274cc324b047fb00cb`，而 `run-04` 为 `sha256:e81e1b65532f2bde1db871c284c9910aa17bb0d1b681947627e3e581e5e3c2d3`；差异字段是 `total_memory_bytes`。
+- 根因：Discovery 为解释 hosted CPU 调度而按处理器型号聚合，但 ADR `0004` 的可比队列还要求镜像精确版本、OS 描述、逻辑处理器数和内存字段属于同一完整指纹；Issue `#54` 的四个样本都相对初始 9V74 队列分类为 `new-cohort-valid`，当时没有继续区分次级队列内部。
+- 处理：不降低方案 A 的硬队列语义；Issue `#59` 选择三次出现的主导完整指纹 `f3954543...` 为目标，历史基数纠正为 `3`，`run-04` 保持同 CPU 不同指纹的新队列。四个新槽位和硬停止上限不变。
+- 验证：旧 manifest 的 hard key、完整指纹对象和 SHA-256 已逐项复算；`run-01` Windows 为 Intel 8370C 指纹 `e3900b38...`，正确分类为 `new-cohort-valid`，macOS 指纹继续匹配历史队列。
+- 关联：Issue `#54`、Issue `#57`、Issue `#59`、ADR `0004` 第 18-20 行。
+
+### 2026-07-26：Issue #59 控制面遗漏既有数值公式正文
+
+- 环境：Issue `#59/run-04` 使 Windows 严格目标队列达到五次，执行面需要生成 warning/blocking 数值。
+- 现象：Issue `#59` 计划写有“固定公式离线复算”，但正文与评论没有展开公式和量子；ADR `0004` 又禁止验证器静默决定安全裕量。
+- 根因：公式与项目所有者预授权已在 Issue `#54` 评论 `issuecomment-5081207478` 及其计划中冻结，但 Issue `#59` 初始控制面只迁移了队列与停止条件，没有把既有公式引用显式带入。
+- 处理：不新造阈值；从 Issue `#54` 权威证据恢复 `warning = round_up(center + max(3 * MAD, 10% * center), quantum)`、`blocking = round_up(center + max(5 * MAD, 20% * center), quantum)`，并把预授权 URL、公式版本和三类量子写入计划、Session、Runtime、预算 JSON 与报告。
+- 验证：离线构建器仅使用五份 Windows 与十二份 macOS 同队列证据；预算 JSON 归一化 SHA-256 为 `sha256:be07138908cd411925db963718b71062060f4fd4a50b910ab5d5f25f88d4ebe5`，验证器输出 `BUDGET_APPROVAL_GREEN passed=10`。
+- 关联：Issue `#54`、Issue `#59`、ADR `0004`、`benchmarks/budgets/issue-59-approved-observation.json`。
+
+### 2026-07-26：ConvertTo-Json 十进制有效位导致精确复算误报
+
+- 环境：Issue `#59` 的预算验证器从入库 JSON 独立复算 center、MAD、安全裕量和 warning/blocking。
+- 现象：`desktop.idle.working_set/median` 的 `7.905468750` 与 `7.90546875` 仅 scale 不同；`rust.application-cancel-stale/p95` 的期望 `0.38972000000000012` 经 `ConvertTo-Json` 读回为 `0.3897200000000001`，初始逐字或绝对 decimal 比较误报公式漂移。
+- 根因：PowerShell `ConvertTo-Json` 对 decimal 输出约十六位有效数字；数值语义和最终量子舍入没有变化，但 JSON 往返会丢失低于预算量子多个数量级的尾数。
+- 处理：文档哈希仍要求完全一致；独立公式验证改为严格数值容差 `max(quantum / 1_000_000, abs(expected) * 1e-15)`，该容差至少比最小 `0.001 ns/op` 量子小一百万倍，不能掩盖一个量子级的阈值篡改。
+- 验证：真实预算十条双平台候选全部可独立复算；把任一 warning 增加一个完整 quantum 仍稳定触发 `BUDGET_FORMULA_INVALID`，完整合同 `10/10` GREEN。
+- 关联：Issue `#59`、`scripts/performance/Test-InputcodexBudgetApproval.ps1`。
+
+### 2026-07-26：PowerShell 拼装 GitHub Markdown 导致证据评论残缺
+
+- 环境：Issue `#59` / PR `#60` 在 Final Head 门禁完成后，通过 PowerShell 调用 `gh api` 回写运行、Artifact 与 Review 证据。
+- 现象：`run-02` 评论出现控制字符、字面量 `$head` / `$tree` 和缺失的 Artifact 数；Final Head 评论把日期表达式按字面量写入，并截断 Artifact 之后的证据。
+- 根因：Markdown 正文混用了 PowerShell 双引号插值、反引号转义和未显式替换的占位符；写入成功后又只检查 API 退出码，没有回读评论正文核对关键字段，导致传输成功被误当成证据完整。
+- 处理：使用单引号 here-string 保存 Markdown 字面量，仅对明确命名的 token 做 `.Replace()`；通过对象序列化生成 JSON 后调用 GitHub API，并在写入后按评论 ID 回读，逐项核对 Head、Run、Artifact、Review 与门禁字段。
+- 验证：原位修正 Issue `#59` 的 `run-02` / Final Head 评论和 PR `#60` 的 Final Head 评论；回读正文不得包含控制字符、`$head`、`$tree`、未求值日期表达式或缺失字段。
+- 关联：Issue `#59`、PR `#60`、`err.md` 第 511 行的既有 PowerShell Markdown 转义记录。
+
 ## 记录模板
 
 ```text

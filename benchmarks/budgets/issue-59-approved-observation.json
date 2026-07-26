@@ -1,0 +1,3044 @@
+{
+  "schema_version": "inputcodex.performance-budget-approval.v1",
+  "issue_number": 59,
+  "status": "approved-observation",
+  "budget_ci_enabled": false,
+  "gate_5_unlocked": false,
+  "formula": {
+    "version": "inputcodex.performance-budget-formula.v1",
+    "owner_preauthorization_ref": "https://github.com/nonononull/inputcodex/issues/54#issuecomment-5081207478",
+    "owner_route_decision_ref": "user-message:批准方案-A-EPYC-7763-四次固定串行复测-2026-07-26",
+    "center": "median(run_level_values)",
+    "mad": "median(abs(value - center))",
+    "warning_margin": "max(3 * mad, 0.10 * center)",
+    "blocking_margin": "max(5 * mad, 0.20 * center)",
+    "rounding": "ceiling(value / quantum) * quantum",
+    "quantums": {
+      "presentation_first_view_milliseconds": 1.0,
+      "desktop_idle_working_set_mebibytes": 1.0,
+      "rust_nanoseconds_per_operation": 0.001
+    }
+  },
+  "sources": {
+    "historical_manifest_path": "benchmarks/results/issue-54/manifest.json",
+    "historical_manifest_normalized_sha256": "sha256:72567fe96f61d19d4eca8a5347e3d3fcea7df823975946ec3f464a43d229f1ae",
+    "current_manifest_path": "benchmarks/results/issue-59/manifest.json",
+    "current_manifest_normalized_sha256": "sha256:5b6bd1e2dc06a5c7618b114248570e9517c8c629059f5d5f8cb946cc467189cb"
+  },
+  "platforms": {
+    "windows": {
+      "hard_key_sha256": "sha256:93e336b29eb619f7d29767e308b440d4ad6d36305e0f1ae798ce522c2d9cff30",
+      "environment_fingerprint_sha256": "sha256:f3954543f3cec519568345d9f40341ddeb8991a7d93b3a274cc324b047fb00cb",
+      "source_runs": [
+        {
+          "issue_number": 54,
+          "slot": "run-03",
+          "run_id": "30182194802",
+          "run_attempt": 1,
+          "result_path": "benchmarks/results/issue-54/runs/run-03/windows.json",
+          "normalized_sha256": "sha256:9be7ccfd560f87de8c1302455557623900efd164eb26c93fd0865b14f25588c0"
+        },
+        {
+          "issue_number": 54,
+          "slot": "run-05",
+          "run_id": "30182870392",
+          "run_attempt": 1,
+          "result_path": "benchmarks/results/issue-54/runs/run-05/windows.json",
+          "normalized_sha256": "sha256:e53dad8abebf68420d1e157971db4133bae552cc24cc1cf7ed8208072df3e87e"
+        },
+        {
+          "issue_number": 54,
+          "slot": "run-08",
+          "run_id": "30183422699",
+          "run_attempt": 1,
+          "result_path": "benchmarks/results/issue-54/runs/run-08/windows.json",
+          "normalized_sha256": "sha256:5415b46bb08a763f599f25f2a17324757ac6fe465fa8135e99fd6fc1977c7f48"
+        },
+        {
+          "issue_number": 59,
+          "slot": "run-02",
+          "run_id": "30190945477",
+          "run_attempt": 1,
+          "result_path": "benchmarks/results/issue-59/runs/run-02/windows.json",
+          "normalized_sha256": "sha256:0c179768bdd5c6df2cf51bf675854584f21e769fd5c4f6d0a83cfd23505eb0b6"
+        },
+        {
+          "issue_number": 59,
+          "slot": "run-04",
+          "run_id": "30191791435",
+          "run_attempt": 1,
+          "result_path": "benchmarks/results/issue-59/runs/run-04/windows.json",
+          "normalized_sha256": "sha256:7b65505db2a6f25fc73b34de32cc96b001f8ede05e82d072c0c11d879f381f17"
+        }
+      ],
+      "blocking_candidates": [
+        {
+          "metric": "presentation.first_view.elapsed",
+          "lane": "median",
+          "unit": "milliseconds",
+          "quantum": 1.0,
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 294.7514,
+              "outlier_indices": [
+                0
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 292.6039,
+              "outlier_indices": [
+                0,
+                3
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 286.5025,
+              "outlier_indices": [
+                0
+              ]
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 290.2414,
+              "outlier_indices": [
+                0
+              ]
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 307.6404,
+              "outlier_indices": [
+                0
+              ]
+            }
+          ],
+          "minimum": 286.5025,
+          "maximum": 307.6404,
+          "center": 292.6039,
+          "mad": 2.3625,
+          "warning_margin": 29.26039,
+          "blocking_margin": 58.52078,
+          "warning_limit": 322.0,
+          "blocking_limit": 352.0
+        },
+        {
+          "metric": "desktop.idle.working_set",
+          "lane": "median",
+          "unit": "mebibytes",
+          "quantum": 1.0,
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 39.6171875,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 39.490234375,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 39.52734375,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 39.42578125,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 39.568359375,
+              "outlier_indices": []
+            }
+          ],
+          "minimum": 39.42578125,
+          "maximum": 39.6171875,
+          "center": 39.52734375,
+          "mad": 0.041015625,
+          "warning_margin": 3.952734375,
+          "blocking_margin": 7.905468750,
+          "warning_limit": 44.0,
+          "blocking_limit": 48.0
+        },
+        {
+          "metric": "rust.application-load-complete",
+          "lane": "median",
+          "unit": "nanoseconds_per_operation",
+          "quantum": 0.001,
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 1.542,
+              "outlier_indices": [],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 1.85,
+              "outlier_indices": [],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 1.7610000000000001,
+              "outlier_indices": [],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 1.854,
+              "outlier_indices": [],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 1.85,
+              "outlier_indices": [],
+              "checksum": "17679974986347008819"
+            }
+          ],
+          "minimum": 1.542,
+          "maximum": 1.854,
+          "center": 1.85,
+          "mad": 0.004,
+          "warning_margin": 0.185,
+          "blocking_margin": 0.370,
+          "warning_limit": 2.035,
+          "blocking_limit": 2.220
+        },
+        {
+          "metric": "rust.application-cancel-stale",
+          "lane": "median",
+          "unit": "nanoseconds_per_operation",
+          "quantum": 0.001,
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 1.85,
+              "outlier_indices": [],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 1.542,
+              "outlier_indices": [
+                9
+              ],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 1.85,
+              "outlier_indices": [
+                6
+              ],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 1.85,
+              "outlier_indices": [],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 1.8495,
+              "outlier_indices": [
+                11
+              ],
+              "checksum": "8313910025374800251"
+            }
+          ],
+          "minimum": 1.542,
+          "maximum": 1.85,
+          "center": 1.85,
+          "mad": 0.00,
+          "warning_margin": 0.185,
+          "blocking_margin": 0.370,
+          "warning_limit": 2.035,
+          "blocking_limit": 2.220
+        },
+        {
+          "metric": "rust.parity-repository-validation",
+          "lane": "median",
+          "unit": "nanoseconds_per_operation",
+          "quantum": 0.001,
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 21328550.0,
+              "outlier_indices": [],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 20642450.0,
+              "outlier_indices": [
+                3,
+                12,
+                15,
+                18
+              ],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 22157800.0,
+              "outlier_indices": [
+                2,
+                3
+              ],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 25127650.0,
+              "outlier_indices": [],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 21585100.0,
+              "outlier_indices": [
+                1,
+                4,
+                11
+              ],
+              "checksum": "10113643288719473305"
+            }
+          ],
+          "minimum": 20642450.0,
+          "maximum": 25127650.0,
+          "center": 21585100.0,
+          "mad": 572700.0,
+          "warning_margin": 2158510.0,
+          "blocking_margin": 4317020.0,
+          "warning_limit": 23743610.000,
+          "blocking_limit": 25902120.000
+        },
+        {
+          "metric": "presentation.first_view.elapsed",
+          "lane": "p95",
+          "unit": "milliseconds",
+          "quantum": 1.0,
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 625.1995,
+              "outlier_indices": [
+                0
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 601.45466,
+              "outlier_indices": [
+                0,
+                3
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 627.38892,
+              "outlier_indices": [
+                0
+              ]
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 575.29726,
+              "outlier_indices": [
+                0
+              ]
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 640.33246,
+              "outlier_indices": [
+                0
+              ]
+            }
+          ],
+          "minimum": 575.29726,
+          "maximum": 640.33246,
+          "center": 625.1995,
+          "mad": 15.13296,
+          "warning_margin": 62.51995,
+          "blocking_margin": 125.03990,
+          "warning_limit": 688.0,
+          "blocking_limit": 751.0
+        },
+        {
+          "metric": "desktop.idle.working_set",
+          "lane": "p95",
+          "unit": "mebibytes",
+          "quantum": 1.0,
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 39.6640625,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 39.52734375,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 39.5625,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 39.47265625,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 39.62109375,
+              "outlier_indices": []
+            }
+          ],
+          "minimum": 39.47265625,
+          "maximum": 39.6640625,
+          "center": 39.5625,
+          "mad": 0.05859375,
+          "warning_margin": 3.95625,
+          "blocking_margin": 7.91250,
+          "warning_limit": 44.0,
+          "blocking_limit": 48.0
+        },
+        {
+          "metric": "rust.application-load-complete",
+          "lane": "p95",
+          "unit": "nanoseconds_per_operation",
+          "quantum": 0.001,
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 1.909,
+              "outlier_indices": [],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 1.9216000000000002,
+              "outlier_indices": [],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 1.93065,
+              "outlier_indices": [],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 2.22405,
+              "outlier_indices": [],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 1.925,
+              "outlier_indices": [],
+              "checksum": "17679974986347008819"
+            }
+          ],
+          "minimum": 1.909,
+          "maximum": 2.22405,
+          "center": 1.925,
+          "mad": 0.00565,
+          "warning_margin": 0.1925,
+          "blocking_margin": 0.3850,
+          "warning_limit": 2.118,
+          "blocking_limit": 2.310
+        },
+        {
+          "metric": "rust.application-cancel-stale",
+          "lane": "p95",
+          "unit": "nanoseconds_per_operation",
+          "quantum": 0.001,
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 1.8731000000000002,
+              "outlier_indices": [],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 1.9366500000000004,
+              "outlier_indices": [
+                9
+              ],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 1.9486000000000006,
+              "outlier_indices": [
+                6
+              ],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 2.18105,
+              "outlier_indices": [],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 2.1757,
+              "outlier_indices": [
+                11
+              ],
+              "checksum": "8313910025374800251"
+            }
+          ],
+          "minimum": 1.8731,
+          "maximum": 2.18105,
+          "center": 1.9486000000000006,
+          "mad": 0.0755000000000004,
+          "warning_margin": 0.2265000000000012,
+          "blocking_margin": 0.38972000000000012,
+          "warning_limit": 2.176,
+          "blocking_limit": 2.339
+        },
+        {
+          "metric": "rust.parity-repository-validation",
+          "lane": "p95",
+          "unit": "nanoseconds_per_operation",
+          "quantum": 0.001,
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 34900625.0,
+              "outlier_indices": [],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 33643175.0,
+              "outlier_indices": [
+                3,
+                12,
+                15,
+                18
+              ],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 26945400.000000004,
+              "outlier_indices": [
+                2,
+                3
+              ],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 36123820.0,
+              "outlier_indices": [],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 24303310.0,
+              "outlier_indices": [
+                1,
+                4,
+                11
+              ],
+              "checksum": "10113643288719473305"
+            }
+          ],
+          "minimum": 24303310.0,
+          "maximum": 36123820.0,
+          "center": 33643175.0,
+          "mad": 2480645.0,
+          "warning_margin": 7441935.0,
+          "blocking_margin": 12403225.0,
+          "warning_limit": 41085110.000,
+          "blocking_limit": 46046400.000
+        }
+      ],
+      "observations": [
+        {
+          "metric": "desktop.idle.cpu",
+          "lane": "median",
+          "unit": "percent",
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 0.0,
+              "outlier_indices": []
+            }
+          ],
+          "minimum": 0.0,
+          "maximum": 0.0,
+          "center": 0.0,
+          "mad": 0.0
+        },
+        {
+          "metric": "desktop.idle.cpu",
+          "lane": "p95",
+          "unit": "percent",
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 0.0,
+              "outlier_indices": []
+            }
+          ],
+          "minimum": 0.0,
+          "maximum": 0.0,
+          "center": 0.0,
+          "mad": 0.0
+        },
+        {
+          "metric": "desktop.release.binary_size",
+          "lane": "value",
+          "unit": "bytes",
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 10263552.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 10263552.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 10263552.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 10263552.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 10263552.0,
+              "outlier_indices": []
+            }
+          ],
+          "minimum": 10263552.0,
+          "maximum": 10263552.0,
+          "center": 10263552.0,
+          "mad": 0.0
+        }
+      ],
+      "diagnostics": [
+        {
+          "metric": "desktop.release.build_duration",
+          "lane": "value",
+          "unit": "milliseconds",
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 231499.442,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 213803.546,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 223981.898,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 246948.389,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 234705.367,
+              "outlier_indices": []
+            }
+          ],
+          "minimum": 213803.546,
+          "maximum": 246948.389,
+          "center": 231499.442,
+          "mad": 7517.544
+        },
+        {
+          "metric": "baseline.release.build_duration",
+          "lane": "value",
+          "unit": "milliseconds",
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 20589.559,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 19292.315,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 22018.08,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 19542.445,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 21707.254,
+              "outlier_indices": []
+            }
+          ],
+          "minimum": 19292.315,
+          "maximum": 22018.08,
+          "center": 20589.559,
+          "mad": 1117.695
+        },
+        {
+          "metric": "baseline.release.binary_size",
+          "lane": "value",
+          "unit": "bytes",
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 954880.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 954880.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 954880.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 954880.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 954880.0,
+              "outlier_indices": []
+            }
+          ],
+          "minimum": 954880.0,
+          "maximum": 954880.0,
+          "center": 954880.0,
+          "mad": 0.0
+        }
+      ]
+    },
+    "macos": {
+      "hard_key_sha256": "sha256:cbf212944e161028589b96ed9062d70cab30d5f53906c93d37c8a846e6e6c29e",
+      "environment_fingerprint_sha256": "sha256:e95c8f57f22013020911c87b7ddf74af763daf461d124cf4ae3f9f1e30805efa",
+      "source_runs": [
+        {
+          "issue_number": 54,
+          "slot": "run-01",
+          "run_id": "30181234619",
+          "run_attempt": 1,
+          "result_path": "benchmarks/results/issue-54/runs/run-01/macos.json",
+          "normalized_sha256": "sha256:aa86b5362d58a5ab20f805f3ee6c28c1410454e8f3e710a8335b70e9d7c3e0a6"
+        },
+        {
+          "issue_number": 54,
+          "slot": "run-02",
+          "run_id": "30181776729",
+          "run_attempt": 1,
+          "result_path": "benchmarks/results/issue-54/runs/run-02/macos.json",
+          "normalized_sha256": "sha256:5be63b7d48527b70ddd9de4f47d04f7ecfed803a0e0d837a0ffb3a09d4c08b94"
+        },
+        {
+          "issue_number": 54,
+          "slot": "run-03",
+          "run_id": "30182194802",
+          "run_attempt": 1,
+          "result_path": "benchmarks/results/issue-54/runs/run-03/macos.json",
+          "normalized_sha256": "sha256:963ce48a2a4ee64a0d7e9a5fdf7a1b508af90792567b3522357aa36692c129ac"
+        },
+        {
+          "issue_number": 54,
+          "slot": "run-04",
+          "run_id": "30182672835",
+          "run_attempt": 1,
+          "result_path": "benchmarks/results/issue-54/runs/run-04/macos.json",
+          "normalized_sha256": "sha256:4932c773a5d2195d02822c784b00feed3816db9f96035b7f944431e31ce9e84a"
+        },
+        {
+          "issue_number": 54,
+          "slot": "run-05",
+          "run_id": "30182870392",
+          "run_attempt": 1,
+          "result_path": "benchmarks/results/issue-54/runs/run-05/macos.json",
+          "normalized_sha256": "sha256:258d6146c107e243e9b9412440c4176e215280a843a58946e4be4c6173eb2cfb"
+        },
+        {
+          "issue_number": 54,
+          "slot": "run-06",
+          "run_id": "30183070190",
+          "run_attempt": 1,
+          "result_path": "benchmarks/results/issue-54/runs/run-06/macos.json",
+          "normalized_sha256": "sha256:10d504406536dfe5d3831a9a3b9053ed3f6eff7cbe81621bfbff9c1645de5220"
+        },
+        {
+          "issue_number": 54,
+          "slot": "run-07",
+          "run_id": "30183239399",
+          "run_attempt": 1,
+          "result_path": "benchmarks/results/issue-54/runs/run-07/macos.json",
+          "normalized_sha256": "sha256:fb4ee8f246fe65af20962179dfd6f30674799d0621c3b0bff86ea206de7e54e2"
+        },
+        {
+          "issue_number": 54,
+          "slot": "run-08",
+          "run_id": "30183422699",
+          "run_attempt": 1,
+          "result_path": "benchmarks/results/issue-54/runs/run-08/macos.json",
+          "normalized_sha256": "sha256:51668fe4f22f0270d3e336c5482ef981b9842b951fa21f134895430c695f82ed"
+        },
+        {
+          "issue_number": 59,
+          "slot": "run-01",
+          "run_id": "30190401855",
+          "run_attempt": 1,
+          "result_path": "benchmarks/results/issue-59/runs/run-01/macos.json",
+          "normalized_sha256": "sha256:a44579973458d33bf8365526c5a108d5ebc3a3ff819f16b180f77ac28a45c324"
+        },
+        {
+          "issue_number": 59,
+          "slot": "run-02",
+          "run_id": "30190945477",
+          "run_attempt": 1,
+          "result_path": "benchmarks/results/issue-59/runs/run-02/macos.json",
+          "normalized_sha256": "sha256:c1b6f9823d4dd6d01b1a37c6c193abb75ecd129cdd9f308b4937d34438a48bbd"
+        },
+        {
+          "issue_number": 59,
+          "slot": "run-03",
+          "run_id": "30191335211",
+          "run_attempt": 1,
+          "result_path": "benchmarks/results/issue-59/runs/run-03/macos.json",
+          "normalized_sha256": "sha256:022f94de2c1cd88a358a971abd710be2956002bfa89b0e341ed0ae0c6b542f31"
+        },
+        {
+          "issue_number": 59,
+          "slot": "run-04",
+          "run_id": "30191791435",
+          "run_attempt": 1,
+          "result_path": "benchmarks/results/issue-59/runs/run-04/macos.json",
+          "normalized_sha256": "sha256:b172165bdcb1a57b65c92e411759a297059f7ac9ebd06c4da234d6544ff8febe"
+        }
+      ],
+      "blocking_candidates": [
+        {
+          "metric": "presentation.first_view.elapsed",
+          "lane": "median",
+          "unit": "milliseconds",
+          "quantum": 1.0,
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-01",
+              "run_id": "30181234619",
+              "value": 201.012292,
+              "outlier_indices": [
+                0,
+                2
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-02",
+              "run_id": "30181776729",
+              "value": 190.886833,
+              "outlier_indices": [
+                0
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 203.166041,
+              "outlier_indices": [
+                0
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-04",
+              "run_id": "30182672835",
+              "value": 306.841458,
+              "outlier_indices": [
+                0
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 195.3785,
+              "outlier_indices": [
+                0
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-06",
+              "run_id": "30183070190",
+              "value": 266.232917,
+              "outlier_indices": [
+                0
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-07",
+              "run_id": "30183239399",
+              "value": 385.440917,
+              "outlier_indices": [
+                0
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 220.087666,
+              "outlier_indices": [
+                0
+              ]
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-01",
+              "run_id": "30190401855",
+              "value": 200.508875,
+              "outlier_indices": [
+                0,
+                4
+              ]
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 229.870958,
+              "outlier_indices": [
+                0
+              ]
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-03",
+              "run_id": "30191335211",
+              "value": 249.760542,
+              "outlier_indices": [
+                0
+              ]
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 211.650625,
+              "outlier_indices": [
+                0
+              ]
+            }
+          ],
+          "minimum": 190.886833,
+          "maximum": 385.440917,
+          "center": 215.8691455,
+          "mad": 17.9254580,
+          "warning_margin": 53.7763740,
+          "blocking_margin": 89.6272900,
+          "warning_limit": 270.0,
+          "blocking_limit": 306.0
+        },
+        {
+          "metric": "desktop.idle.working_set",
+          "lane": "median",
+          "unit": "mebibytes",
+          "quantum": 1.0,
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-01",
+              "run_id": "30181234619",
+              "value": 82.25,
+              "outlier_indices": [
+                57
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-02",
+              "run_id": "30181776729",
+              "value": 82.359375,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 82.546875,
+              "outlier_indices": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-04",
+              "run_id": "30182672835",
+              "value": 83.8125,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 83.0,
+              "outlier_indices": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                47,
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
+                54,
+                55,
+                56,
+                57,
+                58,
+                59
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-06",
+              "run_id": "30183070190",
+              "value": 82.34375,
+              "outlier_indices": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-07",
+              "run_id": "30183239399",
+              "value": 82.703125,
+              "outlier_indices": [
+                0,
+                1,
+                2
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 83.390625,
+              "outlier_indices": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ]
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-01",
+              "run_id": "30190401855",
+              "value": 83.09375,
+              "outlier_indices": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 82.515625,
+              "outlier_indices": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-03",
+              "run_id": "30191335211",
+              "value": 83.40625,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 82.40625,
+              "outlier_indices": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
+          "minimum": 82.25,
+          "maximum": 83.8125,
+          "center": 82.625000,
+          "mad": 0.328125,
+          "warning_margin": 8.2625000,
+          "blocking_margin": 16.5250000,
+          "warning_limit": 91.0,
+          "blocking_limit": 100.0
+        },
+        {
+          "metric": "rust.application-load-complete",
+          "lane": "median",
+          "unit": "nanoseconds_per_operation",
+          "quantum": 0.001,
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-01",
+              "run_id": "30181234619",
+              "value": 0.7893749999999999,
+              "outlier_indices": [
+                14
+              ],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-02",
+              "run_id": "30181776729",
+              "value": 0.788125,
+              "outlier_indices": [
+                1
+              ],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 0.828125,
+              "outlier_indices": [
+                3,
+                4,
+                7,
+                15
+              ],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-04",
+              "run_id": "30182672835",
+              "value": 0.7937449999999999,
+              "outlier_indices": [
+                1
+              ],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 0.7945850000000001,
+              "outlier_indices": [
+                4,
+                10,
+                13
+              ],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-06",
+              "run_id": "30183070190",
+              "value": 0.804165,
+              "outlier_indices": [
+                14,
+                17
+              ],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-07",
+              "run_id": "30183239399",
+              "value": 0.9452100000000001,
+              "outlier_indices": [
+                1
+              ],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 1.03021,
+              "outlier_indices": [
+                5
+              ],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-01",
+              "run_id": "30190401855",
+              "value": 0.79688,
+              "outlier_indices": [
+                8,
+                11,
+                15
+              ],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 0.8060400000000001,
+              "outlier_indices": [
+                0,
+                1,
+                8
+              ],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-03",
+              "run_id": "30191335211",
+              "value": 0.8987499999999999,
+              "outlier_indices": [
+                9,
+                10
+              ],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 0.9025000000000001,
+              "outlier_indices": [],
+              "checksum": "17679974986347008819"
+            }
+          ],
+          "minimum": 0.788125,
+          "maximum": 1.03021,
+          "center": 0.80510250000000005,
+          "mad": 0.01635250000000010,
+          "warning_margin": 0.080510250000000005,
+          "blocking_margin": 0.161020500000000010,
+          "warning_limit": 0.886,
+          "blocking_limit": 0.967
+        },
+        {
+          "metric": "rust.application-cancel-stale",
+          "lane": "median",
+          "unit": "nanoseconds_per_operation",
+          "quantum": 0.001,
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-01",
+              "run_id": "30181234619",
+              "value": 0.794165,
+              "outlier_indices": [],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-02",
+              "run_id": "30181776729",
+              "value": 0.72667,
+              "outlier_indices": [
+                3,
+                16
+              ],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 0.7949949999999999,
+              "outlier_indices": [
+                11
+              ],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-04",
+              "run_id": "30182672835",
+              "value": 0.78083,
+              "outlier_indices": [],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 0.777705,
+              "outlier_indices": [],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-06",
+              "run_id": "30183070190",
+              "value": 0.784375,
+              "outlier_indices": [],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-07",
+              "run_id": "30183239399",
+              "value": 0.78,
+              "outlier_indices": [
+                2,
+                7,
+                17
+              ],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 0.78291,
+              "outlier_indices": [
+                5
+              ],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-01",
+              "run_id": "30190401855",
+              "value": 0.72583,
+              "outlier_indices": [
+                6,
+                7,
+                8,
+                14
+              ],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 0.72625,
+              "outlier_indices": [
+                6,
+                7,
+                18,
+                19
+              ],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-03",
+              "run_id": "30191335211",
+              "value": 0.876875,
+              "outlier_indices": [],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 0.8170850000000001,
+              "outlier_indices": [
+                5
+              ],
+              "checksum": "8313910025374800251"
+            }
+          ],
+          "minimum": 0.72583,
+          "maximum": 0.876875,
+          "center": 0.78187,
+          "mad": 0.01270999999999995,
+          "warning_margin": 0.078187,
+          "blocking_margin": 0.156374,
+          "warning_limit": 0.861,
+          "blocking_limit": 0.939
+        },
+        {
+          "metric": "rust.parity-repository-validation",
+          "lane": "median",
+          "unit": "nanoseconds_per_operation",
+          "quantum": 0.001,
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-01",
+              "run_id": "30181234619",
+              "value": 7864333.5,
+              "outlier_indices": [
+                11
+              ],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-02",
+              "run_id": "30181776729",
+              "value": 7578917.0,
+              "outlier_indices": [],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 9372875.5,
+              "outlier_indices": [
+                7,
+                15
+              ],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-04",
+              "run_id": "30182672835",
+              "value": 8121479.5,
+              "outlier_indices": [],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 8029583.5,
+              "outlier_indices": [
+                13,
+                15,
+                16
+              ],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-06",
+              "run_id": "30183070190",
+              "value": 8678541.5,
+              "outlier_indices": [
+                13,
+                16
+              ],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-07",
+              "run_id": "30183239399",
+              "value": 9771166.5,
+              "outlier_indices": [],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 10494208.5,
+              "outlier_indices": [],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-01",
+              "run_id": "30190401855",
+              "value": 7667166.5,
+              "outlier_indices": [
+                15,
+                16,
+                17
+              ],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 7068854.5,
+              "outlier_indices": [],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-03",
+              "run_id": "30191335211",
+              "value": 10436583.5,
+              "outlier_indices": [
+                2
+              ],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 12960896.0,
+              "outlier_indices": [
+                14,
+                17
+              ],
+              "checksum": "10113643288719473305"
+            }
+          ],
+          "minimum": 7068854.5,
+          "maximum": 12960896.0,
+          "center": 8400010.5,
+          "mad": 896979.25,
+          "warning_margin": 2690937.75,
+          "blocking_margin": 4484896.25,
+          "warning_limit": 11090948.250,
+          "blocking_limit": 12884906.750
+        },
+        {
+          "metric": "presentation.first_view.elapsed",
+          "lane": "p95",
+          "unit": "milliseconds",
+          "quantum": 1.0,
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-01",
+              "run_id": "30181234619",
+              "value": 950.2359421999998,
+              "outlier_indices": [
+                0,
+                2
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-02",
+              "run_id": "30181776729",
+              "value": 1006.5890667999998,
+              "outlier_indices": [
+                0
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 1047.1535665999999,
+              "outlier_indices": [
+                0
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-04",
+              "run_id": "30182672835",
+              "value": 1514.4490669999998,
+              "outlier_indices": [
+                0
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 1119.3320589999998,
+              "outlier_indices": [
+                0
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-06",
+              "run_id": "30183070190",
+              "value": 1139.9768493999999,
+              "outlier_indices": [
+                0
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-07",
+              "run_id": "30183239399",
+              "value": 1542.8716671999998,
+              "outlier_indices": [
+                0
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 1451.7706499999998,
+              "outlier_indices": [
+                0
+              ]
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-01",
+              "run_id": "30190401855",
+              "value": 886.1968163999999,
+              "outlier_indices": [
+                0,
+                4
+              ]
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 1440.3499077999997,
+              "outlier_indices": [
+                0
+              ]
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-03",
+              "run_id": "30191335211",
+              "value": 1437.0800493999999,
+              "outlier_indices": [
+                0
+              ]
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 1537.1460919999998,
+              "outlier_indices": [
+                0
+              ]
+            }
+          ],
+          "minimum": 886.1968164,
+          "maximum": 1542.8716672,
+          "center": 1288.5284493999999,
+          "mad": 233.64775019999995,
+          "warning_margin": 700.94325059999985,
+          "blocking_margin": 1168.23875099999975,
+          "warning_limit": 1990.0,
+          "blocking_limit": 2457.0
+        },
+        {
+          "metric": "desktop.idle.working_set",
+          "lane": "p95",
+          "unit": "mebibytes",
+          "quantum": 1.0,
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-01",
+              "run_id": "30181234619",
+              "value": 82.296875,
+              "outlier_indices": [
+                57
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-02",
+              "run_id": "30181776729",
+              "value": 82.359375,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 82.59375,
+              "outlier_indices": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-04",
+              "run_id": "30182672835",
+              "value": 83.859375,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 83.046875,
+              "outlier_indices": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                47,
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
+                54,
+                55,
+                56,
+                57,
+                58,
+                59
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-06",
+              "run_id": "30183070190",
+              "value": 82.390625,
+              "outlier_indices": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-07",
+              "run_id": "30183239399",
+              "value": 82.81484375,
+              "outlier_indices": [
+                0,
+                1,
+                2
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 83.484375,
+              "outlier_indices": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ]
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-01",
+              "run_id": "30190401855",
+              "value": 83.15625,
+              "outlier_indices": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 82.5625,
+              "outlier_indices": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-03",
+              "run_id": "30191335211",
+              "value": 83.484375,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 82.453125,
+              "outlier_indices": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
+          "minimum": 82.296875,
+          "maximum": 83.859375,
+          "center": 82.704296875,
+          "mad": 0.343750000,
+          "warning_margin": 8.2704296875,
+          "blocking_margin": 16.5408593750,
+          "warning_limit": 91.0,
+          "blocking_limit": 100.0
+        },
+        {
+          "metric": "rust.application-load-complete",
+          "lane": "p95",
+          "unit": "nanoseconds_per_operation",
+          "quantum": 0.001,
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-01",
+              "run_id": "30181234619",
+              "value": 0.9362850000000001,
+              "outlier_indices": [
+                14
+              ],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-02",
+              "run_id": "30181776729",
+              "value": 0.9585830000000002,
+              "outlier_indices": [
+                1
+              ],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 2.3269230000000003,
+              "outlier_indices": [
+                3,
+                4,
+                7,
+                15
+              ],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-04",
+              "run_id": "30182672835",
+              "value": 0.9855590000000002,
+              "outlier_indices": [
+                1
+              ],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 1.0155625000000001,
+              "outlier_indices": [
+                4,
+                10,
+                13
+              ],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-06",
+              "run_id": "30183070190",
+              "value": 1.0613575000000008,
+              "outlier_indices": [
+                14,
+                17
+              ],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-07",
+              "run_id": "30183239399",
+              "value": 2.2502500000000007,
+              "outlier_indices": [
+                1
+              ],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 2.228167000000002,
+              "outlier_indices": [
+                5
+              ],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-01",
+              "run_id": "30190401855",
+              "value": 1.0553960000000009,
+              "outlier_indices": [
+                8,
+                11,
+                15
+              ],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 1.368194000000002,
+              "outlier_indices": [
+                0,
+                1,
+                8
+              ],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-03",
+              "run_id": "30191335211",
+              "value": 1.4951045000000005,
+              "outlier_indices": [
+                9,
+                10
+              ],
+              "checksum": "17679974986347008819"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 2.0522645,
+              "outlier_indices": [],
+              "checksum": "17679974986347008819"
+            }
+          ],
+          "minimum": 0.936285,
+          "maximum": 2.326923,
+          "center": 1.2147757500000014,
+          "mad": 0.26734175000000125,
+          "warning_margin": 0.80202525000000375,
+          "blocking_margin": 1.33670875000000625,
+          "warning_limit": 2.017,
+          "blocking_limit": 2.552
+        },
+        {
+          "metric": "rust.application-cancel-stale",
+          "lane": "p95",
+          "unit": "nanoseconds_per_operation",
+          "quantum": 0.001,
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-01",
+              "run_id": "30181234619",
+              "value": 0.9460800000000001,
+              "outlier_indices": [],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-02",
+              "run_id": "30181776729",
+              "value": 0.7919795000000001,
+              "outlier_indices": [
+                3,
+                16
+              ],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 0.9797325000000001,
+              "outlier_indices": [
+                11
+              ],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-04",
+              "run_id": "30182672835",
+              "value": 0.7871845,
+              "outlier_indices": [],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 0.79425,
+              "outlier_indices": [],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-06",
+              "run_id": "30183070190",
+              "value": 0.9064585000000001,
+              "outlier_indices": [],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-07",
+              "run_id": "30183239399",
+              "value": 1.1003395,
+              "outlier_indices": [
+                2,
+                7,
+                17
+              ],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 1.0537530000000006,
+              "outlier_indices": [
+                5
+              ],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-01",
+              "run_id": "30190401855",
+              "value": 0.752232,
+              "outlier_indices": [
+                6,
+                7,
+                8,
+                14
+              ],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 0.7626280000000002,
+              "outlier_indices": [
+                6,
+                7,
+                18,
+                19
+              ],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-03",
+              "run_id": "30191335211",
+              "value": 0.9559375,
+              "outlier_indices": [],
+              "checksum": "8313910025374800251"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 1.4988750000000002,
+              "outlier_indices": [
+                5
+              ],
+              "checksum": "8313910025374800251"
+            }
+          ],
+          "minimum": 0.752232,
+          "maximum": 1.498875,
+          "center": 0.9262692500000001,
+          "mad": 0.13315450000000005,
+          "warning_margin": 0.39946350000000015,
+          "blocking_margin": 0.66577250000000025,
+          "warning_limit": 1.326,
+          "blocking_limit": 1.593
+        },
+        {
+          "metric": "rust.parity-repository-validation",
+          "lane": "p95",
+          "unit": "nanoseconds_per_operation",
+          "quantum": 0.001,
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-01",
+              "run_id": "30181234619",
+              "value": 8649252.1,
+              "outlier_indices": [
+                11
+              ],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-02",
+              "run_id": "30181776729",
+              "value": 8103722.600000001,
+              "outlier_indices": [],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 14517466.95,
+              "outlier_indices": [
+                7,
+                15
+              ],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-04",
+              "run_id": "30182672835",
+              "value": 9668796.15,
+              "outlier_indices": [],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 9837762.200000005,
+              "outlier_indices": [
+                13,
+                15,
+                16
+              ],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-06",
+              "run_id": "30183070190",
+              "value": 12857202.05,
+              "outlier_indices": [
+                13,
+                16
+              ],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-07",
+              "run_id": "30183239399",
+              "value": 13117871.150000002,
+              "outlier_indices": [],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 17351847.900000002,
+              "outlier_indices": [],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-01",
+              "run_id": "30190401855",
+              "value": 11344439.9,
+              "outlier_indices": [
+                15,
+                16,
+                17
+              ],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 7382296.15,
+              "outlier_indices": [],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-03",
+              "run_id": "30191335211",
+              "value": 19824985.70000001,
+              "outlier_indices": [
+                2
+              ],
+              "checksum": "10113643288719473305"
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 56032709.75000001,
+              "outlier_indices": [
+                14,
+                17
+              ],
+              "checksum": "10113643288719473305"
+            }
+          ],
+          "minimum": 7382296.15,
+          "maximum": 56032709.75,
+          "center": 12100820.975,
+          "mad": 2941796.850,
+          "warning_margin": 8825390.550,
+          "blocking_margin": 14708984.250,
+          "warning_limit": 20926211.525,
+          "blocking_limit": 26809805.225
+        }
+      ],
+      "observations": [
+        {
+          "metric": "desktop.idle.cpu",
+          "lane": "median",
+          "unit": "percent",
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-01",
+              "run_id": "30181234619",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-02",
+              "run_id": "30181776729",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-04",
+              "run_id": "30182672835",
+              "value": 0.0,
+              "outlier_indices": [
+                26
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-06",
+              "run_id": "30183070190",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-07",
+              "run_id": "30183239399",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-01",
+              "run_id": "30190401855",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-03",
+              "run_id": "30191335211",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 0.0,
+              "outlier_indices": []
+            }
+          ],
+          "minimum": 0.0,
+          "maximum": 0.0,
+          "center": 0.0,
+          "mad": 0.0
+        },
+        {
+          "metric": "desktop.idle.cpu",
+          "lane": "p95",
+          "unit": "percent",
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-01",
+              "run_id": "30181234619",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-02",
+              "run_id": "30181776729",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-04",
+              "run_id": "30182672835",
+              "value": 0.0,
+              "outlier_indices": [
+                26
+              ]
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-06",
+              "run_id": "30183070190",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-07",
+              "run_id": "30183239399",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-01",
+              "run_id": "30190401855",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-03",
+              "run_id": "30191335211",
+              "value": 0.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 0.0,
+              "outlier_indices": []
+            }
+          ],
+          "minimum": 0.0,
+          "maximum": 0.0,
+          "center": 0.0,
+          "mad": 0.0
+        },
+        {
+          "metric": "desktop.release.binary_size",
+          "lane": "value",
+          "unit": "bytes",
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-01",
+              "run_id": "30181234619",
+              "value": 10305648.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-02",
+              "run_id": "30181776729",
+              "value": 10305648.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 10305648.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-04",
+              "run_id": "30182672835",
+              "value": 10305648.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 10305648.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-06",
+              "run_id": "30183070190",
+              "value": 10305648.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-07",
+              "run_id": "30183239399",
+              "value": 10305648.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 10305648.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-01",
+              "run_id": "30190401855",
+              "value": 10305648.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 10305648.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-03",
+              "run_id": "30191335211",
+              "value": 10305648.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 10305648.0,
+              "outlier_indices": []
+            }
+          ],
+          "minimum": 10305648.0,
+          "maximum": 10305648.0,
+          "center": 10305648.0,
+          "mad": 0.0
+        }
+      ],
+      "diagnostics": [
+        {
+          "metric": "desktop.release.build_duration",
+          "lane": "value",
+          "unit": "milliseconds",
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-01",
+              "run_id": "30181234619",
+              "value": 86301.308,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-02",
+              "run_id": "30181776729",
+              "value": 84123.841,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 100450.831,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-04",
+              "run_id": "30182672835",
+              "value": 125617.529,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 86424.394,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-06",
+              "run_id": "30183070190",
+              "value": 127042.808,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-07",
+              "run_id": "30183239399",
+              "value": 124665.989,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 125278.801,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-01",
+              "run_id": "30190401855",
+              "value": 85992.811,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 104625.127,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-03",
+              "run_id": "30191335211",
+              "value": 91430.412,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 106089.438,
+              "outlier_indices": []
+            }
+          ],
+          "minimum": 84123.841,
+          "maximum": 127042.808,
+          "center": 102537.979,
+          "mad": 16390.9195
+        },
+        {
+          "metric": "baseline.release.build_duration",
+          "lane": "value",
+          "unit": "milliseconds",
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-01",
+              "run_id": "30181234619",
+              "value": 9044.311,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-02",
+              "run_id": "30181776729",
+              "value": 8466.833,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 10396.304,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-04",
+              "run_id": "30182672835",
+              "value": 16288.86,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 9648.066,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-06",
+              "run_id": "30183070190",
+              "value": 9891.02,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-07",
+              "run_id": "30183239399",
+              "value": 14413.894,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 13513.638,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-01",
+              "run_id": "30190401855",
+              "value": 8630.281,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 10745.267,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-03",
+              "run_id": "30191335211",
+              "value": 11307.472,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 11933.132,
+              "outlier_indices": []
+            }
+          ],
+          "minimum": 8466.833,
+          "maximum": 16288.86,
+          "center": 10570.7855,
+          "mad": 1444.4105
+        },
+        {
+          "metric": "baseline.release.binary_size",
+          "lane": "value",
+          "unit": "bytes",
+          "source_values": [
+            {
+              "issue_number": 54,
+              "slot": "run-01",
+              "run_id": "30181234619",
+              "value": 1228672.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-02",
+              "run_id": "30181776729",
+              "value": 1228672.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-03",
+              "run_id": "30182194802",
+              "value": 1228672.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-04",
+              "run_id": "30182672835",
+              "value": 1228672.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-05",
+              "run_id": "30182870392",
+              "value": 1228672.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-06",
+              "run_id": "30183070190",
+              "value": 1228672.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-07",
+              "run_id": "30183239399",
+              "value": 1228672.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 54,
+              "slot": "run-08",
+              "run_id": "30183422699",
+              "value": 1228672.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-01",
+              "run_id": "30190401855",
+              "value": 1228672.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-02",
+              "run_id": "30190945477",
+              "value": 1228672.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-03",
+              "run_id": "30191335211",
+              "value": 1228672.0,
+              "outlier_indices": []
+            },
+            {
+              "issue_number": 59,
+              "slot": "run-04",
+              "run_id": "30191791435",
+              "value": 1228672.0,
+              "outlier_indices": []
+            }
+          ],
+          "minimum": 1228672.0,
+          "maximum": 1228672.0,
+          "center": 1228672.0,
+          "mad": 0.0
+        }
+      ]
+    }
+  }
+}

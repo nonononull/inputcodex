@@ -1733,6 +1733,157 @@ Write-Output 'ISSUE_55_LOCAL_GREEN'
 gh workflow run 'Performance Baseline' --repo nonononull/inputcodex --ref codex/issue-55-performance-remeasurement-entry -f mode=measure
 ```
 
+## Issue #59 EPYC 7763 四次固定串行复测本地轻量验证
+
+Issue `#59` 的完整允许集合固定为三十八条路径，`scope_hash` 固定为 `sha256:d0577e546d2209d10373eccdf335bbcf3cd4caad7906163838c88b461da0b570`。本机不执行完整 Workspace 或性能采样；四次测量只能使用 GitHub-hosted `Performance Baseline` 的显式 `mode=measure`，且必须严格串行。
+
+控制面、历史证据和任意已完成槽位使用以下命令验证：
+
+```powershell
+$baseline = 'd9d1ed77b9796ac6a99e250d1547217a39426aa9'
+$approvedPaths = @(
+  'AGENTS.md'
+  'README.md'
+  'benchmarks/budgets/issue-59-approved-observation.json'
+  'benchmarks/results/issue-54/manifest.json'
+  'benchmarks/results/issue-54/runs/run-01/macos.json'
+  'benchmarks/results/issue-54/runs/run-01/windows.json'
+  'benchmarks/results/issue-54/runs/run-02/macos.json'
+  'benchmarks/results/issue-54/runs/run-02/windows.json'
+  'benchmarks/results/issue-54/runs/run-03/macos.json'
+  'benchmarks/results/issue-54/runs/run-03/windows.json'
+  'benchmarks/results/issue-54/runs/run-04/macos.json'
+  'benchmarks/results/issue-54/runs/run-04/windows.json'
+  'benchmarks/results/issue-54/runs/run-05/macos.json'
+  'benchmarks/results/issue-54/runs/run-05/windows.json'
+  'benchmarks/results/issue-54/runs/run-06/macos.json'
+  'benchmarks/results/issue-54/runs/run-06/windows.json'
+  'benchmarks/results/issue-54/runs/run-07/macos.json'
+  'benchmarks/results/issue-54/runs/run-07/windows.json'
+  'benchmarks/results/issue-54/runs/run-08/macos.json'
+  'benchmarks/results/issue-54/runs/run-08/windows.json'
+  'benchmarks/results/issue-59/manifest.json'
+  'benchmarks/results/issue-59/runs/run-01/macos.json'
+  'benchmarks/results/issue-59/runs/run-01/windows.json'
+  'benchmarks/results/issue-59/runs/run-02/macos.json'
+  'benchmarks/results/issue-59/runs/run-02/windows.json'
+  'benchmarks/results/issue-59/runs/run-03/macos.json'
+  'benchmarks/results/issue-59/runs/run-03/windows.json'
+  'benchmarks/results/issue-59/runs/run-04/macos.json'
+  'benchmarks/results/issue-59/runs/run-04/windows.json'
+  'build.md'
+  'docs/plans/2026-07-26-issue-59-epyc-7763-fixed-remeasurement.md'
+  'docs/plans/PROJECT-MASTER-PLAN.md'
+  'docs/plans/sessions/2026-07-26-issue-59-epyc-7763-fixed-remeasurement.md'
+  'docs/reports/issue-59-epyc-7763-fixed-remeasurement.md'
+  'docs/workflows/2026-07-26-issue-59-epyc-7763-fixed-remeasurement-runtime.md'
+  'err.md'
+  'scripts/performance/Build-InputcodexBudgetApproval.ps1'
+  'scripts/performance/Test-InputcodexBudgetApproval.ps1'
+) | Sort-Object
+
+$branch = (git branch --show-current).Trim()
+if ($branch -ne 'codex/issue-59-epyc-7763-fixed-remeasurement') {
+  throw "Issue #59 当前分支不正确：$branch"
+}
+
+$committed = @(git diff --name-only "$baseline...HEAD")
+$unstaged = @(git diff --name-only)
+$staged = @(git diff --cached --name-only)
+$untracked = @(git ls-files --others --exclude-standard)
+$actualPaths = @($committed + $unstaged + $staged + $untracked | Where-Object { $_ } | Sort-Object -Unique)
+$unexpectedPaths = @($actualPaths | Where-Object { $_ -notin $approvedPaths })
+if ($unexpectedPaths.Count -ne 0) {
+  $unexpectedPaths | Format-Table -AutoSize
+  throw 'Issue #59 出现批准集合外路径。'
+}
+
+$scopeText = ($approvedPaths -join "`n") + "`n"
+$scopeBytes = [System.Text.UTF8Encoding]::new($false).GetBytes($scopeText)
+$scopeHash = [Convert]::ToHexString([System.Security.Cryptography.SHA256]::HashData($scopeBytes)).ToLowerInvariant()
+if ($scopeHash -ne 'd0577e546d2209d10373eccdf335bbcf3cd4caad7906163838c88b461da0b570') {
+  throw "Issue #59 scope_hash 漂移：$scopeHash"
+}
+
+function Get-NormalizedTextSha256 {
+  param([Parameter(Mandatory = $true)][string]$Path)
+  $text = [System.IO.File]::ReadAllText((Resolve-Path -LiteralPath $Path).Path)
+  $normalized = $text.Replace("`r`n", "`n").Replace("`r", "`n")
+  $bytes = [System.Text.UTF8Encoding]::new($false).GetBytes($normalized)
+  return 'sha256:' + [Convert]::ToHexString([System.Security.Cryptography.SHA256]::HashData($bytes)).ToLowerInvariant()
+}
+
+$historicalManifestPath = 'benchmarks/results/issue-54/manifest.json'
+$historicalManifestHash = Get-NormalizedTextSha256 -Path $historicalManifestPath
+if ($historicalManifestHash -ne 'sha256:72567fe96f61d19d4eca8a5347e3d3fcea7df823975946ec3f464a43d229f1ae') {
+  throw "Issue #54 只读 manifest 漂移：$historicalManifestHash"
+}
+$historicalManifest = Get-Content -LiteralPath $historicalManifestPath -Raw | ConvertFrom-Json -Depth 100
+if ($historicalManifest.runs.Count -ne 8) { throw 'Issue #54 历史 Run 数不是 8。' }
+foreach ($run in $historicalManifest.runs) {
+  foreach ($platform in @('windows', 'macos')) {
+    $result = $run.results.$platform
+    if ((Get-NormalizedTextSha256 -Path $result.path) -ne $result.normalized_sha256) {
+      throw "Issue #54 历史结果哈希漂移：$($result.path)"
+    }
+    Get-Content -LiteralPath $result.path -Raw | ConvertFrom-Json -Depth 100 | Out-Null
+  }
+}
+
+$manifest = Get-Content -LiteralPath 'benchmarks/results/issue-59/manifest.json' -Raw | ConvertFrom-Json -Depth 100
+if ($manifest.issue_number -ne 59) { throw 'Issue #59 manifest issue_number 错误。' }
+if ($manifest.base.max_serial_runs -ne 4) { throw 'Issue #59 max_serial_runs 必须为 4。' }
+if ($manifest.policy.target_windows_processor -ne 'AMD EPYC 7763 64-Core Processor') { throw 'Issue #59 目标处理器漂移。' }
+if ($manifest.policy.target_windows_environment_fingerprint_sha256 -ne 'sha256:f3954543f3cec519568345d9f40341ddeb8991a7d93b3a274cc324b047fb00cb') { throw 'Issue #59 目标完整环境指纹漂移。' }
+if (@($manifest.historical_evidence.windows_target_candidate_slots).Count -ne 3) { throw 'Issue #59 历史严格目标样本数必须为 3。' }
+if ('run-04' -notin @($manifest.historical_evidence.windows_same_processor_other_fingerprint_slots)) { throw 'Issue #59 必须保留同 CPU 不同指纹的 run-04。' }
+if ($manifest.runs.Count -gt 4) { throw 'Issue #59 出现超过四个测量槽位。' }
+$expectedSlots = @('run-01', 'run-02', 'run-03', 'run-04')
+foreach ($run in $manifest.runs) {
+  if ($run.slot -notin $expectedSlots) { throw "Issue #59 非法槽位：$($run.slot)" }
+  foreach ($platform in @('windows', 'macos')) {
+    $result = $run.results.$platform
+    if ((Get-NormalizedTextSha256 -Path $result.path) -ne $result.normalized_sha256) {
+      throw "Issue #59 结果哈希漂移：$($result.path)"
+    }
+    Get-Content -LiteralPath $result.path -Raw | ConvertFrom-Json -Depth 100 | Out-Null
+  }
+}
+
+pwsh -NoProfile -File scripts/performance/Test-InputcodexBaseline.ps1 -RepositoryRoot . -Mode Evidence
+if ($LASTEXITCODE -ne 0) { throw '性能 Evidence 验证失败。' }
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+if ($LASTEXITCODE -ne 0) { throw 'CI 合同验证失败。' }
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw '仓库政策验证失败。' }
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'git diff --check 失败。' }
+Write-Output "ISSUE_59_CONTROL_GREEN actual_paths=$($actualPaths.Count) runs=$($manifest.runs.Count)"
+```
+
+四个槽位全部结束且预算控制面实际生成后，再执行：
+
+```powershell
+$budgetPreviewPath = Join-Path $env:TEMP 'inputcodex-issue59-budget-preview.json'
+pwsh -NoProfile -File scripts/performance/Build-InputcodexBudgetApproval.ps1 `
+  -RepositoryRoot . `
+  -OutputPath $budgetPreviewPath
+if ($LASTEXITCODE -ne 0) { throw '性能预算离线构建失败。' }
+
+pwsh -NoProfile -File scripts/performance/Test-InputcodexBudgetApproval.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw '性能预算数值验证失败。' }
+
+Remove-Item -LiteralPath $budgetPreviewPath -Force
+```
+
+验证器会在系统临时目录重新生成预算 JSON，与入库文档做归一化哈希比较，并独立复算 center、MAD、安全裕量和量子舍入；期望输出 `BUDGET_APPROVAL_GREEN passed=10`。预算 JSON 固定为 `approved-observation` 证据，`budget_ci_enabled=false`、`gate_5_unlocked=false`。
+
+每个槽位只允许在前一个槽位完全闭环后触发：
+
+```powershell
+gh workflow run 'Performance Baseline' --repo nonononull/inputcodex --ref codex/issue-59-epyc-7763-fixed-remeasurement -f mode=measure
+```
+
 ## 外部 AGOS 使用边界
 
 Issue `#17` 曾以 report-only 运行 AGOS 默认入口，结果为 `needs-input/unregistered`；已按项目规则记录并绕过。AGOS 不属于环境要求或合并门禁；不得在本规划 PR 中修改、修复或优化其 Registry、脚本、规则、Workflow 或 Vault。
