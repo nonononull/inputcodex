@@ -1481,6 +1481,247 @@
           }
         }
       }
+    },
+    {
+      "slot": "run-07",
+      "local_recorded_at": "2026-07-26T09:45:03+08:00",
+      "github": {
+        "run_id": "30183239399",
+        "run_attempt": 1,
+        "event": "workflow_dispatch",
+        "workflow": "Performance Baseline",
+        "url": "https://github.com/nonononull/inputcodex/actions/runs/30183239399",
+        "created_at": "07/26/2026 01:39:04",
+        "completed_at": "07/26/2026 01:44:48",
+        "head_commit": "ceee9417585c681e46871c83cd2e998acf836f38",
+        "head_tree": "e88910db313a0cb0d77d9cfc7d1c3818e50031d4"
+      },
+      "artifacts": {
+        "windows": {
+          "id": 8626281401,
+          "name": "performance-windows-30183239399-1",
+          "size_in_bytes": 3485,
+          "expires_at": "07/27/2026 01:44:29"
+        },
+        "macos": {
+          "id": 8626274294,
+          "name": "performance-macos-30183239399-1",
+          "size_in_bytes": 3845,
+          "expires_at": "07/27/2026 01:43:41"
+        }
+      },
+      "classification": {
+        "windows": {
+          "value": "comparable-valid",
+          "reason": "windows 硬键与环境指纹匹配已选候选队列。"
+        },
+        "macos": {
+          "value": "comparable-valid",
+          "reason": "macos 硬键与环境指纹匹配已选候选队列。"
+        }
+      },
+      "results": {
+        "windows": {
+          "path": "benchmarks/results/issue-54/runs/run-07/windows.json",
+          "normalized_sha256": "sha256:e013c546bc324bd68d68e78ef5e6b8b34272b2fcaa452dd1d1be50955b8b2b11",
+          "result_issue_number": 32,
+          "schema_version": "inputcodex.performance-result.v1",
+          "status": "complete",
+          "source": {
+            "commit": "ceee9417585c681e46871c83cd2e998acf836f38",
+            "tree": "e88910db313a0cb0d77d9cfc7d1c3818e50031d4",
+            "config_sha256": "sha256:b9ed601016ececc735634aeb143965c78fbfc61819d37c7f9e584bc971642b53",
+            "implementation_sha256": "sha256:e4c9265396476c918112f553d846239ed21f84c7432e6a34ddc8f55293d64e48",
+            "input_sha256": "sha256:c5b507d219ff49975c13805a2a6e036ade6c61a33a184bfffb74219ce01784b5"
+          },
+          "environment": {
+            "runner_os": "Windows",
+            "runner_arch": "X64",
+            "runner_environment": "github-hosted",
+            "image_os": "win25-vs2026",
+            "image_version": "20260714.173.1",
+            "rust_release_and_host": "1.97.1/x86_64-pc-windows-msvc"
+          },
+          "sample_contract": {
+            "version": "inputcodex.performance-sample-contract.v1",
+            "first_view": {
+              "minimum_successful_samples": 5,
+              "maximum_attempts": 7,
+              "timeout_seconds": 15
+            },
+            "idle_resources": {
+              "settle_seconds": 30,
+              "sample_interval_seconds": 1,
+              "sample_count": 60
+            },
+            "rust_scenarios": [
+              {
+                "name": "application-load-complete",
+                "sample_count": 20
+              },
+              {
+                "name": "application-cancel-stale",
+                "sample_count": 20
+              },
+              {
+                "name": "parity-repository-validation",
+                "sample_count": 20
+              }
+            ]
+          },
+          "sample_contract_sha256": "sha256:316664ead66cea10854a332749501b4b7db50635efafd9a999fce798f4e7c0d9",
+          "hard_key": "inputcodex.performance-result.v1|windows|X64|github-hosted|win25-vs2026|1.97.1/x86_64-pc-windows-msvc|sha256:b9ed601016ececc735634aeb143965c78fbfc61819d37c7f9e584bc971642b53|sha256:c5b507d219ff49975c13805a2a6e036ade6c61a33a184bfffb74219ce01784b5|sha256:316664ead66cea10854a332749501b4b7db50635efafd9a999fce798f4e7c0d9",
+          "hard_key_sha256": "sha256:93e336b29eb619f7d29767e308b440d4ad6d36305e0f1ae798ce522c2d9cff30",
+          "environment_fingerprint": {
+            "image_version": "20260714.173.1",
+            "os_description": "Microsoft Windows 10.0.26100",
+            "processor": "AMD EPYC 9V74 80-Core Processor",
+            "logical_processor_count": 4,
+            "total_memory_bytes": 17174360064
+          },
+          "environment_fingerprint_sha256": "sha256:a3097283cfc677908818cc7b665124d2735be8ae1670deff46590d9ab24c213c",
+          "sample_integrity": {
+            "first_view": {
+              "successful_attempt_count": 5,
+              "attempt_count": 5,
+              "outlier_indices": [
+                0
+              ]
+            },
+            "idle_resources": {
+              "sample_count": 60,
+              "outlier_indices": []
+            },
+            "rust_scenarios": [
+              {
+                "name": "application-load-complete",
+                "sample_count": 20,
+                "checksum": "17679974986347008819",
+                "outlier_indices": []
+              },
+              {
+                "name": "application-cancel-stale",
+                "sample_count": 20,
+                "checksum": "8313910025374800251",
+                "outlier_indices": []
+              },
+              {
+                "name": "parity-repository-validation",
+                "sample_count": 20,
+                "checksum": "10113643288719473305",
+                "outlier_indices": [
+                  5,
+                  11,
+                  12
+                ]
+              }
+            ]
+          }
+        },
+        "macos": {
+          "path": "benchmarks/results/issue-54/runs/run-07/macos.json",
+          "normalized_sha256": "sha256:fb4ee8f246fe65af20962179dfd6f30674799d0621c3b0bff86ea206de7e54e2",
+          "result_issue_number": 32,
+          "schema_version": "inputcodex.performance-result.v1",
+          "status": "complete",
+          "source": {
+            "commit": "ceee9417585c681e46871c83cd2e998acf836f38",
+            "tree": "e88910db313a0cb0d77d9cfc7d1c3818e50031d4",
+            "config_sha256": "sha256:b9ed601016ececc735634aeb143965c78fbfc61819d37c7f9e584bc971642b53",
+            "implementation_sha256": "sha256:e4c9265396476c918112f553d846239ed21f84c7432e6a34ddc8f55293d64e48",
+            "input_sha256": "sha256:c5b507d219ff49975c13805a2a6e036ade6c61a33a184bfffb74219ce01784b5"
+          },
+          "environment": {
+            "runner_os": "macOS",
+            "runner_arch": "ARM64",
+            "runner_environment": "github-hosted",
+            "image_os": "macos26",
+            "image_version": "20260720.0258.1",
+            "rust_release_and_host": "1.97.1/aarch64-apple-darwin"
+          },
+          "sample_contract": {
+            "version": "inputcodex.performance-sample-contract.v1",
+            "first_view": {
+              "minimum_successful_samples": 5,
+              "maximum_attempts": 7,
+              "timeout_seconds": 15
+            },
+            "idle_resources": {
+              "settle_seconds": 30,
+              "sample_interval_seconds": 1,
+              "sample_count": 60
+            },
+            "rust_scenarios": [
+              {
+                "name": "application-load-complete",
+                "sample_count": 20
+              },
+              {
+                "name": "application-cancel-stale",
+                "sample_count": 20
+              },
+              {
+                "name": "parity-repository-validation",
+                "sample_count": 20
+              }
+            ]
+          },
+          "sample_contract_sha256": "sha256:316664ead66cea10854a332749501b4b7db50635efafd9a999fce798f4e7c0d9",
+          "hard_key": "inputcodex.performance-result.v1|macos|ARM64|github-hosted|macos26|1.97.1/aarch64-apple-darwin|sha256:b9ed601016ececc735634aeb143965c78fbfc61819d37c7f9e584bc971642b53|sha256:c5b507d219ff49975c13805a2a6e036ade6c61a33a184bfffb74219ce01784b5|sha256:316664ead66cea10854a332749501b4b7db50635efafd9a999fce798f4e7c0d9",
+          "hard_key_sha256": "sha256:cbf212944e161028589b96ed9062d70cab30d5f53906c93d37c8a846e6e6c29e",
+          "environment_fingerprint": {
+            "image_version": "20260720.0258.1",
+            "os_description": "macOS 26.4.0",
+            "processor": "Apple M1 (Virtual)",
+            "logical_processor_count": 3,
+            "total_memory_bytes": 7516192768
+          },
+          "environment_fingerprint_sha256": "sha256:e95c8f57f22013020911c87b7ddf74af763daf461d124cf4ae3f9f1e30805efa",
+          "sample_integrity": {
+            "first_view": {
+              "successful_attempt_count": 5,
+              "attempt_count": 5,
+              "outlier_indices": [
+                0
+              ]
+            },
+            "idle_resources": {
+              "sample_count": 60,
+              "outlier_indices": [
+                0,
+                1,
+                2
+              ]
+            },
+            "rust_scenarios": [
+              {
+                "name": "application-load-complete",
+                "sample_count": 20,
+                "checksum": "17679974986347008819",
+                "outlier_indices": [
+                  1
+                ]
+              },
+              {
+                "name": "application-cancel-stale",
+                "sample_count": 20,
+                "checksum": "8313910025374800251",
+                "outlier_indices": [
+                  2,
+                  7,
+                  17
+                ]
+              },
+              {
+                "name": "parity-repository-validation",
+                "sample_count": 20,
+                "checksum": "10113643288719473305",
+                "outlier_indices": []
+              }
+            ]
+          }
+        }
+      }
     }
   ]
 }
