@@ -1,5 +1,12 @@
 #![forbid(unsafe_code)]
 
+mod platform_paths;
+
+pub use platform_paths::{
+    ApplicationInstallSource, CodexInstallation, PlatformPathsSnapshot, PrivatePath,
+    PrivatePathError,
+};
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct DiagnosticCode(&'static str);
 

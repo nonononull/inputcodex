@@ -243,14 +243,30 @@ contracts:
     outputs:
       - name: result
         data_type: platform-paths-result
-        description: '返回平台等价的应用和数据路径；未发现受支持安装时返回明确空结果。'
+        description: '返回平台等价的应用和数据路径；未安装受支持 Codex 时仍返回 Ready + installation=None，不使用 Empty。'
     side_effects:
       - filesystem-read
+      - process-read
     persistence: '不持久化私人路径、凭据或真实会话内容。'
     errors:
+      - code: PLATFORM_PATHS_UNSUPPORTED
+        kind: platform
+        semantics: '当前目标不是 Windows 或 macOS 时明确失败，不伪装成功。'
+      - code: EXPLICIT_CODEX_PATH_INVALID
+        kind: validation
+        semantics: '显式应用路径不是受支持的绝对 Codex 应用路径时失败，禁止自动回退。'
+      - code: CODEX_HOME_INVALID
+        kind: validation
+        semantics: '非空 CODEX_HOME 不是已存在绝对目录时失败，禁止静默回退。'
+      - code: USER_HOME_UNAVAILABLE
+        kind: environment
+        semantics: '用户主目录缺失、非绝对或不可用时失败，不使用相对目录。'
+      - code: INPUTCODEX_STATE_ROOT_UNAVAILABLE
+        kind: environment
+        semantics: '平台原生 inputcodex 状态根无法解析时失败，不退到当前目录。'
       - code: PLATFORM_PATHS_FAILED
         kind: feature
-        semantics: '平台路径解析失败时返回稳定错误分类，不伪造空成功。'
+        semantics: '平台 API 或受保护路径构造失败时返回稳定内部错误，不伪造空成功。'
     loading:
       states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
       request_identity: '每次平台路径解析请求使用唯一递增标识。'

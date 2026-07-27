@@ -61,6 +61,18 @@ fn assert_repository_text_contains(relative_path: &str, expected: &[&str]) {
     }
 }
 
+fn yaml_list_item_block<'a>(text: &'a str, id: &str) -> &'a str {
+    let marker = format!("  - id: {id}");
+    let start = text
+        .find(&marker)
+        .unwrap_or_else(|| panic!("YAML 应包含条目：{id}"));
+    let tail = &text[start..];
+    let end = tail[marker.len()..]
+        .find("\n  - id: ")
+        .map_or(tail.len(), |offset| marker.len() + offset);
+    &tail[..end]
+}
+
 struct FeatureRepositoryFixture {
     root: PathBuf,
 }
@@ -524,6 +536,81 @@ fn 仓库v1_2_43受影响行为证据被固定() {
     assert_repository_text_contains(
         "parity/fixtures/feature.session-data.provider-metadata-maintenance/manifest.yml",
         &["SQLite catalog", "同步状态水位"],
+    );
+}
+
+#[test]
+fn gate5_platform_paths_实现合同固定为已实现且无新增副作用() {
+    let feature_text = read_repository_text("parity/features/foundation-platform.yml");
+    let feature = yaml_list_item_block(&feature_text, "feature.foundation-platform.platform-paths");
+    for expected in ["status: implemented", "- issue:74", "- issue:75"] {
+        assert!(
+            feature.contains(expected),
+            "平台路径功能条目应包含：{expected}"
+        );
+    }
+
+    let contract_text = read_repository_text("parity/contracts/foundation-platform.yml");
+    let contract = yaml_list_item_block(
+        &contract_text,
+        "contract.feature.foundation-platform.platform-paths.baseline",
+    );
+    for expected in [
+        "- filesystem-read",
+        "- process-read",
+        "PLATFORM_PATHS_UNSUPPORTED",
+        "EXPLICIT_CODEX_PATH_INVALID",
+        "CODEX_HOME_INVALID",
+        "USER_HOME_UNAVAILABLE",
+        "INPUTCODEX_STATE_ROOT_UNAVAILABLE",
+        "PLATFORM_PATHS_FAILED",
+        "Ready + installation=None",
+    ] {
+        assert!(
+            contract.contains(expected),
+            "平台路径合同应包含：{expected}"
+        );
+    }
+    for forbidden in [
+        "filesystem-write",
+        "network-read",
+        "network-write",
+        "advertising",
+        "remote-recommendation",
+    ] {
+        assert!(
+            !contract.contains(forbidden),
+            "平台路径合同禁止副作用：{forbidden}"
+        );
+    }
+
+    let source_text = read_repository_text("parity/features/source-index.yml");
+    for source_id in [
+        "core-module:app_paths",
+        "core-module:codex_home",
+        "core-module:paths",
+    ] {
+        let source = yaml_list_item_block(&source_text, source_id);
+        assert!(
+            source.contains("side_effects: [filesystem-read, process-read]"),
+            "{source_id} 应固定文件系统与进程环境读取"
+        );
+        for forbidden in [
+            "filesystem-write",
+            "network-read",
+            "network-write",
+            "injection",
+        ] {
+            assert!(
+                !source.contains(forbidden),
+                "{source_id} 禁止副作用：{forbidden}"
+            );
+        }
+    }
+
+    assert_repository_text_contains(
+        "parity/README.md",
+        &["Issue `#75`", "Ready + installation=None"],
     );
 }
 

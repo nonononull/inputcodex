@@ -702,7 +702,9 @@ fn load_feature_repository(
             }
             if !matches!(
                 feature.status(),
-                ParityStatus::Unassessed | ParityStatus::ExceptionPending
+                ParityStatus::Unassessed
+                    | ParityStatus::Implemented
+                    | ParityStatus::ExceptionPending
             ) {
                 issues.push(ValidationIssue::new(
                     ValidationCode::InvalidInitialParityStatus,

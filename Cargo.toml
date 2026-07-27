@@ -32,6 +32,12 @@ iced = { version = "=0.14.0", default-features = false, features = [
     "x11",
     "wayland",
 ] }
+windows = { version = "=0.58.0", default-features = false, features = [
+    "ApplicationModel",
+    "Foundation_Collections",
+    "Management_Deployment",
+    "Storage",
+] }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

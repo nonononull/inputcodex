@@ -829,6 +829,33 @@
 - 工具纠错：首次 RED 提交错误使用 `git diff --name-only` 收集路径，未包含五个 untracked 文件，导致空提交；改为显式批准路径暂存并回读 `git diff --cached --name-only`。CI 合同 RED 后又因双引号正则中的 `$mode` 在 StrictMode 下被 PowerShell 插值而失败；改用单引号正则后同一合同转绿。状态回写时一度改名 Session Plan 固定字段并写入 schema 未允许的复合状态；读取 verifier 的固定字段与状态枚举后恢复 `forbidden_ops_until_replay` 及合法 `pending` 值。三项均按确定根因修复，未绕过测试或改写历史。
 - 关联：Issue `#63`、PR `#72`、提交 `650040763aff07f4884ee9252c50639469622934`、提交 `b465c660d0401ff4bff37673671147aa6b513e1a`。
 
+### 2026-07-27：Issue #75 中间验证混入宿主、锁文件与未跟踪路径语义
+
+- 环境：首个 Gate 5 平台路径切片在 Windows 本机以纯 Rust TDD 实现，同时需要验证 macOS 候选语义、`windows 0.58.0` 直接依赖、三十路径范围和文档补丁。
+- 现象：中间 checkpoint 先后出现 Rust 格式漂移、仓库级搜索把 `Cargo.lock` 既有包项误当作直接依赖证据、在线文档/依赖查询 timeout 或 `403`、Windows 宿主把 macOS `/Applications` 路径按本机 `Path::is_absolute` 解释、`git diff --stat`/`git diff --name-only` 漏计未跟踪报告文件、PowerShell here-string 边界或插值导致补丁文本失真、审查时误向不支持该参数的 `cargo tree` 传入 `--ignore-rust-version`，以及把 `gh pr view --jq .body` 的多行输出直接传给 `gh pr edit --body` 后被逐行展开为命令参数。
+- 根因：格式检查没有紧跟代码批次；直接依赖与锁定解析结果被混为一谈；网络资料被错误放在本地实现关键路径；跨平台纯逻辑测试错误依赖宿主路径解析；Git 统计只覆盖已跟踪差异；PowerShell 多行字符串同时承担代码、Markdown 与变量插值，边界过于脆弱；不同 Cargo 子命令参数集合并不相同，而且 Windows PowerShell 的 `$ErrorActionPreference='Stop'` 不会自动把原生命令非零退出码转成终止异常；外部命令的多行标准输出赋值后是 `string[]`，作为参数传递会被 PowerShell 展开。
+- 处理：每个 Rust checkpoint 后立即运行 `cargo fmt --all -- --check`；直接依赖只以根/目标 crate manifest 和 `cargo tree` 为准，`Cargo.lock` 只证明解析版本；网络 timeout/`403` 记录后改用锁定 crate 源码与本地编译证据；macOS 自动发现测试保留 `/Applications` 原始候选，显式路径测试改用宿主绝对临时目录验证归一化，不把 Windows 结果伪装成 macOS 文件系统结论；范围统计统一合并 `origin/main...HEAD`、工作区 diff 与 `git ls-files --others --exclude-standard`；补丁统一使用 `codex --codex-run-as-apply-patch` 的字面量 patch，不用多层动态拼接 here-string 生成代码；`cargo tree` 改为 `cargo tree --locked --offline ...`，所有原生命令后显式检查 `$LASTEXITCODE`；GitHub 多行正文统一显式 `-join "`n"` 后写临时文件并使用 `--body-file`，不直接把数组传给 `--body`。
+- 验证：Domain、Application、Platform 三 crate 测试与 Clippy 已在提交 `593c447262f1b1aa0ea578bb4a6a0a65037799a6` 前通过；三十路径哈希本机复算为 `sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37`，最终范围脚本显式包含未跟踪文件。
+- 关联：Issue `#75`、提交 `67447913fa656f30dd2e6d3c65707acca7c20869`、`7e52ec2c4ea2667c22a66e3bae7888eb3cb9e2ce`、`593c447262f1b1aa0ea578bb4a6a0a65037799a6`。
+
+### 2026-07-27：Gate 4 初始状态验证器拒绝首个已实现 Gate 5 功能
+
+- 环境：Issue `#75` 已把 `feature.foundation-platform.platform-paths` 的目录事实最小更新为 `status: implemented`，目标文本合同通过后运行完整 `catalog_repository`。
+- 现象：`13` 个目标测试中 `9` 个通过、`4` 个失败，四项统一为 `InvalidInitialParityStatus @ feature.foundation-platform.platform-paths`；继续保留 `unassessed` 会伪造功能状态，绕过仓库验证会削弱 Gate 4 合同。
+- 根因：`crates/inputcodex-parity/src/validation.rs` 的仓库生命周期白名单仍只允许 `ParityStatus::Unassessed | ParityStatus::ExceptionPending`，没有随着首个 Gate 5 产品实现开放 `Implemented`。
+- 处理：建立精确扩围门，将批准范围从二十九路径扩为三十路径；项目所有者批准 `sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37` 后，只在白名单新增 `ParityStatus::Implemented`，继续拒绝 `planned`、`implementing`、`verified`、`exception-approved` 与 `retired`。
+- 验证：修复前 `catalog_repository` 为 `9 passed / 4 failed`；修复后目标为 `13/13`，完整 `inputcodex-parity` 全部测试目标、`cargo fmt --all -- --check` 与 Parity `clippy --all-targets -D warnings` 均通过，提交为 `be5673c82154fe2777046283158a152d11ead62d`。
+- 关联：Issue `#75` 扩围批准评论 `5092021020`、Parity checkpoint 评论 `5092109658`、提交 `a6e4a28e00c976aa91bca14afb1729ae7e6af194` 与 `be5673c82154fe2777046283158a152d11ead62d`。
+
+### 2026-07-27：Linux all-targets 测试配置编译到未使用的 Windows 专用错误 helper
+
+- 环境：PR `#76` Final Head `b64e9a9a3a5aece31cb86959ae66d673b955cb56` 的标准 CI Run `30273494972`；Windows、macOS、governance、classify 与 release-audit 均成功，Linux 在 Workspace Clippy 阶段失败。
+- 现象：`crates/inputcodex-platform/src/platform_paths/windows.rs:230` 的 `platform_paths_error` 被 `-D dead-code` 拒绝；Linux 后续 Workspace 测试和 required 汇总按合同停止。
+- 根因：`windows` 模块为纯选择逻辑测试使用 `#[cfg(any(target_os = "windows", test))]`，所以 Linux `cargo clippy --workspace --all-targets` 会在 test 配置编译该模块；`registered_package_candidates` 已受 `#[cfg(target_os = "windows")]` 保护，但它唯一调用的 `platform_paths_error` 没有同源条件，Linux test 构建中因此成为未使用函数。
+- 处理：只给 `platform_paths_error` 增加 `#[cfg(target_os = "windows")]`，使 helper 与唯一调用方拥有相同编译边界；不增加 `allow/expect(dead_code)`，不跳过 Linux Clippy，不修改 Workflow、Ruleset 或功能语义。
+- 验证：本地重新运行四 crate 测试、四 crate all-targets Clippy、rustfmt、CI 合同、Release Audit、仓库政策、范围与隐私门禁；Linux 真实性由 PR `#76` 新 Head 的标准 CI 重跑确认，动态 Run 证据只回写 GitHub。
+- 关联：Issue `#75`、PR `#76`、CI Run `30273494972`、Job `90001713384`。
+
 ## 记录模板
 
 ```text
