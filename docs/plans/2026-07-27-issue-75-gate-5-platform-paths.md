@@ -3,7 +3,7 @@
 ## 控制状态
 
 ```yaml
-status: implementation-authorized-tdd-ready
+status: implementation-authorized-parity-validator-fix
 issue_ref: https://github.com/nonononull/inputcodex/issues/75
 parity_exception_ref: https://github.com/nonononull/inputcodex/issues/74
 branch_ref: codex/issue-75-gate-5-platform-paths
@@ -17,14 +17,16 @@ written_spec_approval_ref: codex-session-user-message-approved-written-spec-2026
 written_spec_approval_local_time: 2026-07-27 17:39:03 +08:00
 implementation_authorization_ref: https://github.com/nonononull/inputcodex/issues/75#issuecomment-5090986061
 implementation_authorization_local_time: 2026-07-27 19:57:43 +08:00
-candidate_scope_count: 29
-candidate_scope_hash: sha256:251f54063fafa368e5f134fd01d8a1b6ff3f1ff6f3b02a07b661aa5c0d6f523b
-scope_approval_status: approved
+scope_expansion_authorization_ref: https://github.com/nonononull/inputcodex/issues/75#issuecomment-5092021020
+scope_expansion_authorization_local_time: 2026-07-27 21:36:01 +08:00
+candidate_scope_count: 30
+candidate_scope_hash: sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37
+scope_approval_status: approved-expanded
 implementation_authorization: approved-exact-scope-and-operations
 final_merge_authorization: pending
 ```
 
-本文件是 Issue `#75` 的书面设计规范。项目所有者已批准总体设计、Issue `#74` 的路径安全策略、本书面规范、二十九路径与固定 `scope_hash`，并授权 TDD 实施、本地轻量验证、Git checkpoint、提交、普通推送、非 Draft PR 与 Review/CI。最终 Squash Merge 仍保留单独授权门，任何超出批准范围的写入都必须停止。
+本文件是 Issue `#75` 的书面设计规范。项目所有者已批准总体设计、Issue `#74` 的路径安全策略、本书面规范、三十路径与固定 `scope_hash`，并授权 TDD 实施、本地轻量验证、Git checkpoint、提交、普通推送、非 Draft PR 与 Review/CI。新增路径仅允许让仓库生命周期验证接受 `ParityStatus::Implemented`，其余状态继续禁止。最终 Squash Merge 仍保留单独授权门，任何超出批准范围的写入都必须停止。
 
 ## 目标
 
@@ -193,9 +195,9 @@ application `3/3`、domain `1/1`、platform `1/1`，parity 所有测试目标通
 
 GitHub-hosted 验证要求标准 CI、Windows/macOS 真实编译测试和 Performance Baseline 全部成功；成功 Artifact 数为 `0`；Review 对话全部记录根因、处理方式和验证证据。
 
-## 二十九路径候选范围
+## 三十路径候选范围
 
-以下路径按 Windows PowerShell `Sort-Object` 排序；UTF-8 无 BOM、LF 连接并追加末尾 LF 后，SHA-256 为 `sha256:251f54063fafa368e5f134fd01d8a1b6ff3f1ff6f3b02a07b661aa5c0d6f523b`：
+以下路径按 Windows PowerShell `Sort-Object` 排序；UTF-8 无 BOM、LF 连接并追加末尾 LF 后，SHA-256 为 `sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37`：
 
 1. `AGENTS.md`
 2. `build.md`
@@ -208,30 +210,31 @@ GitHub-hosted 验证要求标准 CI、Windows/macOS 真实编译测试和 Perfor
 9. `crates/inputcodex-domain/src/lib.rs`
 10. `crates/inputcodex-domain/src/platform_paths.rs`
 11. `crates/inputcodex-domain/tests/platform_paths.rs`
-12. `crates/inputcodex-parity/tests/catalog_repository.rs`
-13. `crates/inputcodex-platform/Cargo.toml`
-14. `crates/inputcodex-platform/src/lib.rs`
-15. `crates/inputcodex-platform/src/platform_paths.rs`
-16. `crates/inputcodex-platform/src/platform_paths/macos.rs`
-17. `crates/inputcodex-platform/src/platform_paths/windows.rs`
-18. `crates/inputcodex-platform/tests/platform_paths.rs`
-19. `docs/plans/2026-07-27-issue-75-gate-5-platform-paths.md`
-20. `docs/plans/PROJECT-MASTER-PLAN.md`
-21. `docs/plans/sessions/2026-07-27-issue-75-gate-5-platform-paths.md`
-22. `docs/reports/issue-75-gate-5-platform-paths.md`
-23. `docs/workflows/2026-07-27-issue-75-gate-5-platform-paths-runtime.md`
-24. `err.md`
-25. `parity/contracts/foundation-platform.yml`
-26. `parity/features/foundation-platform.yml`
-27. `parity/features/source-index.yml`
-28. `parity/README.md`
-29. `README.md`
+12. `crates/inputcodex-parity/src/validation.rs`
+13. `crates/inputcodex-parity/tests/catalog_repository.rs`
+14. `crates/inputcodex-platform/Cargo.toml`
+15. `crates/inputcodex-platform/src/lib.rs`
+16. `crates/inputcodex-platform/src/platform_paths.rs`
+17. `crates/inputcodex-platform/src/platform_paths/macos.rs`
+18. `crates/inputcodex-platform/src/platform_paths/windows.rs`
+19. `crates/inputcodex-platform/tests/platform_paths.rs`
+20. `docs/plans/2026-07-27-issue-75-gate-5-platform-paths.md`
+21. `docs/plans/PROJECT-MASTER-PLAN.md`
+22. `docs/plans/sessions/2026-07-27-issue-75-gate-5-platform-paths.md`
+23. `docs/reports/issue-75-gate-5-platform-paths.md`
+24. `docs/workflows/2026-07-27-issue-75-gate-5-platform-paths-runtime.md`
+25. `err.md`
+26. `parity/contracts/foundation-platform.yml`
+27. `parity/features/foundation-platform.yml`
+28. `parity/features/source-index.yml`
+29. `parity/README.md`
+30. `README.md`
 
 任何新增、删除、重命名或移出集合的路径都必须重新计算哈希并取得项目所有者批准。路径在范围内也不代表可以进行与 Issue `#75` 无关的修改。
 
 ## 交付链
 
-1. 项目所有者复核本规范、二十九路径和候选哈希。
+1. 项目所有者复核本规范、三十路径和候选哈希。
 2. 使用 `superpowers:writing-plans` 形成项目原生 Session Plan 与 Runtime Workflow。
 3. 在 Issue `#75` 回写正式 `scope_hash`、允许操作和禁止操作。
 4. TDD RED checkpoint、最小 GREEN、定向重构和本地轻量验证。

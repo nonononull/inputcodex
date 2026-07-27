@@ -6,18 +6,18 @@ tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/75
 parity_exception_ref: https://github.com/nonononull/inputcodex/issues/74
 session_plan_ref: docs/plans/sessions/2026-07-27-issue-75-gate-5-platform-paths.md
 implementation_plan_ref: docs/plans/2026-07-27-issue-75-gate-5-platform-paths.md
-approved_decision_ref: https://github.com/nonononull/inputcodex/issues/75#issuecomment-5090986061
+approved_decision_ref: https://github.com/nonononull/inputcodex/issues/75#issuecomment-5092021020
 selected_business_path: inputcodex.gate5.foundation-platform.platform-paths
 baseline_ref: fc1683aabda4afb27ca333387ec954b6a405d2df
 baseline_tree: d17a038fcb4fc986565f121283481eb38cdfbc33
 branch: codex/issue-75-gate-5-platform-paths
-scope_hash: sha256:251f54063fafa368e5f134fd01d8a1b6ff3f1ff6f3b02a07b661aa5c0d6f523b
+scope_hash: sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37
 scope_status: approved-frozen
-scope_approval_ref: https://github.com/nonononull/inputcodex/issues/75#issuecomment-5090986061
-current_execution_status: tdd-implementation-authorized
-current_allowed_operations: exact-twenty-nine-path-tdd, lightweight-local-verification, git-checkpoints, normal-commit, normal-push, non-draft-pr, review-ci
-post_approval_allowed_operations: exact-twenty-nine-path-tdd, lightweight-local-verification, git-checkpoints, normal-commit, normal-push, non-draft-pr, review-ci
-executor_enforcement: exact-twenty-nine-paths, no-force-push, never-delete-main, squash-only
+scope_approval_ref: https://github.com/nonononull/inputcodex/issues/75#issuecomment-5092021020
+current_execution_status: parity-validator-root-cause-fix-authorized
+current_allowed_operations: exact-thirty-path-tdd, lightweight-local-verification, git-checkpoints, normal-commit, normal-push, non-draft-pr, review-ci
+post_approval_allowed_operations: exact-thirty-path-tdd, lightweight-local-verification, git-checkpoints, normal-commit, normal-push, non-draft-pr, review-ci
+executor_enforcement: exact-thirty-paths, no-force-push, never-delete-main, squash-only
 local_time_source: Windows Get-Date
 pr_ref: not-created-by-design
 ci_ref: not-applicable-before-implementation
@@ -29,7 +29,7 @@ merge_ref: pending-separate-owner-authorization
 1. `startup-baseline`：核对 `origin/main=fc1683aabda4afb27ca333387ec954b6a405d2df`、隔离分支、Issue `#74/#75`、干净启动面和 Windows 本机时间。
 2. `written-spec`：书面规范已批准；Windows API 合同修正为 `windows 0.58.0` 安全 WinRT，不允许直接 Win32 FFI 或 `unsafe`。
 3. `planning-control`：只落盘三份规划文件并运行文档、范围、控制字符和空白检查；普通提交、普通推送并回写 Issue `#75`。
-4. `owner-implementation-gate`：项目所有者已明确批准二十九路径、`scope_hash`、TDD、轻量验证、提交、普通推送、非 Draft PR 与 Review/CI；最终 Squash Merge 仍单独授权。
+4. `owner-implementation-gate`：项目所有者已明确批准三十路径、`scope_hash`、TDD、轻量验证、提交、普通推送、非 Draft PR 与 Review/CI；新增路径只允许验证器接受 `ParityStatus::Implemented`，最终 Squash Merge 仍单独授权。
 5. `domain-red-green`：先写 `PrivatePath`、安装来源和快照 RED，再做最小 GREEN；路径 `Debug` 必须脱敏。
 6. `application-red-green`：先写请求、端口、用例、Ready+None、失败和取消/过期结果 RED，再做最小 GREEN。
 7. `platform-common-red-green`：固定 `CODEX_HOME`、用户目录、状态根、派生文件名和 unsupported 错误，再实现共享纯解析核心。
@@ -83,7 +83,7 @@ README.md
 | 阶段 | 允许 | 禁止 |
 | --- | --- | --- |
 | 当前规划 | 三份规划文件、文档校验、普通提交/推送、Issue 回写 | Rust、Cargo、Parity、根状态文档、报告、PR、实现 CI、合并 |
-| 所有者实施批准后 | 二十九路径 TDD、轻量验证、checkpoint 提交、普通推送、非 Draft PR、Review/CI | 扩范围、force push、删除或改写 `main`、修改 Ruleset/预算/Release/`upstream/`/AGOS |
+| 所有者实施批准后 | 三十路径 TDD、轻量验证、checkpoint 提交、普通推送、非 Draft PR、Review/CI | 扩范围、force push、删除或改写 `main`、修改 Ruleset/预算/Release/`upstream/`/AGOS |
 | 产品边界 | 路径发现、验证、选择和安全返回 | UI、Iced、写入、网络、缓存、后台线程、概览、版本、生命周期、设置、会话、Watcher、安装更新 |
 | 最终合并 | 仅在 Final Head 单独授权后 Squash Merge | Merge Commit、Rebase Merge、未解决 Review 对话、未知根因失败、提前关闭 Issue |
 
@@ -102,6 +102,7 @@ $approved = [string[]]@(
   'crates/inputcodex-domain/src/lib.rs',
   'crates/inputcodex-domain/src/platform_paths.rs',
   'crates/inputcodex-domain/tests/platform_paths.rs',
+  'crates/inputcodex-parity/src/validation.rs',
   'crates/inputcodex-parity/tests/catalog_repository.rs',
   'crates/inputcodex-platform/Cargo.toml',
   'crates/inputcodex-platform/src/lib.rs',
@@ -126,8 +127,8 @@ $payload = ($sorted -join "`n") + "`n"
 $hash = [Convert]::ToHexString(
   [Security.Cryptography.SHA256]::HashData([Text.UTF8Encoding]::new($false).GetBytes($payload))
 ).ToLowerInvariant()
-if ($sorted.Count -ne 29) { throw "路径数量漂移：$($sorted.Count)" }
-if ($hash -ne '251f54063fafa368e5f134fd01d8a1b6ff3f1ff6f3b02a07b661aa5c0d6f523b') {
+if ($sorted.Count -ne 30) { throw "路径数量漂移：$($sorted.Count)" }
+if ($hash -ne 'ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37') {
   throw "scope_hash 漂移：sha256:$hash"
 }
 $changed = @(git diff --name-only origin/main...HEAD | Sort-Object)
@@ -218,11 +219,11 @@ evidence:
     application: 3/3
     platform: 1/1
     parity: all test targets passed
-  scope_count: 29
-  scope_hash: sha256:251f54063fafa368e5f134fd01d8a1b6ff3f1ff6f3b02a07b661aa5c0d6f523b
-  implementation_authorization_ref: https://github.com/nonononull/inputcodex/issues/75#issuecomment-5090986061
-  implementation_authorization_local_time: 2026-07-27 19:57:43 +08:00
-  implementation_started: false
+  scope_count: 30
+  scope_hash: sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37
+  implementation_authorization_ref: https://github.com/nonononull/inputcodex/issues/75#issuecomment-5092021020
+  implementation_authorization_local_time: 2026-07-27 21:36:01 +08:00
+  implementation_started: true
   implementation_authorization: approved
   pr_created: false
   final_merge_authorization: pending
@@ -232,7 +233,7 @@ evidence:
 
 ## 停止门
 
-- 未取得项目所有者对二十九路径、`scope_hash`、实施和 PR 操作的明确批准。
+- 未取得项目所有者对三十路径、`scope_hash`、实施和 PR 操作的明确批准。
 - `origin/main`、上游正式 Release、Release commit/tree 或 `release_audit=current` 发生变化。
 - `git diff --name-only` 出现批准集合之外的路径，或规划阶段出现三份规划文件之外的路径。
 - 需要 UI、Iced、写入、网络、缓存、后台线程、新依赖家族、直接 Win32 FFI 或 `unsafe`。

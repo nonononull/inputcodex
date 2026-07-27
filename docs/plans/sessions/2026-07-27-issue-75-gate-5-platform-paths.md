@@ -31,14 +31,14 @@ owner_decision_ref: codex-session-user-message-approved-written-spec-2026-07-27
 written_spec_status: approved
 written_spec_approval_local_time: 2026-07-27 17:39:03 +08:00
 scope_approval_status: approved
-scope_hash: sha256:251f54063fafa368e5f134fd01d8a1b6ff3f1ff6f3b02a07b661aa5c0d6f523b
-scope_approval_ref: https://github.com/nonononull/inputcodex/issues/75#issuecomment-5090986061
-implementation_authorization_local_time: 2026-07-27 19:57:43 +08:00
-allowed_operations: exact-twenty-nine-path-tdd, local-lightweight-verification, git-checkpoints, normal-commit, normal-push, non-draft-pr, review-ci
-post_approval_operations: exact-twenty-nine-path-tdd, local-lightweight-verification, git-checkpoints, normal-commit, normal-push, non-draft-pr, review-ci
+scope_hash: sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37
+scope_approval_ref: https://github.com/nonononull/inputcodex/issues/75#issuecomment-5092021020
+implementation_authorization_local_time: 2026-07-27 21:36:01 +08:00
+allowed_operations: exact-thirty-path-tdd, local-lightweight-verification, git-checkpoints, normal-commit, normal-push, non-draft-pr, review-ci
+post_approval_operations: exact-thirty-path-tdd, local-lightweight-verification, git-checkpoints, normal-commit, normal-push, non-draft-pr, review-ci
 mutation_intent: source-and-control-plane
 business_mutation_intent: source-authorized-within-exact-scope
-executor_enforcement: exact-twenty-nine-paths, no-force-push, squash-only, never-delete-main
+executor_enforcement: exact-thirty-paths, no-force-push, squash-only, never-delete-main
 delivery_contract: agos.issue-pr-merge.v1
 review_strategy: final-head changed-surface review; every conversation records root cause, treatment and verification evidence
 ci_expectation: standard GitHub-hosted CI plus Windows/macOS compile-test and non-required Performance Baseline observation
@@ -204,7 +204,7 @@ change_contract:
     - Issue #65 / PR #72 v1.2.43 功能目录重新审计
     - Issue #63 / PR #73 approved-observation 预算 CI
   stale_verdict_invalidation_refs:
-    - origin/main、上游正式 Release、Release commit/tree、release_audit、二十九路径或 scope_hash 任一变化时，本计划失效
+    - origin/main、上游正式 Release、Release commit/tree、release_audit、三十路径或 scope_hash 任一变化时，本计划失效
   regression_checks:
     - surface: domain/application/platform 路径合同
       command_or_evidence_ref: cargo test --locked --offline --ignore-rust-version -p inputcodex-domain -p inputcodex-application -p inputcodex-platform
@@ -224,14 +224,14 @@ change_contract:
     baseline_evidence_ref: fc1683aabda4afb27ca333387ec954b6a405d2df and Issue #63/#65 merged evidence
     post_change_replay_plan_ref: docs/workflows/2026-07-27-issue-75-gate-5-platform-paths-runtime.md
     post_change_replay_ref: 最终本地门禁与 Final Head GitHub-hosted CI/Performance observation
-    expected_result: 只有批准二十九路径的必要子集变化，平台路径行为实现且相邻产品功能、预算、Release Audit、Ruleset、upstream 和 UI 零语义漂移
+    expected_result: 只有批准三十路径的必要子集变化，平台路径行为实现且相邻产品功能、预算、Release Audit、Ruleset、upstream 和 UI 零语义漂移
     owner_visible_status: pending
     regression_status: pending
     forbidden_ops_until_replay:
       - Squash Merge、关闭 Issue #75、修改预算/Ruleset/Release/upstream/AGOS 或开始下一 Gate 5 功能
 ```
 
-以下二十九路径按 Windows PowerShell `Sort-Object` 排序，以 UTF-8 无 BOM、LF 连接并追加末尾 LF 后计算 SHA-256，正式执行哈希为 `sha256:251f54063fafa368e5f134fd01d8a1b6ff3f1ff6f3b02a07b661aa5c0d6f523b`：
+以下三十路径按 Windows PowerShell `Sort-Object` 排序，以 UTF-8 无 BOM、LF 连接并追加末尾 LF 后计算 SHA-256，正式执行哈希为 `sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37`：
 
 ```text
 AGENTS.md
@@ -245,6 +245,7 @@ crates/inputcodex-application/tests/platform_paths.rs
 crates/inputcodex-domain/src/lib.rs
 crates/inputcodex-domain/src/platform_paths.rs
 crates/inputcodex-domain/tests/platform_paths.rs
+crates/inputcodex-parity/src/validation.rs
 crates/inputcodex-parity/tests/catalog_repository.rs
 crates/inputcodex-platform/Cargo.toml
 crates/inputcodex-platform/src/lib.rs
@@ -275,7 +276,7 @@ README.md
 | `crates/inputcodex-platform/src/platform_paths/windows.rs` | Windows 包与独立安装候选，不包含共享业务规则 |
 | `crates/inputcodex-platform/src/platform_paths/macos.rs` | macOS 固定应用目录候选，不包含共享业务规则 |
 | 三个 `tests/platform_paths.rs` | 对外合同、隐私和用例状态；平台纯选择细节放在对应源文件单元测试 |
-| Parity 三文件与仓库测试 | 将实现状态、错误语义、`process-read` 和 Issue `#74/#75` 固定为机器合同 |
+| Parity 验证器、三文件与仓库测试 | 将 `implemented` 生命周期、错误语义、`process-read` 和 Issue `#74/#75` 固定为机器合同 |
 | 根文档、Master Plan、报告 | 记录 Gate 5 首个产品切片、构建入口、排错与审计证据 |
 
 ---
@@ -288,7 +289,7 @@ README.md
 - Create: `docs/workflows/2026-07-27-issue-75-gate-5-platform-paths-runtime.md`
 
 **Interfaces:**
-- Consumes: Issue `#75`、Issue `#74`、书面规范批准消息、二十九路径哈希。
+- Consumes: Issue `#75`、Issue `#74`、书面规范批准消息、三十路径哈希。
 - Produces: 实施前唯一有效的 Session Plan、Runtime Workflow 和所有者授权门。
 
 - [x] **Step 1：验证当前只修改三份规划文件**
@@ -314,7 +315,7 @@ git commit -m "docs: 固定 issue 75 平台路径执行计划"
 git push origin codex/issue-75-gate-5-platform-paths
 ```
 
-预期：远端 Head 与本地 Head 相同；随后回写 Issue `#75`，等待项目所有者明确批准二十九路径、`scope_hash` 和实施/PR 范围。未批准时不得执行 Task 2。
+预期：远端 Head 与本地 Head 相同；随后回写 Issue `#75`，等待项目所有者明确批准三十路径、`scope_hash` 和实施/PR 范围。未批准时不得执行 Task 2。
 
 ### Task 2：领域路径与快照合同
 
@@ -823,6 +824,7 @@ git commit -m "feat: 实现双平台路径解析适配器"
 ### Task 6：Parity 目录和来源副作用 TDD
 
 **Files:**
+- Modify: `crates/inputcodex-parity/src/validation.rs`
 - Modify: `crates/inputcodex-parity/tests/catalog_repository.rs`
 - Modify: `parity/contracts/foundation-platform.yml`
 - Modify: `parity/features/foundation-platform.yml`
@@ -843,18 +845,18 @@ git commit -m "feat: 实现双平台路径解析适配器"
 cargo test --locked --offline --ignore-rust-version -p inputcodex-parity --test catalog_repository
 ```
 
-预期：只因目录仍是 `unassessed`、错误码不完整和 `process-read` 缺失而失败。
+预期：目录精确断言先因 `unassessed`、错误码不完整和 `process-read` 缺失而失败；最小目录更新后，完整仓库测试继续以 `InvalidInitialParityStatus @ feature.foundation-platform.platform-paths` 证明旧 Gate 4 验证器尚未接受首个已实现 Gate 5 功能。
 
 - [ ] **Step 3：最小更新目录与合同**
 
-`feature.foundation-platform.platform-paths` 只改为 `implemented` 并补 Issue `#74/#75`；baseline contract 增加 `process-read`、六个错误码和未安装语义；`core-module:app_paths`、`core-module:codex_home`、`core-module:paths` 三项副作用改为 `[filesystem-read, process-read]`。不得修改其他 feature 状态或来源入口。
+`feature.foundation-platform.platform-paths` 只改为 `implemented` 并补 Issue `#74/#75`；baseline contract 增加 `process-read`、六个错误码和未安装语义；`core-module:app_paths`、`core-module:codex_home`、`core-module:paths` 三项副作用改为 `[filesystem-read, process-read]`。仓库生命周期验证只新增接受 `ParityStatus::Implemented`，继续拒绝 `planned`、`implementing`、`verified`、`exception-approved` 和 `retired`。不得修改其他 feature 状态或来源入口。
 
 - [ ] **Step 4：运行 GREEN 并提交**
 
 ```powershell
 cargo test --locked --offline --ignore-rust-version -p inputcodex-parity --test catalog_repository
 cargo test --locked --offline --ignore-rust-version -p inputcodex-parity
-git add -- crates/inputcodex-parity/tests/catalog_repository.rs parity/contracts/foundation-platform.yml parity/features/foundation-platform.yml parity/features/source-index.yml parity/README.md
+git add -- crates/inputcodex-parity/src/validation.rs crates/inputcodex-parity/tests/catalog_repository.rs parity/contracts/foundation-platform.yml parity/features/foundation-platform.yml parity/features/source-index.yml parity/README.md
 git commit -m "test: 固定平台路径一致性合同"
 ```
 
@@ -908,7 +910,7 @@ git commit -m "docs: 收口平台路径迁移证据"
 ### Task 8：最终本地验证、PR、Review 与 Hosted CI
 
 **Files:**
-- Verify: 全部二十九路径中的实际差异子集。
+- Verify: 全部三十路径中的实际差异子集。
 
 **Interfaces:**
 - Consumes: 最终实现 Head。
@@ -930,7 +932,7 @@ git diff --check
 
 - [ ] **Step 2：验证范围与私人路径泄露**
 
-使用 Runtime Workflow 中的精确脚本复算二十九路径哈希；`git diff --name-only origin/main...HEAD` 必须是批准集合子集。对二十九路径与测试输出搜索本机用户目录、`C:\Users\dashuai`、`/Users/` 和未脱敏 `Debug`；真实路径只允许出现在项目根控制面固定路径字段，不得出现在产品错误、快照 Debug 或测试断言输出。
+使用 Runtime Workflow 中的精确脚本复算三十路径哈希；`git diff --name-only origin/main...HEAD` 必须是批准集合子集。对三十路径与测试输出搜索本机用户目录、`C:\Users\dashuai`、`/Users/` 和未脱敏 `Debug`；真实路径只允许出现在项目根控制面固定路径字段，不得出现在产品错误、快照 Debug 或测试断言输出。
 
 - [ ] **Step 3：普通推送并创建非 Draft PR**
 
@@ -939,7 +941,7 @@ git push origin codex/issue-75-gate-5-platform-paths
 gh pr create --repo nonononull/inputcodex --base main --head codex/issue-75-gate-5-platform-paths --title "feat: 迁移平台路径解析能力" --body-file $env:TEMP\issue-75-pr-body.md
 ```
 
-PR 正文必须包含 `Closes #75`、Issue `#74`、二十九路径哈希、RED/GREEN 命令、隐私边界、Windows 安全 WinRT 特性、无 UI/写入/网络/缓存声明和最终 Squash Merge 单独授权门。
+PR 正文必须包含 `Closes #75`、Issue `#74`、三十路径哈希、RED/GREEN 命令、隐私边界、Windows 安全 WinRT 特性、无 UI/写入/网络/缓存声明和最终 Squash Merge 单独授权门。
 
 - [ ] **Step 4：核验 Review 与 Hosted CI**
 
@@ -965,4 +967,4 @@ implementation_started: false
 implementation_authorization: approved
 ```
 
-本计划完整覆盖书面规范的领域、应用、共享解析、Windows、macOS、Parity、文档、验证和交付要求。项目所有者已批准二十九路径、`scope_hash` 和实施/PR 操作，Task 1 已完成，允许从 Task 2 的 TDD RED 开始；最终 Squash Merge 仍保留单独授权门。
+本计划完整覆盖书面规范的领域、应用、共享解析、Windows、macOS、Parity、文档、验证和交付要求。项目所有者已批准三十路径、`scope_hash` 和实施/PR 操作，当前允许针对已确认的 Parity 初始状态根因继续 TDD；最终 Squash Merge 仍保留单独授权门。
