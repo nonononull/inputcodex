@@ -328,7 +328,7 @@ git push origin codex/issue-75-gate-5-platform-paths
 - Consumes: `std::path::{Path, PathBuf}`。
 - Produces: `PrivatePath::new(PathBuf) -> Result<PrivatePath, PrivatePathError>`、`ApplicationInstallSource`、`CodexInstallation`、`PlatformPathsSnapshot`。
 
-- [ ] **Step 1：写领域 RED**
+- [x] **Step 1：写领域 RED**
 
 ```rust
 use std::path::PathBuf;
@@ -378,7 +378,7 @@ fn 平台快照保留明确空安装且所有路径继续脱敏() {
 }
 ```
 
-- [ ] **Step 2：运行 RED**
+- [x] **Step 2：运行 RED**
 
 ```powershell
 cargo test --locked --offline --ignore-rust-version -p inputcodex-domain --test platform_paths
@@ -386,7 +386,7 @@ cargo test --locked --offline --ignore-rust-version -p inputcodex-domain --test 
 
 预期：编译失败，原因是 `platform_paths` 模块及五个公开类型尚不存在。
 
-- [ ] **Step 3：写最小领域 GREEN**
+- [x] **Step 3：写最小领域 GREEN**
 
 ```rust
 use std::{fmt, path::{Path, PathBuf}};
@@ -464,7 +464,7 @@ impl PlatformPathsSnapshot {
 
 在 `lib.rs` 中只增加 `mod platform_paths;` 与上述类型的 `pub use`；不得为路径类型增加 `Display`、Serde、字符串 getter 或拥有值导出。
 
-- [ ] **Step 4：运行 GREEN 并提交**
+- [x] **Step 4：运行 GREEN 并提交**
 
 ```powershell
 cargo test --locked --offline --ignore-rust-version -p inputcodex-domain --test platform_paths
@@ -486,7 +486,7 @@ git commit -m "feat: 增加受保护平台路径领域模型"
 - Consumes: `PlatformPathsSnapshot`、`ApplicationError`、`LoadCompletion`、`LoadCoordinator`、`RequestId`。
 - Produces: `PlatformPathsRequest`、`PlatformPathsPort::resolve`、`ResolvePlatformPaths::execute`。
 
-- [ ] **Step 1：写应用 RED**
+- [x] **Step 1：写应用 RED**
 
 ```rust
 use std::path::PathBuf;
@@ -542,7 +542,7 @@ fn 取消后的同步结果按现有协调器规则变为过期() {
 }
 ```
 
-- [ ] **Step 2：运行 RED**
+- [x] **Step 2：运行 RED**
 
 ```powershell
 cargo test --locked --offline --ignore-rust-version -p inputcodex-application --test platform_paths
@@ -550,7 +550,7 @@ cargo test --locked --offline --ignore-rust-version -p inputcodex-application --
 
 预期：编译失败，原因是应用端口、请求与用例尚不存在。
 
-- [ ] **Step 3：写最小应用 GREEN**
+- [x] **Step 3：写最小应用 GREEN**
 
 ```rust
 use std::{fmt, path::{Path, PathBuf}};
@@ -596,7 +596,7 @@ impl<P: PlatformPathsPort> ResolvePlatformPaths<P> {
 
 同时为 `ApplicationError` 增加 `pub const fn internal(code: &'static str) -> Self`，映射到 `ErrorKind::Internal`；`lib.rs` 只做模块和公开类型转出。
 
-- [ ] **Step 4：运行 GREEN 并提交**
+- [x] **Step 4：运行 GREEN 并提交**
 
 ```powershell
 cargo test --locked --offline --ignore-rust-version -p inputcodex-application --test platform_paths
@@ -618,7 +618,7 @@ git commit -m "feat: 增加平台路径应用端口与用例"
 - Consumes: `PlatformPathsRequest`、`PlatformPathsPort`、领域快照。
 - Produces: `SystemPlatformPaths`、内部 `PathProbe`、`CommonInputs`、`resolve_common_paths`。
 
-- [ ] **Step 1：写共享规则 RED**
+- [x] **Step 1：写共享规则 RED**
 
 在 `src/platform_paths.rs` 的 `#[cfg(test)]` 单元测试中用内存 `PathProbe` 固定以下断言：空白 `CODEX_HOME` 使用绝对用户 `.codex`；非空相对、不存在或文件路径返回 `CODEX_HOME_INVALID`；用户目录缺失返回 `USER_HOME_UNAVAILABLE`；Windows `LOCALAPPDATA` 缺失返回 `INPUTCODEX_STATE_ROOT_UNAVAILABLE`；三个派生文件名严格为 `settings.json`、`latest-status.json`、`inputcodex.log`。
 
@@ -635,7 +635,7 @@ fn 系统平台路径解析器实现应用端口且不需要_unsafe() {
 }
 ```
 
-- [ ] **Step 2：运行 RED**
+- [x] **Step 2：运行 RED**
 
 ```powershell
 cargo test --locked --offline --ignore-rust-version -p inputcodex-platform --test platform_paths
@@ -643,7 +643,7 @@ cargo test --locked --offline --ignore-rust-version -p inputcodex-platform --tes
 
 预期：编译失败，原因是 `SystemPlatformPaths` 尚不存在。
 
-- [ ] **Step 3：实现共享解析骨架**
+- [x] **Step 3：实现共享解析骨架**
 
 ```rust
 const SETTINGS_FILE: &str = "settings.json";
@@ -706,7 +706,7 @@ fn resolve_common_paths(
 
 `SystemPlatformPaths::resolve` 必须按 `cfg(target_os)` 选择 Windows/macOS；其他平台直接返回 `ApplicationError::unsupported("PLATFORM_PATHS_UNSUPPORTED")`。环境读取只允许 `CODEX_HOME`、Windows `USERPROFILE`/`LOCALAPPDATA`、macOS `HOME`，不得读取当前目录作为后备。
 
-- [ ] **Step 4：运行共享 GREEN**
+- [x] **Step 4：运行共享 GREEN**
 
 ```powershell
 cargo test --locked --offline --ignore-rust-version -p inputcodex-platform
@@ -728,11 +728,11 @@ cargo test --locked --offline --ignore-rust-version -p inputcodex-platform
 - Consumes: `PathProbe`、固定环境根、`PlatformPathsRequest`。
 - Produces: `windows::resolve_explicit/discover`、`macos::resolve_explicit/discover`，均返回 `Option<CodexInstallation>` 或稳定错误。
 
-- [ ] **Step 1：写平台选择 RED**
+- [x] **Step 1：写平台选择 RED**
 
 Windows 单元测试必须覆盖：三个 Package Family、数值版本降序、同版本身份顺序、`app` 子目录或根目录安全可执行文件、三个 standalone 根、大小写等价 `Codex.exe`/`ChatGPT.exe`、管理器路径拒绝、显式无效不回退。macOS 单元测试必须覆盖：`/Applications` 优先 `$HOME/Applications`、四个固定 `.app` 名称顺序、显式 `.app` 与 `Contents/MacOS` 可执行文件、管理器路径拒绝、最多八个自动候选。
 
-- [ ] **Step 2：固定依赖合同**
+- [x] **Step 2：固定依赖合同**
 
 ```toml
 # Cargo.toml [workspace.dependencies]
@@ -754,7 +754,7 @@ windows.workspace = true
 
 不得加入 `directories`、`dirs`、Tokio、Serde、正则、shell 或新依赖家族；`Cargo.lock` 若内容未变化则保持不动。
 
-- [ ] **Step 3：实现 Windows 安全 WinRT 查询**
+- [x] **Step 3：实现 Windows 安全 WinRT 查询**
 
 ```rust
 #[cfg(target_os = "windows")]
@@ -790,7 +790,7 @@ fn registered_package_candidates() -> Result<Vec<WindowsPackageCandidate>, Appli
 
 固定 Family 为 `OpenAI.Codex_2p2nqsd0c76g0`、`OpenAI.CodexBeta_2p2nqsd0c76g0`、`OpenAI.ChatGPT-Desktop_2p2nqsd0c76g0`。只创建一个 `PackageManager`，每个固定 Family 最多查询一次；查询错误直接失败，不静默退到 standalone。候选只接受 `Codex.exe` 或 `ChatGPT.exe`，应用根只允许包根、包根 `app` 或三个固定 standalone 目录。
 
-- [ ] **Step 4：实现 macOS 固定候选**
+- [x] **Step 4：实现 macOS 固定候选**
 
 ```rust
 const APP_NAMES: [&str; 4] = ["Codex.app", "OpenAI Codex.app", "OpenAI.Codex.app", "ChatGPT.app"];
@@ -809,7 +809,7 @@ fn discover(home: &std::path::Path, probe: &impl PathProbe) -> Option<CodexInsta
 
 显式路径必须绝对；若为 `Contents/MacOS/Codex` 或 `ChatGPT`，只回溯到恰好包含 `.app/Contents/MacOS` 的应用包。任何路径组成部分大小写归一化后命中 `inputcodex`、`codex++`、`codexplusplus` 或 `codex-plus-manager` 都返回 `EXPLICIT_CODEX_PATH_INVALID`。
 
-- [ ] **Step 5：运行双平台本地 GREEN 并提交**
+- [x] **Step 5：运行双平台本地 GREEN 并提交**
 
 ```powershell
 cargo test --locked --offline --ignore-rust-version -p inputcodex-platform
@@ -835,11 +835,11 @@ git commit -m "feat: 实现双平台路径解析适配器"
 - Consumes: 实现后的稳定行为、Issue `#74/#75`。
 - Produces: `implemented` 功能状态、六个稳定错误码、`filesystem-read + process-read` 来源事实。
 
-- [ ] **Step 1：写 Parity RED**
+- [x] **Step 1：写 Parity RED**
 
 在 `catalog_repository.rs` 增加精确文本断言：`status: implemented`、`issue:74`、`issue:75`、六个错误码、未安装 `Ready + installation=None`、三个来源入口均包含 `side_effects: [filesystem-read, process-read]`，并断言仍不存在广告、远程推荐、写入或网络副作用。
 
-- [ ] **Step 2：运行 RED**
+- [x] **Step 2：运行 RED**
 
 ```powershell
 cargo test --locked --offline --ignore-rust-version -p inputcodex-parity --test catalog_repository
@@ -847,11 +847,11 @@ cargo test --locked --offline --ignore-rust-version -p inputcodex-parity --test 
 
 预期：目录精确断言先因 `unassessed`、错误码不完整和 `process-read` 缺失而失败；最小目录更新后，完整仓库测试继续以 `InvalidInitialParityStatus @ feature.foundation-platform.platform-paths` 证明旧 Gate 4 验证器尚未接受首个已实现 Gate 5 功能。
 
-- [ ] **Step 3：最小更新目录与合同**
+- [x] **Step 3：最小更新目录与合同**
 
 `feature.foundation-platform.platform-paths` 只改为 `implemented` 并补 Issue `#74/#75`；baseline contract 增加 `process-read`、六个错误码和未安装语义；`core-module:app_paths`、`core-module:codex_home`、`core-module:paths` 三项副作用改为 `[filesystem-read, process-read]`。仓库生命周期验证只新增接受 `ParityStatus::Implemented`，继续拒绝 `planned`、`implementing`、`verified`、`exception-approved` 和 `retired`。不得修改其他 feature 状态或来源入口。
 
-- [ ] **Step 4：运行 GREEN 并提交**
+- [x] **Step 4：运行 GREEN 并提交**
 
 ```powershell
 cargo test --locked --offline --ignore-rust-version -p inputcodex-parity --test catalog_repository
@@ -880,11 +880,11 @@ git commit -m "test: 固定平台路径一致性合同"
 - Consumes: TDD 与本地验证真实输出。
 - Produces: Gate 5 首个切片状态、定向构建命令、错误处理记录和反递归报告。
 
-- [ ] **Step 1：更新状态但不预写动态 GitHub 证据**
+- [x] **Step 1：更新状态但不预写动态 GitHub 证据**
 
 根文档只声明“Issue `#75` 实现已进入 PR 验证”或其真实阶段；不得在 PR 创建前写虚构 Head、CI、Review、签名、Tree 或合并提交。报告记录设计、范围、RED/GREEN、本地命令与输出；最终 Head、Review、CI、授权和合并证据保留在 GitHub Issue/PR 评论，避免递归 Closeout。
 
-- [ ] **Step 2：把正确命令写入 `build.md`**
+- [x] **Step 2：把正确命令写入 `build.md`**
 
 ```powershell
 cargo test --locked --offline --ignore-rust-version -p inputcodex-domain --test platform_paths
@@ -896,11 +896,11 @@ pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
 git diff --check
 ```
 
-- [ ] **Step 3：记录真实排错**
+- [x] **Step 3：记录真实排错**
 
 只有实际出现且已确定根因的问题才写入 `err.md`；网络文档下载的 `403/timeout` 只能记录为计划阶段外部资料获取失败，结论必须说明仓库未受影响、Windows API 最终采用锁定版本安全 WinRT 合同，不得把网络失败伪装为产品错误。
 
-- [ ] **Step 4：提交控制面同步**
+- [x] **Step 4：提交控制面同步**
 
 ```powershell
 git add -- AGENTS.md build.md CONTEXT.md README.md docs/plans/PROJECT-MASTER-PLAN.md docs/plans/2026-07-27-issue-75-gate-5-platform-paths.md docs/plans/sessions/2026-07-27-issue-75-gate-5-platform-paths.md docs/workflows/2026-07-27-issue-75-gate-5-platform-paths-runtime.md docs/reports/issue-75-gate-5-platform-paths.md err.md
@@ -916,7 +916,7 @@ git commit -m "docs: 收口平台路径迁移证据"
 - Consumes: 最终实现 Head。
 - Produces: 可供项目所有者单独 Squash Merge 授权的 PR Final Head 与证据。
 
-- [ ] **Step 1：运行最终轻量门禁**
+- [x] **Step 1：运行最终轻量门禁**
 
 ```powershell
 cargo test --locked --offline --ignore-rust-version -p inputcodex-domain -p inputcodex-application -p inputcodex-platform -p inputcodex-parity
@@ -930,7 +930,7 @@ git diff --check
 
 预期：定向测试与 Clippy 全绿、CI 合同 `35/35`、`release_audit=current`、仓库政策零违规、无空白错误。
 
-- [ ] **Step 2：验证范围与私人路径泄露**
+- [x] **Step 2：验证范围与私人路径泄露**
 
 使用 Runtime Workflow 中的精确脚本复算三十路径哈希；`git diff --name-only origin/main...HEAD` 必须是批准集合子集。对三十路径与测试输出搜索本机用户目录、`C:\Users\dashuai`、`/Users/` 和未脱敏 `Debug`；真实路径只允许出现在项目根控制面固定路径字段，不得出现在产品错误、快照 Debug 或测试断言输出。
 
@@ -963,8 +963,20 @@ unsafe_check: passed-safe-winrt-only
 privacy_check: passed-redacted-path-values-and-request
 platform_check: passed-equivalent-windows-macos-contract
 ui_boundary: passed-no-ui
-implementation_started: false
+implementation_started: true
 implementation_authorization: approved
+domain_checkpoint: 67447913fa656f30dd2e6d3c65707acca7c20869
+application_checkpoint: 7e52ec2c4ea2667c22a66e3bae7888eb3cb9e2ce
+platform_checkpoint: 593c447262f1b1aa0ea578bb4a6a0a65037799a6
+parity_checkpoint: be5673c82154fe2777046283158a152d11ead62d
+control_plane_sync: ready-to-commit
+final_local_verification: passed-2026-07-27-21-57-22-plus08
+ci_contract: 35/35-passed
+release_audit: current
+repository_policy: passed-zero-violations
+scope_verification: 30/30-passed
+privacy_verification: passed
+pr_created: false
 ```
 
-本计划完整覆盖书面规范的领域、应用、共享解析、Windows、macOS、Parity、文档、验证和交付要求。项目所有者已批准三十路径、`scope_hash` 和实施/PR 操作，当前允许针对已确认的 Parity 初始状态根因继续 TDD；最终 Squash Merge 仍保留单独授权门。
+本计划完整覆盖书面规范的领域、应用、共享解析、Windows、macOS、Parity、文档、验证和交付要求。项目所有者已批准三十路径、`scope_hash` 和实施/PR 操作；Task 2 至 Task 6 已完成，Task 7 正在完成控制面 checkpoint，Task 8 的 PR/Hosted CI 与最终 Squash Merge 仍保留独立门禁。

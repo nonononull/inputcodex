@@ -14,13 +14,13 @@ branch: codex/issue-75-gate-5-platform-paths
 scope_hash: sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37
 scope_status: approved-frozen
 scope_approval_ref: https://github.com/nonononull/inputcodex/issues/75#issuecomment-5092021020
-current_execution_status: parity-validator-root-cause-fix-authorized
+current_execution_status: local-verification-passed-pr-pending
 current_allowed_operations: exact-thirty-path-tdd, lightweight-local-verification, git-checkpoints, normal-commit, normal-push, non-draft-pr, review-ci
 post_approval_allowed_operations: exact-thirty-path-tdd, lightweight-local-verification, git-checkpoints, normal-commit, normal-push, non-draft-pr, review-ci
 executor_enforcement: exact-thirty-paths, no-force-push, never-delete-main, squash-only
 local_time_source: Windows Get-Date
-pr_ref: not-created-by-design
-ci_ref: not-applicable-before-implementation
+pr_ref: pending-not-created
+ci_ref: pending-pr-head
 merge_ref: pending-separate-owner-authorization
 ```
 
@@ -214,6 +214,13 @@ git diff --check
 evidence:
   written_spec_commit: 8a4aef3134974e0c9a25b1e3bd0eccf6f263be1d
   written_spec_tree: e63a4e257dce648288feaa5ac89e86c59757a223
+  planning_commit: 61c7c840ee106e30b9b656cac7dfa3499bc7e85b
+  authorization_commit: be0f7a93325d1102f998798dabf960b8effaef06
+  domain_commit: 67447913fa656f30dd2e6d3c65707acca7c20869
+  application_commit: 7e52ec2c4ea2667c22a66e3bae7888eb3cb9e2ce
+  platform_commit: 593c447262f1b1aa0ea578bb4a6a0a65037799a6
+  scope_expansion_commit: a6e4a28e00c976aa91bca14afb1729ae7e6af194
+  parity_commit: be5673c82154fe2777046283158a152d11ead62d
   baseline_tests:
     domain: 1/1
     application: 3/3
@@ -225,6 +232,17 @@ evidence:
   implementation_authorization_local_time: 2026-07-27 21:36:01 +08:00
   implementation_started: true
   implementation_authorization: approved
+  domain_application_platform_tdd: passed
+  parity_red: 9-passed-4-failed-invalid-initial-parity-status
+  parity_green: catalog-repository-13-of-13-and-full-crate-passed
+  parity_clippy: passed
+  control_plane_sync: ready-to-commit
+  final_local_verification: passed-2026-07-27-21-57-22-plus08
+  ci_contract: 35/35-passed
+  release_audit: current
+  repository_policy: passed-zero-violations
+  scope_verification: 30/30-passed
+  privacy_verification: passed
   pr_created: false
   final_merge_authorization: pending
   agos_session_plan_verifier: passed

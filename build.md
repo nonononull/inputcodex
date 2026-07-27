@@ -2,9 +2,9 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 27 日，Gate 3 七成员 Workspace、Gate 4 `v1.2.42` 功能目录重新审计、双平台性能基线、性能预算 Discovery 与预算数值均已进入 `main`。Issue `#63` / PR `#73` 正在批准的十三路径内实现非 required `approved-observation`：RED `650040763aff07f4884ee9252c50639469622934` 与初始 GREEN `b465c660d0401ff4bff37673671147aa6b513e1a` 已普通推送，观察器 `12/12`、CI 合同 `35/35`、仓库政策零违规；PR Head 双平台 hosted observation、Review/CI 与最终 Squash Merge 尚未完成。预算数值、公式、Ruleset、required check、性能优化和 Gate 5 产品迁移仍保持锁定。
+截至 2026 年 7 月 27 日，Gate 3 七成员 Workspace、Gate 4 `v1.2.43` 功能目录重新审计、双平台性能基线、性能预算数值和非 required `approved-observation` 均已进入 `main`。Issue `#75` 是首个 Gate 5 产品迁移切片：三十路径与 `sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37` 已获批准，领域、应用、Windows/macOS 平台适配器和 Parity TDD 已形成命名 checkpoint；最终本地轻量门禁已于 Windows 本机时间 `2026-07-27 21:57:22 +08:00` 通过，当前只剩控制面提交、非 Draft PR 与 GitHub-hosted Review/CI，最终 Squash Merge 仍未授权。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供二十个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供二十一个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -25,7 +25,8 @@
 17. Issue `#50` 性能预算 ADR、同平台可比队列、阶段门禁、九路径范围与长期状态验证。
 18. Issue `#52` 性能预算 Discovery 合并后稳定状态、八路径范围、反递归边界与主干证据验证。
 19. Issue `#61` 性能预算数值合并后稳定状态、八路径范围、反递归边界、预算复算与双套主干证据验证。
-20. Issue `#63` 十三路径、只读预算观察器、自动 observation、非阻断分类、Artifact 边界与 Gate 5 锁定验证。
+20. Issue `#63` 十三路径、只读预算观察器、自动 observation、非阻断分类、Artifact 边界与 Gate 5 解锁前置验证。
+21. Issue `#75` 三十路径、平台路径分层合同、双平台适配器、隐私边界、Parity 状态和最终本地轻量门禁验证。
 
 当前禁止：
 
@@ -39,6 +40,86 @@
 - 在 Issue `#52` 中修改代码、Cargo、`benchmarks/`、Workflow、Ruleset、Release、AGOS、预算数值、性能优化或 Gate 5 产品功能。
 - 在 Issue `#61` 中修改预算数值、公式、量子、队列、样本、`benchmarks/`、代码、Cargo、Workflow、Ruleset、Release、AGOS、性能优化或 Gate 5 产品功能。
 - 在 Issue `#63` 中修改预算 JSON、历史 Evidence、预算数值/公式、Ruleset、required checks、产品、Gate 5、`upstream/` 或 AGOS，或把阈值分类改成阻断退出码。
+- 在 Issue `#75` 中创建 UI、Iced 视图、目录/文件写入、网络、缓存、后台线程、第二个产品 feature、新依赖家族、直接 Win32 FFI、`unsafe`、预算、Release、Ruleset、`upstream/` 或 AGOS 改动。
+
+## Issue #75 平台路径迁移本地轻量验证
+
+Issue `#75` 本机只验证四个相关 crate、现有治理脚本、精确范围与隐私边界；禁止运行 Iced、完整 Workspace 重型构建、Release 打包或真实性能测量。Windows/macOS 真实编译与非 required observation 由公开仓库标准 GitHub-hosted Runner 完成。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+cargo test --locked --offline --ignore-rust-version -p inputcodex-domain -p inputcodex-application -p inputcodex-platform -p inputcodex-parity
+cargo clippy --locked --offline --ignore-rust-version -p inputcodex-domain -p inputcodex-application -p inputcodex-platform -p inputcodex-parity --all-targets -- -D warnings
+cargo fmt --all -- --check
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+
+$approved = [string[]]@(
+  'AGENTS.md',
+  'build.md',
+  'Cargo.lock',
+  'Cargo.toml',
+  'CONTEXT.md',
+  'crates/inputcodex-application/src/lib.rs',
+  'crates/inputcodex-application/src/platform_paths.rs',
+  'crates/inputcodex-application/tests/platform_paths.rs',
+  'crates/inputcodex-domain/src/lib.rs',
+  'crates/inputcodex-domain/src/platform_paths.rs',
+  'crates/inputcodex-domain/tests/platform_paths.rs',
+  'crates/inputcodex-parity/src/validation.rs',
+  'crates/inputcodex-parity/tests/catalog_repository.rs',
+  'crates/inputcodex-platform/Cargo.toml',
+  'crates/inputcodex-platform/src/lib.rs',
+  'crates/inputcodex-platform/src/platform_paths.rs',
+  'crates/inputcodex-platform/src/platform_paths/macos.rs',
+  'crates/inputcodex-platform/src/platform_paths/windows.rs',
+  'crates/inputcodex-platform/tests/platform_paths.rs',
+  'docs/plans/2026-07-27-issue-75-gate-5-platform-paths.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-07-27-issue-75-gate-5-platform-paths.md',
+  'docs/reports/issue-75-gate-5-platform-paths.md',
+  'docs/workflows/2026-07-27-issue-75-gate-5-platform-paths-runtime.md',
+  'err.md',
+  'parity/contracts/foundation-platform.yml',
+  'parity/features/foundation-platform.yml',
+  'parity/features/source-index.yml',
+  'parity/README.md',
+  'README.md'
+)
+$sorted = @($approved | Sort-Object)
+$payload = ($sorted -join "`n") + "`n"
+$scopeHash = [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData([Text.UTF8Encoding]::new($false).GetBytes($payload))
+).ToLowerInvariant()
+if ($sorted.Count -ne 30) { throw "Issue #75 路径数量漂移：$($sorted.Count)" }
+if ($scopeHash -ne 'ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37') {
+  throw "Issue #75 scope_hash 漂移：sha256:$scopeHash"
+}
+
+$changed = @(
+  git diff --name-only origin/main...HEAD
+  git diff --name-only
+  git ls-files --others --exclude-standard
+) | Where-Object { $_ } | Sort-Object -Unique
+$outside = @($changed | Where-Object { $_ -notin $sorted })
+if ($outside.Count -ne 0) { throw "Issue #75 越界路径：$($outside -join ', ')" }
+if ($changed.Count -ne 30) { throw "Issue #75 最终差异应精确覆盖 30 路径，实际为 $($changed.Count)" }
+
+$privateLeaks = @(rg -n --fixed-strings 'dashuai' crates parity 2>$null)
+if ($LASTEXITCODE -eq 0 -and $privateLeaks.Count -ne 0) {
+  throw "Issue #75 产品或 Parity 表面泄露本机用户标识：$($privateLeaks -join '; ')"
+}
+if ($LASTEXITCODE -notin 0, 1) { throw 'Issue #75 隐私扫描执行失败。' }
+
+git diff --check
+Write-Output "ISSUE75_LOCAL_VERIFY_OK scope_hash=sha256:$scopeHash changed=$($changed.Count)"
+```
+
+预期：四个相关 crate 测试与 Clippy 全绿；`Test-CiScripts.ps1`、Release Audit 和 Repository Policy 通过；范围精确为 `30` 路径且无本机用户标识泄露；`git diff --check` 退出码为 `0`。
 
 ## Issue #63 性能预算 Observation 本地轻量验证
 
@@ -418,7 +499,7 @@ if ($scopeHash -ne 'af1c248c46d54741f9c77ab3621cd66ccd40e3fa50698d377c788fcb0b93
 }
 
 $requiredFacts = @{
-  'AGENTS.md' = @('Issue `#32` 的完成只表示性能基线', 'Issue `#50` 已冻结九路径', 'Gate 5 继续锁定')
+  'AGENTS.md' = @('Issue `#32` 的完成只表示性能基线', 'Issue `#50` 已冻结九路径', 'Issue `#75` 是首个 Gate 5 产品迁移切片')
   'README.md' = @('至少五次独立 Run', 'approved-observation', 'Issue `#50` Discovery 报告')
   'docs/adr/0004-performance-budget-policy.md' = @('comparable-valid', 'new-cohort-valid', 'baseline-only', 'enforced')
   'docs/plans/PROJECT-MASTER-PLAN.md' = @('fd9db9ca1c150b7db34dda8acc09b6f0cc357a17', 'Issue `#50`', 'approved-observation')

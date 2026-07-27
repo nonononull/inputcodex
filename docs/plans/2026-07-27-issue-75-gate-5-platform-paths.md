@@ -3,7 +3,7 @@
 ## 控制状态
 
 ```yaml
-status: implementation-authorized-parity-validator-fix
+status: local-verification-passed-pr-pending
 issue_ref: https://github.com/nonononull/inputcodex/issues/75
 parity_exception_ref: https://github.com/nonononull/inputcodex/issues/74
 branch_ref: codex/issue-75-gate-5-platform-paths
@@ -24,6 +24,10 @@ candidate_scope_hash: sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc6916
 scope_approval_status: approved-expanded
 implementation_authorization: approved-exact-scope-and-operations
 final_merge_authorization: pending
+domain_checkpoint: 67447913fa656f30dd2e6d3c65707acca7c20869
+application_checkpoint: 7e52ec2c4ea2667c22a66e3bae7888eb3cb9e2ce
+platform_checkpoint: 593c447262f1b1aa0ea578bb4a6a0a65037799a6
+parity_checkpoint: be5673c82154fe2777046283158a152d11ead62d
 ```
 
 本文件是 Issue `#75` 的书面设计规范。项目所有者已批准总体设计、Issue `#74` 的路径安全策略、本书面规范、三十路径与固定 `scope_hash`，并授权 TDD 实施、本地轻量验证、Git checkpoint、提交、普通推送、非 Draft PR 与 Review/CI。新增路径仅允许让仓库生命周期验证接受 `ParityStatus::Implemented`，其余状态继续禁止。最终 Squash Merge 仍保留单独授权门，任何超出批准范围的写入都必须停止。
@@ -264,8 +268,12 @@ privacy_boundary: passed-no-public-absolute-path
 dependency_check: passed-no-new-package-family
 windows_api_check: passed-safe-winrt-no-unsafe
 writing_plans_status: completed
-implementation_started: false
+implementation_started: true
 implementation_authorization: approved
+local_tdd_status: passed-through-parity
+control_plane_sync: ready-to-commit
+final_local_verification: passed-2026-07-27-21-57-22-plus08
+pr_created: false
 ```
 
-自审未发现未完成占位标记、占位值、矛盾要求或隐藏的第二功能。Session Plan 与 Runtime Workflow 已固化执行顺序和精确边界；项目所有者授权证据已回写 Issue `#75`，现在允许从 Task 2 的 TDD RED 开始，最终合并仍须针对 Final Head 单独授权。
+自审未发现未完成占位标记、占位值、矛盾要求或隐藏的第二功能。Domain、Application、Platform 与 Parity 均已形成命名 checkpoint；当前只同步控制面并准备最终本地轻量门禁、非 Draft PR 与 Hosted Review/CI，最终合并仍须针对 Final Head 单独授权。
