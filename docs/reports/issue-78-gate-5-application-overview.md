@@ -2,7 +2,7 @@
 
 ## 当前结论
 
-Issue `#78` 已在批准的二十九路径内完成 Domain、Application、Windows/macOS Platform、Parity RED→GREEN、项目控制面和最终本地轻量门禁。产品切片只返回安装事实、已安装版本或明确未知原因、`inputcodex` 构建版本、采集时间与 `LiveProcessState::NotObserved`；不读取历史启动状态，不枚举进程，不写文件，不联网，不缓存，不启动线程，也不引入 UI、Iced、新依赖、广告、远程推荐、遥测、shell 或 `unsafe`。当前正在形成控制面 checkpoint；普通推送、非 Draft PR、Hosted Review/CI 与最终 Squash Merge 仍未完成，最终合并必须由项目所有者针对 Final Head 单独授权。
+Issue `#78` 已在批准的二十九路径内完成 Domain、Application、Windows/macOS Platform、Parity RED→GREEN、项目控制面、最终本地轻量门禁和控制面 checkpoint。产品切片只返回安装事实、已安装版本或明确未知原因、`inputcodex` 构建版本、采集时间与 `LiveProcessState::NotObserved`；不读取历史启动状态，不枚举进程，不写文件，不联网，不缓存，不启动线程，也不引入 UI、Iced、新依赖、广告、远程推荐、遥测、shell 或 `unsafe`。当前只剩普通推送、非 Draft PR、Hosted Review/CI 与最终 Squash Merge；最终合并必须由项目所有者针对 Final Head 单独授权。
 
 ## 基线与批准
 
@@ -66,7 +66,7 @@ Issue `#78` 已在批准的二十九路径内完成 Domain、Application、Windo
 ## 本地验证状态
 
 ```yaml
-status: local-verification-passed-control-checkpoint-pending
+status: local-verification-passed-pr-pending
 scope_count: 29
 scope_hash: sha256:b46a940ff7dbf4bbc9bfdb69d04d755468e12409d9618837d8ff310490eb5ae4
 four_crate_test: passed
@@ -78,6 +78,7 @@ repository_policy: passed with 0 violations
 scope_and_privacy: passed; changed=29
 history_and_forbidden_capabilities: passed
 upstream_fresh: v1.2.43@5036ff056b5c629f19356396b17d6eeb70da664c
+control_checkpoint: 27e8599edff2f0ddeacc24d1d188cfbeb6d85c68
 pr_ref: pending
 review_ci: pending
 final_merge: not-authorized

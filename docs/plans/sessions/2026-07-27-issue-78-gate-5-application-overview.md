@@ -31,7 +31,7 @@ approved_decision_ref: codex-session-user-message-approved-issue-77-scheme-a-202
 owner_decision_local_time: 2026-07-27 23:16:01 +08:00
 planning_authorization_ref: codex-session-user-message-approved-issue-78-written-design-planning-scope-2026-07-27
 planning_authorization_local_time: 2026-07-27 23:34:39 +08:00
-current_phase: control-checkpoint-and-pr-preparation
+current_phase: pr-preparation
 planning_scope_count: 3
 planning_scope_hash: sha256:3f81a54c18c07b6889ad8219b0c1605e4b989f997117141fc2d4baae46ebbeb3
 candidate_scope_count: 29
@@ -48,7 +48,7 @@ delivery_contract: agos.issue-pr-merge.v1
 review_strategy: final-head changed-surface review; every conversation records root cause, treatment and verification evidence
 ci_expectation: standard GitHub-hosted CI plus Windows/macOS compile-test and non-required observation; successful artifact count remains zero
 final_merge_authorization: pending-separate-owner-gate
-status: local-verification-passed-control-checkpoint-pending
+status: local-verification-passed-pr-pending
 ```
 
 ## Global Constraints
@@ -525,7 +525,7 @@ README、CONTEXT、AGENTS 与 Master Plan 只写本 feature 的真实已验证�
 
 报告固定基线、候选哈希、实际差异、TDD RED/GREEN、性能上限、隐私扫描、未包含能力和待办门禁。
 
-- [ ] **Step 5：形成控制面 Git checkpoint**
+- [x] **Step 5：形成控制面 Git checkpoint**
 
 确认报告与控制面没有递归创建 Issue `#75` Closeout，也没有改变外部 AGOS。
 
@@ -583,7 +583,7 @@ git status --short --branch
 
 候选 `29` 路径及远端写入操作已经通过 Issue `#78` 批准评论授权；本 Task 可以执行，但最终 Squash Merge 仍由独立授权门控制。
 
-- [ ] **Step 1：创建最终本地 Git checkpoint**
+- [x] **Step 1：创建最终本地 Git checkpoint**
 
 记录本机 `Get-Date`、HEAD、tree、差异路径、范围哈希和本地验证摘要；禁止覆写 Git 时间。
 

@@ -1,7 +1,7 @@
 # Issue #78：Gate 5 应用概览 Runtime Workflow
 
 ```yaml
-status: local-verification-passed-control-checkpoint-pending
+status: local-verification-passed-pr-pending
 task_id: issue-78
 issue_ref: https://github.com/nonononull/inputcodex/issues/78
 parity_exception_ref: https://github.com/nonononull/inputcodex/issues/77
@@ -367,11 +367,12 @@ current_evidence:
   application_checkpoint: a1c09e59b7552a5f6dac9ba79e0025301cde39f6
   platform_checkpoint: 26751c5a72009008652ac48ef6d0af7a7753c332
   parity_checkpoint: a4012ddbf7ab929d136e0ab5bc7ac1ae61284f7d
+  control_checkpoint: 27e8599edff2f0ddeacc24d1d188cfbeb6d85c68
   local_verification: passed
   changed_paths: 29
   ci_contract: 35/35
   repository_policy_violations: 0
-  commit_push_pr: pending
+  commit_push_pr: pending-normal-push-and-non-draft-pr
 ```
 
 Issue `#77` 评论插值错误已经在原评论修正；稳定证据为 <https://github.com/nonononull/inputcodex/issues/77#issuecomment-5093148603>。

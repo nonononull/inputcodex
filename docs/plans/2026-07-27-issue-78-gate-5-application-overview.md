@@ -3,7 +3,7 @@
 ## 控制状态
 
 ```yaml
-status: local-verification-passed-control-checkpoint-pending
+status: local-verification-passed-pr-pending
 issue_ref: https://github.com/nonononull/inputcodex/issues/78
 parity_exception_ref: https://github.com/nonononull/inputcodex/issues/77
 parity_exception_decision_ref: https://github.com/nonononull/inputcodex/issues/77#issuecomment-5093148603
@@ -30,6 +30,7 @@ domain_checkpoint: f9db364b0fe21c105af427c878d00063e3f76886
 application_checkpoint: a1c09e59b7552a5f6dac9ba79e0025301cde39f6
 platform_checkpoint: 26751c5a72009008652ac48ef6d0af7a7753c332
 parity_checkpoint: a4012ddbf7ab929d136e0ab5bc7ac1ae61284f7d
+control_checkpoint: 27e8599edff2f0ddeacc24d1d188cfbeb6d85c68
 local_verification: passed
 ```
 
