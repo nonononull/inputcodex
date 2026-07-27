@@ -1,11 +1,12 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-65-v1.2.43-catalog-reaudit-review-ci-pending
-active_gate: Gate 4 v1.2.43 功能目录重新审计已完成本地 TDD 与 current 恢复，等待非 Draft PR、Review/CI 和最终 Squash Merge 单独授权；预算 CI、性能优化与 Gate 5 产品迁移继续锁定
+active_task: issue-65-pr-72-v1.2.43-catalog-reaudit-review-ci-pending
+active_gate: Gate 4 v1.2.43 功能目录重新审计已完成本地 TDD 与 current 恢复，非 Draft PR #72 已创建，等待最终 Head Review/CI 和 Squash Merge 单独授权；预算 CI、性能优化与 Gate 5 产品迁移继续锁定
 last_verified_gate: Issue #64 / PR #66 已以单父 Squash 提交 15e91708b41548f523e26ede4c7ca4de41badf77 缓存 v1.2.43；合并后 main CI Run 30214249228 七 Job全绿且 Artifact 为 0，Issue #64 已按 COMPLETED 关闭
-next_legal_gate: 完成 Issue #65 的非 Draft PR、Review/CI 与单独授权 Squash Merge；合并后才恢复为独立预算 CI 观察 Issue
+next_legal_gate: 完成 PR #72 最终 Head 的 Review/CI 与单独授权 Squash Merge；合并后才恢复为独立预算 CI 观察 Issue
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/65
+active_pr_ref: https://github.com/nonononull/inputcodex/pull/72
 performance_remeasurement_issue_ref: https://github.com/nonononull/inputcodex/issues/54
 performance_queue_discovery_issue_ref: https://github.com/nonononull/inputcodex/issues/57
 performance_fixed_remeasurement_issue_ref: https://github.com/nonononull/inputcodex/issues/59

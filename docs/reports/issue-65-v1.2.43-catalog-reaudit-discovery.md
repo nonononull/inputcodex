@@ -66,9 +66,10 @@
 
 ```yaml
 status: local-verification-passed-pr-pending
+pr_ref: https://github.com/nonononull/inputcodex/pull/72
 baseline_test: 12/12 passed
 red_evidence: 9/12 passed; 3 expected failures from old release metadata and missing new semantics
 green_evidence: 12/12 passed; CI contract 35/35; repository policy ok with 0 violations; git diff --check passed at Windows local time 2026-07-27 12:46:06 +08:00
-review_ci: pending
+review_ci: pr-open-final-head-pending
 final_merge: not-authorized
 ```
