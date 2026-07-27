@@ -1,11 +1,15 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: none-awaiting-performance-budget-ci-observation
-active_gate: Gate 4 性能预算数值已稳定进入 main：Windows AMD EPYC 7763 严格队列为 5，macOS 同队列为 12，approved-observation JSON 与 10/10 离线复算合同已通过；预算 CI、性能优化与 Gate 5 产品迁移继续锁定
+active_task: issue-63-performance-budget-ci-observation
+active_gate: Gate 4 非 required approved-observation 正在十三路径独立分支实施；本地观察器 12/12、CI 合同 35/35、仓库政策零违规，PR 与双平台 hosted observation 尚未完成，Gate 5 继续锁定
 last_verified_gate: Issue #59 / PR #60 已以单父 Squash 提交 e225144831a0928bfa3aaa0d169a054779005812 完成性能预算数值批准；tree 为 56eb1e8d95dfce22726c1aef1bdde1c353af055e，GitHub 签名 valid，合并后 main CI Run 30194897171 七 Job与 Performance Run 30194897166 四 Job全绿且 Artifact 均为 0，Issue #59 已按 COMPLETED 关闭
-next_legal_gate: 创建独立预算 CI 观察 Issue；只能以非 required 的 approved-observation 模式消费已批准 JSON，禁止修改数值、公式、量子、队列或 Ruleset，双平台成功执行且 release_audit=current 后再决定 Gate 5
-tracking_issue_ref: none-awaiting-performance-budget-ci-observation-issue
+next_legal_gate: 完成 Issue #63 非 Draft PR、双平台 observation、Review/CI 与独立 Squash 授权；随后重放 PR #72，并在 main observation 双平台成功、Artifact 为 0 且 release_audit=current 后再决定 Gate 5
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/63
+performance_budget_observation_issue_ref: https://github.com/nonononull/inputcodex/issues/63
+performance_budget_observation_scope_hash: sha256:d5eb57c1b93dc2b7acc47ba78c8f514af2a2c98e8661df389774713a7b47d8dc
+performance_budget_observation_red_ref: 650040763aff07f4884ee9252c50639469622934
+performance_budget_observation_green_ref: b465c660d0401ff4bff37673671147aa6b513e1a
 performance_remeasurement_issue_ref: https://github.com/nonononull/inputcodex/issues/54
 performance_queue_discovery_issue_ref: https://github.com/nonononull/inputcodex/issues/57
 performance_fixed_remeasurement_issue_ref: https://github.com/nonononull/inputcodex/issues/59
@@ -34,11 +38,11 @@ gate_3_planning_issue_ref: https://github.com/nonononull/inputcodex/issues/17
 upstream_watch_issue_ref: https://github.com/nonononull/inputcodex/issues/14
 transition_issue_ref: https://github.com/nonononull/inputcodex/issues/8
 upstream_sync_issue_ref: https://github.com/nonononull/inputcodex/issues/9
-active_branch_ref: none-awaiting-performance-budget-ci-observation-issue
+active_branch_ref: codex/issue-63-performance-budget-ci-observation
 transition_branch_ref: codex/issue-8-gate-2-transition
-active_plan_ref: none-awaiting-performance-budget-ci-plan
-active_session_plan_ref: none-awaiting-performance-budget-ci-session-plan
-active_runtime_workflow_ref: none-awaiting-performance-budget-ci-runtime-workflow
+active_plan_ref: docs/plans/2026-07-26-issue-63-performance-budget-ci-observation.md
+active_session_plan_ref: docs/plans/sessions/2026-07-26-issue-63-performance-budget-ci-observation.md
+active_runtime_workflow_ref: docs/workflows/2026-07-26-issue-63-performance-budget-ci-observation-runtime.md
 active_pr_ref: none
 gate_3_closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/23
 gate_3_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/21
@@ -170,6 +174,7 @@ decision_status: performance-budget-values-completed-budget-ci-observation-requi
 - [x] Issue `#59` 已在 38 路径与 `sha256:d0577e546d2209d10373eccdf335bbcf3cd4caad7906163838c88b461da0b570` 内完成四次固定串行槽位，Windows 严格目标队列达到 `5`、macOS 达到 `12`；预算 JSON 与离线构建/验证脚本为 `10/10` GREEN，不存在 `run-05`。
 - [x] PR `#60` Final Head `61c088d74d61a329fbe67e14b8280dfa9701c6b2` 已完成 Review/CI 和项目所有者独立授权，并以单父 Squash 提交 `e225144831a0928bfa3aaa0d169a054779005812` 进入 `main`；tree 为 `56eb1e8d95dfce22726c1aef1bdde1c353af055e`，GitHub 签名 `valid`，Issue `#59` 已按 `COMPLETED` 关闭。
 - [x] PR `#60` Final Head CI/Performance Run `30194465259` / `30194465231` 与合并后主干 Run `30194897171` / `30194897166` 均全绿且 Artifact 为 `0`；Issue `#61` 仅以反递归 Closeout 固化该稳定事实，其自身动态交付证据只保留在 GitHub。
+- [ ] Issue `#63` 已批准方案 A、十三路径与 `sha256:d5eb57c1b93dc2b7acc47ba78c8f514af2a2c98e8661df389774713a7b47d8dc`；RED `650040763aff07f4884ee9252c50639469622934`、初始 GREEN `b465c660d0401ff4bff37673671147aa6b513e1a` 已普通推送，观察器 `12/12`、CI 合同 `35/35`、仓库政策零违规。PR Head 双平台 observation、Review/CI 和项目所有者独立 Squash 授权仍待完成。
 
 ### Gate 5：分域迁移（锁定）
 

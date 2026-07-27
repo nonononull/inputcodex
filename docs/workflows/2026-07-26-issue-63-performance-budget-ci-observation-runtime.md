@@ -64,9 +64,17 @@ git diff --check
 evidence:
   scope_hash: sha256:d5eb57c1b93dc2b7acc47ba78c8f514af2a2c98e8661df389774713a7b47d8dc
   red_test: observer implementation missing at Windows local time 2026-07-27 13:21:15 +08:00; expected failure confirmed
-  observer_test: pending
-  ci_contract: pending
-  repository_policy: pending
+  red_commit: 650040763aff07f4884ee9252c50639469622934
+  green_commit: b465c660d0401ff4bff37673671147aa6b513e1a
+  observer_test: BUDGET_OBSERVATION_GREEN passed=12
+  ci_contract: CI_CONTRACT_GREEN passed=35
+  repository_policy: ok=true violation_count=0
+  diff_check: passed
+  scope_verification: 13 paths exact
+  session_plan: SESSION_PLAN_VERIFY_OK
+  stored_windows_observation: within-budget observations=10
+  stored_macos_observation: within-budget observations=10
+  actionlint: not-installed; hosted workflow parse pending
   pr_ref: pending
   hosted_windows: pending
   hosted_macos: pending

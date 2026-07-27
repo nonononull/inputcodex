@@ -2,9 +2,9 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 26 日，Gate 3 七成员 Workspace、Gate 4 `v1.2.42` 功能目录重新审计、双平台性能基线、性能预算 Discovery 与预算数值均已进入 `main`。Issue `#59` / PR `#60` 的单父 Squash 提交为 `e225144831a0928bfa3aaa0d169a054779005812`；合并后主干 CI Run `30194897171` 七 Job与 Performance Baseline Run `30194897166` 四 Job全绿且 Artifact 均为 `0`，Issue `#59` 已按 `COMPLETED` 关闭。当前只批准 `approved-observation` 数值证据，预算 CI、required check、性能优化和 Gate 5 产品迁移仍需不同 Issue/PR。
+截至 2026 年 7 月 27 日，Gate 3 七成员 Workspace、Gate 4 `v1.2.42` 功能目录重新审计、双平台性能基线、性能预算 Discovery 与预算数值均已进入 `main`。Issue `#63` 正在批准的十三路径内实现非 required `approved-observation`：RED `650040763aff07f4884ee9252c50639469622934` 与初始 GREEN `b465c660d0401ff4bff37673671147aa6b513e1a` 已普通推送，观察器 `12/12`、CI 合同 `35/35`、仓库政策零违规；PR、双平台 hosted observation、Review/CI 与最终 Squash Merge 尚未完成。预算数值、公式、Ruleset、required check、性能优化和 Gate 5 产品迁移仍保持锁定。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供十九个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供二十个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -25,6 +25,7 @@
 17. Issue `#50` 性能预算 ADR、同平台可比队列、阶段门禁、九路径范围与长期状态验证。
 18. Issue `#52` 性能预算 Discovery 合并后稳定状态、八路径范围、反递归边界与主干证据验证。
 19. Issue `#61` 性能预算数值合并后稳定状态、八路径范围、反递归边界、预算复算与双套主干证据验证。
+20. Issue `#63` 十三路径、只读预算观察器、自动 observation、非阻断分类、Artifact 边界与 Gate 5 锁定验证。
 
 当前禁止：
 
@@ -37,6 +38,101 @@
 - 在 Issue `#50` 中填写预算数值、运行新 hosted 测量、修改性能实现/Workflow、实施优化或解锁 Gate 5。
 - 在 Issue `#52` 中修改代码、Cargo、`benchmarks/`、Workflow、Ruleset、Release、AGOS、预算数值、性能优化或 Gate 5 产品功能。
 - 在 Issue `#61` 中修改预算数值、公式、量子、队列、样本、`benchmarks/`、代码、Cargo、Workflow、Ruleset、Release、AGOS、性能优化或 Gate 5 产品功能。
+- 在 Issue `#63` 中修改预算 JSON、历史 Evidence、预算数值/公式、Ruleset、required checks、产品、Gate 5、`upstream/` 或 AGOS，或把阈值分类改成阻断退出码。
+
+## Issue #63 性能预算 Observation 本地轻量验证
+
+Issue `#63` 本机只运行 PowerShell 合同、仓库政策、精确范围和空白检查；不得在项目所有者机器执行完整 Rust Workspace、桌面 Release 或真实性能采集。Windows/macOS 真实 observation 由公开仓库 GitHub-hosted Runner 完成。
+
+```powershell
+$baseline = '15e91708b41548f523e26ede4c7ca4de41badf77'
+$approvedPaths = @(
+  '.github/workflows/performance-baseline.yml'
+  'AGENTS.md'
+  'build.md'
+  'docs/plans/2026-07-26-issue-63-performance-budget-ci-observation.md'
+  'docs/plans/PROJECT-MASTER-PLAN.md'
+  'docs/plans/sessions/2026-07-26-issue-63-performance-budget-ci-observation.md'
+  'docs/reports/issue-63-performance-budget-ci-observation.md'
+  'docs/workflows/2026-07-26-issue-63-performance-budget-ci-observation-runtime.md'
+  'err.md'
+  'README.md'
+  'scripts/ci/Test-CiScripts.ps1'
+  'scripts/performance/Invoke-InputcodexBudgetObservation.ps1'
+  'scripts/performance/Test-InputcodexBudgetObservation.ps1'
+) | Sort-Object
+
+$branch = (git branch --show-current).Trim()
+if ($branch -ne 'codex/issue-63-performance-budget-ci-observation') {
+  throw "Issue #63 当前分支不正确：$branch"
+}
+
+$committed = @(git diff --name-only "$baseline...HEAD")
+$unstaged = @(git diff --name-only)
+$staged = @(git diff --cached --name-only)
+$untracked = @(git ls-files --others --exclude-standard)
+$actualPaths = @($committed + $unstaged + $staged + $untracked | Where-Object { $_ } | Sort-Object -Unique)
+$unexpectedPaths = @($actualPaths | Where-Object { $_ -notin $approvedPaths })
+$missingPaths = @($approvedPaths | Where-Object { $_ -notin $actualPaths })
+if ($unexpectedPaths.Count -ne 0 -or $missingPaths.Count -ne 0 -or $actualPaths.Count -ne 13) {
+  [pscustomobject]@{
+    actual = $actualPaths -join ', '
+    unexpected = $unexpectedPaths -join ', '
+    missing = $missingPaths -join ', '
+  } | Format-List
+  throw 'Issue #63 实际差异不是批准的精确十三路径。'
+}
+
+$scopeText = ($approvedPaths -join "`n") + "`n"
+$scopeBytes = [System.Text.UTF8Encoding]::new($false).GetBytes($scopeText)
+$scopeHash = [Convert]::ToHexString([System.Security.Cryptography.SHA256]::HashData($scopeBytes)).ToLowerInvariant()
+if ($scopeHash -ne 'd5eb57c1b93dc2b7acc47ba78c8f514af2a2c98e8661df389774713a7b47d8dc') {
+  throw "Issue #63 scope_hash 漂移：$scopeHash"
+}
+
+function Get-NormalizedTextSha256 {
+  param([Parameter(Mandatory)][string]$Path)
+
+  $text = [System.IO.File]::ReadAllText($Path, [System.Text.Encoding]::UTF8)
+  $normalized = [regex]::Replace($text, '\r\n?', "`n")
+  $bytes = [System.Text.UTF8Encoding]::new($false).GetBytes($normalized)
+  'sha256:' + [Convert]::ToHexString([System.Security.Cryptography.SHA256]::HashData($bytes)).ToLowerInvariant()
+}
+
+$budgetPath = 'benchmarks/budgets/issue-59-approved-observation.json'
+$budgetHash = Get-NormalizedTextSha256 -Path $budgetPath
+if ($budgetHash -ne 'sha256:be07138908cd411925db963718b71062060f4fd4a50b910ab5d5f25f88d4ebe5') {
+  throw "批准预算哈希漂移：$budgetHash"
+}
+
+pwsh -NoProfile -File scripts/performance/Test-InputcodexBudgetObservation.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw '预算观察器测试失败。' }
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+if ($LASTEXITCODE -ne 0) { throw 'CI 合同测试失败。' }
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw '仓库政策验证失败。' }
+
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'git diff --check 失败。' }
+```
+
+期望输出包含：
+
+```text
+BUDGET_OBSERVATION_GREEN passed=12
+CI_CONTRACT_GREEN passed=35
+"ok":true
+```
+
+PR 创建后，`pull_request` 事件会自动选择 `observation`。如需在同一分支显式重放，可使用：
+
+```powershell
+gh workflow run 'Performance Baseline' --repo nonononull/inputcodex --ref codex/issue-63-performance-budget-ci-observation -f mode=observation
+```
+
+真实 Run 必须满足 Windows/macOS Job 成功、Step Summary 含结构化 observation JSON、成功 Artifact 数为 `0`；阈值分类不得导致失败，合同错误必须失败并仅保留七天最小诊断。
 
 ## Issue #61 性能预算数值 Closeout 本地轻量验证
 

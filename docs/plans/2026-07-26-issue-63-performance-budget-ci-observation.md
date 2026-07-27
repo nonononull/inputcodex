@@ -76,4 +76,4 @@ scripts/performance/Test-InputcodexBudgetObservation.ps1
 
 ## 当前状态
 
-RED 已于 Windows 本机时间 `2026-07-27 13:21:15 +08:00` 确认：`Test-InputcodexBudgetObservation.ps1` 因观察器实现文件不存在而稳定失败，测试脚本本身已成功解析并进入预期断言。下一步只实现满足测试的最小观察器。
+RED 已于 Windows 本机时间 `2026-07-27 13:21:15 +08:00` 确认，并以提交 `650040763aff07f4884ee9252c50639469622934` 普通推送。最小观察器、自动 observation Workflow 与 CI 合同已以初始 GREEN 提交 `b465c660d0401ff4bff37673671147aa6b513e1a` 普通推送；自审追加“预算锁字段缺失必须失败”回归后，本地结果为观察器 `12/12`、CI 合同 `35/35`、仓库政策零违规、`git diff --check` 通过。下一步完成十三路径最终验证、创建非 Draft PR，并取得 Windows/macOS 真实 observation 与 Review/CI 证据；最终 Squash Merge 仍未授权。

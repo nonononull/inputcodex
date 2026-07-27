@@ -143,7 +143,7 @@ change_contract:
         owner: .github/workflows/performance-baseline.yml
         baseline_evidence_ref: Issue #55 与现有 Workflow 合同
         post_change_replay_plan_ref: scripts/ci/Test-CiScripts.ps1 与 PR Head Performance Baseline
-        post_change_replay_ref: pending
+        post_change_replay_ref: CI_CONTRACT_GREEN passed=35 at commit b465c660d0401ff4bff37673671147aa6b513e1a
         expected_result: 手工 evidence/measure 继续可选且默认仍为 evidence
         owner_visible_status: pending
         regression_status: pending
@@ -151,16 +151,15 @@ change_contract:
         owner: benchmarks/budgets/issue-59-approved-observation.json
         baseline_evidence_ref: Issue #59 / PR #60
         post_change_replay_plan_ref: 预算哈希复算、观察器测试与仓库政策
-        post_change_replay_ref: pending
+        post_change_replay_ref: budget hash unchanged; BUDGET_OBSERVATION_GREEN passed=12; repository policy violation_count=0
         expected_result: 预算字节、数值、公式、budget_ci_enabled=false 与 gate_5_unlocked=false 均不变
         owner_visible_status: pending
         regression_status: pending
     forbidden_ops_until_replay:
       - 修改预算 JSON、历史 Evidence、预算公式或阈值
       - 修改 Ruleset、required checks、产品行为、Gate 5、upstream 或 AGOS
-      - commit
-      - push
-      - pr
+      - force push
+      - squash merge without separate owner authorization
       - claim-done
 ```
 
