@@ -120,7 +120,7 @@ features:
       - issue:26
   - id: feature.foundation-platform.platform-paths
     name: '平台路径解析'
-    status: unassessed
+    status: implemented
     evidence:
       - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/app_paths.rs
         symbol: app_paths
@@ -142,6 +142,8 @@ features:
     decision_refs:
       - issue:26
       - issue:38
+      - issue:74
+      - issue:75
   - id: feature.foundation-platform.settings-management
     name: '设置管理'
     status: unassessed

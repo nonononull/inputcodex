@@ -24,7 +24,7 @@ sources:
       path: upstream/CodexPlusPlus/crates/codex-plus-core/src/app_paths.rs
       symbol: app_paths
     platforms: [windows, macos]
-    side_effects: [filesystem-read]
+    side_effects: [filesystem-read, process-read]
     disposition:
       type: feature
       feature_id: feature.foundation-platform.platform-paths
@@ -96,7 +96,7 @@ sources:
       path: upstream/CodexPlusPlus/crates/codex-plus-core/src/codex_home.rs
       symbol: codex_home
     platforms: [windows, macos]
-    side_effects: [filesystem-read]
+    side_effects: [filesystem-read, process-read]
     disposition:
       type: feature
       feature_id: feature.foundation-platform.platform-paths
@@ -272,7 +272,7 @@ sources:
       path: upstream/CodexPlusPlus/crates/codex-plus-core/src/paths.rs
       symbol: paths
     platforms: [windows, macos]
-    side_effects: [filesystem-read]
+    side_effects: [filesystem-read, process-read]
     disposition:
       type: feature
       feature_id: feature.foundation-platform.platform-paths
