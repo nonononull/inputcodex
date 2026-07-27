@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 `v1.2.43` 完整缓存、双平台性能基线、性能预算数值批准、非 required `approved-observation` 预算 CI 和功能目录重新审计。`main` 当前为 `fc1683aabda4afb27ca333387ec954b6a405d2df`，主干 CI 7/7、Performance Baseline 4/4 全绿且 Artifact 为 `0`；Gate 5 已由 Issue `#75` 启动首个平台路径解析迁移切片，当前四 crate 与治理门禁均已本地通过，非 Draft PR 待创建。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 `v1.2.43` 完整缓存、双平台性能基线、性能预算数值批准、非 required `approved-observation` 预算 CI 和功能目录重新审计。`main` 当前为 `a06a97fd59ce125306a13202c8f1a07656c797a0`；Issue `#75` / PR `#76` 已完成首个平台路径迁移，合并后主干 CI 7/7、Performance Baseline 4/4 全绿且 Artifact 为 `0`。Gate 5 当前由 Issue `#78` 迁移应用概览只读事实能力，本地二十九路径门禁已全绿，正在形成控制面 checkpoint 与非 Draft PR。
 
 ## 项目目标
 
@@ -86,13 +86,15 @@
 - Issue `#63` / PR `#73` 已使 `Performance Baseline` 手工模式支持 `evidence`、`measure`、`observation` 且默认仍为 `evidence`，自动 PR/push 固定为非阻断 `observation`；Issue 已按 `COMPLETED` 关闭。
 - Issue `#65` / PR `#72` 已以 Squash 提交 `fc1683aabda4afb27ca333387ec954b6a405d2df` 完成 `v1.2.43` 功能目录重新审计；合并后主干 CI Run `30244760762` 七 Job、Performance Baseline Run `30244760739` 四 Job全绿且 Artifact 为 `0`。
 - Issue `#74` 已固定平台路径安全例外：无效显式路径或非空 `CODEX_HOME` 必须失败，禁止相对目录和静默自动回退。
-- Issue `#75` 已在三十路径与 `sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37` 内完成领域、应用、Windows/macOS 平台适配器和 Parity TDD；产品只读取平台/文件系统元数据，不创建目录、不写文件、不联网、不加载广告或远程推荐。
+- Issue `#75` / PR `#76` 已在三十路径内完成平台路径迁移并 Squash Merge 为 `a06a97fd59ce125306a13202c8f1a07656c797a0`；合并后主干两套 Workflow 全绿且 Artifact 为 `0`。
+- Issue `#77` 已批准应用概览按领域拆分，明确历史启动记录不等于实时运行状态；Issue 已按 `COMPLETED` 关闭。
+- Issue `#78` 已在批准的二十九路径与 `sha256:b46a940ff7dbf4bbc9bfdb69d04d755468e12409d9618837d8ff310490eb5ae4` 内完成 Domain、Application、Windows/macOS Platform 与 Parity TDD；四 crate、格式、CI 合同、Release Audit、仓库政策、范围、隐私、历史依赖与禁止能力门禁已通过，当前只剩控制面 checkpoint、普通推送、非 Draft PR 和 Hosted Review/CI。
 
 ## 下一步
 
-1. 完成 Issue `#75` 的控制面同步、四 crate 轻量验证、范围/隐私检查并创建非 Draft PR。
-2. 核验 Final Head Review、标准 CI、Windows/macOS 真实编译、非 required Performance observation 与 Artifact `0`；全部根因闭环后停在项目所有者单独 Squash Merge 授权门。
-3. Issue `#75` 合并后再以独立 Issue 选择下一个 Gate 5 功能，禁止在当前 PR 夹带 UI、第二个 feature、预算、Release 或上游同步。
+1. 完成 Issue `#78` 的最终四 crate 轻量验证、范围/隐私/禁止能力检查与 Git checkpoint。
+2. 普通推送并创建关联 Issue `#77/#78` 的非 Draft PR，核验 Final Head Review、标准 CI、Windows/macOS 真实编译、非 required Performance observation 与 Artifact `0`。
+3. 全部根因闭环后停在项目所有者单独 Squash Merge 授权门；当前 PR 禁止夹带 UI、第三个 feature、预算、Release 或上游同步。
 
 ## 项目文档
 
@@ -103,6 +105,10 @@
 - Issue `#75` Session Plan：`docs/plans/sessions/2026-07-27-issue-75-gate-5-platform-paths.md`
 - Issue `#75` Runtime Workflow：`docs/workflows/2026-07-27-issue-75-gate-5-platform-paths-runtime.md`
 - Issue `#75` 实施报告：`docs/reports/issue-75-gate-5-platform-paths.md`
+- Issue `#78` 应用概览设计：`docs/plans/2026-07-27-issue-78-gate-5-application-overview.md`
+- Issue `#78` Session Plan：`docs/plans/sessions/2026-07-27-issue-78-gate-5-application-overview.md`
+- Issue `#78` Runtime Workflow：`docs/workflows/2026-07-27-issue-78-gate-5-application-overview-runtime.md`
+- Issue `#78` 实施报告：`docs/reports/issue-78-gate-5-application-overview.md`
 - Gate 4 规划任务：`docs/plans/2026-07-22-issue-24-gate-4-feature-performance-plan.md`
 - Gate 4 Session Plan：`docs/plans/sessions/2026-07-22-issue-24-gate-4-feature-performance-plan.md`
 - Gate 4 Runtime Workflow：`docs/workflows/2026-07-22-issue-24-gate-4-feature-performance-runtime.md`

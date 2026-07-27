@@ -856,6 +856,24 @@
 - 验证：本地重新运行四 crate 测试、四 crate all-targets Clippy、rustfmt、CI 合同、Release Audit、仓库政策、范围与隐私门禁；Linux 真实性由 PR `#76` 新 Head 的标准 CI 重跑确认，动态 Run 证据只回写 GitHub。
 - 关联：Issue `#75`、PR `#76`、CI Run `30273494972`、Job `90001713384`。
 
+### 2026-07-27：应用安装发现复用完整路径快照会被无关状态根阻断
+
+- 环境：Issue `#78` 迁移只读应用概览，最初可选方案是直接调用 Issue `#75` 的完整 `PlatformPathsPort`。
+- 现象：应用概览只需要安装事实与版本，但完整路径解析还会读取 `CODEX_HOME`、用户目录和 `inputcodex` 状态根；合法显式安装路径可能因无关配置缺失或无效而整体失败。
+- 根因：安装发现与设置/状态路径聚合位于同一入口，复用聚合端口会把不属于应用概览的配置与持久化路径变成隐藏前置条件。
+- 处理：保留 `PlatformPathsPort` 既有合同，只在 platform crate 内提取安装专用入口；显式路径先短路解析，自动发现只读取平台发现必需根。应用概览不读取 `CODEX_HOME`、状态根或历史状态文件。
+- 验证：Windows/macOS 显式路径测试固定无需共同状态目录；Issue `#75` 原平台路径测试继续通过；应用概览平台测试固定安装发现一次、有界读取一个版本元数据文件，以及版本问题只降级为 `InstalledVersion::Unknown`。
+- 关联：Issue `#77`、Issue `#78`、`crates/inputcodex-platform/src/platform_paths/windows.rs`、`crates/inputcodex-platform/src/platform_paths/macos.rs`。
+
+### 2026-07-27：Linux 正常库构建保留双平台专用应用概览 helper
+
+- 环境：PR `#79` 原 Head `42d497bca2c8140302df1f207f7ff12988c58a89`，标准 CI Run `30287579159` 的 `linux-quality` Workspace Clippy。
+- 现象：Windows/macOS、Release Audit、governance 与 Performance observation 均成功，但 Linux 以 `-D dead-code` 拒绝 `LimitedRead`、`MetadataReader`、`SystemMetadataReader`、`build_overview` 和 `map_discovery_error`，`required` 按合同失败。
+- 根因：`SystemApplicationOverview` 在非 Windows/macOS 目标只返回稳定 unsupported 错误；元数据读取和快照组装 helper 仅由 Windows/macOS 分支调用，却没有使用同源目标平台 `cfg`。本地 Windows Clippy无法暴露 Linux 正常库构建的未使用 item。
+- 处理：测试夹具需要的 `LimitedRead` 与 `MetadataReader` 使用 `windows | macos | test` 条件；系统 reader、快照组装和发现错误映射只使用 `windows | macos` 条件。拒绝 `allow/expect(dead_code)`、跳过 Linux Clippy或修改 Workflow。
+- 验证：本地 platform tests、platform all-targets Clippy 与 rustfmt 通过；本机仅安装 `x86_64-pc-windows-msvc`。额外执行 Workspace `--offline` Clippy 时在编译前因未缓存 `ash` 中止，属于本地缓存边界，按“本地四 crate 轻量验证 + hosted Workspace 全量验证”合同绕过；Linux 真实性由修复后新 Head 的 GitHub-hosted `linux-quality` 重跑确认。
+- 关联：Issue `#78`、PR `#79`、CI Run `30287579159`、Job `90049150742`。
+
 ## 记录模板
 
 ```text

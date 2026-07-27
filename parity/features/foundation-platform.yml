@@ -30,42 +30,47 @@ features:
     name: '应用生命周期'
     status: unassessed
     evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/status.rs
+        symbol: status
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: launch_codex_plus
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: restart_codex_plus
     entry_points:
+      - core-module:status
       - tauri-command:launch_codex_plus
       - tauri-command:restart_codex_plus
     platforms:
       windows:
         applicability: supported
-        semantics: '启动或重启受管 Codex 进程，明确超时、取消和进程隔离。'
+        semantics: '启动或重启受管 Codex 进程并维护生命周期状态；状态文件读写不得冒充应用概览的实时进程观察。'
       macos:
         applicability: supported
-        semantics: '启动或重启受管 Codex 进程，明确超时、取消和进程隔离。'
+        semantics: '启动或重启受管 Codex 进程并维护生命周期状态；状态文件读写不得冒充应用概览的实时进程观察。'
     decision_refs:
       - issue:26
+      - issue:77
   - id: feature.foundation-platform.application-overview
     name: '应用概览与检测'
-    status: unassessed
+    status: implemented
     evidence:
-      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/status.rs
-        symbol: status
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/app_paths.rs
+        symbol: codex_app_version
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: load_overview
     entry_points:
-      - core-module:status
       - tauri-command:load_overview
     platforms:
       windows:
         applicability: supported
-        semantics: '检测本机 Codex 应用、运行状态与必要路径，失败必须隔离并可诊断。'
+        semantics: '只读采集安装事实、安装版本、inputcodex 构建版本与采集时间；实时进程状态固定为 LiveProcessState::NotObserved。'
       macos:
         applicability: supported
-        semantics: '检测本机 Codex 应用、运行状态与必要路径，失败必须隔离并可诊断。'
+        semantics: '只读采集安装事实、安装版本、inputcodex 构建版本与采集时间；实时进程状态固定为 LiveProcessState::NotObserved。'
     decision_refs:
       - issue:26
+      - issue:77
+      - issue:78
   - id: feature.foundation-platform.diagnostics
     name: '日志与诊断'
     status: unassessed

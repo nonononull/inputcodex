@@ -1,6 +1,13 @@
 #![forbid(unsafe_code)]
 
+mod application_overview;
 mod platform_paths;
+
+pub use application_overview::{
+    ApplicationOverview, ApplicationVersion, ApplicationVersionError, CollectedAtUnixMs,
+    InstallationState, InstalledVersion, InstalledVersionUnknownReason, LiveProcessState,
+    MAX_APPLICATION_VERSION_BYTES,
+};
 
 pub use platform_paths::{
     ApplicationInstallSource, CodexInstallation, PlatformPathsSnapshot, PrivatePath,

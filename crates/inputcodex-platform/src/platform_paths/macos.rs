@@ -43,18 +43,34 @@ pub(super) fn resolve_system(
     )?;
     let discovery_home =
         discovery_home.ok_or_else(|| ApplicationError::unavailable("USER_HOME_UNAVAILABLE"))?;
-    let installation = resolve_installation(request, &discovery_home, probe)?;
+    let installation =
+        resolve_installation(request.explicit_application_path(), &discovery_home, probe)?;
 
     snapshot_from_common(common, installation)
 }
 
 #[cfg(target_os = "macos")]
-fn resolve_installation(
-    request: &PlatformPathsRequest,
+pub(crate) fn resolve_installation_system(
+    explicit_application_path: Option<&Path>,
+    probe: &impl PathProbe,
+) -> Result<Option<CodexInstallation>, ApplicationError> {
+    if let Some(path) = explicit_application_path {
+        return resolve_explicit(path, probe).map(Some);
+    }
+
+    let home = std::env::var_os("HOME")
+        .map(PathBuf::from)
+        .ok_or_else(|| ApplicationError::unavailable("USER_HOME_UNAVAILABLE"))?;
+    resolve_installation(None, &home, probe)
+}
+
+#[cfg(target_os = "macos")]
+pub(crate) fn resolve_installation(
+    explicit_application_path: Option<&Path>,
     home: &Path,
     probe: &impl PathProbe,
 ) -> Result<Option<CodexInstallation>, ApplicationError> {
-    match request.explicit_application_path() {
+    match explicit_application_path {
         Some(path) => resolve_explicit(path, probe).map(Some),
         None => Ok(discover(home, probe)),
     }
@@ -216,6 +232,8 @@ mod tests {
 
     use inputcodex_domain::ApplicationInstallSource;
 
+    #[cfg(target_os = "macos")]
+    use super::resolve_installation_system;
     use super::{APP_NAMES, discover_candidate, resolve_explicit};
     use crate::platform_paths::PathProbe;
 
@@ -336,5 +354,22 @@ mod tests {
 
         assert!(discover_candidate(&user_home, &probe).is_none());
         assert_eq!(probe.directory_checks.get(), 8);
+    }
+
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn 安装专用入口可直接解析显式路径而不依赖共同状态目录() {
+        let bundle = home("inputcodex-overview-explicit-macos").join("Codex.app");
+        let executable = bundle.join("Contents/MacOS/Codex");
+        let probe = MemoryProbe::default()
+            .with_directory(bundle.clone())
+            .with_file(executable);
+
+        let installation = resolve_installation_system(Some(&bundle), &probe)
+            .expect("合法显式路径应成功")
+            .expect("显式路径应返回安装");
+
+        assert_eq!(installation.application_root().as_path(), bundle);
+        assert_eq!(installation.source(), ApplicationInstallSource::Explicit);
     }
 }

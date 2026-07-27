@@ -2,8 +2,12 @@
 
 use inputcodex_domain::DiagnosticCode;
 
+mod application_overview;
 mod platform_paths;
 
+pub use application_overview::{
+    ApplicationOverviewPort, ApplicationOverviewRequest, LoadApplicationOverview,
+};
 pub use platform_paths::{PlatformPathsPort, PlatformPathsRequest, ResolvePlatformPaths};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

@@ -41,18 +41,34 @@ pub(super) fn resolve_system(
     )?;
     let local_appdata = local_appdata
         .ok_or_else(|| ApplicationError::unavailable("INPUTCODEX_STATE_ROOT_UNAVAILABLE"))?;
-    let installation = resolve_installation(request, &local_appdata, probe)?;
+    let installation =
+        resolve_installation(request.explicit_application_path(), &local_appdata, probe)?;
 
     snapshot_from_common(common, installation)
 }
 
 #[cfg(target_os = "windows")]
-fn resolve_installation(
-    request: &PlatformPathsRequest,
+pub(crate) fn resolve_installation_system(
+    explicit_application_path: Option<&Path>,
+    probe: &impl PathProbe,
+) -> Result<Option<CodexInstallation>, ApplicationError> {
+    if let Some(path) = explicit_application_path {
+        return resolve_explicit(path, probe).map(Some);
+    }
+
+    let local_appdata = std::env::var_os("LOCALAPPDATA")
+        .map(PathBuf::from)
+        .ok_or_else(|| ApplicationError::unavailable("INPUTCODEX_STATE_ROOT_UNAVAILABLE"))?;
+    resolve_installation(None, &local_appdata, probe)
+}
+
+#[cfg(target_os = "windows")]
+pub(crate) fn resolve_installation(
+    explicit_application_path: Option<&Path>,
     local_appdata: &Path,
     probe: &impl PathProbe,
 ) -> Result<Option<CodexInstallation>, ApplicationError> {
-    if let Some(path) = request.explicit_application_path() {
+    if let Some(path) = explicit_application_path {
         return resolve_explicit(path, probe).map(Some);
     }
 
@@ -241,6 +257,8 @@ mod tests {
 
     use inputcodex_domain::ApplicationInstallSource;
 
+    #[cfg(target_os = "windows")]
+    use super::resolve_installation_system;
     use super::{
         PACKAGE_FAMILY_NAMES, WindowsPackageCandidate, discover_standalone, installation_from_dir,
         resolve_explicit, select_package_candidate,
@@ -405,6 +423,22 @@ mod tests {
         }
 
         let installation = resolve_explicit(&valid, &probe).expect("合法显式目录应成功");
+        assert_eq!(installation.application_root().as_path(), valid);
+        assert_eq!(installation.source(), ApplicationInstallSource::Explicit);
+    }
+
+    #[cfg(target_os = "windows")]
+    #[test]
+    fn 安装专用入口可直接解析显式路径而不依赖共同状态目录() {
+        let valid = root("inputcodex-overview-explicit-windows");
+        let probe = MemoryProbe::default()
+            .with_directory(valid.clone())
+            .with_file(valid.join("Codex.exe"));
+
+        let installation = resolve_installation_system(Some(&valid), &probe)
+            .expect("合法显式路径应成功")
+            .expect("显式路径应返回安装");
+
         assert_eq!(installation.application_root().as_path(), valid);
         assert_eq!(installation.source(), ApplicationInstallSource::Explicit);
     }

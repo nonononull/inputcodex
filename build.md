@@ -2,9 +2,9 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 27 日，Gate 3 七成员 Workspace、Gate 4 `v1.2.43` 功能目录重新审计、双平台性能基线、性能预算数值和非 required `approved-observation` 均已进入 `main`。Issue `#75` 是首个 Gate 5 产品迁移切片：三十路径与 `sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37` 已获批准，领域、应用、Windows/macOS 平台适配器和 Parity TDD 已形成命名 checkpoint；最终本地轻量门禁已于 Windows 本机时间 `2026-07-27 21:57:22 +08:00` 通过，当前只剩控制面提交、非 Draft PR 与 GitHub-hosted Review/CI，最终 Squash Merge 仍未授权。
+截至 2026 年 7 月 27 日，Gate 3 七成员 Workspace、Gate 4 `v1.2.43` 功能目录重新审计、双平台性能基线、性能预算数值和非 required `approved-observation` 均已进入 `main`。Issue `#75` / PR `#76` 已将首个平台路径切片 Squash Merge 为 `a06a97fd59ce125306a13202c8f1a07656c797a0`，合并后主干两套 Workflow 全绿且 Artifact 为 `0`。Issue `#78` 是当前第二个 Gate 5 产品迁移切片：二十九路径与 `sha256:b46a940ff7dbf4bbc9bfdb69d04d755468e12409d9618837d8ff310490eb5ae4` 已获批准，Domain、Application、Windows/macOS Platform 与 Parity TDD 已完成；四 crate、格式、CI 合同 `35/35`、Release Audit、仓库政策、范围 `29/29`、隐私、历史依赖和禁止能力门禁已通过，当前正在形成控制面 checkpoint 与非 Draft PR，最终 Squash Merge 仍未授权。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供二十一个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供二十二个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -27,6 +27,7 @@
 19. Issue `#61` 性能预算数值合并后稳定状态、八路径范围、反递归边界、预算复算与双套主干证据验证。
 20. Issue `#63` 十三路径、只读预算观察器、自动 observation、非阻断分类、Artifact 边界与 Gate 5 解锁前置验证。
 21. Issue `#75` 三十路径、平台路径分层合同、双平台适配器、隐私边界、Parity 状态和最终本地轻量门禁验证。
+22. Issue `#78` 二十九路径、应用概览只读事实、版本未知、`NotObserved`、有界元数据读取、Parity 重分类和最终本地轻量门禁验证。
 
 当前禁止：
 
@@ -41,6 +42,76 @@
 - 在 Issue `#61` 中修改预算数值、公式、量子、队列、样本、`benchmarks/`、代码、Cargo、Workflow、Ruleset、Release、AGOS、性能优化或 Gate 5 产品功能。
 - 在 Issue `#63` 中修改预算 JSON、历史 Evidence、预算数值/公式、Ruleset、required checks、产品、Gate 5、`upstream/` 或 AGOS，或把阈值分类改成阻断退出码。
 - 在 Issue `#75` 中创建 UI、Iced 视图、目录/文件写入、网络、缓存、后台线程、第二个产品 feature、新依赖家族、直接 Win32 FFI、`unsafe`、预算、Release、Ruleset、`upstream/` 或 AGOS 改动。
+- 在 Issue `#78` 中读取历史启动状态、枚举进程、观察 PID/debug port、写文件、联网、缓存、启动线程、调用 shell、引入 UI/Iced、新依赖、第三个产品 feature、预算、Release、Ruleset、`upstream/` 或 AGOS 改动。
+
+## Issue #78 应用概览只读事实本地轻量验证
+
+在仓库根目录、分支 `codex/issue-78-gate-5-application-overview` 执行。Git 时间只使用系统默认本机时间；不得设置 `GIT_AUTHOR_DATE` 或 `GIT_COMMITTER_DATE`。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+cargo test --locked --offline --ignore-rust-version -p inputcodex-domain -p inputcodex-application -p inputcodex-platform -p inputcodex-parity
+if ($LASTEXITCODE -ne 0) { throw "Issue #78 四 crate 测试失败：$LASTEXITCODE" }
+
+cargo clippy --locked --offline --ignore-rust-version -p inputcodex-domain -p inputcodex-application -p inputcodex-platform -p inputcodex-parity --all-targets -- -D warnings
+if ($LASTEXITCODE -ne 0) { throw "Issue #78 四 crate Clippy 失败：$LASTEXITCODE" }
+
+cargo fmt --all -- --check
+if ($LASTEXITCODE -ne 0) { throw "Issue #78 rustfmt 检查失败：$LASTEXITCODE" }
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+if ($LASTEXITCODE -ne 0) { throw "Issue #78 CI 合同失败：$LASTEXITCODE" }
+
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw "Issue #78 Release Audit 失败：$LASTEXITCODE" }
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw "Issue #78 Repository Policy 失败：$LASTEXITCODE" }
+```
+
+候选路径、规范化规则和哈希复算以 `docs/workflows/2026-07-27-issue-78-gate-5-application-overview-runtime.md` 的 `$candidate` 区块为准。实际差异必须全部属于该集合：
+
+```powershell
+$changed = @(
+  git diff --name-only origin/main...HEAD
+  git diff --name-only
+  git ls-files --others --exclude-standard
+) | Where-Object { $_ } | Sort-Object -Unique
+
+$outside = @($changed | Where-Object { $_ -notin $candidate })
+if ($outside.Count -ne 0) { throw "Issue #78 越界路径：$($outside -join ', ')" }
+
+$ownerName = [Environment]::UserName
+if (-not [string]::IsNullOrWhiteSpace($ownerName)) {
+  $privateLeaks = @(rg -n --fixed-strings $ownerName crates parity docs/reports/issue-78-gate-5-application-overview.md 2>$null)
+  if ($LASTEXITCODE -eq 0 -and $privateLeaks.Count -ne 0) {
+    throw "Issue #78 泄露本机用户标识：$($privateLeaks -join '; ')"
+  }
+  if ($LASTEXITCODE -notin 0, 1) { throw 'Issue #78 隐私扫描执行失败。' }
+}
+
+$forbiddenProduct = @(
+  rg -n 'std::process::Command|tokio::spawn|thread::spawn|reqwest|TcpStream|UdpSocket|File::create|OpenOptions|fs::write|create_dir|unsafe\s*\{' crates/inputcodex-domain/src/application_overview.rs crates/inputcodex-application/src/application_overview.rs crates/inputcodex-platform/src/application_overview.rs crates/inputcodex-platform/src/application_overview 2>$null
+)
+if ($LASTEXITCODE -eq 0 -and $forbiddenProduct.Count -ne 0) {
+  throw "Issue #78 命中禁止运行能力：$($forbiddenProduct -join '; ')"
+}
+if ($LASTEXITCODE -notin 0, 1) { throw 'Issue #78 禁止能力扫描执行失败。' }
+
+$historyDependency = @(
+  rg -n 'latest-status\.json|LaunchHistoryRecord|StatusStore' crates/inputcodex-domain/src/application_overview.rs crates/inputcodex-application/src/application_overview.rs crates/inputcodex-platform/src/application_overview.rs crates/inputcodex-platform/src/application_overview 2>$null
+)
+if ($LASTEXITCODE -eq 0 -and $historyDependency.Count -ne 0) {
+  throw "Issue #78 命中历史状态隐藏依赖：$($historyDependency -join '; ')"
+}
+if ($LASTEXITCODE -notin 0, 1) { throw 'Issue #78 历史依赖扫描执行失败。' }
+
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw "Issue #78 Git 空白检查失败：$LASTEXITCODE" }
+```
+
+预期：四 crate 测试与 Clippy 全绿、`rustfmt` 退出码为 `0`、CI 合同 `35/35`、`release_audit=current`、仓库政策违规数为 `0`，所有变更均位于批准的二十九路径内，产品实现不泄露私人路径且不包含历史状态、写入、网络、shell、线程或 `unsafe`。
 
 ## Issue #75 平台路径迁移本地轻量验证
 

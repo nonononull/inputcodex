@@ -10,9 +10,9 @@ use inputcodex_domain::PlatformPathsSnapshot;
 use inputcodex_domain::{CodexInstallation, PrivatePath};
 
 #[cfg(any(target_os = "macos", test))]
-mod macos;
+pub(crate) mod macos;
 #[cfg(any(target_os = "windows", test))]
-mod windows;
+pub(crate) mod windows;
 
 #[cfg(any(target_os = "windows", target_os = "macos", test))]
 const SETTINGS_FILE: &str = "settings.json";
@@ -22,14 +22,14 @@ const LATEST_STATUS_FILE: &str = "latest-status.json";
 const DIAGNOSTIC_LOG_FILE: &str = "inputcodex.log";
 
 #[cfg(any(target_os = "windows", target_os = "macos", test))]
-trait PathProbe {
+pub(crate) trait PathProbe {
     fn is_dir(&self, path: &Path) -> bool;
     fn is_file(&self, path: &Path) -> bool;
 }
 
 #[derive(Debug, Clone, Copy, Default)]
 #[cfg(any(target_os = "windows", target_os = "macos"))]
-struct SystemPathProbe;
+pub(crate) struct SystemPathProbe;
 
 #[cfg(any(target_os = "windows", target_os = "macos"))]
 impl PathProbe for SystemPathProbe {

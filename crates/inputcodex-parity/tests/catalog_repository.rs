@@ -615,6 +615,101 @@ fn gate5_platform_paths_实现合同固定为已实现且无新增副作用() {
 }
 
 #[test]
+fn gate5_application_overview_实现合同固定为只读事实且不伪造实时状态() {
+    let feature_text = read_repository_text("parity/features/foundation-platform.yml");
+    let overview = yaml_list_item_block(
+        &feature_text,
+        "feature.foundation-platform.application-overview",
+    );
+    for expected in [
+        "status: implemented",
+        "symbol: codex_app_version",
+        "- tauri-command:load_overview",
+        "LiveProcessState::NotObserved",
+        "- issue:77",
+        "- issue:78",
+    ] {
+        assert!(
+            overview.contains(expected),
+            "应用概览功能条目应包含：{expected}"
+        );
+    }
+    assert!(
+        !overview.contains("core-module:status"),
+        "历史状态入口不得继续归属于应用概览"
+    );
+
+    let lifecycle = yaml_list_item_block(
+        &feature_text,
+        "feature.foundation-platform.application-lifecycle",
+    );
+    assert!(
+        lifecycle.contains("core-module:status"),
+        "历史状态入口应归入应用生命周期"
+    );
+
+    let contract_text = read_repository_text("parity/contracts/foundation-platform.yml");
+    let contract = yaml_list_item_block(
+        &contract_text,
+        "contract.feature.foundation-platform.application-overview.baseline",
+    );
+    for expected in [
+        "Ready(Installed Known)",
+        "Ready(Installed Unknown)",
+        "Ready(NotInstalled)",
+        "InstalledVersion::Unknown",
+        "LiveProcessState::NotObserved",
+        "APPLICATION_OVERVIEW_UNSUPPORTED",
+        "EXPLICIT_CODEX_PATH_INVALID",
+        "APPLICATION_OVERVIEW_DISCOVERY_FAILED",
+        "APPLICATION_OVERVIEW_TIME_UNAVAILABLE",
+        "APPLICATION_OVERVIEW_BUILD_VERSION_INVALID",
+        "256 bytes",
+        "65536 bytes",
+    ] {
+        assert!(
+            contract.contains(expected),
+            "应用概览合同应包含：{expected}"
+        );
+    }
+    for forbidden in [
+        "filesystem-write",
+        "process-read",
+        "network-read",
+        "network-write",
+        "latest-status.json",
+        "LaunchHistoryRecord",
+        "advertising",
+        "remote-recommendation",
+    ] {
+        assert!(
+            !contract.contains(forbidden),
+            "应用概览合同禁止能力或隐藏依赖：{forbidden}"
+        );
+    }
+
+    let source_text = read_repository_text("parity/features/source-index.yml");
+    let status_source = yaml_list_item_block(&source_text, "core-module:status");
+    assert!(
+        status_source.contains("side_effects: [filesystem-read, filesystem-write]"),
+        "历史状态源必须记录真实文件读写副作用"
+    );
+    assert!(
+        status_source.contains("feature.foundation-platform.application-lifecycle"),
+        "历史状态源必须归入应用生命周期"
+    );
+
+    assert_repository_text_contains(
+        "parity/README.md",
+        &[
+            "Issue `#78`",
+            "Ready(Installed Known)",
+            "LiveProcessState::NotObserved",
+        ],
+    );
+}
+
+#[test]
 fn 仓库source_index_覆盖锁定上游公开入口() {
     let summary =
         validate_feature_repository(&repository_root()).expect("功能目录应通过仓库级验证");
