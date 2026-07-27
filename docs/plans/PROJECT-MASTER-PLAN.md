@@ -1,16 +1,20 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-63-performance-budget-ci-observation
-active_gate: Gate 4 非 required approved-observation 正在十三路径独立分支实施；本地观察器 12/12、CI 合同 35/35、仓库政策零违规，PR 与双平台 hosted observation 尚未完成，Gate 5 继续锁定
-last_verified_gate: Issue #59 / PR #60 已以单父 Squash 提交 e225144831a0928bfa3aaa0d169a054779005812 完成性能预算数值批准；tree 为 56eb1e8d95dfce22726c1aef1bdde1c353af055e，GitHub 签名 valid，合并后 main CI Run 30194897171 七 Job与 Performance Run 30194897166 四 Job全绿且 Artifact 均为 0，Issue #59 已按 COMPLETED 关闭
-next_legal_gate: 完成 Issue #63 非 Draft PR、双平台 observation、Review/CI 与独立 Squash 授权；随后重放 PR #72，并在 main observation 双平台成功、Artifact 为 0 且 release_audit=current 后再决定 Gate 5
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/63
+active_task: issue-65-pr-72-v1.2.43-catalog-reaudit-main-sync-review-ci-pending
+active_gate: Gate 4 v1.2.43 功能目录重新审计已完成本地 TDD 与 release_audit=current；PR #72 已通过普通 merge 纳入 PR #73 的预算 observation 主干基线，等待新 Final Head Review/CI 和 Squash Merge 单独授权，Gate 5 继续锁定
+last_verified_gate: Issue #63 / PR #73 已以单父 Squash 提交 19d1824398d46a0d4f6b9e4805905485793d3c9d 进入 main；tree 为 8e44390053b9a839a19be6357b833583fbbb6a5a，GitHub 签名 valid，合并后 main CI Run 30242317618 七 Job与 Performance Baseline Run 30242317615 四 Job全绿且 Artifact 均为 0
+next_legal_gate: 完成 PR #72 新 Final Head 的 Review/CI 与项目所有者单独 Squash Merge授权；合并后确认 main observation 双平台成功、Artifact 为 0 且 release_audit=current，再关闭 Issue #63 并决定是否建立首个 Gate 5 产品迁移 Issue
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/65
+active_pr_ref: https://github.com/nonononull/inputcodex/pull/72
 performance_budget_observation_issue_ref: https://github.com/nonononull/inputcodex/issues/63
 performance_budget_observation_scope_hash: sha256:d5eb57c1b93dc2b7acc47ba78c8f514af2a2c98e8661df389774713a7b47d8dc
 performance_budget_observation_red_ref: 650040763aff07f4884ee9252c50639469622934
 performance_budget_observation_green_ref: b465c660d0401ff4bff37673671147aa6b513e1a
 performance_budget_observation_pr_ref: https://github.com/nonononull/inputcodex/pull/73
+performance_budget_observation_merge_ref: 19d1824398d46a0d4f6b9e4805905485793d3c9d
+performance_budget_observation_main_ci_ref: https://github.com/nonononull/inputcodex/actions/runs/30242317618
+performance_budget_observation_main_performance_ref: https://github.com/nonononull/inputcodex/actions/runs/30242317615
 performance_remeasurement_issue_ref: https://github.com/nonononull/inputcodex/issues/54
 performance_queue_discovery_issue_ref: https://github.com/nonononull/inputcodex/issues/57
 performance_fixed_remeasurement_issue_ref: https://github.com/nonononull/inputcodex/issues/59
@@ -26,8 +30,8 @@ performance_budget_discovery_merge_ref: fea8824c652665df710a7e6ef941854060eb6e1f
 performance_budget_discovery_main_ci_ref: https://github.com/nonononull/inputcodex/actions/runs/30175592979
 performance_baseline_issue_ref: https://github.com/nonononull/inputcodex/issues/32
 performance_baseline_pr_ref: https://github.com/nonononull/inputcodex/pull/49
-release_audit_reaudit_issue_ref: https://github.com/nonononull/inputcodex/issues/38
-release_audit_reaudit_pr_ref: https://github.com/nonononull/inputcodex/pull/45
+release_audit_reaudit_issue_ref: https://github.com/nonononull/inputcodex/issues/65
+release_audit_reaudit_pr_ref: https://github.com/nonononull/inputcodex/pull/72
 catalog_reaudit_closeout_issue_ref: https://github.com/nonononull/inputcodex/issues/47
 ci_incident_issue_ref: https://github.com/nonononull/inputcodex/issues/46
 release_watch_issue_ref: https://github.com/nonononull/inputcodex/issues/33
@@ -39,26 +43,26 @@ gate_3_planning_issue_ref: https://github.com/nonononull/inputcodex/issues/17
 upstream_watch_issue_ref: https://github.com/nonononull/inputcodex/issues/14
 transition_issue_ref: https://github.com/nonononull/inputcodex/issues/8
 upstream_sync_issue_ref: https://github.com/nonononull/inputcodex/issues/9
-active_branch_ref: codex/issue-63-performance-budget-ci-observation
+active_branch_ref: codex/issue-65-v1.2.43-catalog-reaudit
 transition_branch_ref: codex/issue-8-gate-2-transition
-active_plan_ref: docs/plans/2026-07-26-issue-63-performance-budget-ci-observation.md
-active_session_plan_ref: docs/plans/sessions/2026-07-26-issue-63-performance-budget-ci-observation.md
-active_runtime_workflow_ref: docs/workflows/2026-07-26-issue-63-performance-budget-ci-observation-runtime.md
-active_pr_ref: https://github.com/nonononull/inputcodex/pull/73
+active_plan_ref: docs/plans/2026-07-27-issue-65-v1.2.43-catalog-reaudit.md
+active_session_plan_ref: docs/plans/sessions/2026-07-27-issue-65-v1.2.43-catalog-reaudit.md
+active_runtime_workflow_ref: docs/workflows/2026-07-27-issue-65-v1.2.43-catalog-reaudit-runtime.md
+active_pr_ref: https://github.com/nonononull/inputcodex/pull/72
 gate_3_closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/23
 gate_3_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/21
 gate_3_planning_pr_ref: https://github.com/nonononull/inputcodex/pull/18
 transition_pr_ref: https://github.com/nonononull/inputcodex/pull/10
 upstream_sync_pr_ref: https://github.com/nonononull/inputcodex/pull/11
 closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5, https://github.com/nonononull/inputcodex/pull/7, https://github.com/nonononull/inputcodex/pull/10, https://github.com/nonononull/inputcodex/pull/11, https://github.com/nonononull/inputcodex/pull/13, https://github.com/nonononull/inputcodex/pull/15, https://github.com/nonononull/inputcodex/pull/18, https://github.com/nonononull/inputcodex/pull/21, https://github.com/nonononull/inputcodex/pull/23, https://github.com/nonononull/inputcodex/pull/25, https://github.com/nonononull/inputcodex/pull/27, https://github.com/nonononull/inputcodex/pull/36, https://github.com/nonononull/inputcodex/pull/40, https://github.com/nonononull/inputcodex/pull/42, https://github.com/nonononull/inputcodex/pull/44, https://github.com/nonononull/inputcodex/pull/45
-active_report_ref: docs/reports/issue-61-performance-budget-closeout.md
+active_report_ref: docs/reports/issue-65-v1.2.43-catalog-reaudit-discovery.md
 gate_3_closeout_report_ref: docs/reports/issue-22-gate-3-closeout.md
 gate_3_implementation_report_ref: docs/reports/issue-19-gate-3-rust-workspace-ci.md
 gate_2_watch_report_ref: docs/reports/issue-14-gate-2-upstream-watch.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-decision_status: performance-budget-values-completed-budget-ci-observation-required-check-optimization-gate-5-blocked
+decision_status: issue-65-main-synced-review-ci-pending-final-merge-not-authorized
 
 ## 当前状态
 
@@ -66,7 +70,7 @@ decision_status: performance-budget-values-completed-budget-ci-observation-requi
 - PR `#7` 合并提交为 `c74b66422ba47f96bd3eb2b2385cdfb90541808e`，由 GitHub 生成有效签名；只有一个父提交 `b7404b0c63f2d2ba65474c077182c42a01cc9a64`，tree 为 `00f0f7fe0e408a1e6f218ee8e1be0d8442ed1e65`。
 - PR `#7` 的 Review 对话总数、未解决数与 Checks 数量均为 `0`；`0 Checks` 只表示当前尚未配置 CI。
 - `main-protection` Ruleset（ID `19395456`）仍为 `active`，只命中 `main`，禁止删除与 Force Push，要求解决全部 Review 对话，只允许 Squash Merge，单人阶段 required approvals 为 `0`。
-- 当前完整审计缓存与功能目录审计基线均为 `v1.2.42`，提交为 `657cd33e009ad02515d30db6492cd4e669b06318`，tree 为 `be938b3cfa7db919c6c17322f4617ab286f280d2`；`release_audit` 状态为 `current`。
+- 当前分支已将完整审计缓存与功能目录审计基线对齐 `v1.2.43 @ 5036ff056b5c629f19356396b17d6eeb70da664c`，tree 为 `d478a9fcda7f22a7c8167cb567777ad9148cf328`；`release_audit` 状态为 `current`，最终进入 `main` 仍取决于 Issue `#65` 的 PR、Review/CI 与单独 Squash Merge 授权。
 - Issue `#9` / PR `#11` 已完成 Gate 2 上游基线导入；PR `#11` 于 `2026-07-21T19:01:02Z` Squash Merge，合并提交为 `dde08b725eb2bf4add7fbcfa955f3eaf4eb1bbc6`，Issue `#9` 已关闭。
 - `upstream/CodexPlusPlus/` 当前包含 `277` 个审计文件，`upstream/source-lock.json` 记录 `24,196,123` 字节、manifest SHA-256 `330bee0284837c4c3a463d73ea79383cd3d01924b62f669def79276b60f21628` 和 `7` 份许可证/声明。
 - Issue `#12` / PR `#13` 已完成上游基线 closeout；PR `#13` 的 Squash Merge 提交为 `5e64015075ddf2adef4bf685f50977b47b7f72e7`，Issue `#12` 已关闭。
@@ -82,6 +86,8 @@ decision_status: performance-budget-values-completed-budget-ci-observation-requi
 - Issue `#41` / PR `#42` 已修复固定 Release 与 stale 语义的错误耦合，Squash 提交为 `8aa1d4c96b0543e766b477b1b8e9652968b55f92`；合并后 main Run `30147071062` 七 Job 全绿，Issue 已关闭。
 - Issue `#43` / PR `#44` 已完成 `v1.2.42` 缓存与 CI 合同状态收口，PR `#44` 以单父 Squash 提交 `fdb2f98c701800969fc478f95cd2539be598faaa` 合并；合并后 main Run `30152001233` 成功。
 - Issue `#38` / PR `#45` 已完成二十六路径重新审计：最终 Head `d3df8759bdb9c6378497a3a0c8f409c3968f4d4f` 精确包含 `26` 路径，CI Run `30157623932` 七 Job 全绿且 Artifact 为 `0`；单父 Squash 提交 `5fd337fb7ceb9b0ef53e2e694cc5ddd81ea0a98c` 的 tree 为 `5273d0e42483bbb5c629a2243fc24f0a892b3db3`、GitHub 签名 `valid`，Issue `#38` 已按 `COMPLETED` 关闭。
+- Issue `#64` / PR `#66` 已将 `v1.2.43` 完整快照缓存为只读审计输入；Squash 提交为 `15e91708b41548f523e26ede4c7ca4de41badf77`，主干 CI Run `30214249228` 七 Job 全绿且 Artifact 为 `0`。
+- Issue `#65` / PR `#72` 已批准二十四路径与 `sha256:82234e7aacce0bd6c57994529ccf74371052ed906dc8371324b90e41f697d7b7`；本地 TDD 为 baseline `12/12`、RED `9/12`、GREEN `12/12`，目录计数保持 `133/36/36/11/10/3/0`。PR `#73` 合并后已通过普通 merge 同步主干，等待新 Final Head Review/CI 与单独 Squash Merge 授权。
 - 合并后 main CI Run `30158058627` 的 Attempt `1/2` 因 GitHub Actions major outage 在创建 Job 前失败；服务恢复后的同一 Run Attempt `3` 绑定同一提交并七 Job 全绿、Artifact 为 `0`，Issue `#46` 已按 `COMPLETED` 关闭，仓库代码与 CI 合同无需为该外部事故修改。
 - Issue `#47` 以 `sha256:dd612ef0c2e5f0f830c40f161b1ef1a85bc58cd1d85458a758c3905ade8db03e` 冻结微型五路径 Closeout；本报告只收口长期状态与事故复用知识，其自身动态 Review、CI 与合并证据保留在 GitHub Issue/PR，不再创建二次 Closeout。
 - Issue `#8` 的过渡交付为 PR `#10`；该 PR 只包含文档与验证控制面，并按项目所有者明确授权执行 Squash Merge。
@@ -158,6 +164,9 @@ decision_status: performance-budget-values-completed-budget-ci-observation-requi
 - [x] Issue `#34` / PR `#40` 已缓存 `v1.2.42` 并保持显式 `stale-re-audit-required`；Issue `#41` / PR `#42` 已使该合法状态通过 CI 合同验证。
 - [x] Issue `#43` / PR `#44` 已将缓存、CI 合同与下一合法工作状态收口到 `main`。
 - [x] Issue `#38` / PR `#45` 已完成二十六路径、Review/CI、全部对话闭环与授权 Squash Merge；Issue 已按 `COMPLETED` 关闭，功能目录和 `release_audit` 均对齐 `v1.2.42`。
+- [x] Issue `#64` / PR `#66` 已缓存 `v1.2.43`，保持 `stale-re-audit-required` 并正确指向 Issue `#65`，合并后主干 CI 七 Job 全绿。
+- [x] Issue `#65` 已完成二十四路径本地 TDD、目录/合同/fixture/source-lock 与控制面同步，`release_audit` 恢复 `current`。
+- [ ] Issue `#65` / PR `#72` 已创建非 Draft PR并同步 PR `#73` 的主干基线；尚待新 Final Head Review/CI、全部对话闭环与项目所有者单独 Squash Merge 授权。
 - [x] Issue `#46` 已证明主干 Run `30158058627` Attempt `1/2` 为 GitHub Actions 外部事故；同一 Run Attempt `3` 七 Job 全绿且 Artifact 为 `0`，事故已按 `COMPLETED` 关闭。
 - [x] Issue `#47` 已冻结五路径 Closeout、范围哈希、禁止面和所有者批准；其报告进入长期控制面，动态 PR/CI/合并证据只保留在 GitHub，不再递归创建 Closeout。
 - [x] Issue `#32` 已完成 Discovery，并冻结 28 路径、测量对象、可比环境与 `sha256:857f6a8a2070d5ddcb43eaf237448d30302d59e39e1dbb910724cfac2fc81505`；项目所有者已授权进入分支、Session Plan、Runtime Workflow、实现、验证与 PR。
@@ -175,7 +184,7 @@ decision_status: performance-budget-values-completed-budget-ci-observation-requi
 - [x] Issue `#59` 已在 38 路径与 `sha256:d0577e546d2209d10373eccdf335bbcf3cd4caad7906163838c88b461da0b570` 内完成四次固定串行槽位，Windows 严格目标队列达到 `5`、macOS 达到 `12`；预算 JSON 与离线构建/验证脚本为 `10/10` GREEN，不存在 `run-05`。
 - [x] PR `#60` Final Head `61c088d74d61a329fbe67e14b8280dfa9701c6b2` 已完成 Review/CI 和项目所有者独立授权，并以单父 Squash 提交 `e225144831a0928bfa3aaa0d169a054779005812` 进入 `main`；tree 为 `56eb1e8d95dfce22726c1aef1bdde1c353af055e`，GitHub 签名 `valid`，Issue `#59` 已按 `COMPLETED` 关闭。
 - [x] PR `#60` Final Head CI/Performance Run `30194465259` / `30194465231` 与合并后主干 Run `30194897171` / `30194897166` 均全绿且 Artifact 为 `0`；Issue `#61` 仅以反递归 Closeout 固化该稳定事实，其自身动态交付证据只保留在 GitHub。
-- [ ] Issue `#63` / PR `#73` 已批准方案 A、十三路径与 `sha256:d5eb57c1b93dc2b7acc47ba78c8f514af2a2c98e8661df389774713a7b47d8dc`；RED `650040763aff07f4884ee9252c50639469622934`、初始 GREEN `b465c660d0401ff4bff37673671147aa6b513e1a` 已普通推送，观察器 `12/12`、CI 合同 `35/35`、仓库政策零违规。PR Head 双平台 observation、Review/CI 和项目所有者独立 Squash 授权仍待完成。
+- [x] Issue `#63` / PR `#73` 已在十三路径与 `sha256:d5eb57c1b93dc2b7acc47ba78c8f514af2a2c98e8661df389774713a7b47d8dc` 内完成观察器 `12/12`、CI 合同 `35/35`、双平台 observation、Review/CI 与独立 Squash 授权，并以提交 `19d1824398d46a0d4f6b9e4805905485793d3c9d` 进入 `main`；Issue `#63` 保持开放，等待 PR `#72` 合并后的 `release_audit=current` 主干观察。
 
 ### Gate 5：分域迁移（锁定）
 
@@ -208,6 +217,11 @@ decision_status: performance-budget-values-completed-budget-ci-observation-requi
 - 已完成 Issue `#35` Runtime Workflow：`docs/workflows/2026-07-22-issue-35-release-catalog-decoupling-runtime.md`。
 - 已完成 Issue `#35` 报告：`docs/reports/issue-35-release-catalog-decoupling.md`。
 - `v1.2.42` 缓存同步报告：`docs/reports/2026-07-23-upstream-v1.2.42-sync.md`。
+- `v1.2.43` 缓存同步报告：`docs/reports/2026-07-26-upstream-v1.2.43-sync.md`。
+- Issue `#65` 重新审计计划：`docs/plans/2026-07-27-issue-65-v1.2.43-catalog-reaudit.md`。
+- Issue `#65` Session Plan：`docs/plans/sessions/2026-07-27-issue-65-v1.2.43-catalog-reaudit.md`。
+- Issue `#65` Runtime Workflow：`docs/workflows/2026-07-27-issue-65-v1.2.43-catalog-reaudit-runtime.md`。
+- Issue `#65` Discovery 报告：`docs/reports/issue-65-v1.2.43-catalog-reaudit-discovery.md`。
 - 已完成 Issue `#41` CI 合同报告：`docs/reports/issue-41-ci-contract-decoupling.md`。
 - 已完成状态收口计划：`docs/plans/2026-07-25-issue-43-v1.2.42-cache-ci-closeout.md`。
 - 已完成状态收口 Session Plan：`docs/plans/sessions/2026-07-25-issue-43-v1.2.42-cache-ci-closeout.md`。
@@ -253,7 +267,8 @@ decision_status: performance-budget-values-completed-budget-ci-observation-requi
 
 ## 停止条件
 
-- 上游最新正式 Release 或已核验的 `v1.2.42` / `657cd33e009ad02515d30db6492cd4e669b06318` 事实发生变化。
+- 上游最新正式 Release 或已核验的 `v1.2.43` / `5036ff056b5c629f19356396b17d6eeb70da664c` / `d478a9fcda7f22a7c8167cb567777ad9148cf328` 事实发生变化。
+- Issue `#65` 出现二十四路径或 `sha256:82234e7aacce0bd6c57994529ccf74371052ed906dc8371324b90e41f697d7b7` 之外的新增、删除或重命名路径，或在最终 Head Review、CI 与全部对话闭环前请求 Squash Merge。
 - 需要修改 `upstream/CodexPlusPlus/` 或 `source-lock.json` 的来源快照字段，但没有新的独立 upstream-sync Issue/PR 与项目所有者批准。
 - `release_audit` 为 stale 时修改 `benchmarks/`、`apps/`、产品 crate、`Cargo.toml` 或 `Cargo.lock`，或在同一 PR 同时更新实际 audit 与受阻产品路径。
 - Issue `#47` 出现五路径或 `sha256:dd612ef0c2e5f0f830c40f161b1ef1a85bc58cd1d85458a758c3905ade8db03e` 之外的新增、删除或重命名路径，或在最终 Head 的 Review、CI 和全部对话闭环前请求 Squash Merge。

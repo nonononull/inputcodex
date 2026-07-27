@@ -2131,6 +2131,57 @@ Remove-Item -LiteralPath $budgetPreviewPath -Force
 gh workflow run 'Performance Baseline' --repo nonononull/inputcodex --ref codex/issue-59-epyc-7763-fixed-remeasurement -f mode=measure
 ```
 
+## Issue #65：`v1.2.43` 功能目录重新审计
+
+本任务只允许在已批准二十四路径内运行本地轻量验证；完整 Workspace 与三平台构建继续交给标准 GitHub-hosted CI。
+
+```powershell
+cargo test -p inputcodex-parity --test catalog_repository --offline
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+git diff --check
+```
+
+二十四路径范围哈希使用项目所有者 Windows 本机 PowerShell 的 `Sort-Object`、UTF-8 无 BOM、LF 拼接和末尾换行复算：
+
+```powershell
+$paths = @(
+  'AGENTS.md',
+  'README.md',
+  'build.md',
+  'crates/inputcodex-parity/tests/catalog_repository.rs',
+  'docs/plans/2026-07-27-issue-65-v1.2.43-catalog-reaudit.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-07-27-issue-65-v1.2.43-catalog-reaudit.md',
+  'docs/reports/issue-65-v1.2.43-catalog-reaudit-discovery.md',
+  'docs/workflows/2026-07-27-issue-65-v1.2.43-catalog-reaudit-runtime.md',
+  'parity/README.md',
+  'parity/contracts/foundation-platform.yml',
+  'parity/contracts/plugin-script.yml',
+  'parity/contracts/provider-network.yml',
+  'parity/contracts/remote-install.yml',
+  'parity/contracts/session-data.yml',
+  'parity/features/foundation-platform.yml',
+  'parity/features/plugin-script.yml',
+  'parity/features/provider-network.yml',
+  'parity/features/remote-install.yml',
+  'parity/features/session-data.yml',
+  'parity/features/source-index.yml',
+  'parity/fixtures/feature.session-data.provider-metadata-maintenance/baseline.yml',
+  'parity/fixtures/feature.session-data.provider-metadata-maintenance/manifest.yml',
+  'upstream/source-lock.json'
+) | Sort-Object
+$text = ($paths -join "`n") + "`n"
+$bytes = [System.Text.UTF8Encoding]::new($false).GetBytes($text)
+$hash = [System.Security.Cryptography.SHA256]::HashData($bytes)
+$scopeHash = 'sha256:' + [Convert]::ToHexString($hash).ToLowerInvariant()
+if ($scopeHash -ne 'sha256:82234e7aacce0bd6c57994529ccf74371052ed906dc8371324b90e41f697d7b7') {
+  throw "Issue #65 范围哈希漂移：$scopeHash"
+}
+```
+
+期望目录测试为 `12 passed; 0 failed`，来源、feature、合同、fixture、例外、排除与覆盖缺口计数分别保持 `133/36/36/11/10/3/0`；`release_audit.status=current` 且 stale 字段为 `null`。
+
 ## 外部 AGOS 使用边界
 
 Issue `#17` 曾以 report-only 运行 AGOS 默认入口，结果为 `needs-input/unregistered`；已按项目规则记录并绕过。AGOS 不属于环境要求或合并门禁；不得在本规划 PR 中修改、修复或优化其 Registry、脚本、规则、Workflow 或 Vault。

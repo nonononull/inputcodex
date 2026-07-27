@@ -17,7 +17,7 @@ contracts:
         description: '只返回待决策状态，不执行上游实现。'
     side_effects:
       - none
-    persistence: '只保存审计决定引用，不加载、下载或执行上游实现。'
+    persistence: '只保存审计决定引用，不得加载、下载或展示 sponsor，也不得执行上游实现。'
     errors:
       - code: PARITY_EXCEPTION_PENDING
         kind: policy
@@ -38,7 +38,7 @@ contracts:
       - duration_ms
       - outcome_class
     platforms:
-      shared_semantics: '项目禁止广告、推广位和付费导流，仅保留上游证据。'
+      shared_semantics: 'v1.2.43 的 sponsor、expires_at 和本地素材只作为审计输入；不得加载、下载或展示 sponsor。'
       windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
       macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
       differences: []
@@ -50,7 +50,7 @@ contracts:
     feature_id: feature.foundation-platform.application-lifecycle
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: application-lifecycle-request
@@ -95,7 +95,7 @@ contracts:
     feature_id: feature.foundation-platform.application-overview
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: application-overview-request
@@ -141,7 +141,7 @@ contracts:
     feature_id: feature.foundation-platform.diagnostics
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: diagnostics-request
@@ -188,7 +188,7 @@ contracts:
     feature_id: feature.foundation-platform.environment-conflicts
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: environment-conflicts-request
@@ -234,7 +234,7 @@ contracts:
     feature_id: feature.foundation-platform.platform-paths
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: platform-paths-request
@@ -279,7 +279,7 @@ contracts:
     feature_id: feature.foundation-platform.settings-management
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: settings-management-request
@@ -326,7 +326,7 @@ contracts:
     feature_id: feature.foundation-platform.version-and-startup
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: version-and-startup-request
@@ -371,12 +371,12 @@ contracts:
     feature_id: feature.foundation-platform.watcher
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: watcher-request
         required: false
-        description: '结构化请求；无参数时为空对象。'
+        description: '结构化请求，包含目标 debug port 与操作类型；无参数时为空对象。'
     outputs:
       - name: result
         data_type: watcher-result
@@ -384,31 +384,35 @@ contracts:
     side_effects:
       - filesystem-write
       - process-control
-    persistence: '文件写入原子化，失败不得留下半成品或凭据日志。'
+    persistence: '文件写入原子化；重启前必须等待旧进程退出，失败不得留下半成品或凭据日志。'
     errors:
       - code: WATCHER_FAILED
         kind: feature
-        semantics: 'Watcher 管理失败时返回稳定错误分类，不伪造空成功。'
+        semantics: 'Watcher 管理、目标进程终止或等待旧进程退出失败时返回稳定错误分类，不伪造空成功。'
     loading:
       states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
       request_identity: '每次Watcher 管理请求使用唯一递增标识。'
       stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
     timeout:
-      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
-      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+      behavior: 等待旧进程退出超时后进入 Failed，不启动替代进程并保留稳定错误分类。
+      evidence: 记录 debug port、目标进程数、剩余进程数、耗时和错误类别，不记录凭据或私人路径。
     cancellation:
       behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
       evidence: 记录取消请求、清理完成和旧请求失效。
-    isolation: 'Watcher 管理单次失败不得污染其他 feature、请求或稳定状态。'
+    isolation: 'Watcher 只能控制目标 debug port 对应的主进程，必须排除 helper 和非目标实例；单次失败不得污染其他 feature、请求或稳定状态。'
     observability:
       - request_identity
+      - debug_port
+      - target_process_count
+      - remaining_process_count
       - duration_ms
       - outcome_class
     platforms:
-      shared_semantics: '安装、启停和查询 Watcher，进程与持久化状态必须可诊断。'
-      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
-      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
-      differences: []
+      shared_semantics: '重启只处理目标实例，等待旧进程退出并对超时留证；不得把上游平台差异带入 inputcodex。'
+      windows: '上游 v1.2.43 仍为粗粒度停止；inputcodex 实现前必须补齐与 macOS 等价的目标隔离。'
+      macos: '按 remote-debugging-port 精确筛选 Codex 主进程，排除 Helpers，等待退出后再重启。'
+      differences:
+        - '上游 v1.2.43 仅 macOS 按 debug port 精确筛选；该差异不得成为 inputcodex 产品差异。'
     fixture_policy:
       mode: none
       reason: '基线只约束状态、副作用和错误语义，不需要结构样本。'

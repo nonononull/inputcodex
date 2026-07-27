@@ -5,7 +5,7 @@ contracts:
     feature_id: feature.provider-network.aggregate-routing
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: aggregate-routing-request
@@ -51,7 +51,7 @@ contracts:
     feature_id: feature.provider-network.context-entry-management
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: context-entry-management-request
@@ -97,7 +97,7 @@ contracts:
     feature_id: feature.provider-network.model-catalog
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: model-catalog-request
@@ -144,7 +144,7 @@ contracts:
     feature_id: feature.provider-network.network-environment
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: network-environment-request
@@ -190,7 +190,7 @@ contracts:
     feature_id: feature.provider-network.protocol-proxy
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: protocol-proxy-request
@@ -236,7 +236,7 @@ contracts:
     feature_id: feature.provider-network.provider-configuration-application
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: provider-configuration-application-request
@@ -282,7 +282,7 @@ contracts:
     feature_id: feature.provider-network.provider-diagnostics
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: provider-diagnostics-request
@@ -327,7 +327,7 @@ contracts:
     feature_id: feature.provider-network.provider-import
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: provider-import-request
@@ -374,7 +374,7 @@ contracts:
     feature_id: feature.provider-network.relay-profile-management
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: relay-profile-management-request

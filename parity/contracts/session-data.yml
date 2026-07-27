@@ -5,7 +5,7 @@ contracts:
     feature_id: feature.session-data.local-session-management
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: local-session-management-request
@@ -66,7 +66,7 @@ contracts:
     feature_id: feature.session-data.markdown-export
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: markdown-export-request
@@ -113,7 +113,7 @@ contracts:
     feature_id: feature.session-data.provider-metadata-maintenance
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: provider-metadata-maintenance-request
@@ -122,16 +122,22 @@ contracts:
     outputs:
       - name: result
         data_type: provider-metadata-maintenance-result
-        description: 'Provider 元数据维护的稳定结果或明确空结果。'
+        description: 'Provider 元数据维护、SQLite catalog 修复与同步状态维护的稳定结果或明确空结果。'
+      - name: sqlite_catalog_rows_inserted
+        data_type: non-negative-integer
+        description: '从 threads 修复到 local_thread_catalog 的新增行数，对外映射为 sqliteCatalogRowsInserted。'
+      - name: catalog_sync_state
+        data_type: provider-catalog-sync-state
+        description: '包含 watermark、initial_build_complete 和 observation_sequence 的同步状态。'
     side_effects:
       - database-read
       - database-write
       - filesystem-write
-    persistence: '数据库写入事务化，失败回滚且不删除原始数据。'
+    persistence: 'local_thread_catalog 与同步状态写入必须同事务提交，失败回滚且不删除原始 threads 数据。'
     errors:
       - code: PROVIDER_METADATA_MAINTENANCE_FAILED
         kind: feature
-        semantics: 'Provider 元数据维护失败时返回稳定错误分类，不伪造空成功。'
+        semantics: 'Provider 元数据维护、catalog 修复或同步状态写入失败时返回稳定错误分类，不伪造空成功或错误计数。'
     loading:
       states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
       request_identity: '每次Provider 元数据维护请求使用唯一递增标识。'
@@ -145,10 +151,12 @@ contracts:
     isolation: 'Provider 元数据维护单次失败不得污染其他 feature、请求或稳定状态。'
     observability:
       - request_identity
+      - sqlite_catalog_rows_inserted
+      - observation_sequence
       - duration_ms
       - outcome_class
     platforms:
-      shared_semantics: '同步 metadata、预览与应用索引清理并生成本地备份。'
+      shared_semantics: '同步 metadata、从 threads 修复 local_thread_catalog、返回 sqlite_catalog_rows_inserted、维护 observation_sequence 并生成本地备份。'
       windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
       macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
       differences: []
@@ -161,7 +169,7 @@ contracts:
     feature_id: feature.session-data.token-usage-history
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.42 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: token-usage-history-request

@@ -1,7 +1,7 @@
 schema_version: inputcodex.source-index.v1
 release:
-  tag: v1.2.42
-  tag_commit: 657cd33e009ad02515d30db6492cd4e669b06318
+  tag: v1.2.43
+  tag_commit: 5036ff056b5c629f19356396b17d6eeb70da664c
 sources:
   - id: core-module:ads
     kind: core-module
@@ -13,9 +13,10 @@ sources:
     disposition:
       type: exception-pending
       feature_id: feature.foundation-platform.advertising
-      reason: '项目禁止广告、推广位和付费导流。'
+      reason: '项目禁止广告、推广位和付费导流；v1.2.43 sponsor 与 expires_at 仅作审计输入。'
       decision_refs:
         - issue:26
+        - issue:65
         - rule:AGENTS-product-constraints
   - id: core-module:app_paths
     kind: core-module
@@ -461,9 +462,10 @@ sources:
     disposition:
       type: exception-pending
       feature_id: feature.plugin-script.user-scripts
-      reason: '用户脚本执行依赖注入链。'
+      reason: '用户脚本执行及 v1.2.43 runtime status/error 仍依赖注入链。'
       decision_refs:
         - issue:26
+        - issue:65
         - rule:AGENTS-product-constraints
   - id: core-module:version
     kind: core-module
