@@ -269,6 +269,16 @@ try {
         Assert-Condition -Condition (@($run.Json.violations.code) -contains 'BUDGET_STATUS_INVALID') -Message '缺少 BUDGET_STATUS_INVALID'
     }
 
+    Invoke-ContractTest -Name '预算锁字段缺失必须失败' -Body {
+        $budget = Copy-JsonValue $approvedBudget
+        $budget.PSObject.Properties.Remove('budget_ci_enabled')
+        $budget.PSObject.Properties.Remove('gate_5_unlocked')
+        $case = Write-TestCase -Name 'budget-guards' -Budget $budget -Result (New-ComparableResult -Platform 'windows' -Budget $approvedBudget)
+        $run = Invoke-Observer -BudgetPath $case.BudgetPath -ResultPath $case.ResultPath -Platform 'windows' -ExpectedBudgetSha256 $case.BudgetHash
+        Assert-Condition -Condition ($run.ExitCode -ne 0) -Message '预算锁字段缺失必须失败'
+        Assert-Condition -Condition (@($run.Json.violations.code) -contains 'BUDGET_GUARD_INVALID') -Message '缺少 BUDGET_GUARD_INVALID'
+    }
+
     Invoke-ContractTest -Name '平台不匹配必须失败' -Body {
         $case = Write-TestCase -Name 'platform' -Budget (Copy-JsonValue $approvedBudget) -Result (New-ComparableResult -Platform 'macos' -Budget $approvedBudget)
         $run = Invoke-Observer -BudgetPath $case.BudgetPath -ResultPath $case.ResultPath -Platform 'windows' -ExpectedBudgetSha256 $case.BudgetHash

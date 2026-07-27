@@ -330,7 +330,14 @@ try {
         if ((Get-JsonProperty -Object $budget -Name 'status') -ne 'approved-observation') {
             Add-Violation -Code 'BUDGET_STATUS_INVALID' -Path $resolvedBudgetPath -Message '预算状态必须为 approved-observation。'
         }
-        if ([bool](Get-JsonProperty -Object $budget -Name 'budget_ci_enabled') -or [bool](Get-JsonProperty -Object $budget -Name 'gate_5_unlocked')) {
+        $budgetCiProperty = $budget.PSObject.Properties['budget_ci_enabled']
+        $gate5Property = $budget.PSObject.Properties['gate_5_unlocked']
+        if ($null -eq $budgetCiProperty -or
+            $budgetCiProperty.Value -isnot [bool] -or
+            $budgetCiProperty.Value -ne $false -or
+            $null -eq $gate5Property -or
+            $gate5Property.Value -isnot [bool] -or
+            $gate5Property.Value -ne $false) {
             Add-Violation -Code 'BUDGET_GUARD_INVALID' -Path $resolvedBudgetPath -Message '预算 CI 与 Gate 5 必须继续锁定。'
         }
     }
