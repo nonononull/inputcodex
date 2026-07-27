@@ -95,47 +95,63 @@ contracts:
     feature_id: feature.foundation-platform.application-overview
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，Issue #77 方案 A 与 Issue #78 只读实现范围已经批准。'
+      - 'Windows 最多读取一个 version 文件和 256 bytes；macOS 最多读取一个 Info.plist 和 65536 bytes。'
     inputs:
       - name: request
         data_type: application-overview-request
         required: false
-        description: '结构化请求；无参数时为空对象。'
+        description: '可选受保护显式安装路径；调试输出不得泄露私人绝对路径。'
     outputs:
       - name: result
         data_type: application-overview-result
-        description: '应用概览与检测的稳定结果或明确空结果。'
+        description: '只返回 Ready(Installed Known)、Ready(Installed Unknown) 或 Ready(NotInstalled)；版本质量问题使用 InstalledVersion::Unknown，实时进程状态固定为 LiveProcessState::NotObserved。'
     side_effects:
       - filesystem-read
-      - process-read
-    persistence: '不持久化私人路径、凭据或真实会话内容。'
+    persistence: '纯只读，不持久化私人路径、凭据、会话内容或采集结果，也不读取历史启动状态。'
     errors:
-      - code: APPLICATION_OVERVIEW_FAILED
-        kind: feature
-        semantics: '应用概览与检测失败时返回稳定错误分类，不伪造空成功。'
+      - code: APPLICATION_OVERVIEW_UNSUPPORTED
+        kind: unsupported
+        semantics: '当前目标平台不是 Windows 或 macOS。'
+      - code: EXPLICIT_CODEX_PATH_INVALID
+        kind: unavailable
+        semantics: '调用方给出的显式安装路径违反受保护路径合同。'
+      - code: APPLICATION_OVERVIEW_DISCOVERY_FAILED
+        kind: internal
+        semantics: '平台安装发现发生不可恢复失败；不得伪造未安装。'
+      - code: APPLICATION_OVERVIEW_TIME_UNAVAILABLE
+        kind: internal
+        semantics: '无法生成合法 Unix 毫秒采集时间；不得填入伪造时间。'
+      - code: APPLICATION_OVERVIEW_BUILD_VERSION_INVALID
+        kind: internal
+        semantics: 'inputcodex 构建版本违反领域版本规则。'
     loading:
       states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
-      request_identity: '每次应用概览与检测请求使用唯一递增标识。'
-      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+      request_identity: '每次只读应用概览请求使用唯一递增标识。'
+      stale_result_rule: '旧请求结果不得覆盖更新请求；未安装仍返回 Ready(NotInstalled)，Empty 不承载本能力结果。'
     timeout:
-      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
-      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+      behavior: '调用方超时后进入 Failed 并使旧请求失效；平台适配器不得启动后台任务。'
+      evidence: '记录请求标识、耗时和稳定诊断码，不记录私人路径或读取内容。'
     cancellation:
-      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
-      evidence: 记录取消请求、清理完成和旧请求失效。
-    isolation: '应用概览与检测单次失败不得污染其他 feature、请求或稳定状态。'
+      behavior: '取消后进入 Cancelling，完成只读调用清理后回到 Idle，旧结果失效。'
+      evidence: '记录取消请求、清理完成和旧请求失效，不新增线程或缓存。'
+    isolation: '版本元数据缺失、不可读或非法只降级为 InstalledVersion::Unknown；单次失败不得污染其他 feature。'
     observability:
       - request_identity
       - duration_ms
       - outcome_class
+      - installation_state
+      - installed_version_state
+      - live_process_state
     platforms:
-      shared_semantics: '检测本机 Codex 应用、运行状态与必要路径，失败必须隔离并可诊断。'
-      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
-      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
-      differences: []
+      shared_semantics: 'Windows 与 macOS 返回同一只读领域快照，不从历史记录推断实时运行状态。'
+      windows: '受控包目录或数字目录优先；只读取一个 version 文件，硬上限 256 bytes。'
+      macos: '短版本优先、构建版本回退；只读取一个 Info.plist，硬上限 65536 bytes。'
+      differences:
+        - '仅安装定位和版本元数据格式不同；领域、加载和错误语义一致。'
     fixture_policy:
       mode: none
-      reason: '基线只约束状态、副作用和错误语义，不需要结构样本。'
+      reason: '合同只约束合成路径下的只读事实和稳定语义，不保存真实机器元数据。'
     fixture_refs: []
   - id: contract.feature.foundation-platform.diagnostics.baseline
     feature_id: feature.foundation-platform.diagnostics

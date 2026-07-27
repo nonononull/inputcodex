@@ -414,10 +414,10 @@ sources:
       path: upstream/CodexPlusPlus/crates/codex-plus-core/src/status.rs
       symbol: status
     platforms: [windows, macos]
-    side_effects: [filesystem-read, process-read]
+    side_effects: [filesystem-read, filesystem-write]
     disposition:
       type: feature
-      feature_id: feature.foundation-platform.application-overview
+      feature_id: feature.foundation-platform.application-lifecycle
   - id: core-module:stepwise
     kind: core-module
     evidence:
