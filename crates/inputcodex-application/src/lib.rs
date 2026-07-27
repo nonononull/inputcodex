@@ -2,6 +2,10 @@
 
 use inputcodex_domain::DiagnosticCode;
 
+mod platform_paths;
+
+pub use platform_paths::{PlatformPathsPort, PlatformPathsRequest, ResolvePlatformPaths};
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct RequestId(u64);
 
@@ -46,6 +50,11 @@ impl ApplicationError {
     #[must_use]
     pub const fn unavailable(code: &'static str) -> Self {
         Self::new(ErrorKind::Unavailable, DiagnosticCode::new(code))
+    }
+
+    #[must_use]
+    pub const fn internal(code: &'static str) -> Self {
+        Self::new(ErrorKind::Internal, DiagnosticCode::new(code))
     }
 
     #[must_use]
