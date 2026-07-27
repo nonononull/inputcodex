@@ -42,13 +42,14 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: '选择 evidence 复核既有证据或 measure 生成新的临时样本'
+        description: '选择 evidence 复核既有证据、measure 生成临时样本或 observation 执行预算观察'
         required: true
         default: evidence
         type: choice
         options:
           - evidence
           - measure
+          - observation
 
 permissions:
   contents: read
@@ -105,18 +106,15 @@ jobs:
               }
               $mode = 'evidence'
             }
+            elseif ($manualMode -eq 'observation') {
+              $mode = 'observation'
+            }
             else {
               throw "不支持的 workflow_dispatch mode：$manualMode"
             }
           }
-          elseif ($presentCount -eq 0) {
-            $mode = 'measure'
-          }
-          elseif ($presentCount -eq $evidencePaths.Count) {
-            $mode = 'evidence'
-          }
           else {
-            throw "性能证据必须全部缺失或全部存在，当前为 $presentCount/$($evidencePaths.Count)。"
+            $mode = 'observation'
           }
           "mode=$mode" | Add-Content -LiteralPath $env:GITHUB_OUTPUT -Encoding utf8
           "mode=$mode" | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Encoding utf8
@@ -144,12 +142,12 @@ jobs:
           persist-credentials: false
 
       - name: 安装固定 Rust 工具链
-        if: ${{ needs.contract.outputs.mode == 'measure' }}
+        if: ${{ needs.contract.outputs.mode == 'measure' || needs.contract.outputs.mode == 'observation' }}
         shell: pwsh
         run: rustup toolchain install 1.97.1 --profile minimal --no-self-update
 
       - name: 采集 Windows 原始结果
-        if: ${{ needs.contract.outputs.mode == 'measure' }}
+        if: ${{ needs.contract.outputs.mode == 'measure' || needs.contract.outputs.mode == 'observation' }}
         shell: pwsh
         run: |
           $reportDir = Join-Path $env:RUNNER_TEMP 'inputcodex-performance/windows'
@@ -168,6 +166,23 @@ jobs:
           pwsh -NoProfile -File scripts/performance/Test-InputcodexBaseline.ps1 -RepositoryRoot . -Mode Evidence 2>&1 |
             Tee-Object -FilePath (Join-Path $reportDir 'evidence.log')
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: 评估 Windows approved-observation
+        if: ${{ needs.contract.outputs.mode == 'observation' }}
+        shell: pwsh
+        run: |
+          $reportDir = Join-Path $env:RUNNER_TEMP 'inputcodex-performance/windows'
+          $observationOutput = @(& pwsh -NoProfile -File scripts/performance/Invoke-InputcodexBudgetObservation.ps1 `
+            -RepositoryRoot . `
+            -BudgetPath benchmarks/budgets/issue-59-approved-observation.json `
+            -ResultPath (Join-Path $reportDir 'result/windows.json') `
+            -Platform windows 2>&1)
+          $observationExitCode = $LASTEXITCODE
+          $observationOutput | Tee-Object -FilePath (Join-Path $reportDir 'observation.log')
+          $observationJson = @($observationOutput | ForEach-Object { $_.ToString() } | Where-Object { $_.TrimStart().StartsWith('{') } | Select-Object -Last 1)
+          if ($observationExitCode -ne 0) { exit $observationExitCode }
+          if ($observationJson.Count -ne 1) { throw 'Windows observation 未输出唯一 JSON。' }
+          $observationJson[0] | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Encoding utf8
 
       - name: 上传 Windows 临时成功结果
         if: ${{ needs.contract.outputs.mode == 'measure' && success() }}
@@ -201,12 +216,12 @@ jobs:
           persist-credentials: false
 
       - name: 安装固定 Rust 工具链
-        if: ${{ needs.contract.outputs.mode == 'measure' }}
+        if: ${{ needs.contract.outputs.mode == 'measure' || needs.contract.outputs.mode == 'observation' }}
         shell: pwsh
         run: rustup toolchain install 1.97.1 --profile minimal --no-self-update
 
       - name: 采集 macOS 原始结果
-        if: ${{ needs.contract.outputs.mode == 'measure' }}
+        if: ${{ needs.contract.outputs.mode == 'measure' || needs.contract.outputs.mode == 'observation' }}
         shell: pwsh
         run: |
           $reportDir = Join-Path $env:RUNNER_TEMP 'inputcodex-performance/macos'
@@ -225,6 +240,23 @@ jobs:
           pwsh -NoProfile -File scripts/performance/Test-InputcodexBaseline.ps1 -RepositoryRoot . -Mode Evidence 2>&1 |
             Tee-Object -FilePath (Join-Path $reportDir 'evidence.log')
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: 评估 macOS approved-observation
+        if: ${{ needs.contract.outputs.mode == 'observation' }}
+        shell: pwsh
+        run: |
+          $reportDir = Join-Path $env:RUNNER_TEMP 'inputcodex-performance/macos'
+          $observationOutput = @(& pwsh -NoProfile -File scripts/performance/Invoke-InputcodexBudgetObservation.ps1 `
+            -RepositoryRoot . `
+            -BudgetPath benchmarks/budgets/issue-59-approved-observation.json `
+            -ResultPath (Join-Path $reportDir 'result/macos.json') `
+            -Platform macos 2>&1)
+          $observationExitCode = $LASTEXITCODE
+          $observationOutput | Tee-Object -FilePath (Join-Path $reportDir 'observation.log')
+          $observationJson = @($observationOutput | ForEach-Object { $_.ToString() } | Where-Object { $_.TrimStart().StartsWith('{') } | Select-Object -Last 1)
+          if ($observationExitCode -ne 0) { exit $observationExitCode }
+          if ($observationJson.Count -ne 1) { throw 'macOS observation 未输出唯一 JSON。' }
+          $observationJson[0] | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Encoding utf8
 
       - name: 上传 macOS 临时成功结果
         if: ${{ needs.contract.outputs.mode == 'measure' && success() }}

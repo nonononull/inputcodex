@@ -79,7 +79,8 @@
 - Issue `#54` 的十六份原始 JSON 与 manifest 在 Issue `#59` 中只能作为只读历史证据缓存；不得修改其原始 `new-cohort-valid` 分类、来源 Run、哈希或任何样本内容。
 - 合并后稳定状态由 `docs/reports/issue-52-performance-budget-closeout.md` 固化；本 Closeout 自身的动态 Head、CI、Review、授权与合并证据只保留在 GitHub Issue/PR 评论，不得递归创建同类状态 Closeout。
 - Issue `#61` 是 Issue `#59` / PR `#60` 稳定事实的八路径反递归 Closeout；其自身动态 Head、CI、Review、授权与合并证据只保留在 GitHub Issue/PR 评论，合并后不得再次创建同类 Closeout。
-- Gate 5 继续锁定；下一合法工作只能是独立预算 CI 观察 Issue，以非 required 的 `approved-observation` 模式在 Windows/macOS 成功执行且 `release_audit=current` 后，才能建立首个 Gate 5 产品迁移 Issue。
 - Issue `#64` / PR `#66` 已将最新正式 Release `v1.2.43 @ 5036ff056b5c629f19356396b17d6eeb70da664c` 缓存为完整只读审计输入；单父 Squash 提交为 `15e91708b41548f523e26ede4c7ca4de41badf77`，合并后主干 CI Run `30214249228` 七 Job 全绿且 Artifact 为 `0`。
-- Issue `#65` 已批准方案 A、二十四路径与 `sha256:82234e7aacce0bd6c57994529ccf74371052ed906dc8371324b90e41f697d7b7`；当前分支只允许把五域目录、合同、source-index、Provider fixture 与 `release_audit` 对齐 `v1.2.43`，不得迁移产品功能或改变既有例外边界。
-- Issue `#65` 的目录测试已完成 `12/12` GREEN，来源、feature、合同、fixture、例外和排除计数保持不变；最终 Squash Merge 仍必须等待最终 PR Head 的 Review、CI、全部对话闭环与项目所有者单独授权。
+- Issue `#63` / PR `#73` 已完成非 required `approved-observation` 预算 CI；Final Head `e742227086a3457ea876a91fc84c2d115257cf40` 以单父 Squash 提交 `19d1824398d46a0d4f6b9e4805905485793d3c9d` 进入 `main`，tree 为 `8e44390053b9a839a19be6357b833583fbbb6a5a`，GitHub 签名 `valid`。合并后主干 CI Run `30242317618` 七 Job、Performance Baseline Run `30242317615` 四 Job全绿且 Artifact 均为 `0`；Issue `#63` 保持开放，等待 `release_audit=current` 的最终主干观察。
+- `Performance Baseline` 的自动 PR/push 固定使用 `observation`；四种阈值分类均不得阻断，预算或结果合同错误必须阻断，成功 observation 禁止上传 Artifact，失败只允许保留七天最小诊断且不得包含 `target/`。
+- Issue `#65` / PR `#72` 已在批准的二十四路径与 `sha256:82234e7aacce0bd6c57994529ccf74371052ed906dc8371324b90e41f697d7b7` 内完成 `12/12` GREEN；分支通过普通 merge 纳入 PR `#73` 的主干基线，只解决控制面状态冲突，不 force push、不改变功能 diff、预算、Workflow、Ruleset 或 Gate 5。新 Final Head 仍必须完成 Review、CI、全部对话闭环与项目所有者单独 Squash Merge 授权。
+- Gate 5 继续锁定；PR `#72` 合并后必须确认 `main` observation 双平台成功、Artifact 为 `0` 且 `release_audit=current`，关闭 Issue `#63` 后才能建立首个 Gate 5 产品迁移 Issue。

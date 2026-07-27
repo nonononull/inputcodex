@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 功能目录、`v1.2.43` 缓存与重新审计、双平台性能基线和性能预算数值批准。Issue `#59` / PR `#60` 已以单父 Squash 提交 `e225144831a0928bfa3aaa0d169a054779005812` 进入 `main`：Windows AMD EPYC 7763 严格目标队列为 `5`，macOS 同队列为 `12`，预算 JSON 与离线复算合同 `10/10` GREEN。预算 CI、性能优化、上游功能迁移和 Gate 5 继续锁定。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 `v1.2.43` 完整缓存、双平台性能基线、性能预算数值批准和非 required `approved-observation` 预算 CI。Issue `#63` / PR `#73` 已以单父 Squash 提交 `19d1824398d46a0d4f6b9e4805905485793d3c9d` 进入 `main`，合并后 CI 7/7、Performance Baseline 4/4 全绿且 Artifact 为 `0`；Issue `#65` / PR `#72` 正在完成 `v1.2.43` 功能目录重新审计，性能优化、上游功能迁移和 Gate 5 继续锁定。
 
 ## 项目目标
 
@@ -52,7 +52,8 @@
 - Issue `#26` / PR `#27` 已完成 Gate 4 功能目录执行：最终 Head `1d1bf32cdc4edc45e2d28f1047604222ebdb51e4` 以 Squash 提交 `a9b20f00ae069aedd42c8124d2789b230187258c` 进入 `main`；merge/head tree 均为 `205c24e05e0451a3aa39af4f43f0d9853cc7a6a2`，GitHub 签名 `valid`，PR 与合并后主干 CI 均六 Job 全绿且成功 Artifact 数为 `0`。
 - Issue `#28` / PR `#29` 已完成 Gate 4 独立 Closeout：最终 Head `7ee316c6bf4d9ca44f3475283ae1aee9c83f8577` 以单父 Squash 提交 `c07da0cad33e09b5c54e528a8a6728a048c88c0b` 合入 `main`，tree 为 `02ab8a3d8497ebb7b990e4078122b9bf916ef454`，GitHub 签名有效；Issue `#28` 已关闭，合并后主干 CI `29948874307` 六 Job 全部成功且 Artifact 数为 `0`。
 - Issue `#64` / PR `#66` 已把 `v1.2.43 @ 5036ff056b5c629f19356396b17d6eeb70da664c` 完整缓存为只读审计输入；Squash 提交 `15e91708b41548f523e26ede4c7ca4de41badf77` 的主干 CI Run `30214249228` 为 `7/7` 成功且 Artifact 为 `0`。
-- Issue `#65` 已按方案 A 的二十四路径和精确范围哈希完成 TDD：基线 `12/12`、RED `9/12`、GREEN `12/12`；Watcher、Provider Sync、User Scripts 与广告例外已按 `v1.2.43` 证据更新，但没有迁移任何上游运行面。
+- Issue `#63` / PR `#73` 已把自动 PR/push 性能检查切换为当前 Head 双平台 `observation`；Final Head 与合并后 `main` 的两套 Workflow 均全绿且成功 Artifact 为 `0`，Issue `#63` 继续等待 `release_audit=current` 的最终主干观察。
+- Issue `#65` / PR `#72` 已按方案 A 的二十四路径和精确范围哈希完成 TDD：基线 `12/12`、RED `9/12`、GREEN `12/12`；Watcher、Provider Sync、User Scripts 与广告例外已按 `v1.2.43` 证据更新，但没有迁移任何上游运行面。当前分支已通过普通 merge 纳入 PR `#73` 的主干基线，新 Final Head 仍待 Review/CI 与单独 Squash Merge 授权。
 
 当前明确不做：
 
@@ -60,6 +61,7 @@
 - 不导入半成品参考仓库源码。
 - Issue `#32` 已完成隔离性能基线，但没有批准预算；两平台数据禁止跨平台排名，单次有效 Run 不得被解释为 required budget。
 - Issue `#50` / PR `#51` 已在批准九路径内冻结性能预算方法和长期状态；该交付没有填写预算数值、修改性能实现/Workflow、实施优化或解锁 Gate 5。
+- Issue `#63` 不修改预算 JSON、数值、公式、历史 Evidence、Ruleset、required checks、产品行为、Gate 5、`upstream/` 或 AGOS；阈值观察不得被解释为 required budget。
 - 不改写 Issue `#38` 的历史 Plan、Session Plan、Runtime Workflow 或来源提交；其阶段性叙述与最终 GitHub 事实的差异只通过 Issue `#47` Closeout 报告和长期控制面更正收口。
 - 不执行功能迁移、安装包构建、发布或未经项目所有者授权的 PR 合并。
 - 不让上游 Tauri/React UI、现有注入脚本和远程推荐列表进入最终运行面。
@@ -81,11 +83,12 @@
 - Issue `#50` / PR `#51` 已通过 ADR `0004` 冻结预算对象、可比队列、五次独立 Run、run-level 稳健统计、错误语义和阶段升级合同；PR Final Head CI 与合并后主干 CI 均通过，Gate 5 仍未解锁。
 - Issue `#55` 使 `Performance Baseline` 的手工 trigger 必须显式选择 `evidence` 或 `measure`，默认值为 `evidence`；它不改变自动 PR/push 行为，也不实施预算 CI。Issue `#54` 已以八次严格串行 hosted Run 验证该入口，但 Windows 的 CPU 队列分裂为四类，未产生五次同队列样本；预算数值预授权因此没有触发。
 - Issue `#59` / PR `#60` 已在固定四次上限内新增两份严格目标 Windows 样本，最终 Windows/macOS 队列数为 `5/12`；`benchmarks/budgets/issue-59-approved-observation.json` 使用所有者预授权公式离线生成并进入 `main`。PR Final Head 与合并后主干的 CI/Performance 共四个 Run 均全绿且 Artifact 为 `0`，预算 CI 与 Gate 5 仍保持关闭。
+- Issue `#63` 的本地实现已使 `Performance Baseline` 手工模式支持 `evidence`、`measure`、`observation` 且默认仍为 `evidence`，自动 PR/push 固定为 `observation`；当前只完成本地轻量验证，尚未以 PR Head 在 Windows/macOS GitHub-hosted Runner 上验收。
 
 ## 下一步
 
-1. 建立独立预算 CI Issue，以非 required 的 `approved-observation` 模式完成 Windows/macOS 观察；只能消费已批准 JSON，不得修改数值、公式、量子、队列或启用 Ruleset。
-2. 预算 CI 双平台成功执行、`release_audit=current` 且后续所有者决策完成后，才建立首个 Gate 5 功能迁移 Issue；性能优化继续使用独立 Issue/PR。
+1. 完成 Issue `#63` 的十三路径验证、非 Draft PR、Review/CI 和 Windows/macOS 真实 observation；最终 Squash Merge 保留单独授权。
+2. Issue `#63` 合并后重放 PR `#72` 的同一 Final Head，再在其独立授权合并后核验 `main` 自动 observation；只有双平台成功、成功 Artifact 为 `0` 且 `release_audit=current`，才建立首个 Gate 5 功能迁移 Issue。
 
 ## 项目文档
 
@@ -131,6 +134,10 @@
 - Issue `#61` Session Plan：`docs/plans/sessions/2026-07-26-issue-61-performance-budget-closeout.md`
 - Issue `#61` Runtime Workflow：`docs/workflows/2026-07-26-issue-61-performance-budget-closeout-runtime.md`
 - Issue `#61` Closeout 报告：`docs/reports/issue-61-performance-budget-closeout.md`
+- Issue `#63` 预算观察实施计划：`docs/plans/2026-07-26-issue-63-performance-budget-ci-observation.md`
+- Issue `#63` Session Plan：`docs/plans/sessions/2026-07-26-issue-63-performance-budget-ci-observation.md`
+- Issue `#63` Runtime Workflow：`docs/workflows/2026-07-26-issue-63-performance-budget-ci-observation-runtime.md`
+- Issue `#63` 实施报告：`docs/reports/issue-63-performance-budget-ci-observation.md`
 - 本次筹备计划：`docs/plans/2026-07-21-bootstrap.md`
 - 筹备会话计划：`docs/plans/sessions/2026-07-21-inputcodex-bootstrap.md`
 - 筹备运行工作流：`docs/workflows/2026-07-21-inputcodex-bootstrap-runtime.md`
