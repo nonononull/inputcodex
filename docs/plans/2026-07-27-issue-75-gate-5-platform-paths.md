@@ -3,7 +3,7 @@
 ## 控制状态
 
 ```yaml
-status: written-spec-awaiting-owner-review
+status: written-spec-approved-planning-control-ready
 issue_ref: https://github.com/nonononull/inputcodex/issues/75
 parity_exception_ref: https://github.com/nonononull/inputcodex/issues/74
 branch_ref: codex/issue-75-gate-5-platform-paths
@@ -13,13 +13,16 @@ upstream_release: v1.2.43
 upstream_commit: 5036ff056b5c629f19356396b17d6eeb70da664c
 feature_id: feature.foundation-platform.platform-paths
 owner_decision_ref: codex-session-user-message-approved-full-platform-paths-design-2026-07-27
+written_spec_approval_ref: codex-session-user-message-approved-written-spec-2026-07-27
+written_spec_approval_local_time: 2026-07-27 17:39:03 +08:00
 candidate_scope_count: 29
 candidate_scope_hash: sha256:251f54063fafa368e5f134fd01d8a1b6ff3f1ff6f3b02a07b661aa5c0d6f523b
-implementation_authorization: pending-owner-written-spec-review
+scope_approval_status: pending-owner-implementation-authorization
+implementation_authorization: pending-owner-exact-scope-approval
 final_merge_authorization: pending
 ```
 
-本文件是 Issue `#75` 的书面设计规范。项目所有者已批准总体设计和 Issue `#74` 的路径安全策略，但尚未复核本文件与二十九路径候选范围。在复核完成前，只允许提交和推送本规范，不允许编写实现代码、创建 PR 或修改其他仓库文件。
+本文件是 Issue `#75` 的书面设计规范。项目所有者已批准总体设计、Issue `#74` 的路径安全策略和本书面规范，现允许使用 `superpowers:writing-plans` 建立项目原生 Session Plan 与 Runtime Workflow。二十九路径及其哈希在正式实施授权前仍只作为待批准执行合同；当前只允许修改、提交和普通推送三份规划控制面，不允许编写实现代码、创建 PR 或修改其他仓库文件。
 
 ## 目标
 
@@ -124,7 +127,7 @@ final_merge_authorization: pending
 5. 任何组成部分命中 `inputcodex`、`Codex++`、`CodexPlusPlus` 或管理器名称时拒绝识别。
 6. `LOCALAPPDATA` 缺失时返回 `INPUTCODEX_STATE_ROOT_UNAVAILABLE`，不得退到当前目录。
 
-Windows 只直接依赖已在锁文件中的 `windows 0.58.0`，启用 `Win32_Foundation` 与 `Win32_Storage_Packaging_Appx`。不新增 `directories`、`dirs`、Tokio、Serde 或外部命令依赖。
+Windows 只直接依赖已在锁文件中的 `windows 0.58.0`，使用安全 WinRT 投影 `PackageManager::new`、`FindPackagesByPackageFamilyName`、`Package::Id`、`Package::InstalledLocation`、`PackageId::Version` 和 `StorageFolder::Path`；启用特性固定为 `ApplicationModel`、`Foundation_Collections`、`Management_Deployment` 与 `Storage`。禁止直接 Win32 FFI，`inputcodex` 自身继续保持 `#![forbid(unsafe_code)]`。不新增 `directories`、`dirs`、Tokio、Serde 或外部命令依赖。
 
 ## macOS 语义
 
@@ -155,7 +158,7 @@ Windows 只直接依赖已在锁文件中的 `windows 0.58.0`，启用 `Win32_Fo
 ## 性能约束
 
 1. 只读取固定环境键和固定候选根，不递归扫描磁盘。
-2. Windows 注册包查询每次请求最多一次；首版不加全局缓存。
+2. Windows 注册包枚举阶段每次请求只执行一次：只创建一个 `PackageManager`，三个固定 Package Family 各查询至多一次；首版不加全局缓存。
 3. 包版本使用整数段解析，不做大范围正则扫描。
 4. macOS 最多检查两个根目录和四个应用名称。
 5. 不新增异步运行时、后台线程、网络或依赖家族。
@@ -254,7 +257,9 @@ ambiguity_check: passed
 ui_boundary: passed-no-ui
 privacy_boundary: passed-no-public-absolute-path
 dependency_check: passed-no-new-package-family
+windows_api_check: passed-safe-winrt-no-unsafe
+writing_plans_status: completed
 implementation_started: false
 ```
 
-自审未发现未完成占位标记、占位值、矛盾要求或隐藏的第二功能。下一步只能等待项目所有者复核本文件；未获批准不得进入实现计划和 TDD。
+自审未发现未完成占位标记、占位值、矛盾要求或隐藏的第二功能。Session Plan 与 Runtime Workflow 只固化执行顺序和精确边界；项目所有者未明确批准二十九路径、`scope_hash`、实现、轻量验证、提交、普通推送、非 Draft PR 与 Review/CI 前，不得进入 TDD RED 或修改产品代码。
