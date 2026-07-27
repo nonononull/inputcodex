@@ -30,13 +30,15 @@ approved_decision_ref: session-plan:issue-75#decision
 owner_decision_ref: codex-session-user-message-approved-written-spec-2026-07-27
 written_spec_status: approved
 written_spec_approval_local_time: 2026-07-27 17:39:03 +08:00
-scope_approval_status: pending-owner-implementation-authorization
+scope_approval_status: approved
 scope_hash: sha256:251f54063fafa368e5f134fd01d8a1b6ff3f1ff6f3b02a07b661aa5c0d6f523b
-allowed_operations: modify-three-planning-documents, local-document-validation, normal-commit, normal-push, issue-comment
+scope_approval_ref: https://github.com/nonononull/inputcodex/issues/75#issuecomment-5090986061
+implementation_authorization_local_time: 2026-07-27 19:57:43 +08:00
+allowed_operations: exact-twenty-nine-path-tdd, local-lightweight-verification, git-checkpoints, normal-commit, normal-push, non-draft-pr, review-ci
 post_approval_operations: exact-twenty-nine-path-tdd, local-lightweight-verification, git-checkpoints, normal-commit, normal-push, non-draft-pr, review-ci
-mutation_intent: control-plane
-business_mutation_intent: source-after-owner-implementation-authorization
-executor_enforcement: exact-three-planning-paths-now, exact-twenty-nine-paths-after-approval, no-force-push, squash-only, never-delete-main
+mutation_intent: source-and-control-plane
+business_mutation_intent: source-authorized-within-exact-scope
+executor_enforcement: exact-twenty-nine-paths, no-force-push, squash-only, never-delete-main
 delivery_contract: agos.issue-pr-merge.v1
 review_strategy: final-head changed-surface review; every conversation records root cause, treatment and verification evidence
 ci_expectation: standard GitHub-hosted CI plus Windows/macOS compile-test and non-required Performance Baseline observation
@@ -79,7 +81,7 @@ brainstorming:
     - pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
     - pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
     - git diff --check
-  implementation_authorization: pending
+  implementation_authorization: approved
 ```
 
 ## Local Knowledge Lookup
@@ -158,7 +160,7 @@ decision:
   selected_architecture: domain protected values plus application port plus platform pure core and system adapters
   selected_feature: feature.foundation-platform.platform-paths
   written_spec_status: approved
-  implementation_scope_status: pending-owner-authorization
+  implementation_scope_status: approved
   accepted_semantics:
     - 未安装是 Ready 且 installation=None
     - 空白 CODEX_HOME 使用绝对用户目录下 .codex
@@ -289,7 +291,7 @@ README.md
 - Consumes: Issue `#75`、Issue `#74`、书面规范批准消息、二十九路径哈希。
 - Produces: 实施前唯一有效的 Session Plan、Runtime Workflow 和所有者授权门。
 
-- [ ] **Step 1：验证当前只修改三份规划文件**
+- [x] **Step 1：验证当前只修改三份规划文件**
 
 ```powershell
 $allowed = @(
@@ -304,7 +306,7 @@ if ($outside.Count -ne 0) { throw "规划阶段越界：$($outside -join ', ')" 
 
 预期：无越界路径；任何 Rust、Cargo、Parity、根状态文档变化都必须立即回退并停止。
 
-- [ ] **Step 2：提交并普通推送规划检查点**
+- [x] **Step 2：提交并普通推送规划检查点**
 
 ```powershell
 git add -- docs/plans/2026-07-27-issue-75-gate-5-platform-paths.md docs/plans/sessions/2026-07-27-issue-75-gate-5-platform-paths.md docs/workflows/2026-07-27-issue-75-gate-5-platform-paths-runtime.md
@@ -960,7 +962,7 @@ privacy_check: passed-redacted-path-values-and-request
 platform_check: passed-equivalent-windows-macos-contract
 ui_boundary: passed-no-ui
 implementation_started: false
-implementation_authorization: pending-owner-exact-scope-approval
+implementation_authorization: approved
 ```
 
-本计划完整覆盖书面规范的领域、应用、共享解析、Windows、macOS、Parity、文档、验证和交付要求。当前执行到 Task 1 后必须停下；项目所有者正式批准二十九路径、`scope_hash` 和实施/PR 操作后，才允许从 Task 2 的 TDD RED 开始。
+本计划完整覆盖书面规范的领域、应用、共享解析、Windows、macOS、Parity、文档、验证和交付要求。项目所有者已批准二十九路径、`scope_hash` 和实施/PR 操作，Task 1 已完成，允许从 Task 2 的 TDD RED 开始；最终 Squash Merge 仍保留单独授权门。

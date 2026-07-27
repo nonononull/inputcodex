@@ -3,7 +3,7 @@
 ## 控制状态
 
 ```yaml
-status: written-spec-approved-planning-control-ready
+status: implementation-authorized-tdd-ready
 issue_ref: https://github.com/nonononull/inputcodex/issues/75
 parity_exception_ref: https://github.com/nonononull/inputcodex/issues/74
 branch_ref: codex/issue-75-gate-5-platform-paths
@@ -15,14 +15,16 @@ feature_id: feature.foundation-platform.platform-paths
 owner_decision_ref: codex-session-user-message-approved-full-platform-paths-design-2026-07-27
 written_spec_approval_ref: codex-session-user-message-approved-written-spec-2026-07-27
 written_spec_approval_local_time: 2026-07-27 17:39:03 +08:00
+implementation_authorization_ref: https://github.com/nonononull/inputcodex/issues/75#issuecomment-5090986061
+implementation_authorization_local_time: 2026-07-27 19:57:43 +08:00
 candidate_scope_count: 29
 candidate_scope_hash: sha256:251f54063fafa368e5f134fd01d8a1b6ff3f1ff6f3b02a07b661aa5c0d6f523b
-scope_approval_status: pending-owner-implementation-authorization
-implementation_authorization: pending-owner-exact-scope-approval
+scope_approval_status: approved
+implementation_authorization: approved-exact-scope-and-operations
 final_merge_authorization: pending
 ```
 
-本文件是 Issue `#75` 的书面设计规范。项目所有者已批准总体设计、Issue `#74` 的路径安全策略和本书面规范，现允许使用 `superpowers:writing-plans` 建立项目原生 Session Plan 与 Runtime Workflow。二十九路径及其哈希在正式实施授权前仍只作为待批准执行合同；当前只允许修改、提交和普通推送三份规划控制面，不允许编写实现代码、创建 PR 或修改其他仓库文件。
+本文件是 Issue `#75` 的书面设计规范。项目所有者已批准总体设计、Issue `#74` 的路径安全策略、本书面规范、二十九路径与固定 `scope_hash`，并授权 TDD 实施、本地轻量验证、Git checkpoint、提交、普通推送、非 Draft PR 与 Review/CI。最终 Squash Merge 仍保留单独授权门，任何超出批准范围的写入都必须停止。
 
 ## 目标
 
@@ -260,6 +262,7 @@ dependency_check: passed-no-new-package-family
 windows_api_check: passed-safe-winrt-no-unsafe
 writing_plans_status: completed
 implementation_started: false
+implementation_authorization: approved
 ```
 
-自审未发现未完成占位标记、占位值、矛盾要求或隐藏的第二功能。Session Plan 与 Runtime Workflow 只固化执行顺序和精确边界；项目所有者未明确批准二十九路径、`scope_hash`、实现、轻量验证、提交、普通推送、非 Draft PR 与 Review/CI 前，不得进入 TDD RED 或修改产品代码。
+自审未发现未完成占位标记、占位值、矛盾要求或隐藏的第二功能。Session Plan 与 Runtime Workflow 已固化执行顺序和精确边界；项目所有者授权证据已回写 Issue `#75`，现在允许从 Task 2 的 TDD RED 开始，最终合并仍须针对 Final Head 单独授权。

@@ -6,18 +6,18 @@ tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/75
 parity_exception_ref: https://github.com/nonononull/inputcodex/issues/74
 session_plan_ref: docs/plans/sessions/2026-07-27-issue-75-gate-5-platform-paths.md
 implementation_plan_ref: docs/plans/2026-07-27-issue-75-gate-5-platform-paths.md
-approved_decision_ref: codex-session-user-message-approved-written-spec-2026-07-27
+approved_decision_ref: https://github.com/nonononull/inputcodex/issues/75#issuecomment-5090986061
 selected_business_path: inputcodex.gate5.foundation-platform.platform-paths
 baseline_ref: fc1683aabda4afb27ca333387ec954b6a405d2df
 baseline_tree: d17a038fcb4fc986565f121283481eb38cdfbc33
 branch: codex/issue-75-gate-5-platform-paths
 scope_hash: sha256:251f54063fafa368e5f134fd01d8a1b6ff3f1ff6f3b02a07b661aa5c0d6f523b
-scope_status: frozen-pending-owner-implementation-authorization
-scope_approval_ref: pending-owner-comment-on-issue-75
-current_execution_status: planning-control-only
-current_allowed_operations: three-planning-paths, document-validation, normal-commit, normal-push, issue-comment
+scope_status: approved-frozen
+scope_approval_ref: https://github.com/nonononull/inputcodex/issues/75#issuecomment-5090986061
+current_execution_status: tdd-implementation-authorized
+current_allowed_operations: exact-twenty-nine-path-tdd, lightweight-local-verification, git-checkpoints, normal-commit, normal-push, non-draft-pr, review-ci
 post_approval_allowed_operations: exact-twenty-nine-path-tdd, lightweight-local-verification, git-checkpoints, normal-commit, normal-push, non-draft-pr, review-ci
-executor_enforcement: exact-three-planning-paths-now, exact-twenty-nine-paths-after-approval, no-force-push, never-delete-main, squash-only
+executor_enforcement: exact-twenty-nine-paths, no-force-push, never-delete-main, squash-only
 local_time_source: Windows Get-Date
 pr_ref: not-created-by-design
 ci_ref: not-applicable-before-implementation
@@ -29,7 +29,7 @@ merge_ref: pending-separate-owner-authorization
 1. `startup-baseline`：核对 `origin/main=fc1683aabda4afb27ca333387ec954b6a405d2df`、隔离分支、Issue `#74/#75`、干净启动面和 Windows 本机时间。
 2. `written-spec`：书面规范已批准；Windows API 合同修正为 `windows 0.58.0` 安全 WinRT，不允许直接 Win32 FFI 或 `unsafe`。
 3. `planning-control`：只落盘三份规划文件并运行文档、范围、控制字符和空白检查；普通提交、普通推送并回写 Issue `#75`。
-4. `owner-implementation-gate`：等待项目所有者明确批准二十九路径、`scope_hash`、TDD、轻量验证、提交、普通推送、非 Draft PR 与 Review/CI；未批准时硬停止。
+4. `owner-implementation-gate`：项目所有者已明确批准二十九路径、`scope_hash`、TDD、轻量验证、提交、普通推送、非 Draft PR 与 Review/CI；最终 Squash Merge 仍单独授权。
 5. `domain-red-green`：先写 `PrivatePath`、安装来源和快照 RED，再做最小 GREEN；路径 `Debug` 必须脱敏。
 6. `application-red-green`：先写请求、端口、用例、Ready+None、失败和取消/过期结果 RED，再做最小 GREEN。
 7. `platform-common-red-green`：固定 `CODEX_HOME`、用户目录、状态根、派生文件名和 unsupported 错误，再实现共享纯解析核心。
@@ -220,8 +220,10 @@ evidence:
     parity: all test targets passed
   scope_count: 29
   scope_hash: sha256:251f54063fafa368e5f134fd01d8a1b6ff3f1ff6f3b02a07b661aa5c0d6f523b
+  implementation_authorization_ref: https://github.com/nonononull/inputcodex/issues/75#issuecomment-5090986061
+  implementation_authorization_local_time: 2026-07-27 19:57:43 +08:00
   implementation_started: false
-  implementation_authorization: pending
+  implementation_authorization: approved
   pr_created: false
   final_merge_authorization: pending
   agos_session_plan_verifier: passed
