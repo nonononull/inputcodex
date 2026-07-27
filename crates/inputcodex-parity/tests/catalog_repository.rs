@@ -10,17 +10,17 @@ use inputcodex_parity::{
     validate_source_index,
 };
 
-const RELEASE_TAG: &str = "v1.2.42";
-const RELEASE_COMMIT: &str = "657cd33e009ad02515d30db6492cd4e669b06318";
-const PREVIOUS_RELEASE_TAG: &str = "v1.2.41";
-const PREVIOUS_RELEASE_COMMIT: &str = "3dafffcafb2566a1e8bce4b35671656d6adb3eda";
-const RE_AUDIT_ISSUE_URL: &str = "https://github.com/nonononull/inputcodex/issues/38";
+const RELEASE_TAG: &str = "v1.2.43";
+const RELEASE_COMMIT: &str = "5036ff056b5c629f19356396b17d6eeb70da664c";
+const PREVIOUS_RELEASE_TAG: &str = "v1.2.42";
+const PREVIOUS_RELEASE_COMMIT: &str = "657cd33e009ad02515d30db6492cd4e669b06318";
+const RE_AUDIT_ISSUE_URL: &str = "https://github.com/nonononull/inputcodex/issues/65";
 
 const VALID_SOURCE_INDEX: &str = r#"
 schema_version: inputcodex.source-index.v1
 release:
-  tag: v1.2.42
-  tag_commit: 657cd33e009ad02515d30db6492cd4e669b06318
+  tag: v1.2.43
+  tag_commit: 5036ff056b5c629f19356396b17d6eeb70da664c
 sources:
   - id: tauri-command:load_overview
     kind: tauri-command
@@ -255,7 +255,10 @@ fn 重复_source_id_被拒绝() {
 
 #[test]
 fn source_index_release_必须与锁定版本一致() {
-    let invalid = VALID_SOURCE_INDEX.replace("tag: v1.2.42", "tag: v1.2.41");
+    let invalid = VALID_SOURCE_INDEX.replace(
+        &format!("tag: {RELEASE_TAG}"),
+        &format!("tag: {PREVIOUS_RELEASE_TAG}"),
+    );
     let source_index = parse_source_index(&invalid).expect("结构仍应可解析");
 
     assert!(
@@ -325,7 +328,7 @@ fn release_audit_显式解耦快照与功能目录审计基线() {
         catalog_tag: PREVIOUS_RELEASE_TAG,
         catalog_commit: PREVIOUS_RELEASE_COMMIT,
         status: "stale-re-audit-required",
-        stale_reason: Some("上游 v1.2.42 已缓存，功能目录尚未完成复审"),
+        stale_reason: Some("上游 v1.2.43 已缓存，功能目录仍为 v1.2.42"),
         re_audit_issue_ref: Some(RE_AUDIT_ISSUE_URL),
     });
     let summary = validate_feature_repository(fixture.root())
@@ -390,8 +393,8 @@ fn release_audit_显式解耦快照与功能目录审计基线() {
 }
 
 #[test]
-fn 仓库v1_2_42目录重新审计证据保持固定() {
-    validate_repository(&repository_root()).expect("v1.2.42 功能目录证据应通过完整验证");
+fn 仓库v1_2_43目录重新审计证据保持固定() {
+    validate_repository(&repository_root()).expect("v1.2.43 功能目录证据应通过完整验证");
 
     for relative_path in [
         "parity/features/foundation-platform.yml",
@@ -404,7 +407,7 @@ fn 仓库v1_2_42目录重新审计证据保持固定() {
         assert_repository_text_contains(relative_path, &[RELEASE_TAG, RELEASE_COMMIT]);
         assert!(
             !read_repository_text(relative_path).contains(PREVIOUS_RELEASE_TAG),
-            "{relative_path} 不得保留 v1.2.41 Release 元数据"
+            "{relative_path} 不得保留 v1.2.42 Release 元数据"
         );
     }
 
@@ -419,25 +422,42 @@ fn 仓库v1_2_42目录重新审计证据保持固定() {
         assert_repository_text_contains(relative_path, &[RELEASE_TAG]);
         assert!(
             !read_repository_text(relative_path).contains(PREVIOUS_RELEASE_TAG),
-            "{relative_path} 不得保留 v1.2.41 合同描述"
+            "{relative_path} 不得保留 v1.2.42 合同描述"
         );
     }
 }
 
 #[test]
-fn 仓库v1_2_42受影响行为证据被固定() {
+fn 仓库v1_2_43受影响行为证据被固定() {
     assert_repository_text_contains(
         "parity/features/foundation-platform.yml",
-        &["OpenAI.ChatGPT-Desktop", "issue:38"],
+        &[
+            "OpenAI.ChatGPT-Desktop",
+            "remote-debugging-port",
+            "等待目标进程退出",
+            "expires_at",
+            "issue:65",
+        ],
     );
     assert_repository_text_contains(
         "parity/contracts/foundation-platform.yml",
-        &["OpenAI.ChatGPT-Desktop"],
+        &[
+            "OpenAI.ChatGPT-Desktop",
+            "debug port",
+            "等待旧进程退出",
+            "不得加载、下载或展示 sponsor",
+        ],
     );
 
     assert_repository_text_contains(
         "parity/features/session-data.yml",
-        &["CODEX_SQLITE_HOME", "grouped-undo-token", "issue:38"],
+        &[
+            "CODEX_SQLITE_HOME",
+            "grouped-undo-token",
+            "local_thread_catalog",
+            "sqliteCatalogRowsInserted",
+            "issue:65",
+        ],
     );
     assert_repository_text_contains(
         "parity/contracts/session-data.yml",
@@ -446,6 +466,9 @@ fn 仓库v1_2_42受影响行为证据被固定() {
             "grouped-undo-token",
             "LOCAL_SESSION_UNDO_PREFLIGHT_FAILED",
             "LOCAL_SESSION_UNDO_PATH_REJECTED",
+            "sqlite_catalog_rows_inserted",
+            "local_thread_catalog",
+            "observation_sequence",
         ],
     );
     assert_repository_text_contains(
@@ -460,7 +483,13 @@ fn 仓库v1_2_42受影响行为证据被固定() {
 
     assert_repository_text_contains(
         "parity/features/plugin-script.yml",
-        &["companion", "renderer-inject.js", "issue:38"],
+        &[
+            "companion",
+            "renderer-inject.js",
+            "runtime status",
+            "status 与 error",
+            "issue:65",
+        ],
     );
     assert_repository_text_contains(
         "parity/contracts/plugin-script.yml",
@@ -468,6 +497,8 @@ fn 仓库v1_2_42受影响行为证据被固定() {
             "data:image/png;base64",
             "DREAM_SKIN_COMPANION_INVALID",
             "companion 显示仍依赖 renderer 注入",
+            "运行状态仍来自 renderer 注入链",
+            "不得伪造运行成功",
         ],
     );
     assert_repository_text_contains(
@@ -477,6 +508,22 @@ fn 仓库v1_2_42受影响行为证据被固定() {
             "width: 96",
             "side: right",
         ],
+    );
+
+    assert_repository_text_contains(
+        "parity/fixtures/feature.session-data.provider-metadata-maintenance/baseline.yml",
+        &[
+            "sqlite_catalog_rows_inserted: 1",
+            "display_title: Thread One",
+            "source_created_at: 100.0",
+            "source_updated_at: 200.0",
+            "initial_build_complete: true",
+            "observation_sequence: 1",
+        ],
+    );
+    assert_repository_text_contains(
+        "parity/fixtures/feature.session-data.provider-metadata-maintenance/manifest.yml",
+        &["SQLite catalog", "同步状态水位"],
     );
 }
 
