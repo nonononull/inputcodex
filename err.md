@@ -856,6 +856,15 @@
 - 验证：本地重新运行四 crate 测试、四 crate all-targets Clippy、rustfmt、CI 合同、Release Audit、仓库政策、范围与隐私门禁；Linux 真实性由 PR `#76` 新 Head 的标准 CI 重跑确认，动态 Run 证据只回写 GitHub。
 - 关联：Issue `#75`、PR `#76`、CI Run `30273494972`、Job `90001713384`。
 
+### 2026-07-27：应用安装发现复用完整路径快照会被无关状态根阻断
+
+- 环境：Issue `#78` 迁移只读应用概览，最初可选方案是直接调用 Issue `#75` 的完整 `PlatformPathsPort`。
+- 现象：应用概览只需要安装事实与版本，但完整路径解析还会读取 `CODEX_HOME`、用户目录和 `inputcodex` 状态根；合法显式安装路径可能因无关配置缺失或无效而整体失败。
+- 根因：安装发现与设置/状态路径聚合位于同一入口，复用聚合端口会把不属于应用概览的配置与持久化路径变成隐藏前置条件。
+- 处理：保留 `PlatformPathsPort` 既有合同，只在 platform crate 内提取安装专用入口；显式路径先短路解析，自动发现只读取平台发现必需根。应用概览不读取 `CODEX_HOME`、状态根或历史状态文件。
+- 验证：Windows/macOS 显式路径测试固定无需共同状态目录；Issue `#75` 原平台路径测试继续通过；应用概览平台测试固定安装发现一次、有界读取一个版本元数据文件，以及版本问题只降级为 `InstalledVersion::Unknown`。
+- 关联：Issue `#77`、Issue `#78`、`crates/inputcodex-platform/src/platform_paths/windows.rs`、`crates/inputcodex-platform/src/platform_paths/macos.rs`。
+
 ## 记录模板
 
 ```text

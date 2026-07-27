@@ -96,7 +96,9 @@ decision_status: issue-75-local-verified-pr-pending-final-merge-not-authorized
 - Issue `#64` / PR `#66` 已将 `v1.2.43` 完整快照缓存为只读审计输入；Squash 提交为 `15e91708b41548f523e26ede4c7ca4de41badf77`，主干 CI Run `30214249228` 七 Job 全绿且 Artifact 为 `0`。
 - Issue `#65` / PR `#72` 已完成二十四路径与 `sha256:82234e7aacce0bd6c57994529ccf74371052ed906dc8371324b90e41f697d7b7` 的 TDD、Review/CI、全部对话闭环与单独 Squash 授权；合并提交为 `fc1683aabda4afb27ca333387ec954b6a405d2df`，Issue 已按 `COMPLETED` 关闭。
 - Issue `#74` 已确认平台路径安全差异：无效显式路径与非空 `CODEX_HOME` 必须失败，禁止相对目录或静默回退；Issue 已按 `COMPLETED` 关闭。
-- Issue `#75` 已在三十路径与 `sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37` 内完成 Domain、Application、Platform、Parity checkpoint 与最终本地轻量门禁；CI 合同 `35/35`、`release_audit=current`、仓库政策 `0` 违规、范围 `30/30` 和隐私检查均通过。当前无 PR，最终 Squash Merge 未授权。
+- Issue `#75` / PR `#76` 已在三十路径与 `sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37` 内完成首个 Gate 5 平台路径迁移；Final Head `ba082669cd6d491cce26e29efcaa249786973a39` 以单父 Squash 提交 `a06a97fd59ce125306a13202c8f1a07656c797a0` 进入 `main`，tree 为 `b669aa6610e976542a74f404ff4f87b36864816b`，Issue 已关闭。合并后主干 CI Run `30276472184` 七 Job、Performance Baseline Run `30276476891` 四 Job全绿且 Artifact 均为 `0`。
+- Issue `#77` 已批准应用概览方案 A 并按 `COMPLETED` 关闭；历史启动记录不得冒充实时运行状态，损坏状态不得静默视为无记录。
+- Issue `#78` 已获批二十九路径与 `sha256:b46a940ff7dbf4bbc9bfdb69d04d755468e12409d9618837d8ff310490eb5ae4`；只读应用概览 TDD 与最终本地轻量门禁已完成，当前正在形成控制面 checkpoint、普通推送和非 Draft PR，最终 Squash Merge保留单独授权门。
 - 合并后 main CI Run `30158058627` 的 Attempt `1/2` 因 GitHub Actions major outage 在创建 Job 前失败；服务恢复后的同一 Run Attempt `3` 绑定同一提交并七 Job 全绿、Artifact 为 `0`，Issue `#46` 已按 `COMPLETED` 关闭，仓库代码与 CI 合同无需为该外部事故修改。
 - Issue `#47` 以 `sha256:dd612ef0c2e5f0f830c40f161b1ef1a85bc58cd1d85458a758c3905ade8db03e` 冻结微型五路径 Closeout；本报告只收口长期状态与事故复用知识，其自身动态 Review、CI 与合并证据保留在 GitHub Issue/PR，不再创建二次 Closeout。
 - Issue `#8` 的过渡交付为 PR `#10`；该 PR 只包含文档与验证控制面，并按项目所有者明确授权执行 Squash Merge。
@@ -201,8 +203,10 @@ decision_status: issue-75-local-verified-pr-pending-final-merge-not-authorized
 - `release_audit` 不是 `current` 时，任何 Gate 5 产品迁移 PR 都必须被门禁阻断。
 - [x] 首个 Gate 5 Issue 的预算复测、数值批准、非 required `approved-observation`、Windows/macOS 主干观察与 `release_audit=current` 前置条件已满足。
 - [x] Issue `#74` 已批准平台路径安全例外并关闭。
-- [ ] Issue `#75` 已完成本地领域、应用、平台、Parity TDD 和最终轻量验证，正在提交控制面并创建非 Draft PR；Hosted Review/CI 与最终 Squash Merge 仍未授权。
-- Issue `#75` 未合并前不得夹带第二个产品 feature、UI、预算、Release、`upstream/`、Ruleset 或 AGOS 改动。
+- [x] Issue `#75` / PR `#76` 已完成平台路径迁移、Review/CI、独立 Squash 授权与合并后主干验证。
+- [x] Issue `#77` 已完成应用概览语义例外决策并关闭。
+- [ ] Issue `#78` 已完成 Domain、Application、Platform、Parity TDD 与最终本地轻量验证，正在形成控制面 checkpoint、普通推送和非 Draft PR；Hosted Review/CI 与最终 Squash Merge 仍未授权。
+- Issue `#78` 未完成前不得夹带第三个产品 feature、UI、预算、Release、`upstream/`、Ruleset 或 AGOS 改动。
 
 ### Gate 6：首个正式版本（锁定）
 
@@ -237,6 +241,10 @@ decision_status: issue-75-local-verified-pr-pending-final-merge-not-authorized
 - Issue `#75` Session Plan：`docs/plans/sessions/2026-07-27-issue-75-gate-5-platform-paths.md`。
 - Issue `#75` Runtime Workflow：`docs/workflows/2026-07-27-issue-75-gate-5-platform-paths-runtime.md`。
 - Issue `#75` 实施报告：`docs/reports/issue-75-gate-5-platform-paths.md`。
+- Issue `#78` 应用概览设计：`docs/plans/2026-07-27-issue-78-gate-5-application-overview.md`。
+- Issue `#78` Session Plan：`docs/plans/sessions/2026-07-27-issue-78-gate-5-application-overview.md`。
+- Issue `#78` Runtime Workflow：`docs/workflows/2026-07-27-issue-78-gate-5-application-overview-runtime.md`。
+- Issue `#78` 实施报告：`docs/reports/issue-78-gate-5-application-overview.md`。
 - 已完成 Issue `#41` CI 合同报告：`docs/reports/issue-41-ci-contract-decoupling.md`。
 - 已完成状态收口计划：`docs/plans/2026-07-25-issue-43-v1.2.42-cache-ci-closeout.md`。
 - 已完成状态收口 Session Plan：`docs/plans/sessions/2026-07-25-issue-43-v1.2.42-cache-ci-closeout.md`。
@@ -283,7 +291,7 @@ decision_status: issue-75-local-verified-pr-pending-final-merge-not-authorized
 ## 停止条件
 
 - 上游最新正式 Release 或已核验的 `v1.2.43` / `5036ff056b5c629f19356396b17d6eeb70da664c` / `d478a9fcda7f22a7c8167cb567777ad9148cf328` 事实发生变化。
-- Issue `#75` 出现三十路径或 `sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37` 之外的新增、删除或重命名路径，或在最终 Head Review、CI 与全部对话闭环前请求 Squash Merge。
+- Issue `#78` 出现二十九路径或 `sha256:b46a940ff7dbf4bbc9bfdb69d04d755468e12409d9618837d8ff310490eb5ae4` 之外的新增、删除或重命名路径，或在最终 Head Review、CI 与全部对话闭环前请求 Squash Merge。
 - 需要修改 `upstream/CodexPlusPlus/` 或 `source-lock.json` 的来源快照字段，但没有新的独立 upstream-sync Issue/PR 与项目所有者批准。
 - `release_audit` 为 stale 时修改 `benchmarks/`、`apps/`、产品 crate、`Cargo.toml` 或 `Cargo.lock`，或在同一 PR 同时更新实际 audit 与受阻产品路径。
 - Issue `#47` 出现五路径或 `sha256:dd612ef0c2e5f0f830c40f161b1ef1a85bc58cd1d85458a758c3905ade8db03e` 之外的新增、删除或重命名路径，或在最终 Head 的 Review、CI 和全部对话闭环前请求 Squash Merge。
