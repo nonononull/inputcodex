@@ -79,4 +79,7 @@
 - Issue `#54` 的十六份原始 JSON 与 manifest 在 Issue `#59` 中只能作为只读历史证据缓存；不得修改其原始 `new-cohort-valid` 分类、来源 Run、哈希或任何样本内容。
 - 合并后稳定状态由 `docs/reports/issue-52-performance-budget-closeout.md` 固化；本 Closeout 自身的动态 Head、CI、Review、授权与合并证据只保留在 GitHub Issue/PR 评论，不得递归创建同类状态 Closeout。
 - Issue `#61` 是 Issue `#59` / PR `#60` 稳定事实的八路径反递归 Closeout；其自身动态 Head、CI、Review、授权与合并证据只保留在 GitHub Issue/PR 评论，合并后不得再次创建同类 Closeout。
-- Gate 5 继续锁定；下一合法工作只能是独立预算 CI 观察 Issue，以非 required 的 `approved-observation` 模式在 Windows/macOS 成功执行且 `release_audit=current` 后，才能建立首个 Gate 5 产品迁移 Issue。
+- Issue `#63` 已批准方案 A、十三路径与 `scope_hash=sha256:d5eb57c1b93dc2b7acc47ba78c8f514af2a2c98e8661df389774713a7b47d8dc`；当前隔离分支为 `codex/issue-63-performance-budget-ci-observation`，非 Draft PR 为 `#73`。RED 提交 `650040763aff07f4884ee9252c50639469622934` 与初始 GREEN 实现提交 `b465c660d0401ff4bff37673671147aa6b513e1a` 已普通推送，观察器测试为 `12/12`、CI 合同为 `35/35`、仓库政策零违规；PR Head 双平台 hosted observation、Review/CI 与最终 Squash Merge 仍待完成。
+- Issue `#63` 将 `Performance Baseline` 的自动 PR/push 固定为 `observation`；手工模式保留默认 `evidence`，并允许显式 `measure` 或 `observation`。四种阈值分类均不得阻断，预算或结果合同错误必须阻断；成功 observation 禁止上传 Artifact，失败只允许保留七天的最小诊断且不得包含 `target/`。
+- Issue `#63` 只能只读消费 `benchmarks/budgets/issue-59-approved-observation.json`；预算字节、数值、公式、历史 Evidence、Ruleset、required checks、产品、Gate 5、`upstream/` 与 AGOS 均禁止变化，最终 Squash Merge 继续保留项目所有者对最终 PR Head 的单独授权门。
+- Gate 5 继续锁定；必须先完成 Issue `#63` 的 PR Head 双平台 observation、Review/CI 与独立 Squash 授权，再按计划重放 PR `#72` 和合并后 `main` observation；只有 `release_audit=current`、双平台成功且成功 Artifact 为 `0` 后，才能建立首个 Gate 5 产品迁移 Issue。
