@@ -2,6 +2,10 @@
 
 use inputcodex_application::{ApplicationError, PlatformKind, PlatformPort};
 
+mod platform_paths;
+
+pub use platform_paths::SystemPlatformPaths;
+
 #[derive(Debug, Clone, Copy, Default)]
 pub struct SystemPlatform;
 

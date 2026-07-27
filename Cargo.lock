@@ -1158,6 +1158,8 @@ name = "inputcodex-platform"
 version = "0.1.0"
 dependencies = [
  "inputcodex-application",
+ "inputcodex-domain",
+ "windows",
 ]
 
 [[package]]

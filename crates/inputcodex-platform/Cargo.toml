@@ -9,6 +9,10 @@ publish = false
 
 [dependencies]
 inputcodex-application.workspace = true
+inputcodex-domain.workspace = true
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows.workspace = true
 
 [lints]
 workspace = true
