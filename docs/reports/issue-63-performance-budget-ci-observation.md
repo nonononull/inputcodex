@@ -2,7 +2,7 @@
 
 ## 当前结论
 
-方案 A 与十三路径已获批准。观察器、自动 observation Workflow 与 CI 合同已完成本地 RED→GREEN；预算 JSON、预算数值、公式、历史 Evidence、Ruleset、产品与 Gate 5 均保持只读。当前等待十三路径最终验证、非 Draft PR、双平台 hosted observation 与 Review/CI。
+方案 A 与十三路径已获批准。观察器、自动 observation Workflow 与 CI 合同已完成本地 RED→GREEN，非 Draft PR `#73` 已创建；预算 JSON、预算数值、公式、历史 Evidence、Ruleset、产品与 Gate 5 均保持只读。当前等待 Final Head 双平台 hosted observation 与 Review/CI。
 
 ## 已确认根因
 
@@ -32,6 +32,7 @@ session_plan: SESSION_PLAN_VERIFY_OK
 stored_windows_observation: within-budget, observations=10
 stored_macos_observation: within-budget, observations=10
 actionlint: not-installed; GitHub-hosted workflow parse pending
+pr_ref: https://github.com/nonononull/inputcodex/pull/73
 hosted_observation: pending
 review_ci: pending
 final_merge: not-authorized

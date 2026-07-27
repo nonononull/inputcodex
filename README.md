@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 功能目录、`v1.2.42` 缓存与重新审计、双平台性能基线和性能预算数值批准。Issue `#59` / PR `#60` 已以单父 Squash 提交 `e225144831a0928bfa3aaa0d169a054779005812` 进入 `main`：Windows AMD EPYC 7763 严格目标队列为 `5`，macOS 同队列为 `12`，预算 JSON 与离线复算合同 `10/10` GREEN。Issue `#63` 正在独立分支实现非 required `approved-observation`：本地观察器 `12/12`、CI 合同 `35/35`、仓库政策零违规，PR 与双平台 hosted observation 尚未完成；性能优化、上游功能迁移和 Gate 5 继续锁定。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 功能目录、`v1.2.42` 缓存与重新审计、双平台性能基线和性能预算数值批准。Issue `#59` / PR `#60` 已以单父 Squash 提交 `e225144831a0928bfa3aaa0d169a054779005812` 进入 `main`：Windows AMD EPYC 7763 严格目标队列为 `5`，macOS 同队列为 `12`，预算 JSON 与离线复算合同 `10/10` GREEN。Issue `#63` / PR `#73` 正在实现非 required `approved-observation`：本地观察器 `12/12`、CI 合同 `35/35`、仓库政策零违规，PR Head 双平台 hosted observation 尚未完成；性能优化、上游功能迁移和 Gate 5 继续锁定。
 
 ## 项目目标
 
@@ -51,7 +51,7 @@
 - PR `#45` CI Run `30157623932` 七 Job 全绿且 Artifact 为 `0`；合并后主干 Run `30158058627` 的 Attempt `1/2` 因 GitHub Actions major outage 未创建任何 Job，服务恢复后的同一 Run Attempt `3` 在未修改仓库的情况下七 Job 全绿且 Artifact 为 `0`，Issue `#46` 已按 `COMPLETED` 关闭。
 - Issue `#26` / PR `#27` 已完成 Gate 4 功能目录执行：最终 Head `1d1bf32cdc4edc45e2d28f1047604222ebdb51e4` 以 Squash 提交 `a9b20f00ae069aedd42c8124d2789b230187258c` 进入 `main`；merge/head tree 均为 `205c24e05e0451a3aa39af4f43f0d9853cc7a6a2`，GitHub 签名 `valid`，PR 与合并后主干 CI 均六 Job 全绿且成功 Artifact 数为 `0`。
 - Issue `#28` / PR `#29` 已完成 Gate 4 独立 Closeout：最终 Head `7ee316c6bf4d9ca44f3475283ae1aee9c83f8577` 以单父 Squash 提交 `c07da0cad33e09b5c54e528a8a6728a048c88c0b` 合入 `main`，tree 为 `02ab8a3d8497ebb7b990e4078122b9bf916ef454`，GitHub 签名有效；Issue `#28` 已关闭，合并后主干 CI `29948874307` 六 Job 全部成功且 Artifact 数为 `0`。
-- Issue `#63` 已在批准的十三路径内完成 RED 与本地 GREEN：自动 PR/push 改为当前 Head 双平台 `observation`，四种阈值分类非阻断，预算/结果合同错误阻断，成功 observation 不上传 Artifact；当前尚未创建 PR，也未取得双平台 hosted 证据或最终 Squash Merge 授权。
+- Issue `#63` 已在批准的十三路径内完成 RED 与本地 GREEN并创建非 Draft PR `#73`：自动 PR/push 改为当前 Head 双平台 `observation`，四种阈值分类非阻断，预算/结果合同错误阻断，成功 observation 不上传 Artifact；当前尚未取得 PR Head 双平台 hosted 证据或最终 Squash Merge 授权。
 
 当前明确不做：
 

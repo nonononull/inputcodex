@@ -10,7 +10,7 @@ scope_hash: sha256:d5eb57c1b93dc2b7acc47ba78c8f514af2a2c98e8661df389774713a7b47d
 scope_status: approved
 scope_approval_ref: https://github.com/nonononull/inputcodex/issues/63#issuecomment-5087488361
 local_time_source: Windows Get-Date
-pr_ref: pending
+pr_ref: https://github.com/nonononull/inputcodex/pull/73
 ci_ref: pending
 merge_ref: pending-separate-owner-authorization
 ```
@@ -75,7 +75,7 @@ evidence:
   stored_windows_observation: within-budget observations=10
   stored_macos_observation: within-budget observations=10
   actionlint: not-installed; hosted workflow parse pending
-  pr_ref: pending
+  pr_ref: https://github.com/nonononull/inputcodex/pull/73
   hosted_windows: pending
   hosted_macos: pending
   review_threads: pending

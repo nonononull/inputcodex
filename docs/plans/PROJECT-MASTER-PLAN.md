@@ -10,6 +10,7 @@ performance_budget_observation_issue_ref: https://github.com/nonononull/inputcod
 performance_budget_observation_scope_hash: sha256:d5eb57c1b93dc2b7acc47ba78c8f514af2a2c98e8661df389774713a7b47d8dc
 performance_budget_observation_red_ref: 650040763aff07f4884ee9252c50639469622934
 performance_budget_observation_green_ref: b465c660d0401ff4bff37673671147aa6b513e1a
+performance_budget_observation_pr_ref: https://github.com/nonononull/inputcodex/pull/73
 performance_remeasurement_issue_ref: https://github.com/nonononull/inputcodex/issues/54
 performance_queue_discovery_issue_ref: https://github.com/nonononull/inputcodex/issues/57
 performance_fixed_remeasurement_issue_ref: https://github.com/nonononull/inputcodex/issues/59
@@ -43,7 +44,7 @@ transition_branch_ref: codex/issue-8-gate-2-transition
 active_plan_ref: docs/plans/2026-07-26-issue-63-performance-budget-ci-observation.md
 active_session_plan_ref: docs/plans/sessions/2026-07-26-issue-63-performance-budget-ci-observation.md
 active_runtime_workflow_ref: docs/workflows/2026-07-26-issue-63-performance-budget-ci-observation-runtime.md
-active_pr_ref: none
+active_pr_ref: https://github.com/nonononull/inputcodex/pull/73
 gate_3_closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/23
 gate_3_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/21
 gate_3_planning_pr_ref: https://github.com/nonononull/inputcodex/pull/18
@@ -174,7 +175,7 @@ decision_status: performance-budget-values-completed-budget-ci-observation-requi
 - [x] Issue `#59` 已在 38 路径与 `sha256:d0577e546d2209d10373eccdf335bbcf3cd4caad7906163838c88b461da0b570` 内完成四次固定串行槽位，Windows 严格目标队列达到 `5`、macOS 达到 `12`；预算 JSON 与离线构建/验证脚本为 `10/10` GREEN，不存在 `run-05`。
 - [x] PR `#60` Final Head `61c088d74d61a329fbe67e14b8280dfa9701c6b2` 已完成 Review/CI 和项目所有者独立授权，并以单父 Squash 提交 `e225144831a0928bfa3aaa0d169a054779005812` 进入 `main`；tree 为 `56eb1e8d95dfce22726c1aef1bdde1c353af055e`，GitHub 签名 `valid`，Issue `#59` 已按 `COMPLETED` 关闭。
 - [x] PR `#60` Final Head CI/Performance Run `30194465259` / `30194465231` 与合并后主干 Run `30194897171` / `30194897166` 均全绿且 Artifact 为 `0`；Issue `#61` 仅以反递归 Closeout 固化该稳定事实，其自身动态交付证据只保留在 GitHub。
-- [ ] Issue `#63` 已批准方案 A、十三路径与 `sha256:d5eb57c1b93dc2b7acc47ba78c8f514af2a2c98e8661df389774713a7b47d8dc`；RED `650040763aff07f4884ee9252c50639469622934`、初始 GREEN `b465c660d0401ff4bff37673671147aa6b513e1a` 已普通推送，观察器 `12/12`、CI 合同 `35/35`、仓库政策零违规。PR Head 双平台 observation、Review/CI 和项目所有者独立 Squash 授权仍待完成。
+- [ ] Issue `#63` / PR `#73` 已批准方案 A、十三路径与 `sha256:d5eb57c1b93dc2b7acc47ba78c8f514af2a2c98e8661df389774713a7b47d8dc`；RED `650040763aff07f4884ee9252c50639469622934`、初始 GREEN `b465c660d0401ff4bff37673671147aa6b513e1a` 已普通推送，观察器 `12/12`、CI 合同 `35/35`、仓库政策零违规。PR Head 双平台 observation、Review/CI 和项目所有者独立 Squash 授权仍待完成。
 
 ### Gate 5：分域迁移（锁定）
 

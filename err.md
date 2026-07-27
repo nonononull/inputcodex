@@ -825,7 +825,7 @@
 - 现象：旧 Evidence 的 `input_sha256=sha256:c5b507d219ff49975c13805a2a6e036ade6c61a33a184bfffb74219ce01784b5` 与当前输入哈希不一致，Windows/macOS Evidence 验证稳定失败；阈值是否回归尚未执行。
 - 根因：自动 PR/push 把“历史证据与当前源码完全同哈希”错误当成长期预算观察前置条件。预算 hard key 又包含历史 `input_sha256`，若直接复用会让任何合法输入变化永久不可比较；正确边界应是当前 Head 临时测量、固定样本合同、GitHub-hosted 与完整环境指纹。
 - 处理：Issue `#63` 在独立十三路径内新增只读观察器，将自动 PR/push 固定为 `observation`；四种阈值分类均非阻断，预算/结果合同错误仍阻断，成功 observation 不上传 Artifact。预算 JSON、历史 Evidence、数值、公式、Ruleset、产品与 Gate 5 均未修改。
-- 验证：RED 于本机时间 `2026-07-27 13:21:15 +08:00` 因实现缺失稳定失败并提交为 `650040763aff07f4884ee9252c50639469622934`；初始 GREEN 提交 `b465c660d0401ff4bff37673671147aa6b513e1a` 后，自审又以“预算锁字段缺失”产生第二个真实 RED，并修正 `$null` 被布尔转换为 `false` 的根因。最终本地达到观察器 `12/12`、CI 合同 `35/35`、仓库政策零违规和 `git diff --check` 通过。双平台 hosted observation 与 PR Review/CI 尚待完成。
+- 验证：RED 于本机时间 `2026-07-27 13:21:15 +08:00` 因实现缺失稳定失败并提交为 `650040763aff07f4884ee9252c50639469622934`；初始 GREEN 提交 `b465c660d0401ff4bff37673671147aa6b513e1a` 后，自审又以“预算锁字段缺失”产生第二个真实 RED，并修正 `$null` 被布尔转换为 `false` 的根因。最终本地达到观察器 `12/12`、CI 合同 `35/35`、仓库政策零违规和 `git diff --check` 通过，非 Draft PR `#73` 已创建。双平台 hosted observation 与 PR Review/CI 尚待完成。
 - 工具纠错：首次 RED 提交错误使用 `git diff --name-only` 收集路径，未包含五个 untracked 文件，导致空提交；改为显式批准路径暂存并回读 `git diff --cached --name-only`。CI 合同 RED 后又因双引号正则中的 `$mode` 在 StrictMode 下被 PowerShell 插值而失败；改用单引号正则后同一合同转绿。状态回写时一度改名 Session Plan 固定字段并写入 schema 未允许的复合状态；读取 verifier 的固定字段与状态枚举后恢复 `forbidden_ops_until_replay` 及合法 `pending` 值。三项均按确定根因修复，未绕过测试或改写历史。
 - 关联：Issue `#63`、PR `#72`、提交 `650040763aff07f4884ee9252c50639469622934`、提交 `b465c660d0401ff4bff37673671147aa6b513e1a`。
 

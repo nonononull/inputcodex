@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 27 日，Gate 3 七成员 Workspace、Gate 4 `v1.2.42` 功能目录重新审计、双平台性能基线、性能预算 Discovery 与预算数值均已进入 `main`。Issue `#63` 正在批准的十三路径内实现非 required `approved-observation`：RED `650040763aff07f4884ee9252c50639469622934` 与初始 GREEN `b465c660d0401ff4bff37673671147aa6b513e1a` 已普通推送，观察器 `12/12`、CI 合同 `35/35`、仓库政策零违规；PR、双平台 hosted observation、Review/CI 与最终 Squash Merge 尚未完成。预算数值、公式、Ruleset、required check、性能优化和 Gate 5 产品迁移仍保持锁定。
+截至 2026 年 7 月 27 日，Gate 3 七成员 Workspace、Gate 4 `v1.2.42` 功能目录重新审计、双平台性能基线、性能预算 Discovery 与预算数值均已进入 `main`。Issue `#63` / PR `#73` 正在批准的十三路径内实现非 required `approved-observation`：RED `650040763aff07f4884ee9252c50639469622934` 与初始 GREEN `b465c660d0401ff4bff37673671147aa6b513e1a` 已普通推送，观察器 `12/12`、CI 合同 `35/35`、仓库政策零违规；PR Head 双平台 hosted observation、Review/CI 与最终 Squash Merge 尚未完成。预算数值、公式、Ruleset、required check、性能优化和 Gate 5 产品迁移仍保持锁定。
 
 仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供二十个检查点：
 
