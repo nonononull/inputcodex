@@ -227,6 +227,7 @@ const fn explicit_path_error() -> ApplicationError {
     ApplicationError::unavailable("EXPLICIT_CODEX_PATH_INVALID")
 }
 
+#[cfg(target_os = "windows")]
 const fn platform_paths_error() -> ApplicationError {
     ApplicationError::internal("PLATFORM_PATHS_FAILED")
 }

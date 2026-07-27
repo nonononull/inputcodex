@@ -847,6 +847,15 @@
 - 验证：修复前 `catalog_repository` 为 `9 passed / 4 failed`；修复后目标为 `13/13`，完整 `inputcodex-parity` 全部测试目标、`cargo fmt --all -- --check` 与 Parity `clippy --all-targets -D warnings` 均通过，提交为 `be5673c82154fe2777046283158a152d11ead62d`。
 - 关联：Issue `#75` 扩围批准评论 `5092021020`、Parity checkpoint 评论 `5092109658`、提交 `a6e4a28e00c976aa91bca14afb1729ae7e6af194` 与 `be5673c82154fe2777046283158a152d11ead62d`。
 
+### 2026-07-27：Linux all-targets 测试配置编译到未使用的 Windows 专用错误 helper
+
+- 环境：PR `#76` Final Head `b64e9a9a3a5aece31cb86959ae66d673b955cb56` 的标准 CI Run `30273494972`；Windows、macOS、governance、classify 与 release-audit 均成功，Linux 在 Workspace Clippy 阶段失败。
+- 现象：`crates/inputcodex-platform/src/platform_paths/windows.rs:230` 的 `platform_paths_error` 被 `-D dead-code` 拒绝；Linux 后续 Workspace 测试和 required 汇总按合同停止。
+- 根因：`windows` 模块为纯选择逻辑测试使用 `#[cfg(any(target_os = "windows", test))]`，所以 Linux `cargo clippy --workspace --all-targets` 会在 test 配置编译该模块；`registered_package_candidates` 已受 `#[cfg(target_os = "windows")]` 保护，但它唯一调用的 `platform_paths_error` 没有同源条件，Linux test 构建中因此成为未使用函数。
+- 处理：只给 `platform_paths_error` 增加 `#[cfg(target_os = "windows")]`，使 helper 与唯一调用方拥有相同编译边界；不增加 `allow/expect(dead_code)`，不跳过 Linux Clippy，不修改 Workflow、Ruleset 或功能语义。
+- 验证：本地重新运行四 crate 测试、四 crate all-targets Clippy、rustfmt、CI 合同、Release Audit、仓库政策、范围与隐私门禁；Linux 真实性由 PR `#76` 新 Head 的标准 CI 重跑确认，动态 Run 证据只回写 GitHub。
+- 关联：Issue `#75`、PR `#76`、CI Run `30273494972`、Job `90001713384`。
+
 ## 记录模板
 
 ```text
