@@ -1,7 +1,7 @@
 schema_version: inputcodex.feature-catalog.v1
 release:
-  tag: v1.2.42
-  tag_commit: 657cd33e009ad02515d30db6492cd4e669b06318
+  tag: v1.2.43
+  tag_commit: 5036ff056b5c629f19356396b17d6eeb70da664c
 domain: session-data
 features:
   - id: feature.session-data.local-session-management
@@ -60,6 +60,8 @@ features:
         symbol: backup
       - path: upstream/CodexPlusPlus/crates/codex-plus-data/src/provider_sync.rs
         symbol: provider_sync
+      - path: upstream/CodexPlusPlus/crates/codex-plus-data/tests/provider_sync.rs
+        symbol: provider_sync_repairs_missing_local_thread_catalog_rows_from_threads
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: apply_session_index_cleanup
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
@@ -78,12 +80,13 @@ features:
     platforms:
       windows:
         applicability: supported
-        semantics: '同步 metadata、预览与应用索引清理并生成本地备份。'
+        semantics: '同步 metadata、修复缺失 local_thread_catalog 行、返回 sqliteCatalogRowsInserted、维护同步状态并生成本地备份。'
       macos:
         applicability: supported
-        semantics: '同步 metadata、预览与应用索引清理并生成本地备份。'
+        semantics: '同步 metadata、修复缺失 local_thread_catalog 行、返回 sqliteCatalogRowsInserted、维护同步状态并生成本地备份。'
     decision_refs:
       - issue:26
+      - issue:65
   - id: feature.session-data.token-usage-history
     name: 'Token 用量历史'
     status: unassessed

@@ -7,4 +7,4 @@ fixtures:
     files:
       - path: baseline.yml
         format: yaml
-        description: '合成 Provider metadata 同步与索引清理预览。'
+        description: '合成 Provider metadata、SQLite catalog 修复计数与同步状态水位。'

@@ -1,7 +1,7 @@
 schema_version: inputcodex.feature-catalog.v1
 release:
-  tag: v1.2.42
-  tag_commit: 657cd33e009ad02515d30db6492cd4e669b06318
+  tag: v1.2.43
+  tag_commit: 5036ff056b5c629f19356396b17d6eeb70da664c
 domain: plugin-script
 features:
   - id: feature.plugin-script.dream-skin-library
@@ -265,6 +265,8 @@ features:
     evidence:
       - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/user_scripts.rs
         symbol: user_scripts
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/user_scripts.rs
+        symbol: inventory_with_runtime_status
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: delete_user_script
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
@@ -276,10 +278,11 @@ features:
     platforms:
       windows:
         applicability: exception-pending
-        semantics: '上游用户脚本依赖注入执行，仅审计安装与启停语义。'
+        semantics: 'v1.2.43 可合并 renderer 提供的 runtime status、status 与 error；真实执行仍依赖注入，仅作为审计证据。'
       macos:
         applicability: exception-pending
-        semantics: '上游用户脚本依赖注入执行，仅审计安装与启停语义。'
+        semantics: 'v1.2.43 可合并 renderer 提供的 runtime status、status 与 error；真实执行仍依赖注入，仅作为审计证据。'
     decision_refs:
       - issue:26
+      - issue:65
       - rule:AGENTS-product-constraints

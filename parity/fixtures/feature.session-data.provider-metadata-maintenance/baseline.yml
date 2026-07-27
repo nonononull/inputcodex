@@ -5,4 +5,22 @@ targets:
 cleanup_candidates:
   - session_id: synthetic-session-archived
     reason: missing-provider
+catalog_repair:
+  thread_id: thread-1
+  display_title: Thread One
+  source_created_at: 100.0
+  source_updated_at: 200.0
+  cwd: synthetic/workspace
+  source_kind: cli
+  source_detail: synthetic/rollout.jsonl
+  model_provider: apigather
+  git_branch: main
+  thread_source: user
+sync_result:
+  sqlite_rows_updated: 2
+  sqlite_catalog_rows_inserted: 1
+sync_state:
+  initial_build_complete: true
+  watermark_updated_at: 200.0
+  observation_sequence: 1
 backup_id: synthetic-backup-001

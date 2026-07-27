@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 功能目录、`v1.2.42` 缓存与重新审计、双平台性能基线和性能预算数值批准。Issue `#59` / PR `#60` 已以单父 Squash 提交 `e225144831a0928bfa3aaa0d169a054779005812` 进入 `main`：Windows AMD EPYC 7763 严格目标队列为 `5`，macOS 同队列为 `12`，预算 JSON 与离线复算合同 `10/10` GREEN。预算 CI、性能优化、上游功能迁移和 Gate 5 继续锁定。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 功能目录、`v1.2.43` 缓存与重新审计、双平台性能基线和性能预算数值批准。Issue `#59` / PR `#60` 已以单父 Squash 提交 `e225144831a0928bfa3aaa0d169a054779005812` 进入 `main`：Windows AMD EPYC 7763 严格目标队列为 `5`，macOS 同队列为 `12`，预算 JSON 与离线复算合同 `10/10` GREEN。预算 CI、性能优化、上游功能迁移和 Gate 5 继续锁定。
 
 ## 项目目标
 
@@ -17,11 +17,11 @@
 - 上游项目：`BigPizzaV3/CodexPlusPlus`
 - 半成品参考：`zsr131550/CodexPlusPlus`
 
-两份参考项目均采用 GNU AGPLv3。当前仓库同样采用 GNU AGPLv3；`BigPizzaV3/CodexPlusPlus` 正式 Release `v1.2.42` 已以完整只读审计快照导入 `upstream/CodexPlusPlus/`，半成品参考仓库尚未导入。
+两份参考项目均采用 GNU AGPLv3。当前仓库同样采用 GNU AGPLv3；`BigPizzaV3/CodexPlusPlus` 正式 Release `v1.2.43` 已以完整只读审计快照导入 `upstream/CodexPlusPlus/`，半成品参考仓库尚未导入。
 
 ## 当前阶段
 
-截至 2026 年 7 月 25 日，已完成：
+截至 2026 年 7 月 27 日，已完成：
 
 - 建立本地 Git 仓库与 GitHub 公开仓库。
 - 固定项目名称、无广告原则和性能优先目标。
@@ -51,6 +51,8 @@
 - PR `#45` CI Run `30157623932` 七 Job 全绿且 Artifact 为 `0`；合并后主干 Run `30158058627` 的 Attempt `1/2` 因 GitHub Actions major outage 未创建任何 Job，服务恢复后的同一 Run Attempt `3` 在未修改仓库的情况下七 Job 全绿且 Artifact 为 `0`，Issue `#46` 已按 `COMPLETED` 关闭。
 - Issue `#26` / PR `#27` 已完成 Gate 4 功能目录执行：最终 Head `1d1bf32cdc4edc45e2d28f1047604222ebdb51e4` 以 Squash 提交 `a9b20f00ae069aedd42c8124d2789b230187258c` 进入 `main`；merge/head tree 均为 `205c24e05e0451a3aa39af4f43f0d9853cc7a6a2`，GitHub 签名 `valid`，PR 与合并后主干 CI 均六 Job 全绿且成功 Artifact 数为 `0`。
 - Issue `#28` / PR `#29` 已完成 Gate 4 独立 Closeout：最终 Head `7ee316c6bf4d9ca44f3475283ae1aee9c83f8577` 以单父 Squash 提交 `c07da0cad33e09b5c54e528a8a6728a048c88c0b` 合入 `main`，tree 为 `02ab8a3d8497ebb7b990e4078122b9bf916ef454`，GitHub 签名有效；Issue `#28` 已关闭，合并后主干 CI `29948874307` 六 Job 全部成功且 Artifact 数为 `0`。
+- Issue `#64` / PR `#66` 已把 `v1.2.43 @ 5036ff056b5c629f19356396b17d6eeb70da664c` 完整缓存为只读审计输入；Squash 提交 `15e91708b41548f523e26ede4c7ca4de41badf77` 的主干 CI Run `30214249228` 为 `7/7` 成功且 Artifact 为 `0`。
+- Issue `#65` 已按方案 A 的二十四路径和精确范围哈希完成 TDD：基线 `12/12`、RED `9/12`、GREEN `12/12`；Watcher、Provider Sync、User Scripts 与广告例外已按 `v1.2.43` 证据更新，但没有迁移任何上游运行面。
 
 当前明确不做：
 
@@ -65,7 +67,7 @@
 ## 当前 Gate 4 功能目录边界
 
 - Gate 2 的 Issue `#9/#12/#14` 与 PR `#11/#13/#15` 均已完成；上游监控 Workflow 持续运行，Issue `#16` 只由机器维护。
-- `upstream/CodexPlusPlus/` 含 `v1.2.42` 的 `277` 个只读审计文件，`upstream/source-lock.json` 记录活动来源、tree、逐文件 blob/SHA-256、许可证、生成工具证据，以及已对齐 `v1.2.42` 的功能目录审计基线与 `current` 状态。
+- `upstream/CodexPlusPlus/` 含 `v1.2.43` 的 `280` 个只读审计文件，`upstream/source-lock.json` 记录活动来源、tree、逐文件 blob/SHA-256、许可证、生成工具证据，以及已对齐 `v1.2.43` 的功能目录审计基线与 `current` 状态。
 - Issue `#19` / PR `#21` 已将七成员纯 Rust Workspace、Rust `1.97.1` 工具链文件、`Cargo.lock`、最小分层源码与首版无缓存三平台 `CI` Workflow 合入 `main`；仍没有 Release、安装包、签名、更新资产或上游业务功能迁移。
 - 当前治理合同为 `30/30`，Workspace 许可证元数据已与根 `LICENSE` 对齐为 `AGPL-3.0-only`；五类受控失败语义已全部完成普通提交 RED→GREEN，最终 PR 运行 `29918843397` 与合并后主干运行 `29919596057` 均六 Job 全绿。
 - Linux、Windows、macOS 已各取得 `3/3` 次无缓存成功样本；Job 执行时间中位数分别为 `133`、`212`、`96` 秒，最低基线不包含 Cache、P95 或七天调优结论。
@@ -73,8 +75,8 @@
 - Iced 只能直接存在于 presentation crate；最小窗口不建立 UI 设计系统，视觉与交互由 Gemini 实现或审阅。
 - Gate 4 规划合同已进入 `main`；Issue `#26` 的 source-index 与五域功能目录 checkpoint `87537e6e4a0e6911dd1427cc23f52dcb805a4679` 已记录 `133` 条入口、`36` 个 feature、`3` 个排除和 `0` 个覆盖缺口。
 - Issue `#26` / PR `#27` 已将 `36` 份五域行为合同、`11` 个合成或不可逆脱敏 fixture manifest 与验证器合入 `main`；来源 PR 的 `classify`、`governance`、`linux-quality`、`windows`、`macos`、`required` 均成功，Issue 已关闭，来源功能分支的远端、本地与远端跟踪引用均已清理。
-- Gate 4 初始功能目录、独立 Closeout、`v1.2.42` 缓存与二十六路径重新审计均已完成；Issue `#47` 只负责把 PR `#45`、主干 CI 恢复与 Issue `#46` 的稳定证据回写到长期控制面，不迁移产品功能。
-- 最新正式功能真源为 `v1.2.42`；活动审计缓存与功能目录审计基线均已对齐该 Release，`release_audit` 为 `current`，上游 `main` 的变化仍只进入 Issue `#20` 预警。
+- Gate 4 初始功能目录、独立 Closeout、`v1.2.42` 历史复审和 `v1.2.43` 二十四路径重新审计均已完成实现；动态 PR、CI 与合并证据继续保留在各自 GitHub Issue/PR，不迁移产品功能。
+- 最新正式功能真源为 `v1.2.43`；活动审计缓存与功能目录审计基线均已对齐该 Release，`release_audit` 为 `current`，上游 `main` 的变化仍只进入 Issue `#20` 预警。
 - Issue `#32` / PR `#49` 已完成 Windows/macOS 基线采集与 Evidence；该结果是预算 Discovery 输入，不是预算批准。
 - Issue `#50` / PR `#51` 已通过 ADR `0004` 冻结预算对象、可比队列、五次独立 Run、run-level 稳健统计、错误语义和阶段升级合同；PR Final Head CI 与合并后主干 CI 均通过，Gate 5 仍未解锁。
 - Issue `#55` 使 `Performance Baseline` 的手工 trigger 必须显式选择 `evidence` 或 `measure`，默认值为 `evidence`；它不改变自动 PR/push 行为，也不实施预算 CI。Issue `#54` 已以八次严格串行 hosted Run 验证该入口，但 Windows 的 CPU 队列分裂为四类，未产生五次同队列样本；预算数值预授权因此没有触发。

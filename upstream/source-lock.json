@@ -19,12 +19,12 @@
   "release_audit": {
     "schema_version": "inputcodex.release-audit.v1",
     "catalog_release": {
-      "tag": "v1.2.42",
-      "commit": "657cd33e009ad02515d30db6492cd4e669b06318"
+      "tag": "v1.2.43",
+      "commit": "5036ff056b5c629f19356396b17d6eeb70da664c"
     },
-    "status": "stale-re-audit-required",
-    "stale_reason": "活动上游快照已推进到 v1.2.43 @ 5036ff056b5c629f19356396b17d6eeb70da664c，功能目录仍固定在 v1.2.42 @ 657cd33e009ad02515d30db6492cd4e669b06318；必须由 Issue #65 完成独立重新审计后才能恢复为 current。",
-    "re_audit_issue_ref": "https://github.com/nonononull/inputcodex/issues/65"
+    "status": "current",
+    "stale_reason": null,
+    "re_audit_issue_ref": null
   },
   "archive": {
     "format": "tar.gz",
