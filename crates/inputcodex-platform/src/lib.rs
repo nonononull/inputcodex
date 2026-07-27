@@ -2,8 +2,10 @@
 
 use inputcodex_application::{ApplicationError, PlatformKind, PlatformPort};
 
+mod application_overview;
 mod platform_paths;
 
+pub use application_overview::SystemApplicationOverview;
 pub use platform_paths::SystemPlatformPaths;
 
 #[derive(Debug, Clone, Copy, Default)]
