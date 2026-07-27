@@ -1,16 +1,20 @@
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 use std::{
     fs::File,
-    io::{self, Read},
-    path::Path,
+    io::Read,
     time::{SystemTime, UNIX_EPOCH},
 };
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
+use std::{io, path::Path};
 
 use inputcodex_application::{
     ApplicationError, ApplicationOverviewPort, ApplicationOverviewRequest,
 };
+use inputcodex_domain::ApplicationOverview;
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 use inputcodex_domain::{
-    ApplicationOverview, ApplicationVersion, CodexInstallation, CollectedAtUnixMs,
-    InstallationState, InstalledVersion, LiveProcessState,
+    ApplicationVersion, CodexInstallation, CollectedAtUnixMs, InstallationState, InstalledVersion,
+    LiveProcessState,
 };
 
 #[cfg(any(target_os = "windows", target_os = "macos"))]
@@ -21,18 +25,22 @@ mod macos;
 #[cfg(any(target_os = "windows", test))]
 mod windows;
 
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 pub(crate) enum LimitedRead {
     Bytes(Vec<u8>),
     TooLarge,
 }
 
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 pub(crate) trait MetadataReader {
     fn read_limited(&self, path: &Path, limit: usize) -> io::Result<LimitedRead>;
 }
 
 #[derive(Debug, Clone, Copy, Default)]
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 struct SystemMetadataReader;
 
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 impl MetadataReader for SystemMetadataReader {
     fn read_limited(&self, path: &Path, limit: usize) -> io::Result<LimitedRead> {
         let file = File::open(path)?;
@@ -88,6 +96,7 @@ impl ApplicationOverviewPort for SystemApplicationOverview {
     }
 }
 
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 fn build_overview(
     installation: Option<CodexInstallation>,
     resolve_version: impl FnOnce(&CodexInstallation) -> InstalledVersion,
@@ -119,6 +128,7 @@ fn build_overview(
     ))
 }
 
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 fn map_discovery_error(error: ApplicationError) -> ApplicationError {
     if error.code().as_str() == "EXPLICIT_CODEX_PATH_INVALID" {
         error

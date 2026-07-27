@@ -31,7 +31,7 @@ approved_decision_ref: codex-session-user-message-approved-issue-77-scheme-a-202
 owner_decision_local_time: 2026-07-27 23:16:01 +08:00
 planning_authorization_ref: codex-session-user-message-approved-issue-78-written-design-planning-scope-2026-07-27
 planning_authorization_local_time: 2026-07-27 23:34:39 +08:00
-current_phase: pr-preparation
+current_phase: hosted-ci-correction-1
 planning_scope_count: 3
 planning_scope_hash: sha256:3f81a54c18c07b6889ad8219b0c1605e4b989f997117141fc2d4baae46ebbeb3
 candidate_scope_count: 29
@@ -48,7 +48,7 @@ delivery_contract: agos.issue-pr-merge.v1
 review_strategy: final-head changed-surface review; every conversation records root cause, treatment and verification evidence
 ci_expectation: standard GitHub-hosted CI plus Windows/macOS compile-test and non-required observation; successful artifact count remains zero
 final_merge_authorization: pending-separate-owner-gate
-status: local-verification-passed-pr-pending
+status: pr-open-ci-correction-1-local-fix-ready
 ```
 
 ## Global Constraints
@@ -141,7 +141,7 @@ local_knowledge_lookup:
 ```yaml
 decision:
   id: issue-78-application-overview-readonly-facts
-  status: approved-design-scope-pending
+  status: approved-implementation-pr-open
   owner: nonononull
   feature_id: feature.foundation-platform.application-overview
   stable_terms:
@@ -587,11 +587,11 @@ git status --short --branch
 
 记录本机 `Get-Date`、HEAD、tree、差异路径、范围哈希和本地验证摘要；禁止覆写 Git 时间。
 
-- [ ] **Step 2：普通提交与普通推送**
+- [x] **Step 2：普通提交与普通推送**
 
 不得 force push；提交必须关联 Issue `#78`，分支固定为 `codex/issue-78-gate-5-application-overview`。
 
-- [ ] **Step 3：创建非 Draft PR**
+- [x] **Step 3：创建非 Draft PR**
 
 PR 必须说明 Issue `#77` 语义例外、三个 Ready 成功面、NotObserved、版本未知边界、I/O 上限和明确排除项。
 

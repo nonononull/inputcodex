@@ -66,7 +66,7 @@ Issue `#78` 已在批准的二十九路径内完成 Domain、Application、Windo
 ## 本地验证状态
 
 ```yaml
-status: local-verification-passed-pr-pending
+status: pr-open-ci-correction-1-local-fix-ready
 scope_count: 29
 scope_hash: sha256:b46a940ff7dbf4bbc9bfdb69d04d755468e12409d9618837d8ff310490eb5ae4
 four_crate_test: passed
@@ -79,12 +79,22 @@ scope_and_privacy: passed; changed=29
 history_and_forbidden_capabilities: passed
 upstream_fresh: v1.2.43@5036ff056b5c629f19356396b17d6eeb70da664c
 control_checkpoint: 27e8599edff2f0ddeacc24d1d188cfbeb6d85c68
-pr_ref: pending
-review_ci: pending
+pr_ref: https://github.com/nonononull/inputcodex/pull/79
+review_ci: linux-quality-correction-1-pending-rerun
 final_merge: not-authorized
 ```
 
 `cargo fmt --all -- --check` 的首次组合命令暴露了纯格式 diff；根因是 PowerShell 不会因原生命令非零自动终止，后续成功脚本覆盖了最终退出码。已按 rustfmt 给出的最小 diff 修正并单独复验退出码为 `0`；最终门禁对每条原生命令显式检查 `$LASTEXITCODE`。
+
+## Hosted CI 纠错 #1
+
+PR `#79` 原 Head `42d497bca2c8140302df1f207f7ff12988c58a89` 的 Performance Baseline Run `30287579035` 四 Job 全绿；标准 CI Run `30287579159` 的 Windows、macOS、governance、classify 和 release-audit 成功，只有 `linux-quality` 在 Workspace Clippy 失败，`required` 按合同失败。
+
+- 失败位置：`crates/inputcodex-platform/src/application_overview.rs`。
+- 根因：Linux 正常库构建不使用 Windows/macOS 元数据读取与快照组装 helper，但这些 item 没有使用与唯一调用方一致的目标平台 `cfg`，因此被 `-D dead-code` 拒绝。
+- 处理：`LimitedRead` 与 `MetadataReader` 只在 Windows/macOS 或测试构建存在；`SystemMetadataReader`、`build_overview`、`map_discovery_error` 只在 Windows/macOS 产品构建存在。禁止使用 `allow/expect(dead_code)` 或跳过 Linux Clippy。
+- 本地验证：platform tests、platform all-targets Clippy 和 rustfmt 通过；本机只安装 Windows target。额外尝试的 Workspace `--offline` Clippy 在编译前因本地未缓存 `ash` 中止，不构成代码失败，也不扩大本地重型构建范围；Linux 真实性必须由新 Head 的官方 hosted Runner 复验。
+- 当前状态：最小修复待普通提交、普通推送和两套 Workflow 重跑；最终 Squash Merge 仍未授权。
 
 ## 后续门禁
 

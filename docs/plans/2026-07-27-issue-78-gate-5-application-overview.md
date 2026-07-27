@@ -3,7 +3,7 @@
 ## 控制状态
 
 ```yaml
-status: local-verification-passed-pr-pending
+status: pr-open-ci-correction-1-local-fix-ready
 issue_ref: https://github.com/nonononull/inputcodex/issues/78
 parity_exception_ref: https://github.com/nonononull/inputcodex/issues/77
 parity_exception_decision_ref: https://github.com/nonononull/inputcodex/issues/77#issuecomment-5093148603
