@@ -7,8 +7,9 @@ Windows/macOS Platform 与 Parity RED→GREEN checkpoint。实现只聚合固定
 来源、`CODEX_HOME/.env` 存在状态和四个固定 Clash Verge 候选的 TUN 状态，不返回变量值、
 文件内容、注册表值或实际路径。
 
-项目控制面与最终本地轻量验证已经完成；尚未普通推送、尚未创建 PR，Hosted Review/CI 与
-最终 Squash Merge 均未完成。最终合并继续保留项目所有者独立授权门。
+项目控制面、本地轻量验证、普通推送、非 Draft PR `#90`、Review/CI 根因闭环与 Artifact
+核验已经完成。动态 Head、Run、Artifact 和 Review 证据保留在 GitHub；最终 Squash Merge
+继续保留项目所有者独立授权门。
 
 ## 基线与批准
 
@@ -121,8 +122,8 @@ runtime_environment_scans_per_target: 1
 local_verification_checkpoint: b33bbbb7a6b2303c7a0c60725745528c92085c66
 push: completed
 pr: https://github.com/nonononull/inputcodex/pull/90
-review: pending
-hosted_ci: root-cause-fix-pending-rerun
+review: completed-no-conversations
+hosted_ci: completed-evidence-on-github
 final_merge_authorization: pending-separate-gate
 ```
 

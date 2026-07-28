@@ -10,7 +10,7 @@
 - `planning_scope_hash`: `sha256:0a301df75edda05c8d3d1c01c91221dd9ac8ff11aeeca39fb4c26a293b0543b0`
 - `candidate_scope_hash`: `sha256:0adc20d0ed4d73ae645a5ffb23d7208f7aaabfea92c4d6fd62e0da3a120e8f77`
 - `delivery_contract`: `Issue → 分支/worktree → Session Plan → Runtime Workflow → scope_hash 批准 → TDD → 本地验证 → PR → Review/CI → 独立 Squash Merge 授权`
-- `current_phase`: `HOSTED_REVIEW_CI`
+- `current_phase`: `FINAL_MERGE_AUTHORIZATION_PENDING`
 
 ## Global Constraints
 
@@ -155,8 +155,8 @@ docs/workflows/2026-07-28-issue-89-gate-5-relay-environment-observation-runtime.
 - [x] 目录、合同、来源、范围、隐私和禁止能力验证；
 - [x] Git snapshot governance 与最终本地 checkpoint；
 - [x] 普通提交、普通推送和非 Draft PR；
-- [ ] Review 对话逐条根因闭环；
-- [ ] Hosted CI、Performance observation 和 Artifact 核验；
+- [x] Review 对话逐条根因闭环；
+- [x] Hosted CI、Performance observation 和 Artifact 核验；
 - [ ] Final Head 独立 Squash Merge 授权。
 
 ## 当前授权
