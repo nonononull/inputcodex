@@ -1102,12 +1102,155 @@ fn gate5_relay_环境只读观察已实现但网络环境总功能仍未评估()
 }
 
 #[test]
+fn gate5_设置只读观察已实现但设置管理总功能仍未评估() {
+    let feature_text = read_repository_text("parity/features/foundation-platform.yml");
+    let observation = yaml_list_item_block(
+        &feature_text,
+        "feature.foundation-platform.settings-observation",
+    );
+    for expected in [
+        "name: '设置只读观察'",
+        "status: implemented",
+        "tauri-command:load_settings",
+        "- issue:91",
+        "- issue:92",
+    ] {
+        assert!(
+            observation.contains(expected),
+            "设置只读观察功能条目应包含：{expected}"
+        );
+    }
+    for forbidden in [
+        "core-module:settings",
+        "tauri-command:reset_settings",
+        "tauri-command:save_settings",
+    ] {
+        assert!(
+            !observation.contains(forbidden),
+            "设置只读观察不得接管原总功能入口：{forbidden}"
+        );
+    }
+
+    let umbrella = yaml_list_item_block(
+        &feature_text,
+        "feature.foundation-platform.settings-management",
+    );
+    for expected in [
+        "status: unassessed",
+        "core-module:settings",
+        "tauri-command:reset_settings",
+        "tauri-command:save_settings",
+        "- issue:91",
+    ] {
+        assert!(
+            umbrella.contains(expected),
+            "原设置管理总功能应继续包含：{expected}"
+        );
+    }
+    assert!(!umbrella.contains("status: implemented"));
+    assert!(!umbrella.contains("tauri-command:load_settings"));
+
+    let contract_text = read_repository_text("parity/contracts/foundation-platform.yml");
+    let contract = yaml_list_item_block(
+        &contract_text,
+        "contract.feature.foundation-platform.settings-observation.baseline",
+    );
+    for expected in [
+        "filesystem-read",
+        "persistence: 'none'",
+        "top_level_entry_count",
+        "LoadCompletion::Ready",
+        "LoadCompletion::Empty",
+        "NotConfigured",
+        "256 KiB",
+        "SETTINGS_OBSERVATION_UNSUPPORTED",
+        "SETTINGS_OBSERVATION_UNAVAILABLE",
+        "SETTINGS_OBSERVATION_INVALID_FILE_TYPE",
+        "SETTINGS_OBSERVATION_TOO_LARGE",
+        "SETTINGS_OBSERVATION_INVALID_JSON",
+        "SETTINGS_OBSERVATION_INVALID_ROOT",
+        "mode: none",
+        "fixture_refs: []",
+    ] {
+        assert!(
+            contract.contains(expected),
+            "设置只读观察合同应包含：{expected}"
+        );
+    }
+    for forbidden in [
+        "filesystem-write",
+        "environment-write",
+        "network-read",
+        "network-write",
+        "process-control",
+        "advertising",
+        "remote-recommendation",
+    ] {
+        assert!(
+            !contract.contains(forbidden),
+            "设置只读观察合同禁止能力：{forbidden}"
+        );
+    }
+
+    let source_text = read_repository_text("parity/features/source-index.yml");
+    let load = yaml_list_item_block(&source_text, "tauri-command:load_settings");
+    assert!(load.contains("side_effects: [filesystem-read]"));
+    assert!(load.contains("feature_id: feature.foundation-platform.settings-observation"));
+    assert!(!load.contains("filesystem-write"));
+
+    for source_id in [
+        "core-module:settings",
+        "tauri-command:reset_settings",
+        "tauri-command:save_settings",
+    ] {
+        let source = yaml_list_item_block(&source_text, source_id);
+        assert!(source.contains("side_effects: [filesystem-read, filesystem-write]"));
+        assert!(source.contains("feature_id: feature.foundation-platform.settings-management"));
+    }
+
+    let production = read_repository_text("crates/inputcodex-platform/src/settings_observation.rs");
+    for expected in [
+        "SystemPlatformPaths.resolve",
+        "fs::symlink_metadata",
+        "File::open",
+        "file.take(limit as u64 + 1)",
+        "serde_json::from_slice::<Value>",
+        "object.len()",
+    ] {
+        assert!(
+            production.contains(expected),
+            "设置观察适配器应包含：{expected}"
+        );
+    }
+    for forbidden in [
+        "pub trait SettingsFileProbe",
+        "pub fn observe_settings_file",
+        "fs::write",
+        "OpenOptions",
+        "std::process::Command",
+        "Command::new",
+        "std::thread",
+        "reqwest",
+        "hyper",
+        "TcpStream",
+        "UdpSocket",
+        "iced",
+        "unsafe {",
+    ] {
+        assert!(
+            !production.contains(forbidden),
+            "设置观察生产适配器禁止能力：{forbidden}"
+        );
+    }
+}
+
+#[test]
 fn 仓库source_index_覆盖锁定上游公开入口() {
     let summary =
         validate_feature_repository(&repository_root()).expect("功能目录应通过仓库级验证");
 
     assert_eq!(summary.source_entry_count(), 133);
-    assert_eq!(summary.feature_count(), 38);
+    assert_eq!(summary.feature_count(), 39);
     assert_eq!(summary.excluded_entry_count(), 3);
     assert_eq!(summary.exception_pending_count(), 10);
     assert_eq!(summary.coverage_gap_count(), 0);
@@ -1118,8 +1261,8 @@ fn 仓库功能目录通过完整引用与安全验证() {
     let summary = validate_repository(&repository_root()).expect("仓库功能目录应通过验证");
 
     assert_eq!(summary.source_entry_count(), 133);
-    assert_eq!(summary.feature_count(), 38);
-    assert_eq!(summary.contract_count(), 38);
+    assert_eq!(summary.feature_count(), 39);
+    assert_eq!(summary.contract_count(), 39);
     assert_eq!(summary.fixture_count(), 11);
     assert_eq!(summary.coverage_gap_count(), 0);
 }

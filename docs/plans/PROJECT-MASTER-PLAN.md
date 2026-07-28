@@ -267,7 +267,10 @@ decision_status: issue-89-pr-90-review-ci-green-final-merge-not-authorized
 - [x] Issue `#85` 已完成运行时环境观察与清理分离决策并关闭。
 - [x] Issue `#86` / PR `#87` 已完成运行时环境冲突只读观察迁移、Review/CI、独立 Squash 授权与合并后主干验证。
 - [x] Issue `#88` 已完成 Relay 环境只读观察与网络环境总功能分拆决策并关闭。
-- [ ] Issue `#89` / PR `#90` 已完成第五个 Gate 5 Relay 环境只读观察切片的实现、Review/CI 与 Artifact 核验；只剩独立 Squash Merge 授权，禁止并行启动第六个切片。
+- [x] Issue `#89` / PR `#90` 已完成第五个 Gate 5 Relay 环境只读观察切片、独立 Squash Merge 与 Issue 关闭。
+- [x] Issue `#91` 已完成设置只读观察与设置写入管理的方案 A 决策并关闭。
+- [x] Issue `#92` 已完成第六个 Gate 5 设置只读观察迁移：只接管 `load_settings`，缺失与合法空对象语义分离，原设置管理总功能继续 `unassessed`。
+- 第七个产品切片必须重新建立独立 Issue、设计批准、精确范围与实现授权，不得复用 Issue `#92` 扩大范围。
 
 ### Gate 6：首个正式版本（锁定）
 

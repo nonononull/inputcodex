@@ -6,6 +6,7 @@ mod application_overview;
 mod platform_paths;
 mod relay_environment_observation;
 mod runtime_environment_observation;
+mod settings_observation;
 mod version_startup;
 
 pub use application_overview::{
@@ -18,6 +19,9 @@ pub use relay_environment_observation::{
 pub use runtime_environment_observation::{
     ObserveRuntimeEnvironmentConflicts, RuntimeEnvironmentObservationPort,
     RuntimeEnvironmentObservationRequest,
+};
+pub use settings_observation::{
+    ObserveSettings, SettingsObservationPort, SettingsObservationRequest,
 };
 pub use version_startup::{LoadVersionStartup, VersionStartupPort, VersionStartupRequest};
 

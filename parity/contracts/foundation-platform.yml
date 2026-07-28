@@ -361,11 +361,73 @@ contracts:
       mode: none
       reason: '基线只约束状态、副作用和错误语义，不需要结构样本。'
     fixture_refs: []
+  - id: contract.feature.foundation-platform.settings-observation.baseline
+    feature_id: feature.foundation-platform.settings-observation
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.43 证据已锁定，Issue #91 方案 A 与 Issue #92 只读实现范围已经批准。'
+      - '请求不接受任意路径，设置文件只通过平台路径解析能力定位，单文件上限为 256 KiB。'
+    inputs:
+      - name: request
+        data_type: settings-observation-request
+        required: false
+        description: '零字段请求，不接受文件路径、字段名称或过滤条件。'
+    outputs:
+      - name: result
+        data_type: settings-observation-result
+        description: '文件缺失返回 LoadCompletion::Empty(NotConfigured)；合法 JSON object 返回 LoadCompletion::Ready(top_level_entry_count)，其中 0 仍是 Ready。'
+    side_effects:
+      - filesystem-read
+    persistence: 'none'
+    errors:
+      - code: SETTINGS_OBSERVATION_UNSUPPORTED
+        kind: unsupported
+        semantics: '非 Windows/macOS 目标明确失败，不伪造空成功。'
+      - code: SETTINGS_OBSERVATION_UNAVAILABLE
+        kind: unavailable
+        semantics: '设置文件元数据或有界读取失败时返回稳定错误，不暴露底层消息。'
+      - code: SETTINGS_OBSERVATION_INVALID_FILE_TYPE
+        kind: invalid-input
+        semantics: '符号链接或非普通文件明确失败。'
+      - code: SETTINGS_OBSERVATION_TOO_LARGE
+        kind: invalid-input
+        semantics: '元数据或实际读取超过 256 KiB 时明确失败。'
+      - code: SETTINGS_OBSERVATION_INVALID_JSON
+        kind: invalid-input
+        semantics: '损坏 JSON 或非 UTF-8 内容明确失败。'
+      - code: SETTINGS_OBSERVATION_INVALID_ROOT
+        kind: invalid-input
+        semantics: 'JSON 根不是 object 时明确失败。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次设置观察请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录文件内容或平台路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '设置观察单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+      - top_level_entry_count
+    platforms:
+      shared_semantics: 'Windows 与 macOS 只读观察同一平台路径语义下的设置文件；缺失、合法对象、损坏内容和错误根使用一致状态与错误分类。'
+      windows: 使用 Windows 平台路径适配器定位设置文件；不支持时明确失败。
+      macos: 使用 macOS 平台路径适配器定位设置文件；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '合成单元测试已固定结构数量、文件边界和错误语义，无需保存设置内容夹具。'
+    fixture_refs: []
   - id: contract.feature.foundation-platform.settings-management.baseline
     feature_id: feature.foundation-platform.settings-management
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，Issue #91 已将只读 load_settings 入口拆出。'
     inputs:
       - name: request
         data_type: settings-management-request
@@ -399,7 +461,7 @@ contracts:
       - duration_ms
       - outcome_class
     platforms:
-      shared_semantics: '加载、保存和重置本地设置，写入必须原子化并可恢复。'
+      shared_semantics: '管理本地设置的底层读写、保存和重置，写入必须原子化并可恢复。'
       windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
       macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
       differences: []
