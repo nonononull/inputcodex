@@ -64,7 +64,7 @@ Issue `#81` 已在批准的二十三路径允许范围内完成 Planning、Domai
 ## 当前验证状态
 
 ```yaml
-status: local-verified-final-git-checkpoint-pending
+status: local-verified-ready-for-push-pr
 verified_at_local: 2026-07-28T14:44:08+08:00
 four_crate_test: passed
 four_crate_clippy: passed
@@ -80,6 +80,7 @@ privacy_matches: 0
 legacy_variable_matches: 0
 forbidden_capability_matches: 0
 source_index_unchanged: verified-at-parity-checkpoint
+local_verification_checkpoint: 73bd5748d2341a92577ab8273b0db6f7bdb6a265
 push: pending
 pr: pending
 hosted_review_ci: pending
@@ -96,7 +97,6 @@ artifact_count: pending
 
 ## 剩余门禁
 
-1. 创建控制面与最终本地验证 checkpoint，并使用本机默认 Git 时间提交。
-2. 普通推送并创建关联 Issue `#80/#81` 的非 Draft PR。
-3. 核验 Final Head Review、标准 CI、Performance Baseline observation、全部 Review 对话和成功 Run Artifact `0`。
-4. 停在项目所有者单独 Squash Merge 授权门，未获授权不得合并。
+1. 普通推送并创建关联 Issue `#80/#81` 的非 Draft PR。
+2. 核验 Final Head Review、标准 CI、Performance Baseline observation、全部 Review 对话和成功 Run Artifact `0`。
+3. 停在项目所有者单独 Squash Merge 授权门，未获授权不得合并。

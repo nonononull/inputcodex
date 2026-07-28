@@ -192,7 +192,7 @@ domain_checkpoint: 391bfe9db9348518600e14c912333f221c3cfaca
 application_checkpoint: 1eafa90866124e4c281eba127fd48bb701817ebd
 platform_checkpoint: f992890611ff86f1fe6ccf5f0dd86e19d0fb07de
 parity_checkpoint: bee9dcb97fe9c790f45082cb23f0286c89b1d815
-current_node: FINAL_GIT_CHECKPOINT
+current_node: NORMAL_PUSH
 local_lightweight_verification: passed
 ci_contract: 35/35
 release_audit: current
@@ -203,6 +203,7 @@ protected_path_changes: 0
 legacy_variable_matches: 0
 forbidden_capability_matches: 0
 privacy_matches: 0
+local_verification_checkpoint: 73bd5748d2341a92577ab8273b0db6f7bdb6a265
 remote_push_pr_review_ci: pending
 final_merge_authorization: pending-separate-gate
 ```

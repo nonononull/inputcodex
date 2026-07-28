@@ -173,5 +173,5 @@ parity/features/foundation-platform.yml
 | Platform RED→GREEN | completed | `f992890611ff86f1fe6ccf5f0dd86e19d0fb07de` |
 | Parity RED→GREEN | completed | `bee9dcb97fe9c790f45082cb23f0286c89b1d815` |
 | 控制面与本地轻量验证 | completed | 四 crate、Clippy、fmt、CI `35/35`、Audit、Policy、范围和禁止面全绿 |
-| 最终 Git checkpoint | in-progress | 当前分支 `codex/issue-81-gate-5-version-startup` |
+| 最终 Git checkpoint | completed | `73bd5748d2341a92577ab8273b0db6f7bdb6a265` |
 | 普通推送、非 Draft PR、Hosted Review/CI | pending | 最终 Squash Merge 仍为独立授权门 |

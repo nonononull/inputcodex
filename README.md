@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 `v1.2.43` 完整缓存、双平台性能基线、性能预算数值批准、非 required `approved-observation` 预算 CI 和功能目录重新审计。`main` 当前为 `ef69494d92c7c461b0cb858e95f6838404ae1a61`；Issue `#75/#78` 已完成前两个 Gate 5 产品切片，两次合并后的主干 CI 与 Performance Baseline 均全绿且 Artifact 为 `0`。Gate 5 当前由 Issue `#81` 迁移版本与启动意图，四个 TDD checkpoint 和最终本地轻量门禁均已完成，正在形成最终 Git checkpoint、普通推送与非 Draft PR。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 `v1.2.43` 完整缓存、双平台性能基线、性能预算数值批准、非 required `approved-observation` 预算 CI 和功能目录重新审计。`main` 当前为 `ef69494d92c7c461b0cb858e95f6838404ae1a61`；Issue `#75/#78` 已完成前两个 Gate 5 产品切片，两次合并后的主干 CI 与 Performance Baseline 均全绿且 Artifact 为 `0`。Gate 5 当前由 Issue `#81` 迁移版本与启动意图，四个 TDD checkpoint、最终本地轻量门禁和本地验证 checkpoint 均已完成，当前可普通推送并创建非 Draft PR。
 
 ## 项目目标
 
@@ -94,8 +94,8 @@
 
 ## 下一步
 
-1. 为 Issue `#81` 创建控制面与最终本地验证 Git checkpoint，并复核工作区只包含批准范围。
-2. 普通推送并创建关联 Issue `#80/#81` 的非 Draft PR，核验 Final Head Review、标准 CI、Windows/macOS 真实编译、非 required Performance observation 与 Artifact `0`。
+1. 普通推送 Issue `#81` 分支并创建关联 Issue `#80/#81` 的非 Draft PR。
+2. 核验 Final Head Review、标准 CI、Windows/macOS 真实编译、非 required Performance observation 与 Artifact `0`。
 3. 全部根因闭环后停在项目所有者单独 Squash Merge 授权门；当前 PR 禁止夹带 UI、第四个 feature、预算、Release 或上游同步。
 
 ## 项目文档

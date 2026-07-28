@@ -1,10 +1,10 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-81-gate-5-version-startup-local-verified-checkpoint-pending
-active_gate: Gate 5 第三个版本与启动意图切片已完成规划、Domain、Application、Platform、Parity TDD 与最终本地轻量门禁，正在形成最终 Git checkpoint并准备普通推送与非 Draft PR
+active_task: issue-81-gate-5-version-startup-ready-for-push-pr
+active_gate: Gate 5 第三个版本与启动意图切片已完成规划、Domain、Application、Platform、Parity TDD、最终本地轻量门禁与本地验证 checkpoint，当前准备普通推送与非 Draft PR
 last_verified_gate: Issue #78 / PR #79 已以单父 Squash 提交 ef69494d92c7c461b0cb858e95f6838404ae1a61 进入 main；合并后 main CI Run 30289461278 七 Job与 Performance Baseline Run 30289461109 四 Job全绿且 Artifact 均为 0，Issue #78 已按 COMPLETED 关闭且 release_audit=current
-next_legal_gate: 创建 Issue #81 最终 Git checkpoint，普通推送并创建非 Draft PR，核验 Review/CI、双平台编译、非 required observation 与 Artifact 0；最终 Squash Merge 保留单独授权
+next_legal_gate: 普通推送 Issue #81 分支并创建非 Draft PR，核验 Review/CI、双平台编译、非 required observation 与 Artifact 0；最终 Squash Merge 保留单独授权
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/81
 active_pr_ref: pending
 gate_5_platform_paths_exception_ref: https://github.com/nonononull/inputcodex/issues/74
@@ -27,6 +27,7 @@ gate_5_version_startup_domain_commit: 391bfe9db9348518600e14c912333f221c3cfaca
 gate_5_version_startup_application_commit: 1eafa90866124e4c281eba127fd48bb701817ebd
 gate_5_version_startup_platform_commit: f992890611ff86f1fe6ccf5f0dd86e19d0fb07de
 gate_5_version_startup_parity_commit: bee9dcb97fe9c790f45082cb23f0286c89b1d815
+gate_5_version_startup_local_checkpoint: 73bd5748d2341a92577ab8273b0db6f7bdb6a265
 performance_budget_observation_issue_ref: https://github.com/nonononull/inputcodex/issues/63
 performance_budget_observation_scope_hash: sha256:d5eb57c1b93dc2b7acc47ba78c8f514af2a2c98e8661df389774713a7b47d8dc
 performance_budget_observation_red_ref: 650040763aff07f4884ee9252c50639469622934
@@ -113,7 +114,7 @@ decision_status: issue-75-local-verified-pr-pending-final-merge-not-authorized
 - Issue `#77` 已批准应用概览方案 A 并按 `COMPLETED` 关闭；历史启动记录不得冒充实时运行状态，损坏状态不得静默视为无记录。
 - Issue `#78` / PR `#79` 已完成二十九路径应用概览只读事实迁移；Final Head `1bae5d51850c3538c3e161e73e266ac19f7406b3` 以单父 Squash 提交 `ef69494d92c7c461b0cb858e95f6838404ae1a61` 进入 `main`，tree 为 `936cc74fbceae2a3ee8d98b924c836e13d9f7ae3`，GitHub 签名 `valid`，Issue 已按 `COMPLETED` 关闭。合并后主干 CI Run `30289461278` 七 Job、Performance Baseline Run `30289461109` 四 Job全绿且 Artifact 均为 `0`。
 - Issue `#80` 已批准版本与启动意图方案 A并按 `COMPLETED` 关闭；版本来源、合法输入、非法值优先级、禁止副作用与非目标平台错误已经冻结。
-- Issue `#81` 已获批二十三路径与 `sha256:c1ef2c00a445dd2bd60dc5f5b375cb27d1e467a3d457d7eb53b7ec82a304aafe`；规划、Domain、Application、Platform 与 Parity TDD checkpoint 已完成，四 crate、Clippy、格式、CI 合同 `35/35`、Release Audit、仓库政策、范围、隐私、旧变量与禁止能力门禁均已通过，当前等待最终 Git checkpoint、普通推送和非 Draft PR，最终 Squash Merge 保留单独授权门。
+- Issue `#81` 已获批二十三路径与 `sha256:c1ef2c00a445dd2bd60dc5f5b375cb27d1e467a3d457d7eb53b7ec82a304aafe`；规划、Domain、Application、Platform 与 Parity TDD checkpoint 已完成，四 crate、Clippy、格式、CI 合同 `35/35`、Release Audit、仓库政策、范围、隐私、旧变量与禁止能力门禁均已通过，本地验证 checkpoint 为 `73bd5748d2341a92577ab8273b0db6f7bdb6a265`，当前可普通推送并创建非 Draft PR，最终 Squash Merge 保留单独授权门。
 - 合并后 main CI Run `30158058627` 的 Attempt `1/2` 因 GitHub Actions major outage 在创建 Job 前失败；服务恢复后的同一 Run Attempt `3` 绑定同一提交并七 Job 全绿、Artifact 为 `0`，Issue `#46` 已按 `COMPLETED` 关闭，仓库代码与 CI 合同无需为该外部事故修改。
 - Issue `#47` 以 `sha256:dd612ef0c2e5f0f830c40f161b1ef1a85bc58cd1d85458a758c3905ade8db03e` 冻结微型五路径 Closeout；本报告只收口长期状态与事故复用知识，其自身动态 Review、CI 与合并证据保留在 GitHub Issue/PR，不再创建二次 Closeout。
 - Issue `#8` 的过渡交付为 PR `#10`；该 PR 只包含文档与验证控制面，并按项目所有者明确授权执行 Squash Merge。
@@ -222,7 +223,7 @@ decision_status: issue-75-local-verified-pr-pending-final-merge-not-authorized
 - [x] Issue `#77` 已完成应用概览语义例外决策并关闭。
 - [x] Issue `#78` / PR `#79` 已完成应用概览只读事实迁移、Review/CI、独立 Squash 授权与合并后主干验证。
 - [x] Issue `#80` 已完成版本与启动意图方案 A 决策并关闭。
-- [ ] Issue `#81` 已完成规划、Domain、Application、Platform、Parity TDD 与最终本地轻量验证，正在形成最终 Git checkpoint、普通推送和非 Draft PR；Hosted Review/CI 与最终 Squash Merge 仍未完成。
+- [ ] Issue `#81` 已完成规划、Domain、Application、Platform、Parity TDD、最终本地轻量验证与本地 checkpoint，当前准备普通推送和非 Draft PR；Hosted Review/CI 与最终 Squash Merge 仍未完成。
 - Issue `#81` 未完成前不得夹带第四个产品 feature、UI、预算、Release、`upstream/`、Ruleset 或 AGOS 改动。
 
 ### Gate 6：首个正式版本（锁定）

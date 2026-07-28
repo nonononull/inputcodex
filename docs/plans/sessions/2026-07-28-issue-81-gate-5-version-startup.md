@@ -128,7 +128,7 @@ cargo test --locked --offline --ignore-rust-version -p inputcodex-parity --test 
 - [x] 创建实施报告；
 - [x] checkpoint 脚本语法问题复用 `err.md` 的 Issue #75 PowerShell 组合命令根因，不新增重复条目；
 - [x] 验证 23 路径和 candidate scope hash；实际差异为 `22` 路径，`err.md` 无新根因所以保持未修改；
-- [ ] 创建控制面 Git checkpoint。
+- [x] 创建控制面 Git checkpoint `73bd5748d2341a92577ab8273b0db6f7bdb6a265`。
 
 ### Batch 6：本地轻量验证
 
@@ -166,7 +166,7 @@ pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
 
 ### Batch 7：远端交付
 
-- [ ] 最终 Git checkpoint；
+- [x] 最终 Git checkpoint `73bd5748d2341a92577ab8273b0db6f7bdb6a265`；
 - [ ] 使用本机默认时间提交；
 - [ ] 普通推送，不 force push；
 - [ ] 创建关联 Issue #80/#81 的非 Draft PR；
