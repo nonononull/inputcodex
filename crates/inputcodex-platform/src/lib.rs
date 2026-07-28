@@ -4,6 +4,7 @@ use inputcodex_application::{ApplicationError, PlatformKind, PlatformPort};
 
 mod application_overview;
 mod platform_paths;
+mod relay_environment_observation;
 mod runtime_environment_observation;
 mod version_startup;
 
