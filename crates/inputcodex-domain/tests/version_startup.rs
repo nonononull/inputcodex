@@ -2,8 +2,8 @@ use inputcodex_domain::{ApplicationVersion, StartupIntent, VersionStartupSnapsho
 
 #[test]
 fn 版本启动快照复用既有应用版本类型() {
-    let version = ApplicationVersion::new("1.2.43-inputcodex.1".to_owned())
-        .expect("合法版本应创建成功");
+    let version =
+        ApplicationVersion::new("1.2.43-inputcodex.1".to_owned()).expect("合法版本应创建成功");
     let snapshot = VersionStartupSnapshot::new(version.clone(), StartupIntent::Default);
 
     assert_eq!(snapshot.inputcodex_version(), &version);

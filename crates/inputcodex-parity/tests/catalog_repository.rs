@@ -747,7 +747,10 @@ fn gate5_version_startup_实现合同固定版本来源与无副作用启动意�
         "VERSION_AND_STARTUP_BUILD_VERSION_INVALID",
         "本功能不会产生 LoadCompletion::Empty",
     ] {
-        assert!(contract.contains(expected), "版本与启动合同应包含：{expected}");
+        assert!(
+            contract.contains(expected),
+            "版本与启动合同应包含：{expected}"
+        );
     }
     assert!(
         !contract.contains("明确空结果"),
@@ -787,8 +790,15 @@ fn gate5_version_startup_实现合同固定版本来源与无副作用启动意�
     }
 
     let production = read_repository_text("crates/inputcodex-platform/src/version_startup.rs");
-    for expected in ["INPUTCODEX_SHOW_UPDATE", "CARGO_PKG_VERSION", "--show-update"] {
-        assert!(production.contains(expected), "生产适配器应包含：{expected}");
+    for expected in [
+        "INPUTCODEX_SHOW_UPDATE",
+        "CARGO_PKG_VERSION",
+        "--show-update",
+    ] {
+        assert!(
+            production.contains(expected),
+            "生产适配器应包含：{expected}"
+        );
     }
     for forbidden in [
         "CODEX_PLUS_SHOW_UPDATE",

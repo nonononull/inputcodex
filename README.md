@@ -1,6 +1,6 @@
 # inputcodex
 
-`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 `v1.2.43` 完整缓存、双平台性能基线、性能预算数值批准、非 required `approved-observation` 预算 CI 和功能目录重新审计。`main` 当前为 `a06a97fd59ce125306a13202c8f1a07656c797a0`；Issue `#75` / PR `#76` 已完成首个平台路径迁移，合并后主干 CI 7/7、Performance Baseline 4/4 全绿且 Artifact 为 `0`。Gate 5 当前由 Issue `#78` 迁移应用概览只读事实能力，本地二十九路径门禁已全绿，正在形成控制面 checkpoint 与非 Draft PR。
+`inputcodex` 是面向 Codex 本地增强与管理场景的新项目，当前已完成 Gate 1 治理冻结、Gate 2 上游监控、Gate 3 纯 Rust Workspace，以及 Gate 4 `v1.2.43` 完整缓存、双平台性能基线、性能预算数值批准、非 required `approved-observation` 预算 CI 和功能目录重新审计。`main` 当前为 `ef69494d92c7c461b0cb858e95f6838404ae1a61`；Issue `#75/#78` 已完成前两个 Gate 5 产品切片，两次合并后的主干 CI 与 Performance Baseline 均全绿且 Artifact 为 `0`。Gate 5 当前由 Issue `#81` 迁移版本与启动意图，四个 TDD checkpoint 和最终本地轻量门禁均已完成，正在形成最终 Git checkpoint、普通推送与非 Draft PR。
 
 ## 项目目标
 
@@ -21,7 +21,7 @@
 
 ## 当前阶段
 
-截至 2026 年 7 月 27 日，已完成：
+截至 2026 年 7 月 28 日，已完成：
 
 - 建立本地 Git 仓库与 GitHub 公开仓库。
 - 固定项目名称、无广告原则和性能优先目标。
@@ -88,13 +88,15 @@
 - Issue `#74` 已固定平台路径安全例外：无效显式路径或非空 `CODEX_HOME` 必须失败，禁止相对目录和静默自动回退。
 - Issue `#75` / PR `#76` 已在三十路径内完成平台路径迁移并 Squash Merge 为 `a06a97fd59ce125306a13202c8f1a07656c797a0`；合并后主干两套 Workflow 全绿且 Artifact 为 `0`。
 - Issue `#77` 已批准应用概览按领域拆分，明确历史启动记录不等于实时运行状态；Issue 已按 `COMPLETED` 关闭。
-- Issue `#78` 已在批准的二十九路径与 `sha256:b46a940ff7dbf4bbc9bfdb69d04d755468e12409d9618837d8ff310490eb5ae4` 内完成 Domain、Application、Windows/macOS Platform 与 Parity TDD；四 crate、格式、CI 合同、Release Audit、仓库政策、范围、隐私、历史依赖与禁止能力门禁已通过，当前只剩控制面 checkpoint、普通推送、非 Draft PR 和 Hosted Review/CI。
+- Issue `#78` / PR `#79` 已将应用概览只读事实能力 Squash Merge 为 `ef69494d92c7c461b0cb858e95f6838404ae1a61`；合并后主干 CI Run `30289461278` 七 Job、Performance Baseline Run `30289461109` 四 Job全绿且 Artifact 均为 `0`。
+- Issue `#80` 已批准版本与启动意图方案 A并按 `COMPLETED` 关闭；历史启动记录、UI、更新检查、下载和安装均不属于该能力。
+- Issue `#81` 已在批准的二十三路径与 `sha256:c1ef2c00a445dd2bd60dc5f5b375cb27d1e467a3d457d7eb53b7ec82a304aafe` 内完成规划、Domain、Application、Platform 与 Parity TDD checkpoint；版本只来自 `CARGO_PKG_VERSION`，启动意图只接受精确 `--show-update` 与 `INPUTCODEX_SHOW_UPDATE` 合法值。四 crate、Clippy、格式、CI 合同 `35/35`、Release Audit、仓库政策、范围、隐私、旧变量与禁止能力门禁已通过。
 
 ## 下一步
 
-1. 完成 Issue `#78` 的最终四 crate 轻量验证、范围/隐私/禁止能力检查与 Git checkpoint。
-2. 普通推送并创建关联 Issue `#77/#78` 的非 Draft PR，核验 Final Head Review、标准 CI、Windows/macOS 真实编译、非 required Performance observation 与 Artifact `0`。
-3. 全部根因闭环后停在项目所有者单独 Squash Merge 授权门；当前 PR 禁止夹带 UI、第三个 feature、预算、Release 或上游同步。
+1. 为 Issue `#81` 创建控制面与最终本地验证 Git checkpoint，并复核工作区只包含批准范围。
+2. 普通推送并创建关联 Issue `#80/#81` 的非 Draft PR，核验 Final Head Review、标准 CI、Windows/macOS 真实编译、非 required Performance observation 与 Artifact `0`。
+3. 全部根因闭环后停在项目所有者单独 Squash Merge 授权门；当前 PR 禁止夹带 UI、第四个 feature、预算、Release 或上游同步。
 
 ## 项目文档
 
@@ -109,6 +111,10 @@
 - Issue `#78` Session Plan：`docs/plans/sessions/2026-07-27-issue-78-gate-5-application-overview.md`
 - Issue `#78` Runtime Workflow：`docs/workflows/2026-07-27-issue-78-gate-5-application-overview-runtime.md`
 - Issue `#78` 实施报告：`docs/reports/issue-78-gate-5-application-overview.md`
+- Issue `#81` 版本与启动意图设计：`docs/plans/2026-07-28-issue-81-gate-5-version-startup.md`
+- Issue `#81` Session Plan：`docs/plans/sessions/2026-07-28-issue-81-gate-5-version-startup.md`
+- Issue `#81` Runtime Workflow：`docs/workflows/2026-07-28-issue-81-gate-5-version-startup-runtime.md`
+- Issue `#81` 实施报告：`docs/reports/issue-81-gate-5-version-startup.md`
 - Gate 4 规划任务：`docs/plans/2026-07-22-issue-24-gate-4-feature-performance-plan.md`
 - Gate 4 Session Plan：`docs/plans/sessions/2026-07-22-issue-24-gate-4-feature-performance-plan.md`
 - Gate 4 Runtime Workflow：`docs/workflows/2026-07-22-issue-24-gate-4-feature-performance-runtime.md`

@@ -153,7 +153,7 @@ if ($outside.Count -ne 0) {
 ### Parity
 
 - RED 证明目录或合同仍为旧语义；
-- GREEN 后 feature 为 implemented、合同不含 Empty 和禁止能力；
+- GREEN 后 feature 为 implemented、结果合同明确不产生 `LoadCompletion::Empty`，共享 schema 中的 `Empty` 仅作为不可达协调器状态保留；
 - `source-index.yml` 必须保持未修改。
 
 ### Closeout
@@ -183,3 +183,26 @@ if ($outside.Count -ne 0) {
 - 成功 Run Artifact 必须为 `0`；
 - Final Head 变化后重新核验全部门禁；
 - 最终停在项目所有者单独 Squash Merge 授权门。
+
+## 当前执行进度
+
+```yaml
+planning_checkpoint: 72b03b1af1fd7ab1984a481af1dd30a20879bb43
+domain_checkpoint: 391bfe9db9348518600e14c912333f221c3cfaca
+application_checkpoint: 1eafa90866124e4c281eba127fd48bb701817ebd
+platform_checkpoint: f992890611ff86f1fe6ccf5f0dd86e19d0fb07de
+parity_checkpoint: bee9dcb97fe9c790f45082cb23f0286c89b1d815
+current_node: FINAL_GIT_CHECKPOINT
+local_lightweight_verification: passed
+ci_contract: 35/35
+release_audit: current
+repository_policy_violations: 0
+candidate_scope_count: 23
+actual_changed_path_count: 22
+protected_path_changes: 0
+legacy_variable_matches: 0
+forbidden_capability_matches: 0
+privacy_matches: 0
+remote_push_pr_review_ci: pending
+final_merge_authorization: pending-separate-gate
+```

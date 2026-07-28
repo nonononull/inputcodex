@@ -22,11 +22,6 @@ impl<P> LoadVersionStartup<P> {
     pub const fn new(port: P) -> Self {
         Self { port }
     }
-
-    #[must_use]
-    pub const fn port(&self) -> &P {
-        &self.port
-    }
 }
 
 impl<P: VersionStartupPort> LoadVersionStartup<P> {

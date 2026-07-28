@@ -88,7 +88,7 @@ agos_status: bypassed-project-native-control-plane
 
 - `foundation-platform.yml`：状态改为 `implemented`，写入 Issue #80/#81 决策引用；
 - `foundation-platform` 合同：固定 Ready/Failed、非法值、禁止能力和平台语义；
-- 仓库测试：验证目录、合同、旧变量禁止、无 `Empty` 与副作用边界；
+- 仓库测试：验证目录、合同、旧变量禁止、输出不产生 `Empty` 与副作用边界；共享合同 schema 仍枚举六种协调器状态，并明确 `LoadCompletion::Empty` 对本功能不可达；
 - `source-index.yml` 已正确映射三个入口，本 Issue 不修改。
 
 ### 控制面
@@ -162,3 +162,16 @@ parity/features/foundation-platform.yml
 - 成功 Run Artifact 数为 `0`；
 - Review 对话全部完成根因闭环；
 - 最终停在项目所有者单独 Squash Merge 授权门。
+
+## 实施进度
+
+| 节点 | 状态 | 证据 |
+| --- | --- | --- |
+| Planning | completed | `72b03b1af1fd7ab1984a481af1dd30a20879bb43` |
+| Domain RED→GREEN | completed | `391bfe9db9348518600e14c912333f221c3cfaca` |
+| Application RED→GREEN | completed | `1eafa90866124e4c281eba127fd48bb701817ebd` |
+| Platform RED→GREEN | completed | `f992890611ff86f1fe6ccf5f0dd86e19d0fb07de` |
+| Parity RED→GREEN | completed | `bee9dcb97fe9c790f45082cb23f0286c89b1d815` |
+| 控制面与本地轻量验证 | completed | 四 crate、Clippy、fmt、CI `35/35`、Audit、Policy、范围和禁止面全绿 |
+| 最终 Git checkpoint | in-progress | 当前分支 `codex/issue-81-gate-5-version-startup` |
+| 普通推送、非 Draft PR、Hosted Review/CI | pending | 最终 Squash Merge 仍为独立授权门 |

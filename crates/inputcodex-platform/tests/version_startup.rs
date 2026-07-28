@@ -1,10 +1,10 @@
 use std::ffi::OsString;
 
-use inputcodex_application::{ErrorKind, VersionStartupPort};
 #[cfg(not(any(target_os = "windows", target_os = "macos")))]
 use inputcodex_application::VersionStartupRequest;
+use inputcodex_application::{ErrorKind, VersionStartupPort};
 use inputcodex_domain::StartupIntent;
-use inputcodex_platform::{resolve_version_startup, SystemVersionStartup};
+use inputcodex_platform::{SystemVersionStartup, resolve_version_startup};
 
 fn process_arguments(arguments: &[&str]) -> Vec<OsString> {
     std::iter::once(OsString::from("inputcodex"))
@@ -35,10 +35,13 @@ fn 系统版本启动适配器实现统一应用端口() {
 
 #[test]
 fn 默认输入返回编译期版本与默认启动意图() {
-    let snapshot = resolve_version_startup(process_arguments(&[]), None)
-        .expect("默认输入必须成功解析");
+    let snapshot =
+        resolve_version_startup(process_arguments(&[]), None).expect("默认输入必须成功解析");
 
-    assert_eq!(snapshot.inputcodex_version().as_str(), env!("CARGO_PKG_VERSION"));
+    assert_eq!(
+        snapshot.inputcodex_version().as_str(),
+        env!("CARGO_PKG_VERSION")
+    );
     assert_eq!(snapshot.startup_intent(), StartupIntent::Default);
 }
 
@@ -58,8 +61,8 @@ fn 只有精确命令行参数请求展示更新() {
 #[test]
 fn 环境变量只接受未设置_空值_零或一() {
     for value in [None, Some(OsString::from("")), Some(OsString::from("0"))] {
-        let snapshot = resolve_version_startup(process_arguments(&[]), value)
-            .expect("默认环境值必须成功解析");
+        let snapshot =
+            resolve_version_startup(process_arguments(&[]), value).expect("默认环境值必须成功解析");
         assert_eq!(snapshot.startup_intent(), StartupIntent::Default);
     }
 
@@ -77,7 +80,11 @@ fn 环境变量只接受未设置_空值_零或一() {
 
 #[test]
 fn 非法环境值返回稳定_invalid_input_且不泄露原值() {
-    for value in [OsString::from("true"), OsString::from(" 1 "), non_unicode_value()] {
+    for value in [
+        OsString::from("true"),
+        OsString::from(" 1 "),
+        non_unicode_value(),
+    ] {
         let error = resolve_version_startup(process_arguments(&[]), Some(value))
             .expect_err("非法显式环境值必须失败");
 

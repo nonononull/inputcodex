@@ -43,15 +43,11 @@ pub fn resolve_version_startup(
         }
         Some(value) if value == OsStr::new("1") => StartupIntent::ShowUpdate,
         Some(_) => {
-            return Err(ApplicationError::invalid_input(
-                "INVALID_STARTUP_OPTION",
-            ));
+            return Err(ApplicationError::invalid_input("INVALID_STARTUP_OPTION"));
         }
     };
     let inputcodex_version = ApplicationVersion::new(env!("CARGO_PKG_VERSION").to_owned())
-        .map_err(|_| {
-            ApplicationError::internal("VERSION_AND_STARTUP_BUILD_VERSION_INVALID")
-        })?;
+        .map_err(|_| ApplicationError::internal("VERSION_AND_STARTUP_BUILD_VERSION_INVALID"))?;
 
     Ok(VersionStartupSnapshot::new(
         inputcodex_version,

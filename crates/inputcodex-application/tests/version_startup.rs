@@ -1,7 +1,6 @@
 use inputcodex_application::{
-    ApplicationError, ErrorKind, LoadCompletion, LoadCoordinator, LoadState,
-    LoadVersionStartup, RequestId, TransitionOutcome, VersionStartupPort,
-    VersionStartupRequest,
+    ApplicationError, ErrorKind, LoadCompletion, LoadCoordinator, LoadState, LoadVersionStartup,
+    RequestId, TransitionOutcome, VersionStartupPort, VersionStartupRequest,
 };
 use inputcodex_domain::{ApplicationVersion, StartupIntent, VersionStartupSnapshot};
 

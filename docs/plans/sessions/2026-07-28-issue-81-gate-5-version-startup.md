@@ -46,8 +46,8 @@ final_merge_authorization: pending-separate-gate
 - [x] 创建 Issue #81 与授权证据；
 - [x] 创建隔离分支；
 - [x] 创建设计、Session Plan 与 Runtime Workflow；
-- [ ] 验证 planning scope 的 3 路径与哈希；
-- [ ] 创建规划 Git checkpoint。
+- [x] 验证 planning scope 的 3 路径与哈希；
+- [x] 创建规划 Git checkpoint `72b03b1af1fd7ab1984a481af1dd30a20879bb43`。
 
 验证：
 
@@ -72,10 +72,10 @@ if ($hash -ne '707b8a43199ffb69b71f18a9681e9432b02c94b8533dd7dcbc4cf2b1ad758579'
 
 ### Batch 1：Domain TDD
 
-- [ ] RED：新增测试引用尚不存在的 `StartupIntent` 和快照；
-- [ ] GREEN：新增最小领域类型与 getter；
-- [ ] 验证复用 `ApplicationVersion`，不修改既有应用概览模块；
-- [ ] 创建 Domain Git checkpoint。
+- [x] RED：新增测试引用尚不存在的 `StartupIntent` 和快照；
+- [x] GREEN：新增最小领域类型与 getter；
+- [x] 验证复用 `ApplicationVersion`，不修改既有应用概览模块；
+- [x] 创建 Domain Git checkpoint `391bfe9db9348518600e14c912333f221c3cfaca`。
 
 定向命令：
 
@@ -85,10 +85,10 @@ cargo test --locked --offline --ignore-rust-version -p inputcodex-domain --test 
 
 ### Batch 2：Application TDD
 
-- [ ] RED：新增 Port/用例、Ready/Failed、InvalidInput 与过期结果测试；
-- [ ] GREEN：实现最小同步用例和共享错误扩展；
-- [ ] 验证请求 Debug 不含私密输入；
-- [ ] 创建 Application Git checkpoint。
+- [x] RED：新增 Port/用例、Ready/Failed、InvalidInput 与过期结果测试；
+- [x] GREEN：实现最小同步用例和共享错误扩展；
+- [x] 验证请求为零字段单元类型，Debug 不含私密输入；
+- [x] 创建 Application Git checkpoint `1eafa90866124e4c281eba127fd48bb701817ebd`。
 
 定向命令：
 
@@ -98,10 +98,10 @@ cargo test --locked --offline --ignore-rust-version -p inputcodex-application --
 
 ### Batch 3：Platform TDD
 
-- [ ] RED：默认、参数、环境、非法值、非 Unicode、优先级与 unsupported；
-- [ ] GREEN：实现纯解析函数与 `SystemVersionStartup`；
-- [ ] 验证生产代码不含旧变量，不读取文件或网络；
-- [ ] 创建 Platform Git checkpoint。
+- [x] RED：默认、参数、环境、非法值、非 Unicode、优先级与 unsupported；
+- [x] GREEN：实现纯解析函数与 `SystemVersionStartup`；
+- [x] 验证生产代码不含旧变量，不读取文件或网络；
+- [x] 创建 Platform Git checkpoint `f992890611ff86f1fe6ccf5f0dd86e19d0fb07de`。
 
 定向命令：
 
@@ -111,10 +111,10 @@ cargo test --locked --offline --ignore-rust-version -p inputcodex-platform --tes
 
 ### Batch 4：Parity TDD
 
-- [ ] RED：目录状态和合同仍不满足 Issue #80；
-- [ ] GREEN：更新 feature、contract、README 与仓库级断言；
-- [ ] 验证 source-index 不发生变更；
-- [ ] 创建 Parity Git checkpoint。
+- [x] RED：目录状态和合同仍不满足 Issue #80；
+- [x] GREEN：更新 feature、contract、README 与仓库级断言；
+- [x] 验证 source-index 不发生变更；
+- [x] 创建 Parity Git checkpoint `bee9dcb97fe9c790f45082cb23f0286c89b1d815`。
 
 定向命令：
 
@@ -124,13 +124,22 @@ cargo test --locked --offline --ignore-rust-version -p inputcodex-parity --test 
 
 ### Batch 5：控制面收口
 
-- [ ] 更新 AGENTS、CONTEXT、README、build 和 Master Plan；
-- [ ] 创建实施报告；
-- [ ] 如发生新根因，更新 err.md；重复问题只引用既有记录；
-- [ ] 验证 23 路径和 candidate scope hash；
+- [x] 更新 AGENTS、CONTEXT、README、build 和 Master Plan；
+- [x] 创建实施报告；
+- [x] checkpoint 脚本语法问题复用 `err.md` 的 Issue #75 PowerShell 组合命令根因，不新增重复条目；
+- [x] 验证 23 路径和 candidate scope hash；实际差异为 `22` 路径，`err.md` 无新根因所以保持未修改；
 - [ ] 创建控制面 Git checkpoint。
 
 ### Batch 6：本地轻量验证
+
+- [x] 四 crate 测试通过；
+- [x] 四 crate all-targets Clippy `-D warnings` 通过；
+- [x] `cargo fmt --all -- --check` 通过；
+- [x] CI 合同 `35/35` 通过；
+- [x] `release_audit=current`；
+- [x] Repository Policy 违规数为 `0`；
+- [x] 候选 `23` 路径、实际 `22` 路径、受保护路径、隐私、旧变量和禁止能力扫描通过；
+- [x] 首次 fmt 漂移与错误的“仅未提交路径”守卫均复用 `err.md` Issue #75 根因完成闭环。
 
 ```powershell
 cargo test --locked --offline --ignore-rust-version `

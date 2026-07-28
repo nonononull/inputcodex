@@ -8,7 +8,7 @@ mod version_startup;
 
 pub use application_overview::SystemApplicationOverview;
 pub use platform_paths::SystemPlatformPaths;
-pub use version_startup::{resolve_version_startup, SystemVersionStartup};
+pub use version_startup::{SystemVersionStartup, resolve_version_startup};
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct SystemPlatform;

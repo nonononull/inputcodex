@@ -1,11 +1,11 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-75-gate-5-platform-paths-local-verified-pr-pending
-active_gate: Gate 5 首个平台路径解析切片已完成领域、应用、Windows/macOS 平台适配器、Parity TDD 与最终本地轻量门禁，正在提交控制面并准备非 Draft PR
-last_verified_gate: Issue #65 / PR #72 已以单父 Squash 提交 fc1683aabda4afb27ca333387ec954b6a405d2df 进入 main；合并后 main CI Run 30244760762 七 Job与 Performance Baseline Run 30244760739 四 Job全绿且 Artifact 均为 0，Issue #63/#65 已按 COMPLETED 关闭且 release_audit=current
-next_legal_gate: 完成 Issue #75 三十路径控制面同步、四 crate 轻量验证、范围与隐私门禁，创建非 Draft PR并核验 Review/CI、双平台编译与非 required observation；最终 Squash Merge 保留单独授权
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/75
+active_task: issue-81-gate-5-version-startup-local-verified-checkpoint-pending
+active_gate: Gate 5 第三个版本与启动意图切片已完成规划、Domain、Application、Platform、Parity TDD 与最终本地轻量门禁，正在形成最终 Git checkpoint并准备普通推送与非 Draft PR
+last_verified_gate: Issue #78 / PR #79 已以单父 Squash 提交 ef69494d92c7c461b0cb858e95f6838404ae1a61 进入 main；合并后 main CI Run 30289461278 七 Job与 Performance Baseline Run 30289461109 四 Job全绿且 Artifact 均为 0，Issue #78 已按 COMPLETED 关闭且 release_audit=current
+next_legal_gate: 创建 Issue #81 最终 Git checkpoint，普通推送并创建非 Draft PR，核验 Review/CI、双平台编译、非 required observation 与 Artifact 0；最终 Squash Merge 保留单独授权
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/81
 active_pr_ref: pending
 gate_5_platform_paths_exception_ref: https://github.com/nonononull/inputcodex/issues/74
 gate_5_platform_paths_scope_hash: sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37
@@ -14,6 +14,19 @@ gate_5_platform_paths_domain_commit: 67447913fa656f30dd2e6d3c65707acca7c20869
 gate_5_platform_paths_application_commit: 7e52ec2c4ea2667c22a66e3bae7888eb3cb9e2ce
 gate_5_platform_paths_platform_commit: 593c447262f1b1aa0ea578bb4a6a0a65037799a6
 gate_5_platform_paths_parity_commit: be5673c82154fe2777046283158a152d11ead62d
+gate_5_application_overview_decision_ref: https://github.com/nonononull/inputcodex/issues/77
+gate_5_application_overview_issue_ref: https://github.com/nonononull/inputcodex/issues/78
+gate_5_application_overview_pr_ref: https://github.com/nonononull/inputcodex/pull/79
+gate_5_application_overview_merge_ref: ef69494d92c7c461b0cb858e95f6838404ae1a61
+gate_5_version_startup_decision_ref: https://github.com/nonononull/inputcodex/issues/80
+gate_5_version_startup_issue_ref: https://github.com/nonononull/inputcodex/issues/81
+gate_5_version_startup_scope_hash: sha256:c1ef2c00a445dd2bd60dc5f5b375cb27d1e467a3d457d7eb53b7ec82a304aafe
+gate_5_version_startup_branch_ref: codex/issue-81-gate-5-version-startup
+gate_5_version_startup_planning_commit: 72b03b1af1fd7ab1984a481af1dd30a20879bb43
+gate_5_version_startup_domain_commit: 391bfe9db9348518600e14c912333f221c3cfaca
+gate_5_version_startup_application_commit: 1eafa90866124e4c281eba127fd48bb701817ebd
+gate_5_version_startup_platform_commit: f992890611ff86f1fe6ccf5f0dd86e19d0fb07de
+gate_5_version_startup_parity_commit: bee9dcb97fe9c790f45082cb23f0286c89b1d815
 performance_budget_observation_issue_ref: https://github.com/nonononull/inputcodex/issues/63
 performance_budget_observation_scope_hash: sha256:d5eb57c1b93dc2b7acc47ba78c8f514af2a2c98e8661df389774713a7b47d8dc
 performance_budget_observation_red_ref: 650040763aff07f4884ee9252c50639469622934
@@ -98,7 +111,9 @@ decision_status: issue-75-local-verified-pr-pending-final-merge-not-authorized
 - Issue `#74` 已确认平台路径安全差异：无效显式路径与非空 `CODEX_HOME` 必须失败，禁止相对目录或静默回退；Issue 已按 `COMPLETED` 关闭。
 - Issue `#75` / PR `#76` 已在三十路径与 `sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37` 内完成首个 Gate 5 平台路径迁移；Final Head `ba082669cd6d491cce26e29efcaa249786973a39` 以单父 Squash 提交 `a06a97fd59ce125306a13202c8f1a07656c797a0` 进入 `main`，tree 为 `b669aa6610e976542a74f404ff4f87b36864816b`，Issue 已关闭。合并后主干 CI Run `30276472184` 七 Job、Performance Baseline Run `30276476891` 四 Job全绿且 Artifact 均为 `0`。
 - Issue `#77` 已批准应用概览方案 A 并按 `COMPLETED` 关闭；历史启动记录不得冒充实时运行状态，损坏状态不得静默视为无记录。
-- Issue `#78` 已获批二十九路径与 `sha256:b46a940ff7dbf4bbc9bfdb69d04d755468e12409d9618837d8ff310490eb5ae4`；只读应用概览 TDD 与最终本地轻量门禁已完成，当前正在形成控制面 checkpoint、普通推送和非 Draft PR，最终 Squash Merge保留单独授权门。
+- Issue `#78` / PR `#79` 已完成二十九路径应用概览只读事实迁移；Final Head `1bae5d51850c3538c3e161e73e266ac19f7406b3` 以单父 Squash 提交 `ef69494d92c7c461b0cb858e95f6838404ae1a61` 进入 `main`，tree 为 `936cc74fbceae2a3ee8d98b924c836e13d9f7ae3`，GitHub 签名 `valid`，Issue 已按 `COMPLETED` 关闭。合并后主干 CI Run `30289461278` 七 Job、Performance Baseline Run `30289461109` 四 Job全绿且 Artifact 均为 `0`。
+- Issue `#80` 已批准版本与启动意图方案 A并按 `COMPLETED` 关闭；版本来源、合法输入、非法值优先级、禁止副作用与非目标平台错误已经冻结。
+- Issue `#81` 已获批二十三路径与 `sha256:c1ef2c00a445dd2bd60dc5f5b375cb27d1e467a3d457d7eb53b7ec82a304aafe`；规划、Domain、Application、Platform 与 Parity TDD checkpoint 已完成，四 crate、Clippy、格式、CI 合同 `35/35`、Release Audit、仓库政策、范围、隐私、旧变量与禁止能力门禁均已通过，当前等待最终 Git checkpoint、普通推送和非 Draft PR，最终 Squash Merge 保留单独授权门。
 - 合并后 main CI Run `30158058627` 的 Attempt `1/2` 因 GitHub Actions major outage 在创建 Job 前失败；服务恢复后的同一 Run Attempt `3` 绑定同一提交并七 Job 全绿、Artifact 为 `0`，Issue `#46` 已按 `COMPLETED` 关闭，仓库代码与 CI 合同无需为该外部事故修改。
 - Issue `#47` 以 `sha256:dd612ef0c2e5f0f830c40f161b1ef1a85bc58cd1d85458a758c3905ade8db03e` 冻结微型五路径 Closeout；本报告只收口长期状态与事故复用知识，其自身动态 Review、CI 与合并证据保留在 GitHub Issue/PR，不再创建二次 Closeout。
 - Issue `#8` 的过渡交付为 PR `#10`；该 PR 只包含文档与验证控制面，并按项目所有者明确授权执行 Squash Merge。
@@ -205,8 +220,10 @@ decision_status: issue-75-local-verified-pr-pending-final-merge-not-authorized
 - [x] Issue `#74` 已批准平台路径安全例外并关闭。
 - [x] Issue `#75` / PR `#76` 已完成平台路径迁移、Review/CI、独立 Squash 授权与合并后主干验证。
 - [x] Issue `#77` 已完成应用概览语义例外决策并关闭。
-- [ ] Issue `#78` 已完成 Domain、Application、Platform、Parity TDD 与最终本地轻量验证，正在形成控制面 checkpoint、普通推送和非 Draft PR；Hosted Review/CI 与最终 Squash Merge 仍未授权。
-- Issue `#78` 未完成前不得夹带第三个产品 feature、UI、预算、Release、`upstream/`、Ruleset 或 AGOS 改动。
+- [x] Issue `#78` / PR `#79` 已完成应用概览只读事实迁移、Review/CI、独立 Squash 授权与合并后主干验证。
+- [x] Issue `#80` 已完成版本与启动意图方案 A 决策并关闭。
+- [ ] Issue `#81` 已完成规划、Domain、Application、Platform、Parity TDD 与最终本地轻量验证，正在形成最终 Git checkpoint、普通推送和非 Draft PR；Hosted Review/CI 与最终 Squash Merge 仍未完成。
+- Issue `#81` 未完成前不得夹带第四个产品 feature、UI、预算、Release、`upstream/`、Ruleset 或 AGOS 改动。
 
 ### Gate 6：首个正式版本（锁定）
 
@@ -245,6 +262,10 @@ decision_status: issue-75-local-verified-pr-pending-final-merge-not-authorized
 - Issue `#78` Session Plan：`docs/plans/sessions/2026-07-27-issue-78-gate-5-application-overview.md`。
 - Issue `#78` Runtime Workflow：`docs/workflows/2026-07-27-issue-78-gate-5-application-overview-runtime.md`。
 - Issue `#78` 实施报告：`docs/reports/issue-78-gate-5-application-overview.md`。
+- Issue `#81` 版本与启动意图设计：`docs/plans/2026-07-28-issue-81-gate-5-version-startup.md`。
+- Issue `#81` Session Plan：`docs/plans/sessions/2026-07-28-issue-81-gate-5-version-startup.md`。
+- Issue `#81` Runtime Workflow：`docs/workflows/2026-07-28-issue-81-gate-5-version-startup-runtime.md`。
+- Issue `#81` 实施报告：`docs/reports/issue-81-gate-5-version-startup.md`。
 - 已完成 Issue `#41` CI 合同报告：`docs/reports/issue-41-ci-contract-decoupling.md`。
 - 已完成状态收口计划：`docs/plans/2026-07-25-issue-43-v1.2.42-cache-ci-closeout.md`。
 - 已完成状态收口 Session Plan：`docs/plans/sessions/2026-07-25-issue-43-v1.2.42-cache-ci-closeout.md`。
@@ -291,7 +312,7 @@ decision_status: issue-75-local-verified-pr-pending-final-merge-not-authorized
 ## 停止条件
 
 - 上游最新正式 Release 或已核验的 `v1.2.43` / `5036ff056b5c629f19356396b17d6eeb70da664c` / `d478a9fcda7f22a7c8167cb567777ad9148cf328` 事实发生变化。
-- Issue `#78` 出现二十九路径或 `sha256:b46a940ff7dbf4bbc9bfdb69d04d755468e12409d9618837d8ff310490eb5ae4` 之外的新增、删除或重命名路径，或在最终 Head Review、CI 与全部对话闭环前请求 Squash Merge。
+- Issue `#81` 出现二十三路径或 `sha256:c1ef2c00a445dd2bd60dc5f5b375cb27d1e467a3d457d7eb53b7ec82a304aafe` 之外的新增、删除或重命名路径，或在最终 Head Review、CI 与全部对话闭环前请求 Squash Merge。
 - 需要修改 `upstream/CodexPlusPlus/` 或 `source-lock.json` 的来源快照字段，但没有新的独立 upstream-sync Issue/PR 与项目所有者批准。
 - `release_audit` 为 stale 时修改 `benchmarks/`、`apps/`、产品 crate、`Cargo.toml` 或 `Cargo.lock`，或在同一 PR 同时更新实际 audit 与受阻产品路径。
 - Issue `#47` 出现五路径或 `sha256:dd612ef0c2e5f0f830c40f161b1ef1a85bc58cd1d85458a758c3905ade8db03e` 之外的新增、删除或重命名路径，或在最终 Head 的 Review、CI 和全部对话闭环前请求 Squash Merge。

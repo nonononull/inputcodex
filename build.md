@@ -2,9 +2,9 @@
 
 ## 当前状态
 
-截至 2026 年 7 月 27 日，Gate 3 七成员 Workspace、Gate 4 `v1.2.43` 功能目录重新审计、双平台性能基线、性能预算数值和非 required `approved-observation` 均已进入 `main`。Issue `#75` / PR `#76` 已将首个平台路径切片 Squash Merge 为 `a06a97fd59ce125306a13202c8f1a07656c797a0`，合并后主干两套 Workflow 全绿且 Artifact 为 `0`。Issue `#78` 是当前第二个 Gate 5 产品迁移切片：二十九路径与 `sha256:b46a940ff7dbf4bbc9bfdb69d04d755468e12409d9618837d8ff310490eb5ae4` 已获批准，Domain、Application、Windows/macOS Platform 与 Parity TDD 已完成；四 crate、格式、CI 合同 `35/35`、Release Audit、仓库政策、范围 `29/29`、隐私、历史依赖和禁止能力门禁已通过，当前正在形成控制面 checkpoint 与非 Draft PR，最终 Squash Merge 仍未授权。
+截至 2026 年 7 月 28 日，Gate 3 七成员 Workspace、Gate 4 `v1.2.43` 功能目录重新审计、双平台性能基线、性能预算数值和非 required `approved-observation` 均已进入 `main`。Issue `#75/#78` 已完成前两个 Gate 5 产品切片；当前 `main` 为 `ef69494d92c7c461b0cb858e95f6838404ae1a61`，合并后主干 CI Run `30289461278` 七 Job、Performance Baseline Run `30289461109` 四 Job全绿且 Artifact 均为 `0`。Issue `#81` 是当前第三个 Gate 5 产品迁移切片：二十三路径与 `sha256:c1ef2c00a445dd2bd60dc5f5b375cb27d1e467a3d457d7eb53b7ec82a304aafe` 已获批准，规划、Domain、Application、Platform 与 Parity TDD checkpoint 和最终本地轻量验证已完成；当前只剩最终 Git checkpoint、普通推送、非 Draft PR 与 Hosted Review/CI，最终 Squash Merge 仍未授权。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供二十二个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供二十三个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -28,6 +28,7 @@
 20. Issue `#63` 十三路径、只读预算观察器、自动 observation、非阻断分类、Artifact 边界与 Gate 5 解锁前置验证。
 21. Issue `#75` 三十路径、平台路径分层合同、双平台适配器、隐私边界、Parity 状态和最终本地轻量门禁验证。
 22. Issue `#78` 二十九路径、应用概览只读事实、版本未知、`NotObserved`、有界元数据读取、Parity 重分类和最终本地轻量门禁验证。
+23. Issue `#81` 二十三路径、编译版本复用、启动意图纯解析、非法显式值、旧变量禁止、Parity 状态和最终本地轻量门禁验证。
 
 当前禁止：
 
@@ -43,6 +44,122 @@
 - 在 Issue `#63` 中修改预算 JSON、历史 Evidence、预算数值/公式、Ruleset、required checks、产品、Gate 5、`upstream/` 或 AGOS，或把阈值分类改成阻断退出码。
 - 在 Issue `#75` 中创建 UI、Iced 视图、目录/文件写入、网络、缓存、后台线程、第二个产品 feature、新依赖家族、直接 Win32 FFI、`unsafe`、预算、Release、Ruleset、`upstream/` 或 AGOS 改动。
 - 在 Issue `#78` 中读取历史启动状态、枚举进程、观察 PID/debug port、写文件、联网、缓存、启动线程、调用 shell、引入 UI/Iced、新依赖、第三个产品 feature、预算、Release、Ruleset、`upstream/` 或 AGOS 改动。
+- 在 Issue `#81` 中兼容旧启动变量、打开 UI、联网、检查/下载/执行更新、读写文件、缓存、启动线程、调用 shell、引入 Iced/Tauri/WebView、新依赖、第四个产品 feature、预算、Release、Ruleset、`upstream/` 或 AGOS 改动。
+
+## Issue #81 版本与启动意图本地轻量验证
+
+在仓库根目录、分支 `codex/issue-81-gate-5-version-startup` 执行。Git 时间只使用系统默认本机时间；不得设置 `GIT_AUTHOR_DATE` 或 `GIT_COMMITTER_DATE`。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+cargo test --locked --offline --ignore-rust-version -p inputcodex-domain -p inputcodex-application -p inputcodex-platform -p inputcodex-parity
+if ($LASTEXITCODE -ne 0) { throw "Issue #81 四 crate 测试失败：$LASTEXITCODE" }
+
+cargo clippy --locked --offline --ignore-rust-version -p inputcodex-domain -p inputcodex-application -p inputcodex-platform -p inputcodex-parity --all-targets -- -D warnings
+if ($LASTEXITCODE -ne 0) { throw "Issue #81 四 crate Clippy 失败：$LASTEXITCODE" }
+
+cargo fmt --all -- --check
+if ($LASTEXITCODE -ne 0) { throw "Issue #81 rustfmt 检查失败：$LASTEXITCODE" }
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+if ($LASTEXITCODE -ne 0) { throw "Issue #81 CI 合同失败：$LASTEXITCODE" }
+
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw "Issue #81 Release Audit 失败：$LASTEXITCODE" }
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw "Issue #81 Repository Policy 失败：$LASTEXITCODE" }
+```
+
+范围、哈希与禁止能力验证：
+
+```powershell
+$candidate = [string[]]@(
+  'AGENTS.md',
+  'CONTEXT.md',
+  'README.md',
+  'build.md',
+  'crates/inputcodex-application/src/lib.rs',
+  'crates/inputcodex-application/src/version_startup.rs',
+  'crates/inputcodex-application/tests/version_startup.rs',
+  'crates/inputcodex-domain/src/lib.rs',
+  'crates/inputcodex-domain/src/version_startup.rs',
+  'crates/inputcodex-domain/tests/version_startup.rs',
+  'crates/inputcodex-parity/tests/catalog_repository.rs',
+  'crates/inputcodex-platform/src/lib.rs',
+  'crates/inputcodex-platform/src/version_startup.rs',
+  'crates/inputcodex-platform/tests/version_startup.rs',
+  'docs/plans/2026-07-28-issue-81-gate-5-version-startup.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-07-28-issue-81-gate-5-version-startup.md',
+  'docs/reports/issue-81-gate-5-version-startup.md',
+  'docs/workflows/2026-07-28-issue-81-gate-5-version-startup-runtime.md',
+  'err.md',
+  'parity/README.md',
+  'parity/contracts/foundation-platform.yml',
+  'parity/features/foundation-platform.yml'
+)
+[Array]::Sort($candidate, [StringComparer]::Ordinal)
+$payload = [string]::Join("`n", $candidate) + "`n"
+$scopeHash = [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData(
+    [Text.UTF8Encoding]::new($false).GetBytes($payload)
+  )
+).ToLowerInvariant()
+if ($candidate.Count -ne 23) { throw "Issue #81 路径数量漂移：$($candidate.Count)" }
+if ($scopeHash -ne 'c1ef2c00a445dd2bd60dc5f5b375cb27d1e467a3d457d7eb53b7ec82a304aafe') {
+  throw "Issue #81 scope_hash 漂移：sha256:$scopeHash"
+}
+
+$changed = @(
+  git -c core.quotePath=false diff --name-only origin/main...HEAD
+  git -c core.quotePath=false diff --name-only
+  git -c core.quotePath=false ls-files --others --exclude-standard
+) | Where-Object { $_ } | Sort-Object -Unique
+$outside = @($changed | Where-Object { $_ -notin $candidate })
+if ($outside.Count -ne 0) { throw "Issue #81 越界路径：$($outside -join ', ')" }
+
+$protected = @(
+  git -c core.quotePath=false diff --name-only origin/main...HEAD -- Cargo.toml Cargo.lock parity/features/source-index.yml
+  git -c core.quotePath=false diff --name-only -- Cargo.toml Cargo.lock parity/features/source-index.yml
+) | Where-Object { $_ } | Sort-Object -Unique
+if ($protected.Count -ne 0) { throw "Issue #81 修改受保护路径：$($protected -join ', ')" }
+
+$production = @(
+  'crates/inputcodex-domain/src/version_startup.rs',
+  'crates/inputcodex-application/src/version_startup.rs',
+  'crates/inputcodex-platform/src/version_startup.rs'
+)
+$legacy = @(rg -n --fixed-strings 'CODEX_PLUS_SHOW_UPDATE' $production 2>$null)
+if ($LASTEXITCODE -eq 0 -and $legacy.Count -ne 0) {
+  throw "Issue #81 命中旧启动变量：$($legacy -join '; ')"
+}
+if ($LASTEXITCODE -notin 0, 1) { throw 'Issue #81 旧变量扫描执行失败。' }
+
+$forbiddenProduct = @(
+  rg -n 'std::fs|File::|OpenOptions|fs::|reqwest|ureq|TcpStream|UdpSocket|std::thread|thread::spawn|std::process::Command|tokio::spawn|unsafe\s*\{|iced|tauri|webview' $production 2>$null
+)
+if ($LASTEXITCODE -eq 0 -and $forbiddenProduct.Count -ne 0) {
+  throw "Issue #81 命中禁止运行能力：$($forbiddenProduct -join '; ')"
+}
+if ($LASTEXITCODE -notin 0, 1) { throw 'Issue #81 禁止能力扫描执行失败。' }
+
+$ownerName = [Environment]::UserName
+if (-not [string]::IsNullOrWhiteSpace($ownerName)) {
+  $privateLeaks = @(rg -n --fixed-strings $ownerName crates parity docs/reports/issue-81-gate-5-version-startup.md 2>$null)
+  if ($LASTEXITCODE -eq 0 -and $privateLeaks.Count -ne 0) {
+    throw "Issue #81 泄露本机用户标识：$($privateLeaks -join '; ')"
+  }
+  if ($LASTEXITCODE -notin 0, 1) { throw 'Issue #81 隐私扫描执行失败。' }
+}
+
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw "Issue #81 Git 空白检查失败：$LASTEXITCODE" }
+```
+
+预期：四 crate 测试与 Clippy 全绿、`rustfmt` 退出码为 `0`、CI 合同 `35/35`、`release_audit=current`、仓库政策违规数为 `0`，实际差异全部位于批准的二十三路径内，`Cargo.toml`、`Cargo.lock` 与 `source-index.yml` 保持未修改，生产实现不含旧变量、UI、网络、读写、shell、线程或 `unsafe`。
 
 ## Issue #78 应用概览只读事实本地轻量验证
 
