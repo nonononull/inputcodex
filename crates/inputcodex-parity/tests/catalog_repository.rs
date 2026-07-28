@@ -710,6 +710,120 @@ fn gate5_application_overview_实现合同固定为只读事实且不伪造实�
 }
 
 #[test]
+fn gate5_version_startup_实现合同固定版本来源与无副作用启动意图() {
+    let feature_text = read_repository_text("parity/features/foundation-platform.yml");
+    let feature = yaml_list_item_block(
+        &feature_text,
+        "feature.foundation-platform.version-and-startup",
+    );
+    for expected in [
+        "status: implemented",
+        "CARGO_PKG_VERSION",
+        "StartupIntent::Default",
+        "StartupIntent::ShowUpdate",
+        "- issue:80",
+        "- issue:81",
+    ] {
+        assert!(
+            feature.contains(expected),
+            "版本与启动功能条目应包含：{expected}"
+        );
+    }
+
+    let contract_text = read_repository_text("parity/contracts/foundation-platform.yml");
+    let contract = yaml_list_item_block(
+        &contract_text,
+        "contract.feature.foundation-platform.version-and-startup.baseline",
+    );
+    for expected in [
+        "Ready(VersionStartupSnapshot)",
+        "StartupIntent::Default",
+        "StartupIntent::ShowUpdate",
+        "CARGO_PKG_VERSION",
+        "--show-update",
+        "INPUTCODEX_SHOW_UPDATE",
+        "INVALID_STARTUP_OPTION",
+        "VERSION_AND_STARTUP_UNSUPPORTED",
+        "VERSION_AND_STARTUP_BUILD_VERSION_INVALID",
+        "本功能不会产生 LoadCompletion::Empty",
+    ] {
+        assert!(
+            contract.contains(expected),
+            "版本与启动合同应包含：{expected}"
+        );
+    }
+    assert!(
+        !contract.contains("明确空结果"),
+        "版本与启动合同不得把 Empty 描述为合法输出"
+    );
+    for forbidden in [
+        "filesystem-read",
+        "filesystem-write",
+        "network-read",
+        "network-write",
+        "process-control",
+        "advertising",
+        "remote-recommendation",
+        "CODEX_PLUS_SHOW_UPDATE",
+    ] {
+        assert!(
+            !contract.contains(forbidden),
+            "版本与启动合同禁止能力或旧变量：{forbidden}"
+        );
+    }
+
+    let source_text = read_repository_text("parity/features/source-index.yml");
+    for source_id in [
+        "core-module:version",
+        "tauri-command:backend_version",
+        "tauri-command:startup_options",
+    ] {
+        let source = yaml_list_item_block(&source_text, source_id);
+        assert!(
+            source.contains("side_effects: [process-read]"),
+            "{source_id} 应继续固定为纯进程输入读取"
+        );
+        assert!(
+            source.contains("feature.foundation-platform.version-and-startup"),
+            "{source_id} 应继续映射版本与启动功能"
+        );
+    }
+
+    let production = read_repository_text("crates/inputcodex-platform/src/version_startup.rs");
+    for expected in [
+        "INPUTCODEX_SHOW_UPDATE",
+        "CARGO_PKG_VERSION",
+        "--show-update",
+    ] {
+        assert!(
+            production.contains(expected),
+            "生产适配器应包含：{expected}"
+        );
+    }
+    for forbidden in [
+        "CODEX_PLUS_SHOW_UPDATE",
+        "std::fs",
+        "std::thread",
+        "reqwest",
+        "ureq",
+    ] {
+        assert!(
+            !production.contains(forbidden),
+            "生产适配器禁止能力或旧变量：{forbidden}"
+        );
+    }
+
+    assert_repository_text_contains(
+        "parity/README.md",
+        &[
+            "Issue `#81`",
+            "StartupIntent::ShowUpdate",
+            "INVALID_STARTUP_OPTION",
+        ],
+    );
+}
+
+#[test]
 fn 仓库source_index_覆盖锁定上游公开入口() {
     let summary =
         validate_feature_repository(&repository_root()).expect("功能目录应通过仓库级验证");

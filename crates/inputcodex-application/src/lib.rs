@@ -4,11 +4,13 @@ use inputcodex_domain::DiagnosticCode;
 
 mod application_overview;
 mod platform_paths;
+mod version_startup;
 
 pub use application_overview::{
     ApplicationOverviewPort, ApplicationOverviewRequest, LoadApplicationOverview,
 };
 pub use platform_paths::{PlatformPathsPort, PlatformPathsRequest, ResolvePlatformPaths};
+pub use version_startup::{LoadVersionStartup, VersionStartupPort, VersionStartupRequest};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct RequestId(u64);
@@ -27,6 +29,7 @@ impl RequestId {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ErrorKind {
+    InvalidInput,
     Unsupported,
     Unavailable,
     Timeout,
@@ -49,6 +52,11 @@ impl ApplicationError {
     #[must_use]
     pub const fn unsupported(code: &'static str) -> Self {
         Self::new(ErrorKind::Unsupported, DiagnosticCode::new(code))
+    }
+
+    #[must_use]
+    pub const fn invalid_input(code: &'static str) -> Self {
+        Self::new(ErrorKind::InvalidInput, DiagnosticCode::new(code))
     }
 
     #[must_use]

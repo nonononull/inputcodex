@@ -4,9 +4,11 @@ use inputcodex_application::{ApplicationError, PlatformKind, PlatformPort};
 
 mod application_overview;
 mod platform_paths;
+mod version_startup;
 
 pub use application_overview::SystemApplicationOverview;
 pub use platform_paths::SystemPlatformPaths;
+pub use version_startup::{SystemVersionStartup, resolve_version_startup};
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct SystemPlatform;

@@ -177,7 +177,7 @@ features:
       - issue:26
   - id: feature.foundation-platform.version-and-startup
     name: '版本与启动参数'
-    status: unassessed
+    status: implemented
     evidence:
       - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/version.rs
         symbol: version
@@ -192,12 +192,14 @@ features:
     platforms:
       windows:
         applicability: supported
-        semantics: '读取版本与启动参数，结果稳定且不触发隐式网络或写入。'
+        semantics: '公开由 CARGO_PKG_VERSION 校验得到的 inputcodex 版本；精确 --show-update 或 INPUTCODEX_SHOW_UPDATE=1 产生 StartupIntent::ShowUpdate，否则为 StartupIntent::Default，非法显式值失败。'
       macos:
         applicability: supported
-        semantics: '读取版本与启动参数，结果稳定且不触发隐式网络或写入。'
+        semantics: '公开由 CARGO_PKG_VERSION 校验得到的 inputcodex 版本；精确 --show-update 或 INPUTCODEX_SHOW_UPDATE=1 产生 StartupIntent::ShowUpdate，否则为 StartupIntent::Default，非法显式值失败。'
     decision_refs:
       - issue:26
+      - issue:80
+      - issue:81
   - id: feature.foundation-platform.watcher
     name: 'Watcher 管理'
     status: unassessed

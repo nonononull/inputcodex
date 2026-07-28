@@ -2,6 +2,7 @@
 
 mod application_overview;
 mod platform_paths;
+mod version_startup;
 
 pub use application_overview::{
     ApplicationOverview, ApplicationVersion, ApplicationVersionError, CollectedAtUnixMs,
@@ -13,6 +14,7 @@ pub use platform_paths::{
     ApplicationInstallSource, CodexInstallation, PlatformPathsSnapshot, PrivatePath,
     PrivatePathError,
 };
+pub use version_startup::{StartupIntent, VersionStartupSnapshot};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct DiagnosticCode(&'static str);
