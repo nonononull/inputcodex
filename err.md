@@ -883,6 +883,15 @@
 - 验证：`git check-ignore -v '.worktrees/'` 与 `git check-ignore -v '.worktrees/probe'` 均返回 `.git/info/exclude` 的 `.worktrees/` 规则；随后成功从 `main@da65f7d8402e4de27e2795ee8905be18ad565653` 创建 `codex/issue-83-readme-information-architecture` 隔离工作树。
 - 关联：Issue `#83`、`superpowers:using-git-worktrees`、Planning checkpoint `c313cba06484eb00ccc373e63419602d13192f7c`。
 
+### 2026-07-28：离线稀疏索引陈旧导致新增 Windows 依赖出现假冲突
+
+- 环境：Issue `#89` 只为 Windows target 新增精确版本 `windows-registry = 0.6.1`，既有锁文件已固定 `futures-util 0.3.33`。
+- 现象：首次执行离线 Cargo 解析时，本机稀疏索引只暴露 `futures-util 0.3.32`，解析器报告与既有锁版本冲突，看起来像新增依赖会引起大范围锁文件漂移。
+- 根因：`cargo --offline` 只能使用本机已经缓存的索引记录；陈旧索引缺少既有锁版本元数据，不能证明真实 registry 不兼容，也不能安全生成本次最小锁文件扩展。
+- 处理：只联网刷新 crates.io 索引并重新解析批准的精确依赖，不升级既有包；随后审计 `Cargo.lock`，确认只新增 `windows-registry 0.6.1`、`windows-result 0.4.1` 和 `windows-strings 0.5.1`，其余差异只是多版本依赖名称消歧。
+- 验证：刷新后 `cargo check --locked --offline` 恢复通过；`git diff origin/main...HEAD -- Cargo.toml crates/inputcodex-platform/Cargo.toml Cargo.lock` 只包含批准的 Windows target 依赖和上述三个新包。
+- 关联：Issue `#89`、`Cargo.toml`、`crates/inputcodex-platform/Cargo.toml`、`Cargo.lock`。
+
 ## 记录模板
 
 ```text

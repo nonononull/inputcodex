@@ -90,11 +90,11 @@ parity/features/source-index.yml
 | 阶段 | 状态 | 允许操作 |
 | --- | --- | --- |
 | 决策与 Discovery | 已完成 | 只读仓库、上游缓存与 GitHub；创建 Issue/worktree |
-| 规划冻结 | 当前允许 | 只写三份规划文件并执行轻量验证 |
-| TDD 与实现 | 已授权 | 只在 `30` 路径内按 RED→GREEN 执行 |
-| Cargo 更新 | 已授权 | 只允许加入 `windows-registry = 0.6.1` 及必要锁文件 |
-| Git checkpoint/提交 | 已授权 | 每个稳定层完成后提交 checkpoint |
-| 普通推送与 PR | 已授权 | 最终本地门禁后普通推送并创建非 Draft PR |
+| 规划冻结 | 已完成 | 三份规划文件、范围哈希与 Issue 回写已验证 |
+| TDD 与实现 | 已完成 | `30` 路径内六层 RED→GREEN checkpoint 已完成 |
+| Cargo 更新 | 已完成 | 只加入 `windows-registry = 0.6.1` 及三个必要锁包 |
+| Git checkpoint/提交 | 已完成六层 | Planning、Domain、Application、共享 Platform、双平台与 Parity |
+| 普通推送与 PR | 已授权待执行 | 最终本地门禁后普通推送并创建非 Draft PR |
 | Squash Merge | 未授权 | Final Head Review/CI 后单独授权 |
 
 ## 双哈希验证
@@ -263,9 +263,12 @@ Workspace 全量、Windows/macOS 编译和 Performance observation 继续交给 
 - [x] Issue `#89`、分支和 worktree 完成；
 - [x] Discovery 与候选依赖核对完成；
 - [x] 三份规划控制面落盘；
-- [ ] 规划轻量验证与 Issue 回写；
+- [x] 规划轻量验证与 Issue 回写；
 - [x] 项目所有者批准 `30` 路径和哈希；
-- [ ] TDD、实现、提交、推送、PR、Review/CI；
+- [x] Domain、Application、共享 Platform、双平台与 Parity TDD checkpoint；
+- [x] 项目控制面与静态实施报告收口；
+- [ ] 最终本地轻量验证与文档 checkpoint；
+- [ ] 普通推送、非 Draft PR、Review/CI；
 - [ ] 独立 Squash Merge 授权。
 
 ## 停止条件

@@ -74,6 +74,18 @@
 运行时进程、用户级持久化环境和系统级持久化环境是否被本次请求真实观察的明确声明；当前切片固定为 `runtime_process: Observed`、`persistent_user: NotObserved`、`persistent_system: NotObserved`。
 避免用语：无系统冲突、全部环境已检查、持久化环境为空
 
+**Relay 环境只读观察**：
+一次无副作用聚合当前进程与平台允许来源中的五个固定代理变量名称、`CODEX_HOME/.env` 存在状态和四个固定 Clash Verge 候选的 `enable_tun_mode` 状态；不测试网络，不返回变量值、文件内容、注册表值或实际路径。
+避免用语：网络环境检测、代理修复、Relay 配置扫描
+
+**局部观察不可用**：
+某个持久化环境来源、`.env` 元数据或 Clash 候选无法读取，但其余来源仍形成可信快照；结果继续为 `Ready` 并保留 `Unavailable`、`Unreadable` 或 `Invalid`，不得静默当成不存在或扩大为整次失败。
+避免用语：没有配置、无风险、读取成功
+
+**Clash TUN 候选状态**：
+四个固定逻辑来源分别记录 `Absent`、`Disabled`、`Enabled`、`Unreadable` 或 `Invalid`；重复实际路径只读取一次再映射回逻辑来源，任何状态都不得公开候选路径或配置内容。
+避免用语：Clash 已开启、Clash 未安装、配置文件详情
+
 ## 版本与发布
 
 **上游基础版本**：

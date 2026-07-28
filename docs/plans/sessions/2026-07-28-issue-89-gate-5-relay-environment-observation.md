@@ -10,7 +10,7 @@
 - `planning_scope_hash`: `sha256:0a301df75edda05c8d3d1c01c91221dd9ac8ff11aeeca39fb4c26a293b0543b0`
 - `candidate_scope_hash`: `sha256:0adc20d0ed4d73ae645a5ffb23d7208f7aaabfea92c4d6fd62e0da3a120e8f77`
 - `delivery_contract`: `Issue → 分支/worktree → Session Plan → Runtime Workflow → scope_hash 批准 → TDD → 本地验证 → PR → Review/CI → 独立 Squash Merge 授权`
-- `current_phase`: `DOMAIN_TDD_PENDING`
+- `current_phase`: `FINAL_LOCAL_VERIFICATION_PENDING`
 
 ## Global Constraints
 
@@ -90,64 +90,64 @@ docs/workflows/2026-07-28-issue-89-gate-5-relay-environment-observation-runtime.
 - [x] 从最新 `origin/main` 建立隔离分支和 worktree；
 - [x] 完成上游、目录、架构与依赖 Discovery；
 - [x] 落盘设计、Session Plan 与 Runtime Workflow；
-- [ ] 运行规划范围、哈希、占位符、受保护路径和 `git diff --check`；
-- [ ] 回写 Issue `#89` 候选范围与验证证据；
+- [x] 运行规划范围、哈希、占位符、受保护路径和 `git diff --check`；
+- [x] 回写 Issue `#89` 候选范围与验证证据；
 - [x] 取得项目所有者对 `30` 路径和哈希的明确批准。
 
 ## Task 1：Domain TDD
 
-- [ ] 为五个固定代理变量名称编写 RED；
-- [ ] 为来源、覆盖状态、稳定排序和去重编写 RED；
-- [ ] 为 `.env` 三态编写 RED；
-- [ ] 为四类 Clash 来源和五种候选状态编写 RED；
-- [ ] 为聚合风险、空事实 Ready 和隐私 Debug 编写 RED；
-- [ ] 最小实现并运行 Domain tests/Clippy；
-- [ ] 建立 Domain Git checkpoint。
+- [x] 为五个固定代理变量名称编写 RED；
+- [x] 为来源、覆盖状态、稳定排序和去重编写 RED；
+- [x] 为 `.env` 三态编写 RED；
+- [x] 为四类 Clash 来源和五种候选状态编写 RED；
+- [x] 为聚合风险、空事实 Ready 和隐私 Debug 编写 RED；
+- [x] 最小实现并运行 Domain tests/Clippy；
+- [x] 建立 Domain Git checkpoint。
 
 ## Task 2：Application TDD
 
-- [ ] 为零输入 Request、Port 和 UseCase 编写 RED；
-- [ ] 固定 Ready、局部不可用 Ready、硬失败 Failed；
-- [ ] 复用请求身份、取消、超时和过期结果合同；
-- [ ] 运行 Application tests/Clippy；
-- [ ] 建立 Application Git checkpoint。
+- [x] 为零输入 Request、Port 和 UseCase 编写 RED；
+- [x] 固定 Ready、局部不可用 Ready、硬失败 Failed；
+- [x] 复用请求身份、取消、超时和过期结果合同；
+- [x] 运行 Application tests/Clippy；
+- [x] 建立 Application Git checkpoint。
 
 ## Task 3：共享 Platform TDD
 
-- [ ] 从 `platform_paths` 提取窄 `CODEX_HOME` 解析入口并保持既有测试；
-- [ ] 固定进程环境单次扫描和名称规范化；
-- [ ] 固定 `.env` 元数据检查且不读取内容；
-- [ ] 固定四候选去重、有界读取、UTF-8 和顶层布尔解析；
-- [ ] 固定非目标平台 unsupported；
-- [ ] 建立共享 Platform checkpoint。
+- [x] 从 `platform_paths` 提取窄 `CODEX_HOME` 解析入口并保持既有测试；
+- [x] 固定进程环境单次扫描和名称规范化；
+- [x] 固定 `.env` 元数据检查且不读取内容；
+- [x] 固定四候选去重、有界读取、UTF-8 和顶层布尔解析；
+- [x] 固定非目标平台 unsupported；
+- [x] 建立共享 Platform checkpoint。
 
 ## Task 4：Windows/macOS Platform TDD
 
-- [ ] Windows target 加入精确版本 `windows-registry = 0.6.1`；
-- [ ] 更新 `Cargo.lock`，禁止其他无关依赖漂移；
-- [ ] Windows 固定当前进程、用户级、系统级来源及 Unavailable；
-- [ ] macOS 固定当前进程来源和两个 NotObserved；
-- [ ] 双平台固定 Clash 候选路径规则，不返回路径；
-- [ ] 运行 Platform tests/Clippy 和格式；
-- [ ] 建立 Platform checkpoint。
+- [x] Windows target 加入精确版本 `windows-registry = 0.6.1`；
+- [x] 更新 `Cargo.lock`，禁止其他无关依赖漂移；
+- [x] Windows 固定当前进程、用户级、系统级来源及 Unavailable；
+- [x] macOS 固定当前进程来源和两个 NotObserved；
+- [x] 双平台固定 Clash 候选路径规则，不返回路径；
+- [x] 运行 Platform tests/Clippy 和格式；
+- [x] 建立 Platform checkpoint。
 
 ## Task 5：Parity TDD
 
-- [ ] 先让目录测试因缺少新子能力失败；
-- [ ] 新增 feature 与 contract；
-- [ ] 迁移 `relay_environment` 和 `check_relay_environment` 两个来源；
-- [ ] 原总功能只保留 `proxy` 且继续 `unassessed`；
-- [ ] 固定 implemented 数、来源归属、副作用和 Release current；
-- [ ] 运行 Parity tests/Clippy；
-- [ ] 建立 Parity checkpoint。
+- [x] 先让目录测试因缺少新子能力失败；
+- [x] 新增 feature 与 contract；
+- [x] 迁移 `relay_environment` 和 `check_relay_environment` 两个来源；
+- [x] 原总功能只保留 `proxy` 且继续 `unassessed`；
+- [x] 固定 implemented 数、来源归属、副作用和 Release current；
+- [x] 运行 Parity tests/Clippy；
+- [x] 建立 Parity checkpoint。
 
 ## Task 6：项目控制面收口
 
-- [ ] 更新 README、CONTEXT、AGENTS、Master Plan 与 parity README；
-- [ ] 在 `build.md` 固定 Issue `#89` 轻量命令和禁止面；
-- [ ] 只有新根因才更新 `err.md`，重复问题引用既有条目；
-- [ ] 创建实施报告并写入静态本地证据；
-- [ ] 不写递归 Closeout 或动态合并证据。
+- [x] 更新 README、CONTEXT、AGENTS、Master Plan 与 parity README；
+- [x] 在 `build.md` 固定 Issue `#89` 轻量命令和禁止面；
+- [x] 只有新根因才更新 `err.md`，重复问题引用既有条目；
+- [x] 创建实施报告并写入静态本地证据；
+- [x] 不写递归 Closeout 或动态合并证据。
 
 ## Task 7：验证与远端交付
 

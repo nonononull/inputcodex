@@ -246,6 +246,17 @@ parity/features/source-index.yml
 7. Review 根因闭环且 Hosted CI 全绿后停在独立 Squash Merge 授权门；
 8. 不创建递归 Closeout。
 
+## 实施状态
+
+- Planning checkpoint：`d4805d3f81801d4d685a510d31566738bc9d3ff6`；
+- Domain checkpoint：`fba0e2e3e7ebb692b417b4e3a80800388f711a1f`；
+- Application checkpoint：`13e1f349b8a4d2556864e67f1066884b0e4832a4`；
+- 共享 Platform checkpoint：`1d9b774a661af44f765cb8e9cb3d7223a56e594d`；
+- Windows/macOS checkpoint：`1dae9843618bdffc95f16069d54b7e7440d21db8`；
+- Parity checkpoint：`749d02e23f1c1fa8f042d598d8f5bb5e28a18638`；
+- 当前阶段：项目控制面已收口，等待最终本地轻量验证、文档 checkpoint、普通推送与非 Draft PR；
+- 最终 Squash Merge：未授权，继续保留单独授权门。
+
 ## 自审
 
 - [x] 与 Issue `#88` 一致；
