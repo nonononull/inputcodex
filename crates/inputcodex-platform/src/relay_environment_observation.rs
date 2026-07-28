@@ -1,3 +1,4 @@
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 use std::{
     collections::BTreeMap,
     ffi::{OsStr, OsString},
@@ -6,25 +7,42 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use inputcodex_application::ApplicationError;
+use inputcodex_application::{
+    ApplicationError, RelayEnvironmentObservationPort, RelayEnvironmentObservationRequest,
+};
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 use inputcodex_domain::{
     ClashTunCandidateStatus, ClashTunObservation, CodexDotenvStatus, ObservationCoverageStatus,
     ProxyEnvironmentCoverage, ProxyEnvironmentSource, ProxyEnvironmentVariableName,
     ProxyEnvironmentVariableObservation, RelayEnvironmentObservation,
 };
 
+#[cfg(any(target_os = "macos", test))]
+mod macos;
+#[cfg(any(target_os = "windows", test))]
+mod windows;
+
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 const CLASH_APP_ID: &str = "io.github.clash-verge-rev.clash-verge-rev";
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 const CLASH_LEGACY_DIR: &str = "clash-verge-rev";
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 const CLASH_CONFIG_FILE: &str = "clash-verge.yaml";
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 const CLASH_TUN_KEY: &str = "enable_tun_mode";
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 const CLASH_CONFIG_LIMIT: usize = 64 * 1024;
 
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 pub(super) enum PersistentEnvironment {
     Observed(Vec<(OsString, OsString)>),
+    #[cfg(any(target_os = "macos", test))]
     NotObserved,
+    #[cfg(any(target_os = "windows", test))]
     Unavailable,
 }
 
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 pub(super) struct RelayObservationInputs {
     pub(super) runtime_environment: Vec<(OsString, OsString)>,
     pub(super) persistent_user: PersistentEnvironment,
@@ -34,24 +52,29 @@ pub(super) struct RelayObservationInputs {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 pub(super) enum FileMetadata {
     File,
     Other,
 }
 
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 pub(super) enum LimitedRead {
     Bytes(Vec<u8>),
     TooLarge,
 }
 
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 pub(super) trait RelayFileProbe {
     fn metadata(&self, path: &Path) -> io::Result<FileMetadata>;
     fn read_limited(&self, path: &Path, limit: usize) -> io::Result<LimitedRead>;
 }
 
 #[derive(Debug, Clone, Copy, Default)]
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 pub(super) struct SystemRelayFileProbe;
 
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 impl RelayFileProbe for SystemRelayFileProbe {
     fn metadata(&self, path: &Path) -> io::Result<FileMetadata> {
         let metadata = fs::metadata(path)?;
@@ -74,6 +97,34 @@ impl RelayFileProbe for SystemRelayFileProbe {
     }
 }
 
+#[derive(Debug, Clone, Copy, Default)]
+pub struct SystemRelayEnvironmentObservation;
+
+impl RelayEnvironmentObservationPort for SystemRelayEnvironmentObservation {
+    fn observe(
+        &self,
+        _request: &RelayEnvironmentObservationRequest,
+    ) -> Result<inputcodex_domain::RelayEnvironmentObservation, ApplicationError> {
+        #[cfg(target_os = "windows")]
+        {
+            windows::observe_system()
+        }
+
+        #[cfg(target_os = "macos")]
+        {
+            macos::observe_system()
+        }
+
+        #[cfg(not(any(target_os = "windows", target_os = "macos")))]
+        {
+            Err(ApplicationError::unsupported(
+                "RELAY_ENVIRONMENT_OBSERVATION_UNSUPPORTED",
+            ))
+        }
+    }
+}
+
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 pub(super) fn observe_with_inputs(
     inputs: RelayObservationInputs,
     probe: &impl RelayFileProbe,
@@ -105,6 +156,7 @@ pub(super) fn observe_with_inputs(
     ))
 }
 
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 fn append_persistent_environment(
     proxy_variables: &mut Vec<ProxyEnvironmentVariableObservation>,
     environment: PersistentEnvironment,
@@ -115,11 +167,14 @@ fn append_persistent_environment(
             proxy_variables.extend(proxy_variables_from_pairs(pairs, source)?);
             Ok(ObservationCoverageStatus::Observed)
         }
+        #[cfg(any(target_os = "macos", test))]
         PersistentEnvironment::NotObserved => Ok(ObservationCoverageStatus::NotObserved),
+        #[cfg(any(target_os = "windows", test))]
         PersistentEnvironment::Unavailable => Ok(ObservationCoverageStatus::Unavailable),
     }
 }
 
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 fn proxy_variables_from_pairs(
     pairs: impl IntoIterator<Item = (OsString, OsString)>,
     source: ProxyEnvironmentSource,
@@ -137,6 +192,7 @@ fn proxy_variables_from_pairs(
     Ok(observations)
 }
 
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 fn contains_non_whitespace(value: &OsStr) -> bool {
     value
         .as_encoded_bytes()
@@ -144,6 +200,7 @@ fn contains_non_whitespace(value: &OsStr) -> bool {
         .any(|byte| !byte.is_ascii_whitespace())
 }
 
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 fn proxy_variable_name(
     name: &OsStr,
 ) -> Result<Option<ProxyEnvironmentVariableName>, ApplicationError> {
@@ -167,10 +224,12 @@ fn proxy_variable_name(
         .ok_or_else(name_unrepresentable_error)
 }
 
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 const fn name_unrepresentable_error() -> ApplicationError {
     ApplicationError::internal("RELAY_ENVIRONMENT_NAME_UNREPRESENTABLE")
 }
 
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 pub(super) fn clash_candidate_paths(
     platform_data_dir: &Path,
     platform_config_dir: &Path,
@@ -192,6 +251,7 @@ pub(super) fn clash_candidate_paths(
     ]
 }
 
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 fn inspect_codex_dotenv(codex_home: &Path, probe: &impl RelayFileProbe) -> CodexDotenvStatus {
     match probe.metadata(&codex_home.join(".env")) {
         Ok(FileMetadata::File) => CodexDotenvStatus::Present,
@@ -201,6 +261,7 @@ fn inspect_codex_dotenv(codex_home: &Path, probe: &impl RelayFileProbe) -> Codex
     }
 }
 
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 fn inspect_clash_candidates(
     candidates: &[PathBuf; 4],
     probe: &impl RelayFileProbe,
@@ -220,6 +281,7 @@ fn inspect_clash_candidates(
     )
 }
 
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 fn inspect_clash_candidate(path: &Path, probe: &impl RelayFileProbe) -> ClashTunCandidateStatus {
     match probe.read_limited(path, CLASH_CONFIG_LIMIT) {
         Err(error) if error.kind() == io::ErrorKind::NotFound => ClashTunCandidateStatus::Absent,
@@ -238,6 +300,7 @@ fn inspect_clash_candidate(path: &Path, probe: &impl RelayFileProbe) -> ClashTun
     }
 }
 
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 fn parse_clash_tun(contents: &str) -> Option<bool> {
     let mut result = None;
     for raw_line in contents.lines() {

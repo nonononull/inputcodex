@@ -10,6 +10,7 @@ mod version_startup;
 
 pub use application_overview::SystemApplicationOverview;
 pub use platform_paths::SystemPlatformPaths;
+pub use relay_environment_observation::SystemRelayEnvironmentObservation;
 pub use runtime_environment_observation::{
     SystemRuntimeEnvironmentObservation, observe_macos_runtime_environment,
     observe_windows_runtime_environment,
