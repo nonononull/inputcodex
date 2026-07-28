@@ -10,6 +10,7 @@ publish = false
 [dependencies]
 inputcodex-application.workspace = true
 inputcodex-domain.workspace = true
+serde_json.workspace = true
 
 [target.'cfg(target_os = "windows")'.dependencies]
 windows.workspace = true
