@@ -6,8 +6,8 @@ Issue `#86` 已在批准的二十四路径内完成 Planning、Domain、Applicat
 RED→GREEN checkpoint。当前实现只读观察当前 `inputcodex` 进程继承的 `OPENAI_*` 环境变量，
 只返回名称、`Empty | NonEmpty` 和明确来源覆盖，不返回或持久化原始值。
 
-项目控制面正在回写，完整本地轻量验证尚待执行；尚未普通推送、尚未创建 PR，Hosted Review/CI
-与最终 Squash Merge 均未完成。最终合并继续保留项目所有者独立授权门。
+项目控制面与完整本地轻量验证已经完成；尚未普通推送、尚未创建 PR，Hosted Review/CI 与最终
+Squash Merge 均未完成。最终合并继续保留项目所有者独立授权门。
 
 ## 基线与批准
 
@@ -76,26 +76,27 @@ Platform 测试曾把名称 `OPENAI_API_KEY ` 误认为“不应命中”。复�
 ## 当前验证状态
 
 ```yaml
-status: control-plane-update-before-final-local-verification
-recorded_at_local: 2026-07-28T19:11:58+08:00
+status: local-verified-ready-for-push-pr
+recorded_at_local: 2026-07-28T19:17:48+08:00
 domain_tests: passed
 application_tests: passed
 platform_tests: passed
 parity_catalog_repository: 16/16
-four_crate_test: pending
-four_crate_clippy: pending
-fmt: pending
-ci_contract: pending
-release_audit: pending
-repository_policy: pending
+four_crate_test: passed
+four_crate_clippy: passed
+fmt: passed-after-one-line-rustfmt-root-cause-fix
+ci_contract: 35/35
+release_audit: current
+repository_policy_violations: 0
 candidate_scope_count: 24
-actual_changed_path_count: pending
+actual_changed_path_count: 23
 scope_hash: sha256:dd1d784ffe3149bf130c6bd678050d6aea3059f33a405abee5e2cc3f9735bb59
 source_index_change: approved-single-entry-two-line-replacement
-protected_path_changes: pending
-privacy_matches: pending
-forbidden_capability_matches: pending
-local_verification_checkpoint: pending
+protected_path_changes: 0
+privacy_matches: 0
+forbidden_capability_matches: 0
+system_vars_os_call_count: 1
+local_verification_checkpoint: c6829fa40b7bf4cf9828f88e2dfe68c552536844
 push: pending
 pr: pending
 review: pending

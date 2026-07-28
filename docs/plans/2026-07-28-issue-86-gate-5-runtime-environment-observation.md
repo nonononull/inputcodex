@@ -2,7 +2,7 @@
 
 ## 文档状态
 
-- `status`: `LOCAL_IMPLEMENTATION_COMPLETE_VERIFICATION_PENDING`
+- `status`: `LOCAL_VERIFIED_READY_FOR_PUSH_PR`
 - `tracking_issue_ref`: `https://github.com/nonononull/inputcodex/issues/86`
 - `approved_decision_ref`: `https://github.com/nonononull/inputcodex/issues/85`
 - `owner_approval_evidence`: `https://github.com/nonononull/inputcodex/issues/85#issuecomment-5102509300`
@@ -27,6 +27,7 @@
 - `scope_revision_checkpoint`: `f177b9d6f17ee31d40bb6568f8e9bdf6bec901b5`
 - `parity_red_checkpoint`: `d5c711d9071aa9e9c65d5214531a96e04dddda98`
 - `parity_green_checkpoint`: `a320086f00bd16c65ae5172c28f4bd8c40a7c110`
+- `local_verification_checkpoint`: `c6829fa40b7bf4cf9828f88e2dfe68c552536844`
 - `written_on`: `2026-07-28`，时间判定只使用项目所有者 Windows 本机时间
 
 ## 目标
@@ -343,6 +344,6 @@ parity/features/source-index.yml
 - [x] `tauri-command:check_env_conflicts` 仅修正为 `environment-read` 并映射到新只读子能力；
 - [x] `core-module:env_conflicts` 与 `tauri-command:remove_env_conflicts` 继续归原总功能；
 - [x] 产品文档、术语、项目规则、构建入口和 Master Plan 已进入控制面回写；
-- [ ] 四 crate、Clippy、格式、项目验证器、二十四路径与禁止能力最终轻量验证；
+- [x] 四 crate、Clippy、格式、项目验证器、二十四路径与禁止能力最终轻量验证；
 - [ ] 普通推送、非 Draft PR、Review/CI 与 Final Head 证据；
 - [ ] 项目所有者针对 Final Head 的独立 Squash Merge 授权。

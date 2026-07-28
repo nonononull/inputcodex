@@ -53,13 +53,14 @@ implementation_authorization: authorized
 commit_push_pr_authorization: authorized
 final_merge_authorization: pending-separate-gate
 agos_status: bypassed-project-native-control-plane
-execution_status: control-plane-update-before-final-local-verification
+execution_status: local-verified-ready-for-push-pr
 domain_checkpoint: 6591882dc23596a502833d38aed08d585b4acc08
 application_checkpoint: 55b84b6c2b45d00fdf3f6e42aaa1e86d1635557e
 platform_checkpoint: cd41fa8ef739b1481cfbfc491ef42e26369f0b4e
 scope_revision_checkpoint: f177b9d6f17ee31d40bb6568f8e9bdf6bec901b5
 parity_red_checkpoint: d5c711d9071aa9e9c65d5214531a96e04dddda98
 parity_green_checkpoint: a320086f00bd16c65ae5172c28f4bd8c40a7c110
+local_verification_checkpoint: c6829fa40b7bf4cf9828f88e2dfe68c552536844
 ```
 
 ## 成功标准
@@ -630,7 +631,7 @@ parity_green_checkpoint: a320086f00bd16c65ae5172c28f4bd8c40a7c110
 
 **Files:** 所有 24 条候选路径，只读验证受保护面。
 
-- [ ] **Step 1: 四 crate 测试**
+- [x] **Step 1: 四 crate 测试**
 
   ```powershell
   cargo test --locked --offline --ignore-rust-version `
@@ -640,7 +641,7 @@ parity_green_checkpoint: a320086f00bd16c65ae5172c28f4bd8c40a7c110
     -p inputcodex-parity
   ```
 
-- [ ] **Step 2: 四 crate Clippy 与格式**
+- [x] **Step 2: 四 crate Clippy 与格式**
 
   ```powershell
   cargo clippy --locked --offline --ignore-rust-version `
@@ -652,7 +653,7 @@ parity_green_checkpoint: a320086f00bd16c65ae5172c28f4bd8c40a7c110
   cargo fmt --all -- --check
   ```
 
-- [ ] **Step 3: 项目验证器**
+- [x] **Step 3: 项目验证器**
 
   ```powershell
   pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
@@ -663,11 +664,11 @@ parity_green_checkpoint: a320086f00bd16c65ae5172c28f4bd8c40a7c110
 
   Expected: CI 合同 `35/35`、`release_audit=current`、政策 `0` 违规。
 
-- [ ] **Step 4: 范围与禁止能力验证**
+- [x] **Step 4: 范围与禁止能力验证**
 
   严格执行 Runtime Workflow 的 24 路径、保护路径、隐私和禁止能力脚本。
 
-- [ ] **Step 5: 创建最终本地验证 checkpoint**
+- [x] **Step 5: 创建最终本地验证 checkpoint**
 
   ```powershell
   git add -- <实际变化且位于候选范围内的路径>

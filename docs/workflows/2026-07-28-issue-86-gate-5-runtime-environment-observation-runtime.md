@@ -441,7 +441,7 @@ git diff --check
 ## 当前执行进度
 
 ```yaml
-current_node: CONTROL_PLANE_UPDATE
+current_node: LOCAL_VERIFICATION_GREEN
 written_design_checkpoint: 26b3b1c54dd35cc92460879483b0f9d1f9d4793f
 planning_documents: 3
 planning_scope_hash: sha256:c3d16ff75e79d9fd2866db1bd59f4259089b7398bce46b20e2766fc2bccc6d34
@@ -454,11 +454,13 @@ platform_checkpoint: cd41fa8ef739b1481cfbfc491ef42e26369f0b4e
 scope_revision_checkpoint: f177b9d6f17ee31d40bb6568f8e9bdf6bec901b5
 parity_red_checkpoint: d5c711d9071aa9e9c65d5214531a96e04dddda98
 parity_green_checkpoint: a320086f00bd16c65ae5172c28f4bd8c40a7c110
+control_plane_checkpoint: 025a60d
+local_verification_checkpoint: c6829fa40b7bf4cf9828f88e2dfe68c552536844
 implementation_changes: domain-application-platform-complete
 product_code_changes: runtime-environment-observation-complete
 parity_changes: feature-contract-and-single-source-index-reclassification-complete
-control_plane_changes: in-progress
-local_final_verification: pending
+control_plane_changes: complete
+local_final_verification: four-crate-tests-clippy-fmt-ci-contract-35-of-35-release-audit-current-policy-zero-scope-and-safety-green
 remote_push_pr_review_ci: authorized-after-local-verification
 final_merge_authorization: pending-separate-gate
 ```
