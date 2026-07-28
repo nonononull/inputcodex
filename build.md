@@ -8,8 +8,8 @@
 GitHub Issue、PR 与 Actions。
 
 Gate 3 七成员 Rust Workspace、Gate 4 上游审计/功能目录/性能基线，以及 Gate 5 的平台路径、
-应用概览、版本与启动意图、运行时环境冲突观察和 Relay 环境只读观察能力已经建立。该说明
-只用于选择正确命令，不能替代任务计划和 GitHub 新鲜证据。
+应用概览、版本与启动意图、运行时环境冲突观察、Relay 环境和设置只读观察能力已经建立。
+该说明只用于选择正确命令，不能替代任务计划和 GitHub 新鲜证据。
 
 ## 文档变更轻量验证
 
@@ -25,7 +25,7 @@ git diff --check
 
 路径范围、Markdown 链接和任务特有内容守卫由对应 Session Plan 与 Runtime Workflow 定义。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供二十五个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供二十六个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -52,6 +52,7 @@ git diff --check
 23. Issue `#81` 二十三路径、编译版本复用、启动意图纯解析、非法显式值、旧变量禁止、Parity 状态和最终本地轻量门禁验证。
 24. Issue `#86` 二十四路径、当前进程环境只读观察、明确来源覆盖、隐私边界、Parity 单入口修订和最终本地轻量门禁验证。
 25. Issue `#89` 三十路径、Relay 环境只读聚合、Windows 注册表覆盖、`.env` 元数据、Clash 有界读取、Parity 分拆和最终本地轻量门禁验证。
+26. Issue `#92` 二十七路径、设置文件有界只读观察、缺失与空对象分离、六个稳定错误、Parity 单入口分拆和最终本地轻量门禁验证。
 
 当前禁止：
 
@@ -69,6 +70,195 @@ git diff --check
 - 在 Issue `#78` 中读取历史启动状态、枚举进程、观察 PID/debug port、写文件、联网、缓存、启动线程、调用 shell、引入 UI/Iced、新依赖、第三个产品 feature、预算、Release、Ruleset、`upstream/` 或 AGOS 改动。
 - 在 Issue `#81` 中兼容旧启动变量、打开 UI、联网、检查/下载/执行更新、读写文件、缓存、启动线程、调用 shell、引入 Iced/Tauri/WebView、新依赖、第四个产品 feature、预算、Release、Ruleset、`upstream/` 或 AGOS 改动。
 - 在 Issue `#89` 中测试网络、返回代理值或路径、读取 `.env` 内容、修改环境/文件/注册表、调用子进程、启动线程/Watcher、打开 UI、注入、迁移 `core-module:proxy`、修改 Workflow/Ruleset、Release、`upstream/` 或 AGOS。
+- 在 Issue `#92` 中公开任意路径读取、返回设置字段或内容、写文件、联网、调用子进程、启动线程/Watcher、打开 UI、使用 `unsafe`、迁移保存/重置/底层设置管理、修改 Workflow/Ruleset、Release、`upstream/` 或 AGOS。
+
+## Issue #92 设置只读观察本地轻量验证
+
+在仓库根目录、分支 `codex/issue-92-gate-5-settings-observation` 执行。Git 时间只使用系统默认
+本机时间；不得设置 `GIT_AUTHOR_DATE` 或 `GIT_COMMITTER_DATE`。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+cargo test --locked --offline --all-targets -p inputcodex-domain -p inputcodex-application -p inputcodex-platform -p inputcodex-parity
+if ($LASTEXITCODE -ne 0) { throw "Issue #92 四 crate 测试失败：$LASTEXITCODE" }
+
+cargo clippy --locked --offline --all-targets -p inputcodex-domain -p inputcodex-application -p inputcodex-platform -p inputcodex-parity -- -D warnings
+if ($LASTEXITCODE -ne 0) { throw "Issue #92 四 crate Clippy 失败：$LASTEXITCODE" }
+
+cargo fmt --all -- --check
+if ($LASTEXITCODE -ne 0) { throw "Issue #92 rustfmt 检查失败：$LASTEXITCODE" }
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+if ($LASTEXITCODE -ne 0) { throw "Issue #92 CI 合同失败：$LASTEXITCODE" }
+
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw "Issue #92 Release Audit 失败：$LASTEXITCODE" }
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw "Issue #92 Repository Policy 失败：$LASTEXITCODE" }
+```
+
+范围、哈希、依赖、目录分拆、隐私与禁止能力验证：
+
+```powershell
+$ErrorActionPreference = 'Stop'
+$baseline = 'a5559f4a873a81d91ed09b571503523a78a45118'
+$candidate = [string[]]@(
+  'AGENTS.md',
+  'CONTEXT.md',
+  'Cargo.lock',
+  'Cargo.toml',
+  'README.md',
+  'build.md',
+  'crates/inputcodex-application/src/lib.rs',
+  'crates/inputcodex-application/src/settings_observation.rs',
+  'crates/inputcodex-application/tests/settings_observation.rs',
+  'crates/inputcodex-domain/src/lib.rs',
+  'crates/inputcodex-domain/src/settings_observation.rs',
+  'crates/inputcodex-domain/tests/settings_observation.rs',
+  'crates/inputcodex-parity/tests/catalog_repository.rs',
+  'crates/inputcodex-platform/Cargo.toml',
+  'crates/inputcodex-platform/src/lib.rs',
+  'crates/inputcodex-platform/src/settings_observation.rs',
+  'crates/inputcodex-platform/tests/settings_observation.rs',
+  'docs/plans/2026-07-28-issue-92-gate-5-settings-observation.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-07-28-issue-92-gate-5-settings-observation.md',
+  'docs/reports/issue-92-gate-5-settings-observation.md',
+  'docs/workflows/2026-07-28-issue-92-gate-5-settings-observation-runtime.md',
+  'err.md',
+  'parity/README.md',
+  'parity/contracts/foundation-platform.yml',
+  'parity/features/foundation-platform.yml',
+  'parity/features/source-index.yml'
+)
+[Array]::Sort($candidate, [StringComparer]::Ordinal)
+$payload = [string]::Join("`n", $candidate) + "`n"
+$scopeHash = [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData(
+    [Text.UTF8Encoding]::new($false).GetBytes($payload)
+  )
+).ToLowerInvariant()
+if ($candidate.Count -ne 27) { throw "Issue #92 路径数量漂移：$($candidate.Count)" }
+if ($scopeHash -ne 'ca252684075d32de7aaf2ca066f12822ce48a5b01d1b0fcf67df146ea792baf1') {
+  throw "Issue #92 scope_hash 漂移：sha256:$scopeHash"
+}
+
+$changed = @(
+  git -c core.quotePath=false diff --name-only $baseline -- |
+    Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+)
+$unexpected = @($changed | Where-Object { $_ -notin $candidate })
+if ($unexpected.Count -ne 0) { throw "Issue #92 路径越界：$($unexpected -join ', ')" }
+if ($changed.Count -ne 26) { throw "Issue #92 实际路径数量漂移：$($changed.Count)" }
+if ($changed -contains 'err.md') { throw 'Issue #92 没有新根因，不应修改 err.md。' }
+
+$baselineLock = @(git show "${baseline}:Cargo.lock")
+if ($LASTEXITCODE -ne 0) { throw 'Issue #92 无法读取基线 Cargo.lock。' }
+$currentLock = Get-Content -LiteralPath Cargo.lock
+$baselinePackages = @(
+  $baselineLock | Select-String '^name = "([^"]+)"$' |
+    ForEach-Object { $_.Matches[0].Groups[1].Value } | Sort-Object -Unique
+)
+$currentPackages = @(
+  $currentLock | Select-String '^name = "([^"]+)"$' |
+    ForEach-Object { $_.Matches[0].Groups[1].Value } | Sort-Object -Unique
+)
+$newPackages = @($currentPackages | Where-Object { $_ -notin $baselinePackages })
+$removedPackages = @($baselinePackages | Where-Object { $_ -notin $currentPackages })
+if (($newPackages -join ',') -ne 'serde_json,zmij' -or $removedPackages.Count -ne 0) {
+  throw "Issue #92 锁文件漂移：新增=$($newPackages -join ',') 移除=$($removedPackages -join ',')"
+}
+
+$rootManifest = Get-Content -Raw -LiteralPath Cargo.toml
+$platformManifest = Get-Content -Raw -LiteralPath crates/inputcodex-platform/Cargo.toml
+if ($rootManifest -notmatch 'serde_json = "=1\.0\.149"') { throw 'Issue #92 serde_json 版本漂移。' }
+if ($platformManifest -notmatch 'serde_json\.workspace = true') { throw 'Issue #92 Platform 未复用 workspace 依赖。' }
+
+$registryRoot = Join-Path $HOME '.cargo/registry/src'
+$serdeManifest = Get-ChildItem -LiteralPath $registryRoot -Recurse -File -Filter Cargo.toml |
+  Where-Object { $_.Directory.Name -eq 'serde_json-1.0.149' } | Select-Object -First 1
+$zmijManifest = Get-ChildItem -LiteralPath $registryRoot -Recurse -File -Filter Cargo.toml |
+  Where-Object { $_.Directory.Name -eq 'zmij-1.0.23' } | Select-Object -First 1
+if ($null -eq $serdeManifest -or $null -eq $zmijManifest) { throw 'Issue #92 依赖许可证元数据未缓存。' }
+if ((Get-Content -Raw -LiteralPath $serdeManifest.FullName) -notmatch 'license = "MIT OR Apache-2\.0"') {
+  throw 'Issue #92 serde_json 许可证漂移。'
+}
+if ((Get-Content -Raw -LiteralPath $zmijManifest.FullName) -notmatch 'license = "MIT"') {
+  throw 'Issue #92 zmij 许可证漂移。'
+}
+
+function Get-YamlListItemBlock {
+  param([Parameter(Mandatory)][string]$Text, [Parameter(Mandatory)][string]$Id)
+  $match = [regex]::Match($Text, "(?ms)^  - id: $([regex]::Escape($Id))\r?\n.*?(?=^  - id: |\z)")
+  if (-not $match.Success) { throw "Issue #92 缺少目录条目：$Id" }
+  $match.Value
+}
+
+$sourceText = Get-Content -Raw -LiteralPath parity/features/source-index.yml
+$loadSettings = Get-YamlListItemBlock -Text $sourceText -Id 'tauri-command:load_settings'
+if ($loadSettings -notmatch 'side_effects: \[filesystem-read\]' -or
+    $loadSettings -notmatch 'feature_id: feature\.foundation-platform\.settings-observation') {
+  throw 'Issue #92 load_settings 归属或副作用漂移。'
+}
+foreach ($sourceId in @('core-module:settings', 'tauri-command:reset_settings', 'tauri-command:save_settings')) {
+  $block = Get-YamlListItemBlock -Text $sourceText -Id $sourceId
+  if ($block -notmatch 'side_effects: \[filesystem-read, filesystem-write\]' -or
+      $block -notmatch 'feature_id: feature\.foundation-platform\.settings-management') {
+    throw "Issue #92 原设置管理入口漂移：$sourceId"
+  }
+}
+
+$platformSource = Get-Content -Raw -LiteralPath crates/inputcodex-platform/src/settings_observation.rs
+foreach ($required in @(
+  'SystemPlatformPaths.resolve',
+  'fs::symlink_metadata',
+  'File::open',
+  'file.take(limit as u64 + 1)',
+  'serde_json::from_slice::<Value>',
+  'object.len()'
+)) {
+  if (-not $platformSource.Contains($required)) { throw "Issue #92 缺少平台门禁：$required" }
+}
+foreach ($forbidden in @(
+  'pub trait SettingsFileProbe',
+  'pub fn observe_settings_file',
+  'fs::write',
+  'OpenOptions',
+  'std::process::Command',
+  'Command::new',
+  'std::thread',
+  'reqwest',
+  'hyper',
+  'TcpStream',
+  'UdpSocket',
+  'iced',
+  'unsafe {'
+)) {
+  if ($platformSource.Contains($forbidden)) { throw "Issue #92 禁止能力命中：$forbidden" }
+}
+
+$ownerName = [Environment]::UserName
+if (-not [string]::IsNullOrWhiteSpace($ownerName)) {
+  $privateLeaks = @(rg -n --fixed-strings $ownerName crates parity docs/reports/issue-92-gate-5-settings-observation.md 2>$null)
+  if ($LASTEXITCODE -eq 0 -and $privateLeaks.Count -ne 0) {
+    throw "Issue #92 泄露本机用户标识：$($privateLeaks -join '; ')"
+  }
+  if ($LASTEXITCODE -notin 0, 1) { throw 'Issue #92 隐私扫描执行失败。' }
+}
+
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw "Issue #92 Git 空白检查失败：$LASTEXITCODE" }
+```
+
+预期：四 crate tests/Clippy、`rustfmt`、CI 合同、Release Audit 与仓库政策均通过；候选范围保持
+`27` 路径和批准哈希，实际使用其中 `26` 路径且 `err.md` 不变；Cargo 只新增
+`serde_json 1.0.149` 与其必要锁包 `zmij 1.0.23`；feature/contract 为 `39/39`、source 为
+`133`、fixture manifest 为 `11`，设置读取不公开任意路径且不包含写入、网络、子进程、线程、
+Watcher、UI 或 `unsafe`。
 
 ## Issue #89 Relay 环境只读观察本地轻量验证
 

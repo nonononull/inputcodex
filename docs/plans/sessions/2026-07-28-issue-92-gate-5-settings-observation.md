@@ -13,7 +13,7 @@
 - `planning_scope_hash`: `sha256:dccd142c0c926433ce01adda37524895db2f4369917a6455fcfc393941a10cc2`
 - `candidate_scope_hash`: `sha256:ca252684075d32de7aaf2ca066f12822ce48a5b01d1b0fcf67df146ea792baf1`
 - `delivery_contract`: `Issue → 设计批准 → 分支/worktree → Session Plan → Runtime Workflow → scope_hash 批准 → TDD → 本地验证 → PR → Review/CI → 独立 Squash Merge 授权`
-- `current_phase`: `DOMAIN_TDD`
+- `current_phase`: `REMOTE_DELIVERY`
 - `mutation_intent`: `approved-product-implementation`
 - `executor_enforcement`: `二十七路径候选 allowlist；路径扩大必须重新批准`
 
@@ -226,7 +226,10 @@ Workspace 全量、Windows/macOS 编译和 Performance observation 交给 GitHub
 - [x] 规划轻量验证和 AGOS 同根因绕过处置完成。
 - [x] Issue 回写候选范围：`https://github.com/nonononull/inputcodex/issues/92#issuecomment-5107913027`。
 - [x] 项目所有者批准 `27` 路径和哈希：`https://github.com/nonononull/inputcodex/issues/92#issuecomment-5108221117`。
-- [ ] 产品 TDD、本地验证、远端交付和独立 Squash Merge 授权。
+- [x] Domain/Application/Platform/Parity TDD、五个 named checkpoint 与本地轻量验证完成。
+- [x] 稳定项目控制面回写完成；实际使用 `26/27` 路径，`err.md` 保持不变。
+- [x] Cargo 只新增 `serde_json 1.0.149` 与必要锁包 `zmij 1.0.23`，许可证边界已核验。
+- [ ] 普通推送、非 Draft PR、Review/Hosted CI 与独立 Squash Merge 授权。
 
 ## 停止条件
 

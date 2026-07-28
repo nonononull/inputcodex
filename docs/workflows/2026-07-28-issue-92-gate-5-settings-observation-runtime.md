@@ -14,7 +14,7 @@
 - `worktree_ref`: `.worktrees/issue-92-gate-5-settings-observation`
 - `planning_scope_hash`: `sha256:dccd142c0c926433ce01adda37524895db2f4369917a6455fcfc393941a10cc2`
 - `candidate_scope_hash`: `sha256:ca252684075d32de7aaf2ca066f12822ce48a5b01d1b0fcf67df146ea792baf1`
-- `current_node`: `issue-92-domain-red`
+- `current_node`: `issue-92-local-verified`
 - `terminal_node`: `issue-92-completed`
 
 ## 状态机
@@ -62,8 +62,8 @@ issue-91-decision-completed
 
 ### Gate C：远端交付
 
-- 状态：`NOT_REACHED`
-- 实施与本地验证形成稳定面后，才可按批准范围普通提交、推送和创建非 Draft PR。
+- 状态：`READY`
+- 实施、本地验证和稳定文档已经形成可推送稳定面；允许按批准范围普通提交、推送和创建非 Draft PR。
 - 禁止 force push。
 
 ### Gate D：最终合并
@@ -277,7 +277,7 @@ cargo fmt --all -- --check
 ## Current Runtime State
 
 ```yaml
-status: scope-approval-pending
+status: local-verified-pr-pending
 baseline_ref: origin/main@a5559f4a873a81d91ed09b571503523a78a45118
 branch_ref: codex/issue-92-gate-5-settings-observation
 planning_scope_count: 4
@@ -285,6 +285,19 @@ planning_scope_hash: sha256:dccd142c0c926433ce01adda37524895db2f4369917a6455fcfc
 candidate_scope_count: 27
 candidate_scope_hash: sha256:ca252684075d32de7aaf2ca066f12822ce48a5b01d1b0fcf67df146ea792baf1
 planning_validation: passed
+actual_scope_count: 26
+err_md_changed: false
+domain_checkpoint: c752d54506e9307528324c3ce5c2ccecfe23f9c7
+application_checkpoint: 10cb5fd0f9f0093b7b9f07e5537e15bb8a84b822
+platform_checkpoint: f77d7edd8a00ec6d40a62808fc50a75d1ec70df4
+parity_checkpoint: 7e55bd038d7b0e5e7dbbb12a781df510c920aed6
+local_verification: passed
+feature_contract_counts: 39/39
+source_entry_count: 133
+fixture_manifest_count: 11
+dependency_delta: serde_json-1.0.149,zmij-1.0.23
+forbidden_capability_matches: 0
+privacy_matches: 0
 local_knowledge_lookup: project-native-doc-and-code-query-completed
 agos_report_only: bypassed-known-unregistered-contract-err-md-2026-07-21
 scope_request_ref: https://github.com/nonononull/inputcodex/issues/92#issuecomment-5107913027
@@ -294,6 +307,7 @@ git_checkpoint_authorized: true
 commit_authorized: true
 push_authorized: true
 pr_authorized: true
+review_ci: not-reached
 squash_merge_authorized: false
 ```
 

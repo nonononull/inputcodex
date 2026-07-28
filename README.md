@@ -31,21 +31,23 @@ Tauri/React 架构。
 
 ### 版本与启动意图
 
-版本只来自编译期 `CARGO_PKG_VERSION`。精确的 `--show-update` 或
-`INPUTCODEX_SHOW_UPDATE=1` 只表达本次启动意图，不代表已经联网检查、下载或安装更新；
-非法显式环境值会以稳定错误语义失败。
+版本只来自编译期 `CARGO_PKG_VERSION`。精确的 `--show-update` 或 `INPUTCODEX_SHOW_UPDATE=1`
+只表达本次启动意图，不代表已经联网检查、下载或安装更新；非法显式环境值会明确失败。
 
 ### 运行时环境冲突观察
 
-只读观察当前 `inputcodex` 进程继承的 `OPENAI_*` 环境变量名称和值存在状态，不返回原始值。
-结果明确区分已观察的运行时进程来源与尚未观察的用户级、系统级持久化来源；零冲突仍返回
-`Ready`。该能力不删除环境变量、不写备份，也不把只读观察冒充为完整环境清理功能。
+只读观察当前 `inputcodex` 进程继承的 `OPENAI_*` 环境变量名称和值存在状态，不返回原始值；
+结果区分已观察和未观察来源，零冲突仍返回 `Ready`，且不执行删除、备份或持久化扫描。
 
 ### Relay 环境只读观察
 
-聚合五个固定代理环境变量的来源、`CODEX_HOME/.env` 存在状态，以及四个 Clash Verge 候选的
-`enable_tun_mode` 状态。结果不返回变量值、文件内容、注册表值或实际路径；局部来源不可用和
-损坏配置会保留为明确状态，零风险仍返回 `Ready`。该能力不测试网络，也不修改任何配置。
+聚合五个固定代理环境变量的来源、`CODEX_HOME/.env` 存在状态和四个 Clash Verge 候选的
+`enable_tun_mode` 状态；不返回敏感内容，局部失败保留明确状态，且不测试网络或修改配置。
+
+### 设置只读观察
+
+只读读取平台路径定位的设置文件；缺失返回 `Empty(NotConfigured)`，合法 JSON object 只返回
+顶层条目数量，空对象仍为 `Ready`。单文件上限为 `256 KiB`，不返回字段、内容或实际路径。
 
 这些能力不打开 UI、不联网、不写入产品文件、不缓存、不启动后台线程，也不执行更新或环境清理。
 
@@ -66,8 +68,7 @@ Workspace 禁止 `unsafe`，依赖方向和 Iced 边界由仓库政策验证器�
 ## 构建与验证
 
 - Rust 工具链固定在 `rust-toolchain.toml`。
-- 本地优先执行定向、轻量验证；完整 Workspace、Windows/macOS 编译和桌面构建由
-  GitHub-hosted runners 执行。
+- 本地优先执行定向轻量验证；完整 Workspace、双平台编译和桌面构建由 GitHub-hosted runners 执行。
 - 正确命令、环境要求和各类验证入口见 [build.md](build.md)。
 - 已知问题和可复用根因见 [err.md](err.md)。
 

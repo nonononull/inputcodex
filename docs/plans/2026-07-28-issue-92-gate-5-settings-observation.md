@@ -2,7 +2,7 @@
 
 ## 文档状态
 
-- `status`: `IMPLEMENTATION_AUTHORIZED`
+- `status`: `LOCAL_VERIFIED_PR_PENDING`
 - `tracking_issue_ref`: `https://github.com/nonononull/inputcodex/issues/92`
 - `approved_decision_ref`: `https://github.com/nonononull/inputcodex/issues/91`
 - `approved_design_ref`: `https://github.com/nonononull/inputcodex/issues/92#issuecomment-5107059878`
@@ -204,23 +204,35 @@ parity/features/source-index.yml
 
 ### Task 1-4：产品 TDD
 
-- [ ] Domain RED→GREEN：数量事实和隐私边界。
-- [ ] Application RED→GREEN：Request/Port/UseCase 与 Ready/Empty/Failed。
-- [ ] Platform RED→GREEN：依赖、路径、文件类型、双重上限、解析和稳定错误。
-- [ ] Parity RED→GREEN：feature/contract/source mapping 与仓库级断言。
-- [ ] 每批验证后建立 named Git checkpoint。
+- [x] Domain RED→GREEN：数量事实和隐私边界。
+- [x] Application RED→GREEN：Request/Port/UseCase 与 Ready/Empty/Failed。
+- [x] Platform RED→GREEN：依赖、路径、文件类型、双重上限、解析和稳定错误。
+- [x] Parity RED→GREEN：feature/contract/source mapping 与仓库级断言。
+- [x] 每批验证后建立 named Git checkpoint。
 
 ### Task 5：控制面收口
 
-- [ ] 更新 README、CONTEXT、AGENTS、Master Plan、parity README 和 build.md 的稳定事实。
-- [ ] 新根因才更新 `err.md`；候选 Report 转为静态实施证据。
-- [ ] 不写递归 Closeout 或动态合并证据。
+- [x] 更新 README、CONTEXT、AGENTS、Master Plan、parity README 和 build.md 的稳定事实。
+- [x] 新根因才更新 `err.md`；本次复用既有离线依赖缓存根因，`err.md` 保持不变。
+- [x] 不写递归 Closeout 或动态合并证据。
 
 ### Task 6：验证与远端交付
 
-- [ ] 四 crate tests/Clippy、rustfmt、范围、隐私、依赖和禁止能力验证。
+- [x] 四 crate tests/Clippy、rustfmt、范围、隐私、依赖和禁止能力验证。
 - [ ] 普通提交、普通推送、非 Draft PR、Review 根因闭环和 Hosted CI。
 - [ ] Final Head 全绿后等待独立 Squash Merge 授权。
+
+## 本地实施证据
+
+- Planning checkpoint：`3848372d5bd75b175901df59a853aa62d03c8e73`。
+- Domain checkpoint：`c752d54506e9307528324c3ce5c2ccecfe23f9c7`。
+- Application checkpoint：`10cb5fd0f9f0093b7b9f07e5537e15bb8a84b822`。
+- Platform checkpoint：`f77d7edd8a00ec6d40a62808fc50a75d1ec70df4`。
+- Parity checkpoint：`7e55bd038d7b0e5e7dbbb12a781df510c920aed6`。
+- 候选 allowlist 保持 `27` 路径和批准哈希；实际使用 `26` 路径，`err.md` 未修改。
+- Cargo 只新增 `serde_json 1.0.149` 与必要锁包 `zmij 1.0.23`；许可证分别为
+  `MIT OR Apache-2.0` 与 `MIT`。
+- feature/contract 为 `39/39`，source 为 `133`，fixture manifest 为 `11`；禁止能力和隐私扫描命中均为 `0`。
 
 ## 当前授权
 
