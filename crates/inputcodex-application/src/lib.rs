@@ -4,6 +4,7 @@ use inputcodex_domain::DiagnosticCode;
 
 mod application_overview;
 mod platform_paths;
+mod relay_environment_observation;
 mod runtime_environment_observation;
 mod version_startup;
 
@@ -11,6 +12,9 @@ pub use application_overview::{
     ApplicationOverviewPort, ApplicationOverviewRequest, LoadApplicationOverview,
 };
 pub use platform_paths::{PlatformPathsPort, PlatformPathsRequest, ResolvePlatformPaths};
+pub use relay_environment_observation::{
+    ObserveRelayEnvironment, RelayEnvironmentObservationPort, RelayEnvironmentObservationRequest,
+};
 pub use runtime_environment_observation::{
     ObserveRuntimeEnvironmentConflicts, RuntimeEnvironmentObservationPort,
     RuntimeEnvironmentObservationRequest,

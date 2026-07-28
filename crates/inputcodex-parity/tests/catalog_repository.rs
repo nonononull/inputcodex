@@ -946,12 +946,168 @@ fn gate5_运行时环境观察已实现但破坏性总功能仍未评估() {
 }
 
 #[test]
+fn gate5_relay_环境只读观察已实现但网络环境总功能仍未评估() {
+    let feature_text = read_repository_text("parity/features/provider-network.yml");
+    let observation = yaml_list_item_block(
+        &feature_text,
+        "feature.provider-network.relay-environment-observation",
+    );
+    for expected in [
+        "name: 'Relay 环境只读观察'",
+        "status: implemented",
+        "core-module:relay_environment",
+        "tauri-command:check_relay_environment",
+        "- issue:88",
+        "- issue:89",
+    ] {
+        assert!(
+            observation.contains(expected),
+            "Relay 环境观察功能条目应包含：{expected}"
+        );
+    }
+    assert!(!observation.contains("core-module:proxy"));
+
+    let umbrella = yaml_list_item_block(
+        &feature_text,
+        "feature.provider-network.network-environment",
+    );
+    for expected in ["status: unassessed", "core-module:proxy", "- issue:88"] {
+        assert!(
+            umbrella.contains(expected),
+            "原网络环境总功能应继续包含：{expected}"
+        );
+    }
+    assert!(!umbrella.contains("status: implemented"));
+    assert!(!umbrella.contains("core-module:relay_environment"));
+    assert!(!umbrella.contains("tauri-command:check_relay_environment"));
+
+    let contract_text = read_repository_text("parity/contracts/provider-network.yml");
+    let contract = yaml_list_item_block(
+        &contract_text,
+        "contract.feature.provider-network.relay-environment-observation.baseline",
+    );
+    for expected in [
+        "environment-read",
+        "filesystem-read",
+        "persistence: 'none'",
+        "无风险仍返回 Ready",
+        "persistent_user: Unavailable",
+        "persistent_user: NotObserved",
+        "64 KiB",
+        "RELAY_ENVIRONMENT_OBSERVATION_UNSUPPORTED",
+        "USER_HOME_UNAVAILABLE",
+        "CODEX_HOME_INVALID",
+        "RELAY_ENVIRONMENT_NAME_UNREPRESENTABLE",
+        "RELAY_ENVIRONMENT_OBSERVATION_FAILED",
+    ] {
+        assert!(
+            contract.contains(expected),
+            "Relay 环境观察合同应包含：{expected}"
+        );
+    }
+    for forbidden in [
+        "environment-write",
+        "filesystem-write",
+        "network-read",
+        "network-write",
+        "process-control",
+        "advertising",
+        "remote-recommendation",
+        "环境变量值",
+        "实际路径",
+    ] {
+        assert!(
+            !contract.contains(forbidden),
+            "Relay 环境观察合同禁止能力或敏感输出：{forbidden}"
+        );
+    }
+
+    let source_text = read_repository_text("parity/features/source-index.yml");
+    for source_id in [
+        "core-module:relay_environment",
+        "tauri-command:check_relay_environment",
+    ] {
+        let source = yaml_list_item_block(&source_text, source_id);
+        assert!(source.contains("side_effects: [environment-read, filesystem-read]"));
+        assert!(
+            source.contains("feature_id: feature.provider-network.relay-environment-observation")
+        );
+        assert!(!source.contains("network-read"));
+    }
+    let proxy = yaml_list_item_block(&source_text, "core-module:proxy");
+    assert!(proxy.contains("side_effects: [environment-read, network-read]"));
+    assert!(proxy.contains("feature_id: feature.provider-network.network-environment"));
+
+    let shared =
+        read_repository_text("crates/inputcodex-platform/src/relay_environment_observation.rs");
+    let windows = read_repository_text(
+        "crates/inputcodex-platform/src/relay_environment_observation/windows.rs",
+    );
+    let macos = read_repository_text(
+        "crates/inputcodex-platform/src/relay_environment_observation/macos.rs",
+    );
+    assert_eq!(windows.matches("std::env::vars_os().collect()").count(), 1);
+    assert_eq!(macos.matches("std::env::vars_os().collect()").count(), 1);
+    for expected in ["64 * 1024", "fs::metadata", "File::open", "read_to_end"] {
+        assert!(shared.contains(expected), "共享平台探针应包含：{expected}");
+    }
+    for expected in [
+        "windows_registry",
+        "CURRENT_USER_ENVIRONMENT",
+        "LOCAL_MACHINE_ENVIRONMENT",
+        "RegistryReadError::Unavailable",
+    ] {
+        assert!(
+            windows.contains(expected),
+            "Windows 适配器应包含：{expected}"
+        );
+    }
+    for expected in [
+        "PersistentEnvironment::NotObserved",
+        "Library/Application Support",
+    ] {
+        assert!(macos.contains(expected), "macOS 适配器应包含：{expected}");
+    }
+    let production = format!("{shared}\n{windows}\n{macos}");
+    for forbidden in [
+        "std::env::set_var",
+        "std::env::remove_var",
+        "fs::write",
+        "OpenOptions",
+        "std::process::Command",
+        "Command::new",
+        "std::thread",
+        "reqwest",
+        "hyper",
+        "TcpStream",
+        "UdpSocket",
+        "unsafe {",
+    ] {
+        assert!(
+            !production.contains(forbidden),
+            "Relay 环境生产适配器禁止能力：{forbidden}"
+        );
+    }
+
+    assert_repository_text_contains(
+        "parity/README.md",
+        &[
+            "Issue `#89`",
+            "feature.provider-network.relay-environment-observation",
+            "64 KiB",
+            "persistent_user: NotObserved",
+            "persistent_user: Unavailable",
+        ],
+    );
+}
+
+#[test]
 fn 仓库source_index_覆盖锁定上游公开入口() {
     let summary =
         validate_feature_repository(&repository_root()).expect("功能目录应通过仓库级验证");
 
     assert_eq!(summary.source_entry_count(), 133);
-    assert_eq!(summary.feature_count(), 37);
+    assert_eq!(summary.feature_count(), 38);
     assert_eq!(summary.excluded_entry_count(), 3);
     assert_eq!(summary.exception_pending_count(), 10);
     assert_eq!(summary.coverage_gap_count(), 0);
@@ -962,8 +1118,8 @@ fn 仓库功能目录通过完整引用与安全验证() {
     let summary = validate_repository(&repository_root()).expect("仓库功能目录应通过验证");
 
     assert_eq!(summary.source_entry_count(), 133);
-    assert_eq!(summary.feature_count(), 37);
-    assert_eq!(summary.contract_count(), 37);
+    assert_eq!(summary.feature_count(), 38);
+    assert_eq!(summary.contract_count(), 38);
     assert_eq!(summary.fixture_count(), 11);
     assert_eq!(summary.coverage_gap_count(), 0);
 }

@@ -8,8 +8,8 @@
 GitHub Issue、PR 与 Actions。
 
 Gate 3 七成员 Rust Workspace、Gate 4 上游审计/功能目录/性能基线，以及 Gate 5 的平台路径、
-应用概览和版本与启动意图能力已经建立。该说明只用于选择正确命令，不能替代任务计划和
-GitHub 新鲜证据。
+应用概览、版本与启动意图、运行时环境冲突观察和 Relay 环境只读观察能力已经建立。该说明
+只用于选择正确命令，不能替代任务计划和 GitHub 新鲜证据。
 
 ## 文档变更轻量验证
 
@@ -25,7 +25,7 @@ git diff --check
 
 路径范围、Markdown 链接和任务特有内容守卫由对应 Session Plan 与 Runtime Workflow 定义。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供二十三个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供二十五个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -50,6 +50,8 @@ git diff --check
 21. Issue `#75` 三十路径、平台路径分层合同、双平台适配器、隐私边界、Parity 状态和最终本地轻量门禁验证。
 22. Issue `#78` 二十九路径、应用概览只读事实、版本未知、`NotObserved`、有界元数据读取、Parity 重分类和最终本地轻量门禁验证。
 23. Issue `#81` 二十三路径、编译版本复用、启动意图纯解析、非法显式值、旧变量禁止、Parity 状态和最终本地轻量门禁验证。
+24. Issue `#86` 二十四路径、当前进程环境只读观察、明确来源覆盖、隐私边界、Parity 单入口修订和最终本地轻量门禁验证。
+25. Issue `#89` 三十路径、Relay 环境只读聚合、Windows 注册表覆盖、`.env` 元数据、Clash 有界读取、Parity 分拆和最终本地轻量门禁验证。
 
 当前禁止：
 
@@ -66,6 +68,233 @@ git diff --check
 - 在 Issue `#75` 中创建 UI、Iced 视图、目录/文件写入、网络、缓存、后台线程、第二个产品 feature、新依赖家族、直接 Win32 FFI、`unsafe`、预算、Release、Ruleset、`upstream/` 或 AGOS 改动。
 - 在 Issue `#78` 中读取历史启动状态、枚举进程、观察 PID/debug port、写文件、联网、缓存、启动线程、调用 shell、引入 UI/Iced、新依赖、第三个产品 feature、预算、Release、Ruleset、`upstream/` 或 AGOS 改动。
 - 在 Issue `#81` 中兼容旧启动变量、打开 UI、联网、检查/下载/执行更新、读写文件、缓存、启动线程、调用 shell、引入 Iced/Tauri/WebView、新依赖、第四个产品 feature、预算、Release、Ruleset、`upstream/` 或 AGOS 改动。
+- 在 Issue `#89` 中测试网络、返回代理值或路径、读取 `.env` 内容、修改环境/文件/注册表、调用子进程、启动线程/Watcher、打开 UI、注入、迁移 `core-module:proxy`、修改 Workflow/Ruleset、Release、`upstream/` 或 AGOS。
+
+## Issue #89 Relay 环境只读观察本地轻量验证
+
+在仓库根目录、分支 `codex/issue-89-gate-5-relay-environment-observation` 执行。Git 时间只使用
+系统默认本机时间；不得设置 `GIT_AUTHOR_DATE` 或 `GIT_COMMITTER_DATE`。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+cargo test --locked --offline -p inputcodex-domain -p inputcodex-application -p inputcodex-platform -p inputcodex-parity
+if ($LASTEXITCODE -ne 0) { throw "Issue #89 四 crate 测试失败：$LASTEXITCODE" }
+
+cargo clippy --locked --offline -p inputcodex-domain -p inputcodex-application -p inputcodex-platform -p inputcodex-parity --all-targets -- -D warnings
+if ($LASTEXITCODE -ne 0) { throw "Issue #89 四 crate Clippy 失败：$LASTEXITCODE" }
+
+cargo fmt --all -- --check
+if ($LASTEXITCODE -ne 0) { throw "Issue #89 rustfmt 检查失败：$LASTEXITCODE" }
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+if ($LASTEXITCODE -ne 0) { throw "Issue #89 CI 合同失败：$LASTEXITCODE" }
+
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw "Issue #89 Release Audit 失败：$LASTEXITCODE" }
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw "Issue #89 Repository Policy 失败：$LASTEXITCODE" }
+```
+
+范围、依赖、目录分拆、隐私与禁止能力验证：
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+$candidate = [string[]]@(
+  'AGENTS.md',
+  'CONTEXT.md',
+  'Cargo.lock',
+  'Cargo.toml',
+  'README.md',
+  'build.md',
+  'crates/inputcodex-application/src/lib.rs',
+  'crates/inputcodex-application/src/relay_environment_observation.rs',
+  'crates/inputcodex-application/tests/relay_environment_observation.rs',
+  'crates/inputcodex-domain/src/lib.rs',
+  'crates/inputcodex-domain/src/relay_environment_observation.rs',
+  'crates/inputcodex-domain/tests/relay_environment_observation.rs',
+  'crates/inputcodex-parity/tests/catalog_repository.rs',
+  'crates/inputcodex-platform/Cargo.toml',
+  'crates/inputcodex-platform/src/lib.rs',
+  'crates/inputcodex-platform/src/platform_paths.rs',
+  'crates/inputcodex-platform/src/relay_environment_observation.rs',
+  'crates/inputcodex-platform/src/relay_environment_observation/macos.rs',
+  'crates/inputcodex-platform/src/relay_environment_observation/windows.rs',
+  'crates/inputcodex-platform/tests/relay_environment_observation.rs',
+  'docs/plans/2026-07-28-issue-89-gate-5-relay-environment-observation.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-07-28-issue-89-gate-5-relay-environment-observation.md',
+  'docs/reports/issue-89-gate-5-relay-environment-observation.md',
+  'docs/workflows/2026-07-28-issue-89-gate-5-relay-environment-observation-runtime.md',
+  'err.md',
+  'parity/README.md',
+  'parity/contracts/provider-network.yml',
+  'parity/features/provider-network.yml',
+  'parity/features/source-index.yml'
+)
+[Array]::Sort($candidate, [StringComparer]::Ordinal)
+$payload = [string]::Join("`n", $candidate) + "`n"
+$scopeHash = [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData(
+    [Text.UTF8Encoding]::new($false).GetBytes($payload)
+  )
+).ToLowerInvariant()
+if ($candidate.Count -ne 30) { throw "Issue #89 路径数量漂移：$($candidate.Count)" }
+if ($scopeHash -ne '0adc20d0ed4d73ae645a5ffb23d7208f7aaabfea92c4d6fd62e0da3a120e8f77') {
+  throw "Issue #89 scope_hash 漂移：sha256:$scopeHash"
+}
+
+$changed = @(
+  git -c core.quotePath=false diff --name-only origin/main...HEAD
+  git -c core.quotePath=false diff --name-only
+  git -c core.quotePath=false ls-files --others --exclude-standard
+) | Where-Object { $_ } | Sort-Object -Unique
+$outside = @($changed | Where-Object { $_ -notin $candidate })
+if ($outside.Count -ne 0) { throw "Issue #89 越界路径：$($outside -join ', ')" }
+
+$protected = @(
+  git -c core.quotePath=false diff --name-only origin/main...HEAD -- apps .github/workflows upstream scripts benchmarks
+  git -c core.quotePath=false diff --name-only -- apps .github/workflows upstream scripts benchmarks
+) | Where-Object { $_ } | Sort-Object -Unique
+if ($protected.Count -ne 0) { throw "Issue #89 修改受保护路径：$($protected -join ', ')" }
+
+$rootCargo = Get-Content -Raw -LiteralPath Cargo.toml
+if (($rootCargo.Split('windows-registry = "=0.6.1"').Count - 1) -ne 1) {
+  throw 'Issue #89 根 Cargo 必须精确登记一次 windows-registry = 0.6.1。'
+}
+$platformCargo = Get-Content -Raw -LiteralPath crates/inputcodex-platform/Cargo.toml
+$windowsTarget = [regex]::Match(
+  $platformCargo,
+  '(?ms)^\[target\.''cfg\(target_os = "windows"\)''\.dependencies\]\r?\n.*?(?=^\[|\z)'
+).Value
+if ($windowsTarget -notmatch '(?m)^windows-registry\.workspace = true$') {
+  throw 'Issue #89 windows-registry 必须只进入 Windows target 依赖。'
+}
+
+$lockDiff = @(git diff --unified=1 origin/main...HEAD -- Cargo.lock)
+$newPackageNames = @()
+foreach ($line in $lockDiff) {
+  if ($line -match '^\+name = "([^"]+)"$') { $newPackageNames += $Matches[1] }
+}
+$expectedPackages = @('windows-registry', 'windows-result', 'windows-strings')
+if ((@($newPackageNames | Sort-Object) -join ',') -ne ($expectedPackages -join ',')) {
+  throw "Issue #89 Cargo.lock 新包漂移：$($newPackageNames -join ', ')"
+}
+$lockText = Get-Content -Raw -LiteralPath Cargo.lock
+foreach ($package in @(
+  @{ Name = 'windows-registry'; Version = '0.6.1' },
+  @{ Name = 'windows-result'; Version = '0.4.1' },
+  @{ Name = 'windows-strings'; Version = '0.5.1' }
+)) {
+  $pattern = "(?ms)\[\[package\]\]\r?\nname = `"$([regex]::Escape($package.Name))`"\r?\nversion = `"$([regex]::Escape($package.Version))`""
+  if ($lockText -notmatch $pattern) { throw "Issue #89 锁文件缺少 $($package.Name) $($package.Version)" }
+}
+
+$sourceText = Get-Content -Raw -LiteralPath parity/features/source-index.yml
+foreach ($sourceId in @('core-module:relay_environment', 'tauri-command:check_relay_environment')) {
+  $block = [regex]::Match(
+    $sourceText,
+    "(?ms)^  - id: $([regex]::Escape($sourceId))\r?\n.*?(?=^  - id: |\z)"
+  ).Value
+  if ($block -notmatch 'side_effects: \[environment-read, filesystem-read\]' -or
+      $block -notmatch 'feature_id: feature\.provider-network\.relay-environment-observation') {
+    throw "Issue #89 Relay 入口归属或副作用漂移：$sourceId"
+  }
+}
+$proxyBlock = [regex]::Match(
+  $sourceText,
+  '(?ms)^  - id: core-module:proxy\r?\n.*?(?=^  - id: |\z)'
+).Value
+if ($proxyBlock -notmatch 'side_effects: \[environment-read, network-read\]' -or
+    $proxyBlock -notmatch 'feature_id: feature\.provider-network\.network-environment') {
+  throw 'Issue #89 core-module:proxy 被错误迁入只读子能力。'
+}
+
+$featureText = Get-Content -Raw -LiteralPath parity/features/provider-network.yml
+$relayFeature = [regex]::Match(
+  $featureText,
+  '(?ms)^  - id: feature\.provider-network\.relay-environment-observation\r?\n.*?(?=^  - id: |\z)'
+).Value
+$networkFeature = [regex]::Match(
+  $featureText,
+  '(?ms)^  - id: feature\.provider-network\.network-environment\r?\n.*?(?=^  - id: |\z)'
+).Value
+if ($relayFeature -notmatch '(?m)^    status: implemented$' -or
+    $relayFeature -notmatch 'core-module:relay_environment' -or
+    $relayFeature -notmatch 'tauri-command:check_relay_environment') {
+  throw 'Issue #89 新 Relay 子能力状态或入口不完整。'
+}
+if ($networkFeature -notmatch '(?m)^    status: unassessed$' -or
+    $networkFeature -notmatch 'core-module:proxy' -or
+    $networkFeature -match 'relay_environment|check_relay_environment') {
+  throw 'Issue #89 原网络环境总功能被错误改写。'
+}
+
+$contractText = Get-Content -Raw -LiteralPath parity/contracts/provider-network.yml
+if ($contractText -notmatch 'contract\.feature\.provider-network\.relay-environment-observation\.baseline' -or
+    $contractText -notmatch 'Clash 单候选最多读取 64 KiB') {
+  throw 'Issue #89 Relay 行为合同缺失或有界读取语义漂移。'
+}
+
+$production = @(
+  'crates/inputcodex-domain/src/relay_environment_observation.rs',
+  'crates/inputcodex-application/src/relay_environment_observation.rs',
+  'crates/inputcodex-platform/src/relay_environment_observation.rs',
+  'crates/inputcodex-platform/src/relay_environment_observation/windows.rs',
+  'crates/inputcodex-platform/src/relay_environment_observation/macos.rs'
+)
+$forbiddenProduct = @(
+  rg -n 'reqwest|hyper|TcpStream|UdpSocket|Command::new|std::process::Command|std::thread|thread::spawn|notify::|Watcher|fs::write|write_all|OpenOptions|set_var|remove_var|RegSetValue|KEY_SET_VALUE|unsafe\s*\{|iced|tauri|webview' $production 2>$null
+)
+if ($LASTEXITCODE -eq 0 -and $forbiddenProduct.Count -ne 0) {
+  throw "Issue #89 命中禁止运行能力：$($forbiddenProduct -join '; ')"
+}
+if ($LASTEXITCODE -notin 0, 1) { throw 'Issue #89 禁止能力扫描执行失败。' }
+
+$sharedPlatform = Get-Content -Raw -LiteralPath crates/inputcodex-platform/src/relay_environment_observation.rs
+if ($sharedPlatform -notmatch 'const CLASH_CONFIG_LIMIT: usize = 64 \* 1024;') {
+  throw 'Issue #89 Clash 单候选上限不是 64 KiB。'
+}
+$dotenvBlock = [regex]::Match(
+  $sharedPlatform,
+  '(?ms)^fn inspect_codex_dotenv\(.*?(?=^fn inspect_clash_candidates)'
+).Value
+if ($dotenvBlock -notmatch '\.metadata\(' -or $dotenvBlock -match 'read_limited|File::open|read_to_') {
+  throw 'Issue #89 .env 检查读取了内容或没有使用元数据。'
+}
+foreach ($platformFile in @(
+  'crates/inputcodex-platform/src/relay_environment_observation/windows.rs',
+  'crates/inputcodex-platform/src/relay_environment_observation/macos.rs'
+)) {
+  $platformSource = Get-Content -Raw -LiteralPath $platformFile
+  if (($platformSource.Split('std::env::vars_os()').Count - 1) -ne 1) {
+    throw "Issue #89 平台入口没有精确扫描一次当前进程环境：$platformFile"
+  }
+}
+
+$ownerName = [Environment]::UserName
+if (-not [string]::IsNullOrWhiteSpace($ownerName)) {
+  $privateLeaks = @(rg -n --fixed-strings $ownerName crates parity docs/reports/issue-89-gate-5-relay-environment-observation.md 2>$null)
+  if ($LASTEXITCODE -eq 0 -and $privateLeaks.Count -ne 0) {
+    throw "Issue #89 泄露本机用户标识：$($privateLeaks -join '; ')"
+  }
+  if ($LASTEXITCODE -notin 0, 1) { throw 'Issue #89 隐私扫描执行失败。' }
+}
+
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw "Issue #89 Git 空白检查失败：$LASTEXITCODE" }
+```
+
+预期：四 crate 测试与 Clippy 全绿、`rustfmt` 退出码为 `0`、CI 合同 `35/35`、
+`release_audit=current`、仓库政策违规数为 `0`，实际差异全部位于批准的三十路径内；
+Cargo 只新增 Windows target 的 `windows-registry = 0.6.1` 及三个必要锁包；两个 Relay 入口
+映射到新只读子能力，`core-module:proxy` 与原网络环境总功能继续 `unassessed`；生产实现不含
+网络、写入、子进程、线程、Watcher、UI 或 `unsafe`，`.env` 只读取元数据，Clash 单候选最多
+读取 `64 KiB`，双平台当前进程环境各精确扫描一次，隐私匹配数为 `0`。
 
 ## Issue #86 运行时环境冲突只读观察本地轻量验证
 

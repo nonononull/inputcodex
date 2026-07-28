@@ -60,15 +60,46 @@ fn resolve_common_roots(
     inputs: CommonInputs,
     probe: &impl PathProbe,
 ) -> Result<ResolvedCommonPaths, ApplicationError> {
-    let user_home = inputs
-        .user_home
-        .filter(|path| path.is_absolute() && probe.is_dir(path))
-        .ok_or_else(|| ApplicationError::unavailable("USER_HOME_UNAVAILABLE"))?;
+    let user_home = resolve_user_home(inputs.user_home, probe)?;
     let state_root = inputs
         .inputcodex_state_root
         .filter(|path| path.is_absolute())
         .ok_or_else(|| ApplicationError::unavailable("INPUTCODEX_STATE_ROOT_UNAVAILABLE"))?;
-    let codex_home = match inputs.codex_home {
+    let codex_home = resolve_codex_home_from_user_home(&user_home, inputs.codex_home, probe)?;
+
+    Ok(ResolvedCommonPaths {
+        codex_home,
+        state_root,
+    })
+}
+
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
+pub(crate) fn resolve_codex_home(
+    user_home: Option<PathBuf>,
+    codex_home: Option<OsString>,
+    probe: &impl PathProbe,
+) -> Result<PathBuf, ApplicationError> {
+    let user_home = resolve_user_home(user_home, probe)?;
+    resolve_codex_home_from_user_home(&user_home, codex_home, probe)
+}
+
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
+fn resolve_user_home(
+    user_home: Option<PathBuf>,
+    probe: &impl PathProbe,
+) -> Result<PathBuf, ApplicationError> {
+    user_home
+        .filter(|path| path.is_absolute() && probe.is_dir(path))
+        .ok_or_else(|| ApplicationError::unavailable("USER_HOME_UNAVAILABLE"))
+}
+
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
+fn resolve_codex_home_from_user_home(
+    user_home: &Path,
+    codex_home: Option<OsString>,
+    probe: &impl PathProbe,
+) -> Result<PathBuf, ApplicationError> {
+    let codex_home = match codex_home {
         None => user_home.join(".codex"),
         Some(value) if value.to_string_lossy().trim().is_empty() => user_home.join(".codex"),
         Some(value) => {
@@ -79,11 +110,7 @@ fn resolve_common_roots(
             path
         }
     };
-
-    Ok(ResolvedCommonPaths {
-        codex_home,
-        state_root,
-    })
+    Ok(codex_home)
 }
 
 #[cfg(any(target_os = "windows", target_os = "macos", test))]
@@ -164,7 +191,7 @@ mod tests {
         path::{Path, PathBuf},
     };
 
-    use super::{CommonInputs, PathProbe, resolve_common_paths};
+    use super::{CommonInputs, PathProbe, resolve_codex_home, resolve_common_paths};
 
     #[derive(Default)]
     struct MemoryProbe {
@@ -229,6 +256,38 @@ mod tests {
             state_root.join("inputcodex.log")
         );
         assert!(snapshot.codex_installation().is_none());
+    }
+
+    #[test]
+    fn 窄_codex_home_解析复用完整路径语义() {
+        let user_home = absolute_root("inputcodex-narrow-home");
+        let explicit = absolute_root("inputcodex-narrow-codex-home");
+        let probe = MemoryProbe::default()
+            .with_directory(user_home.clone())
+            .with_directory(explicit.clone());
+
+        assert_eq!(
+            resolve_codex_home(
+                Some(user_home.clone()),
+                Some(explicit.clone().into_os_string()),
+                &probe,
+            )
+            .expect("合法显式 CODEX_HOME 应原样返回"),
+            explicit
+        );
+        assert_eq!(
+            resolve_codex_home(Some(user_home.clone()), Some(OsString::from("   ")), &probe)
+                .expect("空白 CODEX_HOME 应回退用户目录"),
+            user_home.join(".codex")
+        );
+
+        let error = resolve_codex_home(
+            Some(user_home),
+            Some(OsString::from("relative/.codex")),
+            &probe,
+        )
+        .expect_err("无效显式 CODEX_HOME 不得静默回退");
+        assert_eq!(error.code().as_str(), "CODEX_HOME_INVALID");
     }
 
     #[test]

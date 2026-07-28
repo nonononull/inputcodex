@@ -4,11 +4,13 @@ use inputcodex_application::{ApplicationError, PlatformKind, PlatformPort};
 
 mod application_overview;
 mod platform_paths;
+mod relay_environment_observation;
 mod runtime_environment_observation;
 mod version_startup;
 
 pub use application_overview::SystemApplicationOverview;
 pub use platform_paths::SystemPlatformPaths;
+pub use relay_environment_observation::SystemRelayEnvironmentObservation;
 pub use runtime_environment_observation::{
     SystemRuntimeEnvironmentObservation, observe_macos_runtime_environment,
     observe_windows_runtime_environment,

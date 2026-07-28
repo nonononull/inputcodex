@@ -186,6 +186,68 @@ contracts:
       mode: none
       reason: '基线只约束状态、副作用和错误语义，不需要结构样本。'
     fixture_refs: []
+  - id: contract.feature.provider-network.relay-environment-observation.baseline
+    feature_id: feature.provider-network.relay-environment-observation
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.43 证据已锁定，Issue #88 的只读拆分语义已获批准。'
+      - '用户目录、CODEX_HOME 与目标平台只读适配器遵守平台路径失败语义。'
+    inputs:
+      - name: request
+        data_type: relay-environment-observation-request
+        required: false
+        description: '零敏感参数请求；无参数时使用空对象。'
+    outputs:
+      - name: result
+        data_type: relay-environment-observation-result
+        description: '返回规范代理名称与来源、覆盖状态、Codex .env 三态和四个 Clash Verge TUN 候选状态。'
+    side_effects:
+      - environment-read
+      - filesystem-read
+    persistence: 'none'
+    errors:
+      - code: RELAY_ENVIRONMENT_OBSERVATION_UNSUPPORTED
+        kind: platform
+        semantics: '非 Windows/macOS 目标明确失败，不回退或伪造空报告。'
+      - code: USER_HOME_UNAVAILABLE
+        kind: platform
+        semantics: '用户目录缺失、非绝对或不可用时明确失败。'
+      - code: CODEX_HOME_INVALID
+        kind: validation
+        semantics: '非空显式 CODEX_HOME 无效时明确失败，禁止静默回退。'
+      - code: RELAY_ENVIRONMENT_NAME_UNREPRESENTABLE
+        kind: validation
+        semantics: '命中的代理名称无法无损表示时整次观察失败。'
+      - code: RELAY_ENVIRONMENT_OBSERVATION_FAILED
+        kind: feature
+        semantics: '无法形成可信平台候选集合时返回稳定错误，不丢弃为无风险。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次 Relay 环境观察请求使用唯一递增标识。'
+      stale_result_rule: 取消、超时或新请求产生后，旧同步结果不得覆盖当前状态。
+    timeout:
+      behavior: 超时后进入 Failed，迟到结果按旧请求失效规则丢弃。
+      evidence: 只记录请求标识、耗时、结果分类与覆盖状态。
+    cancellation:
+      behavior: 取消后进入 Cancelling，清理完成回到 Idle，迟到结果失效。
+      evidence: 只记录取消请求、清理完成与旧请求失效。
+    isolation: '单个注册表、.env 或 Clash 候选不可用只进入对应领域状态；其他成功事实继续返回。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+      - coverage_status
+    platforms:
+      shared_semantics: '双平台均按 ASCII 大小写不敏感匹配五个代理名称；无风险仍返回 Ready，Empty 状态对本功能不可达；Clash 单候选最多读取 64 KiB。'
+      windows: 'runtime_process: Observed；用户级或系统级注册表单独失败分别表示 persistent_user: Unavailable 或 persistent_system: Unavailable。'
+      macos: 'runtime_process: Observed；不扫描 shell profile，persistent_user: NotObserved 且 persistent_system: NotObserved。'
+      differences:
+        - 'Windows 只读扫描当前进程、当前用户与本机系统环境注册表。'
+        - 'macOS 只读扫描当前进程，并显式声明两个持久化来源未观察。'
+    fixture_policy:
+      mode: none
+      reason: '领域与平台测试使用合成内存探针固定边界，无需保存配置或敏感样本。'
+    fixture_refs: []
   - id: contract.feature.provider-network.protocol-proxy.baseline
     feature_id: feature.provider-network.protocol-proxy
     scenario: baseline

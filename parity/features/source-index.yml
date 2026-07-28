@@ -346,10 +346,10 @@ sources:
       path: upstream/CodexPlusPlus/crates/codex-plus-core/src/relay_environment.rs
       symbol: relay_environment
     platforms: [windows, macos]
-    side_effects: [environment-read, network-read]
+    side_effects: [environment-read, filesystem-read]
     disposition:
       type: feature
-      feature_id: feature.provider-network.network-environment
+      feature_id: feature.provider-network.relay-environment-observation
   - id: core-module:relay_rotation
     kind: core-module
     evidence:
@@ -641,10 +641,10 @@ sources:
       path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
       symbol: check_relay_environment
     platforms: [windows, macos]
-    side_effects: [environment-read, network-read]
+    side_effects: [environment-read, filesystem-read]
     disposition:
       type: feature
-      feature_id: feature.provider-network.network-environment
+      feature_id: feature.provider-network.relay-environment-observation
   - id: tauri-command:check_update
     kind: tauri-command
     evidence:

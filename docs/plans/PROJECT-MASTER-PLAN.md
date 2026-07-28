@@ -1,12 +1,12 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-86-gate-5-runtime-environment-observation
-active_gate: Gate 5 前三个产品切片已进入 main；第四个运行时环境冲突只读观察切片已完成二十四路径实现与本地轻量验证，正在等待普通推送、非 Draft PR 和 Hosted Review/CI
-last_verified_gate: Issue #81 / PR #82 已以单父 Squash 提交 da65f7d8402e4de27e2795ee8905be18ad565653 进入 main；合并后 main CI Run 30338961661 七 Job与 Performance Baseline Run 30338961713 四 Job全绿且 Artifact 均为 0，Issue #81 已按 COMPLETED 关闭且 release_audit=current
-next_legal_gate: 普通推送 Issue #86 分支、创建非 Draft PR并执行 Review/CI；Final Head 全绿且全部对话根因闭环后停在单独 Squash Merge授权门，第五个产品切片不得并行启动
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/86
-active_pr_ref: none
+active_task: issue-89-gate-5-relay-environment-observation
+active_gate: Gate 5 前四个产品切片已进入 main；第五个 Relay 环境只读观察切片已在三十路径内完成实现、本地验证、非 Draft PR #90、Review/CI 根因闭环与 Artifact 核验，正在等待独立 Squash Merge 授权
+last_verified_gate: Issue #86 / PR #87 已以单父 Squash 提交 db0c09b9df272887deb9407a5e344cf87a59dda8 进入 main；合并后 main CI Run 30356509847 七 Job与 Performance Baseline Run 30356509131 四 Job全绿且 Artifact 均为 0，Issue #86 已按 COMPLETED 关闭且 release_audit=current
+next_legal_gate: 只等待项目所有者针对 PR #90 具体 Final Head 的独立 Squash Merge 授权；未授权前不得合并、删除分支、启动第六个产品切片或创建递归 Closeout
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/89
+active_pr_ref: https://github.com/nonononull/inputcodex/pull/90
 gate_5_platform_paths_exception_ref: https://github.com/nonononull/inputcodex/issues/74
 gate_5_platform_paths_scope_hash: sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37
 gate_5_platform_paths_branch_ref: codex/issue-75-gate-5-platform-paths
@@ -45,7 +45,22 @@ gate_5_runtime_environment_scope_revision_commit: f177b9d6f17ee31d40bb6568f8e9bd
 gate_5_runtime_environment_parity_red_commit: d5c711d9071aa9e9c65d5214531a96e04dddda98
 gate_5_runtime_environment_parity_green_commit: a320086f00bd16c65ae5172c28f4bd8c40a7c110
 gate_5_runtime_environment_local_checkpoint: c6829fa40b7bf4cf9828f88e2dfe68c552536844
-gate_5_runtime_environment_pr_ref: pending
+gate_5_runtime_environment_pr_ref: https://github.com/nonononull/inputcodex/pull/87
+gate_5_runtime_environment_merge_ref: db0c09b9df272887deb9407a5e344cf87a59dda8
+gate_5_runtime_environment_main_ci_ref: https://github.com/nonononull/inputcodex/actions/runs/30356509847
+gate_5_runtime_environment_main_performance_ref: https://github.com/nonononull/inputcodex/actions/runs/30356509131
+gate_5_relay_environment_decision_ref: https://github.com/nonononull/inputcodex/issues/88
+gate_5_relay_environment_issue_ref: https://github.com/nonononull/inputcodex/issues/89
+gate_5_relay_environment_scope_hash: sha256:0adc20d0ed4d73ae645a5ffb23d7208f7aaabfea92c4d6fd62e0da3a120e8f77
+gate_5_relay_environment_branch_ref: codex/issue-89-gate-5-relay-environment-observation
+gate_5_relay_environment_planning_commit: d4805d3f81801d4d685a510d31566738bc9d3ff6
+gate_5_relay_environment_domain_commit: fba0e2e3e7ebb692b417b4e3a80800388f711a1f
+gate_5_relay_environment_application_commit: 13e1f349b8a4d2556864e67f1066884b0e4832a4
+gate_5_relay_environment_shared_platform_commit: 1d9b774a661af44f765cb8e9cb3d7223a56e594d
+gate_5_relay_environment_target_platform_commit: 1dae9843618bdffc95f16069d54b7e7440d21db8
+gate_5_relay_environment_parity_commit: 749d02e23f1c1fa8f042d598d8f5bb5e28a18638
+gate_5_relay_environment_local_checkpoint: b33bbbb7a6b2303c7a0c60725745528c92085c66
+gate_5_relay_environment_pr_ref: https://github.com/nonononull/inputcodex/pull/90
 documentation_information_architecture_issue_ref: https://github.com/nonononull/inputcodex/issues/83
 documentation_information_architecture_scope_hash: sha256:d8a404c19b108587a5e17b4ded454444d5e948c92410b759504a7eb7c63bed44
 performance_budget_observation_issue_ref: https://github.com/nonononull/inputcodex/issues/63
@@ -84,26 +99,26 @@ gate_3_planning_issue_ref: https://github.com/nonononull/inputcodex/issues/17
 upstream_watch_issue_ref: https://github.com/nonononull/inputcodex/issues/14
 transition_issue_ref: https://github.com/nonononull/inputcodex/issues/8
 upstream_sync_issue_ref: https://github.com/nonononull/inputcodex/issues/9
-active_branch_ref: codex/issue-65-v1.2.43-catalog-reaudit
+active_branch_ref: codex/issue-89-gate-5-relay-environment-observation
 transition_branch_ref: codex/issue-8-gate-2-transition
-active_plan_ref: docs/plans/2026-07-27-issue-65-v1.2.43-catalog-reaudit.md
-active_session_plan_ref: docs/plans/sessions/2026-07-27-issue-65-v1.2.43-catalog-reaudit.md
-active_runtime_workflow_ref: docs/workflows/2026-07-27-issue-65-v1.2.43-catalog-reaudit-runtime.md
-active_pr_ref: https://github.com/nonononull/inputcodex/pull/72
+active_plan_ref: docs/plans/2026-07-28-issue-89-gate-5-relay-environment-observation.md
+active_session_plan_ref: docs/plans/sessions/2026-07-28-issue-89-gate-5-relay-environment-observation.md
+active_runtime_workflow_ref: docs/workflows/2026-07-28-issue-89-gate-5-relay-environment-observation-runtime.md
+active_pr_ref: https://github.com/nonononull/inputcodex/pull/90
 gate_3_closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/23
 gate_3_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/21
 gate_3_planning_pr_ref: https://github.com/nonononull/inputcodex/pull/18
 transition_pr_ref: https://github.com/nonononull/inputcodex/pull/10
 upstream_sync_pr_ref: https://github.com/nonononull/inputcodex/pull/11
 closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5, https://github.com/nonononull/inputcodex/pull/7, https://github.com/nonononull/inputcodex/pull/10, https://github.com/nonononull/inputcodex/pull/11, https://github.com/nonononull/inputcodex/pull/13, https://github.com/nonononull/inputcodex/pull/15, https://github.com/nonononull/inputcodex/pull/18, https://github.com/nonononull/inputcodex/pull/21, https://github.com/nonononull/inputcodex/pull/23, https://github.com/nonononull/inputcodex/pull/25, https://github.com/nonononull/inputcodex/pull/27, https://github.com/nonononull/inputcodex/pull/36, https://github.com/nonononull/inputcodex/pull/40, https://github.com/nonononull/inputcodex/pull/42, https://github.com/nonononull/inputcodex/pull/44, https://github.com/nonononull/inputcodex/pull/45
-active_report_ref: docs/reports/issue-65-v1.2.43-catalog-reaudit-discovery.md
+active_report_ref: docs/reports/issue-89-gate-5-relay-environment-observation.md
 gate_3_closeout_report_ref: docs/reports/issue-22-gate-3-closeout.md
 gate_3_implementation_report_ref: docs/reports/issue-19-gate-3-rust-workspace-ci.md
 gate_2_watch_report_ref: docs/reports/issue-14-gate-2-upstream-watch.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-decision_status: issue-75-local-verified-pr-pending-final-merge-not-authorized
+decision_status: issue-89-pr-90-review-ci-green-final-merge-not-authorized
 
 ## 当前状态
 
@@ -137,7 +152,9 @@ decision_status: issue-75-local-verified-pr-pending-final-merge-not-authorized
 - Issue `#81` / PR `#82` 已完成二十三路径版本与启动意图迁移；Final Head `adc91bafd850fd054346b44e8b79a42bb7b00f71` 以单父 Squash 提交 `da65f7d8402e4de27e2795ee8905be18ad565653` 进入 `main`，tree 为 `0aad4659daaf9e07f3e62d1fd1ad9dfea38fd604`，GitHub 签名 `valid`，Issue 已按 `COMPLETED` 关闭。合并后主干 CI Run `30338961661` 七 Job、Performance Baseline Run `30338961713` 四 Job全绿且 Artifact 均为 `0`。
 - Issue `#83` / PR `#84` 已完成 README 与文档导航重构，并以单父 Squash 提交 `3f2914cd81ace7afe28e0137c867c20fd346c3f9` 进入 `main`；该任务没有迁移产品能力。
 - Issue `#85` 已批准运行时环境观察与破坏性清理分离并按 `COMPLETED` 关闭；原环境冲突总功能继续为 `unassessed`。
-- Issue `#86` 已在二十四路径与 `sha256:dd1d784ffe3149bf130c6bd678050d6aea3059f33a405abee5e2cc3f9735bb59` 内完成 Domain、Application、Platform、Parity RED→GREEN 和本地轻量验证；本地 checkpoint 为 `c6829fa40b7bf4cf9828f88e2dfe68c552536844`，当前尚未普通推送、尚未创建 PR，Hosted Review/CI 与最终 Squash Merge 均未完成。
+- Issue `#86` / PR `#87` 已完成第四个 Gate 5 运行时环境冲突只读观察切片；Final Head `4799d40aedbf1ea4e95fbbf97fc2ed5cf72e5379` 以单父 Squash 提交 `db0c09b9df272887deb9407a5e344cf87a59dda8` 进入 `main`，tree 为 `7429a3cf1705239a47ac5bf7536e5541da401c51`，GitHub 签名 `valid`，Issue 已按 `COMPLETED` 关闭。合并后主干 CI Run `30356509847` 七 Job、Performance Baseline Run `30356509131` 四 Job全绿且 Artifact 均为 `0`。
+- Issue `#88` 已批准 Relay 环境方案 A 并按 `COMPLETED` 关闭；独立只读观察只覆盖固定代理环境来源、`CODEX_HOME/.env` 存在状态和四个 Clash Verge TUN 候选，网络测试、配置修改与原网络环境总功能继续未评估。
+- Issue `#89` 已在批准的三十路径与 `sha256:0adc20d0ed4d73ae645a5ffb23d7208f7aaabfea92c4d6fd62e0da3a120e8f77` 内完成 Planning、Domain、Application、共享 Platform、双平台适配、Parity、项目控制面、本地验证、非 Draft PR `#90`、Review/CI 根因闭环与 Artifact 核验；动态证据保留在 GitHub，当前只等待独立 Squash Merge 授权。
 - 合并后 main CI Run `30158058627` 的 Attempt `1/2` 因 GitHub Actions major outage 在创建 Job 前失败；服务恢复后的同一 Run Attempt `3` 绑定同一提交并七 Job 全绿、Artifact 为 `0`，Issue `#46` 已按 `COMPLETED` 关闭，仓库代码与 CI 合同无需为该外部事故修改。
 - Issue `#47` 以 `sha256:dd612ef0c2e5f0f830c40f161b1ef1a85bc58cd1d85458a758c3905ade8db03e` 冻结微型五路径 Closeout；本报告只收口长期状态与事故复用知识，其自身动态 Review、CI 与合并证据保留在 GitHub Issue/PR，不再创建二次 Closeout。
 - Issue `#8` 的过渡交付为 PR `#10`；该 PR 只包含文档与验证控制面，并按项目所有者明确授权执行 Squash Merge。
@@ -248,7 +265,9 @@ decision_status: issue-75-local-verified-pr-pending-final-merge-not-authorized
 - [x] Issue `#80` 已完成版本与启动意图方案 A 决策并关闭。
 - [x] Issue `#81` / PR `#82` 已完成版本与启动意图迁移、Review/CI、独立 Squash 授权与合并后主干验证。
 - [x] Issue `#85` 已完成运行时环境观察与清理分离决策并关闭。
-- [ ] Issue `#86` 正在完成第四个 Gate 5 运行时环境冲突只读观察切片；必须完成本地验证、非 Draft PR、Review/CI 与独立 Squash 授权，禁止并行启动第五个切片。
+- [x] Issue `#86` / PR `#87` 已完成运行时环境冲突只读观察迁移、Review/CI、独立 Squash 授权与合并后主干验证。
+- [x] Issue `#88` 已完成 Relay 环境只读观察与网络环境总功能分拆决策并关闭。
+- [ ] Issue `#89` / PR `#90` 已完成第五个 Gate 5 Relay 环境只读观察切片的实现、Review/CI 与 Artifact 核验；只剩独立 Squash Merge 授权，禁止并行启动第六个切片。
 
 ### Gate 6：首个正式版本（锁定）
 
@@ -295,6 +314,10 @@ decision_status: issue-75-local-verified-pr-pending-final-merge-not-authorized
 - Issue `#86` Session Plan：`docs/plans/sessions/2026-07-28-issue-86-gate-5-runtime-environment-observation.md`。
 - Issue `#86` Runtime Workflow：`docs/workflows/2026-07-28-issue-86-gate-5-runtime-environment-observation-runtime.md`。
 - Issue `#86` 实施报告：`docs/reports/issue-86-gate-5-runtime-environment-observation.md`。
+- Issue `#89` Relay 环境观察设计：`docs/plans/2026-07-28-issue-89-gate-5-relay-environment-observation.md`。
+- Issue `#89` Session Plan：`docs/plans/sessions/2026-07-28-issue-89-gate-5-relay-environment-observation.md`。
+- Issue `#89` Runtime Workflow：`docs/workflows/2026-07-28-issue-89-gate-5-relay-environment-observation-runtime.md`。
+- Issue `#89` 实施报告：`docs/reports/issue-89-gate-5-relay-environment-observation.md`。
 - 已完成 Issue `#41` CI 合同报告：`docs/reports/issue-41-ci-contract-decoupling.md`。
 - 已完成状态收口计划：`docs/plans/2026-07-25-issue-43-v1.2.42-cache-ci-closeout.md`。
 - 已完成状态收口 Session Plan：`docs/plans/sessions/2026-07-25-issue-43-v1.2.42-cache-ci-closeout.md`。
@@ -341,7 +364,7 @@ decision_status: issue-75-local-verified-pr-pending-final-merge-not-authorized
 ## 停止条件
 
 - 上游最新正式 Release 或已核验的 `v1.2.43` / `5036ff056b5c629f19356396b17d6eeb70da664c` / `d478a9fcda7f22a7c8167cb567777ad9148cf328` 事实发生变化。
-- Issue `#86` 出现二十四路径或 `sha256:dd1d784ffe3149bf130c6bd678050d6aea3059f33a405abee5e2cc3f9735bb59` 之外的新增、删除或重命名路径，`source-index.yml` 超出 `check_env_conflicts` 单入口修订，或在最终 Head Review、CI 与全部对话闭环前请求 Squash Merge。
+- Issue `#89` 出现三十路径或 `sha256:0adc20d0ed4d73ae645a5ffb23d7208f7aaabfea92c4d6fd62e0da3a120e8f77` 之外的新增、删除或重命名路径；把 `core-module:proxy` 或原网络环境总功能迁入新子能力；引入网络、写入、子进程、线程、UI、注入、`unsafe` 或敏感值/路径泄露；或在最终 Head Review、CI 与全部对话闭环前请求 Squash Merge。
 - 需要修改 `upstream/CodexPlusPlus/` 或 `source-lock.json` 的来源快照字段，但没有新的独立 upstream-sync Issue/PR 与项目所有者批准。
 - `release_audit` 为 stale 时修改 `benchmarks/`、`apps/`、产品 crate、`Cargo.toml` 或 `Cargo.lock`，或在同一 PR 同时更新实际 audit 与受阻产品路径。
 - Issue `#47` 出现五路径或 `sha256:dd612ef0c2e5f0f830c40f161b1ef1a85bc58cd1d85458a758c3905ade8db03e` 之外的新增、删除或重命名路径，或在最终 Head 的 Review、CI 和全部对话闭环前请求 Squash Merge。

@@ -883,6 +883,24 @@
 - 验证：`git check-ignore -v '.worktrees/'` 与 `git check-ignore -v '.worktrees/probe'` 均返回 `.git/info/exclude` 的 `.worktrees/` 规则；随后成功从 `main@da65f7d8402e4de27e2795ee8905be18ad565653` 创建 `codex/issue-83-readme-information-architecture` 隔离工作树。
 - 关联：Issue `#83`、`superpowers:using-git-worktrees`、Planning checkpoint `c313cba06484eb00ccc373e63419602d13192f7c`。
 
+### 2026-07-28：离线稀疏索引陈旧导致新增 Windows 依赖出现假冲突
+
+- 环境：Issue `#89` 只为 Windows target 新增精确版本 `windows-registry = 0.6.1`，既有锁文件已固定 `futures-util 0.3.33`。
+- 现象：首次执行离线 Cargo 解析时，本机稀疏索引只暴露 `futures-util 0.3.32`，解析器报告与既有锁版本冲突，看起来像新增依赖会引起大范围锁文件漂移。
+- 根因：`cargo --offline` 只能使用本机已经缓存的索引记录；陈旧索引缺少既有锁版本元数据，不能证明真实 registry 不兼容，也不能安全生成本次最小锁文件扩展。
+- 处理：只联网刷新 crates.io 索引并重新解析批准的精确依赖，不升级既有包；随后审计 `Cargo.lock`，确认只新增 `windows-registry 0.6.1`、`windows-result 0.4.1` 和 `windows-strings 0.5.1`，其余差异只是多版本依赖名称消歧。
+- 验证：刷新后 `cargo check --locked --offline` 恢复通过；`git diff origin/main...HEAD -- Cargo.toml crates/inputcodex-platform/Cargo.toml Cargo.lock` 只包含批准的 Windows target 依赖和上述三个新包。
+- 关联：Issue `#89`、`Cargo.toml`、`crates/inputcodex-platform/Cargo.toml`、`Cargo.lock`。
+
+### 2026-07-28：Linux all-targets 测试编译保留目标平台系统探针
+
+- 环境：PR `#90` Final Head `1082138f6b2d4dc001c1de09941d883212098c0e`，标准 CI Run `30370601107` 的 `linux-quality` Workspace Clippy。
+- 现象：Windows、macOS、governance、classify 与 release-audit 均成功；Linux test 配置以 `-D dead-code` 拒绝 `SystemRelayFileProbe`、两个 Windows 注册表路径常量和 `SystemWindowsRegistryProbe`，`required` 按合同失败。
+- 根因：Windows/macOS 纯选择逻辑模块为跨平台单元测试使用 `cfg(test)` 编译，但真实文件系统探针、注册表路径和系统注册表探针只由目标平台 `observe_system` 调用；这些系统 I/O 实体错误继承了测试编译边界，Linux lib test 因而保留没有调用方的 item。
+- 处理：把共享文件系统探针及其 `fs/File/Read` 导入收紧为 `windows | macos`，把两个注册表路径常量和系统注册表探针收紧为 `windows`；测试所需 trait、内存探针、选择逻辑和领域语义保持 `test` 可见。拒绝 `allow/expect(dead_code)`、跳过 Linux Clippy或修改 Workflow。
+- 验证：本地 platform all-targets tests `31/31`、Platform Clippy `-D warnings` 与 rustfmt 通过；Linux 真实性必须由修复后新 Head 的同一标准 Workflow 重新验证，动态 Run 证据只回写 GitHub。
+- 关联：Issue `#89`、PR `#90`、CI Run `30370601107`、Job `90313244125`。
+
 ## 记录模板
 
 ```text
