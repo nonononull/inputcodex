@@ -824,6 +824,125 @@ fn gate5_version_startup_实现合同固定版本来源与无副作用启动意�
 }
 
 #[test]
+fn gate5_运行时环境观察已实现但破坏性总功能仍未评估() {
+    let feature_text = read_repository_text("parity/features/foundation-platform.yml");
+    let observation = yaml_list_item_block(
+        &feature_text,
+        "feature.foundation-platform.runtime-environment-conflict-observation",
+    );
+    for expected in [
+        "status: implemented",
+        "detected_env_conflicts_from_pairs",
+        "tauri-command:check_env_conflicts",
+        "- issue:85",
+        "- issue:86",
+    ] {
+        assert!(
+            observation.contains(expected),
+            "运行时环境观察功能条目应包含：{expected}"
+        );
+    }
+    assert!(!observation.contains("remove_env_conflicts"));
+
+    let umbrella = yaml_list_item_block(
+        &feature_text,
+        "feature.foundation-platform.environment-conflicts",
+    );
+    for expected in [
+        "status: unassessed",
+        "core-module:env_conflicts",
+        "tauri-command:remove_env_conflicts",
+        "- issue:85",
+    ] {
+        assert!(
+            umbrella.contains(expected),
+            "原环境冲突总功能应继续包含：{expected}"
+        );
+    }
+    assert!(!umbrella.contains("status: implemented"));
+    assert!(!umbrella.contains("tauri-command:check_env_conflicts"));
+
+    let contract_text = read_repository_text("parity/contracts/foundation-platform.yml");
+    let contract = yaml_list_item_block(
+        &contract_text,
+        "contract.feature.foundation-platform.runtime-environment-conflict-observation.baseline",
+    );
+    for expected in [
+        "environment-read",
+        "persistence: 'none'",
+        "Ready(empty)",
+        "runtime_process: Observed",
+        "persistent_user: NotObserved",
+        "persistent_system: NotObserved",
+        "RUNTIME_ENVIRONMENT_OBSERVATION_UNSUPPORTED",
+        "RUNTIME_ENVIRONMENT_OBSERVATION_TIMEOUT",
+        "RUNTIME_ENVIRONMENT_NAME_UNREPRESENTABLE",
+    ] {
+        assert!(
+            contract.contains(expected),
+            "运行时环境观察合同应包含：{expected}"
+        );
+    }
+    for forbidden in [
+        "environment-write",
+        "filesystem-read",
+        "filesystem-write",
+        "network-read",
+        "network-write",
+        "process-control",
+        "advertising",
+        "remote-recommendation",
+        "变量实际值",
+    ] {
+        assert!(
+            !contract.contains(forbidden),
+            "运行时环境观察合同禁止能力或敏感输出：{forbidden}"
+        );
+    }
+
+    let source_text = read_repository_text("parity/features/source-index.yml");
+    let check = yaml_list_item_block(&source_text, "tauri-command:check_env_conflicts");
+    assert!(check.contains("side_effects: [environment-read]"));
+    assert!(check.contains(
+        "feature_id: feature.foundation-platform.runtime-environment-conflict-observation"
+    ));
+    assert!(!check.contains("environment-write"));
+
+    for source_id in ["core-module:env_conflicts", "tauri-command:remove_env_conflicts"] {
+        let source = yaml_list_item_block(&source_text, source_id);
+        assert!(source.contains("side_effects: [environment-read, environment-write]"));
+        assert!(source.contains("feature_id: feature.foundation-platform.environment-conflicts"));
+    }
+
+    let production =
+        read_repository_text("crates/inputcodex-platform/src/runtime_environment_observation.rs");
+    assert_eq!(production.matches("std::env::vars_os()").count(), 1);
+    for forbidden in [
+        "std::env::set_var",
+        "std::env::remove_var",
+        "std::fs",
+        "std::process::Command",
+        "std::thread",
+        "unsafe {",
+    ] {
+        assert!(
+            !production.contains(forbidden),
+            "生产适配器禁止能力：{forbidden}"
+        );
+    }
+
+    assert_repository_text_contains(
+        "parity/README.md",
+        &[
+            "Issue `#86`",
+            "Ready(empty)",
+            "persistent_user: NotObserved",
+            "RUNTIME_ENVIRONMENT_NAME_UNREPRESENTABLE",
+        ],
+    );
+}
+
+#[test]
 fn 仓库source_index_覆盖锁定上游公开入口() {
     let summary =
         validate_feature_repository(&repository_root()).expect("功能目录应通过仓库级验证");
