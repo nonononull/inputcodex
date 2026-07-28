@@ -268,7 +268,8 @@ Workspace 全量、Windows/macOS 编译和 Performance observation 继续交给 
 - [x] Domain、Application、共享 Platform、双平台与 Parity TDD checkpoint；
 - [x] 项目控制面与静态实施报告收口；
 - [x] 最终本地轻量验证与文档 checkpoint `b33bbbb7a6b2303c7a0c60725745528c92085c66`；
-- [ ] 普通推送、非 Draft PR、Review/CI；
+- [x] 普通推送与非 Draft PR `#90`；
+- [ ] Review/CI 根因闭环；
 - [ ] 独立 Squash Merge 授权。
 
 ## 停止条件

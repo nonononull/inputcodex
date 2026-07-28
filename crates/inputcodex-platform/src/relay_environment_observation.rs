@@ -2,9 +2,13 @@
 use std::{
     collections::BTreeMap,
     ffi::{OsStr, OsString},
-    fs::{self, File},
-    io::{self, Read},
+    io,
     path::{Path, PathBuf},
+};
+#[cfg(any(target_os = "windows", target_os = "macos"))]
+use std::{
+    fs::{self, File},
+    io::Read,
 };
 
 use inputcodex_application::{
@@ -71,10 +75,10 @@ pub(super) trait RelayFileProbe {
 }
 
 #[derive(Debug, Clone, Copy, Default)]
-#[cfg(any(target_os = "windows", target_os = "macos", test))]
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 pub(super) struct SystemRelayFileProbe;
 
-#[cfg(any(target_os = "windows", target_os = "macos", test))]
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 impl RelayFileProbe for SystemRelayFileProbe {
     fn metadata(&self, path: &Path) -> io::Result<FileMetadata> {
         let metadata = fs::metadata(path)?;

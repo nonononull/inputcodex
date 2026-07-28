@@ -16,7 +16,9 @@ use super::{
     observe_with_inputs,
 };
 
+#[cfg(target_os = "windows")]
 const CURRENT_USER_ENVIRONMENT: &str = "Environment";
+#[cfg(target_os = "windows")]
 const LOCAL_MACHINE_ENVIRONMENT: &str =
     r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment";
 
@@ -39,6 +41,7 @@ trait WindowsRegistryProbe {
 }
 
 #[derive(Debug, Clone, Copy, Default)]
+#[cfg(target_os = "windows")]
 struct SystemWindowsRegistryProbe;
 
 #[cfg(target_os = "windows")]

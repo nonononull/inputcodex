@@ -86,6 +86,11 @@ windows-rs 包只因多版本共存增加名称消歧。
 首次离线解析被本机陈旧稀疏索引中的 `futures-util 0.3.32` 假冲突阻断。刷新 registry 索引后，
 解析器保留既有锁版本并只产生上述三个批准的新包；该可复用根因已写入 `err.md`。
 
+PR `#90` 首个标准 CI Head 在 Linux Workspace Clippy 暴露目标平台系统探针的 `dead_code`：
+纯选择逻辑需要 `cfg(test)`，但真实文件系统探针、Windows 注册表路径常量和系统注册表探针只应
+在目标平台编译。修复只收紧这些系统 I/O 实体的 `cfg`，保留测试 trait 与内存探针，不使用
+`allow/expect(dead_code)`，不修改 Workflow 或产品语义。
+
 ## 当前验证状态
 
 ```yaml
@@ -114,10 +119,10 @@ dotenv_content_reads: 0
 clash_candidate_read_limit_bytes: 65536
 runtime_environment_scans_per_target: 1
 local_verification_checkpoint: b33bbbb7a6b2303c7a0c60725745528c92085c66
-push: pending
-pr: pending
+push: completed
+pr: https://github.com/nonononull/inputcodex/pull/90
 review: pending
-hosted_ci: pending
+hosted_ci: root-cause-fix-pending-rerun
 final_merge_authorization: pending-separate-gate
 ```
 

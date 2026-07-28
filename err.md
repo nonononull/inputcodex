@@ -892,6 +892,15 @@
 - 验证：刷新后 `cargo check --locked --offline` 恢复通过；`git diff origin/main...HEAD -- Cargo.toml crates/inputcodex-platform/Cargo.toml Cargo.lock` 只包含批准的 Windows target 依赖和上述三个新包。
 - 关联：Issue `#89`、`Cargo.toml`、`crates/inputcodex-platform/Cargo.toml`、`Cargo.lock`。
 
+### 2026-07-28：Linux all-targets 测试编译保留目标平台系统探针
+
+- 环境：PR `#90` Final Head `1082138f6b2d4dc001c1de09941d883212098c0e`，标准 CI Run `30370601107` 的 `linux-quality` Workspace Clippy。
+- 现象：Windows、macOS、governance、classify 与 release-audit 均成功；Linux test 配置以 `-D dead-code` 拒绝 `SystemRelayFileProbe`、两个 Windows 注册表路径常量和 `SystemWindowsRegistryProbe`，`required` 按合同失败。
+- 根因：Windows/macOS 纯选择逻辑模块为跨平台单元测试使用 `cfg(test)` 编译，但真实文件系统探针、注册表路径和系统注册表探针只由目标平台 `observe_system` 调用；这些系统 I/O 实体错误继承了测试编译边界，Linux lib test 因而保留没有调用方的 item。
+- 处理：把共享文件系统探针及其 `fs/File/Read` 导入收紧为 `windows | macos`，把两个注册表路径常量和系统注册表探针收紧为 `windows`；测试所需 trait、内存探针、选择逻辑和领域语义保持 `test` 可见。拒绝 `allow/expect(dead_code)`、跳过 Linux Clippy或修改 Workflow。
+- 验证：本地 platform all-targets tests `31/31`、Platform Clippy `-D warnings` 与 rustfmt 通过；Linux 真实性必须由修复后新 Head 的同一标准 Workflow 重新验证，动态 Run 证据只回写 GitHub。
+- 关联：Issue `#89`、PR `#90`、CI Run `30370601107`、Job `90313244125`。
+
 ## 记录模板
 
 ```text
