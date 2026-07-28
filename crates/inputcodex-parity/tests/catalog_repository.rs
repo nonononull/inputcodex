@@ -908,7 +908,10 @@ fn gate5_运行时环境观察已实现但破坏性总功能仍未评估() {
     ));
     assert!(!check.contains("environment-write"));
 
-    for source_id in ["core-module:env_conflicts", "tauri-command:remove_env_conflicts"] {
+    for source_id in [
+        "core-module:env_conflicts",
+        "tauri-command:remove_env_conflicts",
+    ] {
         let source = yaml_list_item_block(&source_text, source_id);
         assert!(source.contains("side_effects: [environment-read, environment-write]"));
         assert!(source.contains("feature_id: feature.foundation-platform.environment-conflicts"));
