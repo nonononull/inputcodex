@@ -2,13 +2,22 @@
 
 ## 文档状态
 
-- `status`: `APPROVED_DESIGN_PENDING_WRITTEN_REVIEW`
+- `status`: `PLANNING_SCOPE_FROZEN_OWNER_APPROVAL_PENDING`
 - `tracking_issue_ref`: `https://github.com/nonononull/inputcodex/issues/86`
 - `approved_decision_ref`: `https://github.com/nonononull/inputcodex/issues/85`
 - `owner_approval_evidence`: `https://github.com/nonononull/inputcodex/issues/85#issuecomment-5102509300`
+- `written_review_ref`: `https://github.com/nonononull/inputcodex/issues/86#issuecomment-5102713590`
 - `base_ref`: `3f2914cd81ace7afe28e0137c867c20fd346c3f9`
 - `upstream_release`: `v1.2.43`
 - `branch_ref`: `codex/issue-86-gate-5-runtime-environment-observation`
+- `planning_scope_count`: `3`
+- `planning_scope_hash`: `sha256:c3d16ff75e79d9fd2866db1bd59f4259089b7398bce46b20e2766fc2bccc6d34`
+- `candidate_scope_count`: `23`
+- `candidate_scope_hash`: `sha256:448587243eb7cf842f7412bba868347aaada01016b964424812d5b47a278d66e`
+- `implementation_authorization`: `pending-owner-scope-approval`
+- `commit_push_pr_authorization`: `pending-owner-scope-approval`
+- `final_merge_authorization`: `pending-separate-gate`
+- `agos_status`: `bypassed-project-native-control-plane`
 - `written_on`: `2026-07-28`，时间判定只使用项目所有者 Windows 本机时间
 
 ## 目标
@@ -245,6 +254,42 @@ Parity 必须同时表达这两个事实，禁止通过描述文字掩盖状态�
 - `err.md`：只有出现新的可复用根因时才增加条目；
 - `docs/plans/PROJECT-MASTER-PLAN.md`：记录活动任务、决策引用和下一阶段；
 - Session Plan、Runtime Workflow 与实施报告使用 Issue `#86` 独立文件。
+
+## 候选完整实施范围
+
+```text
+AGENTS.md
+CONTEXT.md
+README.md
+build.md
+crates/inputcodex-application/src/lib.rs
+crates/inputcodex-application/src/runtime_environment_observation.rs
+crates/inputcodex-application/tests/runtime_environment_observation.rs
+crates/inputcodex-domain/src/lib.rs
+crates/inputcodex-domain/src/runtime_environment_observation.rs
+crates/inputcodex-domain/tests/runtime_environment_observation.rs
+crates/inputcodex-parity/tests/catalog_repository.rs
+crates/inputcodex-platform/src/lib.rs
+crates/inputcodex-platform/src/runtime_environment_observation.rs
+crates/inputcodex-platform/tests/runtime_environment_observation.rs
+docs/plans/2026-07-28-issue-86-gate-5-runtime-environment-observation.md
+docs/plans/PROJECT-MASTER-PLAN.md
+docs/plans/sessions/2026-07-28-issue-86-gate-5-runtime-environment-observation.md
+docs/reports/issue-86-gate-5-runtime-environment-observation.md
+docs/workflows/2026-07-28-issue-86-gate-5-runtime-environment-observation-runtime.md
+err.md
+parity/README.md
+parity/contracts/foundation-platform.yml
+parity/features/foundation-platform.yml
+```
+
+规范化后共 `23` 路径，哈希为
+`sha256:448587243eb7cf842f7412bba868347aaada01016b964424812d5b47a278d66e`。
+
+规划控制面固定为设计稿、Session Plan 和 Runtime Workflow 三路径，哈希为
+`sha256:c3d16ff75e79d9fd2866db1bd59f4259089b7398bce46b20e2766fc2bccc6d34`。
+
+任何新增、删除、重命名或替换路径都必须重新计算哈希并取得项目所有者批准。
 
 ## 非目标
 
