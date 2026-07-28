@@ -67,6 +67,146 @@ git diff --check
 - 在 Issue `#78` 中读取历史启动状态、枚举进程、观察 PID/debug port、写文件、联网、缓存、启动线程、调用 shell、引入 UI/Iced、新依赖、第三个产品 feature、预算、Release、Ruleset、`upstream/` 或 AGOS 改动。
 - 在 Issue `#81` 中兼容旧启动变量、打开 UI、联网、检查/下载/执行更新、读写文件、缓存、启动线程、调用 shell、引入 Iced/Tauri/WebView、新依赖、第四个产品 feature、预算、Release、Ruleset、`upstream/` 或 AGOS 改动。
 
+## Issue #86 运行时环境冲突只读观察本地轻量验证
+
+在仓库根目录、分支 `codex/issue-86-gate-5-runtime-environment-observation` 执行。Git 时间只使用系统默认本机时间；不得设置 `GIT_AUTHOR_DATE` 或 `GIT_COMMITTER_DATE`。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+cargo test --locked --offline --ignore-rust-version -p inputcodex-domain -p inputcodex-application -p inputcodex-platform -p inputcodex-parity
+if ($LASTEXITCODE -ne 0) { throw "Issue #86 四 crate 测试失败：$LASTEXITCODE" }
+
+cargo clippy --locked --offline --ignore-rust-version -p inputcodex-domain -p inputcodex-application -p inputcodex-platform -p inputcodex-parity --all-targets -- -D warnings
+if ($LASTEXITCODE -ne 0) { throw "Issue #86 四 crate Clippy 失败：$LASTEXITCODE" }
+
+cargo fmt --all -- --check
+if ($LASTEXITCODE -ne 0) { throw "Issue #86 rustfmt 检查失败：$LASTEXITCODE" }
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+if ($LASTEXITCODE -ne 0) { throw "Issue #86 CI 合同失败：$LASTEXITCODE" }
+
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw "Issue #86 Release Audit 失败：$LASTEXITCODE" }
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw "Issue #86 Repository Policy 失败：$LASTEXITCODE" }
+```
+
+范围、哈希、单入口目录修订与禁止能力验证：
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+$candidate = @(
+  'AGENTS.md',
+  'CONTEXT.md',
+  'README.md',
+  'build.md',
+  'crates/inputcodex-application/src/lib.rs',
+  'crates/inputcodex-application/src/runtime_environment_observation.rs',
+  'crates/inputcodex-application/tests/runtime_environment_observation.rs',
+  'crates/inputcodex-domain/src/lib.rs',
+  'crates/inputcodex-domain/src/runtime_environment_observation.rs',
+  'crates/inputcodex-domain/tests/runtime_environment_observation.rs',
+  'crates/inputcodex-parity/tests/catalog_repository.rs',
+  'crates/inputcodex-platform/src/lib.rs',
+  'crates/inputcodex-platform/src/runtime_environment_observation.rs',
+  'crates/inputcodex-platform/tests/runtime_environment_observation.rs',
+  'docs/plans/2026-07-28-issue-86-gate-5-runtime-environment-observation.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-07-28-issue-86-gate-5-runtime-environment-observation.md',
+  'docs/reports/issue-86-gate-5-runtime-environment-observation.md',
+  'docs/workflows/2026-07-28-issue-86-gate-5-runtime-environment-observation-runtime.md',
+  'err.md',
+  'parity/README.md',
+  'parity/contracts/foundation-platform.yml',
+  'parity/features/foundation-platform.yml',
+  'parity/features/source-index.yml'
+)
+[Array]::Sort($candidate, [StringComparer]::Ordinal)
+$payload = [string]::Join("`n", $candidate) + "`n"
+$scopeHash = [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData(
+    [Text.UTF8Encoding]::new($false).GetBytes($payload)
+  )
+).ToLowerInvariant()
+if ($candidate.Count -ne 24) { throw "Issue #86 路径数量漂移：$($candidate.Count)" }
+if ($scopeHash -ne 'dd1d784ffe3149bf130c6bd678050d6aea3059f33a405abee5e2cc3f9735bb59') {
+  throw "Issue #86 scope_hash 漂移：sha256:$scopeHash"
+}
+
+$changed = @(
+  git -c core.quotePath=false diff --name-only origin/main...HEAD
+  git -c core.quotePath=false diff --name-only
+  git -c core.quotePath=false ls-files --others --exclude-standard
+) | Where-Object { $_ } | Sort-Object -Unique
+$outside = @($changed | Where-Object { $_ -notin $candidate })
+if ($outside.Count -ne 0) { throw "Issue #86 越界路径：$($outside -join ', ')" }
+
+$protected = @(
+  git -c core.quotePath=false diff --name-only origin/main...HEAD -- Cargo.toml Cargo.lock apps .github/workflows upstream scripts
+  git -c core.quotePath=false diff --name-only -- Cargo.toml Cargo.lock apps .github/workflows upstream scripts
+) | Where-Object { $_ } | Sort-Object -Unique
+if ($protected.Count -ne 0) { throw "Issue #86 修改受保护路径：$($protected -join ', ')" }
+
+$sourceIndexStat = @(git diff --numstat origin/main...HEAD -- parity/features/source-index.yml)
+if ($sourceIndexStat.Count -ne 1 -or $sourceIndexStat[0] -notmatch '^2\s+2\s+parity/features/source-index\.yml$') {
+  throw "Issue #86 source-index 差异不是批准的 2 行替换：$($sourceIndexStat -join '; ')"
+}
+$sourceText = Get-Content -Raw -LiteralPath parity/features/source-index.yml
+$checkBlock = [regex]::Match($sourceText, '(?ms)^  - id: tauri-command:check_env_conflicts\r?\n.*?(?=^  - id: )').Value
+if ($checkBlock -notmatch 'side_effects: \[environment-read\]' -or
+    $checkBlock -notmatch 'feature_id: feature\.foundation-platform\.runtime-environment-conflict-observation' -or
+    $checkBlock -match 'environment-write') {
+  throw 'Issue #86 check_env_conflicts 单入口修订不符合批准语义。'
+}
+foreach ($sourceId in @('core-module:env_conflicts', 'tauri-command:remove_env_conflicts')) {
+  $block = [regex]::Match($sourceText, "(?ms)^  - id: $([regex]::Escape($sourceId))\r?\n.*?(?=^  - id: )").Value
+  if ($block -notmatch 'side_effects: \[environment-read, environment-write\]' -or
+      $block -notmatch 'feature_id: feature\.foundation-platform\.environment-conflicts') {
+    throw "Issue #86 破坏性总功能入口归属漂移：$sourceId"
+  }
+}
+
+$production = @(
+  'crates/inputcodex-domain/src/runtime_environment_observation.rs',
+  'crates/inputcodex-application/src/runtime_environment_observation.rs',
+  'crates/inputcodex-platform/src/runtime_environment_observation.rs'
+)
+$forbiddenProduct = @(
+  rg -n 'std::env::set_var|std::env::remove_var|std::fs|File::|OpenOptions|reqwest|ureq|TcpStream|UdpSocket|std::thread|thread::spawn|std::process::Command|tokio::spawn|unsafe\s*\{|iced|tauri|webview' $production 2>$null
+)
+if ($LASTEXITCODE -eq 0 -and $forbiddenProduct.Count -ne 0) {
+  throw "Issue #86 命中禁止运行能力：$($forbiddenProduct -join '; ')"
+}
+if ($LASTEXITCODE -notin 0, 1) { throw 'Issue #86 禁止能力扫描执行失败。' }
+
+$platformSource = Get-Content -Raw -LiteralPath 'crates/inputcodex-platform/src/runtime_environment_observation.rs'
+if (($platformSource.Split('std::env::vars_os()').Count - 1) -ne 1) {
+  throw 'Issue #86 系统入口必须精确调用一次 std::env::vars_os()。'
+}
+if ($platformSource -match 'value\.(to_string|to_str|into_string)|format!\([^\r\n]*value') {
+  throw 'Issue #86 环境值进入了转换或格式化路径。'
+}
+
+$ownerName = [Environment]::UserName
+if (-not [string]::IsNullOrWhiteSpace($ownerName)) {
+  $privateLeaks = @(rg -n --fixed-strings $ownerName crates parity docs/reports/issue-86-gate-5-runtime-environment-observation.md 2>$null)
+  if ($LASTEXITCODE -eq 0 -and $privateLeaks.Count -ne 0) {
+    throw "Issue #86 泄露本机用户标识：$($privateLeaks -join '; ')"
+  }
+  if ($LASTEXITCODE -notin 0, 1) { throw 'Issue #86 隐私扫描执行失败。' }
+}
+
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw "Issue #86 Git 空白检查失败：$LASTEXITCODE" }
+```
+
+预期：四 crate 测试与 Clippy 全绿、`rustfmt` 退出码为 `0`、CI 合同 `35/35`、`release_audit=current`、仓库政策违规数为 `0`，实际差异全部位于批准的二十四路径内；`source-index.yml` 只替换 `check_env_conflicts` 的两行副作用和 feature 归属，生产实现不含写环境、文件、网络、线程、子进程、UI 或 `unsafe`，系统入口精确调用一次 `std::env::vars_os()`。
+
 ## Issue #81 版本与启动意图本地轻量验证
 
 在仓库根目录、分支 `codex/issue-81-gate-5-version-startup` 执行。Git 时间只使用系统默认本机时间；不得设置 `GIT_AUTHOR_DATE` 或 `GIT_COMMITTER_DATE`。

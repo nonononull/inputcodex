@@ -53,6 +53,13 @@ implementation_authorization: authorized
 commit_push_pr_authorization: authorized
 final_merge_authorization: pending-separate-gate
 agos_status: bypassed-project-native-control-plane
+execution_status: control-plane-update-before-final-local-verification
+domain_checkpoint: 6591882dc23596a502833d38aed08d585b4acc08
+application_checkpoint: 55b84b6c2b45d00fdf3f6e42aaa1e86d1635557e
+platform_checkpoint: cd41fa8ef739b1481cfbfc491ef42e26369f0b4e
+scope_revision_checkpoint: f177b9d6f17ee31d40bb6568f8e9bdf6bec901b5
+parity_red_checkpoint: d5c711d9071aa9e9c65d5214531a96e04dddda98
+parity_green_checkpoint: a320086f00bd16c65ae5172c28f4bd8c40a7c110
 ```
 
 ## 成功标准
@@ -144,7 +151,7 @@ agos_status: bypassed-project-native-control-plane
   `RuntimeEnvironmentConflict`、`RuntimeEnvironmentConflictObservation`。
 - Consumed by: Application Port 和 Platform 纯观察函数。
 
-- [ ] **Step 1: 编写 Domain RED 测试**
+- [x] **Step 1: 编写 Domain RED 测试**
 
   ```rust
   use inputcodex_domain::{
@@ -182,7 +189,7 @@ agos_status: bypassed-project-native-control-plane
   }
   ```
 
-- [ ] **Step 2: 运行 RED**
+- [x] **Step 2: 运行 RED**
 
   Run:
 
@@ -193,7 +200,7 @@ agos_status: bypassed-project-native-control-plane
 
   Expected: FAIL，原因是公开类型和模块尚不存在。
 
-- [ ] **Step 3: 实现最小 Domain 类型**
+- [x] **Step 3: 实现最小 Domain 类型**
 
   ```rust
   #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -229,7 +236,7 @@ agos_status: bypassed-project-native-control-plane
   `RuntimeEnvironmentConflictObservation::new` 必须使用 `BTreeMap` 按名称合并重复项；同名
   冲突只要任一值为 `NonEmpty`，最终状态即为 `NonEmpty`。
 
-- [ ] **Step 4: 运行 Domain GREEN 与格式检查**
+- [x] **Step 4: 运行 Domain GREEN 与格式检查**
 
   ```powershell
   cargo test --locked --offline --ignore-rust-version -p inputcodex-domain `
@@ -239,7 +246,7 @@ agos_status: bypassed-project-native-control-plane
 
   Expected: Domain 目标测试全绿，格式退出码为 `0`。
 
-- [ ] **Step 5: 创建 Domain checkpoint**
+- [x] **Step 5: 创建 Domain checkpoint**
 
   ```powershell
   git add -- `
@@ -263,7 +270,7 @@ agos_status: bypassed-project-native-control-plane
 - Produces: `RuntimeEnvironmentObservationRequest`、`RuntimeEnvironmentObservationPort`、
   `ObserveRuntimeEnvironmentConflicts<P>`、`ApplicationError::timeout`。
 
-- [ ] **Step 1: 编写 Application RED 测试**
+- [x] **Step 1: 编写 Application RED 测试**
 
   ```rust
   #[derive(Clone)]
@@ -291,7 +298,7 @@ agos_status: bypassed-project-native-control-plane
 
   同文件继续固定超时错误、取消后迟到结果和旧请求不覆盖新请求。
 
-- [ ] **Step 2: 运行 Application RED**
+- [x] **Step 2: 运行 Application RED**
 
   ```powershell
   cargo test --locked --offline --ignore-rust-version -p inputcodex-application `
@@ -300,7 +307,7 @@ agos_status: bypassed-project-native-control-plane
 
   Expected: FAIL，原因是 Port、UseCase 和 `ApplicationError::timeout` 尚不存在。
 
-- [ ] **Step 3: 实现最小 Application 接口**
+- [x] **Step 3: 实现最小 Application 接口**
 
   ```rust
   #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
@@ -333,7 +340,7 @@ agos_status: bypassed-project-native-control-plane
 
   `ApplicationError::timeout` 必须构造 `ErrorKind::Timeout`，错误码固定由调用方传入。
 
-- [ ] **Step 4: 运行 Application GREEN**
+- [x] **Step 4: 运行 Application GREEN**
 
   ```powershell
   cargo test --locked --offline --ignore-rust-version -p inputcodex-application `
@@ -341,7 +348,7 @@ agos_status: bypassed-project-native-control-plane
   cargo fmt --all -- --check
   ```
 
-- [ ] **Step 5: 创建 Application checkpoint**
+- [x] **Step 5: 创建 Application checkpoint**
 
   ```powershell
   git add -- `
@@ -365,7 +372,7 @@ agos_status: bypassed-project-native-control-plane
 - Produces: `SystemRuntimeEnvironmentObservation`、
   `observe_windows_runtime_environment`、`observe_macos_runtime_environment`。
 
-- [ ] **Step 1: 编写 Platform RED 测试**
+- [x] **Step 1: 编写 Platform RED 测试**
 
   ```rust
   #[test]
@@ -398,7 +405,7 @@ agos_status: bypassed-project-native-control-plane
 
   继续覆盖不修剪、排除 `CUSTOM_OPENAI_*`、空值、重复项、不可表示名称和 unsupported。
 
-- [ ] **Step 2: 运行 Platform RED**
+- [x] **Step 2: 运行 Platform RED**
 
   ```powershell
   cargo test --locked --offline --ignore-rust-version -p inputcodex-platform `
@@ -407,7 +414,7 @@ agos_status: bypassed-project-native-control-plane
 
   Expected: FAIL，原因是系统适配器和纯观察函数尚不存在。
 
-- [ ] **Step 3: 实现纯观察函数与系统适配器**
+- [x] **Step 3: 实现纯观察函数与系统适配器**
 
   ```rust
   #[derive(Debug, Clone, Copy, Default)]
@@ -439,7 +446,7 @@ agos_status: bypassed-project-native-control-plane
   两个纯观察函数必须先按平台名称规则判断候选，再无损转换命中名称；值只调用
   `OsStr::is_empty`，不得转换或格式化。
 
-- [ ] **Step 4: 运行 Platform GREEN 与静态扫描**
+- [x] **Step 4: 运行 Platform GREEN 与静态扫描**
 
   ```powershell
   cargo test --locked --offline --ignore-rust-version -p inputcodex-platform `
@@ -453,7 +460,7 @@ agos_status: bypassed-project-native-control-plane
   if ($forbidden.Count -ne 0) { throw "Platform 出现禁止能力：$($forbidden -join '; ')" }
   ```
 
-- [ ] **Step 5: 创建 Platform checkpoint**
+- [x] **Step 5: 创建 Platform checkpoint**
 
   ```powershell
   git add -- `
@@ -478,7 +485,7 @@ agos_status: bypassed-project-native-control-plane
 - Consumes: Issue `#85/#86` 稳定语义和已实现 Rust 类型。
 - Produces: 新子能力 `implemented` 合同，同时保留原总功能 `unassessed`。
 
-- [ ] **Step 1: 编写 Parity RED 断言**
+- [x] **Step 1: 编写 Parity RED 断言**
 
   ```rust
   #[test]
@@ -504,7 +511,7 @@ agos_status: bypassed-project-native-control-plane
   合同断言必须包含 `environment-read`、`Ready(empty)`、三个覆盖字段、三条稳定错误/状态语义，
   并拒绝环境写入、文件写入和变量值。
 
-- [ ] **Step 2: 运行 Parity RED**
+- [x] **Step 2: 运行 Parity RED**
 
   ```powershell
   cargo test --locked --offline --ignore-rust-version -p inputcodex-parity `
@@ -513,7 +520,7 @@ agos_status: bypassed-project-native-control-plane
 
   Expected: FAIL，新子能力和合同尚不存在。
 
-- [ ] **Step 3: 增加 Feature 与 Contract**
+- [x] **Step 3: 增加 Feature 与 Contract**
 
   Feature 必须只引用：
 
@@ -541,7 +548,7 @@ agos_status: bypassed-project-native-control-plane
   - 把该入口映射到 `feature.foundation-platform.runtime-environment-conflict-observation`；
   - 保持 `core-module:env_conflicts` 与 `tauri-command:remove_env_conflicts` 的现有归属和读写副作用。
 
-- [ ] **Step 4: 运行 Parity GREEN**
+- [x] **Step 4: 运行 Parity GREEN**
 
   ```powershell
   cargo test --locked --offline --ignore-rust-version -p inputcodex-parity `
@@ -554,7 +561,7 @@ agos_status: bypassed-project-native-control-plane
 
   Expected: `catalog_repository` 全绿，`source-index.yml` 只包含批准的单入口修订。
 
-- [ ] **Step 5: 创建 Parity checkpoint**
+- [x] **Step 5: 创建 Parity checkpoint**
 
   ```powershell
   git add -- `
@@ -584,26 +591,26 @@ agos_status: bypassed-project-native-control-plane
 - Consumes: 四层 GREEN checkpoint 与实际验证证据。
 - Produces: 当前 Gate 状态、构建命令、领域术语、实施报告和下一合法阶段。
 
-- [ ] **Step 1: 更新稳定产品文档**
+- [x] **Step 1: 更新稳定产品文档**
 
   README 只增加“运行时环境冲突观察”，明确当前进程覆盖和实际值不读取；不得描述环境清理。
 
-- [ ] **Step 2: 更新项目规则与总计划**
+- [x] **Step 2: 更新项目规则与总计划**
 
   `AGENTS.md` 和 Master Plan 将 Issue `#86` 标为当前第四切片；下一合法阶段只能是本 Issue 的
   Review/CI 或合并后第五切片选择。
 
-- [ ] **Step 3: 更新 build.md 验证命令**
+- [x] **Step 3: 更新 build.md 验证命令**
 
   增加四 crate 定向测试、Clippy、格式、CI 合同、Release Audit、Repository Policy、24 路径、
   隐私、禁止能力和受保护路径检查。
 
-- [ ] **Step 4: 处理 err.md**
+- [x] **Step 4: 处理 err.md**
 
   先查重；只有出现新的可复用根因才增加条目。重复 PowerShell here-string、未跟踪文件统计或
   原生命令退出码问题只引用既有结论，保持文件未修改。
 
-- [ ] **Step 5: 创建实施报告与控制面 checkpoint**
+- [x] **Step 5: 创建实施报告与控制面 checkpoint**
 
   ```powershell
   git add -- `

@@ -2,7 +2,7 @@
 
 ## 文档状态
 
-- `status`: `IMPLEMENTATION_AUTHORIZED_PARITY_RESUMED`
+- `status`: `LOCAL_IMPLEMENTATION_COMPLETE_VERIFICATION_PENDING`
 - `tracking_issue_ref`: `https://github.com/nonononull/inputcodex/issues/86`
 - `approved_decision_ref`: `https://github.com/nonononull/inputcodex/issues/85`
 - `owner_approval_evidence`: `https://github.com/nonononull/inputcodex/issues/85#issuecomment-5102509300`
@@ -19,6 +19,14 @@
 - `commit_push_pr_authorization`: `authorized-normal-push-non-draft-pr-review-ci`
 - `final_merge_authorization`: `pending-separate-gate`
 - `agos_status`: `bypassed-project-native-control-plane`
+- `written_design_checkpoint`: `26b3b1c54dd35cc92460879483b0f9d1f9d4793f`
+- `planning_checkpoint`: `8119f921c061e5019336322a7ad4a4504ff8e16b`
+- `domain_checkpoint`: `6591882dc23596a502833d38aed08d585b4acc08`
+- `application_checkpoint`: `55b84b6c2b45d00fdf3f6e42aaa1e86d1635557e`
+- `platform_checkpoint`: `cd41fa8ef739b1481cfbfc491ef42e26369f0b4e`
+- `scope_revision_checkpoint`: `f177b9d6f17ee31d40bb6568f8e9bdf6bec901b5`
+- `parity_red_checkpoint`: `d5c711d9071aa9e9c65d5214531a96e04dddda98`
+- `parity_green_checkpoint`: `a320086f00bd16c65ae5172c28f4bd8c40a7c110`
 - `written_on`: `2026-07-28`，时间判定只使用项目所有者 Windows 本机时间
 
 ## 目标
@@ -327,3 +335,14 @@ parity/features/source-index.yml
 - [x] 明确持久化来源未观察；
 - [x] 没有占位符、未决设计或递归 Closeout；
 - [x] 实现前仍保留书面审阅和精确范围批准门。
+
+## 当前实施进度
+
+- [x] 书面设计、Session Plan、Runtime Workflow 与二十四路径范围已批准；
+- [x] Domain、Application、Platform 与 Parity 均完成 RED→GREEN 和 Git checkpoint；
+- [x] `tauri-command:check_env_conflicts` 仅修正为 `environment-read` 并映射到新只读子能力；
+- [x] `core-module:env_conflicts` 与 `tauri-command:remove_env_conflicts` 继续归原总功能；
+- [x] 产品文档、术语、项目规则、构建入口和 Master Plan 已进入控制面回写；
+- [ ] 四 crate、Clippy、格式、项目验证器、二十四路径与禁止能力最终轻量验证；
+- [ ] 普通推送、非 Draft PR、Review/CI 与 Final Head 证据；
+- [ ] 项目所有者针对 Final Head 的独立 Squash Merge 授权。

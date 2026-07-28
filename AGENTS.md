@@ -100,5 +100,7 @@
 - Issue `#78` / PR `#79` 已完成第二个 Gate 5 应用概览只读事实迁移；Final Head `1bae5d51850c3538c3e161e73e266ac19f7406b3` 以单父 Squash 提交 `ef69494d92c7c461b0cb858e95f6838404ae1a61` 进入 `main`，tree 为 `936cc74fbceae2a3ee8d98b924c836e13d9f7ae3`，GitHub 签名 `valid`，Issue `#78` 已按 `COMPLETED` 关闭。合并后主干 CI Run `30289461278` 七 Job、Performance Baseline Run `30289461109` 四 Job全绿且 Artifact 均为 `0`。
 - Issue `#80` 已批准版本与启动意图方案 A 并按 `COMPLETED` 关闭：版本只来自编译期 `CARGO_PKG_VERSION`；精确 `--show-update` 或 `INPUTCODEX_SHOW_UPDATE=1` 请求展示更新；非法显式环境值必须以 `INVALID_STARTUP_OPTION` 失败。
 - Issue `#81` / PR `#82` 已完成第三个 Gate 5 版本与启动意图切片；Final Head `adc91bafd850fd054346b44e8b79a42bb7b00f71` 以单父 Squash 提交 `da65f7d8402e4de27e2795ee8905be18ad565653` 进入 `main`，tree 为 `0aad4659daaf9e07f3e62d1fd1ad9dfea38fd604`，GitHub 签名 `valid`，Issue 已按 `COMPLETED` 关闭。合并后主干 CI Run `30338961661` 七 Job、Performance Baseline Run `30338961713` 四 Job全绿且 Artifact 均为 `0`。
-- Issue `#83` 是独立文档信息架构任务，只允许稳定 README、分类文档门户、职责边界和 PR `#82` 后的最小状态修正；它不迁移产品功能，也不解锁第四个 Gate 5 切片。
-- 下一项产品工作必须重新建立独立一致性决策或功能 Issue、Session Plan、Runtime Workflow 和批准范围；禁止借文档维护夹带第四个 feature、UI、预算、Release、`upstream/`、Ruleset 或 AGOS 改动。
+- Issue `#83` / PR `#84` 已完成独立 README 与文档导航重构；单父 Squash 提交为 `3f2914cd81ace7afe28e0137c867c20fd346c3f9`，该任务不迁移产品功能。
+- Issue `#85` 已批准“观察与清理分离”并按 `COMPLETED` 关闭：当前进程环境只读观察可独立迁移，删除、备份和持久化来源扫描继续保留在未评估的环境冲突总功能中。
+- Issue `#86` 是当前第四个 Gate 5 产品切片；二十四路径与 `sha256:dd1d784ffe3149bf130c6bd678050d6aea3059f33a405abee5e2cc3f9735bb59` 已获批准。Domain、Application、Platform 与 Parity TDD checkpoint 已完成；当前只允许控制面回写、本地轻量验证、普通推送、非 Draft PR 与 Review/CI，最终 Squash Merge 仍须单独授权。
+- Issue `#86` 未完成前不得夹带第五个产品 feature、UI、预算、Release、`upstream/`、Ruleset 或 AGOS 改动；`tauri-command:check_env_conflicts` 只能作为 `environment-read` 映射到新只读子能力，`core-module:env_conflicts` 与 `tauri-command:remove_env_conflicts` 必须继续归原环境冲突总功能。
