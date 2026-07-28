@@ -149,5 +149,6 @@ Ordinal 排序、UTF-8 无 BOM、末尾单个 LF 的路径清单哈希固定为�
 - [x] 项目所有者批准十路径 candidate scope；
 - [x] README、文档门户、职责边界、稳定状态和排错记录已实施；
 - [x] 最终本地轻量验证通过；
-- [ ] 提交、普通推送、非 Draft PR 与 Review/CI；
+- [x] 提交、普通推送与非 Draft PR `#84` 已完成；
+- [ ] Review/CI 与最终授权的动态证据只在 GitHub 收口；
 - [ ] 项目所有者独立 Squash Merge 授权。

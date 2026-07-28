@@ -127,12 +127,15 @@ if ($hash -ne '83c915a75626bbfb31d9520a519dba3a5a210adc8b47a535f46fc21412c3a95f'
 
 ### Batch 6：远端交付
 
-- [ ] 使用 Windows 本机默认时间提交；
-- [ ] 普通推送，不 force push；
-- [ ] 创建关联 Issue #83 的非 Draft PR；
+- [x] 使用 Windows 本机默认时间提交；
+- [x] 普通推送，未 force push；
+- [x] 创建关联 Issue #83 的非 Draft PR `#84`；
 - [ ] 核验 Review 对话、CI 分类、required 与 Artifact；
 - [ ] 根因全部闭环后停在独立 Squash Merge 授权门；
 - [ ] 不删除分支，不创建递归 Closeout。
+
+PR #84 之后的动态 Head、Review、CI、授权和合并证据只保留在 GitHub，不通过继续修改
+任务文档制造递归状态提交。
 
 ## 范围强制
 

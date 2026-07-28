@@ -5,7 +5,8 @@
 方案 B“稳定首页 + 文档门户”已在批准的十路径内完成内容实施。README 已从项目流水账
 收敛为用户优先的公开首页，分类文档门户、职责边界、PR #82 后稳定状态和新排错根因均已
 落盘；本地内容、范围、链接、CI 合同、Release Audit、仓库政策、暂存级 diff check 和
-官方纯文档分类均已通过，当前只剩提交、普通推送、非 Draft PR 与 Hosted Review/CI。
+官方纯文档分类均已通过。实现提交、普通推送和非 Draft PR `#84` 已完成；后续动态 Head、
+Review、CI、授权和合并证据只保留在 GitHub，不通过继续修改本报告制造递归状态提交。
 
 ## 基线与批准
 
@@ -63,6 +64,17 @@ Workspace、构建入口、上游边界、贡献流程和许可证。
 - 新增根因：`git check-ignore .worktrees` 对尚不存在目录本身不命中 `.worktrees/`，
   应检查 `.worktrees/` 或目录内探针路径。
 
+## 人工评审修正
+
+- 现象：AGENTS 的 Gate 3 条目使用“仓库尚未迁移功能”的当前时态，与三个 Gate 5 能力已
+  合并的事实冲突；报告在 PR 创建后仍写“只剩提交、推送和 PR”，立即发生时效漂移。
+- 根因：历史交付事实与当前仓库事实没有明确分时态，任务本地文档又试图追踪可随 GitHub
+  事件变化的交付状态。
+- 处理：Gate 3 条目改为“该 Gate 当时”的历史语义；任务文档固定本地稳定面和 PR 引用，
+  Review/CI/授权/合并动态证据统一留在 GitHub。
+- 验证：活动状态扫描不再把 Gate 3 描述成当前仓库状态；PR #84 之后无需为每次 CI 或授权
+  再推送文档状态提交。
+
 ## 非目标确认
 
 本任务没有修改 Rust、Cargo、UI、CI Workflow、Ruleset、性能预算、Parity、`upstream/`、
@@ -96,6 +108,5 @@ Workspace、构建入口、上游边界、贡献流程和许可证。
 
 ## 剩余门禁
 
-1. Git checkpoint、提交、普通推送和非 Draft PR；
-2. Hosted Review/CI 根因闭环；
-3. 项目所有者独立 Squash Merge 授权。
+1. Hosted Review/CI 根因闭环；
+2. 项目所有者独立 Squash Merge 授权。

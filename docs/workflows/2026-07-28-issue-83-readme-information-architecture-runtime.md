@@ -208,5 +208,5 @@ if ($failures.Count -gt 0) { throw "Markdown 链接失效：$($failures -join ';
 - `SCOPE_PENDING`：完成，十路径与 candidate scope hash 已批准；
 - `EXECUTING`：完成；
 - `VERIFYING`：完成；十路径、链接、CI 合同、Release Audit、仓库政策、暂存级 diff check 和官方纯文档分类均已通过；
-- `PR_OPEN`：未开始；
-- `MERGE_GATE`：未开始。
+- `PR_OPEN`：已通过非 Draft PR `#84` 交付；动态 Head、Review 与 CI 状态以 GitHub 为真源；
+- `MERGE_GATE`：Review/CI 根因闭环后进入项目所有者独立授权门，动态结果不递归写回任务文档。
