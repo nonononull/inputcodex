@@ -358,46 +358,63 @@ contracts:
     feature_id: feature.foundation-platform.version-and-startup
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，Windows 或 macOS 平台适配器可用。'
+      - 'inputcodex 编译版本只能来自 CARGO_PKG_VERSION，并通过既有 ApplicationVersion 校验。'
     inputs:
       - name: request
-        data_type: version-and-startup-request
+        data_type: version-startup-request
+        required: true
+        description: '零敏感输入的同步请求，不携带原始命令行、环境值、路径或凭据。'
+      - name: process_arguments
+        data_type: os-string-sequence
         required: false
-        description: '结构化请求；无参数时为空对象。'
+        description: '只匹配跳过可执行文件名后的精确 --show-update；其他参数不改变默认意图。'
+      - name: show_update_environment
+        data_type: optional-os-string
+        required: false
+        description: 'INPUTCODEX_SHOW_UPDATE 未设置、空值或 0 使用命令行意图，1 请求展示更新，其他值明确失败。'
     outputs:
       - name: result
-        data_type: version-and-startup-result
-        description: '版本与启动参数的稳定结果或明确空结果。'
+        data_type: version-startup-snapshot
+        description: '成功只返回 Ready(VersionStartupSnapshot)，包含经 ApplicationVersion 校验的 CARGO_PKG_VERSION 与 StartupIntent::Default 或 StartupIntent::ShowUpdate；本功能不会产生 LoadCompletion::Empty。'
     side_effects:
       - process-read
-    persistence: '不持久化私人路径、凭据或真实会话内容。'
+    persistence: '不写文件、不缓存、不持久化命令行、环境值、路径、凭据或会话内容。'
     errors:
-      - code: VERSION_AND_STARTUP_FAILED
-        kind: feature
-        semantics: '版本与启动参数失败时返回稳定错误分类，不伪造空成功。'
+      - code: INVALID_STARTUP_OPTION
+        kind: invalid-input
+        semantics: 'INPUTCODEX_SHOW_UPDATE 为 0、1 或空值之外的非空值时失败；无法转换为 Unicode 的值同样失败，且错误不得回显原值。'
+      - code: VERSION_AND_STARTUP_UNSUPPORTED
+        kind: unsupported
+        semantics: '非 Windows/macOS 系统入口明确失败，不回退到其他平台或伪造默认结果。'
+      - code: VERSION_AND_STARTUP_BUILD_VERSION_INVALID
+        kind: internal
+        semantics: '编译期版本无法构造既有 ApplicationVersion 时失败，不复制版本类型或改用其他版本来源。'
     loading:
       states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
-      request_identity: '每次版本与启动参数请求使用唯一递增标识。'
-      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+      request_identity: '每次版本与启动意图请求使用唯一递增标识。'
+      stale_result_rule: '旧请求结果不得覆盖更新请求；取消后的同步结果必须按既有协调器规则视为过期。'
     timeout:
-      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
-      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+      behavior: '同步解析不启动等待、后台线程或定时任务；外层超时只使本次请求失效。'
+      evidence: '只记录请求标识、耗时、结果类别与稳定诊断码，不记录原始参数或环境值。'
     cancellation:
-      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
-      evidence: 记录取消请求、清理完成和旧请求失效。
-    isolation: '版本与启动参数单次失败不得污染其他 feature、请求或稳定状态。'
+      behavior: '取消后进入 Cancelling，完成清理后回到 Idle；已完成的同步结果不得覆盖取消状态。'
+      evidence: '记录取消请求、清理完成与过期结果，不记录原始参数或环境值。'
+    isolation: '非法环境值优先失败，即使命令行含 --show-update 也不得掩盖；单次失败不得污染其他 feature、请求或稳定状态。'
     observability:
       - request_identity
       - duration_ms
       - outcome_class
+      - diagnostic_code
     platforms:
-      shared_semantics: '读取版本与启动参数，结果稳定且不触发隐式网络或写入。'
-      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
-      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
-      differences: []
+      shared_semantics: 'Windows 与 macOS 使用相同 CARGO_PKG_VERSION、--show-update 和 INPUTCODEX_SHOW_UPDATE 解析语义，不联网、不写入、不检查或执行更新。'
+      windows: '读取当前进程参数与 INPUTCODEX_SHOW_UPDATE，返回共享 VersionStartupSnapshot。'
+      macos: '读取当前进程参数与 INPUTCODEX_SHOW_UPDATE，返回共享 VersionStartupSnapshot。'
+      differences:
+        - '其他目标仅用于质量测试，系统入口返回 VERSION_AND_STARTUP_UNSUPPORTED。'
     fixture_policy:
       mode: none
-      reason: '基线只约束状态、副作用和错误语义，不需要结构样本。'
+      reason: '输入只来自当前进程且结果只含编译版本与枚举意图；纯解析测试足以固定结构和错误语义。'
     fixture_refs: []
   - id: contract.feature.foundation-platform.watcher.baseline
     feature_id: feature.foundation-platform.watcher

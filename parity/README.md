@@ -25,6 +25,7 @@
 - `feature.foundation-platform.platform-paths` 纳入 Windows 包身份 `OpenAI.ChatGPT-Desktop`，macOS 保持等价原生路径语义。
 - Issue `#75` 已将 `feature.foundation-platform.platform-paths` 固定为 `implemented`：未安装受支持 Codex 时返回 `Ready + installation=None`，不使用 `Empty`；三个来源入口只增加 `process-read` 环境读取，不增加写入、网络、广告或远程推荐副作用。
 - Issue `#78` 已将 `feature.foundation-platform.application-overview` 固定为只读事实切片：结果只能是 `Ready(Installed Known)`、`Ready(Installed Unknown)` 或 `Ready(NotInstalled)`，实时进程状态固定为 `LiveProcessState::NotObserved`；历史状态、写入、网络、广告与远程推荐均不进入该能力。
+- Issue `#81` 已将 `feature.foundation-platform.version-and-startup` 固定为无副作用进程输入切片：版本只来自 `CARGO_PKG_VERSION`，精确 `--show-update` 或 `INPUTCODEX_SHOW_UPDATE=1` 产生 `StartupIntent::ShowUpdate`，其他合法情况为 `StartupIntent::Default`，非法显式环境值返回 `INVALID_STARTUP_OPTION`。
 - `feature.session-data.local-session-management` 纳入合法 `CODEX_SQLITE_HOME`、多数据库删除、`grouped-undo-token`、全库恢复预检、允许路径保护和撤销窗口。
 - `feature.plugin-script.dream-skin-library` 只纳入受限本地 companion data URL 与布局配置；fixture 使用合成图片数据。
 - `feature.plugin-script.dream-skin-runtime` 与 `feature.plugin-script.renderer-enhancements` 的 companion 显示仍依赖 renderer 注入，继续保持 `exception-pending`，不得进入 Rust/Iced 运行面。
