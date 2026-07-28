@@ -631,10 +631,10 @@ sources:
       path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
       symbol: check_env_conflicts
     platforms: [windows, macos]
-    side_effects: [environment-read, environment-write]
+    side_effects: [environment-read]
     disposition:
       type: feature
-      feature_id: feature.foundation-platform.environment-conflicts
+      feature_id: feature.foundation-platform.runtime-environment-conflict-observation
   - id: tauri-command:check_relay_environment
     kind: tauri-command
     evidence:

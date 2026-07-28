@@ -948,7 +948,7 @@ fn 仓库source_index_覆盖锁定上游公开入口() {
         validate_feature_repository(&repository_root()).expect("功能目录应通过仓库级验证");
 
     assert_eq!(summary.source_entry_count(), 133);
-    assert_eq!(summary.feature_count(), 36);
+    assert_eq!(summary.feature_count(), 37);
     assert_eq!(summary.excluded_entry_count(), 3);
     assert_eq!(summary.exception_pending_count(), 10);
     assert_eq!(summary.coverage_gap_count(), 0);
@@ -959,8 +959,8 @@ fn 仓库功能目录通过完整引用与安全验证() {
     let summary = validate_repository(&repository_root()).expect("仓库功能目录应通过验证");
 
     assert_eq!(summary.source_entry_count(), 133);
-    assert_eq!(summary.feature_count(), 36);
-    assert_eq!(summary.contract_count(), 36);
+    assert_eq!(summary.feature_count(), 37);
+    assert_eq!(summary.contract_count(), 37);
     assert_eq!(summary.fixture_count(), 11);
     assert_eq!(summary.coverage_gap_count(), 0);
 }

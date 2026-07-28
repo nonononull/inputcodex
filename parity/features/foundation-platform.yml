@@ -107,12 +107,9 @@ features:
       - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/env_conflicts.rs
         symbol: env_conflicts
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
-        symbol: check_env_conflicts
-      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: remove_env_conflicts
     entry_points:
       - core-module:env_conflicts
-      - tauri-command:check_env_conflicts
       - tauri-command:remove_env_conflicts
     platforms:
       windows:
@@ -123,6 +120,28 @@ features:
         semantics: '检测并按明确授权清理冲突环境配置，默认只读并保留证据。'
     decision_refs:
       - issue:26
+      - issue:85
+  - id: feature.foundation-platform.runtime-environment-conflict-observation
+    name: '运行时环境冲突观察'
+    status: implemented
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/env_conflicts.rs
+        symbol: detected_env_conflicts_from_pairs
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: check_env_conflicts
+    entry_points:
+      - tauri-command:check_env_conflicts
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '只读观察当前进程继承的 OPENAI_* 环境变量名称和值存在性；名称大小写不敏感并规范为大写，持久化用户与系统来源明确标记为 NotObserved。'
+      macos:
+        applicability: supported
+        semantics: '只读观察当前进程继承的 OPENAI_* 环境变量名称和值存在性；名称大小写敏感并保留原名，持久化用户与系统来源明确标记为 NotObserved。'
+    decision_refs:
+      - issue:26
+      - issue:85
+      - issue:86
   - id: feature.foundation-platform.platform-paths
     name: '平台路径解析'
     status: implemented
