@@ -4,6 +4,7 @@ mod application_overview;
 mod platform_paths;
 mod relay_environment_observation;
 mod runtime_environment_observation;
+mod settings_observation;
 mod version_startup;
 
 pub use application_overview::{
@@ -26,6 +27,7 @@ pub use runtime_environment_observation::{
     EnvironmentValuePresence, EnvironmentVariableName, EnvironmentVariableNameError,
     RuntimeEnvironmentConflict, RuntimeEnvironmentConflictObservation,
 };
+pub use settings_observation::SettingsDocumentObservation;
 pub use version_startup::{StartupIntent, VersionStartupSnapshot};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
