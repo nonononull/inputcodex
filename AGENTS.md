@@ -104,5 +104,5 @@
 - Issue `#85` 已批准“观察与清理分离”并按 `COMPLETED` 关闭：当前进程环境只读观察可独立迁移，删除、备份和持久化来源扫描继续保留在未评估的环境冲突总功能中。
 - Issue `#86` / PR `#87` 已完成第四个 Gate 5 运行时环境冲突只读观察切片；Final Head `4799d40aedbf1ea4e95fbbf97fc2ed5cf72e5379` 以单父 Squash 提交 `db0c09b9df272887deb9407a5e344cf87a59dda8` 进入 `main`，tree 为 `7429a3cf1705239a47ac5bf7536e5541da401c51`，GitHub 签名 `valid`，Issue `#86` 已按 `COMPLETED` 关闭。合并后主干 CI Run `30356509847` 七 Job、Performance Baseline Run `30356509131` 四 Job全绿且 Artifact 均为 `0`。
 - Issue `#88` 已批准 Relay 环境方案 A 并按 `COMPLETED` 关闭：当前进程代理环境、Windows 固定持久化环境来源、`CODEX_HOME/.env` 存在状态和四个 Clash Verge 候选的 `enable_tun_mode` 状态可组成独立只读观察；网络测试、配置修改和原代理总功能继续保持未评估。
-- Issue `#89` 是当前第五个 Gate 5 产品切片；三十路径与 `sha256:0adc20d0ed4d73ae645a5ffb23d7208f7aaabfea92c4d6fd62e0da3a120e8f77` 已获批准。Planning、Domain、Application、共享 Platform、双平台适配与 Parity checkpoint 已完成，当前只允许项目文档收口、最终本地轻量验证、普通推送、非 Draft PR 与 Review/CI；最终 Squash Merge 仍须单独授权。
+- Issue `#89` 是当前第五个 Gate 5 产品切片；三十路径与 `sha256:0adc20d0ed4d73ae645a5ffb23d7208f7aaabfea92c4d6fd62e0da3a120e8f77` 已获批准。Planning、Domain、Application、共享 Platform、双平台适配、Parity、项目控制面与最终本地轻量验证已完成，本地验证 checkpoint 为 `b33bbbb7a6b2303c7a0c60725745528c92085c66`；当前只允许普通推送、非 Draft PR 与 Review/CI，最终 Squash Merge 仍须单独授权。
 - Issue `#89` 不得联网、写环境或文件、调用子进程、启动线程/Watcher、打开 UI、注入或泄露环境值、文件内容、注册表值和实际路径；`core-module:proxy` 与原 `feature.provider-network.network-environment` 必须继续保持 `unassessed`。

@@ -267,7 +267,7 @@ Workspace 全量、Windows/macOS 编译和 Performance observation 继续交给 
 - [x] 项目所有者批准 `30` 路径和哈希；
 - [x] Domain、Application、共享 Platform、双平台与 Parity TDD checkpoint；
 - [x] 项目控制面与静态实施报告收口；
-- [ ] 最终本地轻量验证与文档 checkpoint；
+- [x] 最终本地轻量验证与文档 checkpoint `b33bbbb7a6b2303c7a0c60725745528c92085c66`；
 - [ ] 普通推送、非 Draft PR、Review/CI；
 - [ ] 独立 Squash Merge 授权。
 

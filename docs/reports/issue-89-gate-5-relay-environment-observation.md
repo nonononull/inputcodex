@@ -7,8 +7,8 @@ Windows/macOS Platform 与 Parity RED→GREEN checkpoint。实现只聚合固定
 来源、`CODEX_HOME/.env` 存在状态和四个固定 Clash Verge 候选的 TUN 状态，不返回变量值、
 文件内容、注册表值或实际路径。
 
-项目控制面正在收口，最终本地轻量验证尚未执行；尚未普通推送、尚未创建 PR，Hosted
-Review/CI 与最终 Squash Merge 均未完成。最终合并继续保留项目所有者独立授权门。
+项目控制面与最终本地轻量验证已经完成；尚未普通推送、尚未创建 PR，Hosted Review/CI 与
+最终 Squash Merge 均未完成。最终合并继续保留项目所有者独立授权门。
 
 ## 基线与批准
 
@@ -89,24 +89,31 @@ windows-rs 包只因多版本共存增加名称消歧。
 ## 当前验证状态
 
 ```yaml
-status: implementation-checkpoints-complete-final-local-validation-pending
-recorded_at_local: pending
+status: local-verified-ready-for-push-pr
+recorded_at_local: 2026-07-28T22:44:34+08:00
 domain_checkpoint_tests: passed
 application_checkpoint_tests: passed
 platform_checkpoint_tests: passed
 parity_checkpoint_tests: passed
-four_crate_test: pending-final-run
-four_crate_clippy: pending-final-run
-fmt: pending-final-run
-ci_contract: pending-final-run
-release_audit: pending-final-run
-repository_policy: pending-final-run
+parity_catalog_repository: 17/17
+four_crate_test: passed
+four_crate_clippy: passed
+fmt: passed
+locked_offline_platform_check: passed
+ci_contract: 35/35
+release_audit: current
+repository_policy_violations: 0
 candidate_scope_count: 30
-actual_changed_path_count: pending-final-audit
+actual_changed_path_count: 30
 scope_hash: sha256:0adc20d0ed4d73ae645a5ffb23d7208f7aaabfea92c4d6fd62e0da3a120e8f77
-protected_path_changes: pending-final-audit
-privacy_matches: pending-final-audit
-forbidden_capability_matches: pending-final-audit
+new_lock_packages: windows-registry-0.6.1,windows-result-0.4.1,windows-strings-0.5.1
+protected_path_changes: 0
+privacy_matches: 0
+forbidden_capability_matches: 0
+dotenv_content_reads: 0
+clash_candidate_read_limit_bytes: 65536
+runtime_environment_scans_per_target: 1
+local_verification_checkpoint: b33bbbb7a6b2303c7a0c60725745528c92085c66
 push: pending
 pr: pending
 review: pending

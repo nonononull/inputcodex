@@ -2,9 +2,9 @@
 
 schema_version: inputcodex.master-plan.v1
 active_task: issue-89-gate-5-relay-environment-observation
-active_gate: Gate 5 前四个产品切片已进入 main；第五个 Relay 环境只读观察切片已完成 Planning、Domain、Application、共享 Platform、双平台适配与 Parity checkpoint，正在完成项目文档和最终本地轻量验证
+active_gate: Gate 5 前四个产品切片已进入 main；第五个 Relay 环境只读观察切片已在三十路径内完成实现、项目控制面与最终本地轻量验证，正在等待普通推送、非 Draft PR 和 Hosted Review/CI
 last_verified_gate: Issue #86 / PR #87 已以单父 Squash 提交 db0c09b9df272887deb9407a5e344cf87a59dda8 进入 main；合并后 main CI Run 30356509847 七 Job与 Performance Baseline Run 30356509131 四 Job全绿且 Artifact 均为 0，Issue #86 已按 COMPLETED 关闭且 release_audit=current
-next_legal_gate: 在批准的三十路径内完成 Issue #89 项目文档与最终本地轻量验证，随后普通推送并创建非 Draft PR；Final Head 全绿且全部 Review 对话根因闭环后停在单独 Squash Merge 授权门
+next_legal_gate: 普通推送 Issue #89 分支并创建非 Draft PR；Final Head 全绿、成功 Artifact 为 0 且全部 Review 对话根因闭环后停在单独 Squash Merge 授权门
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/89
 active_pr_ref: none
 gate_5_platform_paths_exception_ref: https://github.com/nonononull/inputcodex/issues/74
@@ -59,6 +59,7 @@ gate_5_relay_environment_application_commit: 13e1f349b8a4d2556864e67f1066884b0e4
 gate_5_relay_environment_shared_platform_commit: 1d9b774a661af44f765cb8e9cb3d7223a56e594d
 gate_5_relay_environment_target_platform_commit: 1dae9843618bdffc95f16069d54b7e7440d21db8
 gate_5_relay_environment_parity_commit: 749d02e23f1c1fa8f042d598d8f5bb5e28a18638
+gate_5_relay_environment_local_checkpoint: b33bbbb7a6b2303c7a0c60725745528c92085c66
 gate_5_relay_environment_pr_ref: pending
 documentation_information_architecture_issue_ref: https://github.com/nonononull/inputcodex/issues/83
 documentation_information_architecture_scope_hash: sha256:d8a404c19b108587a5e17b4ded454444d5e948c92410b759504a7eb7c63bed44
@@ -117,7 +118,7 @@ gate_2_watch_report_ref: docs/reports/issue-14-gate-2-upstream-watch.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-decision_status: issue-89-parity-green-documentation-closeout-final-local-validation-pending-final-merge-not-authorized
+decision_status: issue-89-local-verified-pr-pending-final-merge-not-authorized
 
 ## 当前状态
 
@@ -153,7 +154,7 @@ decision_status: issue-89-parity-green-documentation-closeout-final-local-valida
 - Issue `#85` 已批准运行时环境观察与破坏性清理分离并按 `COMPLETED` 关闭；原环境冲突总功能继续为 `unassessed`。
 - Issue `#86` / PR `#87` 已完成第四个 Gate 5 运行时环境冲突只读观察切片；Final Head `4799d40aedbf1ea4e95fbbf97fc2ed5cf72e5379` 以单父 Squash 提交 `db0c09b9df272887deb9407a5e344cf87a59dda8` 进入 `main`，tree 为 `7429a3cf1705239a47ac5bf7536e5541da401c51`，GitHub 签名 `valid`，Issue 已按 `COMPLETED` 关闭。合并后主干 CI Run `30356509847` 七 Job、Performance Baseline Run `30356509131` 四 Job全绿且 Artifact 均为 `0`。
 - Issue `#88` 已批准 Relay 环境方案 A 并按 `COMPLETED` 关闭；独立只读观察只覆盖固定代理环境来源、`CODEX_HOME/.env` 存在状态和四个 Clash Verge TUN 候选，网络测试、配置修改与原网络环境总功能继续未评估。
-- Issue `#89` 已在批准的三十路径与 `sha256:0adc20d0ed4d73ae645a5ffb23d7208f7aaabfea92c4d6fd62e0da3a120e8f77` 内完成 Planning、Domain、Application、共享 Platform、双平台适配与 Parity checkpoint；当前正在完成项目控制面、最终本地轻量验证和静态报告，尚未普通推送、尚未创建 PR，Hosted Review/CI 与最终 Squash Merge 均未完成。
+- Issue `#89` 已在批准的三十路径与 `sha256:0adc20d0ed4d73ae645a5ffb23d7208f7aaabfea92c4d6fd62e0da3a120e8f77` 内完成 Planning、Domain、Application、共享 Platform、双平台适配、Parity、项目控制面与最终本地轻量验证；本地 checkpoint 为 `b33bbbb7a6b2303c7a0c60725745528c92085c66`，当前尚未普通推送、尚未创建 PR，Hosted Review/CI 与最终 Squash Merge 均未完成。
 - 合并后 main CI Run `30158058627` 的 Attempt `1/2` 因 GitHub Actions major outage 在创建 Job 前失败；服务恢复后的同一 Run Attempt `3` 绑定同一提交并七 Job 全绿、Artifact 为 `0`，Issue `#46` 已按 `COMPLETED` 关闭，仓库代码与 CI 合同无需为该外部事故修改。
 - Issue `#47` 以 `sha256:dd612ef0c2e5f0f830c40f161b1ef1a85bc58cd1d85458a758c3905ade8db03e` 冻结微型五路径 Closeout；本报告只收口长期状态与事故复用知识，其自身动态 Review、CI 与合并证据保留在 GitHub Issue/PR，不再创建二次 Closeout。
 - Issue `#8` 的过渡交付为 PR `#10`；该 PR 只包含文档与验证控制面，并按项目所有者明确授权执行 Squash Merge。
@@ -266,7 +267,7 @@ decision_status: issue-89-parity-green-documentation-closeout-final-local-valida
 - [x] Issue `#85` 已完成运行时环境观察与清理分离决策并关闭。
 - [x] Issue `#86` / PR `#87` 已完成运行时环境冲突只读观察迁移、Review/CI、独立 Squash 授权与合并后主干验证。
 - [x] Issue `#88` 已完成 Relay 环境只读观察与网络环境总功能分拆决策并关闭。
-- [ ] Issue `#89` 正在完成第五个 Gate 5 Relay 环境只读观察切片；必须完成最终本地验证、非 Draft PR、Review/CI 与独立 Squash 授权，禁止并行启动第六个切片。
+- [ ] Issue `#89` 已完成第五个 Gate 5 Relay 环境只读观察切片的本地实现与验证；必须继续完成非 Draft PR、Review/CI 与独立 Squash 授权，禁止并行启动第六个切片。
 
 ### Gate 6：首个正式版本（锁定）
 
