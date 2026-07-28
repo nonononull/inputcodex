@@ -85,23 +85,39 @@ features:
     evidence:
       - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/proxy.rs
         symbol: proxy
+    entry_points:
+      - core-module:proxy
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '保留系统代理探测、平台命令和网络诊断扩展；Relay 环境只读观察已拆分。'
+      macos:
+        applicability: supported
+        semantics: '保留系统代理探测、平台命令和网络诊断扩展；Relay 环境只读观察已拆分。'
+    decision_refs:
+      - issue:26
+      - issue:88
+  - id: feature.provider-network.relay-environment-observation
+    name: 'Relay 环境只读观察'
+    status: implemented
+    evidence:
       - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/relay_environment.rs
         symbol: relay_environment
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: check_relay_environment
     entry_points:
-      - core-module:proxy
       - core-module:relay_environment
       - tauri-command:check_relay_environment
     platforms:
       windows:
         applicability: supported
-        semantics: '检查系统代理、环境变量与 Relay 前置条件，默认不修改环境。'
+        semantics: '只读观察进程、用户级和系统级代理环境、Codex .env 与 Clash Verge TUN；局部读取失败保留明确状态。'
       macos:
         applicability: supported
-        semantics: '检查系统代理、环境变量与 Relay 前置条件，默认不修改环境。'
+        semantics: '只读观察进程代理环境、Codex .env 与 Clash Verge TUN；持久化代理来源固定为 NotObserved。'
     decision_refs:
-      - issue:26
+      - issue:88
+      - issue:89
   - id: feature.provider-network.protocol-proxy
     name: '协议代理'
     status: unassessed
