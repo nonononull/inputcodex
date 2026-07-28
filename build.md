@@ -1,8 +1,29 @@
 # inputcodex 构建与验证说明
 
-## 当前状态
+## 文档职责
 
-截至 2026 年 7 月 28 日，Gate 3 七成员 Workspace、Gate 4 `v1.2.43` 功能目录重新审计、双平台性能基线、性能预算数值和非 required `approved-observation` 均已进入 `main`。Issue `#75/#78` 已完成前两个 Gate 5 产品切片；当前 `main` 为 `ef69494d92c7c461b0cb858e95f6838404ae1a61`，合并后主干 CI Run `30289461278` 七 Job、Performance Baseline Run `30289461109` 四 Job全绿且 Artifact 均为 `0`。Issue `#81` 是当前第三个 Gate 5 产品迁移切片：二十三路径与 `sha256:c1ef2c00a445dd2bd60dc5f5b375cb27d1e467a3d457d7eb53b7ec82a304aafe` 已获批准，规划、Domain、Application、Platform、Parity TDD、最终本地轻量验证和 checkpoint `73bd5748d2341a92577ab8273b0db6f7bdb6a265` 已完成；当前只剩普通推送、非 Draft PR 与 Hosted Review/CI，最终 Squash Merge 仍未授权。
+本文件只维护可重复构建、测试和验证命令，不再承担活动任务面板、逐 PR 合并流水账或
+主干状态真源职责。稳定产品 Gate 与下一合法阶段见
+`docs/plans/PROJECT-MASTER-PLAN.md`；动态 Head、Review、CI、授权和合并后证据见对应的
+GitHub Issue、PR 与 Actions。
+
+Gate 3 七成员 Rust Workspace、Gate 4 上游审计/功能目录/性能基线，以及 Gate 5 的平台路径、
+应用概览和版本与启动意图能力已经建立。该说明只用于选择正确命令，不能替代任务计划和
+GitHub 新鲜证据。
+
+## 文档变更轻量验证
+
+纯文档任务不运行本地 Workspace 全量编译或 Iced 桌面构建。至少执行：
+
+```powershell
+$ErrorActionPreference = 'Stop'
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+git diff --check
+```
+
+路径范围、Markdown 链接和任务特有内容守卫由对应 Session Plan 与 Runtime Workflow 定义。
 
 仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供二十三个检查点：
 
