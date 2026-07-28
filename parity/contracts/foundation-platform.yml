@@ -246,6 +246,60 @@ contracts:
       mode: none
       reason: '基线只约束状态、副作用和错误语义，不需要结构样本。'
     fixture_refs: []
+  - id: contract.feature.foundation-platform.runtime-environment-conflict-observation.baseline
+    feature_id: feature.foundation-platform.runtime-environment-conflict-observation
+    scenario: baseline
+    preconditions:
+      - 'Issue #85 已批准观察与清理分离；上游 Release v1.2.43 证据已锁定，Windows 或 macOS 平台适配器可用。'
+      - '当前切片只观察 inputcodex 进程继承的环境，用户级与系统级持久化来源均不在本次观察范围。'
+    inputs:
+      - name: request
+        data_type: runtime-environment-observation-request
+        required: true
+        description: '零敏感输入的只读同步请求，不携带环境名称、原始环境内容、路径或凭据。'
+    outputs:
+      - name: result
+        data_type: runtime-environment-conflict-observation
+        description: '成功只返回 Ready(RuntimeEnvironmentConflictObservation)；零冲突返回 Ready(empty)，覆盖固定为 runtime_process: Observed、persistent_user: NotObserved、persistent_system: NotObserved，不使用 LoadCompletion::Empty。'
+    side_effects:
+      - environment-read
+    persistence: 'none'
+    errors:
+      - code: RUNTIME_ENVIRONMENT_OBSERVATION_UNSUPPORTED
+        kind: unsupported
+        semantics: '非 Windows/macOS 系统入口明确失败，不回退到其他平台或伪造空结果。'
+      - code: RUNTIME_ENVIRONMENT_OBSERVATION_TIMEOUT
+        kind: timeout
+        semantics: '外层协调器判定请求超时时返回稳定错误；迟到结果不得覆盖更新请求或取消状态。'
+      - code: RUNTIME_ENVIRONMENT_NAME_UNREPRESENTABLE
+        kind: internal
+        semantics: '命中的环境名称无法无损表示时整次观察失败，不静默丢弃、不替换名称。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次运行时环境观察请求使用唯一递增标识。'
+      stale_result_rule: '旧请求结果不得覆盖更新请求；取消后的同步结果必须按既有协调器规则视为过期。'
+    timeout:
+      behavior: '同步观察不启动等待、后台线程或定时任务；外层超时只使本次请求失效。'
+      evidence: '只记录请求标识、耗时、结果类别与稳定诊断码，不记录环境名称或原始环境内容。'
+    cancellation:
+      behavior: '取消后进入 Cancelling，完成清理后回到 Idle；已完成的同步结果不得覆盖取消状态。'
+      evidence: '记录取消请求、清理完成与过期结果，不记录环境名称或原始环境内容。'
+    isolation: '名称不可表示、平台不支持或超时只使本次请求失败，不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+      - diagnostic_code
+    platforms:
+      shared_semantics: 'Windows 与 macOS 只读观察当前进程继承的 OPENAI_* 名称和值存在性，并返回相同领域结构与来源覆盖。'
+      windows: '名称比较大小写不敏感，命中后输出大写规范名；同名结果去重且 NonEmpty 优先。'
+      macos: '名称比较大小写敏感并保留原名；同名结果去重且 NonEmpty 优先。'
+      differences:
+        - '其他目标仅用于质量测试，系统入口返回 RUNTIME_ENVIRONMENT_OBSERVATION_UNSUPPORTED。'
+    fixture_policy:
+      mode: none
+      reason: '纯函数测试使用合成 OsString 对，无需保存环境夹具或敏感数据。'
+    fixture_refs: []
   - id: contract.feature.foundation-platform.platform-paths.baseline
     feature_id: feature.foundation-platform.platform-paths
     scenario: baseline

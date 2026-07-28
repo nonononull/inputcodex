@@ -2,6 +2,7 @@
 
 mod application_overview;
 mod platform_paths;
+mod runtime_environment_observation;
 mod version_startup;
 
 pub use application_overview::{
@@ -13,6 +14,11 @@ pub use application_overview::{
 pub use platform_paths::{
     ApplicationInstallSource, CodexInstallation, PlatformPathsSnapshot, PrivatePath,
     PrivatePathError,
+};
+pub use runtime_environment_observation::{
+    EnvironmentConflictSource, EnvironmentObservationStatus, EnvironmentSourceCoverage,
+    EnvironmentValuePresence, EnvironmentVariableName, EnvironmentVariableNameError,
+    RuntimeEnvironmentConflict, RuntimeEnvironmentConflictObservation,
 };
 pub use version_startup::{StartupIntent, VersionStartupSnapshot};
 

@@ -4,12 +4,17 @@ use inputcodex_domain::DiagnosticCode;
 
 mod application_overview;
 mod platform_paths;
+mod runtime_environment_observation;
 mod version_startup;
 
 pub use application_overview::{
     ApplicationOverviewPort, ApplicationOverviewRequest, LoadApplicationOverview,
 };
 pub use platform_paths::{PlatformPathsPort, PlatformPathsRequest, ResolvePlatformPaths};
+pub use runtime_environment_observation::{
+    ObserveRuntimeEnvironmentConflicts, RuntimeEnvironmentObservationPort,
+    RuntimeEnvironmentObservationRequest,
+};
 pub use version_startup::{LoadVersionStartup, VersionStartupPort, VersionStartupRequest};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -62,6 +67,11 @@ impl ApplicationError {
     #[must_use]
     pub const fn unavailable(code: &'static str) -> Self {
         Self::new(ErrorKind::Unavailable, DiagnosticCode::new(code))
+    }
+
+    #[must_use]
+    pub const fn timeout(code: &'static str) -> Self {
+        Self::new(ErrorKind::Timeout, DiagnosticCode::new(code))
     }
 
     #[must_use]

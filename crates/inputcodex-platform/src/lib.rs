@@ -4,10 +4,15 @@ use inputcodex_application::{ApplicationError, PlatformKind, PlatformPort};
 
 mod application_overview;
 mod platform_paths;
+mod runtime_environment_observation;
 mod version_startup;
 
 pub use application_overview::SystemApplicationOverview;
 pub use platform_paths::SystemPlatformPaths;
+pub use runtime_environment_observation::{
+    SystemRuntimeEnvironmentObservation, observe_macos_runtime_environment,
+    observe_windows_runtime_environment,
+};
 pub use version_startup::{SystemVersionStartup, resolve_version_startup};
 
 #[derive(Debug, Clone, Copy, Default)]
