@@ -3,7 +3,7 @@
 ## 运行元数据
 
 ```yaml
-status: planning-scope-frozen-owner-approval-pending
+status: implementation-authorized-parity-resumed
 task_id: issue-86-gate-5-runtime-environment-observation
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/86
 approved_decision_ref: https://github.com/nonononull/inputcodex/issues/85#issuecomment-5102509300
@@ -14,11 +14,11 @@ upstream_release: v1.2.43
 upstream_commit: 5036ff056b5c629f19356396b17d6eeb70da664c
 planning_scope_count: 3
 planning_scope_hash: sha256:c3d16ff75e79d9fd2866db1bd59f4259089b7398bce46b20e2766fc2bccc6d34
-candidate_scope_count: 23
-candidate_scope_hash: sha256:448587243eb7cf842f7412bba868347aaada01016b964424812d5b47a278d66e
-approved_scope_ref: pending-owner-scope-approval
-implementation_authorization: pending-owner-scope-approval
-remote_write_authorization: pending-owner-scope-approval
+candidate_scope_count: 24
+candidate_scope_hash: sha256:dd1d784ffe3149bf130c6bd678050d6aea3059f33a405abee5e2cc3f9735bb59
+approved_scope_ref: https://github.com/nonononull/inputcodex/issues/86#issuecomment-5103198917
+implementation_authorization: authorized
+remote_write_authorization: authorized-normal-push-non-draft-pr-review-ci
 final_merge_authorization: pending-separate-gate
 local_time_source: Windows Get-Date
 agos_status: bypassed-project-native-control-plane
@@ -56,8 +56,8 @@ ISSUE_85_DECISION_COMPLETED
   -> POST_MERGE_VERIFICATION
 ```
 
-当前授权只允许执行到 `PLANNING_GIT_CHECKPOINT`。进入 Domain RED、任何产品或 Parity 写入、
-普通推送和 PR 前，必须取得项目所有者对 `23` 路径与候选哈希的明确批准。
+项目所有者已批准 `24` 路径修订范围，可执行到 `FINAL_HEAD_REVIEW_CI`；最终 Squash Merge 仍由
+独立授权门锁定。
 
 ## 当前规划写入范围
 
@@ -96,10 +96,11 @@ err.md
 parity/README.md
 parity/contracts/foundation-platform.yml
 parity/features/foundation-platform.yml
+parity/features/source-index.yml
 ```
 
-候选范围固定为 `23` 路径，哈希为
-`sha256:448587243eb7cf842f7412bba868347aaada01016b964424812d5b47a278d66e`。实现可以只修改其中必要
+候选范围固定为 `24` 路径，哈希为
+`sha256:dd1d784ffe3149bf130c6bd678050d6aea3059f33a405abee5e2cc3f9735bb59`。实现可以只修改其中必要
 子集，不得为了凑数制造无意义差异。
 
 ## 阶段授权
@@ -108,8 +109,8 @@ parity/features/foundation-platform.yml
 | --- | --- | --- |
 | Discovery 与书面设计 | 已完成并批准 | 只读项目、上游快照与 Issue，落盘设计稿 |
 | 规划冻结 | 当前已授权 | 只写三份规划文件、轻量文档验证、Git checkpoint 与规划提交 |
-| TDD 实施 | 未授权 | 等待 `23` 路径和候选哈希明确批准 |
-| 普通推送、PR、Review/CI | 未授权 | 等待同一范围批准覆盖远端写入 |
+| TDD 实施 | 已授权 | 只在 `24` 路径内执行 RED/GREEN、验证和 checkpoint |
+| 普通推送、PR、Review/CI | 已授权 | 最终本地门禁通过后普通推送并创建非 Draft PR |
 | Squash Merge | 未授权 | Final Head Review/CI 通过后单独授权 |
 
 ## 双哈希验证
@@ -157,7 +158,8 @@ $candidate = [string[]]@(
   'err.md',
   'parity/README.md',
   'parity/contracts/foundation-platform.yml',
-  'parity/features/foundation-platform.yml'
+  'parity/features/foundation-platform.yml',
+  'parity/features/source-index.yml'
 )
 [Array]::Sort($candidate, [StringComparer]::Ordinal)
 $candidateText = [string]::Join("`n", $candidate) + "`n"
@@ -166,8 +168,8 @@ $candidateHash = [Convert]::ToHexString(
     [Text.UTF8Encoding]::new($false).GetBytes($candidateText)
   )
 ).ToLowerInvariant()
-if ($candidate.Count -ne 23) { throw "Issue #86 候选路径数量漂移：$($candidate.Count)" }
-if ($candidateHash -ne '448587243eb7cf842f7412bba868347aaada01016b964424812d5b47a278d66e') {
+if ($candidate.Count -ne 24) { throw "Issue #86 候选路径数量漂移：$($candidate.Count)" }
+if ($candidateHash -ne 'dd1d784ffe3149bf130c6bd678050d6aea3059f33a405abee5e2cc3f9735bb59') {
   throw "Issue #86 candidate_scope_hash 漂移：sha256:$candidateHash"
 }
 ```
@@ -280,7 +282,6 @@ $protected = @($changed | Where-Object {
   $_ -eq 'Cargo.toml' -or
   $_ -eq 'Cargo.lock' -or
   $_ -like '*/Cargo.toml' -or
-  $_ -eq 'parity/features/source-index.yml' -or
   $_ -like '.github/*' -or
   $_ -like 'upstream/*' -or
   $_ -like 'apps/*' -or
@@ -378,7 +379,8 @@ if ($ownerName) {
 - GREEN 后 `feature.foundation-platform.runtime-environment-conflict-observation` 为 `implemented`；
 - `feature.foundation-platform.environment-conflicts` 继续为 `unassessed`；
 - 合同明确 `Ready(empty)`、三项覆盖、三条稳定错误/状态语义和禁止副作用；
-- `parity/features/source-index.yml` 保持未修改。
+- `parity/features/source-index.yml` 只修正 `check_env_conflicts` 为只读副作用并映射到新子能力；
+- `core-module:env_conflicts` 与 `remove_env_conflicts` 的原总功能映射保持不变。
 
 ### Closeout
 
@@ -439,17 +441,20 @@ git diff --check
 ## 当前执行进度
 
 ```yaml
-current_node: OWNER_CANDIDATE_SCOPE_APPROVAL_REQUIRED
+current_node: PARITY_RED
 written_design_checkpoint: 26b3b1c54dd35cc92460879483b0f9d1f9d4793f
 planning_documents: 3
 planning_scope_hash: sha256:c3d16ff75e79d9fd2866db1bd59f4259089b7398bce46b20e2766fc2bccc6d34
-candidate_scope_count: 23
-candidate_scope_hash: sha256:448587243eb7cf842f7412bba868347aaada01016b964424812d5b47a278d66e
+candidate_scope_count: 24
+candidate_scope_hash: sha256:dd1d784ffe3149bf130c6bd678050d6aea3059f33a405abee5e2cc3f9735bb59
 planning_validation: ci-contract-35-of-35-release-audit-current-policy-zero
-implementation_changes: none
-product_code_changes: none
+domain_checkpoint: 6591882dc23596a502833d38aed08d585b4acc08
+application_checkpoint: 55b84b6c2b45d00fdf3f6e42aaa1e86d1635557e
+platform_checkpoint: cd41fa8ef739b1481cfbfc491ef42e26369f0b4e
+implementation_changes: domain-application-platform-complete
+product_code_changes: runtime-environment-observation-complete
 parity_changes: none
-remote_push_pr_review_ci: blocked-by-owner-scope-approval
+remote_push_pr_review_ci: authorized-after-local-verification
 final_merge_authorization: pending-separate-gate
 ```
 
@@ -457,9 +462,10 @@ final_merge_authorization: pending-separate-gate
 
 出现任一情况立即停止并回到 Issue `#86`：
 
-- 三路径规划范围、`23` 路径候选范围或任一哈希漂移；
+- 三路径规划范围、`24` 路径候选范围或任一哈希漂移；
 - 未取得所有者范围批准却开始 Rust、Parity、根控制面、推送或 PR 写入；
-- 需要 Cargo、新依赖、`source-index.yml`、UI、预算、Release、Workflow、Ruleset、`upstream/` 或 AGOS 改动；
+- `source-index.yml` 超出批准的 `check_env_conflicts` 单入口修订；
+- 需要 Cargo、新依赖、UI、预算、Release、Workflow、Ruleset、`upstream/` 或 AGOS 改动；
 - 需要读取或修改持久化环境、文件、网络、缓存、线程、子进程、FFI 或 `unsafe`；
 - 环境变量实际值进入领域、错误、诊断、日志、报告或生产 `Debug`；
 - 原环境冲突总功能被标记为 `implemented`；

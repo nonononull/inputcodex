@@ -2,20 +2,21 @@
 
 ## 文档状态
 
-- `status`: `PLANNING_SCOPE_FROZEN_OWNER_APPROVAL_PENDING`
+- `status`: `IMPLEMENTATION_AUTHORIZED_PARITY_RESUMED`
 - `tracking_issue_ref`: `https://github.com/nonononull/inputcodex/issues/86`
 - `approved_decision_ref`: `https://github.com/nonononull/inputcodex/issues/85`
 - `owner_approval_evidence`: `https://github.com/nonononull/inputcodex/issues/85#issuecomment-5102509300`
 - `written_review_ref`: `https://github.com/nonononull/inputcodex/issues/86#issuecomment-5102713590`
+- `approved_scope_ref`: `https://github.com/nonononull/inputcodex/issues/86#issuecomment-5103198917`
 - `base_ref`: `3f2914cd81ace7afe28e0137c867c20fd346c3f9`
 - `upstream_release`: `v1.2.43`
 - `branch_ref`: `codex/issue-86-gate-5-runtime-environment-observation`
 - `planning_scope_count`: `3`
 - `planning_scope_hash`: `sha256:c3d16ff75e79d9fd2866db1bd59f4259089b7398bce46b20e2766fc2bccc6d34`
-- `candidate_scope_count`: `23`
-- `candidate_scope_hash`: `sha256:448587243eb7cf842f7412bba868347aaada01016b964424812d5b47a278d66e`
-- `implementation_authorization`: `pending-owner-scope-approval`
-- `commit_push_pr_authorization`: `pending-owner-scope-approval`
+- `candidate_scope_count`: `24`
+- `candidate_scope_hash`: `sha256:dd1d784ffe3149bf130c6bd678050d6aea3059f33a405abee5e2cc3f9735bb59`
+- `implementation_authorization`: `authorized`
+- `commit_push_pr_authorization`: `authorized-normal-push-non-draft-pr-review-ci`
 - `final_merge_authorization`: `pending-separate-gate`
 - `agos_status`: `bypassed-project-native-control-plane`
 - `written_on`: `2026-07-28`，时间判定只使用项目所有者 Windows 本机时间
@@ -208,7 +209,9 @@ Parity 必须同时表达这两个事实，禁止通过描述文字掩盖状态�
 - 明确调用方截止时间、稳定超时码和迟到结果失效；
 - 不修改原总功能的清理合同完成状态。
 
-`parity/features/source-index.yml` 和 `upstream/` 保持不变。
+`parity/features/source-index.yml` 只允许把 `tauri-command:check_env_conflicts` 的副作用修正为
+`environment-read` 并映射到新只读子能力；`core-module:env_conflicts` 与
+`tauri-command:remove_env_conflicts` 继续归原总功能。`upstream/` 保持不变。
 
 ## TDD 验收矩阵
 
@@ -241,7 +244,7 @@ Parity 必须同时表达这两个事实，禁止通过描述文字掩盖状态�
 ### Parity 与仓库政策
 
 - 新子能力可进入 `implemented`，原总功能仍为 `unassessed`；
-- 合同和目录 ID 一致，`source-index.yml` 未修改；
+- 合同和目录 ID 一致，`source-index.yml` 只发生批准的单入口副作用与归属修正；
 - Cargo、UI、网络、写入、线程、shell、`unsafe` 和值泄露守卫通过；
 - Windows/macOS Hosted 测试和现有七 Job CI 合同通过。
 
@@ -281,10 +284,11 @@ err.md
 parity/README.md
 parity/contracts/foundation-platform.yml
 parity/features/foundation-platform.yml
+parity/features/source-index.yml
 ```
 
-规范化后共 `23` 路径，哈希为
-`sha256:448587243eb7cf842f7412bba868347aaada01016b964424812d5b47a278d66e`。
+规范化后共 `24` 路径，哈希为
+`sha256:dd1d784ffe3149bf130c6bd678050d6aea3059f33a405abee5e2cc3f9735bb59`。
 
 规划控制面固定为设计稿、Session Plan 和 Runtime Workflow 三路径，哈希为
 `sha256:c3d16ff75e79d9fd2866db1bd59f4259089b7398bce46b20e2766fc2bccc6d34`。

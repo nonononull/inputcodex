@@ -25,10 +25,10 @@ PowerShell 项目验证器、GitHub-hosted Windows/macOS CI。
 - Windows 按环境变量大小写不敏感语义识别；macOS 按大小写敏感语义识别。
 - 只观察当前进程；用户级和系统级持久化来源必须明确为 `NotObserved`。
 - 原 `feature.foundation-platform.environment-conflicts` 必须保持 `unassessed`。
-- `Cargo.toml`、`Cargo.lock`、`parity/features/source-index.yml`、UI、预算、Release、`upstream/`、
-  Ruleset 和 AGOS 均为受保护面。
+- `Cargo.toml`、`Cargo.lock`、UI、预算、Release、`upstream/`、Ruleset 和 AGOS 均为受保护面；
+  `parity/features/source-index.yml` 只允许修正 `tauri-command:check_env_conflicts` 的副作用和归属。
 - 时间只使用 Windows 本机 `Get-Date`；禁止覆写 Git author/committer 日期。
-- 普通推送和 PR 必须等待 23 路径与候选哈希获得项目所有者批准；最终 Squash Merge 单独授权。
+- `24` 路径与修订候选哈希已获批准；最终 Squash Merge 仍单独授权。
 
 ---
 
@@ -39,18 +39,18 @@ task_id: issue-86-gate-5-runtime-environment-observation
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/86
 approved_decision_ref: https://github.com/nonononull/inputcodex/issues/85#issuecomment-5102509300
 written_review_ref: https://github.com/nonononull/inputcodex/issues/86#issuecomment-5102713590
-approved_scope_ref: pending-owner-scope-approval
+approved_scope_ref: https://github.com/nonononull/inputcodex/issues/86#issuecomment-5103198917
 branch: codex/issue-86-gate-5-runtime-environment-observation
 baseline_main: 3f2914cd81ace7afe28e0137c867c20fd346c3f9
 planning_scope_count: 3
 planning_scope_hash: sha256:c3d16ff75e79d9fd2866db1bd59f4259089b7398bce46b20e2766fc2bccc6d34
-candidate_scope_count: 23
-candidate_scope_hash: sha256:448587243eb7cf842f7412bba868347aaada01016b964424812d5b47a278d66e
-allowed_operations: plan,local-light-verification,git-checkpoint,commit
+candidate_scope_count: 24
+candidate_scope_hash: sha256:dd1d784ffe3149bf130c6bd678050d6aea3059f33a405abee5e2cc3f9735bb59
+allowed_operations: tdd,local-light-verification,git-checkpoint,commit,normal-push,non-draft-pr,review-ci
 mutation_intent: add-runtime-environment-observation-slice-without-remediation
 executor_enforcement: exact-path-scope-secret-value-and-side-effect-hard-stop
-implementation_authorization: pending-owner-scope-approval
-commit_push_pr_authorization: pending-owner-scope-approval
+implementation_authorization: authorized
+commit_push_pr_authorization: authorized
 final_merge_authorization: pending-separate-gate
 agos_status: bypassed-project-native-control-plane
 ```
@@ -64,7 +64,7 @@ agos_status: bypassed-project-native-control-plane
 5. Windows/macOS 名称比较遵守各自真实语义，结果排序去重稳定；
 6. 实际变量值不进入领域、错误、诊断或生产代码格式化路径；
 7. 新子能力为 `implemented`，原总功能仍为 `unassessed`；
-8. 23 路径、隐私、禁止能力、四 crate、本地轻量验证与 Hosted CI 全部通过；
+8. 24 路径、隐私、禁止能力、四 crate、本地轻量验证与 Hosted CI 全部通过；
 9. 非 Draft PR 停在独立 Squash Merge 授权门。
 
 ## Task 0：规划控制面与范围冻结
@@ -78,7 +78,7 @@ agos_status: bypassed-project-native-control-plane
 **Interfaces:**
 
 - Consumes: Issue `#85` 决策、Issue `#86` 书面设计批准、`main@3f2914c`。
-- Produces: 3 路径 planning hash、23 路径 candidate hash、可执行批次和硬停止条件。
+- Produces: 3 路径 planning hash、24 路径 candidate hash、可执行批次和硬停止条件。
 
 - [x] **Step 1: 建立并关闭一致性决策 Issue #85**
 
@@ -470,6 +470,7 @@ agos_status: bypassed-project-native-control-plane
 - Modify: `crates/inputcodex-parity/tests/catalog_repository.rs`
 - Modify: `parity/features/foundation-platform.yml`
 - Modify: `parity/contracts/foundation-platform.yml`
+- Modify: `parity/features/source-index.yml`
 - Modify: `parity/README.md`
 
 **Interfaces:**
@@ -534,15 +535,24 @@ agos_status: bypassed-project-native-control-plane
 
   不得把 `remove_env_conflicts` 入口归入新子能力。
 
+  `source-index.yml` 只允许：
+
+  - 把 `tauri-command:check_env_conflicts` 的 `side_effects` 修正为 `[environment-read]`；
+  - 把该入口映射到 `feature.foundation-platform.runtime-environment-conflict-observation`；
+  - 保持 `core-module:env_conflicts` 与 `tauri-command:remove_env_conflicts` 的现有归属和读写副作用。
+
 - [ ] **Step 4: 运行 Parity GREEN**
 
   ```powershell
   cargo test --locked --offline --ignore-rust-version -p inputcodex-parity `
     --test catalog_repository
-  git diff --name-only -- parity/features/source-index.yml
+  $sourceIndexChanges = @(git diff --name-only origin/main...HEAD -- parity/features/source-index.yml)
+  if ($sourceIndexChanges.Count -ne 1) {
+    throw "Issue #86 source-index 修订缺失或漂移：$($sourceIndexChanges -join ', ')"
+  }
   ```
 
-  Expected: `catalog_repository` 全绿，`source-index.yml` 无输出。
+  Expected: `catalog_repository` 全绿，`source-index.yml` 只包含批准的单入口修订。
 
 - [ ] **Step 5: 创建 Parity checkpoint**
 
@@ -551,6 +561,7 @@ agos_status: bypassed-project-native-control-plane
     crates/inputcodex-parity/tests/catalog_repository.rs `
     parity/features/foundation-platform.yml `
     parity/contracts/foundation-platform.yml `
+    parity/features/source-index.yml `
     parity/README.md
   git commit -m "feat: 记录运行时环境观察一致性合同 (#86)"
   ```
@@ -584,7 +595,7 @@ agos_status: bypassed-project-native-control-plane
 
 - [ ] **Step 3: 更新 build.md 验证命令**
 
-  增加四 crate 定向测试、Clippy、格式、CI 合同、Release Audit、Repository Policy、23 路径、
+  增加四 crate 定向测试、Clippy、格式、CI 合同、Release Audit、Repository Policy、24 路径、
   隐私、禁止能力和受保护路径检查。
 
 - [ ] **Step 4: 处理 err.md**
@@ -610,7 +621,7 @@ agos_status: bypassed-project-native-control-plane
 
 ## Task 6：完整本地轻量验证
 
-**Files:** 所有 23 条候选路径，只读验证受保护面。
+**Files:** 所有 24 条候选路径，只读验证受保护面。
 
 - [ ] **Step 1: 四 crate 测试**
 
@@ -647,7 +658,7 @@ agos_status: bypassed-project-native-control-plane
 
 - [ ] **Step 4: 范围与禁止能力验证**
 
-  严格执行 Runtime Workflow 的 23 路径、保护路径、隐私和禁止能力脚本。
+  严格执行 Runtime Workflow 的 24 路径、保护路径、隐私和禁止能力脚本。
 
 - [ ] **Step 5: 创建最终本地验证 checkpoint**
 
@@ -658,7 +669,7 @@ agos_status: bypassed-project-native-control-plane
 
 ## Task 7：远端交付与 Review/CI
 
-- [ ] **Step 1: 取得项目所有者 23 路径与哈希批准**
+- [x] **Step 1: 取得项目所有者 24 路径与修订哈希批准**
 
   批准前不得执行本 Task 或 Task 1-6 的实现写入。
 
@@ -672,7 +683,7 @@ agos_status: bypassed-project-native-control-plane
 
 - [ ] **Step 3: 创建非 Draft PR**
 
-  PR 必须关联 Issue `#85/#86`，正文列出 23 路径哈希、RED/GREEN checkpoint、本地验证和硬边界。
+  PR 必须关联 Issue `#85/#86`，正文列出 24 路径哈希、RED/GREEN checkpoint、本地验证和硬边界。
 
 - [ ] **Step 4: Review 根因闭环**
 
@@ -690,8 +701,9 @@ agos_status: bypassed-project-native-control-plane
 
 出现任一情况立即硬停止并回到 Issue `#86`：
 
-- 23 路径或候选哈希发生变化；
-- 需要 Cargo、新依赖、`source-index.yml`、`upstream/`、UI、预算、Release、Ruleset 或 AGOS；
+- 24 路径或候选哈希发生变化；
+- `source-index.yml` 超出批准的 `check_env_conflicts` 单入口修订；
+- 需要 Cargo、新依赖、`upstream/`、UI、预算、Release、Ruleset 或 AGOS；
 - 需要读取/修改持久化环境、执行子进程、写文件、联网、线程或 `unsafe`；
 - 环境变量实际值进入领域、错误、诊断或生产 `Debug`；
 - 原总功能被改为 `implemented`；
