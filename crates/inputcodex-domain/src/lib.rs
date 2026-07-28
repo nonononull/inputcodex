@@ -2,6 +2,7 @@
 
 mod application_overview;
 mod platform_paths;
+mod relay_environment_observation;
 mod runtime_environment_observation;
 mod version_startup;
 
@@ -14,6 +15,11 @@ pub use application_overview::{
 pub use platform_paths::{
     ApplicationInstallSource, CodexInstallation, PlatformPathsSnapshot, PrivatePath,
     PrivatePathError,
+};
+pub use relay_environment_observation::{
+    ClashConfigSource, ClashTunCandidateStatus, ClashTunObservation, CodexDotenvStatus,
+    ObservationCoverageStatus, ProxyEnvironmentCoverage, ProxyEnvironmentSource,
+    ProxyEnvironmentVariableName, ProxyEnvironmentVariableObservation, RelayEnvironmentObservation,
 };
 pub use runtime_environment_observation::{
     EnvironmentConflictSource, EnvironmentObservationStatus, EnvironmentSourceCoverage,
