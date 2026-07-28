@@ -6,7 +6,7 @@
 task_id: issue-83-readme-information-architecture
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/83
 approved_decision_ref: https://github.com/nonononull/inputcodex/issues/83
-approved_scope_ref: pending-owner-approval
+approved_scope_ref: https://github.com/nonononull/inputcodex/issues/83#issuecomment-5101769289
 branch: codex/issue-83-readme-information-architecture
 baseline_main: da65f7d8402e4de27e2795ee8905be18ad565653
 planning_scope_count: 3
@@ -14,7 +14,7 @@ planning_scope_hash: sha256:83c915a75626bbfb31d9520a519dba3a5a210adc8b47a535f46f
 candidate_scope_count: 10
 candidate_scope_hash: sha256:d8a404c19b108587a5e17b4ded454444d5e948c92410b759504a7eb7c63bed44
 delivery_contract: agos.issue-pr-merge.v1
-allowed_operations: plan,local-light-verification,git-checkpoint
+allowed_operations: plan,documentation-edit,local-light-verification,git-checkpoint,commit,push,non-draft-pr,review-ci
 mutation_intent: separate-stable-readme-from-dynamic-governance-history
 executor_enforcement: exact-path-scope-and-no-product-surface-hard-stop
 final_merge_authorization: pending-separate-gate
@@ -145,7 +145,9 @@ Ordinal 排序、UTF-8 无 BOM、末尾单个 LF 的路径清单哈希固定为�
 - [x] 隔离 worktree 与分支基于最新 `main` 创建；
 - [x] 基线 CI 合同 `35/35`、Repository Policy `0` 违规；
 - [x] planning/candidate scope 与哈希已计算；
-- [ ] planning scope Git checkpoint；
-- [ ] 项目所有者批准十路径 candidate scope；
-- [ ] 实施、验证、PR 与 Review/CI；
+- [x] planning scope Git checkpoint `c313cba06484eb00ccc373e63419602d13192f7c`；
+- [x] 项目所有者批准十路径 candidate scope；
+- [x] README、文档门户、职责边界、稳定状态和排错记录已实施；
+- [x] 最终本地轻量验证通过；
+- [ ] 提交、普通推送、非 Draft PR 与 Review/CI；
 - [ ] 项目所有者独立 Squash Merge 授权。

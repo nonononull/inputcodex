@@ -44,6 +44,17 @@
 - 上游缓存同步 PR 只能更新 `upstream/` 与同步报告；功能重构必须使用独立 Issue 和 PR。
 - 客户端更新、安装包、签名和下载地址只能指向 `nonononull/inputcodex`。
 
+## 文档职责
+
+- `README.md` 是稳定的公开项目首页，最终用户是第一读者、开发者是第二读者；目标保持约 `70–100` 行，只记录产品定位、稳定能力、架构入口、构建入口、贡献和许可证。
+- README 禁止记录活动分支、待推送/待建 PR/待合并步骤、逐 Issue/PR 历史、完整提交 SHA、Git tree、Actions Run、Artifact 流水账或全量任务文档清单。
+- `docs/README.md` 是分类文档门户，只维护精选长期入口和目录级导航，不复制全部 Plan、Session Plan、Runtime Workflow 或报告。
+- `docs/plans/PROJECT-MASTER-PLAN.md` 只维护产品 Gate、稳定决策和下一合法产品阶段；维护型 Issue 的动态 PR 状态留在任务本地控制面与 GitHub。
+- `build.md` 只维护可重复构建、测试和验证命令；不得继续承担合并流水账或活动任务面板职责。
+- `err.md` 只记录可复用根因、处理方式和验证证据；相同根因必须引用既有条目，禁止重复堆叠。
+- task-local Plan、Session Plan、Runtime Workflow 和 Report 只服务对应 Issue；动态 Head、Review、CI、授权与合并后证据保留在 GitHub Issue/PR/Actions。
+- 任何任务修改 README 前必须证明内容是稳定的用户入口信息；仅为回写当前 Head、CI、合并证据或下一操作而修改 README 属于越界。
+
 ## UI 边界
 
 - UI、视觉和交互方案默认交给 Gemini；只有用户明确要求当前助手实现 UI 时才执行。
@@ -88,5 +99,6 @@
 - Issue `#77` 已批准应用概览方案 A 并按 `COMPLETED` 关闭：应用概览按领域拆分，历史启动记录不得冒充实时运行状态，损坏状态不得静默视为无记录。
 - Issue `#78` / PR `#79` 已完成第二个 Gate 5 应用概览只读事实迁移；Final Head `1bae5d51850c3538c3e161e73e266ac19f7406b3` 以单父 Squash 提交 `ef69494d92c7c461b0cb858e95f6838404ae1a61` 进入 `main`，tree 为 `936cc74fbceae2a3ee8d98b924c836e13d9f7ae3`，GitHub 签名 `valid`，Issue `#78` 已按 `COMPLETED` 关闭。合并后主干 CI Run `30289461278` 七 Job、Performance Baseline Run `30289461109` 四 Job全绿且 Artifact 均为 `0`。
 - Issue `#80` 已批准版本与启动意图方案 A 并按 `COMPLETED` 关闭：版本只来自编译期 `CARGO_PKG_VERSION`；精确 `--show-update` 或 `INPUTCODEX_SHOW_UPDATE=1` 请求展示更新；非法显式环境值必须以 `INVALID_STARTUP_OPTION` 失败。
-- Issue `#81` 是当前第三个 Gate 5 产品切片；二十三路径与 `sha256:c1ef2c00a445dd2bd60dc5f5b375cb27d1e467a3d457d7eb53b7ec82a304aafe` 已获批准。规划、Domain、Application、Platform 与 Parity TDD checkpoint 已完成；当前切片只读取当前进程参数、`INPUTCODEX_SHOW_UPDATE` 和编译版本，不打开 UI、不联网、不检查或执行更新、不写文件、不缓存、不启动线程、不引入新依赖，并且 `source-index.yml` 保持不变。四 crate 测试/Clippy、格式、CI 合同 `35/35`、`release_audit=current`、仓库政策 `0` 违规、候选范围 `23`/实际差异 `22`、受保护路径、隐私、旧变量和禁止能力检查已通过；`err.md` 因无新根因保持未修改。本地验证 checkpoint 为 `73bd5748d2341a92577ab8273b0db6f7bdb6a265`，当前只剩普通推送、非 Draft PR 与 Hosted Review/CI，最终 Squash Merge 仍须单独授权。
-- Gate 5 只能按独立功能 Issue/PR 串行推进；Issue `#81` 未完成前不得夹带第四个产品 feature、UI、预算、Release、`upstream/`、Ruleset 或 AGOS 改动。
+- Issue `#81` / PR `#82` 已完成第三个 Gate 5 版本与启动意图切片；Final Head `adc91bafd850fd054346b44e8b79a42bb7b00f71` 以单父 Squash 提交 `da65f7d8402e4de27e2795ee8905be18ad565653` 进入 `main`，tree 为 `0aad4659daaf9e07f3e62d1fd1ad9dfea38fd604`，GitHub 签名 `valid`，Issue 已按 `COMPLETED` 关闭。合并后主干 CI Run `30338961661` 七 Job、Performance Baseline Run `30338961713` 四 Job全绿且 Artifact 均为 `0`。
+- Issue `#83` 是独立文档信息架构任务，只允许稳定 README、分类文档门户、职责边界和 PR `#82` 后的最小状态修正；它不迁移产品功能，也不解锁第四个 Gate 5 切片。
+- 下一项产品工作必须重新建立独立一致性决策或功能 Issue、Session Plan、Runtime Workflow 和批准范围；禁止借文档维护夹带第四个 feature、UI、预算、Release、`upstream/`、Ruleset 或 AGOS 改动。

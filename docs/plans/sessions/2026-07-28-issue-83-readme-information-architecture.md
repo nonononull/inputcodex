@@ -6,7 +6,7 @@
 task_id: issue-83-readme-information-architecture
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/83
 approved_decision_ref: https://github.com/nonononull/inputcodex/issues/83
-approved_scope_ref: pending-owner-approval
+approved_scope_ref: https://github.com/nonononull/inputcodex/issues/83#issuecomment-5101769289
 branch: codex/issue-83-readme-information-architecture
 worktree: .worktrees/issue-83-readme-information-architecture
 baseline_main: da65f7d8402e4de27e2795ee8905be18ad565653
@@ -14,7 +14,7 @@ planning_scope_count: 3
 planning_scope_hash: sha256:83c915a75626bbfb31d9520a519dba3a5a210adc8b47a535f46fc21412c3a95f
 candidate_scope_count: 10
 candidate_scope_hash: sha256:d8a404c19b108587a5e17b4ded454444d5e948c92410b759504a7eb7c63bed44
-allowed_operations: plan,local-light-verification,git-checkpoint
+allowed_operations: plan,documentation-edit,local-light-verification,git-checkpoint,commit,push,non-draft-pr,review-ci
 mutation_intent: separate-stable-readme-from-dynamic-governance-history
 executor_enforcement: exact-path-scope-and-no-product-surface-hard-stop
 final_merge_authorization: pending-separate-gate
@@ -23,6 +23,8 @@ final_merge_authorization: pending-separate-gate
 ## 当前事实
 
 - Issue #83 已由仓库所有者账号创建并保存方案 B 批准证据；
+- 十路径与 `sha256:d8a404c19b108587a5e17b4ded454444d5e948c92410b759504a7eb7c63bed44`
+  已由项目所有者批准；
 - 分支基线是 PR #82 合并后的 `main@da65f7d8402e4de27e2795ee8905be18ad565653`；
 - 当前无开放 PR，第四个 Gate 5 产品切片尚未建立；
 - README 的动态状态与文档清单占比为 `84.5%`；
@@ -53,9 +55,10 @@ final_merge_authorization: pending-separate-gate
 - [x] 运行 CI 合同和 Repository Policy 基线；
 - [x] 计算 planning/candidate scope；
 - [x] 创建设计、Session Plan 与 Runtime Workflow；
-- [ ] 验证 planning scope 并创建 Git checkpoint；
-- [ ] 将十路径和 candidate scope hash 回写 Issue #83；
-- [ ] 获得项目所有者精确范围批准。
+- [x] 验证 planning scope 并创建 Git checkpoint
+  `c313cba06484eb00ccc373e63419602d13192f7c`；
+- [x] 将十路径和 candidate scope hash 回写 Issue #83；
+- [x] 获得项目所有者精确范围批准。
 
 Planning scope 验证：
 
@@ -80,42 +83,44 @@ if ($hash -ne '83c915a75626bbfb31d9520a519dba3a5a210adc8b47a535f46fc21412c3a95f'
 
 ### Batch 1：稳定 README
 
-- [ ] 删除逐 Issue 历史、完整 SHA、Run 与文档流水账；
-- [ ] 增加开发阶段警告和三个已迁移能力；
-- [ ] 增加七成员 Workspace 架构表；
-- [ ] 增加构建、上游、一致性、贡献和许可证入口；
-- [ ] 验证不存在产品成熟度夸大或上游运行面混入。
+- [x] 删除逐 Issue 历史、完整 SHA、Run 与文档流水账；
+- [x] 增加开发阶段警告和三个已迁移能力；
+- [x] 增加七成员 Workspace 架构表；
+- [x] 增加构建、上游、一致性、贡献和许可证入口；
+- [x] 验证不存在产品成熟度夸大或上游运行面混入。
 
 ### Batch 2：文档门户
 
-- [ ] 新增 `docs/README.md`；
-- [ ] 分类控制面、ADR、Gate 5、上游一致性、性能与历史目录；
-- [ ] 精选长期入口，避免复制全部 `146` 份文档；
-- [ ] 验证全部相对链接存在。
+- [x] 新增 `docs/README.md`；
+- [x] 分类控制面、ADR、Gate 5、上游一致性、性能与历史目录；
+- [x] 精选长期入口，避免复制全部 `146` 份文档；
+- [x] 初步验证全部相对链接存在。
 
 ### Batch 3：职责与稳定状态
 
-- [ ] 在 AGENTS 固定 README、docs portal、Master Plan、build、err 和 GitHub 证据职责；
-- [ ] Master Plan 记录 PR #82 稳定完成，下一产品切片尚未选择；
-- [ ] build.md 删除 Issue #81 待推送/待 PR 的顶部陈述；
-- [ ] 不重排或重写 Master Plan/build.md 的历史主体。
+- [x] 在 AGENTS 固定 README、docs portal、Master Plan、build、err 和 GitHub 证据职责；
+- [x] Master Plan 记录 PR #82 稳定完成，下一产品切片尚未选择；
+- [x] build.md 删除 Issue #81 待推送/待 PR 的顶部陈述；
+- [x] 未重排或重写 Master Plan/build.md 的历史主体。
 
 ### Batch 4：排错与报告
 
-- [ ] err.md 新增 `git check-ignore` 对不存在目录本身需使用尾斜杠或子路径的根因；
-- [ ] 既有 PowerShell Markdown 与 apply-patch 根因只引用，不重复新增；
-- [ ] 创建 `docs/reports/issue-83-readme-information-architecture.md`；
-- [ ] 回写实际行数、链接数、路径数和轻量验证结果。
+- [x] err.md 新增 `git check-ignore` 对不存在目录本身需使用尾斜杠或子路径的根因；
+- [x] 既有 PowerShell Markdown 与 apply-patch 根因只引用，不重复新增；
+- [x] 创建 `docs/reports/issue-83-readme-information-architecture.md`；
+- [x] 回写实际行数、链接数和初步范围结果。
 
 ### Batch 5：本地轻量验证
 
-- [ ] candidate scope count/hash 精确匹配；
-- [ ] README 动态内容与长度守卫通过；
-- [ ] README 和 docs portal 相对链接全部存在；
-- [ ] CI 合同 `35/35`；
-- [ ] Repository Policy `0` 违规；
-- [ ] `git diff --check` 通过；
-- [ ] 实际差异不进入产品、CI、上游、性能或第四功能路径。
+- [x] candidate scope count/hash 精确匹配；
+- [x] README 动态内容与长度守卫通过；
+- [x] README 和 docs portal 的 `42` 个 Markdown 链接全部存在；
+- [x] CI 合同 `35/35`；
+- [x] Release Audit 为 `current`；
+- [x] Repository Policy `0` 违规；
+- [x] 非法控制字节为 `0`；
+- [x] 暂存级 `git diff --check` 与官方纯文档分类通过；
+- [x] 实际差异不进入产品、CI、上游、性能或第四功能路径。
 
 不运行本地 Cargo 全量编译或桌面构建。本任务是纯文档治理，Hosted CI 根据现有分类合同跳过
 重型 Job，并由 required 汇总验证文档 PR 语义。

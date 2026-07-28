@@ -6,14 +6,14 @@
 task_id: issue-83-readme-information-architecture
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/83
 approved_decision_ref: https://github.com/nonononull/inputcodex/issues/83
-approved_scope_ref: pending-owner-approval
+approved_scope_ref: https://github.com/nonononull/inputcodex/issues/83#issuecomment-5101769289
 branch: codex/issue-83-readme-information-architecture
 baseline_main: da65f7d8402e4de27e2795ee8905be18ad565653
 planning_scope_count: 3
 planning_scope_hash: sha256:83c915a75626bbfb31d9520a519dba3a5a210adc8b47a535f46fc21412c3a95f
 candidate_scope_count: 10
 candidate_scope_hash: sha256:d8a404c19b108587a5e17b4ded454444d5e948c92410b759504a7eb7c63bed44
-allowed_operations: plan,local-light-verification,git-checkpoint
+allowed_operations: plan,documentation-edit,local-light-verification,git-checkpoint,commit,push,non-draft-pr,review-ci
 mutation_intent: separate-stable-readme-from-dynamic-governance-history
 executor_enforcement: exact-path-scope-and-no-product-surface-hard-stop
 final_merge_authorization: pending-separate-gate
@@ -204,9 +204,9 @@ if ($failures.Count -gt 0) { throw "Markdown 链接失效：$($failures -join ';
 ## 当前执行进度
 
 - `DISCOVERY`：完成；
-- `PLANNING`：进行中；
-- `SCOPE_PENDING`：等待 planning checkpoint 后进入；
-- `EXECUTING`：未开始；
-- `VERIFYING`：未开始；
+- `PLANNING`：完成，checkpoint 为 `c313cba06484eb00ccc373e63419602d13192f7c`；
+- `SCOPE_PENDING`：完成，十路径与 candidate scope hash 已批准；
+- `EXECUTING`：完成；
+- `VERIFYING`：完成；十路径、链接、CI 合同、Release Audit、仓库政策、暂存级 diff check 和官方纯文档分类均已通过；
 - `PR_OPEN`：未开始；
 - `MERGE_GATE`：未开始。

@@ -874,6 +874,15 @@
 - 验证：本地 platform tests、platform all-targets Clippy 与 rustfmt 通过；本机仅安装 `x86_64-pc-windows-msvc`。额外执行 Workspace `--offline` Clippy 时在编译前因未缓存 `ash` 中止，属于本地缓存边界，按“本地四 crate 轻量验证 + hosted Workspace 全量验证”合同绕过；Linux 真实性由修复后新 Head 的 GitHub-hosted `linux-quality` 重跑确认。
 - 关联：Issue `#78`、PR `#79`、CI Run `30287579159`、Job `90049150742`。
 
+### 2026-07-28：git check-ignore 对不存在目录本身不命中尾斜杠规则
+
+- 环境：Issue `#83` 按隔离工作树流程准备 `.worktrees/`，先把 `.worktrees/` 写入本地 `.git/info/exclude`，再在目录尚不存在时执行 ignore 安全检查。
+- 现象：`git check-ignore -q .worktrees` 返回退出码 `1`，流程误判目录未被忽略；同一规则通过 `Get-Content .git/info/exclude` 已确认存在，仓库受版本控制文件没有变化。
+- 根因：尾斜杠目录规则匹配目录形式或目录内路径；对尚不存在且没有尾斜杠的字面量 `.worktrees` 查询时，Git 不把它按目录路径处理，因此不命中 `.worktrees/`。
+- 处理：安全检查改为 `git check-ignore -q '.worktrees/'`，也可使用 `.worktrees/probe` 作为目录内探针；确认命中后再创建工作树。忽略规则只保留在 `.git/info/exclude`，不为本机工作树修改项目 `.gitignore`。
+- 验证：`git check-ignore -v '.worktrees/'` 与 `git check-ignore -v '.worktrees/probe'` 均返回 `.git/info/exclude` 的 `.worktrees/` 规则；随后成功从 `main@da65f7d8402e4de27e2795ee8905be18ad565653` 创建 `codex/issue-83-readme-information-architecture` 隔离工作树。
+- 关联：Issue `#83`、`superpowers:using-git-worktrees`、Planning checkpoint `c313cba06484eb00ccc373e63419602d13192f7c`。
+
 ## 记录模板
 
 ```text
