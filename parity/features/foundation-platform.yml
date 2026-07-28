@@ -168,6 +168,25 @@ features:
       - issue:38
       - issue:74
       - issue:75
+  - id: feature.foundation-platform.settings-observation
+    name: '设置只读观察'
+    status: implemented
+    evidence:
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: load_settings
+    entry_points:
+      - tauri-command:load_settings
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '只读观察平台路径解析出的 inputcodex 设置文件；缺失返回 NotConfigured，合法 JSON object 只返回顶层条目数量。'
+      macos:
+        applicability: supported
+        semantics: '只读观察平台路径解析出的 inputcodex 设置文件；缺失返回 NotConfigured，合法 JSON object 只返回顶层条目数量。'
+    decision_refs:
+      - issue:26
+      - issue:91
+      - issue:92
   - id: feature.foundation-platform.settings-management
     name: '设置管理'
     status: unassessed
@@ -175,25 +194,23 @@ features:
       - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/settings.rs
         symbol: settings
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
-        symbol: load_settings
-      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: reset_settings
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: save_settings
     entry_points:
       - core-module:settings
-      - tauri-command:load_settings
       - tauri-command:reset_settings
       - tauri-command:save_settings
     platforms:
       windows:
         applicability: supported
-        semantics: '加载、保存和重置本地设置，写入必须原子化并可恢复。'
+        semantics: '管理本地设置的底层读写、保存和重置，写入必须原子化并可恢复。'
       macos:
         applicability: supported
-        semantics: '加载、保存和重置本地设置，写入必须原子化并可恢复。'
+        semantics: '管理本地设置的底层读写、保存和重置，写入必须原子化并可恢复。'
     decision_refs:
       - issue:26
+      - issue:91
   - id: feature.foundation-platform.version-and-startup
     name: '版本与启动参数'
     status: implemented
