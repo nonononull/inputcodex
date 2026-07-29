@@ -3,6 +3,7 @@
 use inputcodex_application::{ApplicationError, PlatformKind, PlatformPort};
 
 mod application_overview;
+mod context_entry_observation;
 mod diagnostic_log_observation;
 mod platform_paths;
 mod relay_environment_observation;
@@ -12,6 +13,7 @@ mod settings_observation;
 mod version_startup;
 
 pub use application_overview::SystemApplicationOverview;
+pub use context_entry_observation::SystemContextEntryObservation;
 pub use diagnostic_log_observation::SystemDiagnosticLogObservation;
 pub use platform_paths::SystemPlatformPaths;
 pub use relay_environment_observation::SystemRelayEnvironmentObservation;

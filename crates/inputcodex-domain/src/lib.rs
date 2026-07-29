@@ -1,6 +1,7 @@
 #![forbid(unsafe_code)]
 
 mod application_overview;
+mod context_entry_observation;
 mod diagnostic_log_observation;
 mod platform_paths;
 mod relay_environment_observation;
@@ -13,6 +14,10 @@ pub use application_overview::{
     ApplicationOverview, ApplicationVersion, ApplicationVersionError, CollectedAtUnixMs,
     InstallationState, InstalledVersion, InstalledVersionUnknownReason, LiveProcessState,
     MAX_APPLICATION_VERSION_BYTES,
+};
+pub use context_entry_observation::{
+    ContextEntryCatalogObservation, ContextEntryCategorySummary, ContextEntryKind,
+    ContextEntryObservation, ContextEntryObservationError,
 };
 pub use diagnostic_log_observation::DiagnosticLogObservation;
 

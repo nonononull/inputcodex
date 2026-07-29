@@ -21,6 +21,24 @@ features:
         semantics: '支持故障转移、会话轮转、请求轮转和权重轮转并留证。'
     decision_refs:
       - issue:26
+  - id: feature.provider-network.context-entry-observation
+    name: '上下文能力只读目录观察'
+    status: implemented
+    evidence:
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: read_live_context_entries
+    entry_points:
+      - tauri-command:read_live_context_entries
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '只读观察平台路径定位的 CODEX_HOME/config.toml；单文件最多 256 KiB，只返回 MCP Server、Skill 与 Plugin 的 ID、稳定种类、启用状态和分类计数。'
+      macos:
+        applicability: supported
+        semantics: '只读观察平台路径定位的 CODEX_HOME/config.toml；单文件最多 256 KiB，只返回 MCP Server、Skill 与 Plugin 的 ID、稳定种类、启用状态和分类计数。'
+    decision_refs:
+      - issue:100
+      - issue:101
   - id: feature.provider-network.context-entry-management
     name: '上下文能力选择'
     status: unassessed
@@ -32,8 +50,6 @@ features:
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: list_context_entries
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
-        symbol: read_live_context_entries
-      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: sync_live_context_entries
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: upsert_context_entry
@@ -41,18 +57,19 @@ features:
       - tauri-command:delete_context_entry
       - tauri-command:extract_relay_common_config
       - tauri-command:list_context_entries
-      - tauri-command:read_live_context_entries
       - tauri-command:sync_live_context_entries
       - tauri-command:upsert_context_entry
     platforms:
       windows:
         applicability: supported
-        semantics: '管理供应商关联的 MCP、Skill 与 Plugin 并与实时配置同步。'
+        semantics: '保留上下文增加、删除、同步、提取和设置正文解析；只读目录观察已拆分。'
       macos:
         applicability: supported
-        semantics: '管理供应商关联的 MCP、Skill 与 Plugin 并与实时配置同步。'
+        semantics: '保留上下文增加、删除、同步、提取和设置正文解析；只读目录观察已拆分。'
     decision_refs:
       - issue:26
+      - issue:100
+      - issue:101
   - id: feature.provider-network.model-catalog
     name: '模型目录与上下文'
     status: unassessed

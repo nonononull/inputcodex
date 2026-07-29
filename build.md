@@ -26,7 +26,7 @@ git diff --check
 
 路径范围、Markdown 链接和任务特有内容守卫由对应 Session Plan 与 Runtime Workflow 定义。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供二十八个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供二十九个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -56,6 +56,7 @@ git diff --check
 26. Issue `#92` 二十七路径、设置文件有界只读观察、缺失与空对象分离、六个稳定错误、Parity 单入口分拆和最终本地轻量门禁验证。
 27. Issue `#95` 二十四路径、诊断日志尾部有界观察、损坏记录分类、Parity 单入口分拆和最终本地轻量门禁验证。
 28. Issue `#98` 二十七路径、Relay 双文档有界观察、凭据存在事实、配置完整性、Parity 单入口分拆和最终本地轻量门禁验证。
+29. Issue `#101` 二十四路径、上下文能力固定文件有界观察、条目最小投影、严格 TOML 失败语义、Parity 单入口分拆和最终本地轻量门禁验证。
 
 当前禁止：
 
@@ -76,6 +77,233 @@ git diff --check
 - 在 Issue `#92` 中公开任意路径读取、返回设置字段或内容、写文件、联网、调用子进程、启动线程/Watcher、打开 UI、使用 `unsafe`、迁移保存/重置/底层设置管理、修改 Workflow/Ruleset、Release、`upstream/` 或 AGOS。
 - 在 Issue `#95` 中接受任意路径/长度/过滤器、读取完整日志、返回正文/字段/事件/detail/PID/时间戳/实际路径/用户名/机器名/凭据、写入或清理日志、复制诊断报告、联网、调用子进程、启动线程/Watcher、打开 UI、注入、使用 `unsafe`、迁移其余诊断总功能、修改 Cargo/Workflow/Ruleset/Release/`upstream/` 或 AGOS。
 - 在 Issue `#98` 中公开任意路径、返回账号/Token/Provider/URL/字段/内容/认证来源/实际路径、写文件、修改环境、联网、调用子进程、启动线程/Watcher、打开 UI、注入、使用 `unsafe`、迁移完整 Relay 文件读取/保存/切换/回填、修改 Workflow/Ruleset/Release/`upstream/` 或 AGOS。
+- 在 Issue `#101` 中接受任意路径或配置正文、返回完整 TOML/摘要/命令/参数/环境变量/Header/URL/Token/账号/实际路径、写文件、联网、调用子进程、启动线程/Watcher、打开 UI、注入、使用 `unsafe`、新增依赖、迁移上下文增加/删除/同步/提取/设置正文解析、修改 Workflow/Ruleset/Release/`upstream/` 或 AGOS。
+
+## Issue #101 上下文能力只读目录观察本地轻量验证
+
+在仓库根目录、分支 `codex/issue-101-gate-5-context-entry-observation` 执行。Git 时间只使用系统
+默认本机时间；不得设置 `GIT_AUTHOR_DATE` 或 `GIT_COMMITTER_DATE`。Issue `#101` 已取得项目所有者
+对二十四路径和 `candidate_scope_hash` 的批准；以下命令用于实现后的本地轻量验证。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+function Assert-NativeSuccess {
+  param([Parameter(Mandatory)][string]$Label)
+  if ($LASTEXITCODE -ne 0) { throw "$Label 失败：$LASTEXITCODE" }
+}
+
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+cargo test --locked --offline --all-targets `
+  -p inputcodex-domain `
+  -p inputcodex-application `
+  -p inputcodex-platform `
+  -p inputcodex-parity
+Assert-NativeSuccess 'Issue #101 定向测试'
+
+cargo clippy --locked --offline --all-targets `
+  -p inputcodex-domain `
+  -p inputcodex-application `
+  -p inputcodex-platform `
+  -p inputcodex-parity -- -D warnings
+Assert-NativeSuccess 'Issue #101 定向 Clippy'
+
+cargo fmt --all -- --check
+Assert-NativeSuccess 'Issue #101 rustfmt'
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+Assert-NativeSuccess 'Issue #101 CI 合同'
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #101 仓库政策'
+
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #101 Release Audit'
+
+cargo metadata --locked --offline --no-deps --format-version 1 | Out-Null
+Assert-NativeSuccess 'Issue #101 Cargo metadata'
+
+$approved = @(
+  'AGENTS.md',
+  'build.md',
+  'CONTEXT.md',
+  'crates/inputcodex-application/src/context_entry_observation.rs',
+  'crates/inputcodex-application/src/lib.rs',
+  'crates/inputcodex-application/tests/context_entry_observation.rs',
+  'crates/inputcodex-domain/src/context_entry_observation.rs',
+  'crates/inputcodex-domain/src/lib.rs',
+  'crates/inputcodex-domain/tests/context_entry_observation.rs',
+  'crates/inputcodex-parity/tests/catalog_repository.rs',
+  'crates/inputcodex-platform/src/context_entry_observation.rs',
+  'crates/inputcodex-platform/src/lib.rs',
+  'crates/inputcodex-platform/tests/context_entry_observation.rs',
+  'docs/plans/2026-07-29-issue-101-gate-5-context-entry-observation.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-07-29-issue-101-gate-5-context-entry-observation.md',
+  'docs/reports/issue-101-gate-5-context-entry-observation.md',
+  'docs/workflows/2026-07-29-issue-101-gate-5-context-entry-observation-runtime.md',
+  'err.md',
+  'parity/contracts/provider-network.yml',
+  'parity/features/provider-network.yml',
+  'parity/features/source-index.yml',
+  'parity/README.md',
+  'README.md'
+) | Sort-Object
+$scopePayload = ($approved -join "`n") + "`n"
+$scopeHash = [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData(
+    [Text.UTF8Encoding]::new($false).GetBytes($scopePayload)
+  )
+).ToLowerInvariant()
+if ($approved.Count -ne 24) { throw "Issue #101 路径数量漂移：$($approved.Count)" }
+if ($scopeHash -ne '5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372') {
+  throw "Issue #101 scope_hash 漂移：sha256:$scopeHash"
+}
+
+$baseline = 'origin/main'
+$actual = @(
+  git -c core.quotePath=false diff --name-only "$baseline...HEAD"
+  git -c core.quotePath=false diff --name-only
+  git -c core.quotePath=false ls-files --others --exclude-standard
+) | Where-Object { $_ } | Sort-Object -Unique
+$outside = @($actual | Where-Object { $_ -notin $approved })
+if ($outside.Count -ne 0) { throw "Issue #101 越界路径：$($outside -join ', ')" }
+$actualPayload = ($actual -join "`n") + "`n"
+$actualHash = [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData(
+    [Text.UTF8Encoding]::new($false).GetBytes($actualPayload)
+  )
+).ToLowerInvariant()
+$errChanged = $actual -contains 'err.md'
+if ($errChanged) {
+  if ($actual.Count -ne 24 -or $actualHash -ne $scopeHash) {
+    throw "Issue #101 含 err.md 时实际范围漂移：count=$($actual.Count) sha256:$actualHash"
+  }
+} else {
+  $expectedActual = @($approved | Where-Object { $_ -ne 'err.md' })
+  if ($actual.Count -ne 23 -or (Compare-Object $expectedActual $actual).Count -ne 0) {
+    throw "Issue #101 无新根因时实际路径必须精确排除 err.md：$($actual -join ', ')"
+  }
+  if ($actualHash -ne '08b223934a07a66d91e5cf2e1b340a243ea460d6c4edc266f58d30101c478d47') {
+    throw "Issue #101 常态实际范围哈希漂移：sha256:$actualHash"
+  }
+}
+
+$protected = @(
+  git -c core.quotePath=false diff --name-only "$baseline...HEAD" -- `
+    Cargo.toml Cargo.lock .github apps upstream scripts benchmarks
+  git -c core.quotePath=false diff --name-only -- `
+    Cargo.toml Cargo.lock .github apps upstream scripts benchmarks
+) | Where-Object { $_ } | Sort-Object -Unique
+if ($protected.Count -ne 0) { throw "Issue #101 修改受保护路径：$($protected -join ', ')" }
+
+$dependencyDiff = @(git -c core.quotePath=false diff "$baseline...HEAD" -- Cargo.toml Cargo.lock crates/*/Cargo.toml)
+foreach ($forbiddenDependency in @('rusqlite', 'reqwest', 'sysinfo', 'tokio', 'hyper')) {
+  if ($dependencyDiff -match [regex]::Escape($forbiddenDependency)) {
+    throw "Issue #101 禁止新增依赖：$forbiddenDependency"
+  }
+}
+
+function Get-YamlListItemBlock {
+  param([Parameter(Mandatory)][string]$Text, [Parameter(Mandatory)][string]$Id)
+  $match = [regex]::Match($Text, "(?ms)^  - id: $([regex]::Escape($Id))\r?\n.*?(?=^  - id: |\z)")
+  if (-not $match.Success) { throw "Issue #101 缺少目录条目：$Id" }
+  $match.Value
+}
+
+$featureText = Get-Content -Raw -LiteralPath parity/features/provider-network.yml
+$observation = Get-YamlListItemBlock -Text $featureText -Id 'feature.provider-network.context-entry-observation'
+if ($observation -notmatch 'status: implemented' -or
+    $observation -notmatch 'tauri-command:read_live_context_entries') {
+  throw 'Issue #101 上下文目录观察 feature 漂移。'
+}
+$umbrella = Get-YamlListItemBlock -Text $featureText -Id 'feature.provider-network.context-entry-management'
+if ($umbrella -notmatch 'status: unassessed' -or
+    $umbrella -match 'tauri-command:read_live_context_entries') {
+  throw 'Issue #101 原上下文管理总功能漂移。'
+}
+
+$sourceText = Get-Content -Raw -LiteralPath parity/features/source-index.yml
+$readLive = Get-YamlListItemBlock -Text $sourceText -Id 'tauri-command:read_live_context_entries'
+if ($readLive -notmatch 'side_effects: \[filesystem-read\]' -or
+    $readLive -notmatch 'feature_id: feature\.provider-network\.context-entry-observation') {
+  throw 'Issue #101 read_live_context_entries 归属或副作用漂移。'
+}
+foreach ($sourceId in @(
+  'tauri-command:delete_context_entry',
+  'tauri-command:extract_relay_common_config',
+  'tauri-command:list_context_entries',
+  'tauri-command:sync_live_context_entries',
+  'tauri-command:upsert_context_entry'
+)) {
+  $block = Get-YamlListItemBlock -Text $sourceText -Id $sourceId
+  if ($block -notmatch 'side_effects: \[filesystem-read, filesystem-write\]' -or
+      $block -notmatch 'feature_id: feature\.provider-network\.context-entry-management') {
+    throw "Issue #101 原上下文管理入口漂移：$sourceId"
+  }
+}
+
+$platformSource = Get-Content -Raw -LiteralPath crates/inputcodex-platform/src/context_entry_observation.rs
+$productionSource = [regex]::Split($platformSource, '(?m)^#\[cfg\(test\)\]')[0]
+foreach ($required in @(
+  'SystemPlatformPaths.resolve',
+  'symlink_metadata',
+  'File::open',
+  '256 * 1024',
+  'DocumentMut',
+  'ContextEntryCatalogObservation'
+)) {
+  if (-not $productionSource.Contains($required)) { throw "Issue #101 缺少平台门禁：$required" }
+}
+foreach ($forbidden in @(
+  'read_to_string',
+  'normalize_duplicate_toml_text',
+  'toml_body',
+  'summary',
+  'fs::write',
+  'OpenOptions',
+  'std::process::Command',
+  'Command::new',
+  'std::thread',
+  'rusqlite',
+  'reqwest',
+  'hyper',
+  'TcpStream',
+  'UdpSocket',
+  'iced',
+  'unsafe {'
+)) {
+  if ($productionSource.Contains($forbidden)) { throw "Issue #101 禁止能力命中：$forbidden" }
+}
+
+$ownerName = [Environment]::UserName
+$productionPaths = @(
+  'crates/inputcodex-domain/src/context_entry_observation.rs',
+  'crates/inputcodex-application/src/context_entry_observation.rs',
+  'crates/inputcodex-platform/src/context_entry_observation.rs'
+)
+$addedDiff = @(git -c core.quotePath=false diff --unified=0 "$baseline...HEAD" -- $productionPaths)
+if ($LASTEXITCODE -ne 0) { throw 'Issue #101 新增行隐私扫描准备失败。' }
+$addedLines = @($addedDiff | Where-Object { $_ -cmatch '^\+(?!\+\+)' })
+if (-not [string]::IsNullOrWhiteSpace($ownerName)) {
+  $privateLeaks = @($addedLines | Select-String -SimpleMatch -CaseSensitive $ownerName)
+  if ($privateLeaks.Count -ne 0) { throw "Issue #101 泄露本机用户标识：$($privateLeaks -join '; ')" }
+}
+$absolutePathLeaks = @($addedLines | Select-String -Pattern '(?i)[A-Z]:\\Users\\')
+if ($absolutePathLeaks.Count -ne 0) { throw "Issue #101 泄露 Windows 用户绝对路径：$($absolutePathLeaks -join '; ')" }
+
+git diff --check
+Assert-NativeSuccess 'Issue #101 Git 空白检查'
+```
+
+预期：四 crate tests/Clippy、`rustfmt`、CI 合同、Release Audit、仓库政策和 Cargo metadata 均通过；
+批准上限为 `24` 路径且哈希为
+`sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372`。本次已形成
+`DocumentMut` span 新根因，实际范围必须包含 `err.md` 并精确使用同一 `24` 路径哈希；没有新根因的
+复用任务才使用排除 `err.md` 的 `23` 路径和
+`sha256:08b223934a07a66d91e5cf2e1b340a243ea460d6c4edc266f58d30101c478d47`。只重映射
+`read_live_context_entries`，不新增依赖、不返回配置正文且原上下文管理总功能继续 `unassessed`。
 
 ## Issue #98 Relay 认证与配置状态只读观察本地轻量验证
 
