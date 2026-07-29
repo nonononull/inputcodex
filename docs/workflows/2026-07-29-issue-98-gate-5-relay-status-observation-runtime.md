@@ -13,6 +13,13 @@
 - `worktree_ref`: `.worktrees/issue-98-gate-5-relay-status-observation`
 - `planning_scope_hash`: `sha256:ec6c88d4a96c351fee85d6c416b04c95b27050893ccbe55b4ad55edfd8d95051`
 - `candidate_scope_hash`: `sha256:b1dda60cda57d4be9344b3fa0c74a49b6087b9bdf03fceb5a772ec7e893d63a5`
+- `planning_checkpoint_ref`: `a6b3cdc5f88cafaf1624da34793bb133d8d05300`
+- `domain_checkpoint_ref`: `01d94aba6a65544d42d1da9d18b3affb0afb3227`
+- `application_checkpoint_ref`: `b0bdf4eac7c0ee19a3f85b7ae2ba35e4683b7247`
+- `platform_checkpoint_ref`: `f6eb1d3ce5f934a09878fe83b7945df2730b3f2e`
+- `parity_checkpoint_ref`: `f21d04225e131eb0ed2bbe24cc7827046ceaef1f`
+- `current_node`: `issue-98-local-verified`
+- `next_node`: `issue-98-pr-open`
 - `mutation_intent`: `source`
 - `current_gate`: `IMPLEMENTATION_APPROVED_DOMAIN_TDD`
 
@@ -290,6 +297,9 @@ pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
 
 执行四 crate tests/Clippy、格式、CI 合同、仓库政策、Release Audit、实际范围、scope hash、隐私与
 禁止能力扫描。完整 Workspace 与双平台构建不占用本机，交给 GitHub-hosted CI。
+
+本 Phase 已按 `build.md` 的 Issue `#98` 稳定命令完成；五个前序 checkpoint、四 crate 定向验证、
+CI 合同、Release Audit、仓库政策、Cargo metadata、范围、隐私和禁止能力门禁均已通过。
 
 隐私扫描至少覆盖新增 Rust、Parity 与任务报告，禁止出现真实凭据样本、账号、URL、绝对路径和
 原始配置正文。测试数据只允许明显虚构且不可用的最小结构值。

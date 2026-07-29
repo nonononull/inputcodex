@@ -2,7 +2,7 @@
 
 ## 文档状态
 
-- `status`: `IMPLEMENTATION_APPROVED_TDD_IN_PROGRESS`
+- `status`: `LOCAL_VERIFIED_PR_PENDING`
 - `tracking_issue_ref`: `https://github.com/nonononull/inputcodex/issues/98`
 - `approved_decision_ref`: `https://github.com/nonononull/inputcodex/issues/97#issuecomment-5115176838`
 - `design_ref`: `https://github.com/nonononull/inputcodex/issues/98`
@@ -12,8 +12,13 @@
 - `worktree_ref`: `.worktrees/issue-98-gate-5-relay-status-observation`
 - `planning_scope_hash`: `sha256:ec6c88d4a96c351fee85d6c416b04c95b27050893ccbe55b4ad55edfd8d95051`
 - `candidate_scope_hash`: `sha256:b1dda60cda57d4be9344b3fa0c74a49b6087b9bdf03fceb5a772ec7e893d63a5`
+- `planning_checkpoint_ref`: `a6b3cdc5f88cafaf1624da34793bb133d8d05300`
+- `domain_checkpoint_ref`: `01d94aba6a65544d42d1da9d18b3affb0afb3227`
+- `application_checkpoint_ref`: `b0bdf4eac7c0ee19a3f85b7ae2ba35e4683b7247`
+- `platform_checkpoint_ref`: `f6eb1d3ce5f934a09878fe83b7945df2730b3f2e`
+- `parity_checkpoint_ref`: `f21d04225e131eb0ed2bbe24cc7827046ceaef1f`
 - `mutation_intent`: `source`
-- `planning_checkpoint_policy`: `验证后建立本地提交，提交哈希回写 Issue #98`
+- `planning_checkpoint_policy`: `completed-and-recorded`
 
 ## 目标
 
@@ -325,6 +330,37 @@ parity/features/source-index.yml
 2. 核验 Hosted 标准 CI、Performance observation 和 Artifact 合同。
 3. Final Head 全绿后请求独立 Squash Merge 授权；禁止自行合并。
 
+## 本地实施 Checkpoints
+
+- Planning：`a6b3cdc5f88cafaf1624da34793bb133d8d05300`。
+- Domain GREEN：`01d94aba6a65544d42d1da9d18b3affb0afb3227`。
+- Application GREEN：`b0bdf4eac7c0ee19a3f85b7ae2ba35e4683b7247`。
+- Platform GREEN：`f6eb1d3ce5f934a09878fe83b7945df2730b3f2e`。
+- Parity GREEN：`f21d04225e131eb0ed2bbe24cc7827046ceaef1f`。
+- 最终内容态验证已通过；本次文档提交将封存 `issue-98-local-verified`，动态 Head 留在 GitHub Issue/PR。
+
+## TDD 验收
+
+### Domain RED → GREEN
+
+- 三个封闭枚举与聚合值最初不存在，RED 由缺失类型稳定触发。
+- GREEN 固定五种文档状态、三种凭据状态、四种配置状态、getter 与最小 Debug。
+
+### Application RED → GREEN
+
+- 零字段 Request、Port 与 UseCase 最初不存在。
+- GREEN 固定 `Some → Ready`、`None → Empty`、`Err → Failed`，不接收旧请求或任意路径。
+
+### Platform RED → GREEN
+
+- 先覆盖公开 Port 缺失与私有文件矩阵，再实现固定双文档、有界读取和严格 JSON/TOML 解析。
+- 两份均缺失返回 `None`；至少一份存在时保留每份文档状态，不泄露字符串、路径或内容。
+
+### Parity RED → GREEN
+
+- RED 证明新 feature/contract/source mapping 不存在。
+- GREEN 只移动 `tauri-command:relay_status`，目录固定为 `41/41`、source `133`、fixture `11`，原 Relay 配置管理总功能继续 `unassessed`。
+
 ## 本地验证合同
 
 规划阶段：
@@ -371,11 +407,7 @@ checkpoint，并在 Issue `#98` 写明根因；不得扩大授权解释。
 
 ## 下一批准门
 
-本规划完成后只请求下列独立实施授权，不以“继续”或既有设计批准代替：
-
-```text
-批准 Issue #98 二十七路径范围与 candidate_scope_hash
-sha256:b1dda60cda57d4be9344b3fa0c74a49b6087b9bdf03fceb5a772ec7e893d63a5，允许 TDD 实施、
-本地轻量验证、Git checkpoint、提交、普通推送、非 Draft PR、Review/CI；最终 Squash Merge
-保留单独授权门。
-```
+1. 完成四 crate 定向 tests/Clippy、格式、CI 合同、Release Audit、仓库政策、范围、隐私和禁止能力门禁。
+2. 建立最终本地验证 checkpoint，普通 push 并创建关联 Issue `#98` 的非 Draft PR。
+3. 逐条闭环 Review，对标准 CI、Performance observation 和 Artifact 合同做 Final Head 核验。
+4. 全绿后只请求绑定 Final Head 的独立 Squash Merge 授权；当前禁止自行合并。

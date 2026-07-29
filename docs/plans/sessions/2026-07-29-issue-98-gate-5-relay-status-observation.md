@@ -13,20 +13,25 @@
 - `planning_scope_hash`: `sha256:ec6c88d4a96c351fee85d6c416b04c95b27050893ccbe55b4ad55edfd8d95051`
 - `candidate_scope_hash`: `sha256:b1dda60cda57d4be9344b3fa0c74a49b6087b9bdf03fceb5a772ec7e893d63a5`
 - `planning_validation`: `PASSED`
-- `execution_state`: `IMPLEMENTATION_APPROVED_DOMAIN_RED_PENDING`
+- `execution_state`: `LOCAL_VERIFIED_PR_PENDING`
+- `planning_checkpoint_ref`: `a6b3cdc5f88cafaf1624da34793bb133d8d05300`
+- `domain_checkpoint_ref`: `01d94aba6a65544d42d1da9d18b3affb0afb3227`
+- `application_checkpoint_ref`: `b0bdf4eac7c0ee19a3f85b7ae2ba35e4683b7247`
+- `platform_checkpoint_ref`: `f6eb1d3ce5f934a09878fe83b7945df2730b3f2e`
+- `parity_checkpoint_ref`: `f21d04225e131eb0ed2bbe24cc7827046ceaef1f`
 - `agos_report_only`: `needs-input-unregistered-bypassed`
 
 ## Mutation Intent
 
 - `mutation_intent`: `source`
 - 产品目标：把上游 `tauri-command:relay_status` 拆为独立、只读、最小披露的结构观察能力。
-- 当前实际写入：只允许四份 planning 控制面。
-- 后续候选写入：仅在所有者批准二十七路径与 candidate hash 后开放。
+- 当前实际写入：已批准二十七路径内的稳定控制面与本地收口证据。
+- 产品实现、依赖与 Parity 写入已完成 checkpoint；当前只允许最终验证所需的范围内修正。
 - 禁止把凭据读取、Provider 配置管理、网络测试或 UI 借本切片带入新架构。
 
 ## Executor Enforcement
 
-- 当前阶段：`implementation-tdd`
+- 当前阶段：`local-verified`
 - 当前写入 allowlist：已批准二十七路径，实际路径必须为其子集。
 - 当前允许操作：二十七路径内 TDD、稳定控制面更新、本地轻量验证、Git checkpoint、提交、
   普通 push、非 Draft PR、Review/CI。
@@ -171,12 +176,11 @@ parity/features/source-index.yml
 
 ## 当前成功标准
 
-- 四份 planning 文件全部存在。
-- 实际差异精确为四路径。
-- 两个 hash 由独立脚本复算一致。
-- CI 脚本合同、仓库政策、Cargo metadata 和 `git diff --check` 通过。
-- 无占位符、无产品源码、Cargo、Parity 或稳定项目文档改动。
-- Issue `#98` 获得 planning 证据和下一批准原文。
+- Planning、Domain、Application、Platform 与 Parity 五个 checkpoint 已建立。
+- Candidate allowlist 保持 `27` 路径，哈希与所有者批准证据一致。
+- `relay_status` 已独立映射，原 Relay 配置管理入口继续 `unassessed`。
+- Platform 与 Parity 批次 tests/Clippy、格式和 Release Audit 已通过。
+- 最终四 crate、CI 合同、仓库政策、Cargo metadata、范围、隐私与禁止能力门禁已通过。
 
 ## Stop Conditions
 
@@ -187,11 +191,7 @@ parity/features/source-index.yml
 - 基线、scope hash 或验证结果不一致。
 - AGOS 试图要求修改其自身控制面；此时记录并绕过，不修 AGOS。
 
-## 下一批准原文
+## 下一门
 
-```text
-批准 Issue #98 二十七路径范围与 candidate_scope_hash
-sha256:b1dda60cda57d4be9344b3fa0c74a49b6087b9bdf03fceb5a772ec7e893d63a5，允许 TDD 实施、
-本地轻量验证、Git checkpoint、提交、普通推送、非 Draft PR、Review/CI；最终 Squash Merge
-保留单独授权门。
-```
+完成最终本地门禁后建立 `issue-98-local-verified` checkpoint，普通 push 并创建非 Draft PR。
+Review/CI 全绿后只请求绑定 Final Head 的独立 Squash Merge 授权；当前禁止自行合并。
