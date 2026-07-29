@@ -212,7 +212,8 @@ pub struct ObserveRelayStatus<P> {
 ### 依赖
 
 - 根 `Cargo.toml` 固定 Workspace 依赖：
-  `toml_edit = { version = "=0.25.13+spec-1.1.0", default-features = false, features = ["parse"] }`。
+  `toml_edit = { version = "=0.25.13", default-features = false, features = ["parse"] }`；
+  Cargo 锁定结果保持 `0.25.13+spec-1.1.0`，避免在版本约束中写入会被 SemVer 忽略的构建元数据。
 - `crates/inputcodex-platform/Cargo.toml` 只引用 Workspace 依赖。
 - `Cargo.lock` 纳入允许范围；本地锁定源码已确认该版本最低 Rust 为 `1.85`，支持
   `DocumentMut: FromStr` 及本切片所需只读访问。

@@ -6,6 +6,7 @@ mod application_overview;
 mod diagnostic_log_observation;
 mod platform_paths;
 mod relay_environment_observation;
+mod relay_status_observation;
 mod runtime_environment_observation;
 mod settings_observation;
 mod version_startup;
@@ -14,6 +15,7 @@ pub use application_overview::SystemApplicationOverview;
 pub use diagnostic_log_observation::SystemDiagnosticLogObservation;
 pub use platform_paths::SystemPlatformPaths;
 pub use relay_environment_observation::SystemRelayEnvironmentObservation;
+pub use relay_status_observation::SystemRelayStatusObservation;
 pub use runtime_environment_observation::{
     SystemRuntimeEnvironmentObservation, observe_macos_runtime_environment,
     observe_windows_runtime_environment,
