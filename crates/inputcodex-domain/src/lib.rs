@@ -3,6 +3,7 @@
 mod application_overview;
 mod context_entry_observation;
 mod diagnostic_log_observation;
+mod local_session_directory_observation;
 mod platform_paths;
 mod relay_environment_observation;
 mod relay_status_observation;
@@ -20,6 +21,13 @@ pub use context_entry_observation::{
     ContextEntryObservation, ContextEntryObservationError,
 };
 pub use diagnostic_log_observation::DiagnosticLogObservation;
+
+pub use local_session_directory_observation::{
+    LocalSessionDirectoryEntry, LocalSessionDirectoryEntryError, LocalSessionDirectoryPage,
+    LocalSessionDirectoryPageError, LocalSessionSourceCoverage, LocalSessionSourceSummary,
+    LocalSessionSourceSummaryError, LocalSessionTitle, MAX_LOCAL_SESSION_DIRECTORY_PAGE_SIZE,
+    MAX_LOCAL_SESSION_ID_BYTES, MAX_LOCAL_SESSION_TITLE_CHARS,
+};
 
 pub use platform_paths::{
     ApplicationInstallSource, CodexInstallation, PlatformPathsSnapshot, PrivatePath,

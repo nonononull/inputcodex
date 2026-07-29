@@ -16,7 +16,7 @@
 - `candidate_scope_hash`: `sha256:47dcb2c181daa61a8df073e7f3ada069bf8e3d9b95df0c57f7709bcb6cde211d`
 - `executor`: `codex-desktop-main-thread`
 - `subagents`: `not-authorized`
-- `current_node`: `planning-checkpoint`
+- `current_node`: `domain-checkpoint`
 
 ## Current Gate
 
@@ -63,7 +63,7 @@
 4. 运行 AGOS default-entry `-ReportOnly` 和项目原生 planning 验证。
 5. 建立 `issue-104-planning-freeze` Git checkpoint。
 
-状态：`ready-for-checkpoint`。planning 七路径/hash、CI 合同、仓库政策、Release Audit、Cargo metadata、Markdown 链接和 diff check 已通过；AGOS default-entry 因任务未注册和缺少 owner scope manifest 返回 blocked，已按项目规则绕过。
+状态：`completed`。checkpoint `7d11a6ff904b7d9bc2ca74bbaf52c122fc31feb9`；planning 七路径/hash、CI 合同、仓库政策、Release Audit、Cargo metadata、Markdown 链接和 diff check 通过，AGOS blocked 状态已按项目规则绕过。
 
 ### Node 3：Domain TDD
 
@@ -73,7 +73,7 @@
 4. 运行 domain tests/Clippy/fmt。
 5. 建立 `issue-104-domain` checkpoint。
 
-状态：`pending`。
+状态：`ready-for-checkpoint`。RED 为缺少领域 API 的 `E0432`；GREEN 为定向 `7 passed`、Clippy 和 rustfmt 通过。
 
 ### Node 4：Application TDD
 

@@ -119,14 +119,14 @@
 - [x] 回写 `AGENTS.md`、`CONTEXT.md`、Master Plan 与 `build.md`。
 - [x] 验证七路径 planning allowlist 和 hash。
 - [x] 运行 AGOS default-entry `-ReportOnly`；实际 `blocked/unregistered` 与缺失 owner scope manifest 已记录并按项目规则绕过。
-- [ ] 建立 planning Git checkpoint。
+- [x] 建立 planning Git checkpoint：`7d11a6ff904b7d9bc2ca74bbaf52c122fc31feb9`。
 
 ### Batch 1：Domain RED → GREEN
 
-- [ ] 先写领域测试：标题空白、空白规范化、控制字符、256 字符边界、截断、空 ID、分页与覆盖不变量、脱敏 Debug。
-- [ ] 运行定向测试并证明因模块/API 缺失而 RED。
-- [ ] 写最小领域实现并导出符号。
-- [ ] 运行领域测试 GREEN、格式与 Clippy。
+- [x] 先写领域测试：标题空白、空白规范化、控制字符、256 字符边界、截断、空 ID、分页与覆盖不变量、脱敏 Debug。
+- [x] 运行定向测试并证明因模块/API 缺失而 RED：`E0432`，退出码 `101`。
+- [x] 写最小领域实现并导出符号。
+- [x] 运行领域测试 GREEN `7 passed`、格式与 Clippy。
 - [ ] 建立 domain Git checkpoint。
 
 ### Batch 2：Application RED → GREEN

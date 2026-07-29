@@ -17,8 +17,8 @@
 - `candidate_scope_hash`: `sha256:47dcb2c181daa61a8df073e7f3ada069bf8e3d9b95df0c57f7709bcb6cde211d`
 - `normal_scope_without_err`: `sha256:acee55e9539631f6eca4fb557d27999c7815d20ae15a4b4ea932db243079cb8c`
 - `planning_validation`: `PASSED`
-- `execution_state`: `PLANNING_VERIFIED`
-- `planning_checkpoint_ref`: `pending`
+- `execution_state`: `DOMAIN_VERIFIED_PENDING_CHECKPOINT`
+- `planning_checkpoint_ref`: `7d11a6ff904b7d9bc2ca74bbaf52c122fc31feb9`
 - `domain_checkpoint_ref`: `pending`
 - `application_checkpoint_ref`: `pending`
 - `platform_checkpoint_ref`: `pending`
@@ -166,15 +166,17 @@ README.md
 
 ### Batch 0：Planning Freeze
 
-状态：`ready-for-checkpoint`。
+状态：`completed`。checkpoint `7d11a6ff904b7d9bc2ca74bbaf52c122fc31feb9`。
 
 验证：planning 七路径与 hash、Markdown 链接、CI 合同 `35/35`、仓库政策、Release Audit、Cargo metadata 和 diff check 已通过。AGOS default-entry 返回 `blocked/unregistered`、`missing-owner-scope-manifest`；按 inputcodex 项目规则记录后绕过，不修改 AGOS。
 
 ### Batch 1：Domain RED → GREEN
 
-状态：`pending`。
+状态：`ready-for-checkpoint`。
 
-产出：领域条目、标题、分页和覆盖状态；先失败测试后最小实现。
+RED：定向测试因根 crate 缺少全部会话目录领域 API 返回 `E0432`，退出码 `101`。
+
+GREEN：新增标题安全值、条目、来源摘要和页面不变量；定向测试 `7 passed`，Domain Clippy 与 rustfmt 通过。
 
 ### Batch 2：Application RED → GREEN
 
