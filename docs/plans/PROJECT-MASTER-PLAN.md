@@ -2,9 +2,9 @@
 
 schema_version: inputcodex.master-plan.v1
 active_task: issue-101-gate-5-context-entry-observation
-active_gate: Gate 5 前八个产品切片已进入 main；Issue #100 已完成上下文能力观察与管理分离决策，Issue #101 已建立隔离分支、书面计划、Session Plan、Runtime Workflow 和二十四路径候选范围，正在等待独立实施批准
+active_gate: Gate 5 前八个产品切片已进入 main；Issue #101 的二十四路径实施、四层 checkpoint 与本地轻量全门禁已完成，当前等待普通 push、非 Draft PR、Review/CI 与 Artifact 核验
 last_verified_gate: Issue #98 / PR #99 已以单父 Squash 提交 52320c2c02e19d9ffae11ccb6742a0f0fc4b71b9 进入 main；合并后 main CI Run 30449847793 七 Job与 Performance Baseline Run 30449848277 四 Job全绿且 Artifact 均为 0，Issue #98 已按 COMPLETED 关闭且 release_audit=current
-next_legal_gate: 只等待项目所有者批准 Issue #101 二十四路径与 candidate_scope_hash sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372；未批准前不得开始产品 TDD、提交实现、push、PR 或 Review/CI
+next_legal_gate: 为 Issue #101 建立 local-verified checkpoint，普通 push 并创建关联非 Draft PR；完成 Review 根因闭环、Hosted CI、Performance observation 与 Artifact 核验后，才能请求绑定 Final Head 的独立 Squash Merge 授权
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/101
 active_pr_ref: pending
 gate_5_platform_paths_exception_ref: https://github.com/nonononull/inputcodex/issues/74
@@ -71,6 +71,12 @@ gate_5_context_entry_decision_ref: https://github.com/nonononull/inputcodex/issu
 gate_5_context_entry_issue_ref: https://github.com/nonononull/inputcodex/issues/101
 gate_5_context_entry_scope_hash: sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372
 gate_5_context_entry_branch_ref: codex/issue-101-gate-5-context-entry-observation
+gate_5_context_entry_scope_approval_ref: https://github.com/nonononull/inputcodex/issues/101#issuecomment-5119498422
+gate_5_context_entry_planning_commit: f72ec09680980b396897f9363f3fc79c4b179d32
+gate_5_context_entry_domain_commit: 325b86a94c19c0eb494ce724e438187fc3bd97b3
+gate_5_context_entry_application_commit: bbb9b88a58ba08e4d7184c6d3b1a93229307f7ed
+gate_5_context_entry_platform_commit: 273f3234e36e35e7c09e00a2b9e0ff5ec81564ab
+gate_5_context_entry_parity_commit: 40a9dc15f19f80a576622178a05c6511534eae7b
 documentation_information_architecture_issue_ref: https://github.com/nonononull/inputcodex/issues/83
 documentation_information_architecture_scope_hash: sha256:d8a404c19b108587a5e17b4ded454444d5e948c92410b759504a7eb7c63bed44
 performance_budget_observation_issue_ref: https://github.com/nonononull/inputcodex/issues/63
@@ -285,7 +291,7 @@ decision_status: issue-89-pr-90-review-ci-green-final-merge-not-authorized
 - [x] Issue `#97` 已完成 Relay 认证与配置状态观察方案 A 决策并关闭；最小披露的只读状态观察与配置管理总功能正式分离。
 - [x] Issue `#98` / PR `#99` 已完成第八个 Gate 5 Relay 认证与配置状态只读观察迁移、独立 Squash Merge 与主干验证；只接管 `relay_status`，原 Relay 配置管理总功能继续 `unassessed`。
 - [x] Issue `#100` 已完成上下文能力只读目录观察与完整管理分离决策并按 `COMPLETED` 关闭。
-- Issue `#101` 是第九个 Gate 5 上下文能力只读目录观察切片：只接管 `read_live_context_entries`，固定单文件 `256 KiB` 上限，只返回条目 ID、稳定种类、启用状态和分类计数；当前停在二十四路径与 `candidate_scope_hash` 的独立实施批准门。
+- Issue `#101` 是第九个 Gate 5 上下文能力只读目录观察切片：只接管 `read_live_context_entries`，固定单文件 `256 KiB` 上限，只返回条目 ID、稳定种类、启用状态和分类计数；实施批准、四层 checkpoint 与二十四路径本地全门禁已完成，当前等待非 Draft PR 与 Review/CI。
 - 第十个产品切片必须等待 Issue `#101` 完成后重新建立独立 Issue、书面设计、精确范围与实现授权；不得复用当前范围扩展上下文写入、完整 TOML、网络、SQLite、Zed Remote、Token 用量、UI 或其他总功能。
 
 ### Gate 6：首个正式版本（锁定）
@@ -389,4 +395,5 @@ decision_status: issue-89-pr-90-review-ci-green-final-merge-not-authorized
 - Issue `#47` 出现五路径或 `sha256:dd612ef0c2e5f0f830c40f161b1ef1a85bc58cd1d85458a758c3905ade8db03e` 之外的新增、删除或重命名路径，或在最终 Head 的 Review、CI 和全部对话闭环前请求 Squash Merge。
 - Issue `#32` 出现已批准 28 路径或 `sha256:857f6a8a2070d5ddcb43eaf237448d30302d59e39e1dbb910724cfac2fc81505` 之外的新增、删除或重命名路径，或改动根 Cargo、`apps/`、`parity/`、`upstream/`、Ruleset、发布资产或 AGOS。
 - 在独立性能基线 Issue 中创建性能优化、产品迁移、`parity-exception`、运行上游/半成品或填写绝对性能预算，但没有新的独立 Issue 与项目所有者批准。
+- Issue `#101` 出现二十四路径或 `sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372` 之外的新增、删除或重命名路径；引入第二文件、依赖、写入、网络、子进程、线程、UI、原始配置披露，或在 Final Head Review/CI/Artifact 闭环与独立授权前请求 Squash Merge。
 - Fresh 验证失败、Ruleset 变化、Review 对话未闭环或出现未批准的一致性差异。

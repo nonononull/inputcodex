@@ -13,24 +13,27 @@
 - `planning_scope_hash`: `sha256:0393705157d30192e317a8158686baf6c2a79483abab1e5a7a5b109d30923dbd`
 - `candidate_scope_hash`: `sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372`
 - `planning_validation`: `PASSED`
-- `execution_state`: `PARITY_GREEN`
+- `execution_state`: `LOCAL_VERIFIED_PR_PENDING`
+- `planning_checkpoint_ref`: `f72ec09680980b396897f9363f3fc79c4b179d32`
+- `domain_checkpoint_ref`: `325b86a94c19c0eb494ce724e438187fc3bd97b3`
+- `application_checkpoint_ref`: `bbb9b88a58ba08e4d7184c6d3b1a93229307f7ed`
+- `platform_checkpoint_ref`: `273f3234e36e35e7c09e00a2b9e0ff5ec81564ab`
+- `parity_checkpoint_ref`: `40a9dc15f19f80a576622178a05c6511534eae7b`
 - `agos_report_only`: `needs-input-unregistered-bypassed`
 
 ## Mutation Intent
 
 - `mutation_intent`: `source`
-- 当前阶段实际允许写入：七路径 planning 控制面。
-- 获得实施批准后的目标写入：二十四路径内的 Domain、Application、Platform、Parity、测试、
-  稳定文档和任务报告。
+- 当前实际写入：已批准二十四路径内的稳定文档、任务报告与本地收口证据。
+- Domain、Application、Platform 与 Parity 实现已形成独立 checkpoint；当前不再扩大产品语义。
 - 禁止把上下文管理写入、完整 TOML、网络、SQLite、UI、线程或 AGOS 改动带入本切片。
 
 ## Executor Enforcement
 
-- 当前阶段：`planning-freeze`
-- 当前允许操作：Issue 写入、隔离分支/worktree、七路径控制面写入、范围哈希复算、只读验证。
-- 当前禁止操作：产品 TDD、Rust 实现、Parity 状态修改、依赖修改、实现提交、push、PR、Review/CI、
-  Squash Merge、force push、`main` 写入和 AGOS 控制面修改。
-- 产品实现前置门：项目所有者批准二十四路径与 `candidate_scope_hash`。
+- 当前阶段：`local-verified`
+- 当前允许操作：二十四路径内稳定文档更新、本地轻量验证、Git checkpoint、普通 push、非 Draft PR 与 Review/CI。
+- 当前禁止操作：范围外写入、依赖或语义扩展、Squash Merge、force push、`main` 写入和 AGOS 控制面修改。
+- 产品实现前置门：`PASSED`，证据为 `implementation_scope_approval_ref`。
 - 最终合并前置门：具体 PR Final Head、全部 Review 根因闭环、Hosted CI 全绿、Artifact 合同和
   独立 Squash Merge 授权。
 
@@ -104,7 +107,7 @@ local_knowledge_lookup:
   - 四个受影响 crate 定向 tests/Clippy
   - `cargo fmt --all -- --check`
   - Release Audit、CI 合同、仓库政策、范围和隐私扫描
-- `sibling_regression_guard`: `pending-implementation`
+- `sibling_regression_guard`: `passed-four-crate-local-gate`
 
 ## Planning Allowlist
 
@@ -196,6 +199,7 @@ CI 脚本合同、仓库政策、Cargo metadata、Parity baseline 与 diff 检�
 
 - 更新稳定文档与报告；先查 `err.md`，只有形成新可复用根因时才写入，否则实际范围固定排除该路径。
 - 运行本地轻量全门禁并建立 named checkpoint。
+- 状态：`completed`；四 crate tests/Clippy、fmt、CI 合同、仓库政策、Release Audit、Cargo metadata、二十四路径哈希、隐私、禁止能力和 diff 门禁均通过。
 
 ### Batch 6：Review / CI
 
@@ -230,4 +234,4 @@ CI 脚本合同、仓库政策、Cargo metadata、Parity baseline 与 diff 检�
 
 ## Next Gate
 
-Domain、Application、Platform 与 Parity TDD 已完成；下一合法节点为稳定文档、本地全门禁与 local-verified checkpoint。
+Domain、Application、Platform、Parity 与本地全门禁已完成；下一合法节点为 local-verified checkpoint、普通 push、非 Draft PR 与 Review/CI。

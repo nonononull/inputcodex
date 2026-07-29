@@ -11,7 +11,12 @@
 - `baseline_ref`: `52320c2c02e19d9ffae11ccb6742a0f0fc4b71b9`
 - `branch_ref`: `codex/issue-101-gate-5-context-entry-observation`
 - `candidate_scope_hash`: `sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372`
-- `runtime_state`: `parity-green`
+- `runtime_state`: `local-verified-pr-pending`
+- `planning_checkpoint_ref`: `f72ec09680980b396897f9363f3fc79c4b179d32`
+- `domain_checkpoint_ref`: `325b86a94c19c0eb494ce724e438187fc3bd97b3`
+- `application_checkpoint_ref`: `bbb9b88a58ba08e4d7184c6d3b1a93229307f7ed`
+- `platform_checkpoint_ref`: `273f3234e36e35e7c09e00a2b9e0ff5ec81564ab`
+- `parity_checkpoint_ref`: `40a9dc15f19f80a576622178a05c6511534eae7b`
 - `agos_status`: `needs-input-unregistered-bypassed`
 
 ## Current Gate
@@ -23,7 +28,8 @@ Issue #100 owner decision approved
   -> Application RED / GREEN / VERIFY completed
   -> Platform RED / GREEN / VERIFY completed
   -> Parity RED / GREEN / VERIFY completed
-  -> NEXT: Local Closeout
+  -> Local Closeout completed
+  -> NEXT: Remote Delivery
 ```
 
 当前 `ALLOWED_OPS`：
@@ -113,7 +119,7 @@ Cargo metadata、Parity baseline 和 diff 检查均已通过；下一节点保�
    scope hash、禁止能力、隐私和 `git diff --check`。
 4. 建立 `issue-101-local-verified` named checkpoint。
 
-状态：`ready`。
+状态：`completed`。四 crate tests/Clippy、fmt、CI 合同、仓库政策、Release Audit、Cargo metadata、二十四路径哈希、隐私、禁止能力和 diff 门禁均通过。
 
 ### Node 8：Remote Delivery
 
@@ -123,7 +129,7 @@ Cargo metadata、Parity baseline 和 diff 检查均已通过；下一节点保�
 4. 核验标准 CI、Performance observation 和 Artifact 合同。
 5. 绑定 Final Head 请求独立 Squash Merge 授权。
 
-状态：`blocked-by-node-7`。
+状态：`ready`。最终 Squash Merge 仍被独立授权门阻断。
 
 ## Scope Enforcement
 

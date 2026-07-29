@@ -82,8 +82,8 @@ git diff --check
 ## Issue #101 上下文能力只读目录观察本地轻量验证
 
 在仓库根目录、分支 `codex/issue-101-gate-5-context-entry-observation` 执行。Git 时间只使用系统
-默认本机时间；不得设置 `GIT_AUTHOR_DATE` 或 `GIT_COMMITTER_DATE`。产品实现前必须先取得
-Issue `#101` 对二十四路径和 `candidate_scope_hash` 的项目所有者批准。
+默认本机时间；不得设置 `GIT_AUTHOR_DATE` 或 `GIT_COMMITTER_DATE`。Issue `#101` 已取得项目所有者
+对二十四路径和 `candidate_scope_hash` 的批准；以下命令用于实现后的本地轻量验证。
 
 ```powershell
 $ErrorActionPreference = 'Stop'
@@ -299,9 +299,10 @@ Assert-NativeSuccess 'Issue #101 Git 空白检查'
 
 预期：四 crate tests/Clippy、`rustfmt`、CI 合同、Release Audit、仓库政策和 Cargo metadata 均通过；
 批准上限为 `24` 路径且哈希为
-`sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372`；无新根因时实际使用
-`23` 路径并排除 `err.md`，实际哈希为
-`sha256:08b223934a07a66d91e5cf2e1b340a243ea460d6c4edc266f58d30101c478d47`；只重映射
+`sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372`。本次已形成
+`DocumentMut` span 新根因，实际范围必须包含 `err.md` 并精确使用同一 `24` 路径哈希；没有新根因的
+复用任务才使用排除 `err.md` 的 `23` 路径和
+`sha256:08b223934a07a66d91e5cf2e1b340a243ea460d6c4edc266f58d30101c478d47`。只重映射
 `read_live_context_entries`，不新增依赖、不返回配置正文且原上下文管理总功能继续 `unassessed`。
 
 ## Issue #98 Relay 认证与配置状态只读观察本地轻量验证

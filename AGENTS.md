@@ -118,4 +118,4 @@
 - Issue `#98` / PR `#99` 已完成第八个 Gate 5 Relay 认证与配置状态只读观察切片；PR `#99` 以单父 Squash 提交 `52320c2c02e19d9ffae11ccb6742a0f0fc4b71b9` 进入 `main`，Issue `#98` 已按 `COMPLETED` 关闭，合并后主干 CI Run `30449847793` 七 Job、Performance Baseline Run `30449848277` 四 Job全绿且 Artifact 均为 `0`。
 - Issue `#100` 已批准上下文能力方案 A 并按 `COMPLETED` 关闭：只读目录观察可独立迁移；完整 TOML、摘要、命令、参数、环境变量、Header、URL、Token、账号和实际路径不得进入新合同，上下文增加、删除、同步、提取和设置正文解析继续保留在未评估的总功能中。
 - Issue `#101` 是第九个 Gate 5 产品切片：只接管 `tauri-command:read_live_context_entries`，固定读取平台路径定位的 `CODEX_HOME/config.toml`，单文件上限 `256 KiB`，只返回条目 ID、稳定种类、启用状态和分类计数。
-- Issue `#101` 当前只允许二十四路径规划、范围哈希和轻量验证；在项目所有者批准 `sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372` 前，禁止产品 TDD、实现提交、推送、PR 或 Review/CI。
+- Issue `#101` 已获得二十四路径与 `sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372` 的实施批准；Domain、Application、Platform、Parity 与本地二十四路径轻量门禁均已通过，下一合法节点仅为普通 push、非 Draft PR、Review/CI 与 Artifact 核验，最终 Squash Merge 仍需绑定 Final Head 的独立授权。

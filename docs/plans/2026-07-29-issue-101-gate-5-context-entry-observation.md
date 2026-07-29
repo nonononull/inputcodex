@@ -1,6 +1,6 @@
 # Issue #101 Gate 5 上下文能力只读目录观察实施计划
 
-> **状态：** `implementation-in-progress`
+> **状态：** `local-verified-pr-pending`
 >
 > **实施纪律：** 项目所有者已批准二十四路径与 `candidate_scope_hash`，允许按本计划执行 TDD、
 > 本地验证、checkpoint、普通推送、非 Draft PR 与 Review/CI；最终 Squash Merge 仍保留独立授权门。
@@ -18,6 +18,11 @@
 - `candidate_scope_hash`: `sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372`
 - `candidate_scope_count`: `24`
 - `planning_validation`: `PASSED`
+- `planning_checkpoint_ref`: `f72ec09680980b396897f9363f3fc79c4b179d32`
+- `domain_checkpoint_ref`: `325b86a94c19c0eb494ce724e438187fc3bd97b3`
+- `application_checkpoint_ref`: `bbb9b88a58ba08e4d7184c6d3b1a93229307f7ed`
+- `platform_checkpoint_ref`: `273f3234e36e35e7c09e00a2b9e0ff5ec81564ab`
+- `parity_checkpoint_ref`: `40a9dc15f19f80a576622178a05c6511534eae7b`
 
 ## 目标
 
@@ -83,7 +88,7 @@
 2. 只派生 `config.toml`，不接受调用方路径或配置正文。
 3. 使用 `symlink_metadata` 拒绝符号链接与非普通文件。
 4. 元数据长度和实际读取均执行 `256 KiB` 上限，读取 `limit + 1` 字节识别增长竞态。
-5. 使用 `toml_edit::DocumentMut` 严格解析，不调用上游重复项删除或文本修复函数。
+5. 先使用 `toml_edit::Document<String>` 严格解析并保留原文 span，再转换为 `DocumentMut` 做结构投影；不调用上游重复项删除或文本修复函数。
 6. 三类根项存在时必须是 table；每个子项必须是 table；布尔字段必须类型正确。
 7. 原始字节、TOML 文档和配置字段在平台函数内部销毁，只返回领域投影。
 
@@ -107,6 +112,8 @@
 3. 实现最小领域类型、构造器、getter、计数不变量和脱敏 Debug。
 4. 运行 Domain tests、Clippy 和格式检查。
 5. 建立 `issue-101-domain-green` Git checkpoint。
+
+状态：`completed`。Domain RED 精确命中目标类型缺失；GREEN 后 4 个新增测试与 Domain 全目标测试、Clippy、fmt 通过。
 
 ### Batch 2：Application RED → GREEN
 
@@ -150,6 +157,8 @@ GREEN 仅实现固定路径、有界读取、严格解析和最小投影。随�
 - 只运行四个受影响 crate 的定向测试/Clippy、格式、Release Audit、CI 合同、仓库政策、
   Cargo metadata、范围和隐私门禁。
 - 完整 Workspace 与 Windows/macOS 编译交给 GitHub-hosted CI。
+
+状态：`completed`。稳定文档与报告已写入；四 crate tests/Clippy、fmt、CI 合同、仓库政策、Release Audit、Cargo metadata、二十四路径哈希、隐私、禁止能力和 diff 门禁均通过。
 
 ### Batch 6：远端交付
 
@@ -200,18 +209,15 @@ observation、Artifact 核验，并绑定 Final Head 请求独立 Squash Merge �
 
 ## 成功标准
 
-- 二十四路径批准上限与哈希不漂移，无越界文件；没有新根因时实际范围精确排除 `err.md`，
-  使用二十三路径和 `sha256:08b223934a07a66d91e5cf2e1b340a243ea460d6c4edc266f58d30101c478d47`。
+- 二十四路径批准上限与哈希不漂移，无越界文件；本次形成 `DocumentMut` span 新根因，实际范围必须精确包含 `err.md`，使用完整二十四路径和 `sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372`。
 - Domain/Application/Platform/Parity 定向测试和 Clippy 全绿，`cargo fmt --check` 通过。
 - Release Audit 保持 `current`，CI/仓库政策通过。
 - 新入口只读一个固定文件且最大 `256 KiB`，没有新增依赖或副作用。
 - 原上下文管理总功能和剩余入口继续 `unassessed`。
 - 新增行不包含真实账号、凭据、URL、绝对用户路径或配置正文。
 
-当前 planning gate 已通过：七路径实际集合与
-`sha256:0393705157d30192e317a8158686baf6c2a79483abab1e5a7a5b109d30923dbd` 精确一致；
-Release Audit 为 `current`，CI 脚本合同 `35/35`、仓库政策、Cargo metadata、Parity baseline 和
-`git diff --check` 均通过。
+Planning、Domain、Application、Platform、Parity 与本地轻量 gate 均已通过；实际范围精确为包含
+`err.md` 的二十四路径，哈希为 `sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372`。下一节点为 local-verified checkpoint、普通 push 和非 Draft PR。
 
 ## 停止门
 
