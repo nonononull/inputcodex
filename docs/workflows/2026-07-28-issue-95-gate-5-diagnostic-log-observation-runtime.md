@@ -5,12 +5,13 @@
 - `workflow_id`: `inputcodex.issue-95.diagnostic-log-observation.v1`
 - `tracking_issue_ref`: `https://github.com/nonononull/inputcodex/issues/95`
 - `approved_decision_ref`: `https://github.com/nonononull/inputcodex/issues/94#issuecomment-5109582183`
+- `owner_scope_approval_ref`: `https://github.com/nonononull/inputcodex/issues/95#issuecomment-5113647548`
 - `baseline_ref`: `origin/main@9587549c3f1bb334507075499f806485d83fce6a`
 - `branch_ref`: `codex/issue-95-gate-5-diagnostic-log-observation`
 - `worktree_ref`: `.worktrees/issue-95-gate-5-diagnostic-log-observation`
 - `planning_scope_hash`: `sha256:14d78bf1a92f5b8db58650b501fb0cebee59a329823ff49e7b8ff3e93e0b7231`
 - `candidate_scope_hash`: `sha256:8d407c269436c655e12ff94035183de6aa50dc7759fbc75f9cb7b6f9b0349d38`
-- `current_node`: `issue-95-planning-verified`
+- `current_node`: `issue-95-scope-approved`
 - `terminal_node`: `issue-95-completed`
 
 ## 状态机
@@ -53,10 +54,10 @@ issue-94-option-1-approved
 
 ### Gate B：二十四路径实现范围
 
-- 状态：`PENDING_OWNER_APPROVAL`
-- 待批准：`24` 路径与
+- 状态：`PASSED`
+- 已批准：`24` 路径与
   `sha256:8d407c269436c655e12ff94035183de6aa50dc7759fbc75f9cb7b6f9b0349d38`
-- 通过后才允许：产品 TDD、稳定文档、轻量验证、Git checkpoint、普通 push、非 Draft PR、Review/CI
+- 当前允许：产品 TDD、稳定文档、轻量验证、Git checkpoint、普通 push、非 Draft PR、Review/CI
 
 ### Gate C：远端交付
 

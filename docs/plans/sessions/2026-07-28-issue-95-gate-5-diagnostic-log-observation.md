@@ -5,6 +5,7 @@
 - `task_id`: `issue-95-gate-5-diagnostic-log-observation`
 - `tracking_issue_ref`: `https://github.com/nonononull/inputcodex/issues/95`
 - `approved_decision_ref`: `https://github.com/nonononull/inputcodex/issues/94#issuecomment-5109582183`
+- `owner_scope_approval_ref`: `https://github.com/nonononull/inputcodex/issues/95#issuecomment-5113647548`
 - `selected_business_path`: `gate-5/diagnostic-log-observation`
 - `baseline_ref`: `origin/main@9587549c3f1bb334507075499f806485d83fce6a`
 - `branch_ref`: `codex/issue-95-gate-5-diagnostic-log-observation`
@@ -22,11 +23,11 @@
 
 ## Executor Enforcement
 
-- 当前阶段：`planning-only`
+- 当前阶段：`implementation-authorized`
 - 当前写入 allowlist：四份 task-local 规划文件
-- 当前允许操作：读取、Discovery、规划写入、规划验证、规划 checkpoint、普通 push、Issue 回写
-- 当前禁止操作：Rust/Parity/稳定文档实现、依赖变更、PR、合并、force push、`main` 写入
-- 产品实现前置门：项目所有者批准 `24` 路径与候选哈希
+- 当前允许操作：二十四路径内 TDD、稳定文档、本地轻量验证、Git checkpoint、普通 push、非 Draft PR、Review/CI
+- 当前禁止操作：范围外写入、依赖变更、合并、force push、`main` 写入
+- 产品实现前置门：`PASSED`，证据为 `owner_scope_approval_ref`
 - 最终合并前置门：具体 PR Final Head、Review 根因闭环、Hosted CI 全绿和独立 Squash Merge 授权
 
 ## 本地知识与来源

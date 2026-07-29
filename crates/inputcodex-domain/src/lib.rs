@@ -1,6 +1,7 @@
 #![forbid(unsafe_code)]
 
 mod application_overview;
+mod diagnostic_log_observation;
 mod platform_paths;
 mod relay_environment_observation;
 mod runtime_environment_observation;
@@ -12,6 +13,7 @@ pub use application_overview::{
     InstallationState, InstalledVersion, InstalledVersionUnknownReason, LiveProcessState,
     MAX_APPLICATION_VERSION_BYTES,
 };
+pub use diagnostic_log_observation::DiagnosticLogObservation;
 
 pub use platform_paths::{
     ApplicationInstallSource, CodexInstallation, PlatformPathsSnapshot, PrivatePath,

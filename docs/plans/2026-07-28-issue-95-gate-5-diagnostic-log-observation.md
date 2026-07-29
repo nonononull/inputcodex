@@ -2,10 +2,11 @@
 
 ## 文档状态
 
-- `status`: `PLANNING_VERIFIED_SCOPE_APPROVAL_PENDING`
+- `status`: `IMPLEMENTATION_AUTHORIZED`
 - `tracking_issue_ref`: `https://github.com/nonononull/inputcodex/issues/95`
 - `approved_decision_ref`: `https://github.com/nonononull/inputcodex/issues/94#issuecomment-5109582183`
 - `design_ref`: `https://github.com/nonononull/inputcodex/issues/95`
+- `owner_scope_approval_ref`: `https://github.com/nonononull/inputcodex/issues/95#issuecomment-5113647548`
 - `baseline_ref`: `origin/main@9587549c3f1bb334507075499f806485d83fce6a`
 - `branch_ref`: `codex/issue-95-gate-5-diagnostic-log-observation`
 - `worktree_ref`: `.worktrees/issue-95-gate-5-diagnostic-log-observation`
@@ -202,8 +203,8 @@ docs/workflows/2026-07-28-issue-95-gate-5-diagnostic-log-observation-runtime.md
 
 ## 当前授权
 
-当前只允许 Discovery、四份规划文档、精确范围、候选哈希、规划验证、规划 checkpoint、普通
-推送和 Issue 回写。未获得 `24` 路径批准前，禁止写 Rust 产品代码、Parity、稳定项目文档或创建 PR。
+项目所有者已批准 `24` 路径与候选哈希，当前允许按本计划执行 TDD、稳定项目控制面、本地
+轻量验证、Git checkpoint、普通推送、非 Draft PR 与 Review/CI。最终 Squash Merge 仍未授权。
 
 规划阶段的 CI 脚本合同、仓库政策、四路径 allowlist、两个哈希、占位符和 `git diff --check`
 均已通过。AGOS ReportOnly 返回既有 `needs-input`/未登记边界，已按 `err.md` 记录绕过，不构成

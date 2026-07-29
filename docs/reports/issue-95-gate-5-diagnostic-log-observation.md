@@ -2,12 +2,13 @@
 
 ## 状态
 
-- `phase`: `PLANNING_VERIFIED`
+- `phase`: `IMPLEMENTATION_AUTHORIZED`
 - `tracking_issue_ref`: `https://github.com/nonononull/inputcodex/issues/95`
 - `approved_decision_ref`: `https://github.com/nonononull/inputcodex/issues/94#issuecomment-5109582183`
+- `owner_scope_approval_ref`: `https://github.com/nonononull/inputcodex/issues/95#issuecomment-5113647548`
 - `baseline_ref`: `9587549c3f1bb334507075499f806485d83fce6a`
 - `planning_validation`: `PASSED`
-- `implementation`: `NOT_AUTHORIZED`
+- `implementation`: `IN_PROGRESS`
 - `pr_ref`: `NOT_REACHED`
 - `squash_merge`: `NOT_AUTHORIZED`
 
@@ -118,7 +119,7 @@ review_ci: not-reached
 
 ## 下一门
 
-1. 完成四路径规划验证并建立 planning checkpoint。
-2. 普通推送当前分支并把设计、范围、哈希和验证证据回写 Issue `#95`。
-3. 请求项目所有者精确批准二十四路径与候选哈希。
-4. 未获批准前不得写 Rust 产品代码、Parity、稳定项目文档或创建 PR。
+1. 按 Domain → Application → Platform → Parity 顺序执行 RED→GREEN。
+2. 更新稳定项目控制面并完成二十四路径范围验证。
+3. 普通推送并创建关联 Issue `#95` 的非 Draft PR。
+4. Review/CI 全绿后绑定 Final Head，请求独立 Squash Merge 授权。
