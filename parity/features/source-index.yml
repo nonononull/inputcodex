@@ -1099,10 +1099,10 @@ sources:
       path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
       symbol: read_latest_logs
     platforms: [windows, macos]
-    side_effects: [filesystem-read, filesystem-write, clipboard-write]
+    side_effects: [filesystem-read]
     disposition:
       type: feature
-      feature_id: feature.foundation-platform.diagnostics
+      feature_id: feature.foundation-platform.diagnostic-log-observation
   - id: tauri-command:read_live_context_entries
     kind: tauri-command
     evidence:

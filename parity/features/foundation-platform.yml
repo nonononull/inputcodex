@@ -82,14 +82,11 @@ features:
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: copy_diagnostics
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
-        symbol: read_latest_logs
-      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: write_diagnostic_event
     entry_points:
       - core-module:diagnostic_log
       - tauri-command:clear_logs
       - tauri-command:copy_diagnostics
-      - tauri-command:read_latest_logs
       - tauri-command:write_diagnostic_event
     platforms:
       windows:
@@ -100,6 +97,27 @@ features:
         semantics: '读取、清理和复制诊断材料，必须脱敏并限制数据边界。'
     decision_refs:
       - issue:26
+      - issue:94
+      - issue:95
+  - id: feature.foundation-platform.diagnostic-log-observation
+    name: '诊断日志只读结构观察'
+    status: implemented
+    evidence:
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: read_latest_logs
+    entry_points:
+      - tauri-command:read_latest_logs
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '只读观察平台路径定位的诊断日志；缺失返回 NoDiagnosticLog，只读取尾部 256 KiB，并将完整 JSON object 与 malformed 记录分开计数。'
+      macos:
+        applicability: supported
+        semantics: '只读观察平台路径定位的诊断日志；缺失返回 NoDiagnosticLog，只读取尾部 256 KiB，并将完整 JSON object 与 malformed 记录分开计数。'
+    decision_refs:
+      - issue:26
+      - issue:94
+      - issue:95
   - id: feature.foundation-platform.environment-conflicts
     name: '环境冲突检查'
     status: unassessed
