@@ -3,6 +3,7 @@
 use inputcodex_domain::DiagnosticCode;
 
 mod application_overview;
+mod diagnostic_log_observation;
 mod platform_paths;
 mod relay_environment_observation;
 mod runtime_environment_observation;
@@ -11,6 +12,9 @@ mod version_startup;
 
 pub use application_overview::{
     ApplicationOverviewPort, ApplicationOverviewRequest, LoadApplicationOverview,
+};
+pub use diagnostic_log_observation::{
+    DiagnosticLogObservationPort, DiagnosticLogObservationRequest, ObserveDiagnosticLog,
 };
 pub use platform_paths::{PlatformPathsPort, PlatformPathsRequest, ResolvePlatformPaths};
 pub use relay_environment_observation::{

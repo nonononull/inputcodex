@@ -1245,12 +1245,159 @@ fn gate5_设置只读观察已实现但设置管理总功能仍未评估() {
 }
 
 #[test]
+fn gate5_诊断日志只读结构观察已实现但诊断总功能仍未评估() {
+    let feature_text = read_repository_text("parity/features/foundation-platform.yml");
+    let observation = yaml_list_item_block(
+        &feature_text,
+        "feature.foundation-platform.diagnostic-log-observation",
+    );
+    for expected in [
+        "name: '诊断日志只读结构观察'",
+        "status: implemented",
+        "tauri-command:read_latest_logs",
+        "256 KiB",
+        "NoDiagnosticLog",
+        "JSON object",
+        "malformed",
+        "- issue:94",
+        "- issue:95",
+    ] {
+        assert!(
+            observation.contains(expected),
+            "诊断日志只读结构观察应包含：{expected}"
+        );
+    }
+
+    let umbrella = yaml_list_item_block(&feature_text, "feature.foundation-platform.diagnostics");
+    for expected in [
+        "status: unassessed",
+        "core-module:diagnostic_log",
+        "tauri-command:clear_logs",
+        "tauri-command:copy_diagnostics",
+        "tauri-command:write_diagnostic_event",
+        "- issue:94",
+        "- issue:95",
+    ] {
+        assert!(
+            umbrella.contains(expected),
+            "原诊断总功能应继续包含：{expected}"
+        );
+    }
+    assert!(!umbrella.contains("status: implemented"));
+    assert!(!umbrella.contains("tauri-command:read_latest_logs"));
+
+    let contract_text = read_repository_text("parity/contracts/foundation-platform.yml");
+    let contract = yaml_list_item_block(
+        &contract_text,
+        "contract.feature.foundation-platform.diagnostic-log-observation.baseline",
+    );
+    for expected in [
+        "filesystem-read",
+        "persistence: 'none'",
+        "file_size_bytes",
+        "sampled_record_count",
+        "valid_object_record_count",
+        "malformed_record_count",
+        "truncated",
+        "partial_record_discarded",
+        "LoadCompletion::Ready",
+        "LoadCompletion::Empty",
+        "NoDiagnosticLog",
+        "256 KiB",
+        "DIAGNOSTIC_LOG_OBSERVATION_UNSUPPORTED",
+        "DIAGNOSTIC_LOG_OBSERVATION_UNAVAILABLE",
+        "DIAGNOSTIC_LOG_OBSERVATION_INVALID_FILE_TYPE",
+        "mode: none",
+        "fixture_refs: []",
+    ] {
+        assert!(
+            contract.contains(expected),
+            "诊断日志只读结构观察合同应包含：{expected}"
+        );
+    }
+    for forbidden in [
+        "filesystem-write",
+        "environment-write",
+        "network-read",
+        "network-write",
+        "process-control",
+        "clipboard-write",
+        "advertising",
+        "remote-recommendation",
+    ] {
+        assert!(
+            !contract.contains(forbidden),
+            "诊断日志只读结构观察合同禁止能力：{forbidden}"
+        );
+    }
+
+    let source_text = read_repository_text("parity/features/source-index.yml");
+    let read = yaml_list_item_block(&source_text, "tauri-command:read_latest_logs");
+    assert!(read.contains("side_effects: [filesystem-read]"));
+    assert!(read.contains("feature_id: feature.foundation-platform.diagnostic-log-observation"));
+    assert!(!read.contains("filesystem-write"));
+    assert!(!read.contains("clipboard-write"));
+
+    for source_id in [
+        "core-module:diagnostic_log",
+        "tauri-command:clear_logs",
+        "tauri-command:copy_diagnostics",
+        "tauri-command:write_diagnostic_event",
+    ] {
+        let source = yaml_list_item_block(&source_text, source_id);
+        assert!(
+            source.contains("side_effects: [filesystem-read, filesystem-write, clipboard-write]")
+        );
+        assert!(source.contains("feature_id: feature.foundation-platform.diagnostics"));
+    }
+
+    let source =
+        read_repository_text("crates/inputcodex-platform/src/diagnostic_log_observation.rs");
+    let production = source.split("#[cfg(test)]").next().unwrap_or(&source);
+    for expected in [
+        "SystemPlatformPaths.resolve",
+        "fs::symlink_metadata",
+        "File::open",
+        "file.seek(SeekFrom::Start(start))",
+        "file.take(limit as u64)",
+        "serde_json::from_slice::<Value>",
+        "DiagnosticLogObservation::new",
+    ] {
+        assert!(
+            production.contains(expected),
+            "诊断日志观察适配器应包含：{expected}"
+        );
+    }
+    for forbidden in [
+        "pub trait DiagnosticLogFileProbe",
+        "pub fn observe_diagnostic_log_file",
+        "read_to_string",
+        "fs::write",
+        "OpenOptions",
+        "std::process::Command",
+        "Command::new",
+        "std::thread",
+        "reqwest",
+        "hyper",
+        "TcpStream",
+        "UdpSocket",
+        "iced",
+        "unsafe {",
+    ] {
+        assert!(
+            !production.contains(forbidden),
+            "诊断日志观察生产适配器禁止能力：{forbidden}"
+        );
+    }
+}
+
+#[test]
 fn 仓库source_index_覆盖锁定上游公开入口() {
     let summary =
         validate_feature_repository(&repository_root()).expect("功能目录应通过仓库级验证");
 
     assert_eq!(summary.source_entry_count(), 133);
-    assert_eq!(summary.feature_count(), 39);
+    assert_eq!(summary.feature_count(), 40);
     assert_eq!(summary.excluded_entry_count(), 3);
     assert_eq!(summary.exception_pending_count(), 10);
     assert_eq!(summary.coverage_gap_count(), 0);
@@ -1261,8 +1408,8 @@ fn 仓库功能目录通过完整引用与安全验证() {
     let summary = validate_repository(&repository_root()).expect("仓库功能目录应通过验证");
 
     assert_eq!(summary.source_entry_count(), 133);
-    assert_eq!(summary.feature_count(), 39);
-    assert_eq!(summary.contract_count(), 39);
+    assert_eq!(summary.feature_count(), 40);
+    assert_eq!(summary.contract_count(), 40);
     assert_eq!(summary.fixture_count(), 11);
     assert_eq!(summary.coverage_gap_count(), 0);
 }

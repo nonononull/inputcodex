@@ -71,6 +71,147 @@ git diff --check
 - 在 Issue `#81` 中兼容旧启动变量、打开 UI、联网、检查/下载/执行更新、读写文件、缓存、启动线程、调用 shell、引入 Iced/Tauri/WebView、新依赖、第四个产品 feature、预算、Release、Ruleset、`upstream/` 或 AGOS 改动。
 - 在 Issue `#89` 中测试网络、返回代理值或路径、读取 `.env` 内容、修改环境/文件/注册表、调用子进程、启动线程/Watcher、打开 UI、注入、迁移 `core-module:proxy`、修改 Workflow/Ruleset、Release、`upstream/` 或 AGOS。
 - 在 Issue `#92` 中公开任意路径读取、返回设置字段或内容、写文件、联网、调用子进程、启动线程/Watcher、打开 UI、使用 `unsafe`、迁移保存/重置/底层设置管理、修改 Workflow/Ruleset、Release、`upstream/` 或 AGOS。
+- 在 Issue `#95` 中接受任意路径/长度/过滤器、读取完整日志、返回正文/字段/事件/detail/PID/时间戳/实际路径/用户名/机器名/凭据、写入或清理日志、复制诊断报告、联网、调用子进程、启动线程/Watcher、打开 UI、注入、使用 `unsafe`、迁移其余诊断总功能、修改 Cargo/Workflow/Ruleset/Release/`upstream/` 或 AGOS。
+
+## Issue #95 诊断日志只读结构观察本地轻量验证
+
+在仓库根目录、分支 `codex/issue-95-gate-5-diagnostic-log-observation` 执行。Git 时间只使用系统
+默认本机时间；不得设置 `GIT_AUTHOR_DATE` 或 `GIT_COMMITTER_DATE`。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+cargo test --locked --offline --all-targets -p inputcodex-domain -p inputcodex-application -p inputcodex-platform -p inputcodex-parity
+if ($LASTEXITCODE -ne 0) { throw "Issue #95 四 crate 测试失败：$LASTEXITCODE" }
+
+cargo clippy --locked --offline --all-targets -p inputcodex-domain -p inputcodex-application -p inputcodex-platform -p inputcodex-parity -- -D warnings
+if ($LASTEXITCODE -ne 0) { throw "Issue #95 四 crate Clippy 失败：$LASTEXITCODE" }
+
+cargo fmt --all -- --check
+if ($LASTEXITCODE -ne 0) { throw "Issue #95 rustfmt 检查失败：$LASTEXITCODE" }
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+if ($LASTEXITCODE -ne 0) { throw "Issue #95 CI 合同失败：$LASTEXITCODE" }
+
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw "Issue #95 Release Audit 失败：$LASTEXITCODE" }
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw "Issue #95 Repository Policy 失败：$LASTEXITCODE" }
+```
+
+范围、哈希、目录分拆、隐私与禁止能力验证：
+
+```powershell
+$ErrorActionPreference = 'Stop'
+$baseline = '9587549c3f1bb334507075499f806485d83fce6a'
+$candidate = [string[]]@(
+  'AGENTS.md',
+  'CONTEXT.md',
+  'README.md',
+  'build.md',
+  'crates/inputcodex-application/src/diagnostic_log_observation.rs',
+  'crates/inputcodex-application/src/lib.rs',
+  'crates/inputcodex-application/tests/diagnostic_log_observation.rs',
+  'crates/inputcodex-domain/src/diagnostic_log_observation.rs',
+  'crates/inputcodex-domain/src/lib.rs',
+  'crates/inputcodex-domain/tests/diagnostic_log_observation.rs',
+  'crates/inputcodex-parity/tests/catalog_repository.rs',
+  'crates/inputcodex-platform/src/diagnostic_log_observation.rs',
+  'crates/inputcodex-platform/src/lib.rs',
+  'crates/inputcodex-platform/tests/diagnostic_log_observation.rs',
+  'docs/plans/2026-07-28-issue-95-gate-5-diagnostic-log-observation.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-07-28-issue-95-gate-5-diagnostic-log-observation.md',
+  'docs/reports/issue-95-gate-5-diagnostic-log-observation.md',
+  'docs/workflows/2026-07-28-issue-95-gate-5-diagnostic-log-observation-runtime.md',
+  'err.md',
+  'parity/README.md',
+  'parity/contracts/foundation-platform.yml',
+  'parity/features/foundation-platform.yml',
+  'parity/features/source-index.yml'
+)
+[Array]::Sort($candidate, [StringComparer]::Ordinal)
+$payload = [string]::Join("`n", $candidate) + "`n"
+$scopeHash = [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData(
+    [Text.UTF8Encoding]::new($false).GetBytes($payload)
+  )
+).ToLowerInvariant()
+if ($candidate.Count -ne 24) { throw "Issue #95 路径数量漂移：$($candidate.Count)" }
+if ($scopeHash -ne '8d407c269436c655e12ff94035183de6aa50dc7759fbc75f9cb7b6f9b0349d38') {
+  throw "Issue #95 scope_hash 漂移：sha256:$scopeHash"
+}
+
+$committed = @(git -c core.quotePath=false diff --name-only "$baseline...HEAD" --)
+$unstaged = @(git -c core.quotePath=false diff --name-only --)
+$staged = @(git -c core.quotePath=false diff --cached --name-only --)
+$untracked = @(git -c core.quotePath=false ls-files --others --exclude-standard)
+$actual = @($committed + $unstaged + $staged + $untracked | Where-Object { $_ } | Sort-Object -Unique)
+$unexpected = @($actual | Where-Object { $_ -notin $candidate })
+if ($unexpected.Count -ne 0) { throw "Issue #95 路径越界：$($unexpected -join ', ')" }
+if ($actual.Count -ne 23) { throw "Issue #95 实际路径数量漂移：$($actual.Count)" }
+if ($actual -contains 'err.md') { throw 'Issue #95 没有新根因，不应修改 err.md。' }
+if (@($actual | Where-Object { $_ -match '(^|/)Cargo\.(toml|lock)$' }).Count -ne 0) {
+  throw 'Issue #95 禁止修改 Cargo 依赖或锁文件。'
+}
+
+function Get-YamlListItemBlock {
+  param([Parameter(Mandatory)][string]$Text, [Parameter(Mandatory)][string]$Id)
+  $match = [regex]::Match($Text, "(?ms)^  - id: $([regex]::Escape($Id))\r?\n.*?(?=^  - id: |\z)")
+  if (-not $match.Success) { throw "Issue #95 缺少目录条目：$Id" }
+  $match.Value
+}
+
+$sourceText = Get-Content -Raw -LiteralPath parity/features/source-index.yml
+$readLatest = Get-YamlListItemBlock -Text $sourceText -Id 'tauri-command:read_latest_logs'
+if ($readLatest -notmatch 'side_effects: \[filesystem-read\]' -or
+    $readLatest -notmatch 'feature_id: feature\.foundation-platform\.diagnostic-log-observation') {
+  throw 'Issue #95 read_latest_logs 归属或副作用漂移。'
+}
+foreach ($sourceId in @('core-module:diagnostic_log', 'tauri-command:clear_logs', 'tauri-command:copy_diagnostics', 'tauri-command:write_diagnostic_event')) {
+  $block = Get-YamlListItemBlock -Text $sourceText -Id $sourceId
+  if ($block -notmatch 'side_effects: \[filesystem-read, filesystem-write, clipboard-write\]' -or
+      $block -notmatch 'feature_id: feature\.foundation-platform\.diagnostics') {
+    throw "Issue #95 原诊断总功能入口漂移：$sourceId"
+  }
+}
+
+$platformSource = Get-Content -Raw -LiteralPath crates/inputcodex-platform/src/diagnostic_log_observation.rs
+$productionSource = [regex]::Split($platformSource, '(?m)^#\[cfg\(test\)\]')[0]
+foreach ($required in @('SystemPlatformPaths.resolve', 'fs::symlink_metadata', 'File::open', 'file.seek(SeekFrom::Start(start))', 'file.take(limit as u64)', 'serde_json::from_slice::<Value>', 'DiagnosticLogObservation::new')) {
+  if (-not $productionSource.Contains($required)) { throw "Issue #95 缺少平台门禁：$required" }
+}
+foreach ($forbidden in @('pub trait DiagnosticLogFileProbe', 'pub fn observe_diagnostic_log_file', 'read_to_string', 'fs::write', 'OpenOptions', 'std::process::Command', 'Command::new', 'std::thread', 'reqwest', 'hyper', 'TcpStream', 'UdpSocket', 'iced', 'unsafe {')) {
+  if ($productionSource.Contains($forbidden)) { throw "Issue #95 禁止能力命中：$forbidden" }
+}
+
+$ownerName = [Environment]::UserName
+if (-not [string]::IsNullOrWhiteSpace($ownerName)) {
+  $addedDiff = @(git -c core.quotePath=false diff --unified=0 "$baseline" -- $actual)
+  if ($LASTEXITCODE -ne 0) { throw 'Issue #95 新增行隐私扫描准备失败。' }
+  $addedLines = @($addedDiff | Where-Object { $_ -cmatch '^\+(?!\+\+)' })
+  $privateLeaks = @($addedLines | Select-String -SimpleMatch -CaseSensitive $ownerName)
+  $untrackedScanPaths = @($untracked | Where-Object { Test-Path -LiteralPath $_ })
+  if ($untrackedScanPaths.Count -ne 0) {
+    $privateLeaks += @(rg -n --fixed-strings $ownerName -- $untrackedScanPaths 2>$null)
+    if ($LASTEXITCODE -notin 0, 1) { throw 'Issue #95 未跟踪文件隐私扫描执行失败。' }
+  }
+  if ($privateLeaks.Count -ne 0) {
+    throw "Issue #95 泄露本机用户标识：$($privateLeaks -join '; ')"
+  }
+}
+
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw "Issue #95 Git 空白检查失败：$LASTEXITCODE" }
+```
+
+预期：四 crate tests/Clippy、`rustfmt`、CI 合同、Release Audit 与仓库政策均通过；候选范围保持
+`24` 路径和批准哈希，实际使用其中 `23` 路径且 `err.md` 不变；Cargo 无变化；feature/contract
+为 `40/40`、source 为 `133`、fixture manifest 为 `11`，诊断日志观察不公开任意路径且不包含
+正文泄露、写入、网络、子进程、线程、Watcher、UI、注入或 `unsafe`。
 
 ## Issue #92 设置只读观察本地轻量验证
 

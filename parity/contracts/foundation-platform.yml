@@ -200,6 +200,64 @@ contracts:
       mode: none
       reason: '基线只约束状态、副作用和错误语义，不需要结构样本。'
     fixture_refs: []
+  - id: contract.feature.foundation-platform.diagnostic-log-observation.baseline
+    feature_id: feature.foundation-platform.diagnostic-log-observation
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.43 证据已锁定，Issue #94 方案 1 与 Issue #95 二十四路径范围已经批准。'
+      - '请求不接受任意路径、读取长度或过滤器，诊断日志只通过平台路径解析能力定位。'
+    inputs:
+      - name: request
+        data_type: diagnostic-log-observation-request
+        required: false
+        description: '零字段请求，不携带路径、正文、事件、PID、时间戳或凭据。'
+    outputs:
+      - name: result
+        data_type: diagnostic-log-observation-result
+        description: '文件缺失返回 LoadCompletion::Empty(NoDiagnosticLog)；普通文件返回 LoadCompletion::Ready(file_size_bytes, sampled_record_count, valid_object_record_count, malformed_record_count, truncated, partial_record_discarded)。'
+    side_effects:
+      - filesystem-read
+    persistence: 'none'
+    errors:
+      - code: DIAGNOSTIC_LOG_OBSERVATION_UNSUPPORTED
+        kind: unsupported
+        semantics: '非 Windows/macOS 目标明确失败，不伪造空成功。'
+      - code: DIAGNOSTIC_LOG_OBSERVATION_UNAVAILABLE
+        kind: unavailable
+        semantics: '日志元数据、打开、Seek 或尾部读取失败时返回稳定错误，不暴露底层消息或实际路径。'
+      - code: DIAGNOSTIC_LOG_OBSERVATION_INVALID_FILE_TYPE
+        kind: invalid-input
+        semantics: '符号链接或非普通文件明确失败。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次诊断日志观察请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时和错误类别，不记录正文、事件、实际路径或凭据。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '诊断日志观察单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+      - file_size_bytes
+      - sampled_record_count
+      - valid_object_record_count
+      - malformed_record_count
+      - truncated
+      - partial_record_discarded
+    platforms:
+      shared_semantics: 'Windows 与 macOS 使用同一 256 KiB 尾部窗口、JSON object 分类、malformed 计数、缺失语义和稳定错误。'
+      windows: 使用 Windows 平台路径适配器定位诊断日志；不支持时明确失败。
+      macos: 使用 macOS 平台路径适配器定位诊断日志；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '合成单元测试已固定尾部窗口、记录分类、文件边界和隐私语义，无需保存日志正文夹具。'
+    fixture_refs: []
   - id: contract.feature.foundation-platform.environment-conflicts.baseline
     feature_id: feature.foundation-platform.environment-conflicts
     scenario: baseline
