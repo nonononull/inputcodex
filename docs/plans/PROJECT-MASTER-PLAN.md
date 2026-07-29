@@ -271,8 +271,10 @@ decision_status: issue-89-pr-90-review-ci-green-final-merge-not-authorized
 - [x] Issue `#91` 已完成设置只读观察与设置写入管理的方案 A 决策并关闭。
 - [x] Issue `#92` / PR `#93` 已完成第六个 Gate 5 设置只读观察迁移、独立 Squash Merge 与主干落盘；只接管 `load_settings`，原设置管理总功能继续 `unassessed`。
 - [x] Issue `#94` 已完成设置管理写入、重置与损坏语义的方案 1 决策并关闭。
-- Issue `#95` 是第七个 Gate 5 诊断日志只读结构观察切片：只接管 `read_latest_logs`，固定 `256 KiB` 尾部窗口、严格 UTF-8/JSON object 分类和最小披露；原诊断总功能继续 `unassessed`。
-- 第八个产品切片必须在 Issue `#95` 完成后重新建立独立 Issue、设计批准、精确范围与实现授权，不得复用当前范围扩展日志搜索、导出、清理或写入。
+- [x] Issue `#95` / PR `#96` 已完成第七个 Gate 5 诊断日志只读结构观察迁移、独立 Squash Merge 与主干落盘；只接管 `read_latest_logs`，原诊断总功能继续 `unassessed`。
+- [x] Issue `#97` 已完成 Relay 认证与配置状态观察方案 A 决策并关闭；最小披露的只读状态观察与配置管理总功能正式分离。
+- Issue `#98` 是第八个 Gate 5 Relay 认证与配置状态只读观察切片：只接管 `relay_status`，固定双文档 `256 KiB` 上限、明确文档状态和凭据存在事实；原 Relay 配置管理总功能继续 `unassessed`。
+- 第九个产品切片必须在 Issue `#98` 完成后重新建立独立 Issue、书面设计、精确范围与实现授权，不得复用当前范围扩展完整文件读取、保存、切换、回填、网络测试或 UI。
 
 ### Gate 6：首个正式版本（锁定）
 

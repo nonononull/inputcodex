@@ -8,7 +8,8 @@
 GitHub Issue、PR 与 Actions。
 
 Gate 3 七成员 Rust Workspace、Gate 4 上游审计/功能目录/性能基线，以及 Gate 5 的平台路径、
-应用概览、版本与启动意图、运行时环境冲突观察、Relay 环境和设置只读观察能力已经建立。
+应用概览、版本与启动意图、运行时环境冲突、Relay 环境、设置、诊断日志和 Relay 状态只读观察
+能力已经建立。
 该说明只用于选择正确命令，不能替代任务计划和 GitHub 新鲜证据。
 
 ## 文档变更轻量验证
@@ -25,7 +26,7 @@ git diff --check
 
 路径范围、Markdown 链接和任务特有内容守卫由对应 Session Plan 与 Runtime Workflow 定义。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供二十六个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供二十八个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -53,6 +54,8 @@ git diff --check
 24. Issue `#86` 二十四路径、当前进程环境只读观察、明确来源覆盖、隐私边界、Parity 单入口修订和最终本地轻量门禁验证。
 25. Issue `#89` 三十路径、Relay 环境只读聚合、Windows 注册表覆盖、`.env` 元数据、Clash 有界读取、Parity 分拆和最终本地轻量门禁验证。
 26. Issue `#92` 二十七路径、设置文件有界只读观察、缺失与空对象分离、六个稳定错误、Parity 单入口分拆和最终本地轻量门禁验证。
+27. Issue `#95` 二十四路径、诊断日志尾部有界观察、损坏记录分类、Parity 单入口分拆和最终本地轻量门禁验证。
+28. Issue `#98` 二十七路径、Relay 双文档有界观察、凭据存在事实、配置完整性、Parity 单入口分拆和最终本地轻量门禁验证。
 
 当前禁止：
 
@@ -72,6 +75,200 @@ git diff --check
 - 在 Issue `#89` 中测试网络、返回代理值或路径、读取 `.env` 内容、修改环境/文件/注册表、调用子进程、启动线程/Watcher、打开 UI、注入、迁移 `core-module:proxy`、修改 Workflow/Ruleset、Release、`upstream/` 或 AGOS。
 - 在 Issue `#92` 中公开任意路径读取、返回设置字段或内容、写文件、联网、调用子进程、启动线程/Watcher、打开 UI、使用 `unsafe`、迁移保存/重置/底层设置管理、修改 Workflow/Ruleset、Release、`upstream/` 或 AGOS。
 - 在 Issue `#95` 中接受任意路径/长度/过滤器、读取完整日志、返回正文/字段/事件/detail/PID/时间戳/实际路径/用户名/机器名/凭据、写入或清理日志、复制诊断报告、联网、调用子进程、启动线程/Watcher、打开 UI、注入、使用 `unsafe`、迁移其余诊断总功能、修改 Cargo/Workflow/Ruleset/Release/`upstream/` 或 AGOS。
+- 在 Issue `#98` 中公开任意路径、返回账号/Token/Provider/URL/字段/内容/认证来源/实际路径、写文件、修改环境、联网、调用子进程、启动线程/Watcher、打开 UI、注入、使用 `unsafe`、迁移完整 Relay 文件读取/保存/切换/回填、修改 Workflow/Ruleset/Release/`upstream/` 或 AGOS。
+
+## Issue #98 Relay 认证与配置状态只读观察本地轻量验证
+
+在仓库根目录、分支 `codex/issue-98-gate-5-relay-status-observation` 执行。Git 时间只使用系统
+默认本机时间；不得设置 `GIT_AUTHOR_DATE` 或 `GIT_COMMITTER_DATE`。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+function Assert-NativeSuccess {
+  param([Parameter(Mandatory)][string]$Label)
+  if ($LASTEXITCODE -ne 0) { throw "$Label 失败：$LASTEXITCODE" }
+}
+
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+cargo test --locked --offline --all-targets -p inputcodex-domain -p inputcodex-application -p inputcodex-platform -p inputcodex-parity
+Assert-NativeSuccess 'Issue #98 四 crate 测试'
+
+cargo clippy --locked --offline --all-targets -p inputcodex-domain -p inputcodex-application -p inputcodex-platform -p inputcodex-parity -- -D warnings
+Assert-NativeSuccess 'Issue #98 四 crate Clippy'
+
+cargo fmt --all -- --check
+Assert-NativeSuccess 'Issue #98 rustfmt 检查'
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+Assert-NativeSuccess 'Issue #98 CI 合同'
+
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #98 Release Audit'
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #98 Repository Policy'
+
+cargo metadata --locked --offline --no-deps | Out-Null
+Assert-NativeSuccess 'Issue #98 Cargo metadata'
+```
+
+范围、哈希、依赖、目录分拆、隐私与禁止能力验证：
+
+```powershell
+$ErrorActionPreference = 'Stop'
+$baseline = 'b7c4174671caba806162a42e82b7bc0b20f73bf5'
+$candidate = [string[]]@(
+  'AGENTS.md',
+  'CONTEXT.md',
+  'Cargo.lock',
+  'Cargo.toml',
+  'README.md',
+  'build.md',
+  'crates/inputcodex-application/src/lib.rs',
+  'crates/inputcodex-application/src/relay_status_observation.rs',
+  'crates/inputcodex-application/tests/relay_status_observation.rs',
+  'crates/inputcodex-domain/src/lib.rs',
+  'crates/inputcodex-domain/src/relay_status_observation.rs',
+  'crates/inputcodex-domain/tests/relay_status_observation.rs',
+  'crates/inputcodex-parity/tests/catalog_repository.rs',
+  'crates/inputcodex-platform/Cargo.toml',
+  'crates/inputcodex-platform/src/lib.rs',
+  'crates/inputcodex-platform/src/relay_status_observation.rs',
+  'crates/inputcodex-platform/tests/relay_status_observation.rs',
+  'docs/plans/2026-07-29-issue-98-gate-5-relay-status-observation.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-07-29-issue-98-gate-5-relay-status-observation.md',
+  'docs/reports/issue-98-gate-5-relay-status-observation.md',
+  'docs/workflows/2026-07-29-issue-98-gate-5-relay-status-observation-runtime.md',
+  'err.md',
+  'parity/README.md',
+  'parity/contracts/provider-network.yml',
+  'parity/features/provider-network.yml',
+  'parity/features/source-index.yml'
+)
+$orderedCandidate = [string[]]$candidate.Clone()
+[Array]::Sort($orderedCandidate, [StringComparer]::Ordinal)
+$payload = [string]::Join("`n", $orderedCandidate) + "`n"
+$scopeHash = [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData(
+    [Text.UTF8Encoding]::new($false).GetBytes($payload)
+  )
+).ToLowerInvariant()
+if ($candidate.Count -ne 27) { throw "Issue #98 路径数量漂移：$($candidate.Count)" }
+if ($scopeHash -ne 'b1dda60cda57d4be9344b3fa0c74a49b6087b9bdf03fceb5a772ec7e893d63a5') {
+  throw "Issue #98 scope_hash 漂移：sha256:$scopeHash"
+}
+
+$actualSet = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+foreach ($path in @(git -c core.quotePath=false diff --name-only "$baseline...HEAD" --)) {
+  if ($path) { [void]$actualSet.Add($path.Replace('\', '/')) }
+}
+if ($LASTEXITCODE -ne 0) { throw 'Issue #98 已提交路径收集失败。' }
+foreach ($path in @(git -c core.quotePath=false diff --name-only --)) {
+  if ($path) { [void]$actualSet.Add($path.Replace('\', '/')) }
+}
+if ($LASTEXITCODE -ne 0) { throw 'Issue #98 未暂存路径收集失败。' }
+foreach ($path in @(git -c core.quotePath=false diff --cached --name-only --)) {
+  if ($path) { [void]$actualSet.Add($path.Replace('\', '/')) }
+}
+if ($LASTEXITCODE -ne 0) { throw 'Issue #98 已暂存路径收集失败。' }
+foreach ($path in @(git -c core.quotePath=false ls-files --others --exclude-standard)) {
+  if ($path) { [void]$actualSet.Add($path.Replace('\', '/')) }
+}
+if ($LASTEXITCODE -ne 0) { throw 'Issue #98 未跟踪路径收集失败。' }
+
+$allowedSet = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+foreach ($path in $candidate) { [void]$allowedSet.Add($path) }
+$actual = [string[]]$actualSet
+[Array]::Sort($actual, [StringComparer]::Ordinal)
+$unexpected = @($actual | Where-Object { -not $allowedSet.Contains($_) })
+if ($unexpected.Count -ne 0) { throw "Issue #98 路径越界：$($unexpected -join ', ')" }
+if ($actual.Count -ne 27) { throw "Issue #98 实际路径数量漂移：$($actual.Count)" }
+$actualPayload = [string]::Join("`n", $actual) + "`n"
+$actualHash = [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData(
+    [Text.UTF8Encoding]::new($false).GetBytes($actualPayload)
+  )
+).ToLowerInvariant()
+if ($actualHash -ne $scopeHash) { throw "Issue #98 实际范围哈希漂移：sha256:$actualHash" }
+
+$rootManifest = Get-Content -Raw -LiteralPath Cargo.toml
+if (-not $rootManifest.Contains('toml_edit = { version = "=0.25.13", default-features = false, features = ["parse"] }')) {
+  throw 'Issue #98 toml_edit Workspace 依赖合同漂移。'
+}
+$platformManifest = Get-Content -Raw -LiteralPath crates/inputcodex-platform/Cargo.toml
+if (-not $platformManifest.Contains('toml_edit.workspace = true')) {
+  throw 'Issue #98 Platform toml_edit 依赖合同漂移。'
+}
+$lockText = Get-Content -Raw -LiteralPath Cargo.lock
+if (-not $lockText.Contains('name = "toml_edit"') -or
+    -not $lockText.Contains('version = "0.25.13+spec-1.1.0"')) {
+  throw 'Issue #98 Cargo.lock 未保持批准的 toml_edit 锁定实体。'
+}
+
+function Get-YamlListItemBlock {
+  param([Parameter(Mandatory)][string]$Text, [Parameter(Mandatory)][string]$Id)
+  $match = [regex]::Match($Text, "(?ms)^  - id: $([regex]::Escape($Id))\r?\n.*?(?=^  - id: |\z)")
+  if (-not $match.Success) { throw "Issue #98 缺少目录条目：$Id" }
+  $match.Value
+}
+
+$featureText = Get-Content -Raw -LiteralPath parity/features/provider-network.yml
+$observation = Get-YamlListItemBlock -Text $featureText -Id 'feature.provider-network.relay-status-observation'
+if ($observation -notmatch 'status: implemented' -or
+    $observation -notmatch 'tauri-command:relay_status') {
+  throw 'Issue #98 Relay 状态观察 feature 漂移。'
+}
+$umbrella = Get-YamlListItemBlock -Text $featureText -Id 'feature.provider-network.relay-profile-management'
+if ($umbrella -notmatch 'status: unassessed' -or $umbrella -match 'tauri-command:relay_status') {
+  throw 'Issue #98 原 Relay 配置管理总功能漂移。'
+}
+
+$sourceText = Get-Content -Raw -LiteralPath parity/features/source-index.yml
+$relayStatus = Get-YamlListItemBlock -Text $sourceText -Id 'tauri-command:relay_status'
+if ($relayStatus -notmatch 'side_effects: \[filesystem-read\]' -or
+    $relayStatus -notmatch 'feature_id: feature\.provider-network\.relay-status-observation') {
+  throw 'Issue #98 relay_status 归属或副作用漂移。'
+}
+foreach ($sourceId in @('core-module:relay_config', 'tauri-command:backfill_relay_profile_from_live', 'tauri-command:read_relay_files', 'tauri-command:save_relay_file', 'tauri-command:switch_relay_profile')) {
+  $block = Get-YamlListItemBlock -Text $sourceText -Id $sourceId
+  if ($block -notmatch 'side_effects: \[filesystem-read, filesystem-write\]' -or
+      $block -notmatch 'feature_id: feature\.provider-network\.relay-profile-management') {
+    throw "Issue #98 原 Relay 配置管理入口漂移：$sourceId"
+  }
+}
+
+$platformSource = Get-Content -Raw -LiteralPath crates/inputcodex-platform/src/relay_status_observation.rs
+$productionSource = [regex]::Split($platformSource, '(?m)^#\[cfg\(test\)\]')[0]
+foreach ($required in @('SystemPlatformPaths.resolve', 'fs::symlink_metadata', 'File::open', 'file.take(limit as u64 + 1)', 'serde_json::from_slice::<Value>', 'parse::<DocumentMut>()', 'RelayStatusObservation::new')) {
+  if (-not $productionSource.Contains($required)) { throw "Issue #98 缺少平台门禁：$required" }
+}
+foreach ($forbidden in @('pub trait RelayStatusFileProbe', 'pub fn observe_relay_status_files', 'read_to_string', 'fs::write', 'OpenOptions', 'std::process::Command', 'Command::new', 'std::thread', 'reqwest', 'hyper', 'TcpStream', 'UdpSocket', 'iced', 'unsafe {')) {
+  if ($productionSource.Contains($forbidden)) { throw "Issue #98 禁止能力命中：$forbidden" }
+}
+
+$ownerName = [Environment]::UserName
+$addedDiff = @(git -c core.quotePath=false diff --unified=0 "$baseline" -- $actual)
+if ($LASTEXITCODE -ne 0) { throw 'Issue #98 新增行隐私扫描准备失败。' }
+$addedLines = @($addedDiff | Where-Object { $_ -cmatch '^\+(?!\+\+)' })
+if (-not [string]::IsNullOrWhiteSpace($ownerName)) {
+  $privateLeaks = @($addedLines | Select-String -SimpleMatch -CaseSensitive $ownerName)
+  if ($privateLeaks.Count -ne 0) { throw "Issue #98 泄露本机用户标识：$($privateLeaks -join '; ')" }
+}
+$absolutePathLeaks = @($addedLines | Select-String -Pattern '(?i)[A-Z]:\\Users\\')
+if ($absolutePathLeaks.Count -ne 0) { throw "Issue #98 泄露 Windows 用户绝对路径：$($absolutePathLeaks -join '; ')" }
+
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw "Issue #98 Git 空白检查失败：$LASTEXITCODE" }
+```
+
+预期：四 crate tests/Clippy、`rustfmt`、CI 合同、Release Audit、仓库政策和 Cargo metadata 均通过；
+候选与实际范围均为 `27` 路径且哈希为
+`sha256:b1dda60cda57d4be9344b3fa0c74a49b6087b9bdf03fceb5a772ec7e893d63a5`；feature/contract
+为 `41/41`、source 为 `133`、fixture manifest 为 `11`；Relay 状态观察只读两个固定文档，隐私与
+禁止能力扫描命中为 `0`。
 
 ## Issue #95 诊断日志只读结构观察本地轻量验证
 

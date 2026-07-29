@@ -1160,6 +1160,7 @@ dependencies = [
  "inputcodex-application",
  "inputcodex-domain",
  "serde_json",
+ "toml_edit",
  "windows",
  "windows-registry",
 ]

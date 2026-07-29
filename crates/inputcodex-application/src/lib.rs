@@ -6,6 +6,7 @@ mod application_overview;
 mod diagnostic_log_observation;
 mod platform_paths;
 mod relay_environment_observation;
+mod relay_status_observation;
 mod runtime_environment_observation;
 mod settings_observation;
 mod version_startup;
@@ -19,6 +20,9 @@ pub use diagnostic_log_observation::{
 pub use platform_paths::{PlatformPathsPort, PlatformPathsRequest, ResolvePlatformPaths};
 pub use relay_environment_observation::{
     ObserveRelayEnvironment, RelayEnvironmentObservationPort, RelayEnvironmentObservationRequest,
+};
+pub use relay_status_observation::{
+    ObserveRelayStatus, RelayStatusObservationPort, RelayStatusObservationRequest,
 };
 pub use runtime_environment_observation::{
     ObserveRuntimeEnvironmentConflicts, RuntimeEnvironmentObservationPort,

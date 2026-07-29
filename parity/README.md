@@ -17,7 +17,7 @@
 - 锁定来源：`BigPizzaV3/CodexPlusPlus` Release `v1.2.43`，tag commit `5036ff056b5c629f19356396b17d6eeb70da664c`。
 - 当前机器验证范围：84 个 Tauri command、45 个 `codex-plus-core` 公开模块、4 个 `codex-plus-data` 公开模块，共 133 个入口。
 - 每个入口映射到稳定 feature、显式排除项或 `exception-pending`；当前显式排除 3 个旧适配入口。
-- 当前共有 40 个 feature，其中 10 个为 `exception-pending`。
+- 当前共有 41 个 feature，其中 10 个为 `exception-pending`。
 - 这 133 条覆盖只证明上述三类公开入口已枚举，不等于所有私有函数、React 交互或隐式副作用已经完成审计。
 
 ## `v1.2.43` 定向复审结论
@@ -30,6 +30,7 @@
 - Issue `#89` 已将 `feature.provider-network.relay-environment-observation` 固定为 Relay 环境只读观察切片：双平台只返回五个规范代理名称与来源，不返回配置值或路径；Windows 注册表单来源失败表示 `persistent_user: Unavailable` 或 `persistent_system: Unavailable`，macOS 固定 `persistent_user: NotObserved` 与 `persistent_system: NotObserved`；Codex `.env` 只查元数据，Clash Verge 单候选最多读取 `64 KiB`，无风险仍返回 `Ready`。
 - Issue `#92` 已将 `feature.foundation-platform.settings-observation` 固定为设置只读观察切片：只接管 `tauri-command:load_settings`，文件缺失返回 `Empty(NotConfigured)`，合法 JSON object 只返回顶层条目数量且 `{}` 仍为 `Ready(0)`；单文件上限为 `256 KiB`，原设置管理总功能继续 `unassessed`。
 - Issue `#95` 已将 `feature.foundation-platform.diagnostic-log-observation` 固定为诊断日志只读结构观察切片：只接管 `tauri-command:read_latest_logs`，最多读取固定文件尾部 `256 KiB`，只返回文件大小、合法 JSON object、malformed 与截断事实；日志正文、实际路径和其余诊断副作用不进入该能力，原诊断总功能继续 `unassessed`。
+- Issue `#98` 已将 `feature.provider-network.relay-status-observation` 固定为 Relay 认证与配置状态只读观察切片：只接管 `tauri-command:relay_status`，固定观察 `CODEX_HOME/auth.json` 与 `config.toml`，单文件最多读取 `256 KiB`；结果只包含文档状态、凭据存在事实和 Relay 配置完整性，原 Relay 配置管理总功能继续 `unassessed`。
 - `feature.session-data.local-session-management` 纳入合法 `CODEX_SQLITE_HOME`、多数据库删除、`grouped-undo-token`、全库恢复预检、允许路径保护和撤销窗口。
 - `feature.plugin-script.dream-skin-library` 只纳入受限本地 companion data URL 与布局配置；fixture 使用合成图片数据。
 - `feature.plugin-script.dream-skin-runtime` 与 `feature.plugin-script.renderer-enhancements` 的 companion 显示仍依赖 renderer 注入，继续保持 `exception-pending`，不得进入 Rust/Iced 运行面。
@@ -54,6 +55,6 @@
 
 - 行为合同按同名五域文件保存于 `parity/contracts/`。
 - 夹具仅允许合成或不可逆脱敏数据，保存于 `parity/fixtures/<feature-id>/`。
-- 当前五域共保存 `40` 份行为合同，并为 `11` 个需要结构数据的 feature 保存 `11` 个 fixture manifest；其余场景以合同中的 `fixture_policy: none` 说明无需 fixture。
+- 当前五域共保存 `41` 份行为合同，并为 `11` 个需要结构数据的 feature 保存 `11` 个 fixture manifest；其余场景以合同中的 `fixture_policy: none` 说明无需 fixture。
 - 合同与 fixture 必须由 `inputcodex-parity` 完整仓库验证共同检查 domain、稳定 ID、引用、目录归属、路径安全、敏感 payload 和文本控制字节。
 - `exception-pending` 只有在独立一致性例外 Issue 获得项目所有者决定后才能改变状态。
