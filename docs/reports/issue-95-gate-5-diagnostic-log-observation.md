@@ -2,13 +2,13 @@
 
 ## 状态
 
-- `phase`: `IMPLEMENTATION_AUTHORIZED`
+- `phase`: `LOCAL_VERIFIED_PR_PENDING`
 - `tracking_issue_ref`: `https://github.com/nonononull/inputcodex/issues/95`
 - `approved_decision_ref`: `https://github.com/nonononull/inputcodex/issues/94#issuecomment-5109582183`
 - `owner_scope_approval_ref`: `https://github.com/nonononull/inputcodex/issues/95#issuecomment-5113647548`
 - `baseline_ref`: `9587549c3f1bb334507075499f806485d83fce6a`
 - `planning_validation`: `PASSED`
-- `implementation`: `IN_PROGRESS`
+- `implementation`: `LOCAL_VERIFIED`
 - `pr_ref`: `NOT_REACHED`
 - `squash_merge`: `NOT_AUTHORIZED`
 
@@ -100,6 +100,14 @@ sampled_record_count = valid_object_record_count + malformed_record_count
 - 哈希：`sha256:8d407c269436c655e12ff94035183de6aa50dc7759fbc75f9cb7b6f9b0349d38`
 - 不包含 Cargo、UI、Workflow、Ruleset、Release、`upstream/` 或 AGOS 写入。
 
+## 本地实施 Checkpoints
+
+- Planning：`9ae2447619bd26e6818968b9c3f1cf8df3e61cc6`。
+- Domain GREEN：`b6b05b4e0e2ac21086f24927d2106fd63ee7b048`。
+- Application GREEN：`0b2093044f6f9598f7ff56fbbc73c5c5a0469162`。
+- Platform GREEN：`d647fadd264084d6376a6b3f64c8819e7f698552`。
+- Parity GREEN：`4ea54fdf4b81cb8eee76d36f9917047098769613`。
+
 ## 当前验证证据
 
 ```yaml
@@ -113,13 +121,31 @@ placeholder_scan: passed
 git_diff_check: passed
 local_knowledge_lookup: project-native-doc-and-code-query-completed
 agos_report_only: needs-input-known-unregistered-bypassed
-product_tests: not-authorized
+domain_checkpoint: green
+application_checkpoint: green
+platform_checkpoint: green
+parity_checkpoint: green
+four_crate_tests_all_targets: passed
+four_crate_clippy_all_targets: passed
+rustfmt: passed
+release_audit: current
+candidate_scope: passed-24-paths
+actual_scope: passed-23-paths
+err_md: unchanged
+cargo_delta: none
+feature_contract_counts: 40/40
+source_entry_count: 133
+fixture_manifest_count: 11
+privacy_matches: 0
+forbidden_capability_matches: 0
+validation_contract_fix: scan-added-lines-and-untracked-files
+reused_err_root_cause: 2026-07-21-validator-self-scan-false-positive
+full_local_verification: passed
 review_ci: not-reached
 ```
 
 ## 下一门
 
-1. 按 Domain → Application → Platform → Parity 顺序执行 RED→GREEN。
-2. 更新稳定项目控制面并完成二十四路径范围验证。
-3. 普通推送并创建关联 Issue `#95` 的非 Draft PR。
-4. Review/CI 全绿后绑定 Final Head，请求独立 Squash Merge 授权。
+1. 建立最终本地验证 checkpoint。
+2. 普通推送并创建关联 Issue `#95` 的非 Draft PR。
+3. Review/CI 全绿后绑定 Final Head，请求独立 Squash Merge 授权。

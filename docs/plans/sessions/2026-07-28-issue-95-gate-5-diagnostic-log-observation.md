@@ -13,6 +13,12 @@
 - `planning_scope_hash`: `sha256:14d78bf1a92f5b8db58650b501fb0cebee59a329823ff49e7b8ff3e93e0b7231`
 - `candidate_scope_hash`: `sha256:8d407c269436c655e12ff94035183de6aa50dc7759fbc75f9cb7b6f9b0349d38`
 - `planning_validation`: `PASSED`
+- `execution_state`: `LOCAL_VERIFIED_PR_PENDING`
+- `planning_checkpoint_ref`: `9ae2447619bd26e6818968b9c3f1cf8df3e61cc6`
+- `domain_checkpoint_ref`: `b6b05b4e0e2ac21086f24927d2106fd63ee7b048`
+- `application_checkpoint_ref`: `0b2093044f6f9598f7ff56fbbc73c5c5a0469162`
+- `platform_checkpoint_ref`: `d647fadd264084d6376a6b3f64c8819e7f698552`
+- `parity_checkpoint_ref`: `4ea54fdf4b81cb8eee76d36f9917047098769613`
 - `agos_report_only`: `needs-input-known-unregistered-bypassed`
 
 ## Mutation Intent
@@ -23,8 +29,8 @@
 
 ## Executor Enforcement
 
-- 当前阶段：`implementation-authorized`
-- 当前写入 allowlist：四份 task-local 规划文件
+- 当前阶段：`local-verified-pr-pending`
+- 当前写入 allowlist：已批准二十四路径
 - 当前允许操作：二十四路径内 TDD、稳定文档、本地轻量验证、Git checkpoint、普通 push、非 Draft PR、Review/CI
 - 当前禁止操作：范围外写入、依赖变更、合并、force push、`main` 写入
 - 产品实现前置门：`PASSED`，证据为 `owner_scope_approval_ref`
@@ -149,6 +155,10 @@ parity/features/source-index.yml
 3. `err.md` 仅在出现新且可复用根因时更新，否则保持不变。
 4. 执行四 crate 定向 tests/Clippy、fmt、CI 合同、仓库政策、范围和隐私扫描。
 5. 建立最终本地验证 checkpoint。
+
+当前恢复点：Domain、Application、Platform 与 Parity 已分别建立 GREEN checkpoint；稳定控制面、
+四 crate tests/Clippy、格式、CI 合同、Release Audit、仓库政策、范围、隐私与禁止能力门禁均已通过。
+下一动作是建立最终文档 checkpoint、普通 push 并创建非 Draft PR。
 
 ### Batch 6：远端交付
 

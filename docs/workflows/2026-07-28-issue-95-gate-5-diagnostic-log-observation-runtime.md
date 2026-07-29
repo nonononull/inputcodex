@@ -11,7 +11,12 @@
 - `worktree_ref`: `.worktrees/issue-95-gate-5-diagnostic-log-observation`
 - `planning_scope_hash`: `sha256:14d78bf1a92f5b8db58650b501fb0cebee59a329823ff49e7b8ff3e93e0b7231`
 - `candidate_scope_hash`: `sha256:8d407c269436c655e12ff94035183de6aa50dc7759fbc75f9cb7b6f9b0349d38`
-- `current_node`: `issue-95-scope-approved`
+- `planning_checkpoint_ref`: `9ae2447619bd26e6818968b9c3f1cf8df3e61cc6`
+- `domain_checkpoint_ref`: `b6b05b4e0e2ac21086f24927d2106fd63ee7b048`
+- `application_checkpoint_ref`: `0b2093044f6f9598f7ff56fbbc73c5c5a0469162`
+- `platform_checkpoint_ref`: `d647fadd264084d6376a6b3f64c8819e7f698552`
+- `parity_checkpoint_ref`: `4ea54fdf4b81cb8eee76d36f9917047098769613`
+- `current_node`: `issue-95-local-verified`
 - `terminal_node`: `issue-95-completed`
 
 ## 状态机
@@ -61,7 +66,7 @@ issue-94-option-1-approved
 
 ### Gate C：远端交付
 
-- 状态：`NOT_REACHED`
+- 状态：`READY`
 - 前置：Gate B 通过且本地验证稳定
 - 要求：禁止 force push；PR 必须关联 Issue `#95`
 
@@ -164,14 +169,14 @@ parity/features/source-index.yml
 - RED：新领域类型、六字段、不变量和隐私断言不存在。
 - GREEN：实现 `DiagnosticLogObservation` 私有字段、构造、getter 与 `NoDiagnosticLog` 语义。
 - 验证：Domain 全目标测试、Clippy、格式检查。
-- checkpoint：`issue-95-domain-green`。
+- checkpoint：`issue-95-domain-green @ b6b05b4e0e2ac21086f24927d2106fd63ee7b048`。
 
 ### Batch 2：Application
 
 - RED：Request/Port/UseCase 和完成态映射不存在。
 - GREEN：实现 `ObserveDiagnosticLog<P>`，固定 Some/None/Err 映射。
 - 验证：Application 全目标测试、Clippy、LoadCoordinator 兼容测试。
-- checkpoint：`issue-95-application-green`。
+- checkpoint：`issue-95-application-green @ 0b2093044f6f9598f7ff56fbbc73c5c5a0469162`。
 
 ### Batch 3：Platform
 
@@ -179,14 +184,14 @@ parity/features/source-index.yml
 - GREEN：实现 `SystemDiagnosticLogObservation` 与模块私有文件探针。
 - 算法：`symlink_metadata` → 普通文件门禁 → 计算窗口 → Seek → 有界读取 → 首片段丢弃 → 逐行严格解析。
 - 验证：Platform 全目标测试、Clippy、格式、隐私与禁止能力扫描。
-- checkpoint：`issue-95-platform-green`。
+- checkpoint：`issue-95-platform-green @ d647fadd264084d6376a6b3f64c8819e7f698552`。
 
 ### Batch 4：Parity
 
 - RED：新 feature/contract/source mapping 和计数断言先失败。
 - GREEN：只移动 `read_latest_logs`，原诊断总功能保留四入口且 `unassessed`。
 - 预期：feature/contract `40/40`、source `133`、fixture manifest `11`。
-- checkpoint：`issue-95-parity-green`。
+- checkpoint：`issue-95-parity-green @ 4ea54fdf4b81cb8eee76d36f9917047098769613`。
 
 ### Batch 5：Project Closeout
 

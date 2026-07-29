@@ -107,5 +107,8 @@
 - Issue `#89` / PR `#90` 已完成第五个 Gate 5 Relay 环境只读观察切片；PR `#90` 以单父 Squash 提交 `a5559f4a873a81d91ed09b571503523a78a45118` 进入 `main`，Issue `#89` 已按 `COMPLETED` 关闭。
 - Issue `#89` 不得联网、写环境或文件、调用子进程、启动线程/Watcher、打开 UI、注入或泄露环境值、文件内容、注册表值和实际路径；`core-module:proxy` 与原 `feature.provider-network.network-environment` 必须继续保持 `unassessed`。
 - Issue `#91` 已批准设置方案 A 并按 `COMPLETED` 关闭：`load_settings` 的安全只读结构观察可独立迁移，保存、重置和底层设置读写继续保留在未评估的设置管理总功能中。
-- Issue `#92` 是第六个 Gate 5 产品切片：只接管 `tauri-command:load_settings`，使用既有平台路径定位设置文件；缺失返回 `Empty(NotConfigured)`，合法 JSON object 只返回顶层条目数量且 `{}` 仍为 `Ready(0)`，单文件上限为 `256 KiB`。
+- Issue `#92` / PR `#93` 已完成第六个 Gate 5 设置只读观察切片；PR `#93` 以单父 Squash 提交 `9587549c3f1bb334507075499f806485d83fce6a` 进入 `main`。
 - Issue `#92` 禁止公开任意路径读取、返回字段/内容/实际路径、写文件、联网、调用子进程、启动线程/Watcher、打开 UI 或使用 `unsafe`；`core-module:settings`、`save_settings`、`reset_settings` 与原 `feature.foundation-platform.settings-management` 必须继续保持 `unassessed`。
+- Issue `#94` 已批准设置管理方案 1 并按 `COMPLETED` 关闭：设置写入、重置和损坏恢复必须等待真实 typed owner，不复制上游单体 `BackendSettings`，也不提前建立无人使用的通用写入抽象。
+- Issue `#95` 是第七个 Gate 5 产品切片：只接管 `tauri-command:read_latest_logs`，最多读取固定诊断日志尾部 `256 KiB`，只返回文件大小、合法/损坏记录计数与截断事实；缺失返回 `Empty(NoDiagnosticLog)`，合法空文件仍为 `Ready(0)`。
+- Issue `#95` 禁止任意路径、完整文件读取、日志正文/字段/事件/detail/PID/时间戳/实际路径/用户名/机器名/凭据泄露，以及写入、清理、复制报告、网络、子进程、线程/Watcher、UI、注入或 `unsafe`；`core-module:diagnostic_log`、`clear_logs`、`copy_diagnostics`、`write_diagnostic_event` 与原 `feature.foundation-platform.diagnostics` 必须继续保持 `unassessed`。

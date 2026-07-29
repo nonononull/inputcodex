@@ -2,7 +2,7 @@
 
 ## 文档状态
 
-- `status`: `IMPLEMENTATION_AUTHORIZED`
+- `status`: `LOCAL_VERIFIED_PR_PENDING`
 - `tracking_issue_ref`: `https://github.com/nonononull/inputcodex/issues/95`
 - `approved_decision_ref`: `https://github.com/nonononull/inputcodex/issues/94#issuecomment-5109582183`
 - `design_ref`: `https://github.com/nonononull/inputcodex/issues/95`
@@ -12,6 +12,11 @@
 - `worktree_ref`: `.worktrees/issue-95-gate-5-diagnostic-log-observation`
 - `planning_scope_hash`: `sha256:14d78bf1a92f5b8db58650b501fb0cebee59a329823ff49e7b8ff3e93e0b7231`
 - `candidate_scope_hash`: `sha256:8d407c269436c655e12ff94035183de6aa50dc7759fbc75f9cb7b6f9b0349d38`
+- `planning_checkpoint_ref`: `9ae2447619bd26e6818968b9c3f1cf8df3e61cc6`
+- `domain_checkpoint_ref`: `b6b05b4e0e2ac21086f24927d2106fd63ee7b048`
+- `application_checkpoint_ref`: `0b2093044f6f9598f7ff56fbbc73c5c5a0469162`
+- `platform_checkpoint_ref`: `d647fadd264084d6376a6b3f64c8819e7f698552`
+- `parity_checkpoint_ref`: `4ea54fdf4b81cb8eee76d36f9917047098769613`
 
 ## 目标
 
@@ -191,15 +196,48 @@ docs/workflows/2026-07-28-issue-95-gate-5-diagnostic-log-observation-runtime.md
 
 ## 实施任务
 
-1. 冻结四份规划控制面并完成范围、哈希、占位符和仓库政策验证。
-2. 获得 `24` 路径与候选哈希的独立所有者批准。
-3. Domain TDD：实现六字段结构、不变量和隐私边界。
-4. Application TDD：实现零字段请求、Port、UseCase 和完成态映射。
-5. Platform TDD：实现固定路径、有界尾读、记录分类和稳定错误。
-6. Parity TDD：新增子能力/合同并精确移动单一来源入口。
-7. 更新稳定项目控制面，执行本地轻量验证与 Git checkpoint。
-8. 普通推送、非 Draft PR、Review 根因闭环和 Hosted CI。
-9. 绑定 Final Head 后请求独立 Squash Merge 授权。
+- [x] 冻结四份规划控制面并完成范围、哈希、占位符和仓库政策验证。
+- [x] 获得 `24` 路径与候选哈希的独立所有者批准。
+- [x] Domain TDD：实现六字段结构、不变量和隐私边界。
+- [x] Application TDD：实现零字段请求、Port、UseCase 和完成态映射。
+- [x] Platform TDD：实现固定路径、有界尾读、记录分类和稳定错误。
+- [x] Parity TDD：新增子能力/合同并精确移动单一来源入口。
+- [x] 完成稳定项目控制面与完整本地轻量验证。
+- [ ] 普通推送、非 Draft PR、Review 根因闭环和 Hosted CI。
+- [ ] 绑定 Final Head 后请求独立 Squash Merge 授权。
+
+## 本地实施 Checkpoints
+
+- Planning：`9ae2447619bd26e6818968b9c3f1cf8df3e61cc6`。
+- Domain GREEN：`b6b05b4e0e2ac21086f24927d2106fd63ee7b048`。
+- Application GREEN：`0b2093044f6f9598f7ff56fbbc73c5c5a0469162`。
+- Platform GREEN：`d647fadd264084d6376a6b3f64c8819e7f698552`。
+- Parity GREEN：`4ea54fdf4b81cb8eee76d36f9917047098769613`。
+- 最终内容态验证已通过；本次文档提交将封存本地验证状态，动态 Head 留在 GitHub Issue/PR。
+
+## 本地验证
+
+```yaml
+four_crate_tests_all_targets: passed
+four_crate_clippy_all_targets: passed
+rustfmt: passed
+ci_contract: passed
+release_audit: current
+repository_policy: passed-zero-violations
+candidate_scope: passed-24-paths
+actual_scope: passed-23-paths
+scope_hash: sha256:8d407c269436c655e12ff94035183de6aa50dc7759fbc75f9cb7b6f9b0349d38
+err_md: unchanged
+cargo_delta: none
+feature_contract_counts: 40/40
+source_entry_count: 133
+fixture_manifest_count: 11
+privacy_matches: 0
+forbidden_capability_matches: 0
+git_diff_check: passed
+validation_contract_fix: scan-added-lines-and-untracked-files
+reused_err_root_cause: 2026-07-21-validator-self-scan-false-positive
+```
 
 ## 当前授权
 
