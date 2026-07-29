@@ -131,6 +131,8 @@ RED 矩阵至少覆盖：
 GREEN 仅实现固定路径、有界读取、严格解析和最小投影。随后运行 Platform tests、Clippy 和格式
 检查，并建立 `issue-101-platform-green` Git checkpoint。
 
+状态：`completed`。Platform RED 覆盖固定路径、文件门禁、双重上限、严格 TOML、顺序、启用状态和隐私矩阵；GREEN 后 Platform 全目标测试、Clippy、fmt 通过。`DocumentMut` 清除 span 的新可复用根因已记录到 `err.md`。
+
 ### Batch 4：Parity RED → GREEN
 
 1. 先写 feature/contract/source mapping RED 断言。

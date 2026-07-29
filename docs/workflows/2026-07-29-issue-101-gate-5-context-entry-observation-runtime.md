@@ -11,7 +11,7 @@
 - `baseline_ref`: `52320c2c02e19d9ffae11ccb6742a0f0fc4b71b9`
 - `branch_ref`: `codex/issue-101-gate-5-context-entry-observation`
 - `candidate_scope_hash`: `sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372`
-- `runtime_state`: `application-green`
+- `runtime_state`: `platform-green`
 - `agos_status`: `needs-input-unregistered-bypassed`
 
 ## Current Gate
@@ -21,7 +21,8 @@ Issue #100 owner decision approved
   -> Issue #101 planning scope approved
   -> Domain RED / GREEN / VERIFY completed
   -> Application RED / GREEN / VERIFY completed
-  -> NEXT: Platform RED / GREEN
+  -> Platform RED / GREEN / VERIFY completed
+  -> NEXT: Parity RED / GREEN
 ```
 
 当前 `ALLOWED_OPS`：
@@ -92,7 +93,7 @@ Cargo metadata、Parity baseline 和 diff 检查均已通过；下一节点保�
 3. VERIFY：Platform tests、Clippy、fmt。
 4. CHECKPOINT：`issue-101-platform-green`。
 
-状态：`ready`。
+状态：`completed`。完整文件与解析 RED 矩阵转绿；Platform 全目标测试、Clippy、fmt 通过，span 根因已进入 `err.md`。
 
 ### Node 6：Parity TDD
 
@@ -101,7 +102,7 @@ Cargo metadata、Parity baseline 和 diff 检查均已通过；下一节点保�
 3. VERIFY：Parity tests、Release Audit、Clippy、fmt。
 4. CHECKPOINT：`issue-101-parity-green`。
 
-状态：`blocked-by-node-5`。
+状态：`ready`。
 
 ### Node 7：Local Closeout
 

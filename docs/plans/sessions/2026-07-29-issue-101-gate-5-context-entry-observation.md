@@ -13,7 +13,7 @@
 - `planning_scope_hash`: `sha256:0393705157d30192e317a8158686baf6c2a79483abab1e5a7a5b109d30923dbd`
 - `candidate_scope_hash`: `sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372`
 - `planning_validation`: `PASSED`
-- `execution_state`: `APPLICATION_GREEN`
+- `execution_state`: `PLATFORM_GREEN`
 - `agos_report_only`: `needs-input-unregistered-bypassed`
 
 ## Mutation Intent
@@ -184,6 +184,7 @@ CI 脚本合同、仓库政策、Cargo metadata、Parity baseline 与 diff 检�
 
 - 测试固定路径、普通文件门禁、双重上限、严格 TOML、条目顺序、启用语义和最小披露。
 - 实现 `SystemContextEntryObservation`，不触碰既有 Relay 状态实现。
+- 状态：`completed`；完整 RED 矩阵转绿，Platform 全目标测试、Clippy、fmt 通过；新增 `DocumentMut` span 根因已写入 `err.md`。
 
 ### Batch 4：Parity RED → GREEN
 
@@ -228,4 +229,4 @@ CI 脚本合同、仓库政策、Cargo metadata、Parity baseline 与 diff 检�
 
 ## Next Gate
 
-实施范围已由项目所有者批准；Domain 与 Application TDD 已完成，下一合法节点为 Platform RED → GREEN。
+实施范围已由项目所有者批准；Domain、Application 与 Platform TDD 已完成，下一合法节点为 Parity RED → GREEN。

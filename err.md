@@ -910,6 +910,15 @@
 - 验证：重新运行 Parity 全目标测试、Clippy、rustfmt、Release Audit 与 diff 检查均退出 `0`；目录测试包含 `20` 个仓库级用例，Release Audit 返回 `ok=true`、`status=current`、`requires_reaudit=false`。
 - 关联：Issue `#98`、`build.md`、`docs/workflows/2026-07-29-issue-98-gate-5-relay-status-observation-runtime.md`、`scripts/ci/Verify-ReleaseAuditGate.ps1`。
 
+### 2026-07-29：`DocumentMut` 解析会清除 TOML 原文 span，跨根表顺序被错误聚合
+
+- 环境：Issue `#101` 的 Platform TDD 需要在严格解析 `config.toml` 后，跨 `mcp_servers`、`skills`、`plugins` 三个根表保留条目原文顺序。
+- 现象：使用 `contents.parse::<toml_edit::DocumentMut>()` 后按子 `Item::span()` 排序，测试实际得到 `writer, reviewer, context7, local`，而原文顺序是 `writer, context7, local, reviewer`；诊断显示所有根键、子键和 Item 的 span 均为 `None`。
+- 根因：`toml_edit 0.25.13` 的 `DocumentMut::from_str` 先解析不可变 `Document<String>`，随后调用 `Document::into_mut()`；该转换会执行 `despan()`，原文位置被主动清除。此后 Table 迭代只保留根表首次出现顺序和各表内部顺序，无法恢复跨根表交错顺序。
+- 处理：先以 `Document<String>` 做同一严格 TOML 解析并仅记录 `(稳定种类, ID) -> 子 Item 起始偏移`，再转换为 `DocumentMut` 执行 table/布尔/空 ID 验证和最小领域投影，最终按原文偏移排序；不新增手写 TOML 解析器，不保存或返回正文。
+- 验证：顺序 RED 从 `writer, reviewer, context7, local` 转为批准的 `writer, context7, local, reviewer`；Platform 全目标测试、Clippy `-D warnings` 与 `cargo fmt --check` 均通过，隐私断言确认 Debug 不含摘要、命令、参数、环境、Token、URL 或路径。
+- 关联：Issue `#101`、`crates/inputcodex-platform/src/context_entry_observation.rs`、`toml_edit 0.25.13`。
+
 ## 记录模板
 
 ```text
