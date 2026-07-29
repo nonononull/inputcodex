@@ -19,7 +19,7 @@
 - `planning_validation`: `PASSED`
 - `execution_state`: `DOMAIN_VERIFIED_PENDING_CHECKPOINT`
 - `planning_checkpoint_ref`: `7d11a6ff904b7d9bc2ca74bbaf52c122fc31feb9`
-- `domain_checkpoint_ref`: `pending`
+- `domain_checkpoint_ref`: `c684f4bc115ef8d7b406a343876419edb8f2d290`
 - `application_checkpoint_ref`: `pending`
 - `platform_checkpoint_ref`: `pending`
 - `parity_checkpoint_ref`: `pending`
@@ -172,17 +172,19 @@ README.md
 
 ### Batch 1：Domain RED → GREEN
 
-状态：`ready-for-checkpoint`。
+状态：`completed`。checkpoint `c684f4bc115ef8d7b406a343876419edb8f2d290`。
 
 RED：定向测试因根 crate 缺少全部会话目录领域 API 返回 `E0432`，退出码 `101`。
 
-GREEN：新增标题安全值、条目、来源摘要和页面不变量；定向测试 `7 passed`，Domain Clippy 与 rustfmt 通过。
+GREEN：新增标题安全值、条目、来源摘要和页面不变量；定向测试 `7 passed`，Domain Clippy 与 rustfmt 通过；提交后 AGOS `RequireClean` 返回 `GIT_SNAPSHOT_READY`。
 
 ### Batch 2：Application RED → GREEN
 
-状态：`pending`。
+状态：`ready-for-checkpoint`。
 
-产出：请求、取消标记、Port、UseCase 与完成态映射。
+RED：定向测试因根 crate 缺少 Request、Cancellation、Port 和 UseCase 四个 API 返回 `E0432`，退出码 `101`。
+
+GREEN：默认/显式分页、读取上限溢出校验、共享取消标记、预取消短路、Ready/Partial/Empty/Failed 映射和旧结果隔离测试 `8 passed`；Application 全目标测试、Clippy、rustfmt 与 diff check 通过。
 
 ### Batch 3：Platform RED → GREEN
 

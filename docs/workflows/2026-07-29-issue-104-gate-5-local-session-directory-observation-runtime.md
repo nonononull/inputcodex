@@ -16,7 +16,7 @@
 - `candidate_scope_hash`: `sha256:47dcb2c181daa61a8df073e7f3ada069bf8e3d9b95df0c57f7709bcb6cde211d`
 - `executor`: `codex-desktop-main-thread`
 - `subagents`: `not-authorized`
-- `current_node`: `domain-checkpoint`
+- `current_node`: `application-checkpoint`
 
 ## Current Gate
 
@@ -73,7 +73,7 @@
 4. 运行 domain tests/Clippy/fmt。
 5. 建立 `issue-104-domain` checkpoint。
 
-状态：`ready-for-checkpoint`。RED 为缺少领域 API 的 `E0432`；GREEN 为定向 `7 passed`、Clippy 和 rustfmt 通过。
+状态：`completed`。checkpoint `c684f4bc115ef8d7b406a343876419edb8f2d290`；RED 为缺少领域 API 的 `E0432`；GREEN 为定向 `7 passed`、Clippy 和 rustfmt 通过；提交后 AGOS `RequireClean` 返回 `GIT_SNAPSHOT_READY`。
 
 ### Node 4：Application TDD
 
@@ -82,7 +82,7 @@
 3. 运行 application tests/Clippy/fmt。
 4. 建立 `issue-104-application` checkpoint。
 
-状态：`pending`。
+状态：`ready-for-checkpoint`。RED 为缺少四个应用 API 的 `E0432`、退出码 `101`；GREEN 为新定向 `8 passed`，Application 全目标测试、Clippy、rustfmt 和 diff check 通过。
 
 ### Node 5：Platform TDD
 

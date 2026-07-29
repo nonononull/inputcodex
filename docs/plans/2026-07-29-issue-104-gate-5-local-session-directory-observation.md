@@ -127,14 +127,14 @@
 - [x] 运行定向测试并证明因模块/API 缺失而 RED：`E0432`，退出码 `101`。
 - [x] 写最小领域实现并导出符号。
 - [x] 运行领域测试 GREEN `7 passed`、格式与 Clippy。
-- [ ] 建立 domain Git checkpoint。
+- [x] 建立 domain Git checkpoint：`c684f4bc115ef8d7b406a343876419edb8f2d290`。
 
 ### Batch 2：Application RED → GREEN
 
-- [ ] 先写应用测试：默认/合法分页、非法分页、Ready/Partial、Empty、Failed、取消标记和旧结果隔离所需接口。
-- [ ] 运行定向测试并记录 RED 根因。
-- [ ] 写 Request、Cancellation、Port 和 UseCase 的最小实现。
-- [ ] 运行应用测试 GREEN、格式与 Clippy。
+- [x] 先写应用测试：默认/合法分页、非法分页、Ready/Partial、Empty、Failed、取消标记和旧结果隔离所需接口。
+- [x] 运行定向测试并记录 RED：根 crate 缺少四个应用 API，`E0432`，退出码 `101`。
+- [x] 写 Request、Cancellation、Port 和 UseCase 的最小实现。
+- [x] 运行应用测试 GREEN `8 passed`、Application 全目标测试、格式与 Clippy。
 - [ ] 建立 application Git checkpoint。
 
 ### Batch 3：Platform RED → GREEN
