@@ -11,7 +11,7 @@
 - `baseline_ref`: `52320c2c02e19d9ffae11ccb6742a0f0fc4b71b9`
 - `branch_ref`: `codex/issue-101-gate-5-context-entry-observation`
 - `candidate_scope_hash`: `sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372`
-- `runtime_state`: `platform-green`
+- `runtime_state`: `parity-green`
 - `agos_status`: `needs-input-unregistered-bypassed`
 
 ## Current Gate
@@ -22,7 +22,8 @@ Issue #100 owner decision approved
   -> Domain RED / GREEN / VERIFY completed
   -> Application RED / GREEN / VERIFY completed
   -> Platform RED / GREEN / VERIFY completed
-  -> NEXT: Parity RED / GREEN
+  -> Parity RED / GREEN / VERIFY completed
+  -> NEXT: Local Closeout
 ```
 
 当前 `ALLOWED_OPS`：
@@ -102,7 +103,7 @@ Cargo metadata、Parity baseline 和 diff 检查均已通过；下一节点保�
 3. VERIFY：Parity tests、Release Audit、Clippy、fmt。
 4. CHECKPOINT：`issue-101-parity-green`。
 
-状态：`ready`。
+状态：`completed`。新 feature/contract/source mapping RED 转绿；Parity 全目标测试、Clippy、fmt 与 Release Audit `current` 通过。
 
 ### Node 7：Local Closeout
 
@@ -112,7 +113,7 @@ Cargo metadata、Parity baseline 和 diff 检查均已通过；下一节点保�
    scope hash、禁止能力、隐私和 `git diff --check`。
 4. 建立 `issue-101-local-verified` named checkpoint。
 
-状态：`blocked-by-node-6`。
+状态：`ready`。
 
 ### Node 8：Remote Delivery
 

@@ -141,6 +141,8 @@ GREEN 仅实现固定路径、有界读取、严格解析和最小投影。随�
 4. 运行 Parity tests、Release Audit、Clippy 和格式检查。
 5. 建立 `issue-101-parity-green` Git checkpoint。
 
+状态：`completed`。Parity RED 精确命中新 feature/contract/source mapping 缺失；GREEN 只移动 `read_live_context_entries`，目录测试 `21/21`、Parity 全目标测试、Clippy、fmt 与 Release Audit `current` 通过。
+
 ### Batch 5：文档与本地收口
 
 - 更新稳定产品说明、术语、Gate 状态、Parity 导航和任务报告。

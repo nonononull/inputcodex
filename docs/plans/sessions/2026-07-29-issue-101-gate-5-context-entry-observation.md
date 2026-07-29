@@ -13,7 +13,7 @@
 - `planning_scope_hash`: `sha256:0393705157d30192e317a8158686baf6c2a79483abab1e5a7a5b109d30923dbd`
 - `candidate_scope_hash`: `sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372`
 - `planning_validation`: `PASSED`
-- `execution_state`: `PLATFORM_GREEN`
+- `execution_state`: `PARITY_GREEN`
 - `agos_report_only`: `needs-input-unregistered-bypassed`
 
 ## Mutation Intent
@@ -190,6 +190,7 @@ CI 脚本合同、仓库政策、Cargo metadata、Parity baseline 与 diff 检�
 
 - 新增 observation feature/contract/source mapping。
 - 只移动 `read_live_context_entries`，其余入口保持原归属。
+- 状态：`completed`；新目录测试由缺失条目 RED 转绿，Parity 目录测试 21/21、全目标测试、Clippy、fmt 与 Release Audit `current` 通过。
 
 ### Batch 5：Local Closeout
 
@@ -229,4 +230,4 @@ CI 脚本合同、仓库政策、Cargo metadata、Parity baseline 与 diff 检�
 
 ## Next Gate
 
-实施范围已由项目所有者批准；Domain、Application 与 Platform TDD 已完成，下一合法节点为 Parity RED → GREEN。
+Domain、Application、Platform 与 Parity TDD 已完成；下一合法节点为稳定文档、本地全门禁与 local-verified checkpoint。

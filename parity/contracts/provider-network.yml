@@ -47,6 +47,88 @@ contracts:
       mode: none
       reason: '基线只约束状态、副作用和错误语义，不需要结构样本。'
     fixture_refs: []
+  - id: contract.feature.provider-network.context-entry-observation.baseline
+    feature_id: feature.provider-network.context-entry-observation
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.43 证据已锁定，Issue #100 方案 A 与 Issue #101 二十四路径范围已经批准。'
+      - '请求不接受任意路径、配置正文、读取上限或上下文类型输入。'
+    inputs:
+      - name: request
+        data_type: context-entry-observation-request
+        required: false
+        description: '零字段请求；固定观察平台路径能力定位的 CODEX_HOME/config.toml。'
+    outputs:
+      - name: result
+        data_type: context-entry-observation-result
+        description: '文件缺失返回 LoadCompletion::Empty；合法配置返回 LoadCompletion::Ready，按原文顺序只公开 ID、McpServer / Skill / Plugin、enabled 与 total/enabled/disabled 分类计数；错误返回 LoadCompletion::Failed。'
+    side_effects:
+      - filesystem-read
+    persistence: 'none'
+    errors:
+      - code: CONTEXT_ENTRY_OBSERVATION_UNSUPPORTED
+        kind: unsupported
+        semantics: '非 Windows/macOS 目标明确失败，不伪造空成功。'
+      - code: USER_HOME_UNAVAILABLE
+        kind: unavailable
+        semantics: '用户目录缺失、非绝对或不可用时明确失败。'
+      - code: CODEX_HOME_INVALID
+        kind: invalid-input
+        semantics: '非空显式 CODEX_HOME 无效时明确失败，禁止静默回退。'
+      - code: CONTEXT_ENTRY_OBSERVATION_UNAVAILABLE
+        kind: unavailable
+        semantics: '固定 config.toml 元数据或读取失败时明确失败，不回传路径或正文。'
+      - code: CONTEXT_ENTRY_OBSERVATION_INVALID_FILE_TYPE
+        kind: invalid-input
+        semantics: '符号链接或非普通文件明确失败。'
+      - code: CONTEXT_ENTRY_OBSERVATION_TOO_LARGE
+        kind: invalid-input
+        semantics: '元数据或实际读取超过 256 KiB 时明确失败。'
+      - code: CONTEXT_ENTRY_OBSERVATION_INVALID_UTF8
+        kind: invalid-input
+        semantics: '配置不是合法 UTF-8 时明确失败。'
+      - code: CONTEXT_ENTRY_OBSERVATION_INVALID_TOML
+        kind: invalid-input
+        semantics: '非法 TOML 或重复定义明确失败，不执行文本修复。'
+      - code: CONTEXT_ENTRY_OBSERVATION_INVALID_ROOT_TABLE
+        kind: invalid-input
+        semantics: 'mcp_servers、skills 或 plugins 根项不是标准 TOML table 时明确失败。'
+      - code: CONTEXT_ENTRY_OBSERVATION_INVALID_ENTRY_TABLE
+        kind: invalid-input
+        semantics: '目标根项的子项不是标准 TOML table 时明确失败。'
+      - code: CONTEXT_ENTRY_OBSERVATION_EMPTY_ID
+        kind: invalid-input
+        semantics: '上下文条目 ID 为空或全空白时明确失败。'
+      - code: CONTEXT_ENTRY_OBSERVATION_INVALID_BOOLEAN
+        kind: invalid-input
+        semantics: 'enabled 或 disabled 存在但不是布尔值时整个配置明确失败。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次上下文目录观察请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时、结果分类和条目分类计数，不记录 TOML 正文、命令、参数、环境、Header、URL、Token、账号或路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '单文件缺失、损坏、超限、错误类型或不可读只影响本次观察，不修改配置或污染其他功能。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+      - total
+      - enabled
+      - disabled
+    platforms:
+      shared_semantics: 'Windows 与 macOS 使用同一固定文件名、普通文件门禁、严格 UTF-8/TOML、原文顺序和封闭错误语义；单文件最多 256 KiB。'
+      windows: 使用 Windows 平台路径适配器定位 CODEX_HOME；不支持时明确失败。
+      macos: 使用 macOS 平台路径适配器定位 CODEX_HOME；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '合成单元测试已固定文件边界、顺序、布尔矩阵、结构错误和隐私语义，无需保存真实配置样本。'
+    fixture_refs: []
   - id: contract.feature.provider-network.context-entry-management.baseline
     feature_id: feature.provider-network.context-entry-management
     scenario: baseline

@@ -1541,12 +1541,180 @@ fn gate5_relay_认证与配置状态只读观察已实现但配置管理总功�
 }
 
 #[test]
+fn gate5_上下文能力只读目录观察已实现但上下文管理总功能仍未评估() {
+    let feature_text = read_repository_text("parity/features/provider-network.yml");
+    let observation = yaml_list_item_block(
+        &feature_text,
+        "feature.provider-network.context-entry-observation",
+    );
+    for expected in [
+        "name: '上下文能力只读目录观察'",
+        "status: implemented",
+        "tauri-command:read_live_context_entries",
+        "config.toml",
+        "256 KiB",
+        "- issue:100",
+        "- issue:101",
+    ] {
+        assert!(
+            observation.contains(expected),
+            "上下文目录观察功能条目应包含：{expected}"
+        );
+    }
+    for forbidden in [
+        "tauri-command:delete_context_entry",
+        "tauri-command:extract_relay_common_config",
+        "tauri-command:list_context_entries",
+        "tauri-command:sync_live_context_entries",
+        "tauri-command:upsert_context_entry",
+        "filesystem-write",
+    ] {
+        assert!(
+            !observation.contains(forbidden),
+            "上下文目录观察功能禁止能力：{forbidden}"
+        );
+    }
+
+    let umbrella = yaml_list_item_block(
+        &feature_text,
+        "feature.provider-network.context-entry-management",
+    );
+    for expected in [
+        "status: unassessed",
+        "tauri-command:delete_context_entry",
+        "tauri-command:extract_relay_common_config",
+        "tauri-command:list_context_entries",
+        "tauri-command:sync_live_context_entries",
+        "tauri-command:upsert_context_entry",
+        "- issue:100",
+        "- issue:101",
+    ] {
+        assert!(
+            umbrella.contains(expected),
+            "原上下文管理总功能应继续包含：{expected}"
+        );
+    }
+    assert!(!umbrella.contains("status: implemented"));
+    assert!(!umbrella.contains("tauri-command:read_live_context_entries"));
+
+    let contract_text = read_repository_text("parity/contracts/provider-network.yml");
+    let contract = yaml_list_item_block(
+        &contract_text,
+        "contract.feature.provider-network.context-entry-observation.baseline",
+    );
+    for expected in [
+        "filesystem-read",
+        "persistence: 'none'",
+        "LoadCompletion::Ready",
+        "LoadCompletion::Empty",
+        "LoadCompletion::Failed",
+        "McpServer",
+        "Skill",
+        "Plugin",
+        "total",
+        "enabled",
+        "disabled",
+        "256 KiB",
+        "CONTEXT_ENTRY_OBSERVATION_UNSUPPORTED",
+        "CONTEXT_ENTRY_OBSERVATION_UNAVAILABLE",
+        "CONTEXT_ENTRY_OBSERVATION_INVALID_FILE_TYPE",
+        "CONTEXT_ENTRY_OBSERVATION_TOO_LARGE",
+        "CONTEXT_ENTRY_OBSERVATION_INVALID_UTF8",
+        "CONTEXT_ENTRY_OBSERVATION_INVALID_TOML",
+        "CONTEXT_ENTRY_OBSERVATION_INVALID_ROOT_TABLE",
+        "CONTEXT_ENTRY_OBSERVATION_INVALID_ENTRY_TABLE",
+        "CONTEXT_ENTRY_OBSERVATION_EMPTY_ID",
+        "CONTEXT_ENTRY_OBSERVATION_INVALID_BOOLEAN",
+        "USER_HOME_UNAVAILABLE",
+        "CODEX_HOME_INVALID",
+        "mode: none",
+        "fixture_refs: []",
+    ] {
+        assert!(
+            contract.contains(expected),
+            "上下文目录观察合同应包含：{expected}"
+        );
+    }
+    for forbidden in [
+        "filesystem-write",
+        "environment-write",
+        "network-read",
+        "network-write",
+        "process-control",
+        "advertising",
+        "remote-recommendation",
+    ] {
+        assert!(
+            !contract.contains(forbidden),
+            "上下文目录观察合同禁止能力：{forbidden}"
+        );
+    }
+
+    let source_text = read_repository_text("parity/features/source-index.yml");
+    let live = yaml_list_item_block(&source_text, "tauri-command:read_live_context_entries");
+    assert!(live.contains("side_effects: [filesystem-read]"));
+    assert!(live.contains("feature_id: feature.provider-network.context-entry-observation"));
+    assert!(!live.contains("filesystem-write"));
+
+    for source_id in [
+        "tauri-command:delete_context_entry",
+        "tauri-command:extract_relay_common_config",
+        "tauri-command:list_context_entries",
+        "tauri-command:sync_live_context_entries",
+        "tauri-command:upsert_context_entry",
+    ] {
+        let source = yaml_list_item_block(&source_text, source_id);
+        assert!(source.contains("side_effects: [filesystem-read, filesystem-write]"));
+        assert!(source.contains("feature_id: feature.provider-network.context-entry-management"));
+    }
+
+    let source =
+        read_repository_text("crates/inputcodex-platform/src/context_entry_observation.rs");
+    let production = source.split("#[cfg(test)]").next().unwrap_or(&source);
+    for expected in [
+        "SystemPlatformPaths.resolve",
+        "fs::symlink_metadata",
+        "File::open",
+        "file.take(limit as u64 + 1)",
+        "Document::parse",
+        "source_document.into_mut()",
+        "ContextEntryObservation::new",
+    ] {
+        assert!(
+            production.contains(expected),
+            "上下文目录观察生产适配器应包含：{expected}"
+        );
+    }
+    for forbidden in [
+        "pub trait ContextEntryFileProbe",
+        "pub fn observe_context_entry_file",
+        "read_to_string",
+        "fs::write",
+        "OpenOptions",
+        "std::process::Command",
+        "Command::new",
+        "std::thread",
+        "reqwest",
+        "hyper",
+        "TcpStream",
+        "UdpSocket",
+        "iced",
+        "unsafe {",
+    ] {
+        assert!(
+            !production.contains(forbidden),
+            "上下文目录观察生产适配器禁止能力：{forbidden}"
+        );
+    }
+}
+
+#[test]
 fn 仓库source_index_覆盖锁定上游公开入口() {
     let summary =
         validate_feature_repository(&repository_root()).expect("功能目录应通过仓库级验证");
 
     assert_eq!(summary.source_entry_count(), 133);
-    assert_eq!(summary.feature_count(), 41);
+    assert_eq!(summary.feature_count(), 42);
     assert_eq!(summary.excluded_entry_count(), 3);
     assert_eq!(summary.exception_pending_count(), 10);
     assert_eq!(summary.coverage_gap_count(), 0);
@@ -1557,8 +1725,8 @@ fn 仓库功能目录通过完整引用与安全验证() {
     let summary = validate_repository(&repository_root()).expect("仓库功能目录应通过验证");
 
     assert_eq!(summary.source_entry_count(), 133);
-    assert_eq!(summary.feature_count(), 41);
-    assert_eq!(summary.contract_count(), 41);
+    assert_eq!(summary.feature_count(), 42);
+    assert_eq!(summary.contract_count(), 42);
     assert_eq!(summary.fixture_count(), 11);
     assert_eq!(summary.coverage_gap_count(), 0);
 }
