@@ -2,8 +2,7 @@ use std::{cell::Cell, rc::Rc};
 
 use inputcodex_application::{
     ApplicationError, DiagnosticLogObservationPort, DiagnosticLogObservationRequest,
-    LoadCompletion, LoadCoordinator, LoadState, ObserveDiagnosticLog, RequestId,
-    TransitionOutcome,
+    LoadCompletion, LoadCoordinator, LoadState, ObserveDiagnosticLog, RequestId, TransitionOutcome,
 };
 use inputcodex_domain::DiagnosticLogObservation;
 
