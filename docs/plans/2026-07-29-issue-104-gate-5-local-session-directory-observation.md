@@ -135,16 +135,16 @@
 - [x] 运行定向测试并记录 RED：根 crate 缺少四个应用 API，`E0432`，退出码 `101`。
 - [x] 写 Request、Cancellation、Port 和 UseCase 的最小实现。
 - [x] 运行应用测试 GREEN `8 passed`、Application 全目标测试、格式与 Clippy。
-- [ ] 建立 application Git checkpoint。
+- [x] 建立 application Git checkpoint：`bd03cd3a8ba8b6df222c191d75bd672881c32d6a`。
 
 ### Batch 3：Platform RED → GREEN
 
-- [ ] 先写合成 SQLite 测试：无库、threads、automation_runs、可选列、跨库排序/去重、当前/legacy 优先级、分页、部分失败、全部失败、符号链接/非普通文件、候选超限、非法显式根、只读、超时和取消。
-- [ ] 运行平台测试并证明缺少实现/依赖的 RED。
-- [ ] 在根 Workspace 与 Platform crate 锁定 `rusqlite = 0.40.1`，仅启用 `bundled`、`hooks`。
-- [ ] 写最小候选发现、只读连接、schema 查询和结果聚合实现。
-- [ ] 验证真实 fixture 文件没有被写入，且错误/Debug 不含私人路径、标题或 ID。
-- [ ] 运行平台测试 GREEN、格式与 Clippy。
+- [x] 先写合成 SQLite 测试：无库、threads、automation_runs、可选列、跨库排序/去重、当前/legacy 优先级、分页、部分失败、全部失败、符号链接/非普通文件、候选超限、非法显式根、只读、超时和取消。
+- [x] 运行平台测试并证明因实现文件缺失而 RED，退出码 `101`。
+- [x] 在根 Workspace 与 Platform crate 锁定 `rusqlite = 0.40.1`，仅启用 `bundled`、`hooks`。
+- [x] 写最小候选发现、只读连接、schema 查询和结果聚合实现；`automation_runs` 时间列按单行 `COALESCE(updated_at, created_at)` 回退。
+- [x] 验证主数据库与 WAL 字节、目录清单保持不变，SHM 长度保持不变且只允许 SQLite reader 协调区字节变化；错误/Debug 不含私人路径、标题或 ID。
+- [x] 运行平台定向测试 GREEN `15 passed`、Platform 全目标测试、格式、Clippy、仓库政策、依赖树和安全字符串门。
 - [ ] 建立 platform Git checkpoint。
 
 ### Batch 4：Parity RED → GREEN
@@ -186,7 +186,7 @@
 ## 成功标准
 
 - A1 条目、分页、跨库去重和覆盖状态拥有领域、应用和真实 SQLite 合成测试。
-- 生产 SQLite 连接只读且不改变数据库、WAL、SHM 或业务文件内容。
+- 生产 SQLite 连接只读；主数据库与 WAL 字节、目录清单和 SHM 长度保持不变，SHM 只允许 SQLite WAL reader 协调区字节变化，不得产生业务数据写入。
 - 非法显式根、符号链接、超限、损坏 schema、锁等待、超时和取消均有稳定脱敏失败。
 - `feature.session-data.local-session-directory-observation=implemented`。
 - `feature.session-data.local-session-management=unassessed`。

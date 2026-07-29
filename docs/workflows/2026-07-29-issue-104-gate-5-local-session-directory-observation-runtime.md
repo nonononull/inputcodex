@@ -16,7 +16,7 @@
 - `candidate_scope_hash`: `sha256:47dcb2c181daa61a8df073e7f3ada069bf8e3d9b95df0c57f7709bcb6cde211d`
 - `executor`: `codex-desktop-main-thread`
 - `subagents`: `not-authorized`
-- `current_node`: `application-checkpoint`
+- `current_node`: `platform-checkpoint`
 
 ## Current Gate
 
@@ -82,7 +82,7 @@
 3. 运行 application tests/Clippy/fmt。
 4. 建立 `issue-104-application` checkpoint。
 
-状态：`ready-for-checkpoint`。RED 为缺少四个应用 API 的 `E0432`、退出码 `101`；GREEN 为新定向 `8 passed`，Application 全目标测试、Clippy、rustfmt 和 diff check 通过。
+状态：`completed`。checkpoint `bd03cd3a8ba8b6df222c191d75bd672881c32d6a`；RED 为缺少四个应用 API 的 `E0432`、退出码 `101`；GREEN 为新定向 `8 passed`，Application 全目标测试、Clippy、rustfmt 和 diff check 通过；提交后 AGOS `RequireClean` 返回 `GIT_SNAPSHOT_READY`。
 
 ### Node 5：Platform TDD
 
@@ -90,11 +90,11 @@
 2. 锁定 `rusqlite = 0.40.1`，仅启用 `bundled` 与 `hooks`。
 3. 实现固定根、候选门禁、只读连接、schema 查询、多库排序/去重/分页。
 4. 实现 busy timeout、deadline、progress cancellation 和错误脱敏。
-5. 证明 fixture、WAL/SHM 和目录内容没有业务写入。
+5. 证明主数据库与 WAL 字节、目录清单不变，SHM 长度不变且仅允许 SQLite reader 协调区字节变化。
 6. 运行 platform tests/Clippy/fmt。
 7. 建立 `issue-104-platform` checkpoint。
 
-状态：`pending`。
+状态：`ready-for-checkpoint`。RED 为实现文件缺失、退出码 `101`；GREEN 为定向 `15 passed`，Platform 全目标测试、Clippy、rustfmt、diff check、仓库政策、`cargo tree --prefix none` 精确依赖断言和安全字符串门通过。实现使用只读 OpenFlags、`query_only`、短 busy timeout、progress handler 与白名单 schema；`automation_runs` 的单行时间回退使用 `COALESCE(updated_at, created_at)`。WAL 证据确认主数据库与 WAL 字节、目录清单不变，SHM 长度不变且协调区字节变化不属于业务写入。
 
 ### Node 6：Parity TDD
 
@@ -111,7 +111,7 @@
 1. 更新 README 和 Issue #104 报告。
 2. 新根因去重后决定是否更新 `err.md`。
 3. 运行 `build.md` Issue #104 全门禁、安全检查和依赖审查。
-4. 验证二十九路径；未改 err.md 时验证二十八路径 hash。
+4. 验证实际二十九路径与 `sha256:47dcb2c181daa61a8df073e7f3ada069bf8e3d9b95df0c57f7709bcb6cde211d`。
 5. 运行知识图谱刷新；无有效 CodeGraph 索引时只记录跳过，不初始化。
 6. 建立 `issue-104-local-verified` checkpoint。
 
@@ -239,7 +239,7 @@ if ($hash -ne '47dcb2c181daa61a8df073e7f3ada069bf8e3d9b95df0c57f7709bcb6cde211d'
 
 ### Delivery Gate
 
-- 实际路径为批准范围子集；若无 err.md 新根因，精确匹配二十八路径 hash。
+- 已确认出现两个新可复用根因并更新 `err.md`；最终实际范围必须精确匹配二十九路径与 `sha256:47dcb2c181daa61a8df073e7f3ada069bf8e3d9b95df0c57f7709bcb6cde211d`。
 - 安全清单、许可证、测试、Clippy、fmt、治理、Release Audit 与知识图谱状态完成。
 - 所有 Review 对话闭环，Hosted CI/Performance/Artifact 通过。
 - Squash Merge 仅在项目所有者对 Final Head 单独授权后执行。

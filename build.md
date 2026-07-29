@@ -122,7 +122,7 @@ Assert-NativeSuccess 'Issue #104 Release Audit'
 cargo metadata --locked --offline --no-deps --format-version 1 | Out-Null
 Assert-NativeSuccess 'Issue #104 Cargo metadata'
 
-$tree = @(cargo tree --locked --offline -p inputcodex-platform)
+$tree = @(cargo tree --locked --offline -p inputcodex-platform --prefix none)
 Assert-NativeSuccess 'Issue #104 依赖树'
 if (-not ($tree -match '^rusqlite v0\.40\.1$')) {
   throw 'Issue #104 必须锁定 rusqlite v0.40.1。'

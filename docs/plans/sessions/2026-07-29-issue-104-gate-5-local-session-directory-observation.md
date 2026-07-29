@@ -17,10 +17,10 @@
 - `candidate_scope_hash`: `sha256:47dcb2c181daa61a8df073e7f3ada069bf8e3d9b95df0c57f7709bcb6cde211d`
 - `normal_scope_without_err`: `sha256:acee55e9539631f6eca4fb557d27999c7815d20ae15a4b4ea932db243079cb8c`
 - `planning_validation`: `PASSED`
-- `execution_state`: `DOMAIN_VERIFIED_PENDING_CHECKPOINT`
+- `execution_state`: `PLATFORM_VERIFIED_PENDING_CHECKPOINT`
 - `planning_checkpoint_ref`: `7d11a6ff904b7d9bc2ca74bbaf52c122fc31feb9`
 - `domain_checkpoint_ref`: `c684f4bc115ef8d7b406a343876419edb8f2d290`
-- `application_checkpoint_ref`: `pending`
+- `application_checkpoint_ref`: `bd03cd3a8ba8b6df222c191d75bd672881c32d6a`
 - `platform_checkpoint_ref`: `pending`
 - `parity_checkpoint_ref`: `pending`
 - `local_verified_checkpoint_ref`: `pending`
@@ -160,7 +160,7 @@ README.md
 
 - `count`: `29`
 - `hash`: `sha256:47dcb2c181daa61a8df073e7f3ada069bf8e3d9b95df0c57f7709bcb6cde211d`
-- 无新根因时实际范围排除 `err.md`，固定为 `28` 路径与 `sha256:acee55e9539631f6eca4fb557d27999c7815d20ae15a4b4ea932db243079cb8c`。
+- 本任务已确认新的可复用根因并更新 `err.md`；最终实际范围固定为全部 `29` 路径与 `sha256:47dcb2c181daa61a8df073e7f3ada069bf8e3d9b95df0c57f7709bcb6cde211d`。
 
 ## Execution Batches
 
@@ -180,17 +180,21 @@ GREEN：新增标题安全值、条目、来源摘要和页面不变量；定向
 
 ### Batch 2：Application RED → GREEN
 
-状态：`ready-for-checkpoint`。
+状态：`completed`。checkpoint `bd03cd3a8ba8b6df222c191d75bd672881c32d6a`。
 
 RED：定向测试因根 crate 缺少 Request、Cancellation、Port 和 UseCase 四个 API 返回 `E0432`，退出码 `101`。
 
-GREEN：默认/显式分页、读取上限溢出校验、共享取消标记、预取消短路、Ready/Partial/Empty/Failed 映射和旧结果隔离测试 `8 passed`；Application 全目标测试、Clippy、rustfmt 与 diff check 通过。
+GREEN：默认/显式分页、读取上限溢出校验、共享取消标记、预取消短路、Ready/Partial/Empty/Failed 映射和旧结果隔离测试 `8 passed`；Application 全目标测试、Clippy、rustfmt 与 diff check 通过；提交后 AGOS `RequireClean` 返回 `GIT_SNAPSHOT_READY`。
 
 ### Batch 3：Platform RED → GREEN
 
-状态：`pending`。
+状态：`ready-for-checkpoint`。
 
-产出：锁定 rusqlite、严格路径、只读 SQLite、schema 投影、多库分页/去重、超时取消和脱敏错误。
+RED：定向测试因 Platform 实现文件缺失而失败，退出码 `101`。
+
+GREEN：锁定 `rusqlite 0.40.1` 的 `bundled/hooks`，实现严格根、最多 32 个直接普通数据库候选、只读 OpenFlags、`query_only`、短 busy timeout、progress handler、白名单 schema、多库排序/去重/分页与稳定脱敏错误；定向测试 `15 passed`，Platform 全目标测试、Clippy、rustfmt、diff check、仓库政策、依赖树和安全字符串门通过。
+
+排错证据：`automation_runs` 同时存在两个时间列时改为单行 `COALESCE(updated_at, created_at)`；`cargo tree` 增加 `--prefix none` 后做精确版本断言；WAL 模式只读 reader 可修改 SHM 协调区，因此证据固定为主数据库与 WAL 字节、目录清单不变，SHM 长度不变且不把协调字节变化误判为业务写入。
 
 ### Batch 4：Parity RED → GREEN
 
