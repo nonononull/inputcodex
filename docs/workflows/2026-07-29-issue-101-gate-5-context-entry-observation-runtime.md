@@ -11,7 +11,7 @@
 - `baseline_ref`: `52320c2c02e19d9ffae11ccb6742a0f0fc4b71b9`
 - `branch_ref`: `codex/issue-101-gate-5-context-entry-observation`
 - `candidate_scope_hash`: `sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372`
-- `runtime_state`: `domain-green`
+- `runtime_state`: `application-green`
 - `agos_status`: `needs-input-unregistered-bypassed`
 
 ## Current Gate
@@ -20,7 +20,8 @@
 Issue #100 owner decision approved
   -> Issue #101 planning scope approved
   -> Domain RED / GREEN / VERIFY completed
-  -> NEXT: Application RED / GREEN
+  -> Application RED / GREEN / VERIFY completed
+  -> NEXT: Platform RED / GREEN
 ```
 
 当前 `ALLOWED_OPS`：
@@ -82,7 +83,7 @@ Cargo metadata、Parity baseline 和 diff 检查均已通过；下一节点保�
 3. VERIFY：Application tests、Clippy、fmt。
 4. CHECKPOINT：`issue-101-application-green`。
 
-状态：`ready`。
+状态：`completed`。RED 精确命中目标应用类型缺失；GREEN 后 Application 全目标测试、Clippy 与 fmt 通过。
 
 ### Node 5：Platform TDD
 
@@ -91,7 +92,7 @@ Cargo metadata、Parity baseline 和 diff 检查均已通过；下一节点保�
 3. VERIFY：Platform tests、Clippy、fmt。
 4. CHECKPOINT：`issue-101-platform-green`。
 
-状态：`blocked-by-node-4`。
+状态：`ready`。
 
 ### Node 6：Parity TDD
 

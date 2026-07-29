@@ -13,7 +13,7 @@
 - `planning_scope_hash`: `sha256:0393705157d30192e317a8158686baf6c2a79483abab1e5a7a5b109d30923dbd`
 - `candidate_scope_hash`: `sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372`
 - `planning_validation`: `PASSED`
-- `execution_state`: `DOMAIN_GREEN`
+- `execution_state`: `APPLICATION_GREEN`
 - `agos_report_only`: `needs-input-unregistered-bypassed`
 
 ## Mutation Intent
@@ -178,6 +178,7 @@ CI 脚本合同、仓库政策、Cargo metadata、Parity baseline 与 diff 检�
 
 - 测试零字段 Request、Port、UseCase、Some/None/Err 映射和旧请求隔离。
 - 实现 `ObserveContextEntries<P>`。
+- 状态：`completed`；RED 为目标应用类型未导出，GREEN 后 6 个新增测试与 Application 全目标测试、Clippy、fmt 通过。
 
 ### Batch 3：Platform RED → GREEN
 
@@ -227,4 +228,4 @@ CI 脚本合同、仓库政策、Cargo metadata、Parity baseline 与 diff 检�
 
 ## Next Gate
 
-实施范围已由项目所有者批准；Domain TDD 已完成，下一合法节点为 Application RED → GREEN。
+实施范围已由项目所有者批准；Domain 与 Application TDD 已完成，下一合法节点为 Platform RED → GREEN。

@@ -116,6 +116,8 @@
 4. 运行 Application tests、Clippy 和格式检查。
 5. 建立 `issue-101-application-green` Git checkpoint。
 
+状态：`completed`。Application RED 精确命中 Request、Port 与 UseCase 缺失；GREEN 后 6 个新增测试与 Application 全目标测试、Clippy、fmt 通过。
+
 ### Batch 3：Platform RED → GREEN
 
 RED 矩阵至少覆盖：
