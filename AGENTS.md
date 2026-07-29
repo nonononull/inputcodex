@@ -115,3 +115,7 @@
 - Issue `#97` 已批准 Relay 认证与配置状态观察方案 A 并按 `COMPLETED` 关闭：安全状态观察可独立迁移，账号标签、认证来源、实际路径、完整配置读取、保存、切换和回填继续保留在未评估的 Relay 配置管理总功能中。
 - Issue `#98` 是第八个 Gate 5 产品切片：只接管 `tauri-command:relay_status`，固定观察 `CODEX_HOME/auth.json` 与 `config.toml`；单文件最多读取 `256 KiB`，两份均缺失返回 `Empty`，任何一份存在都返回带明确文档状态的 `Ready`。
 - Issue `#98` 禁止公开任意路径、返回账号/Token/Provider/URL/字段/内容/认证来源/实际路径、写文件、修改环境、联网、调用子进程、启动线程/Watcher、打开 UI、注入或使用 `unsafe`；`core-module:relay_config`、读取完整文件、保存、切换、回填与原 `feature.provider-network.relay-profile-management` 必须继续保持 `unassessed`。
+- Issue `#98` / PR `#99` 已完成第八个 Gate 5 Relay 认证与配置状态只读观察切片；PR `#99` 以单父 Squash 提交 `52320c2c02e19d9ffae11ccb6742a0f0fc4b71b9` 进入 `main`，Issue `#98` 已按 `COMPLETED` 关闭，合并后主干 CI Run `30449847793` 七 Job、Performance Baseline Run `30449848277` 四 Job全绿且 Artifact 均为 `0`。
+- Issue `#100` 已批准上下文能力方案 A 并按 `COMPLETED` 关闭：只读目录观察可独立迁移；完整 TOML、摘要、命令、参数、环境变量、Header、URL、Token、账号和实际路径不得进入新合同，上下文增加、删除、同步、提取和设置正文解析继续保留在未评估的总功能中。
+- Issue `#101` 是第九个 Gate 5 产品切片：只接管 `tauri-command:read_live_context_entries`，固定读取平台路径定位的 `CODEX_HOME/config.toml`，单文件上限 `256 KiB`，只返回条目 ID、稳定种类、启用状态和分类计数。
+- Issue `#101` 当前只允许二十四路径规划、范围哈希和轻量验证；在项目所有者批准 `sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372` 前，禁止产品 TDD、实现提交、推送、PR 或 Review/CI。
