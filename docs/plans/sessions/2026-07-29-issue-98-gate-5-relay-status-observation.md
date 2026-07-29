@@ -5,7 +5,7 @@
 - `task_id`: `issue-98-gate-5-relay-status-observation`
 - `tracking_issue_ref`: `https://github.com/nonononull/inputcodex/issues/98`
 - `approved_decision_ref`: `https://github.com/nonononull/inputcodex/issues/97#issuecomment-5115176838`
-- `implementation_scope_approval_ref`: `REQUIRED_BEFORE_PRODUCT_MUTATION`
+- `implementation_scope_approval_ref`: `https://github.com/nonononull/inputcodex/issues/98#issuecomment-5115957943`
 - `selected_business_path`: `gate-5/relay-status-observation`
 - `baseline_ref`: `origin/main@b7c4174671caba806162a42e82b7bc0b20f73bf5`
 - `branch_ref`: `codex/issue-98-gate-5-relay-status-observation`
@@ -13,7 +13,7 @@
 - `planning_scope_hash`: `sha256:ec6c88d4a96c351fee85d6c416b04c95b27050893ccbe55b4ad55edfd8d95051`
 - `candidate_scope_hash`: `sha256:b1dda60cda57d4be9344b3fa0c74a49b6087b9bdf03fceb5a772ec7e893d63a5`
 - `planning_validation`: `PASSED`
-- `execution_state`: `PLANNING_VERIFIED_IMPLEMENTATION_FORBIDDEN`
+- `execution_state`: `IMPLEMENTATION_APPROVED_DOMAIN_RED_PENDING`
 - `agos_report_only`: `needs-input-unregistered-bypassed`
 
 ## Mutation Intent
@@ -26,13 +26,12 @@
 
 ## Executor Enforcement
 
-- 当前阶段：`planning-freeze`
-- 当前写入 allowlist：四份 planning 文件，必须精确相等，不接受子集或超集。
-- 当前允许操作：读取项目/上游证据、修改四份 planning 文件、轻量只读验证、AGOS ReportOnly、
-  Git status/diff、建立本地 planning checkpoint、回写 Issue `#98`。
-- 当前禁止操作：产品测试或源码写入、Cargo 修改、普通 push、PR、Hosted CI、Review、合并、
-  force push、`main` 写入和任何 AGOS 控制面修改。
-- 产品实现前置门：项目所有者明确批准二十七路径与 candidate hash。
+- 当前阶段：`implementation-tdd`
+- 当前写入 allowlist：已批准二十七路径，实际路径必须为其子集。
+- 当前允许操作：二十七路径内 TDD、稳定控制面更新、本地轻量验证、Git checkpoint、提交、
+  普通 push、非 Draft PR、Review/CI。
+- 当前禁止操作：范围外写入、Squash Merge、force push、`main` 写入和任何 AGOS 控制面修改。
+- 产品实现前置门：`PASSED`，证据为 `implementation_scope_approval_ref`。
 - 最终合并前置门：具体 PR Final Head、Review 根因闭环、Hosted CI 全绿和独立 Squash Merge 授权。
 
 ## 本地知识与来源

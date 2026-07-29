@@ -2,11 +2,11 @@
 
 ## 文档状态
 
-- `status`: `PLANNING_VERIFIED_IMPLEMENTATION_APPROVAL_REQUIRED`
+- `status`: `IMPLEMENTATION_APPROVED_TDD_IN_PROGRESS`
 - `tracking_issue_ref`: `https://github.com/nonononull/inputcodex/issues/98`
 - `approved_decision_ref`: `https://github.com/nonononull/inputcodex/issues/97#issuecomment-5115176838`
 - `design_ref`: `https://github.com/nonononull/inputcodex/issues/98`
-- `implementation_scope_approval_ref`: `REQUIRED_BEFORE_PRODUCT_MUTATION`
+- `implementation_scope_approval_ref`: `https://github.com/nonononull/inputcodex/issues/98#issuecomment-5115957943`
 - `baseline_ref`: `origin/main@b7c4174671caba806162a42e82b7bc0b20f73bf5`
 - `branch_ref`: `codex/issue-98-gate-5-relay-status-observation`
 - `worktree_ref`: `.worktrees/issue-98-gate-5-relay-status-observation`

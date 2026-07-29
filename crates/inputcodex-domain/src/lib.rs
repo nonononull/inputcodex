@@ -4,6 +4,7 @@ mod application_overview;
 mod diagnostic_log_observation;
 mod platform_paths;
 mod relay_environment_observation;
+mod relay_status_observation;
 mod runtime_environment_observation;
 mod settings_observation;
 mod version_startup;
@@ -23,6 +24,9 @@ pub use relay_environment_observation::{
     ClashConfigSource, ClashTunCandidateStatus, ClashTunObservation, CodexDotenvStatus,
     ObservationCoverageStatus, ProxyEnvironmentCoverage, ProxyEnvironmentSource,
     ProxyEnvironmentVariableName, ProxyEnvironmentVariableObservation, RelayEnvironmentObservation,
+};
+pub use relay_status_observation::{
+    CredentialPresence, RelayConfigurationStatus, RelayDocumentStatus, RelayStatusObservation,
 };
 pub use runtime_environment_observation::{
     EnvironmentConflictSource, EnvironmentObservationStatus, EnvironmentSourceCoverage,

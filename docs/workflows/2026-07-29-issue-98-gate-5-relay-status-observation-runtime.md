@@ -14,7 +14,7 @@
 - `planning_scope_hash`: `sha256:ec6c88d4a96c351fee85d6c416b04c95b27050893ccbe55b4ad55edfd8d95051`
 - `candidate_scope_hash`: `sha256:b1dda60cda57d4be9344b3fa0c74a49b6087b9bdf03fceb5a772ec7e893d63a5`
 - `mutation_intent`: `source`
-- `current_gate`: `PLANNING_VERIFIED_AWAITING_IMPLEMENTATION_APPROVAL`
+- `current_gate`: `IMPLEMENTATION_APPROVED_DOMAIN_TDD`
 
 ## 不变量
 
