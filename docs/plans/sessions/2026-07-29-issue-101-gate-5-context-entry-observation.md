@@ -5,7 +5,7 @@
 - `task_id`: `issue-101-gate-5-context-entry-observation`
 - `tracking_issue_ref`: `https://github.com/nonononull/inputcodex/issues/101`
 - `approved_decision_ref`: `https://github.com/nonononull/inputcodex/issues/100#issuecomment-5118455158`
-- `implementation_scope_approval_ref`: `pending`
+- `implementation_scope_approval_ref`: `https://github.com/nonononull/inputcodex/issues/101#issuecomment-5119498422`
 - `selected_business_path`: `gate-5/context-entry-observation`
 - `baseline_ref`: `origin/main@52320c2c02e19d9ffae11ccb6742a0f0fc4b71b9`
 - `branch_ref`: `codex/issue-101-gate-5-context-entry-observation`
@@ -13,7 +13,7 @@
 - `planning_scope_hash`: `sha256:0393705157d30192e317a8158686baf6c2a79483abab1e5a7a5b109d30923dbd`
 - `candidate_scope_hash`: `sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372`
 - `planning_validation`: `PASSED`
-- `execution_state`: `AWAITING_OWNER_SCOPE_APPROVAL`
+- `execution_state`: `DOMAIN_GREEN`
 - `agos_report_only`: `needs-input-unregistered-bypassed`
 
 ## Mutation Intent
@@ -172,6 +172,7 @@ CI 脚本合同、仓库政策、Cargo metadata、Parity baseline 与 diff 检�
 
 - 测试种类、条目、汇总、目录和计数不变量。
 - 实现纯领域类型与脱敏 Debug。
+- 状态：`completed`；RED 为目标类型未导出，GREEN 后 4 个新增测试与 Domain 全目标测试、Clippy、fmt 通过。
 
 ### Batch 2：Application RED → GREEN
 
@@ -226,5 +227,4 @@ CI 脚本合同、仓库政策、Cargo metadata、Parity baseline 与 diff 检�
 
 ## Next Gate
 
-等待项目所有者批准 Issue `#101` 二十四路径与
-`sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372`；批准前不得开始产品 TDD。
+实施范围已由项目所有者批准；Domain TDD 已完成，下一合法节点为 Application RED → GREEN。

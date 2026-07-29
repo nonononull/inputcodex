@@ -1,15 +1,15 @@
 # Issue #101 Gate 5 上下文能力只读目录观察实施计划
 
-> **状态：** `awaiting-owner-scope-approval`
+> **状态：** `implementation-in-progress`
 >
-> **实施纪律：** 当前只允许维护任务控制面。产品 TDD、实现代码、依赖修改、提交实现、推送、
-> PR 和 Review/CI 必须等待项目所有者批准本计划的二十四路径与
-> `candidate_scope_hash`。
+> **实施纪律：** 项目所有者已批准二十四路径与 `candidate_scope_hash`，允许按本计划执行 TDD、
+> 本地验证、checkpoint、普通推送、非 Draft PR 与 Review/CI；最终 Squash Merge 仍保留独立授权门。
 
 ## 任务元数据
 
 - `tracking_issue_ref`: https://github.com/nonononull/inputcodex/issues/101
 - `approved_decision_ref`: https://github.com/nonononull/inputcodex/issues/100#issuecomment-5118455158
+- `implementation_scope_approval_ref`: https://github.com/nonononull/inputcodex/issues/101#issuecomment-5119498422
 - `decision_issue_ref`: https://github.com/nonononull/inputcodex/issues/100
 - `branch_ref`: `codex/issue-101-gate-5-context-entry-observation`
 - `baseline_ref`: `52320c2c02e19d9ffae11ccb6742a0f0fc4b71b9`

@@ -6,36 +6,33 @@
 - `tracking_issue_ref`: https://github.com/nonononull/inputcodex/issues/101
 - `session_plan_ref`: `docs/plans/sessions/2026-07-29-issue-101-gate-5-context-entry-observation.md`
 - `approved_decision_ref`: https://github.com/nonononull/inputcodex/issues/100#issuecomment-5118455158
+- `implementation_scope_approval_ref`: https://github.com/nonononull/inputcodex/issues/101#issuecomment-5119498422
 - `selected_business_path`: `gate-5/context-entry-observation`
 - `baseline_ref`: `52320c2c02e19d9ffae11ccb6742a0f0fc4b71b9`
 - `branch_ref`: `codex/issue-101-gate-5-context-entry-observation`
 - `candidate_scope_hash`: `sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372`
-- `runtime_state`: `awaiting-owner-scope-approval`
+- `runtime_state`: `domain-green`
 - `agos_status`: `needs-input-unregistered-bypassed`
 
 ## Current Gate
 
 ```text
 Issue #100 owner decision approved
-  -> Issue #101 created
-  -> isolated branch/worktree ready
-  -> planning control plane and exact scope prepared
-  -> STOP: await owner approval for 24 paths + candidate_scope_hash
+  -> Issue #101 planning scope approved
+  -> Domain RED / GREEN / VERIFY completed
+  -> NEXT: Application RED / GREEN
 ```
 
 当前 `ALLOWED_OPS`：
 
-- GitHub Issue 评论和只读查询。
-- 七路径 planning 控制面写入。
-- 本地范围/hash/Release Audit/Parity/Cargo metadata/diff 验证。
-- 本地 planning checkpoint；未经追加授权不得 push。
+- 二十四路径批准范围内的 TDD、文档回写和本地验证。
+- Git checkpoint、普通 push、非 Draft PR 与 Review/CI。
 
 当前 `FORBIDDEN_OPS`：
 
-- 产品 Rust 测试或实现。
-- Parity feature/contract/source mapping 修改。
-- 依赖、Cargo、CI、应用、上游缓存、脚本或性能预算修改。
-- push、PR、Review/CI、Squash Merge、force push 或 `main` 写入。
+- 批准范围外文件、依赖、Cargo、CI、应用、上游缓存、脚本或性能预算修改。
+- 第二文件读取、写入、联网、子进程、线程、Watcher、UI 或原始配置返回。
+- Squash Merge、force push 或 `main` 写入。
 
 ## Node Order
 
@@ -76,7 +73,7 @@ Cargo metadata、Parity baseline 和 diff 检查均已通过；下一节点保�
 3. VERIFY：Domain tests、Clippy、fmt。
 4. CHECKPOINT：`issue-101-domain-green`。
 
-状态：`blocked-by-owner-scope-gate`。
+状态：`completed`。RED 精确命中目标类型缺失；GREEN 后 Domain 全目标测试、Clippy 与 fmt 通过。
 
 ### Node 4：Application TDD
 
@@ -85,7 +82,7 @@ Cargo metadata、Parity baseline 和 diff 检查均已通过；下一节点保�
 3. VERIFY：Application tests、Clippy、fmt。
 4. CHECKPOINT：`issue-101-application-green`。
 
-状态：`blocked-by-node-3`。
+状态：`ready`。
 
 ### Node 5：Platform TDD
 
