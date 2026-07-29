@@ -1392,12 +1392,161 @@ fn gate5_诊断日志只读结构观察已实现但诊断总功能仍未评估()
 }
 
 #[test]
+fn gate5_relay_认证与配置状态只读观察已实现但配置管理总功能仍未评估() {
+    let feature_text = read_repository_text("parity/features/provider-network.yml");
+    let observation = yaml_list_item_block(
+        &feature_text,
+        "feature.provider-network.relay-status-observation",
+    );
+    for expected in [
+        "name: 'Relay 认证与配置状态只读观察'",
+        "status: implemented",
+        "tauri-command:relay_status",
+        "auth.json",
+        "config.toml",
+        "256 KiB",
+        "- issue:97",
+        "- issue:98",
+    ] {
+        assert!(
+            observation.contains(expected),
+            "Relay 状态观察功能条目应包含：{expected}"
+        );
+    }
+    assert!(!observation.contains("core-module:relay_config"));
+    assert!(!observation.contains("tauri-command:read_relay_files"));
+    assert!(!observation.contains("tauri-command:save_relay_file"));
+    assert!(!observation.contains("tauri-command:switch_relay_profile"));
+
+    let umbrella = yaml_list_item_block(
+        &feature_text,
+        "feature.provider-network.relay-profile-management",
+    );
+    for expected in [
+        "status: unassessed",
+        "core-module:relay_config",
+        "tauri-command:backfill_relay_profile_from_live",
+        "tauri-command:read_relay_files",
+        "tauri-command:save_relay_file",
+        "tauri-command:switch_relay_profile",
+        "- issue:97",
+        "- issue:98",
+    ] {
+        assert!(
+            umbrella.contains(expected),
+            "原 Relay 配置管理总功能应继续包含：{expected}"
+        );
+    }
+    assert!(!umbrella.contains("status: implemented"));
+    assert!(!umbrella.contains("tauri-command:relay_status"));
+
+    let contract_text = read_repository_text("parity/contracts/provider-network.yml");
+    let contract = yaml_list_item_block(
+        &contract_text,
+        "contract.feature.provider-network.relay-status-observation.baseline",
+    );
+    for expected in [
+        "filesystem-read",
+        "persistence: 'none'",
+        "auth_document_status",
+        "config_document_status",
+        "chatgpt_credentials",
+        "openai_api_key",
+        "relay_configuration",
+        "LoadCompletion::Ready",
+        "LoadCompletion::Empty",
+        "256 KiB",
+        "512 KiB",
+        "RELAY_STATUS_OBSERVATION_UNSUPPORTED",
+        "USER_HOME_UNAVAILABLE",
+        "CODEX_HOME_INVALID",
+        "mode: none",
+        "fixture_refs: []",
+    ] {
+        assert!(
+            contract.contains(expected),
+            "Relay 状态观察合同应包含：{expected}"
+        );
+    }
+    for forbidden in [
+        "filesystem-write",
+        "environment-write",
+        "network-read",
+        "network-write",
+        "process-control",
+        "advertising",
+        "remote-recommendation",
+    ] {
+        assert!(
+            !contract.contains(forbidden),
+            "Relay 状态观察合同禁止能力：{forbidden}"
+        );
+    }
+
+    let source_text = read_repository_text("parity/features/source-index.yml");
+    let relay_status = yaml_list_item_block(&source_text, "tauri-command:relay_status");
+    assert!(relay_status.contains("side_effects: [filesystem-read]"));
+    assert!(relay_status.contains("feature_id: feature.provider-network.relay-status-observation"));
+    assert!(!relay_status.contains("filesystem-write"));
+
+    for source_id in [
+        "core-module:relay_config",
+        "tauri-command:backfill_relay_profile_from_live",
+        "tauri-command:read_relay_files",
+        "tauri-command:save_relay_file",
+        "tauri-command:switch_relay_profile",
+    ] {
+        let source = yaml_list_item_block(&source_text, source_id);
+        assert!(source.contains("side_effects: [filesystem-read, filesystem-write]"));
+        assert!(source.contains("feature_id: feature.provider-network.relay-profile-management"));
+    }
+
+    let source = read_repository_text("crates/inputcodex-platform/src/relay_status_observation.rs");
+    let production = source.split("#[cfg(test)]").next().unwrap_or(&source);
+    for expected in [
+        "SystemPlatformPaths.resolve",
+        "fs::symlink_metadata",
+        "File::open",
+        "file.take(limit as u64 + 1)",
+        "serde_json::from_slice::<Value>",
+        "parse::<DocumentMut>()",
+        "RelayStatusObservation::new",
+    ] {
+        assert!(
+            production.contains(expected),
+            "Relay 状态观察生产适配器应包含：{expected}"
+        );
+    }
+    for forbidden in [
+        "pub trait RelayStatusFileProbe",
+        "pub fn observe_relay_status_files",
+        "read_to_string",
+        "fs::write",
+        "OpenOptions",
+        "std::process::Command",
+        "Command::new",
+        "std::thread",
+        "reqwest",
+        "hyper",
+        "TcpStream",
+        "UdpSocket",
+        "iced",
+        "unsafe {",
+    ] {
+        assert!(
+            !production.contains(forbidden),
+            "Relay 状态观察生产适配器禁止能力：{forbidden}"
+        );
+    }
+}
+
+#[test]
 fn 仓库source_index_覆盖锁定上游公开入口() {
     let summary =
         validate_feature_repository(&repository_root()).expect("功能目录应通过仓库级验证");
 
     assert_eq!(summary.source_entry_count(), 133);
-    assert_eq!(summary.feature_count(), 40);
+    assert_eq!(summary.feature_count(), 41);
     assert_eq!(summary.excluded_entry_count(), 3);
     assert_eq!(summary.exception_pending_count(), 10);
     assert_eq!(summary.coverage_gap_count(), 0);
@@ -1408,8 +1557,8 @@ fn 仓库功能目录通过完整引用与安全验证() {
     let summary = validate_repository(&repository_root()).expect("仓库功能目录应通过验证");
 
     assert_eq!(summary.source_entry_count(), 133);
-    assert_eq!(summary.feature_count(), 40);
-    assert_eq!(summary.contract_count(), 40);
+    assert_eq!(summary.feature_count(), 41);
+    assert_eq!(summary.contract_count(), 41);
     assert_eq!(summary.fixture_count(), 11);
     assert_eq!(summary.coverage_gap_count(), 0);
 }

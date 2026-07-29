@@ -281,7 +281,7 @@ cargo fmt --all -- --check
 cargo test -p inputcodex-parity --all-targets --offline
 cargo clippy -p inputcodex-parity --all-targets --offline -- -D warnings
 cargo fmt --all -- --check
-pwsh -NoProfile -File scripts/parity/Invoke-ReleaseAudit.ps1 -RepositoryRoot .
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
 ```
 
 建立 `issue-98-parity-green` checkpoint。

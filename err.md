@@ -901,6 +901,15 @@
 - 验证：本地 platform all-targets tests `31/31`、Platform Clippy `-D warnings` 与 rustfmt 通过；Linux 真实性必须由修复后新 Head 的同一标准 Workflow 重新验证，动态 Run 证据只回写 GitHub。
 - 关联：Issue `#89`、PR `#90`、CI Run `30370601107`、Job `90313244125`。
 
+### 2026-07-29：任务本地 Release Audit 路径漂移且原生命令失败被后续命令掩盖
+
+- 环境：Issue `#98` Parity 批次按 Runtime Workflow 串行运行 tests、Clippy、rustfmt、Release Audit 与 diff 检查。
+- 现象：Parity tests/Clippy 已通过，`cargo fmt --check` 返回排版差异；随后 `pwsh -File scripts/parity/Invoke-ReleaseAudit.ps1` 报告脚本不存在，但整条 PowerShell 调用最终仍因末尾 `git diff --check` 成功而返回退出码 `0`。
+- 根因：任务本地 Runtime Workflow 手写了仓库中不存在的 Release Audit 路径，偏离 `build.md` 的稳定入口 `scripts/ci/Verify-ReleaseAuditGate.ps1`；同时 `$ErrorActionPreference = 'Stop'` 不会在当前调用方式下自动把原生命令非零退出码转换为终止错误，后续命令覆盖了最终退出状态。
+- 处理：把 Runtime Workflow 修正为 `scripts/ci/Verify-ReleaseAuditGate.ps1`；串行验证在每个 `cargo`、`pwsh` 与 `git` 调用后显式检查 `$LASTEXITCODE`，任何非零立即抛错。rustfmt 差异按其输出做最小排版修正，不改语义。
+- 验证：重新运行 Parity 全目标测试、Clippy、rustfmt、Release Audit 与 diff 检查均退出 `0`；目录测试包含 `20` 个仓库级用例，Release Audit 返回 `ok=true`、`status=current`、`requires_reaudit=false`。
+- 关联：Issue `#98`、`build.md`、`docs/workflows/2026-07-29-issue-98-gate-5-relay-status-observation-runtime.md`、`scripts/ci/Verify-ReleaseAuditGate.ps1`。
+
 ## 记录模板
 
 ```text

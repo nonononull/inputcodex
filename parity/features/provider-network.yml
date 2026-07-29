@@ -225,6 +225,25 @@ features:
         semantics: '读取供应商配置，预览后再确认写入并禁止泄漏凭据。'
     decision_refs:
       - issue:26
+  - id: feature.provider-network.relay-status-observation
+    name: 'Relay 认证与配置状态只读观察'
+    status: implemented
+    evidence:
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: relay_status
+    entry_points:
+      - tauri-command:relay_status
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '只读观察 CODEX_HOME/auth.json 与 config.toml 的文档状态、凭据存在事实和 Relay 配置完整性；单文件上限 256 KiB。'
+      macos:
+        applicability: supported
+        semantics: '只读观察 CODEX_HOME/auth.json 与 config.toml 的文档状态、凭据存在事实和 Relay 配置完整性；单文件上限 256 KiB。'
+    decision_refs:
+      - issue:26
+      - issue:97
+      - issue:98
   - id: feature.provider-network.relay-profile-management
     name: 'Relay 配置管理'
     status: unassessed
@@ -236,8 +255,6 @@ features:
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: read_relay_files
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
-        symbol: relay_status
-      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: save_relay_file
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: switch_relay_profile
@@ -245,7 +262,6 @@ features:
       - core-module:relay_config
       - tauri-command:backfill_relay_profile_from_live
       - tauri-command:read_relay_files
-      - tauri-command:relay_status
       - tauri-command:save_relay_file
       - tauri-command:switch_relay_profile
     platforms:
@@ -257,3 +273,5 @@ features:
         semantics: '读取、保存、切换和回填 Relay 配置，切换前保存当前状态。'
     decision_refs:
       - issue:26
+      - issue:97
+      - issue:98

@@ -432,6 +432,63 @@ contracts:
       reason: '使用合成 fixture 固定结构字段、边界值与引用关系。'
     fixture_refs:
       - fixture.feature.provider-network.provider-import.baseline
+  - id: contract.feature.provider-network.relay-status-observation.baseline
+    feature_id: feature.provider-network.relay-status-observation
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.43 证据已锁定，Issue #97 方案 A 与 Issue #98 二十七路径范围已经批准。'
+      - '请求不接受任意路径、文件名、读取上限、Provider ID 或认证来源输入。'
+    inputs:
+      - name: request
+        data_type: relay-status-observation-request
+        required: false
+        description: '零字段请求；固定观察平台路径能力定位的 auth.json 与 config.toml。'
+    outputs:
+      - name: result
+        data_type: relay-status-observation-result
+        description: '两份文档均缺失返回 LoadCompletion::Empty；至少一份存在返回 LoadCompletion::Ready(auth_document_status, config_document_status, chatgpt_credentials, openai_api_key, relay_configuration)。'
+    side_effects:
+      - filesystem-read
+    persistence: 'none'
+    errors:
+      - code: RELAY_STATUS_OBSERVATION_UNSUPPORTED
+        kind: unsupported
+        semantics: '非 Windows/macOS 目标明确失败，不伪造空成功。'
+      - code: USER_HOME_UNAVAILABLE
+        kind: unavailable
+        semantics: '用户目录缺失、非绝对或不可用时明确失败。'
+      - code: CODEX_HOME_INVALID
+        kind: invalid-input
+        semantics: '非空显式 CODEX_HOME 无效时明确失败，禁止静默回退。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次 Relay 状态观察请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
+      evidence: 记录请求标识、耗时、结果分类和封闭状态，不记录账号、凭据、Provider、URL、字段、内容或路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
+      evidence: 记录取消请求、清理完成和旧请求失效。
+    isolation: '单份文档缺失、损坏、超限或不可读只进入该文档状态；另一份可信事实继续返回。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+      - auth_document_status
+      - config_document_status
+      - chatgpt_credentials
+      - openai_api_key
+      - relay_configuration
+    platforms:
+      shared_semantics: 'Windows 与 macOS 使用同一固定文件名、严格 UTF-8、JSON/TOML 解析和封闭状态；单文件最多 256 KiB，总读取预算最多 512 KiB。'
+      windows: 使用 Windows 平台路径适配器定位 CODEX_HOME；不支持时明确失败。
+      macos: 使用 macOS 平台路径适配器定位 CODEX_HOME；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '合成单元测试已固定文件边界、解析矩阵、凭据存在事实和隐私语义，无需保存认证或配置样本。'
+    fixture_refs: []
   - id: contract.feature.provider-network.relay-profile-management.baseline
     feature_id: feature.provider-network.relay-profile-management
     scenario: baseline
