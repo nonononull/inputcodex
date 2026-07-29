@@ -291,8 +291,10 @@ decision_status: issue-89-pr-90-review-ci-green-final-merge-not-authorized
 - [x] Issue `#97` 已完成 Relay 认证与配置状态观察方案 A 决策并关闭；最小披露的只读状态观察与配置管理总功能正式分离。
 - [x] Issue `#98` / PR `#99` 已完成第八个 Gate 5 Relay 认证与配置状态只读观察迁移、独立 Squash Merge 与主干验证；只接管 `relay_status`，原 Relay 配置管理总功能继续 `unassessed`。
 - [x] Issue `#100` 已完成上下文能力只读目录观察与完整管理分离决策并按 `COMPLETED` 关闭。
-- Issue `#101` 是第九个 Gate 5 上下文能力只读目录观察切片：只接管 `read_live_context_entries`，固定单文件 `256 KiB` 上限，只返回条目 ID、稳定种类、启用状态和分类计数；实施批准、四层 checkpoint 与二十四路径本地全门禁已完成，当前等待非 Draft PR 与 Review/CI。
-- 第十个产品切片必须等待 Issue `#101` 完成后重新建立独立 Issue、书面设计、精确范围与实现授权；不得复用当前范围扩展上下文写入、完整 TOML、网络、SQLite、Zed Remote、Token 用量、UI 或其他总功能。
+- [x] Issue `#101` / PR `#102` 已完成第九个 Gate 5 上下文能力只读目录观察切片；Final Head `40494a5881907552d917ad4ced4deb04710b5526` 以单父 Squash 提交 `4032b051f0f18be71d344eded2d6e79595233b65` 进入 `main`，合并后 CI 七 Job、Performance Baseline 四 Job全绿且 Artifact 均为 `0`。
+- [x] Issue `#103` 已完成本地会话目录 A1 一致性决策并按 `COMPLETED` 关闭；观察与删除/备份/恢复管理正式分离。
+- Issue `#104` 是第十个 Gate 5 本地会话目录只读观察切片：只接管 `list_local_sessions`，返回会话 ID、有界标题、归档状态、更新时间、分页和脱敏来源覆盖；固定只读 SQLite、多数据库排序/去重、超时取消和严格失败语义。
+- Issue `#104` 的候选范围固定为二十九路径与 `sha256:47dcb2c181daa61a8df073e7f3ada069bf8e3d9b95df0c57f7709bcb6cde211d`；当前下一合法节点为 Planning Freeze 后按 Domain → Application → Platform → Parity 执行 TDD，最终 Squash Merge 仍需绑定 Final Head 的独立授权。
 
 ### Gate 6：首个正式版本（锁定）
 
@@ -395,5 +397,5 @@ decision_status: issue-89-pr-90-review-ci-green-final-merge-not-authorized
 - Issue `#47` 出现五路径或 `sha256:dd612ef0c2e5f0f830c40f161b1ef1a85bc58cd1d85458a758c3905ade8db03e` 之外的新增、删除或重命名路径，或在最终 Head 的 Review、CI 和全部对话闭环前请求 Squash Merge。
 - Issue `#32` 出现已批准 28 路径或 `sha256:857f6a8a2070d5ddcb43eaf237448d30302d59e39e1dbb910724cfac2fc81505` 之外的新增、删除或重命名路径，或改动根 Cargo、`apps/`、`parity/`、`upstream/`、Ruleset、发布资产或 AGOS。
 - 在独立性能基线 Issue 中创建性能优化、产品迁移、`parity-exception`、运行上游/半成品或填写绝对性能预算，但没有新的独立 Issue 与项目所有者批准。
-- Issue `#101` 出现二十四路径或 `sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372` 之外的新增、删除或重命名路径；引入第二文件、依赖、写入、网络、子进程、线程、UI、原始配置披露，或在 Final Head Review/CI/Artifact 闭环与独立授权前请求 Squash Merge。
+- Issue `#104` 出现二十九路径或 `sha256:47dcb2c181daa61a8df073e7f3ada069bf8e3d9b95df0c57f7709bcb6cde211d` 之外的新增、删除或重命名路径；引入数据库写入/删除/修复/迁移/备份/恢复、任意路径、Provider/正文/Token/模型/账号/凭据披露、UI、网络、子进程、永久线程/Watcher、其他依赖家族或其他 feature，或在 Final Head Review、CI 与 Artifact 闭环和独立授权前请求 Squash Merge。
 - Fresh 验证失败、Ruleset 变化、Review 对话未闭环或出现未批准的一致性差异。

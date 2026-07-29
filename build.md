@@ -79,6 +79,212 @@ git diff --check
 - 在 Issue `#98` 中公开任意路径、返回账号/Token/Provider/URL/字段/内容/认证来源/实际路径、写文件、修改环境、联网、调用子进程、启动线程/Watcher、打开 UI、注入、使用 `unsafe`、迁移完整 Relay 文件读取/保存/切换/回填、修改 Workflow/Ruleset/Release/`upstream/` 或 AGOS。
 - 在 Issue `#101` 中接受任意路径或配置正文、返回完整 TOML/摘要/命令/参数/环境变量/Header/URL/Token/账号/实际路径、写文件、联网、调用子进程、启动线程/Watcher、打开 UI、注入、使用 `unsafe`、新增依赖、迁移上下文增加/删除/同步/提取/设置正文解析、修改 Workflow/Ruleset/Release/`upstream/` 或 AGOS。
 
+## Issue #104 本地会话目录只读观察本地轻量验证
+
+在仓库根目录、分支 `codex/issue-104-gate-5-local-session-directory-observation` 执行。Git 时间只使用系统默认本机时间；不得设置 `GIT_AUTHOR_DATE` 或 `GIT_COMMITTER_DATE`。Issue `#104` 已取得项目所有者对 A1、二十九路径和 `candidate_scope_hash` 的集中授权；完整 Workspace 与 Windows/macOS/Linux 编译继续交给标准 GitHub-hosted CI。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+function Assert-NativeSuccess {
+  param([Parameter(Mandatory)][string]$Label)
+  if ($LASTEXITCODE -ne 0) { throw "$Label 失败：$LASTEXITCODE" }
+}
+
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+cargo test --locked --offline --all-targets `
+  -p inputcodex-domain `
+  -p inputcodex-application `
+  -p inputcodex-platform `
+  -p inputcodex-parity
+Assert-NativeSuccess 'Issue #104 定向测试'
+
+cargo clippy --locked --offline --all-targets `
+  -p inputcodex-domain `
+  -p inputcodex-application `
+  -p inputcodex-platform `
+  -p inputcodex-parity -- -D warnings
+Assert-NativeSuccess 'Issue #104 定向 Clippy'
+
+cargo fmt --all -- --check
+Assert-NativeSuccess 'Issue #104 rustfmt'
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+Assert-NativeSuccess 'Issue #104 CI 合同'
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #104 仓库政策'
+
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #104 Release Audit'
+
+cargo metadata --locked --offline --no-deps --format-version 1 | Out-Null
+Assert-NativeSuccess 'Issue #104 Cargo metadata'
+
+$tree = @(cargo tree --locked --offline -p inputcodex-platform)
+Assert-NativeSuccess 'Issue #104 依赖树'
+if (-not ($tree -match '^rusqlite v0\.40\.1$')) {
+  throw 'Issue #104 必须锁定 rusqlite v0.40.1。'
+}
+if ($tree -match 'tokio|async-std|sqlx|diesel|deadpool') {
+  throw 'Issue #104 禁止引入异步 runtime、ORM 或连接池依赖。'
+}
+
+$approved = @(
+  'AGENTS.md',
+  'build.md',
+  'Cargo.lock',
+  'Cargo.toml',
+  'CONTEXT.md',
+  'crates/inputcodex-application/src/lib.rs',
+  'crates/inputcodex-application/src/local_session_directory_observation.rs',
+  'crates/inputcodex-application/tests/local_session_directory_observation.rs',
+  'crates/inputcodex-domain/src/lib.rs',
+  'crates/inputcodex-domain/src/local_session_directory_observation.rs',
+  'crates/inputcodex-domain/tests/local_session_directory_observation.rs',
+  'crates/inputcodex-parity/tests/catalog_repository.rs',
+  'crates/inputcodex-platform/Cargo.toml',
+  'crates/inputcodex-platform/src/lib.rs',
+  'crates/inputcodex-platform/src/local_session_directory_observation.rs',
+  'crates/inputcodex-platform/tests/local_session_directory_observation.rs',
+  'docs/plans/2026-07-29-issue-104-gate-5-local-session-directory-observation.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-07-29-issue-104-gate-5-local-session-directory-observation.md',
+  'docs/reports/issue-104-gate-5-local-session-directory-observation.md',
+  'docs/workflows/2026-07-29-issue-104-gate-5-local-session-directory-observation-runtime.md',
+  'err.md',
+  'parity/README.md',
+  'parity/contracts/session-data.yml',
+  'parity/features/session-data.yml',
+  'parity/features/source-index.yml',
+  'parity/fixtures/feature.session-data.local-session-directory-observation/baseline.yml',
+  'parity/fixtures/feature.session-data.local-session-directory-observation/manifest.yml',
+  'README.md'
+) | Sort-Object
+$scopePayload = ($approved -join "`n") + "`n"
+$scopeHash = [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData(
+    [Text.UTF8Encoding]::new($false).GetBytes($scopePayload)
+  )
+).ToLowerInvariant()
+if ($approved.Count -ne 29) { throw "Issue #104 路径数量漂移：$($approved.Count)" }
+if ($scopeHash -ne '47dcb2c181daa61a8df073e7f3ada069bf8e3d9b95df0c57f7709bcb6cde211d') {
+  throw "Issue #104 scope_hash 漂移：sha256:$scopeHash"
+}
+
+$baseline = 'origin/main'
+$actual = @(
+  git -c core.quotePath=false diff --name-only "$baseline...HEAD"
+  git -c core.quotePath=false diff --name-only
+  git -c core.quotePath=false ls-files --others --exclude-standard
+) | Where-Object { $_ } | Sort-Object -Unique
+$outside = @($actual | Where-Object { $_ -notin $approved })
+if ($outside.Count -ne 0) { throw "Issue #104 越界路径：$($outside -join ', ')" }
+
+$actualPayload = ($actual -join "`n") + "`n"
+$actualHash = [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData(
+    [Text.UTF8Encoding]::new($false).GetBytes($actualPayload)
+  )
+).ToLowerInvariant()
+$errChanged = $actual -contains 'err.md'
+if ($errChanged) {
+  if ($actual.Count -ne 29 -or $actualHash -ne $scopeHash) {
+    throw "Issue #104 含 err.md 时实际范围漂移：count=$($actual.Count) sha256:$actualHash"
+  }
+} else {
+  $expectedActual = @($approved | Where-Object { $_ -ne 'err.md' })
+  if ($actual.Count -ne 28 -or (Compare-Object $expectedActual $actual).Count -ne 0) {
+    throw "Issue #104 无新根因时实际路径必须精确排除 err.md：$($actual -join ', ')"
+  }
+  if ($actualHash -ne 'acee55e9539631f6eca4fb557d27999c7815d20ae15a4b4ea932db243079cb8c') {
+    throw "Issue #104 常态实际范围哈希漂移：sha256:$actualHash"
+  }
+}
+
+$protected = @(
+  git -c core.quotePath=false diff --name-only "$baseline...HEAD" -- `
+    .github apps benchmarks scripts upstream `
+    crates/inputcodex-infrastructure crates/inputcodex-presentation
+  git -c core.quotePath=false diff --name-only -- `
+    .github apps benchmarks scripts upstream `
+    crates/inputcodex-infrastructure crates/inputcodex-presentation
+) | Where-Object { $_ } | Sort-Object -Unique
+if ($protected.Count -ne 0) { throw "Issue #104 修改受保护路径：$($protected -join ', ')" }
+
+$rootCargo = Get-Content -LiteralPath Cargo.toml -Raw
+if ($rootCargo -notmatch '(?m)^rusqlite = \{ version = "=0\.40\.1", default-features = false, features = \["bundled", "hooks"\] \}$') {
+  throw 'Workspace 必须精确锁定 rusqlite 0.40.1 bundled/hooks。'
+}
+$platformCargo = Get-Content -LiteralPath crates/inputcodex-platform/Cargo.toml -Raw
+if ($platformCargo -notmatch '(?m)^rusqlite\.workspace = true$') {
+  throw 'Platform crate 必须通过 workspace 使用 rusqlite。'
+}
+
+$productionPaths = @(
+  'crates/inputcodex-domain/src/local_session_directory_observation.rs',
+  'crates/inputcodex-application/src/local_session_directory_observation.rs',
+  'crates/inputcodex-platform/src/local_session_directory_observation.rs'
+)
+$production = ($productionPaths | ForEach-Object { Get-Content -LiteralPath $_ -Raw }) -join "`n"
+foreach ($required in @(
+  'LOCAL_SESSION_DIRECTORY_INVALID_PAGINATION',
+  'LOCAL_SESSION_DIRECTORY_INVALID_SQLITE_HOME',
+  'LOCAL_SESSION_DIRECTORY_TOO_MANY_DATABASES',
+  'LOCAL_SESSION_DIRECTORY_UNSUPPORTED_SCHEMA',
+  'LOCAL_SESSION_DIRECTORY_UNAVAILABLE',
+  'LOCAL_SESSION_DIRECTORY_TIMEOUT',
+  'LOCAL_SESSION_DIRECTORY_CANCELLED',
+  'SQLITE_OPEN_READ_ONLY',
+  'query_only',
+  'progress_handler'
+)) {
+  if (-not $production.Contains($required)) { throw "Issue #104 缺少稳定合同：$required" }
+}
+foreach ($forbidden in @(
+  'Connection::open(',
+  'execute_batch(',
+  '.execute(',
+  '.transaction(',
+  'CREATE TABLE',
+  'CREATE INDEX',
+  'ALTER TABLE',
+  'DELETE FROM',
+  'INSERT INTO',
+  'UPDATE ',
+  'TcpStream',
+  'UdpSocket',
+  'Command::new',
+  'iced',
+  'unsafe {'
+)) {
+  if ($production.Contains($forbidden)) { throw "Issue #104 禁止能力命中：$forbidden" }
+}
+
+$ownerName = [Environment]::UserName
+$addedDiff = @(git -c core.quotePath=false diff --unified=0 "$baseline...HEAD" -- $productionPaths)
+Assert-NativeSuccess 'Issue #104 新增行隐私扫描准备'
+$addedLines = @($addedDiff | Where-Object { $_ -cmatch '^\+(?!\+\+)' })
+if (-not [string]::IsNullOrWhiteSpace($ownerName)) {
+  $privateLeaks = @($addedLines | Select-String -SimpleMatch -CaseSensitive $ownerName)
+  if ($privateLeaks.Count -ne 0) { throw "Issue #104 泄露本机用户标识。" }
+}
+$absolutePathLeaks = @($addedLines | Select-String -Pattern '(?i)[A-Z]:\\Users\\')
+if ($absolutePathLeaks.Count -ne 0) { throw 'Issue #104 泄露 Windows 用户绝对路径。' }
+
+$fixtureText = Get-Content -LiteralPath `
+  parity/fixtures/feature.session-data.local-session-directory-observation/baseline.yml -Raw
+if ($fixtureText -match '(?i)[A-Z]:\\Users\\|/Users/|/home/|token|api[_-]?key|bearer') {
+  throw 'Issue #104 合成 fixture 包含私人路径或凭据标记。'
+}
+
+git diff --check
+Assert-NativeSuccess 'Issue #104 Git 空白检查'
+```
+
+预期：四 crate tests/Clippy、`rustfmt`、CI 合同、仓库政策、Release Audit、Cargo metadata、依赖树、范围哈希、只读 SQLite、安全和隐私门禁均通过。完整 Workspace、三平台与 Performance Baseline 继续由 GitHub-hosted Actions 验收。
+
 ## Issue #101 上下文能力只读目录观察本地轻量验证
 
 在仓库根目录、分支 `codex/issue-101-gate-5-context-entry-observation` 执行。Git 时间只使用系统

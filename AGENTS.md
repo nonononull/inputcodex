@@ -117,5 +117,7 @@
 - Issue `#98` 禁止公开任意路径、返回账号/Token/Provider/URL/字段/内容/认证来源/实际路径、写文件、修改环境、联网、调用子进程、启动线程/Watcher、打开 UI、注入或使用 `unsafe`；`core-module:relay_config`、读取完整文件、保存、切换、回填与原 `feature.provider-network.relay-profile-management` 必须继续保持 `unassessed`。
 - Issue `#98` / PR `#99` 已完成第八个 Gate 5 Relay 认证与配置状态只读观察切片；PR `#99` 以单父 Squash 提交 `52320c2c02e19d9ffae11ccb6742a0f0fc4b71b9` 进入 `main`，Issue `#98` 已按 `COMPLETED` 关闭，合并后主干 CI Run `30449847793` 七 Job、Performance Baseline Run `30449848277` 四 Job全绿且 Artifact 均为 `0`。
 - Issue `#100` 已批准上下文能力方案 A 并按 `COMPLETED` 关闭：只读目录观察可独立迁移；完整 TOML、摘要、命令、参数、环境变量、Header、URL、Token、账号和实际路径不得进入新合同，上下文增加、删除、同步、提取和设置正文解析继续保留在未评估的总功能中。
-- Issue `#101` 是第九个 Gate 5 产品切片：只接管 `tauri-command:read_live_context_entries`，固定读取平台路径定位的 `CODEX_HOME/config.toml`，单文件上限 `256 KiB`，只返回条目 ID、稳定种类、启用状态和分类计数。
-- Issue `#101` 已获得二十四路径与 `sha256:5b96235eb1fa7832e5710f7343917a5c2512bc50a46198ed584323366dd34372` 的实施批准；Domain、Application、Platform、Parity 与本地二十四路径轻量门禁均已通过，下一合法节点仅为普通 push、非 Draft PR、Review/CI 与 Artifact 核验，最终 Squash Merge 仍需绑定 Final Head 的独立授权。
+- Issue `#101` / PR `#102` 已完成第九个 Gate 5 上下文能力只读目录观察切片；Final Head `40494a5881907552d917ad4ced4deb04710b5526` 以单父 Squash 提交 `4032b051f0f18be71d344eded2d6e79595233b65` 进入 `main`，tree 为 `017e866c3f69793515796118e6bcfd5f163fdf0b`，GitHub 签名 `valid`，Issue `#101` 已按 `COMPLETED` 关闭。合并后主干 CI Run `30468707879` 七 Job、Performance Baseline Run `30468701214` 四 Job全绿且 Artifact 均为 `0`。
+- Issue `#103` 已批准本地会话目录方案 A1 并按 `COMPLETED` 关闭：只读观察可独立迁移，允许返回会话 ID、有界标题、归档状态、更新时间、分页和脱敏来源覆盖；路径、Provider、正文、Token、模型、账号与凭据不得进入新合同。
+- Issue `#104` 是第十个 Gate 5 产品切片：只接管 `tauri-command:list_local_sessions`，使用严格只读 SQLite、多数据库排序/去重、显式部分覆盖、超时取消与最小披露；删除、备份、恢复、schema 修复和 grouped undo 继续保留在 `feature.session-data.local-session-management=unassessed`。
+- Issue `#104` 已由项目所有者集中授权在二十九路径与 `sha256:47dcb2c181daa61a8df073e7f3ada069bf8e3d9b95df0c57f7709bcb6cde211d` 内自主推进 TDD、提交、推送、PR 与 Review/CI；任何越界语义和最终 Squash Merge 仍需单独授权。
