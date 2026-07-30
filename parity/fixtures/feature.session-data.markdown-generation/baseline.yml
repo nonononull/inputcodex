@@ -1,0 +1,31 @@
+schema_version: inputcodex.synthetic.markdown-generation.v1
+request:
+  session_id: synthetic-session-109
+source:
+  database_mode: read-only
+  query_only: true
+  rollout_root: synthetic-sessions
+  source_paths_exposed: false
+messages:
+  - role: user
+    timestamp: '2025-12-31T23:30:00Z'
+    body: synthetic prompt
+  - role: assistant
+    timestamp: null
+    body: '> Image attachment omitted'
+result:
+  suggested_filename: session-Synthetic-session.md
+  message_count: 2
+  session_id_exposed: false
+  file_saved: false
+  markdown: |-
+    # Synthetic session
+
+    ### User
+    _2025-12-31T23:30:00Z_
+
+    synthetic prompt
+
+    ### Assistant
+
+    > Image attachment omitted

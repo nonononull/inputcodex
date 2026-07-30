@@ -33,6 +33,7 @@
 - Issue `#98` 已将 `feature.provider-network.relay-status-observation` 固定为 Relay 认证与配置状态只读观察切片：只接管 `tauri-command:relay_status`，固定观察 `CODEX_HOME/auth.json` 与 `config.toml`，单文件最多读取 `256 KiB`；结果只包含文档状态、凭据存在事实和 Relay 配置完整性，原 Relay 配置管理总功能继续 `unassessed`。
 - Issue `#101` 已将 `feature.provider-network.context-entry-observation` 固定为上下文能力只读目录观察切片：只接管 `tauri-command:read_live_context_entries`，有界解析固定 `CODEX_HOME/config.toml`，只返回条目 ID、`McpServer / Skill / Plugin`、启用状态和分类计数；原上下文管理总功能与五个写入/完整管理入口继续 `unassessed`。
 - Issue `#104` 已将 `feature.session-data.local-session-directory-observation` 固定为本地会话目录只读观察切片：只接管 `tauri-command:list_local_sessions`，最多观察 32 个受控 SQLite 候选，跨库排序去重后按默认 50、最大 100 分页；原删除、备份、恢复和 grouped undo 总功能继续 `unassessed`。
+- Issue `#109` 已将误命名的后端目录项重分类为 `feature.session-data.markdown-generation`：只按既有会话 ID 严格只读 SQLite 与受控 rollout，生成 UTC、LF、仅 user/assistant 文本和不可联网图片占位的内存 Markdown；`saveMarkdown` 文件保存继续属于 `feature.plugin-script.renderer-enhancements` 的 renderer 注入例外。
 - `feature.session-data.local-session-management` 纳入合法 `CODEX_SQLITE_HOME`、多数据库删除、`grouped-undo-token`、全库恢复预检、允许路径保护和撤销窗口。
 - `feature.plugin-script.dream-skin-library` 只纳入受限本地 companion data URL 与布局配置；fixture 使用合成图片数据。
 - `feature.plugin-script.dream-skin-runtime` 与 `feature.plugin-script.renderer-enhancements` 的 companion 显示仍依赖 renderer 注入，继续保持 `exception-pending`，不得进入 Rust/Iced 运行面。

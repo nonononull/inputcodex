@@ -1,0 +1,10 @@
+schema_version: inputcodex.fixture-manifest.v1
+feature_id: feature.session-data.markdown-generation
+fixtures:
+  - id: fixture.feature.session-data.markdown-generation.baseline
+    scenario: baseline
+    kind: synthetic
+    files:
+      - path: baseline.yml
+        format: yaml
+        description: '合成只读会话 Markdown 生成期望值。'
