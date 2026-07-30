@@ -134,6 +134,12 @@ Ordinal 排序、UTF-8 无 BOM、末尾单个 LF 的路径清单哈希固定为�
 - 验证七路径 planning scope 并建立命名 Git checkpoint；
 - 运行 AGOS default-entry 与 Git snapshot `-ReportOnly`，异常按项目规则记录后绕过。
 
+状态：`completed`。Planning checkpoint 为
+`c266cab2570ce477bc6079b951cd9e79f5abe4a0`；干净状态 Git snapshot 为
+`GIT_SNAPSHOT_READY`。AGOS default-entry 因 task `unregistered`、缺 owner-scope manifest 与其
+自身 mutation admission 不兼容而返回 `blocked/needs-input`，已按 inputcodex 规则绕过且未修改
+外部仓库。
+
 ### Batch 1：Security RED -> GREEN
 
 - 已观察 fresh `cargo audit` 因两条目标公告以退出码 `1` 失败；
@@ -141,11 +147,19 @@ Ordinal 排序、UTF-8 无 BOM、末尾单个 LF 的路径清单哈希固定为�
 - 检查锁文件只修改两个 package block；
 - 再运行 fresh `cargo audit`，要求漏洞总数为 `0`。
 
+状态：`completed`。Security checkpoint 为
+`7c890e3137a503cac334e2802bd2441feae41052`；锁文件精确 `4/4`，fresh audit 扫描 `350`
+个依赖后退出 `0`、漏洞 `0`，保留两条单独的 unmaintained warning。
+
 ### Batch 2：本地轻量验证与报告
 
 - 运行 `build.md` 的 Issue #105 完整命令链；
 - 记录许可证、MSRV、warning 分离、范围与安全结果；
 - 创建报告并建立 local-verified checkpoint。
+
+状态：`completed`。本机 `2026-07-30 17:49:18 +08:00` 开始的完整九路径门禁输出
+`ISSUE_105_LOCAL_GREEN`：audit 漏洞 `0`、warning `2`、CI contract `35/35`、Repository
+Policy `0` 违规、Release Audit `current`、实际 scope/hash 与批准值精确一致。
 
 ### Batch 3：远端交付
 
@@ -153,6 +167,8 @@ Ordinal 排序、UTF-8 无 BOM、末尾单个 LF 的路径清单哈希固定为�
 - 处理 Review，对每条反馈记录根因、处理和 fresh 证据；
 - 核验 CI、Performance Baseline、Artifact 与 Final Head；
 - 停在项目所有者绑定 Final Head 的独立 Squash Merge 授权门。
+
+状态：`pending`。下一节点是建立 local-verified checkpoint 后普通 push 与非 Draft PR。
 
 ## 验收与停止门
 

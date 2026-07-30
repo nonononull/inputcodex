@@ -12,7 +12,7 @@
 - `candidate_scope_hash`: `sha256:0c90d018e06aa640d33a4c65c75aea45c89eb0e365b91fadee803b0426c8c58f`
 - `mutation_intent`: `config`
 - `executor_enforcement`: `exact-path-and-exact-package-diff-hard-stop`
-- `current_node`: `planning-freeze`
+- `current_node`: `remote-delivery`
 
 ## Node Graph
 
@@ -78,7 +78,10 @@ unmaintained warning。
 4. 运行 Git snapshot checkpoint，建立 `issue-105-planning-freeze` 提交。
 5. 在干净 checkpoint 上运行 AGOS default-entry `-ReportOnly`。
 
-状态：`in-progress`。
+状态：`completed`。七路径 planning checkpoint 为
+`c266cab2570ce477bc6079b951cd9e79f5abe4a0`；Git snapshot 为 `GIT_SNAPSHOT_READY`。
+AGOS default-entry 返回 `needs-input/unregistered/missing-owner-scope-manifest`，按项目规则绕过，
+没有修改 AGOS。
 
 ### Node 4：Lockfile GREEN
 
@@ -88,7 +91,9 @@ unmaintained warning。
 4. 检查当前图包含 `quick-xml 0.41.0` 与 `wayland-scanner 0.31.11`，不含旧版本。
 5. 运行 fresh `cargo audit --json`，要求 `vulnerabilities.count=0`。
 
-状态：`pending`。
+状态：`completed`。Security checkpoint 为
+`7c890e3137a503cac334e2802bd2441feae41052`；锁文件差异精确为 `4/4`，fresh audit 扫描
+`350` 个依赖后得到漏洞 `0`、两条单列 unmaintained warning。
 
 ### Node 5：Local Closeout
 
@@ -97,7 +102,9 @@ unmaintained warning。
 3. 验证九路径/hash、许可证/MSRV、仓库政策、Release Audit 与 diff check。
 4. 运行 Git snapshot checkpoint并建立 `issue-105-local-verified` 提交。
 
-状态：`pending`。
+状态：`completed`。`build.md` 完整命令链输出 `ISSUE_105_LOCAL_GREEN`；fresh audit 漏洞 `0`、
+CI contract `35/35`、Repository Policy `0` 违规、Release Audit `current`、九路径/hash 精确。
+报告已落盘，local-verified checkpoint 正在建立。
 
 ### Node 6：Remote Delivery
 

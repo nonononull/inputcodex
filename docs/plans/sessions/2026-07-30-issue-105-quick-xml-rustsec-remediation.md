@@ -17,9 +17,11 @@
 - `delivery_contract`: `agos.issue-pr-merge.v1`
 - `planning_scope_hash`: `sha256:25337a6cb90386439878af2bd8be7d00af0276e102663ab6add7e3d3b4621a09`
 - `candidate_scope_hash`: `sha256:0c90d018e06aa640d33a4c65c75aea45c89eb0e365b91fadee803b0426c8c58f`
-- `execution_state`: `PLANNING_FREEZE`
-- `planning_checkpoint_ref`: `pending`
+- `execution_state`: `LOCAL_VERIFIED_PR_PENDING`
+- `planning_checkpoint_ref`: `c266cab2570ce477bc6079b951cd9e79f5abe4a0`
+- `security_checkpoint_ref`: `7c890e3137a503cac334e2802bd2441feae41052`
 - `local_verified_checkpoint_ref`: `pending`
+- `agos_report_only`: `blocked-unregistered-missing-owner-scope-manifest-bypassed`
 - `review_strategy`: `single-main-thread-fresh-local-verification-and-github-review`
 - `ci_expectation`: `standard-hosted-ci-and-performance-no-success-artifacts`
 - `merge_policy`: `squash-only-final-head-owner-authorization`
@@ -132,17 +134,22 @@ err.md
 
 ### Batch 1：Planning Freeze
 
-状态：`in-progress`。创建项目原生三件套、更新长期控制面和 err，验证七路径后提交；运行 AGOS
-default-entry 与 Git snapshot report-only，外部异常按项目规则记录并绕过。
+状态：`completed`。七路径 planning hash、CI contract、Repository Policy、Release Audit、metadata、
+Markdown 链接和 diff check 通过，checkpoint 为 `c266cab2570ce477bc6079b951cd9e79f5abe4a0`；
+干净 Git snapshot 为 `GIT_SNAPSHOT_READY`。AGOS default-entry 返回
+`needs-input/unregistered/missing-owner-scope-manifest`，按项目规则绕过且未修改 AGOS。
 
 ### Batch 2：Security TDD
 
-状态：`pending`。执行唯一批准的精确 cargo update，验证只改变两个 package block；fresh audit
-必须返回漏洞 `0`，两条 unmaintained warning 单独记录。
+状态：`completed`。checkpoint 为 `7c890e3137a503cac334e2802bd2441feae41052`；
+`Cargo.lock` 只发生两个 package block 的 `4/4` 版本/checksum 变化。fresh audit 扫描 `350`
+个依赖后退出 `0`、漏洞 `0`；`paste` 与 `ttf-parser` 两条 unmaintained warning 单独保留。
 
 ### Batch 3：Local Closeout
 
-状态：`pending`。执行 `build.md` 完整本地轻量门禁，创建报告与 local-verified checkpoint。
+状态：`completed`。本机完整门禁输出 `ISSUE_105_LOCAL_GREEN`；audit 漏洞 `0`、warning `2`、
+CI contract `35/35`、Repository Policy `0` 违规、Release Audit `current`，九路径与 scope hash
+精确匹配。报告已创建，local-verified checkpoint 正在建立。
 
 ### Batch 4：Review / CI
 

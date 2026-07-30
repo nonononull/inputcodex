@@ -947,6 +947,15 @@
 - 验证：代理重试成功加载 `1173` 条 advisory、扫描 `350` 个锁定依赖，并真实报告 `RUSTSEC-2026-0194/0195` 两条 `quick-xml 0.39.4` high 漏洞以及两条单独的 unmaintained warning；此时退出码 `1` 才是本任务的预期 security RED。
 - 关联：Issue `#105`、`Cargo.lock`、`build.md`、RustSec advisory database。
 
+### 2026-07-30：PowerShell 点号访问含连字符 JSON 属性会在命令执行前解析失败
+
+- 环境：Issue `#105` 的 GREEN 证据命令把 `cargo audit --json` 转为 PowerShell 对象，并准备输出 lockfile 的 `dependency-count`。
+- 现象：写成 `$audit.lockfile.dependency-count` 后，PowerShell 在解析整段命令时报告 `Unexpected token '-count'` 并退出；由于错误发生在执行前，`cargo audit` 实际没有运行，该退出码不能算作安全扫描失败。
+- 根因：PowerShell 把点号后的 `dependency-count` 解析为属性访问后再执行减法，而不是一个含连字符的属性名。
+- 处理：改用 `$audit.lockfile.'dependency-count'` 的引号属性访问后，从头重跑完整 audit；不复用失败调用中的任何状态。
+- 验证：修正后 fresh audit 真实执行并返回 `CARGO_AUDIT_EXIT=0`、`DEPENDENCIES=350`、`VULNERABILITIES=0`，两条 unmaintained warning 可正常枚举。
+- 关联：Issue `#105`、`build.md`、cargo-audit JSON 输出。
+
 ## 记录模板
 
 ```text
