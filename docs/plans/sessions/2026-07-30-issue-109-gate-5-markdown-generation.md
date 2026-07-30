@@ -225,6 +225,11 @@ post_pr_review_disposition: accepted-3-residual-boundary-1-rejected-with-evidenc
 post_pr_correction_tdd: targeted-green-platform-23
 post_pr_correction_clippy: passed-platform-all-targets
 post_pr_correction_full_gate: passed-29-paths-four-crate-tests-clippy
+final_incremental_review: completed-0-critical-0-important-2-minor
+final_review_disposition: accepted-2
+final_review_correction_tdd: targeted-green-platform-25
+final_review_correction_clippy: passed-platform-all-targets
+final_review_correction_full_gate: passed-29-paths-four-crate-tests-clippy
 remote_delivery: github-dynamic-see-pr-110
 ```
 
@@ -242,6 +247,10 @@ remote_delivery: github-dynamic-see-pr-110
 - 闰秒：继续接受 RFC 3339 允许的六月/十二月月末位置，不引入会拒绝未来闰秒的静态历史表。
 - 远端状态：PR `#110` 的 Head、Checks、Artifact、Review 与最终授权均为 GitHub 动态事实，仓库
   只记录 `github-dynamic-see-pr-110`。
+- 最终增量 reviewer 返回 `0 Critical / 0 Important / 2 Minor`；两项均采纳。SQL 投影现在先以
+  `typeof` 区分 NULL、TEXT 与非 TEXT，只对 TEXT 执行 `octet_length`，超限 TEXT 映射
+  `RESOURCE_LIMIT`、非 TEXT 映射 `INVALID_CONTENT`；threads 与 automation_runs 的生产 SQL
+  构造函数均由精确五列查询测试直接覆盖。
 
 ## Agent Lifecycle
 
@@ -254,7 +263,11 @@ remote_delivery: github-dynamic-see-pr-110
 - `reviewer_write_ownership`: `none-readonly`
 - `reviewer_result`: `0-critical / 5-important / 3-minor`
 - `parent_disposition`: `accepted-6 / rejected-with-evidence-2`
-- `closed_agent_refs`: `019fb30f-c92f-7f32-9176-2440df85d622`
+- `final_reviewer_ref`: `019fb39e-2221-7913-adb2-16a4d0dac55b`
+- `final_reviewer_scope`: `prior-corrective-source..next-final-review-source`
+- `final_reviewer_result`: `0-critical / 0-important / 2-minor`
+- `final_reviewer_disposition`: `accepted-2`
+- `closed_agent_refs`: `019fb30f-c92f-7f32-9176-2440df85d622, 019fb39e-2221-7913-adb2-16a4d0dac55b`
 - `completion_status`: `reviewer-completed-and-closed`
 
 ## Stop Conditions

@@ -10,7 +10,7 @@
 - `baseline_ref`: `88eaf6301f1897cadaf4da830db998078fb06e97`
 - `branch_ref`: `codex/issue-109-gate-5-markdown-generation`
 - `candidate_scope_hash`: `sha256:b113da5d41514f50e36cef7d4eb9ade89e2562cbcfe8d392a5173d38fd0ebaac`
-- `runtime_state`: `pr-110-corrective-delivery-dynamic`
+- `runtime_state`: `pr-110-final-review-delivery-dynamic`
 - `paseo_workspace_ref`: `wks_495c490aa88811f1`
 - `agos_status`: `blocked-needs-input-unregistered-bypassed`
 
@@ -30,6 +30,9 @@ Issue #108 owner decision A
   -> PR #110 incremental review correction
   -> corrective full local gate
   -> corrective source checkpoint
+  -> final readonly incremental review
+  -> final-review correction full local gate
+  -> final-review source checkpoint
   -> NOW: github-dynamic-see-pr-110 Review/CI/Artifact
   -> Final Head independent Squash authorization
 ```
@@ -145,6 +148,19 @@ CI 合同 `35/35`、仓库政策、Release Audit、Cargo metadata、静态安全
 门禁再次达到四 crate 全绿、CI 合同 `35/35`、仓库政策零违规、Release Audit current 及
 `29 / sha256:b113da...`。本提交作为 corrective source checkpoint；普通 push 及后续远端状态
 只见 `github-dynamic-see-pr-110`。
+
+### Node 7.7：最终只读评审修正
+
+1. 对 corrective source 执行只读 reviewer，返回 `0 Critical / 0 Important / 2 Minor`。
+2. 接受超限 BLOB 错误分类回归：新增双字段 RED，SQL 以 `typeof` 三态先区分 NULL、TEXT 与
+   非 TEXT，仅在 TEXT 分支执行 `octet_length`。
+3. 接受 SQL helper 测试盲区：新增 threads/automation_runs 两个生产查询构造函数的精确 RED，
+   生产查询改为只调用已测试构造函数。
+4. VERIFY：Platform Markdown 专项、Platform all-targets Clippy、rustfmt、完整 Issue #109 门禁。
+
+状态：`completed`。两项 RED/GREEN 已完成，Platform `25/25`、Clippy 与 rustfmt 通过；完整本地
+门禁再次达到四 crate 全绿、CI 合同 `35/35`、仓库政策零违规、Release Audit current 及
+`29 / sha256:b113da...`。本提交作为 final-review source checkpoint，远端状态只见 PR `#110`。
 
 ### Node 8：Remote Delivery
 

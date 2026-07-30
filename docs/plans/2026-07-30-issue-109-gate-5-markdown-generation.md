@@ -166,8 +166,14 @@ impl MarkdownGenerationPort for SystemMarkdownGeneration { /* 系统入口 */ }
   rusqlite 连接 handle 需要 `unsafe`；本切片约束内不引入 `unsafe`、新依赖或 Cargo 改动。
 - [x] 新增两项 RED/GREEN，Platform 专项达到 `23/23`，Platform all-targets Clippy 通过。
 - [x] 重跑完整本地门禁，确认四 crate 全绿及 `29 / sha256:b113da...`。
-- [x] 本提交形成 corrective source checkpoint；普通 push 及其后 Head、CI、Review、Artifact 状态
+- [x] 上一 corrective source checkpoint 的普通 push 及其后 Head、CI、Review、Artifact 状态
   统一由 `github-dynamic-see-pr-110` 承接，不在仓库固化执行时点。
+- [x] 对该候选 Head 执行最终只读增量评审，取得 `0 Critical / 0 Important / 2 Minor`；两项均成立：
+  超限 BLOB 分类回归，以及 SQL helper 测试未锁住两张表的生产调用点。
+- [x] 分别以 RED/GREEN 恢复非 TEXT `INVALID_CONTENT` 分类，并让 threads/automation_runs 生产 SQL
+  构造接受精确测试；Platform 专项达到 `25/25`，Platform all-targets Clippy 通过。
+- [x] 重跑完整本地门禁；本提交形成 final-review source checkpoint，后续远端状态继续只见
+  PR `#110`。
 
 ## 成功标准
 

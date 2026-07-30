@@ -503,6 +503,18 @@ fn query_threads(
     max_text_bytes: usize,
     interruption: &InterruptionControl,
 ) -> Result<Option<SessionRecord>, ApplicationError> {
+    let sql = threads_query_sql(columns);
+    query_record(
+        connection,
+        &sql,
+        session_id,
+        priority,
+        max_text_bytes,
+        interruption,
+    )
+}
+
+pub(super) fn threads_query_sql(columns: &HashSet<String>) -> String {
     let title = optional_expression(columns, "title", "title", "NULL");
     let title_projection = bounded_text_projection(title, "display_title");
     let rollout_path = optional_expression(columns, "rollout_path", "rollout_path", "NULL");
@@ -522,14 +534,7 @@ fn query_threads(
         "SELECT {title_projection}, {rollout_path_projection}, \
          {updated_at} AS updated_at_ms FROM threads WHERE id = ?1 LIMIT 1"
     );
-    query_record(
-        connection,
-        &sql,
-        session_id,
-        priority,
-        max_text_bytes,
-        interruption,
-    )
+    sql
 }
 
 fn query_automation_runs(
@@ -540,6 +545,18 @@ fn query_automation_runs(
     max_text_bytes: usize,
     interruption: &InterruptionControl,
 ) -> Result<Option<SessionRecord>, ApplicationError> {
+    let sql = automation_runs_query_sql(columns);
+    query_record(
+        connection,
+        &sql,
+        session_id,
+        priority,
+        max_text_bytes,
+        interruption,
+    )
+}
+
+pub(super) fn automation_runs_query_sql(columns: &HashSet<String>) -> String {
     let title = if columns.contains("thread_title") {
         "thread_title"
     } else if columns.contains("title") {
@@ -563,14 +580,7 @@ fn query_automation_runs(
         "SELECT {title_projection}, {rollout_path_projection}, \
          {updated_at} AS updated_at_ms FROM automation_runs WHERE thread_id = ?1 LIMIT 1"
     );
-    query_record(
-        connection,
-        &sql,
-        session_id,
-        priority,
-        max_text_bytes,
-        interruption,
-    )
+    sql
 }
 
 enum QueriedSessionRecord {
@@ -596,10 +606,10 @@ fn query_record(
     let max_text_bytes_parameter = i64::try_from(max_text_bytes).unwrap_or(i64::MAX);
     let result = connection
         .query_row(sql, params![session_id, max_text_bytes_parameter], |row| {
-            let title_oversized = row.get::<_, i64>(1)? != 0;
-            let rollout_path_oversized = row.get::<_, i64>(3)? != 0;
-            if title_oversized || rollout_path_oversized {
-                return Ok(QueriedSessionRecord::ResourceLimit);
+            match row.get::<_, i64>(1)? {
+                0 => {}
+                1 => return Ok(QueriedSessionRecord::ResourceLimit),
+                _ => return Ok(QueriedSessionRecord::InvalidContent),
             }
             let raw_title = match read_bounded_optional_text(row.get_ref(0)?, max_text_bytes) {
                 BoundedOptionalText::Value(value) => value,
@@ -610,6 +620,11 @@ fn query_record(
                     return Ok(QueriedSessionRecord::InvalidContent);
                 }
             };
+            match row.get::<_, i64>(3)? {
+                0 => {}
+                1 => return Ok(QueriedSessionRecord::ResourceLimit),
+                _ => return Ok(QueriedSessionRecord::InvalidContent),
+            }
             let raw_rollout_path = match read_bounded_optional_text(row.get_ref(2)?, max_text_bytes)
             {
                 BoundedOptionalText::Value(value) => value,
@@ -643,8 +658,11 @@ fn query_record(
 
 pub(super) fn bounded_text_projection(expression: &str, alias: &str) -> String {
     format!(
-        "CASE WHEN octet_length({expression}) > ?2 THEN NULL ELSE {expression} END AS {alias}, \
-         CASE WHEN octet_length({expression}) > ?2 THEN 1 ELSE 0 END AS {alias}_oversized"
+        "CASE typeof({expression}) WHEN 'null' THEN NULL WHEN 'text' THEN \
+         CASE WHEN octet_length({expression}) > ?2 THEN NULL ELSE {expression} END \
+         ELSE NULL END AS {alias}, CASE typeof({expression}) WHEN 'null' THEN 0 \
+         WHEN 'text' THEN CASE WHEN octet_length({expression}) > ?2 THEN 1 ELSE 0 END \
+         ELSE 2 END AS {alias}_status"
     )
 }
 

@@ -1,7 +1,7 @@
 #![cfg(any(target_os = "windows", target_os = "macos"))]
 
 use std::{
-    collections::HashMap,
+    collections::{HashMap, HashSet},
     fs, io,
     mem::size_of,
     path::{Path, PathBuf},
@@ -337,16 +337,109 @@ fn sqlite_标题和_rollout_path_在分配前受文本字节上限约束() {
 }
 
 #[test]
+fn sqlite_超限非文本字段仍归类为损坏内容() {
+    for (label, blob_in_title) in [("title", true), ("rollout-path", false)] {
+        let temp = TestDirectory::new(&format!("oversized-blob-{label}"));
+        let session_id = format!("private-session-oversized-blob-{label}");
+        let rollout = temp.path().join("sessions/valid.jsonl");
+        write_rollout(
+            &rollout,
+            &[
+                r#"{"type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"must not return"}]}}"#,
+            ],
+        );
+        let db = database(&temp.path().join("sqlite/current.db"));
+        db.execute_batch(
+            "CREATE TABLE threads (
+                id TEXT PRIMARY KEY,
+                title TEXT,
+                rollout_path TEXT,
+                updated_at_ms INTEGER
+            );",
+        )
+        .expect("创建非文本字段测试 schema 应成功");
+        let oversized_blob = vec![0_u8; subject::MAX_ROLLOUT_METADATA_BYTES + 1];
+        let rollout_text = rollout.to_string_lossy().into_owned();
+        if blob_in_title {
+            db.execute(
+                "INSERT INTO threads VALUES (?1, ?2, ?3, 1)",
+                (
+                    session_id.as_str(),
+                    oversized_blob.as_slice(),
+                    rollout_text.as_str(),
+                ),
+            )
+            .expect("插入超限 BLOB 标题应成功");
+        } else {
+            db.execute(
+                "INSERT INTO threads VALUES (?1, 'Bounded', ?2, 1)",
+                (session_id.as_str(), oversized_blob.as_slice()),
+            )
+            .expect("插入超限 BLOB rollout_path 应成功");
+        }
+        drop(db);
+
+        let error = generate(temp.path(), temp.path(), &session_id)
+            .expect_err("超限非文本字段必须保持损坏内容分类");
+        assert_error(
+            error,
+            ErrorKind::Unavailable,
+            "MARKDOWN_GENERATION_INVALID_CONTENT",
+        );
+    }
+}
+
+#[test]
 fn sqlite_有界投影在返回文本前检查字节长度() {
     assert_eq!(
         subject::bounded_text_projection("title", "display_title"),
-        "CASE WHEN octet_length(title) > ?2 THEN NULL ELSE title END AS display_title, \
-         CASE WHEN octet_length(title) > ?2 THEN 1 ELSE 0 END AS display_title_oversized"
+        "CASE typeof(title) WHEN 'null' THEN NULL WHEN 'text' THEN \
+         CASE WHEN octet_length(title) > ?2 THEN NULL ELSE title END \
+         ELSE NULL END AS display_title, CASE typeof(title) WHEN 'null' THEN 0 \
+         WHEN 'text' THEN CASE WHEN octet_length(title) > ?2 THEN 1 ELSE 0 END \
+         ELSE 2 END AS display_title_status"
     );
     assert_eq!(
         subject::bounded_text_projection("NULL", "rollout_path"),
-        "CASE WHEN octet_length(NULL) > ?2 THEN NULL ELSE NULL END AS rollout_path, \
-         CASE WHEN octet_length(NULL) > ?2 THEN 1 ELSE 0 END AS rollout_path_oversized"
+        "CASE typeof(NULL) WHEN 'null' THEN NULL WHEN 'text' THEN \
+         CASE WHEN octet_length(NULL) > ?2 THEN NULL ELSE NULL END \
+         ELSE NULL END AS rollout_path, CASE typeof(NULL) WHEN 'null' THEN 0 \
+         WHEN 'text' THEN CASE WHEN octet_length(NULL) > ?2 THEN 1 ELSE 0 END \
+         ELSE 2 END AS rollout_path_status"
+    );
+}
+
+#[test]
+fn sqlite_两张生产查询都使用有界五列投影() {
+    let threads_columns = HashSet::from([
+        "title".to_owned(),
+        "rollout_path".to_owned(),
+        "updated_at_ms".to_owned(),
+    ]);
+    let threads_title = subject::bounded_text_projection("title", "display_title");
+    let threads_rollout = subject::bounded_text_projection("rollout_path", "rollout_path");
+    assert_eq!(
+        subject::threads_query_sql(&threads_columns),
+        format!(
+            "SELECT {threads_title}, {threads_rollout}, updated_at_ms AS updated_at_ms \
+             FROM threads WHERE id = ?1 LIMIT 1"
+        )
+    );
+
+    let automation_columns = HashSet::from([
+        "thread_title".to_owned(),
+        "rollout_path".to_owned(),
+        "updated_at".to_owned(),
+        "created_at".to_owned(),
+    ]);
+    let automation_title = subject::bounded_text_projection("thread_title", "display_title");
+    let automation_rollout = subject::bounded_text_projection("rollout_path", "rollout_path");
+    assert_eq!(
+        subject::automation_runs_query_sql(&automation_columns),
+        format!(
+            "SELECT {automation_title}, {automation_rollout}, COALESCE(updated_at, created_at) \
+             AS updated_at_ms FROM automation_runs WHERE thread_id = ?1 LIMIT 1"
+        )
     );
 }
 

@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-- `state`: `PR_110_CORRECTIVE_DELIVERY_DYNAMIC`
+- `state`: `PR_110_FINAL_REVIEW_DELIVERY_DYNAMIC`
 - `tracking_issue_ref`: `https://github.com/nonononull/inputcodex/issues/109`
 - `approved_decision_ref`: `https://github.com/nonononull/inputcodex/issues/108#issuecomment-5130112866`
 - `implementation_scope_approval_ref`: `https://github.com/nonononull/inputcodex/issues/109#issuecomment-5130373022`
@@ -14,7 +14,8 @@
 - `platform_checkpoint_ref`: `b4a66b5`
 - `parity_checkpoint_ref`: `338359f`
 - `local_verified_checkpoint_ref`: `623e35abfbf94ef667adb368b7995c0f496639d0`
-- `review_correction_checkpoint_ref`: `this-corrective-source-commit`
+- `review_correction_checkpoint_ref`: `prior-corrective-source-commit`
+- `final_review_checkpoint_ref`: `this-final-review-source-commit`
 - `pull_request_ref`: `https://github.com/nonononull/inputcodex/pull/110`
 - `dynamic_delivery_evidence`: `github-dynamic-see-pr-110`
 - `remote_delivery_started`: `true`
@@ -52,9 +53,10 @@
 - rollout 深度 `4`、枚举项 `8192`、候选 `4096`、metadata 前缀 `8 KiB`、发现累计
   `32 MiB`、单文件 `16 MiB`、非空记录 `100000`、消息 `20000`、Markdown `16 MiB`。
 - 整体 deadline 为 `2 s`；取消与超时均使用稳定脱敏错误，JSONL 全程经 `BufReader` 流式解析。
-- SQLite title/rollout_path 复用 `8 KiB` metadata 上限；SQL 先用 `octet_length` 与惰性 `CASE`
-  在结果文本物化前分类超限，借用 `ValueRef` 再做类型与字节二次检查；SQLite 与 rollout 目录项
-  均在继续收集前执行剩余条目上限。
+- SQLite title/rollout_path 复用 `8 KiB` metadata 上限；SQL 先用 `typeof` 区分 NULL、TEXT 与
+  非 TEXT，只在 TEXT 惰性分支用 `octet_length` 分类超限，分别稳定映射合法、资源上限和损坏
+  内容；借用 `ValueRef` 再做字节与 UTF-8 二次检查。SQLite 与 rollout 目录项均在继续收集前
+  执行剩余条目上限。
 - rollout 使用平台 no-follow 打开、打开前后组件复验和文件身份/稳定元数据比较；发现到多个
   同会话候选时明确失败，不按词法首项输出旧副本；发现式匹配从 metadata 验证到全文解析沿用
   同一个已打开 `File`，不再按路径重开。
@@ -74,6 +76,9 @@
 - PR 后增量评审返回 `0 Critical / 3 Important / 2 Minor`；接受 SQL C 层物化、发现式重开竞态
   和动态证据归位，固定两项新 RED/GREEN 后 Platform `23 passed`。Windows/SQLite ABA 作为约束
   下的显式残余边界保留；静态闰秒历史表建议以 RFC 3339 语义驳回。
+- 最终只读增量评审返回 `0 Critical / 0 Important / 2 Minor`；两项均采纳。双字段超限 BLOB RED
+  恢复非 TEXT `INVALID_CONTENT` 分类，threads/automation_runs 生产查询构造 RED 锁定两条实际
+  SQL 调用路径；修正后 Platform `25 passed`。
 
 ## 安全审查
 
@@ -116,6 +121,11 @@ post_pr_review_disposition: accepted-3-residual-boundary-1-rejected-with-evidenc
 post_pr_correction_tdd: targeted-green-platform-23
 post_pr_correction_clippy: passed-platform-all-targets
 post_pr_correction_full_gate: passed-29-paths-four-crate-tests-clippy
+final_incremental_review: completed-0-critical-0-important-2-minor
+final_review_disposition: accepted-2
+final_review_correction_tdd: targeted-green-platform-25
+final_review_correction_clippy: passed-platform-all-targets
+final_review_correction_full_gate: passed-29-paths-four-crate-tests-clippy
 parity_tdd: passed-red-green
 four_crate_tests_all_targets: passed
 four_crate_clippy_all_targets: passed
@@ -141,7 +151,7 @@ hosted_ci: github-dynamic-see-pr-110
 
 ## 下一门
 
-1. 普通 push 本 corrective source checkpoint 到现有非 Draft PR `#110`。
+1. 普通 push 本 final-review source checkpoint 到现有非 Draft PR `#110`。
 2. 核验新 Head 的 Review/CI、Performance Baseline、
    Review threads 与 Artifact；动态证据只见 `github-dynamic-see-pr-110`。
 3. 对新 Head 完成一次只读增量复评。
