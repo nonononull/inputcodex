@@ -6,6 +6,7 @@ mod application_overview;
 mod context_entry_observation;
 mod diagnostic_log_observation;
 mod local_session_directory_observation;
+mod markdown_generation;
 mod platform_paths;
 mod relay_environment_observation;
 mod relay_status_observation;
@@ -25,6 +26,10 @@ pub use diagnostic_log_observation::{
 pub use local_session_directory_observation::{
     LocalSessionDirectoryCancellation, LocalSessionDirectoryObservationPort,
     LocalSessionDirectoryRequest, ObserveLocalSessionDirectory,
+};
+pub use markdown_generation::{
+    GenerateSessionMarkdown, MarkdownGenerationCancellation, MarkdownGenerationPort,
+    MarkdownGenerationRequest,
 };
 pub use platform_paths::{PlatformPathsPort, PlatformPathsRequest, ResolvePlatformPaths};
 pub use relay_environment_observation::{
