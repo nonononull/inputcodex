@@ -153,15 +153,15 @@
 - [x] 运行定向 `catalog_repository` 并记录预期 RED：缺少独立 observation feature，退出码 `101`。
 - [x] 写最小 YAML、fixture 和说明更新；只重映射 `tauri-command:list_local_sessions`，原管理总功能继续 `unassessed`。
 - [x] 运行 Parity 全目标测试 GREEN；仓库目录测试 `22 passed`，总计 `43` 个 feature、`43` 份合同和 `12` 个 fixture manifest。
-- [ ] 建立 parity Git checkpoint。
+- [x] 建立 parity Git checkpoint：`8896eb5174a7e37539f35c6ac5d1ef09f93ae9e8`。
 
 ### Batch 5：文档与本地收口
 
-- [ ] 更新 README 稳定能力说明与任务报告。
-- [ ] 仅在出现新的可复用根因时更新 `err.md`；否则实际范围排除该路径。
-- [ ] 运行 `build.md` 的 Issue #104 完整本地轻量验证。
-- [ ] 执行安全清单、依赖许可证/锁文件、禁止内容和范围哈希检查。
-- [ ] 运行知识图谱刷新；CodeGraph 无有效索引时不得初始化，只记录跳过原因。
+- [x] 更新 README 稳定能力说明与任务报告。
+- [x] `err.md` 已记录 `cargo tree` 前缀与 SQLite WAL reader SHM 协调区两个新可复用根因，最终范围包含该路径。
+- [x] 运行 `build.md` 的 Issue #104 完整本地轻量验证，四 crate tests/Clippy、格式、CI 合同、仓库政策、Release Audit、Cargo metadata 和 diff check 全绿。
+- [x] 执行安全清单、依赖许可证/锁文件、禁止内容和范围哈希检查；新增依赖均为 MIT 或 MIT/Apache-2.0，实际二十九路径哈希精确通过。
+- [x] 运行知识图谱刷新入口；CodeGraph 无现有索引，按合同返回 `not-initialized` 且未初始化，GBrain/Understand 不适用于本项目工作树并跳过。
 - [ ] 建立 local-verified Git checkpoint。
 
 ### Batch 6：远端交付

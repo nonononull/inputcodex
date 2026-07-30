@@ -16,7 +16,7 @@
 - `candidate_scope_hash`: `sha256:47dcb2c181daa61a8df073e7f3ada069bf8e3d9b95df0c57f7709bcb6cde211d`
 - `executor`: `codex-desktop-main-thread`
 - `subagents`: `not-authorized`
-- `current_node`: `parity-checkpoint`
+- `current_node`: `local-verified-checkpoint`
 
 ## Current Gate
 
@@ -104,7 +104,7 @@
 4. 运行 parity tests。
 5. 建立 `issue-104-parity` checkpoint。
 
-状态：`ready-for-checkpoint`。RED 因独立 observation feature 缺失而按预期失败，退出码 `101`；GREEN 后新 feature/contract/fixture、source remap 和 Parity 说明就绪，原管理总功能继续 `unassessed`。Parity 全目标测试中仓库目录 `22 passed`，总计 `43` 个 feature、`43` 份合同和 `12` 个 fixture manifest。
+状态：`completed`。checkpoint `8896eb5174a7e37539f35c6ac5d1ef09f93ae9e8`；RED 因独立 observation feature 缺失而按预期失败，退出码 `101`；GREEN 后新 feature/contract/fixture、source remap 和 Parity 说明就绪，原管理总功能继续 `unassessed`。Parity 全目标测试中仓库目录 `22 passed`，总计 `43` 个 feature、`43` 份合同和 `12` 个 fixture manifest；提交后 AGOS `RequireClean` 返回 `GIT_SNAPSHOT_READY`。
 
 ### Node 7：Local Closeout
 
@@ -115,7 +115,7 @@
 5. 运行知识图谱刷新；无有效 CodeGraph 索引时只记录跳过，不初始化。
 6. 建立 `issue-104-local-verified` checkpoint。
 
-状态：`pending`。
+状态：`ready-for-checkpoint`。四 crate 全目标 tests/Clippy、rustfmt、CI 合同 `35/35`、仓库政策、Release Audit、Cargo metadata、依赖/许可证、安全、隐私、二十九路径 hash 与 diff check 全绿。CodeGraph 无索引并按合同返回 `not-initialized`，未初始化；AGOS rollout dry-run 因 source task 未登记而按项目规则绕过，没有修改 AGOS。RustSec 基线 `quick-xml 0.39.4` 公告已隔离登记 Issue `#105`，不进入本任务范围。
 
 ### Node 8：Remote Delivery
 

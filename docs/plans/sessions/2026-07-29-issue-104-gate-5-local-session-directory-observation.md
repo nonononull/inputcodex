@@ -17,12 +17,12 @@
 - `candidate_scope_hash`: `sha256:47dcb2c181daa61a8df073e7f3ada069bf8e3d9b95df0c57f7709bcb6cde211d`
 - `normal_scope_without_err`: `sha256:acee55e9539631f6eca4fb557d27999c7815d20ae15a4b4ea932db243079cb8c`
 - `planning_validation`: `PASSED`
-- `execution_state`: `PARITY_VERIFIED_PENDING_CHECKPOINT`
+- `execution_state`: `LOCAL_VERIFIED_PR_PENDING`
 - `planning_checkpoint_ref`: `7d11a6ff904b7d9bc2ca74bbaf52c122fc31feb9`
 - `domain_checkpoint_ref`: `c684f4bc115ef8d7b406a343876419edb8f2d290`
 - `application_checkpoint_ref`: `bd03cd3a8ba8b6df222c191d75bd672881c32d6a`
 - `platform_checkpoint_ref`: `129e7d57f644ba32fdd46fb669f3e86774c8ae9a`
-- `parity_checkpoint_ref`: `pending`
+- `parity_checkpoint_ref`: `8896eb5174a7e37539f35c6ac5d1ef09f93ae9e8`
 - `local_verified_checkpoint_ref`: `pending`
 - `agos_report_only`: `blocked-unregistered-missing-owner-scope-manifest-bypassed`
 
@@ -200,19 +200,25 @@ GREEN：锁定 `rusqlite 0.40.1` 的 `bundled/hooks`，实现严格根、最多 
 
 ### Batch 4：Parity RED → GREEN
 
-状态：`ready-for-checkpoint`。
+状态：`completed`。checkpoint `8896eb5174a7e37539f35c6ac5d1ef09f93ae9e8`。
 
 RED：新增目录合同测试后，因 `feature.session-data.local-session-directory-observation` 尚不存在而按预期失败，退出码 `101`；测试尚未读取任何新 fixture，证明失败来自独立 feature 缺失。
 
 GREEN：新增独立 observation feature、baseline contract 与合成 fixture，只把 `tauri-command:list_local_sessions` 重映射为 `[filesystem-read, database-read]`；原 `core-module:codex_sqlite`、`data-module:storage`、删除、备份、恢复和 grouped undo 继续归 `feature.session-data.local-session-management=unassessed`。定向测试通过，Parity 全目标测试中仓库目录 `22 passed`，目录总数更新为 `43` 个 feature、`43` 份合同和 `12` 个 fixture manifest。
 
+提交后 AGOS `RequireClean` 返回 `GIT_SNAPSHOT_READY`。
+
 产出：新 feature/contract/fixture、source remap 与原总功能继续未评估。
 
 ### Batch 5：Local Closeout
 
-状态：`pending`。
+状态：`ready-for-checkpoint`。
 
 产出：README、报告、完整定向验证、安全审查、范围证据和知识图谱状态。
+
+验证：四 crate 全目标 tests/Clippy、rustfmt、CI 合同 `35/35`、仓库政策零违规、Release Audit `current`、Cargo metadata、`rusqlite 0.40.1` 依赖树、只读安全门、fixture 隐私和 diff check 全绿；实际二十九路径哈希精确为 `sha256:47dcb2c181daa61a8df073e7f3ada069bf8e3d9b95df0c57f7709bcb6cde211d`。新增依赖 SPDX 为 MIT 或 MIT/Apache-2.0。CodeGraph 返回 `not-initialized` 并按合同未初始化；AGOS rollout dry-run 因任务未登记而绕过，未修改外部仓库。
+
+安全补充：fresh RustSec 扫描发现的两条 `quick-xml 0.39.4` 高危公告已确认存在于基线 Iced/Wayland 依赖树、并非 Issue #104 新增；已单独登记 Issue `#105`，本 PR 不越界升级展示依赖。
 
 ### Batch 6：Review / CI
 

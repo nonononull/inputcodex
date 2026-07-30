@@ -294,7 +294,7 @@ decision_status: issue-89-pr-90-review-ci-green-final-merge-not-authorized
 - [x] Issue `#101` / PR `#102` 已完成第九个 Gate 5 上下文能力只读目录观察切片；Final Head `40494a5881907552d917ad4ced4deb04710b5526` 以单父 Squash 提交 `4032b051f0f18be71d344eded2d6e79595233b65` 进入 `main`，合并后 CI 七 Job、Performance Baseline 四 Job全绿且 Artifact 均为 `0`。
 - [x] Issue `#103` 已完成本地会话目录 A1 一致性决策并按 `COMPLETED` 关闭；观察与删除/备份/恢复管理正式分离。
 - Issue `#104` 是第十个 Gate 5 本地会话目录只读观察切片：只接管 `list_local_sessions`，返回会话 ID、有界标题、归档状态、更新时间、分页和脱敏来源覆盖；固定只读 SQLite、多数据库排序/去重、超时取消和严格失败语义。
-- Issue `#104` 的候选范围固定为二十九路径与 `sha256:47dcb2c181daa61a8df073e7f3ada069bf8e3d9b95df0c57f7709bcb6cde211d`；当前下一合法节点为 Planning Freeze 后按 Domain → Application → Platform → Parity 执行 TDD，最终 Squash Merge 仍需绑定 Final Head 的独立授权。
+- Issue `#104` 的 Domain、Application、Platform、Parity 与本地二十九路径轻量门禁均已通过；实际范围精确为 `sha256:47dcb2c181daa61a8df073e7f3ada069bf8e3d9b95df0c57f7709bcb6cde211d`。当前下一合法节点为普通 push、非 Draft PR 与 Review/CI，最终 Squash Merge 仍需绑定 Final Head 的独立授权。
 
 ### Gate 6：首个正式版本（锁定）
 
