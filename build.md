@@ -26,7 +26,7 @@ git diff --check
 
 路径范围、Markdown 链接和任务特有内容守卫由对应 Session Plan 与 Runtime Workflow 定义。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供三十一个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供三十二个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -59,6 +59,7 @@ git diff --check
 29. Issue `#101` 二十四路径、上下文能力固定文件有界观察、条目最小投影、严格 TOML 失败语义、Parity 单入口分拆和最终本地轻量门禁验证。
 30. Issue `#104` 二十九路径、只读 SQLite 会话目录、多来源排序/去重、分页、超时取消、最小披露和最终本地轻量门禁验证。
 31. Issue `#105` 九路径、quick-xml 两条 high RustSec 公告、精确两 package 锁文件升级、许可证和 audit RED/GREEN 验证。
+32. Issue `#109` 二十九路径、严格只读 SQLite、受控 rollout、确定性 Markdown、隐私边界和最终本地轻量门禁验证。
 
 当前禁止：
 
@@ -81,6 +82,181 @@ git diff --check
 - 在 Issue `#98` 中公开任意路径、返回账号/Token/Provider/URL/字段/内容/认证来源/实际路径、写文件、修改环境、联网、调用子进程、启动线程/Watcher、打开 UI、注入、使用 `unsafe`、迁移完整 Relay 文件读取/保存/切换/回填、修改 Workflow/Ruleset/Release/`upstream/` 或 AGOS。
 - 在 Issue `#101` 中接受任意路径或配置正文、返回完整 TOML/摘要/命令/参数/环境变量/Header/URL/Token/账号/实际路径、写文件、联网、调用子进程、启动线程/Watcher、打开 UI、注入、使用 `unsafe`、新增依赖、迁移上下文增加/删除/同步/提取/设置正文解析、修改 Workflow/Ruleset/Release/`upstream/` 或 AGOS。
 - 在 Issue `#105` 中修改 `Cargo.toml`、升级 Iced/winit/smithay、改产品功能/UI/Workflow/Ruleset/Runner/`upstream/`/AGOS，或让 `Cargo.lock` 出现 `wayland-scanner` 与 `quick-xml` 之外的 package 变化。
+- 在 Issue `#109` 中接受任意 SQLite、rollout、输出路径或 Markdown 正文，写文件，打开 UI，联网，调用子进程，启动永久线程/Watcher，返回内部角色、远程图片 URL、完整会话 ID、真实路径或原始错误，新增依赖家族，迁移第二个 feature，或修改 Cargo/Workflow/Ruleset/Runner/Release/`upstream/`/AGOS。
+
+## Issue #109 受控会话 Markdown 生成本地轻量验证
+
+在仓库根目录、分支 `codex/issue-109-gate-5-markdown-generation` 执行。Git 时间只使用系统默认本机时间；不得设置 `GIT_AUTHOR_DATE` 或 `GIT_COMMITTER_DATE`。完整 Workspace 与 Windows/macOS/Linux 编译继续交给标准 GitHub-hosted runners。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+function Assert-NativeSuccess {
+  param([Parameter(Mandatory)][string]$Label)
+  if ($LASTEXITCODE -ne 0) { throw "$Label 失败：$LASTEXITCODE" }
+}
+
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+$branch = git branch --show-current
+Assert-NativeSuccess 'Issue #109 分支读取'
+if ($branch -ne 'codex/issue-109-gate-5-markdown-generation') {
+  throw "Issue #109 分支错误：$branch"
+}
+
+cargo test --locked --offline --all-targets `
+  -p inputcodex-domain `
+  -p inputcodex-application `
+  -p inputcodex-platform `
+  -p inputcodex-parity
+Assert-NativeSuccess 'Issue #109 定向测试'
+
+cargo clippy --locked --offline --all-targets `
+  -p inputcodex-domain `
+  -p inputcodex-application `
+  -p inputcodex-platform `
+  -p inputcodex-parity -- -D warnings
+Assert-NativeSuccess 'Issue #109 定向 Clippy'
+
+cargo fmt --all -- --check
+Assert-NativeSuccess 'Issue #109 rustfmt'
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+Assert-NativeSuccess 'Issue #109 CI 合同'
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #109 仓库政策'
+
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #109 Release Audit'
+
+cargo metadata --locked --offline --no-deps --format-version 1 | Out-Null
+Assert-NativeSuccess 'Issue #109 Cargo metadata'
+
+if (-not (git diff --quiet origin/main -- Cargo.toml Cargo.lock crates/inputcodex-platform/Cargo.toml)) {
+  throw 'Issue #109 禁止修改 Cargo 或锁文件。'
+}
+
+$platform = Get-Content crates/inputcodex-platform/src/markdown_generation.rs -Raw
+foreach ($required in @(
+  'SQLITE_OPEN_READ_ONLY',
+  'SQLITE_OPEN_NO_MUTEX',
+  'query_only',
+  'MAX_ROLLOUT_DISCOVERY_ENTRIES',
+  'MAX_ROLLOUT_CANDIDATES',
+  'MAX_ROLLOUT_DISCOVERY_BYTES',
+  'MAX_ROLLOUT_BYTES',
+  'MAX_ROLLOUT_RECORDS',
+  'MAX_MARKDOWN_MESSAGE_COUNT',
+  'symlink_metadata',
+  'BufReader',
+  'MARKDOWN_GENERATION_TIMEOUT',
+  'MARKDOWN_GENERATION_CANCELLED'
+)) {
+  if (-not $platform.Contains($required)) { throw "Issue #109 缺少平台合同：$required" }
+}
+foreach ($forbidden in @(
+  'Connection::open(',
+  'read_to_string',
+  'fs::write',
+  'OpenOptions',
+  'std::process::Command',
+  'Command::new',
+  'std::thread',
+  'reqwest',
+  'hyper',
+  'TcpStream',
+  'UdpSocket',
+  'iced',
+  'unsafe {'
+)) {
+  if ($platform.Contains($forbidden)) { throw "Issue #109 出现禁止能力：$forbidden" }
+}
+
+$approved = @(
+  'AGENTS.md',
+  'build.md',
+  'CONTEXT.md',
+  'crates/inputcodex-application/src/lib.rs',
+  'crates/inputcodex-application/src/markdown_generation.rs',
+  'crates/inputcodex-application/tests/markdown_generation.rs',
+  'crates/inputcodex-domain/src/lib.rs',
+  'crates/inputcodex-domain/src/markdown_generation.rs',
+  'crates/inputcodex-domain/tests/markdown_generation.rs',
+  'crates/inputcodex-parity/tests/catalog_repository.rs',
+  'crates/inputcodex-platform/src/lib.rs',
+  'crates/inputcodex-platform/src/markdown_generation.rs',
+  'crates/inputcodex-platform/tests/markdown_generation.rs',
+  'docs/plans/2026-07-30-issue-109-gate-5-markdown-generation.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-07-30-issue-109-gate-5-markdown-generation.md',
+  'docs/reports/issue-109-gate-5-markdown-generation.md',
+  'docs/workflows/2026-07-30-issue-109-gate-5-markdown-generation-runtime.md',
+  'err.md',
+  'parity/contracts/session-data.yml',
+  'parity/features/plugin-script.yml',
+  'parity/features/session-data.yml',
+  'parity/features/source-index.yml',
+  'parity/fixtures/feature.session-data.markdown-export/baseline.yml',
+  'parity/fixtures/feature.session-data.markdown-export/manifest.yml',
+  'parity/fixtures/feature.session-data.markdown-generation/baseline.yml',
+  'parity/fixtures/feature.session-data.markdown-generation/manifest.yml',
+  'parity/README.md',
+  'README.md'
+) | Sort-Object
+$scopePayload = ($approved -join "`n") + "`n"
+$scopeHash = [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData(
+    [Text.UTF8Encoding]::new($false).GetBytes($scopePayload)
+  )
+).ToLowerInvariant()
+if ($approved.Count -ne 29) { throw "Issue #109 路径数量漂移：$($approved.Count)" }
+if ($scopeHash -ne 'b113da5d41514f50e36cef7d4eb9ade89e2562cbcfe8d392a5173d38fd0ebaac') {
+  throw "Issue #109 scope_hash 漂移：sha256:$scopeHash"
+}
+
+$actual = @(
+  git -c core.quotePath=false diff --no-renames --name-only origin/main...HEAD
+  git -c core.quotePath=false diff --no-renames --name-only
+  git -c core.quotePath=false ls-files --others --exclude-standard
+) | Where-Object { $_ } | Sort-Object -Unique
+$outside = @($actual | Where-Object { $_ -notin $approved })
+if ($outside.Count -ne 0) { throw "Issue #109 越界路径：$($outside -join ', ')" }
+$actualPayload = ($actual -join "`n") + "`n"
+$actualHash = [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData(
+    [Text.UTF8Encoding]::new($false).GetBytes($actualPayload)
+  )
+).ToLowerInvariant()
+$errChanged = $actual -contains 'err.md'
+if ($errChanged) {
+  if ($actual.Count -ne 29 -or $actualHash -ne $scopeHash) {
+    throw "Issue #109 含 err.md 时实际范围漂移：count=$($actual.Count) sha256:$actualHash"
+  }
+} else {
+  if ($actual.Count -ne 28 -or $actualHash -ne '3d19b05918c8294f050f3f0c83f9118453705afd8aad016827fafb477e74a50b') {
+    throw "Issue #109 无新根因时实际范围漂移：count=$($actual.Count) sha256:$actualHash"
+  }
+}
+
+$production = @(
+  'crates/inputcodex-domain/src/markdown_generation.rs',
+  'crates/inputcodex-application/src/markdown_generation.rs',
+  'crates/inputcodex-platform/src/markdown_generation.rs'
+)
+$sensitive = @('session-123', 'C:\\Users\\', '/Users/', 'data:image', 'https://example.com/image')
+foreach ($path in $production) {
+  $text = Get-Content $path -Raw
+  foreach ($value in $sensitive) {
+    if ($text.Contains($value)) { throw "Issue #109 生产代码含敏感样例：$path -> $value" }
+  }
+}
+
+git diff --check origin/main
+Assert-NativeSuccess 'Issue #109 Git 空白检查'
+
+Write-Output "ISSUE_109_LOCAL_GREEN scope=$($actual.Count) hash=sha256:$actualHash"
+```
 
 ## Issue #105 quick-xml RustSec 高危公告修复本地轻量验证
 

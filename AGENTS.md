@@ -122,3 +122,7 @@
 - Issue `#104` / PR `#106` 已完成第十个 Gate 5 本地会话目录只读观察切片；Final Head `72369e0a138da8a6f94819e03d746cbbdb658be0` 以单父 Squash 提交 `060ca045d2c134f8be3c9adc8cdb038842fc3243` 进入 `main`，tree 为 `bc05534a0ba0d68f69f126d08c2a8a9b2f97574e`，GitHub 签名 `valid`，Issue `#104` 已按 `COMPLETED` 关闭。合并后主干 CI Run `30528235591` 七 Job、Performance Baseline Run `30528233052` 四 Job全绿且 Artifact 均为 `0`。
 - Issue `#105` 是独立依赖安全维护任务：基线 `Cargo.lock` 的 `quick-xml 0.39.4` 命中 `RUSTSEC-2026-0194/0195` 两条 `7.5 high` 公告；批准路线只允许将 `wayland-scanner 0.31.10 -> 0.31.11`，从而将 `quick-xml 0.39.4 -> 0.41.0`。
 - Issue `#105` 固定九路径与 `sha256:0c90d018e06aa640d33a4c65c75aea45c89eb0e365b91fadee803b0426c8c58f`；禁止升级 Iced/winit/smithay、修改 `Cargo.toml`、产品功能、UI、Workflow、Ruleset、Runner、上游缓存或 AGOS。fresh audit、Review/CI 与 Artifact 闭环前暂停新的 Gate 5 产品 PR，最终 Squash Merge 仍需绑定 Final Head 的独立授权。
+- Issue `#105` / PR `#107` 已完成上述依赖安全修复；Final Head `0e4af42b86c2ffce8704228198fab13447443d38` 以单父 Squash 提交 `88eaf6301f1897cadaf4da830db998078fb06e97` 进入 `main`，Issue 已按 `COMPLETED` 关闭。
+- Issue `#108` 已批准 Markdown 方案 A 并按 `COMPLETED` 关闭：受控会话 Markdown 内存生成与文件保存/UI 分离，真正的保存对话框、覆盖确认和原子文件写入不得进入首个生成切片。
+- Issue `#109` 是第十一个 Gate 5 产品切片：只接管 `feature.session-data.markdown-generation`，输入既有本地会话 ID，经严格只读 SQLite 与受控 rollout 生成确定性 Markdown；禁止任意路径、文件写入、UI、网络、内部角色、远程图片 URL、真实路径或原始错误披露。
+- Issue `#109` 固定二十九路径与 `sha256:b113da5d41514f50e36cef7d4eb9ade89e2562cbcfe8d392a5173d38fd0ebaac`；无新可复用根因时实际范围排除 `err.md`，为二十八路径与 `sha256:3d19b05918c8294f050f3f0c83f9118453705afd8aad016827fafb477e74a50b`。最终 Squash Merge 仍需绑定 Final Head 的独立授权。

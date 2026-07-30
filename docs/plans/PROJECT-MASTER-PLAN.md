@@ -1,12 +1,12 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-105-quick-xml-rustsec-remediation
-active_gate: Gate 5 前十个产品切片已进入 main；当前先执行 Issue #105 的独立依赖安全修复，完成前暂停新的 Gate 5 产品 PR
-last_verified_gate: Issue #104 / PR #106 已以单父 Squash 提交 060ca045d2c134f8be3c9adc8cdb038842fc3243 进入 main；合并后 CI Run 30528235591 七 Job与 Performance Baseline Run 30528233052 四 Job全绿且 Artifact 均为 0，Issue #104 已按 COMPLETED 关闭
-next_legal_gate: 在 Issue #105 九路径内精确升级 wayland-scanner 0.31.10 到 0.31.11 与 quick-xml 0.39.4 到 0.41.0；fresh audit、本地轻量门禁、Review/CI 与 Artifact 闭环后，才能请求绑定 Final Head 的独立 Squash Merge 授权
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/105
-active_pr_ref: github-dynamic
+active_task: issue-109-gate-5-markdown-generation
+active_gate: Gate 5 前十个产品切片与 Issue #105 依赖安全修复已进入 main；Issue #108 已批准方案 A，当前执行第十一个受控会话 Markdown 生成切片
+last_verified_gate: Issue #105 / PR #107 已以单父 Squash 提交 88eaf6301f1897cadaf4da830db998078fb06e97 进入 main；合并后 CI Run 30534052555 七 Job与 Performance Baseline Run 30534052538 四 Job全绿且 Artifact 均为 0，Issue #105 已按 COMPLETED 关闭
+next_legal_gate: 在 Issue #109 二十九路径内完成严格只读 SQLite、受控 rollout、确定性 Markdown、TDD 与本地轻量门禁；普通 push、Review/CI 与 Artifact 闭环后，才能请求绑定 Final Head 的独立 Squash Merge 授权
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/109
+active_pr_ref: pending
 gate_5_platform_paths_exception_ref: https://github.com/nonononull/inputcodex/issues/74
 gate_5_platform_paths_scope_hash: sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37
 gate_5_platform_paths_branch_ref: codex/issue-75-gate-5-platform-paths
@@ -303,7 +303,9 @@ decision_status: issue-105-security-green-remote-delivery-gated
 - [x] Issue `#101` / PR `#102` 已完成第九个 Gate 5 上下文能力只读目录观察切片；Final Head `40494a5881907552d917ad4ced4deb04710b5526` 以单父 Squash 提交 `4032b051f0f18be71d344eded2d6e79595233b65` 进入 `main`，合并后 CI 七 Job、Performance Baseline 四 Job全绿且 Artifact 均为 `0`。
 - [x] Issue `#103` 已完成本地会话目录 A1 一致性决策并按 `COMPLETED` 关闭；观察与删除/备份/恢复管理正式分离。
 - [x] Issue `#104` / PR `#106` 已完成第十个 Gate 5 本地会话目录只读观察切片；Final Head `72369e0a138da8a6f94819e03d746cbbdb658be0` 以单父 Squash 提交 `060ca045d2c134f8be3c9adc8cdb038842fc3243` 进入 `main`，合并后 CI 七 Job、Performance Baseline 四 Job全绿且 Artifact 均为 `0`。
-- [ ] Issue `#105` 先于后续产品切片修复 `quick-xml 0.39.4` 的两条 high RustSec 公告；只允许 `wayland-scanner 0.31.10 -> 0.31.11` 与 `quick-xml 0.39.4 -> 0.41.0` 的九路径锁文件维护，完成前暂停新的 Gate 5 产品 PR。
+- [x] Issue `#105` / PR `#107` 已完成 `quick-xml` 两条 high RustSec 公告修复；Final Head `0e4af42b86c2ffce8704228198fab13447443d38` 以单父 Squash 提交 `88eaf6301f1897cadaf4da830db998078fb06e97` 进入 `main`。
+- [x] Issue `#108` 已批准 Markdown 方案 A 并按 `COMPLETED` 关闭；内存生成与文件保存/UI 正式分离。
+- [ ] Issue `#109` 执行第十一个 Gate 5 受控会话 Markdown 生成切片；只允许严格只读 SQLite、受控 rollout、用户/助手文本、UTC、LF、不可联网图片占位与内存结果，文件写入和 UI 继续禁止。
 
 ### Gate 6：首个正式版本（锁定）
 
