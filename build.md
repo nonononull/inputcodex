@@ -133,9 +133,8 @@ Assert-NativeSuccess 'Issue #109 Release Audit'
 cargo metadata --locked --offline --no-deps --format-version 1 | Out-Null
 Assert-NativeSuccess 'Issue #109 Cargo metadata'
 
-if (-not (git diff --quiet origin/main -- Cargo.toml Cargo.lock crates/inputcodex-platform/Cargo.toml)) {
-  throw 'Issue #109 禁止修改 Cargo 或锁文件。'
-}
+git diff --quiet origin/main -- Cargo.toml Cargo.lock crates/inputcodex-platform/Cargo.toml
+Assert-NativeSuccess 'Issue #109 Cargo 与锁文件差异检查'
 
 $platform = Get-Content crates/inputcodex-platform/src/markdown_generation.rs -Raw
 foreach ($required in @(
@@ -217,6 +216,7 @@ if ($scopeHash -ne 'b113da5d41514f50e36cef7d4eb9ade89e2562cbcfe8d392a5173d38fd0e
 
 $actual = @(
   git -c core.quotePath=false diff --no-renames --name-only origin/main...HEAD
+  git -c core.quotePath=false diff --cached --no-renames --name-only
   git -c core.quotePath=false diff --no-renames --name-only
   git -c core.quotePath=false ls-files --others --exclude-standard
 ) | Where-Object { $_ } | Sort-Object -Unique

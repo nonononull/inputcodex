@@ -63,10 +63,10 @@ impl SessionMarkdownDocument {
 }
 ```
 
-- [ ] 先写测试：角色标题、UTC 行、LF、图片占位正文、文件名清洗/截断、零消息、消息/输出上限和脱敏 Debug。
-- [ ] 运行 `cargo test --locked --offline -p inputcodex-domain --test markdown_generation`，确认因目标 API 缺失而 RED。
-- [ ] 实现最小领域类型；文件名固定 `session-<clean-title>.md`，不使用 session ID。
-- [ ] 运行 Domain 测试、Clippy 与 fmt，确认 GREEN 后建立 `issue-109-domain-green` checkpoint。
+- [x] 先写测试：角色标题、UTC 行、LF、图片占位正文、文件名清洗/截断、零消息、消息/输出上限和脱敏 Debug。
+- [x] 运行 `cargo test --locked --offline -p inputcodex-domain --test markdown_generation`，确认因目标 API 缺失而 RED。
+- [x] 实现最小领域类型；文件名固定 `session-<clean-title>.md`，不使用 session ID。
+- [x] 运行 Domain 测试、Clippy 与 fmt，确认 GREEN 后建立 `issue-109-domain-green` checkpoint。
 
 ### Task 2：Application RED → GREEN
 
@@ -90,10 +90,10 @@ pub trait MarkdownGenerationPort {
 pub struct GenerateSessionMarkdown<P>;
 ```
 
-- [ ] 先写测试：合法/非法 session ID、请求 Debug 脱敏、克隆取消、`Some/None/Err` 到 `Ready/Empty/Failed`、执行前取消和旧结果隔离。
-- [ ] 运行定向测试，确认只因 Application API 缺失而 RED。
-- [ ] 实现最小 Request/Cancellation/Port/UseCase；复用 `MAX_LOCAL_SESSION_ID_BYTES`。
-- [ ] 运行 Application 测试、Clippy 与 fmt，确认 GREEN 后建立 `issue-109-application-green` checkpoint。
+- [x] 先写测试：合法/非法 session ID、请求 Debug 脱敏、克隆取消、`Some/None/Err` 到 `Ready/Empty/Failed`、执行前取消和旧结果隔离。
+- [x] 运行定向测试，确认只因 Application API 缺失而 RED。
+- [x] 实现最小 Request/Cancellation/Port/UseCase；复用 `MAX_LOCAL_SESSION_ID_BYTES`。
+- [x] 运行 Application 测试、Clippy 与 fmt，确认 GREEN 后建立 `issue-109-application-green` checkpoint。
 
 ### Task 3：Platform RED → GREEN
 
@@ -111,12 +111,12 @@ pub struct SystemMarkdownGeneration;
 impl MarkdownGenerationPort for SystemMarkdownGeneration { /* 系统入口 */ }
 ```
 
-- [ ] 先写合成测试：零来源、threads/automation_runs、跨库去重、显式/发现 rollout、根越界、符号链接种类、只读/query_only、WAL 业务不变、malformed JSON、角色过滤、图片占位、UTC 正负偏移与日期边界、所有资源上限、超时/取消和错误脱敏。
-- [ ] 运行 `cargo test --locked --offline -p inputcodex-platform --test markdown_generation`，确认因平台模块/API 缺失而 RED。
-- [ ] 实现 SQLite 精确参数查询；任何候选数据库失败都阻断生成，避免较旧重复记录冒充权威记录。
-- [ ] 实现固定根候选发现和流式 JSONL 解析；不得使用 `read_to_string`。
-- [ ] 实现不依赖本机时区和新依赖的 RFC 3339 → UTC 规范化，并覆盖闰年、跨日/月/年与正负 offset。
-- [ ] 运行 Platform 测试、Clippy 与 fmt；确认 GREEN 后建立 `issue-109-platform-green` checkpoint。
+- [x] 先写合成测试：零来源、threads/automation_runs、跨库去重、显式/发现 rollout、根越界、符号链接种类、只读/query_only、WAL 业务不变、malformed JSON、角色过滤、图片占位、UTC 正负偏移与日期边界、所有资源上限、超时/取消和错误脱敏。
+- [x] 运行 `cargo test --locked --offline -p inputcodex-platform --test markdown_generation`，确认因平台模块/API 缺失而 RED。
+- [x] 实现 SQLite 精确参数查询；任何候选数据库失败都阻断生成，避免较旧重复记录冒充权威记录。
+- [x] 实现固定根候选发现和流式 JSONL 解析；不得使用 `read_to_string`。
+- [x] 实现不依赖本机时区和新依赖的 RFC 3339 → UTC 规范化，并覆盖闰年、跨日/月/年与正负 offset。
+- [x] 运行 Platform 测试、Clippy 与 fmt；确认 GREEN 后建立 `issue-109-platform-green` checkpoint。
 
 ### Task 4：Parity RED → GREEN
 
@@ -133,10 +133,10 @@ impl MarkdownGenerationPort for SystemMarkdownGeneration { /* 系统入口 */ }
 
 **说明：** 删除旧 fixture 与新增新 fixture 均计入两个目标路径，不扩大 allowlist；Git 预期识别为 rename。现有 Source Index 对公开模块是一对一映射，因此将误命名的 `markdown-export` 条目重分类为 `markdown-generation`；真实保存代码继续由既有 `feature.plugin-script.renderer-enhancements` 的 `exception-pending` 注入证据承接，不能把完整导出标为已实现。
 
-- [ ] 先写目录测试，要求 generation 为 implemented、data module 仅有 database/filesystem read、保存仍 exception-pending、总数保持 `43/43/12`。
-- [ ] 运行 Parity 定向测试，确认旧目录使新断言 RED。
-- [ ] 重分类 feature/contract/fixture/source mapping，并补 `saveMarkdown` 注入证据。
-- [ ] 运行 Parity 全目标测试、Clippy、fmt 与 Release Audit，确认 GREEN 后建立 `issue-109-parity-green` checkpoint。
+- [x] 先写目录测试，要求 generation 为 implemented、data module 仅有 database/filesystem read、保存仍 exception-pending、总数保持 `43/43/12`。
+- [x] 运行 Parity 定向测试，确认旧目录使新断言 RED。
+- [x] 重分类 feature/contract/fixture/source mapping，并补 `saveMarkdown` 注入证据。
+- [x] 运行 Parity 全目标测试、Clippy、fmt 与 Release Audit，确认 GREEN 后建立 `issue-109-parity-green` checkpoint。
 
 ### Task 5：稳定文档与本地收口
 
@@ -145,10 +145,10 @@ impl MarkdownGenerationPort for SystemMarkdownGeneration { /* 系统入口 */ }
 - 新建：`docs/reports/issue-109-gate-5-markdown-generation.md`
 - 可选修改：`err.md`，仅限不存在等价条目的新可复用根因。
 
-- [ ] 更新公开稳定能力，明确“生成不等于保存”。
-- [ ] 运行 `build.md` 的 Issue #109 完整本地轻量门禁。
-- [ ] 执行安全审查：路径、SQL 参数、边界、Debug/错误、真实数据和禁止能力逐项核对。
-- [ ] 执行 AGOS ReportOnly；`needs-input/unregistered` 记录后绕过，不修改外部控制面。
+- [x] 更新公开稳定能力，明确“生成不等于保存”。
+- [x] 运行 `build.md` 的 Issue #109 完整本地轻量门禁。
+- [x] 执行安全审查：路径、SQL 参数、边界、Debug/错误、真实数据和禁止能力逐项核对。
+- [x] 执行 AGOS ReportOnly；`needs-input/unregistered` 记录后绕过，不修改外部控制面。
 - [ ] 建立 `issue-109-local-verified` checkpoint，普通 push 并创建关联 #109 的非 Draft PR。
 
 ## 成功标准

@@ -10,7 +10,7 @@
 - `baseline_ref`: `88eaf6301f1897cadaf4da830db998078fb06e97`
 - `branch_ref`: `codex/issue-109-gate-5-markdown-generation`
 - `candidate_scope_hash`: `sha256:b113da5d41514f50e36cef7d4eb9ade89e2562cbcfe8d392a5173d38fd0ebaac`
-- `runtime_state`: `planning-verified`
+- `runtime_state`: `local-verified-pr-pending`
 - `paseo_workspace_ref`: `wks_495c490aa88811f1`
 - `agos_status`: `blocked-needs-input-unregistered-bypassed`
 
@@ -19,13 +19,13 @@
 ```text
 Issue #108 owner decision A
   -> Issue #109 + isolated worktree
-  -> NOW: planning freeze
+  -> planning freeze
   -> Domain RED/GREEN
   -> Application RED/GREEN
   -> Platform RED/GREEN
   -> Parity RED/GREEN
   -> local closeout
-  -> Review/CI
+  -> NOW: Review/CI
   -> Final Head independent Squash authorization
 ```
 
@@ -69,12 +69,18 @@ replay 要求返回 blocked，已按项目规则记录并绕过，未修改外�
 3. VERIFY：Domain tests、Clippy、fmt。
 4. CHECKPOINT：`issue-109-domain-green`。
 
+状态：`completed`。缺失 API 的 RED 后，专项 `7/7` 与 Domain 全目标测试、Clippy、fmt 通过；
+checkpoint `16d0816`。
+
 ### Node 4：Application TDD
 
 1. RED：Request、Cancellation、Port、UseCase 缺失。
 2. GREEN：输入验证和完成态映射。
 3. VERIFY：Application tests、Clippy、fmt。
 4. CHECKPOINT：`issue-109-application-green`。
+
+状态：`completed`。缺失 API 的 RED 后，专项 `6/6` 与 Application 全目标测试、Clippy、fmt 通过；
+checkpoint `60da5b1`。
 
 ### Node 5：Platform TDD
 
@@ -83,6 +89,9 @@ replay 要求返回 blocked，已按项目规则记录并绕过，未修改外�
 3. VERIFY：Platform tests、Clippy、fmt，WAL 业务数据不变。
 4. CHECKPOINT：`issue-109-platform-green`。
 
+状态：`completed`。缺失模块的 RED 后，专项 `17/17` 覆盖只读 SQLite、受控 rollout、WAL、UTC、
+资源上限、取消/超时与脱敏；Platform 全目标测试、Clippy、fmt 通过；checkpoint `b4a66b5`。
+
 ### Node 6：Parity TDD
 
 1. RED：generation feature/contract/fixture 和保存例外证据缺失。
@@ -90,12 +99,18 @@ replay 要求返回 blocked，已按项目规则记录并绕过，未修改外�
 3. VERIFY：Parity tests、Clippy、fmt、Release Audit。
 4. CHECKPOINT：`issue-109-parity-green`。
 
+状态：`completed`。缺失 generation 条目的 RED 后，完整目录验证保持 `43/43/12`，Parity 全目标
+测试、Clippy、fmt 与 Release Audit 通过；checkpoint `338359f`。
+
 ### Node 7：Local Closeout
 
 1. 更新 README 和任务报告；`err.md` 只记录新可复用根因。
 2. 运行 `build.md` Issue #109 全门禁和 security review。
 3. AGOS ReportOnly 与 Git pre-delivery checkpoint。
 4. 建立 `issue-109-local-verified` named snapshot。
+
+状态：`completed`。Issue #109 本地轻量门禁、安全审查、二十八路径 scope hash、CI 脚本合同、
+仓库政策、Release Audit、Cargo metadata 与 Git 空白检查全部通过；`err.md` 无新根因而未修改。
 
 ### Node 8：Remote Delivery
 

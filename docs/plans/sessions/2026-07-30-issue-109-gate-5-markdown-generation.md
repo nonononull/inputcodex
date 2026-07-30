@@ -197,6 +197,29 @@ README.md
 6. Local closeout：稳定文档、报告、安全审查、完整轻量门禁。
 7. Remote delivery：普通 push、非 Draft PR、Review/CI/Artifact、Final Head 授权。
 
+## Local Execution Evidence
+
+```yaml
+planning_checkpoint_ref: bc05e31ef3b4d9fda79fbd4170cae5bd52f24db4
+domain_checkpoint_ref: 16d0816
+application_checkpoint_ref: 60da5b1
+platform_checkpoint_ref: b4a66b5
+parity_checkpoint_ref: 338359f
+domain_tdd: passed-red-green-7-tests
+application_tdd: passed-red-green-6-tests
+platform_tdd: passed-red-green-17-tests
+parity_tdd: passed-red-green-43-features-43-contracts-12-fixtures
+sibling_regression_guard: passed
+security_review: passed-fixed-sql-readonly-bounded-redacted
+local_gate: passed
+actual_scope: 28-paths-without-err-md
+actual_scope_hash: sha256:3d19b05918c8294f050f3f0c83f9118453705afd8aad016827fafb477e74a50b
+remote_delivery: pending
+```
+
+`err.md` 未修改：本次只复用了既有 WAL SHM、精确 scope hash、PowerShell 与文本锚点结论，未发现
+新的可复用根因。测试数据全部现场合成；未读取、复制或提交真实会话。
+
 ## Agent Lifecycle
 
 - `agent_strategy`: parent-only
