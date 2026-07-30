@@ -938,6 +938,24 @@
 - 验证：强化后的 focused 测试返回 `WAL_BUSINESS_READONLY_EVIDENCE=READY`，Platform 定向测试 `15 passed`，全目标测试与 Clippy 通过；没有创建新业务文件，也没有改变主数据库或 WAL 字节。
 - 关联：Issue `#104`、`crates/inputcodex-platform/src/local_session_directory_observation.rs`、`crates/inputcodex-platform/tests/local_session_directory_observation.rs`、SQLite WAL/WAL-index 与 URI immutable 官方说明。
 
+### 2026-07-30：`cargo audit` advisory-db 直连失败会遮蔽真正的漏洞 RED
+
+- 环境：Issue `#105` 在 Windows 本机对 `origin/main@060ca045d2c134f8be3c9adc8cdb038842fc3243` 执行 fresh `cargo audit`，需要从 GitHub 更新 RustSec advisory database。
+- 现象：首次扫描在依赖分析前以退出码 `1` 失败，错误为 `couldn't fetch advisory database`、`failed to prepare fetch` 和 `error sending request`；该输出没有任何漏洞条目，不能作为安全测试 RED。
+- 根因：失败发生在 cargo-audit 到 GitHub advisory-db 的网络边界；本机直连路径不可用，而本地代理 `127.0.0.1:7897` 的 TCP 探测成功。网络退出码与“锁文件命中漏洞”的退出码相同，但语义完全不同。
+- 处理：不修改仓库、不降级为 `--no-fetch` 旧数据库，也不调查或输出 GitHub Token；只在当前 PowerShell 进程设置 `HTTPS_PROXY`、`HTTP_PROXY` 和 `ALL_PROXY` 为 `http://127.0.0.1:7897` 后，从头重跑同一 fresh audit。其他机器没有该代理时必须使用其正常网络路径，不能照搬本机端口。
+- 验证：代理重试成功加载 `1173` 条 advisory、扫描 `350` 个锁定依赖，并真实报告 `RUSTSEC-2026-0194/0195` 两条 `quick-xml 0.39.4` high 漏洞以及两条单独的 unmaintained warning；此时退出码 `1` 才是本任务的预期 security RED。
+- 关联：Issue `#105`、`Cargo.lock`、`build.md`、RustSec advisory database。
+
+### 2026-07-30：PowerShell 点号访问含连字符 JSON 属性会在命令执行前解析失败
+
+- 环境：Issue `#105` 的 GREEN 证据命令把 `cargo audit --json` 转为 PowerShell 对象，并准备输出 lockfile 的 `dependency-count`。
+- 现象：写成 `$audit.lockfile.dependency-count` 后，PowerShell 在解析整段命令时报告 `Unexpected token '-count'` 并退出；由于错误发生在执行前，`cargo audit` 实际没有运行，该退出码不能算作安全扫描失败。
+- 根因：PowerShell 把点号后的 `dependency-count` 解析为属性访问后再执行减法，而不是一个含连字符的属性名。
+- 处理：改用 `$audit.lockfile.'dependency-count'` 的引号属性访问后，从头重跑完整 audit；不复用失败调用中的任何状态。
+- 验证：修正后 fresh audit 真实执行并返回 `CARGO_AUDIT_EXIT=0`、`DEPENDENCIES=350`、`VULNERABILITIES=0`，两条 unmaintained warning 可正常枚举。
+- 关联：Issue `#105`、`build.md`、cargo-audit JSON 输出。
+
 ## 记录模板
 
 ```text
