@@ -16,6 +16,7 @@ use inputcodex_domain::LocalSessionSourceCoverage;
 use inputcodex_platform::SystemLocalSessionDirectoryObservation;
 use rusqlite::{Connection, OpenFlags};
 
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 pub(crate) use inputcodex_platform::SystemPlatformPaths;
 
 #[allow(dead_code)]
