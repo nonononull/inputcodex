@@ -145,53 +145,99 @@ contracts:
       reason: '使用合成 fixture 固定双数据库、全库预检、允许路径和撤销窗口语义，不包含真实会话或私人绝对路径。'
     fixture_refs:
       - fixture.feature.session-data.local-session-management.baseline
-  - id: contract.feature.session-data.markdown-export.baseline
-    feature_id: feature.session-data.markdown-export
+  - id: contract.feature.session-data.markdown-generation.baseline
+    feature_id: feature.session-data.markdown-generation
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.43 证据已锁定，Windows 或 macOS 平台路径适配器可用。'
+      - '调用方提交的 session_id 来自既有本地会话目录。'
     inputs:
-      - name: request
-        data_type: markdown-export-request
-        required: false
-        description: '结构化请求；无参数时为空对象。'
+      - name: session_id
+        data_type: markdown-generation-request
+        required: true
+        description: '非空、无空白或控制字符且不超过 256 UTF-8 bytes 的既有本地会话标识；不得携带路径或 Markdown 正文。'
     outputs:
-      - name: result
-        data_type: markdown-export-result
-        description: 'Markdown 导出的稳定结果或明确空结果。'
+      - name: completion
+        data_type: LoadCompletion<SessionMarkdownDocument>
+        description: '有可导出消息返回 LoadCompletion::Ready，合法零消息返回 LoadCompletion::Empty，来源、内容、资源或平台错误返回 LoadCompletion::Failed。'
+      - name: document
+        data_type: SessionMarkdownDocument
+        description: '只返回 suggested_filename、内存 markdown 与 message_count；文件名不含完整 session_id，正文固定 LF 和结尾换行。'
     side_effects:
+      - database-read
       - filesystem-read
-      - filesystem-write
-    persistence: '文件写入原子化，失败不得留下半成品或凭据日志。'
+    persistence: 'none'
     errors:
-      - code: MARKDOWN_EXPORT_FAILED
+      - code: MARKDOWN_GENERATION_INVALID_SESSION_ID
+        kind: validation
+        semantics: '会话标识为空、含空白或控制字符、首尾不精确或超过 256 UTF-8 bytes 时失败。'
+      - code: MARKDOWN_GENERATION_INVALID_SQLITE_HOME
+        kind: validation
+        semantics: '非空显式 CODEX_SQLITE_HOME 不是合法受支持目录时失败且不得回退。'
+      - code: MARKDOWN_GENERATION_TOO_MANY_DATABASES
+        kind: policy
+        semantics: '直接普通 SQLite 候选超过 32 个时在打开数据库前失败。'
+      - code: MARKDOWN_GENERATION_UNSUPPORTED_SCHEMA
+        kind: validation
+        semantics: '任一候选不具备受支持 threads 或 automation_runs 最小 schema 时阻断整次生成。'
+      - code: MARKDOWN_GENERATION_UNAVAILABLE
         kind: feature
-        semantics: 'Markdown 导出失败时返回稳定错误分类，不伪造空成功。'
+        semantics: '数据库打开、锁等待、查询、目录枚举或普通文件读取失败时返回脱敏不可用错误。'
+      - code: MARKDOWN_GENERATION_INVALID_ROLLOUT
+        kind: validation
+        semantics: '显式或发现 rollout 为相对路径、越出固定根、符号链接、非普通 JSONL 或会话来源不可用时失败。'
+      - code: MARKDOWN_GENERATION_INVALID_CONTENT
+        kind: validation
+        semantics: 'JSONL 非 UTF-8、malformed JSON、消息结构错误或声明的会话 ID 不匹配时失败，不返回部分文档。'
+      - code: MARKDOWN_GENERATION_RESOURCE_LIMIT
+        kind: policy
+        semantics: 'rollout 深度 4、枚举 8192、候选 4096、metadata 前缀 8 KiB、发现累计 32 MiB、单 rollout 16 MiB、记录 100000、消息 20000、Markdown 16 MiB 或文件名 160 UTF-8 bytes 任一上限被突破时失败。'
+      - code: MARKDOWN_GENERATION_TIMEOUT
+        kind: feature
+        semantics: '整体 2 s deadline 到期时停止生成并使结果失败；SQLite busy timeout 为 50 ms，progress interval 为 1000。'
+      - code: MARKDOWN_GENERATION_CANCELLED
+        kind: feature
+        semantics: '取消标记生效后停止当前生成，旧请求结果不得发布。'
+      - code: MARKDOWN_GENERATION_UNSUPPORTED
+        kind: platform
+        semantics: '非 Windows 与 macOS 平台调用系统适配器时明确报告不支持。'
+      - code: USER_HOME_UNAVAILABLE
+        kind: platform
+        semantics: '默认平台用户目录无法解析时失败，不使用当前目录或相对目录。'
+      - code: CODEX_HOME_INVALID
+        kind: platform
+        semantics: '非空显式 CODEX_HOME 无效时失败且不得自动回退。'
     loading:
       states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
-      request_identity: '每次Markdown 导出请求使用唯一递增标识。'
+      request_identity: '每次 Markdown 生成请求使用唯一递增标识。'
       stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
     timeout:
-      behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
-      evidence: 记录请求标识、耗时和错误类别，不记录凭据或私人路径。
+      behavior: 整体 2 s deadline 到期后进入 Failed，中止 SQLite、rollout 与结果发布。
+      evidence: 只记录请求标识、耗时、结构计数和稳定错误类别，不记录 session_id、标题、正文、URL、文件名或路径。
     cancellation:
-      behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
-      evidence: 记录取消请求、清理完成和旧请求失效。
-    isolation: 'Markdown 导出单次失败不得污染其他 feature、请求或稳定状态。'
+      behavior: 取消后进入 Cancelling，停止有界读取并使旧结果失效。
+      evidence: 只记录取消请求、清理完成和旧请求失效，不记录私人数据。
+    isolation: '任一候选来源或 JSONL 记录失败都阻断本次生成，不得用较旧重复记录或部分消息冒充成功；单次失败不得污染其他请求。'
     observability:
       - request_identity
+      - database_candidate_count
+      - rollout_candidate_count
+      - rollout_record_count
+      - message_count
+      - markdown_bytes
+      - filename_bytes
       - duration_ms
       - outcome_class
     platforms:
-      shared_semantics: '将选定会话导出为确定性 Markdown，失败不得修改源数据。'
-      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
-      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      shared_semantics: '从平台 CODEX_HOME 或合法非空 CODEX_SQLITE_HOME 严格只读查询最多 32 个 SQLite 候选，在固定 sessions 或 archived_sessions 根内有界流式解析 rollout，生成 user/assistant 文本、不可联网图片占位、UTC 与 LF 逐字节确定的内存 Markdown。'
+      windows: 使用 Windows 平台路径适配器、只读 SQLite 与共享确定性合同；不选择或保存输出文件。
+      macos: 使用 macOS 平台路径适配器、只读 SQLite 与共享确定性合同；不选择或保存输出文件。
       differences: []
     fixture_policy:
       mode: required
-      reason: '使用合成 fixture 固定结构字段、边界值与引用关系。'
+      reason: '使用合成 fixture 固定只读来源、角色过滤、UTC、图片占位、安全文件名、内存结果和零持久化，不包含真实会话或私人路径。'
     fixture_refs:
-      - fixture.feature.session-data.markdown-export.baseline
+      - fixture.feature.session-data.markdown-generation.baseline
   - id: contract.feature.session-data.provider-metadata-maintenance.baseline
     feature_id: feature.session-data.provider-metadata-maintenance
     scenario: baseline

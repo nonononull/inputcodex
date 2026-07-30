@@ -54,9 +54,9 @@ features:
       - issue:38
       - issue:103
       - issue:104
-  - id: feature.session-data.markdown-export
-    name: 'Markdown 导出'
-    status: unassessed
+  - id: feature.session-data.markdown-generation
+    name: '会话 Markdown 生成'
+    status: implemented
     evidence:
       - path: upstream/CodexPlusPlus/crates/codex-plus-data/src/markdown.rs
         symbol: markdown
@@ -65,12 +65,14 @@ features:
     platforms:
       windows:
         applicability: supported
-        semantics: '将选定会话导出为确定性 Markdown，失败不得修改源数据。'
+        semantics: '按既有本地会话 ID 严格只读定位最多 32 个 SQLite 候选与受控 rollout，只生成 user/assistant 文本、不可联网图片占位、UTC 时间戳和固定 LF 的内存 Markdown；消息最多 20,000 条，rollout 与结果各限 16 MiB。'
       macos:
         applicability: supported
-        semantics: '将选定会话导出为确定性 Markdown，失败不得修改源数据。'
+        semantics: '按既有本地会话 ID 严格只读定位最多 32 个 SQLite 候选与受控 rollout，只生成 user/assistant 文本、不可联网图片占位、UTC 时间戳和固定 LF 的内存 Markdown；消息最多 20,000 条，rollout 与结果各限 16 MiB。'
     decision_refs:
       - issue:26
+      - issue:108
+      - issue:109
   - id: feature.session-data.provider-metadata-maintenance
     name: 'Provider 元数据维护'
     status: unassessed

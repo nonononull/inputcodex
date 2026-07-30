@@ -956,6 +956,25 @@
 - 验证：修正后 fresh audit 真实执行并返回 `CARGO_AUDIT_EXIT=0`、`DEPENDENCIES=350`、`VULNERABILITIES=0`，两条 unmaintained warning 可正常枚举。
 - 关联：Issue `#105`、`build.md`、cargo-audit JSON 输出。
 
+### 2026-07-30：资源上限晚于目录/SQLite C 层物化且 rollout 验证与消费未绑定句柄
+
+- 环境：Issue `#109` 的三轮独立只读评审复核受控 SQLite、rollout 发现和 JSONL 打开边界。
+- 现象：目录项曾先完整收集到 `Vec` 再检查数量；SQLite `title` / `rollout_path` 即使改用借用 `ValueRef`，SQLite C 层仍会先把完整结果文本物化；发现式 rollout 验证会话 metadata 后又按路径重新打开全文，验证对象与消费对象可能不是同一文件。后续 reviewer 还确认，单一“超限”状态会把大 BLOB 错分为资源上限，且只断言通用 SQL helper 无法证明两张表的生产查询真的使用有界投影。
+- 根因：资源门禁必须位于数据库结果文本物化之前，而不是只位于 Rust 字符串分配之前；状态投影还必须先区分 SQLite storage class，避免大小覆盖类型错误。基于路径的验证结果不能跨越关闭并重开，必须把已验证的所有权句柄直接传给消费阶段；测试也必须覆盖生产查询构造调用点，不能只证明一个可能闲置的 helper 正确。“确定性首项”同样不能代替唯一权威来源证明。
+- 处理：目录读取只收集剩余上限加一项并在继续分配前失败；SQLite 查询以 `?1` 绑定会话 ID、`?2` 绑定字节上限，惰性 `CASE typeof(...)` 先区分 NULL、TEXT 与非 TEXT，只在 TEXT 分支执行 `octet_length`，以三态稳定映射合法、资源上限和损坏内容，`ValueRef` 保留为二次字节与 UTF-8 防线；threads/automation_runs 的生产 SQL 构造函数均由精确五列查询测试直接覆盖。SQLite 保留 `SQLITE_OPEN_NOFOLLOW`；rollout 使用平台 no-follow、打开前后组件复验和文件身份比较，发现式匹配返回已验证的同一 `File`，回卷后直接完成全文解析；多个匹配明确失败，显式路径同步执行四层目录深度上限。
+- 残余边界：本机 `rustc 1.97.1` 的 Windows `MetadataExt::file_index` / `volume_serial_number` 仍不稳定，`rusqlite::Connection::handle` 又要求 `unsafe`。Issue `#109` 明确禁止 `unsafe`、新依赖和 Cargo 改动，因此 Windows 继续以 no-follow、组件复验及稳定 metadata 字段做 fail-closed 比较；恶意替换者伪造全部稳定 metadata 的 ABA，以及 SQLite 连接句柄与路径 metadata 的内核级同一性，不在本切片可证明范围内，禁止把现状表述为强文件 ID 保证。
+- 验证：每项先以专项测试取得 RED；最新 Platform 专项 `25/25` 与 Platform all-targets Clippy `-D warnings` 通过，其中固定 SQL 返回前限长、同一 rollout 句柄、双字段大 BLOB 分类和两张表生产 SQL 构造。完整本地门禁再次达到四 crate 全绿、CI 合同 `35/35`、仓库政策零违规、Release Audit current 及 `29 / sha256:b113da...`；GitHub-hosted 双平台与 Artifact 证据仍必须在 PR `#110` 的最终修复 Head 上重新执行，动态状态只见 PR。
+- 关联：Issue `#109`、PR `#110`、`crates/inputcodex-platform/src/markdown_generation.rs`、`crates/inputcodex-platform/tests/markdown_generation.rs`。
+
+### 2026-07-30：macOS 临时目录逻辑路径触发 SQLite NOFOLLOW 拒绝
+
+- 环境：PR `#110` 的 GitHub-hosted macOS Runner，Platform Markdown 生成专项测试使用 `std::env::temp_dir()` 创建合成 SQLite/JSONL。
+- 现象：Windows 与 Linux 通过，但 macOS 专项为 `9 passed / 12 failed`；所有需要打开正常合成 SQLite 的用例均提前返回 `MARKDOWN_GENERATION_UNAVAILABLE`。
+- 根因：macOS 临时目录通常以 `/var/folders/...` 返回，而 `/var` 是指向 `/private/var` 的符号链接；`SQLITE_OPEN_NOFOLLOW` 会检查完整数据库路径中的符号链接组件，因此测试夹具的逻辑临时路径违反了生产 fail-closed 合同。
+- 处理：保留生产 `SQLITE_OPEN_NOFOLLOW` 和路径复验；仅在 macOS 测试夹具创建目录后将根 canonicalize 为物理路径，再派生合成 SQLite 与 rollout。
+- 验证：初始 CI Run `30549071963` 稳定复现共享失败；修正后继续执行 Platform `21/21`、四 crate 本地门禁与 GitHub-hosted macOS Workspace 全目标测试，最终远端证据保留在 PR `#110`。
+- 关联：Issue `#109`、PR `#110`、`crates/inputcodex-platform/tests/markdown_generation.rs`。
+
 ## 记录模板
 
 ```text

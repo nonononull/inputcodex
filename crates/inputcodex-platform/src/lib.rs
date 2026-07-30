@@ -31,6 +31,32 @@ mod local_session_directory_observation {
         }
     }
 }
+#[cfg(any(target_os = "windows", target_os = "macos"))]
+mod markdown_generation;
+#[cfg(not(any(target_os = "windows", target_os = "macos")))]
+mod markdown_generation {
+    use inputcodex_application::{
+        ApplicationError, MarkdownGenerationCancellation, MarkdownGenerationPort,
+        MarkdownGenerationRequest,
+    };
+    use inputcodex_domain::SessionMarkdownDocument;
+
+    #[derive(Debug, Clone, Copy, Default)]
+    pub struct SystemMarkdownGeneration;
+
+    impl MarkdownGenerationPort for SystemMarkdownGeneration {
+        fn generate(
+            &self,
+            request: &MarkdownGenerationRequest,
+            cancellation: &MarkdownGenerationCancellation,
+        ) -> Result<Option<SessionMarkdownDocument>, ApplicationError> {
+            let _ = (request, cancellation);
+            Err(ApplicationError::unsupported(
+                "MARKDOWN_GENERATION_UNSUPPORTED",
+            ))
+        }
+    }
+}
 mod platform_paths;
 mod relay_environment_observation;
 mod relay_status_observation;
@@ -42,6 +68,7 @@ pub use application_overview::SystemApplicationOverview;
 pub use context_entry_observation::SystemContextEntryObservation;
 pub use diagnostic_log_observation::SystemDiagnosticLogObservation;
 pub use local_session_directory_observation::SystemLocalSessionDirectoryObservation;
+pub use markdown_generation::SystemMarkdownGeneration;
 pub use platform_paths::SystemPlatformPaths;
 pub use relay_environment_observation::SystemRelayEnvironmentObservation;
 pub use relay_status_observation::SystemRelayStatusObservation;

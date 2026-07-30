@@ -1880,6 +1880,195 @@ fn gate5_本地会话目录只读观察已实现但本地会话管理总功能�
 }
 
 #[test]
+fn gate5_会话_markdown_生成已实现但文件保存继续留在_renderer_例外() {
+    let feature_text = read_repository_text("parity/features/session-data.yml");
+    let generation =
+        yaml_list_item_block(&feature_text, "feature.session-data.markdown-generation");
+    for expected in [
+        "name: '会话 Markdown 生成'",
+        "status: implemented",
+        "data-module:markdown",
+        "严格只读",
+        "UTC",
+        "LF",
+        "最多 32",
+        "20,000",
+        "16 MiB",
+        "- issue:108",
+        "- issue:109",
+    ] {
+        assert!(
+            generation.contains(expected),
+            "Markdown 生成功能条目应包含：{expected}"
+        );
+    }
+    for forbidden in [
+        "status: unassessed",
+        "filesystem-write",
+        "保存对话框",
+        "覆盖确认",
+        "原子写入",
+    ] {
+        assert!(
+            !generation.contains(forbidden),
+            "Markdown 生成功能禁止能力：{forbidden}"
+        );
+    }
+    assert!(!feature_text.contains("feature.session-data.markdown-export"));
+
+    let contract_text = read_repository_text("parity/contracts/session-data.yml");
+    let contract = yaml_list_item_block(
+        &contract_text,
+        "contract.feature.session-data.markdown-generation.baseline",
+    );
+    for expected in [
+        "markdown-generation-request",
+        "SessionMarkdownDocument",
+        "suggested_filename",
+        "markdown",
+        "message_count",
+        "database-read",
+        "filesystem-read",
+        "persistence: 'none'",
+        "LoadCompletion::Ready",
+        "LoadCompletion::Empty",
+        "LoadCompletion::Failed",
+        "32",
+        "8 KiB",
+        "32 MiB",
+        "16 MiB",
+        "100000",
+        "20000",
+        "160 UTF-8 bytes",
+        "50 ms",
+        "1000",
+        "2 s",
+        "MARKDOWN_GENERATION_INVALID_SESSION_ID",
+        "MARKDOWN_GENERATION_INVALID_SQLITE_HOME",
+        "MARKDOWN_GENERATION_TOO_MANY_DATABASES",
+        "MARKDOWN_GENERATION_UNSUPPORTED_SCHEMA",
+        "MARKDOWN_GENERATION_UNAVAILABLE",
+        "MARKDOWN_GENERATION_INVALID_ROLLOUT",
+        "MARKDOWN_GENERATION_INVALID_CONTENT",
+        "MARKDOWN_GENERATION_RESOURCE_LIMIT",
+        "MARKDOWN_GENERATION_TIMEOUT",
+        "MARKDOWN_GENERATION_CANCELLED",
+        "MARKDOWN_GENERATION_UNSUPPORTED",
+        "fixture.feature.session-data.markdown-generation.baseline",
+    ] {
+        assert!(
+            contract.contains(expected),
+            "Markdown 生成合同应包含：{expected}"
+        );
+    }
+    for forbidden in [
+        "filesystem-write",
+        "database-write",
+        "network-read",
+        "network-write",
+        "process-control",
+        "output_path",
+        "save dialog",
+        "atomic write",
+    ] {
+        assert!(
+            !contract.contains(forbidden),
+            "Markdown 生成合同禁止能力：{forbidden}"
+        );
+    }
+
+    assert_repository_text_contains(
+        "parity/fixtures/feature.session-data.markdown-generation/manifest.yml",
+        &[
+            "feature_id: feature.session-data.markdown-generation",
+            "fixture.feature.session-data.markdown-generation.baseline",
+            "path: baseline.yml",
+            "kind: synthetic",
+        ],
+    );
+    assert_repository_text_contains(
+        "parity/fixtures/feature.session-data.markdown-generation/baseline.yml",
+        &[
+            "schema_version: inputcodex.synthetic.markdown-generation.v1",
+            "database_mode: read-only",
+            "query_only: true",
+            "timestamp: '2025-12-31T23:30:00Z'",
+            "body: '> Image attachment omitted'",
+            "suggested_filename: session-Synthetic-session.md",
+            "source_paths_exposed: false",
+            "session_id_exposed: false",
+            "file_saved: false",
+        ],
+    );
+
+    let source_text = read_repository_text("parity/features/source-index.yml");
+    let markdown = yaml_list_item_block(&source_text, "data-module:markdown");
+    assert!(markdown.contains("side_effects: [database-read, filesystem-read]"));
+    assert!(markdown.contains("feature_id: feature.session-data.markdown-generation"));
+    assert!(!markdown.contains("filesystem-write"));
+
+    let plugin_text = read_repository_text("parity/features/plugin-script.yml");
+    let renderer =
+        yaml_list_item_block(&plugin_text, "feature.plugin-script.renderer-enhancements");
+    for expected in [
+        "status: exception-pending",
+        "symbol: saveMarkdown",
+        "renderer 注入",
+        "文件保存",
+        "- issue:108",
+        "- issue:109",
+    ] {
+        assert!(
+            renderer.contains(expected),
+            "renderer 例外应继续保存文件写入证据：{expected}"
+        );
+    }
+    assert!(!renderer.contains("status: implemented"));
+
+    let production = read_repository_text("crates/inputcodex-platform/src/markdown_generation.rs");
+    for required in [
+        "SQLITE_OPEN_READ_ONLY",
+        "SQLITE_OPEN_NO_MUTEX",
+        "query_only",
+        "MAX_ROLLOUT_DISCOVERY_ENTRIES",
+        "MAX_ROLLOUT_CANDIDATES",
+        "MAX_ROLLOUT_DISCOVERY_BYTES",
+        "MAX_ROLLOUT_BYTES",
+        "MAX_ROLLOUT_RECORDS",
+        "MAX_MARKDOWN_MESSAGE_COUNT",
+        "symlink_metadata",
+        "BufReader",
+        "MARKDOWN_GENERATION_TIMEOUT",
+        "MARKDOWN_GENERATION_CANCELLED",
+    ] {
+        assert!(
+            production.contains(required),
+            "Markdown 生成生产适配器应包含：{required}"
+        );
+    }
+    for forbidden in [
+        "Connection::open(",
+        "read_to_string",
+        "fs::write",
+        "OpenOptions",
+        "std::process::Command",
+        "Command::new",
+        "std::thread",
+        "reqwest",
+        "hyper",
+        "TcpStream",
+        "UdpSocket",
+        "iced",
+        "unsafe {",
+    ] {
+        assert!(
+            !production.contains(forbidden),
+            "Markdown 生成生产适配器禁止能力：{forbidden}"
+        );
+    }
+}
+
+#[test]
 fn 仓库source_index_覆盖锁定上游公开入口() {
     let summary =
         validate_feature_repository(&repository_root()).expect("功能目录应通过仓库级验证");

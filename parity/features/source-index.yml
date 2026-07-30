@@ -527,10 +527,10 @@ sources:
       path: upstream/CodexPlusPlus/crates/codex-plus-data/src/markdown.rs
       symbol: markdown
     platforms: [windows, macos]
-    side_effects: [filesystem-read, filesystem-write]
+    side_effects: [database-read, filesystem-read]
     disposition:
       type: feature
-      feature_id: feature.session-data.markdown-export
+      feature_id: feature.session-data.markdown-generation
   - id: data-module:provider_sync
     kind: data-module
     evidence:
