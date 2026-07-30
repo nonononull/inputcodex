@@ -1,11 +1,11 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-101-gate-5-context-entry-observation
-active_gate: Gate 5 前八个产品切片已进入 main；Issue #101 的二十四路径实施、四层 checkpoint 与本地轻量全门禁已完成，当前等待普通 push、非 Draft PR、Review/CI 与 Artifact 核验
-last_verified_gate: Issue #98 / PR #99 已以单父 Squash 提交 52320c2c02e19d9ffae11ccb6742a0f0fc4b71b9 进入 main；合并后 main CI Run 30449847793 七 Job与 Performance Baseline Run 30449848277 四 Job全绿且 Artifact 均为 0，Issue #98 已按 COMPLETED 关闭且 release_audit=current
-next_legal_gate: 为 Issue #101 建立 local-verified checkpoint，普通 push 并创建关联非 Draft PR；完成 Review 根因闭环、Hosted CI、Performance observation 与 Artifact 核验后，才能请求绑定 Final Head 的独立 Squash Merge 授权
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/101
+active_task: issue-105-quick-xml-rustsec-remediation
+active_gate: Gate 5 前十个产品切片已进入 main；当前先执行 Issue #105 的独立依赖安全修复，完成前暂停新的 Gate 5 产品 PR
+last_verified_gate: Issue #104 / PR #106 已以单父 Squash 提交 060ca045d2c134f8be3c9adc8cdb038842fc3243 进入 main；合并后 CI Run 30528235591 七 Job与 Performance Baseline Run 30528233052 四 Job全绿且 Artifact 均为 0，Issue #104 已按 COMPLETED 关闭
+next_legal_gate: 在 Issue #105 九路径内精确升级 wayland-scanner 0.31.10 到 0.31.11 与 quick-xml 0.39.4 到 0.41.0；fresh audit、本地轻量门禁、Review/CI 与 Artifact 闭环后，才能请求绑定 Final Head 的独立 Squash Merge 授权
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/105
 active_pr_ref: pending
 gate_5_platform_paths_exception_ref: https://github.com/nonononull/inputcodex/issues/74
 gate_5_platform_paths_scope_hash: sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37
@@ -77,6 +77,16 @@ gate_5_context_entry_domain_commit: 325b86a94c19c0eb494ce724e438187fc3bd97b3
 gate_5_context_entry_application_commit: bbb9b88a58ba08e4d7184c6d3b1a93229307f7ed
 gate_5_context_entry_platform_commit: 273f3234e36e35e7c09e00a2b9e0ff5ec81564ab
 gate_5_context_entry_parity_commit: 40a9dc15f19f80a576622178a05c6511534eae7b
+gate_5_local_session_decision_ref: https://github.com/nonononull/inputcodex/issues/103
+gate_5_local_session_issue_ref: https://github.com/nonononull/inputcodex/issues/104
+gate_5_local_session_scope_hash: sha256:47dcb2c181daa61a8df073e7f3ada069bf8e3d9b95df0c57f7709bcb6cde211d
+gate_5_local_session_pr_ref: https://github.com/nonononull/inputcodex/pull/106
+gate_5_local_session_merge_ref: 060ca045d2c134f8be3c9adc8cdb038842fc3243
+gate_5_local_session_main_ci_ref: https://github.com/nonononull/inputcodex/actions/runs/30528235591
+gate_5_local_session_main_performance_ref: https://github.com/nonononull/inputcodex/actions/runs/30528233052
+dependency_security_issue_ref: https://github.com/nonononull/inputcodex/issues/105
+dependency_security_scope_hash: sha256:0c90d018e06aa640d33a4c65c75aea45c89eb0e365b91fadee803b0426c8c58f
+dependency_security_approval_ref: https://github.com/nonononull/inputcodex/issues/105#issuecomment-5129028445
 documentation_information_architecture_issue_ref: https://github.com/nonononull/inputcodex/issues/83
 documentation_information_architecture_scope_hash: sha256:d8a404c19b108587a5e17b4ded454444d5e948c92410b759504a7eb7c63bed44
 performance_budget_observation_issue_ref: https://github.com/nonononull/inputcodex/issues/63
@@ -115,11 +125,11 @@ gate_3_planning_issue_ref: https://github.com/nonononull/inputcodex/issues/17
 upstream_watch_issue_ref: https://github.com/nonononull/inputcodex/issues/14
 transition_issue_ref: https://github.com/nonononull/inputcodex/issues/8
 upstream_sync_issue_ref: https://github.com/nonononull/inputcodex/issues/9
-active_branch_ref: codex/issue-101-gate-5-context-entry-observation
+active_branch_ref: codex/issue-105-quick-xml-rustsec-remediation
 transition_branch_ref: codex/issue-8-gate-2-transition
-active_plan_ref: docs/plans/2026-07-29-issue-101-gate-5-context-entry-observation.md
-active_session_plan_ref: docs/plans/sessions/2026-07-29-issue-101-gate-5-context-entry-observation.md
-active_runtime_workflow_ref: docs/workflows/2026-07-29-issue-101-gate-5-context-entry-observation-runtime.md
+active_plan_ref: docs/plans/2026-07-30-issue-105-quick-xml-rustsec-remediation.md
+active_session_plan_ref: docs/plans/sessions/2026-07-30-issue-105-quick-xml-rustsec-remediation.md
+active_runtime_workflow_ref: docs/workflows/2026-07-30-issue-105-quick-xml-rustsec-remediation-runtime.md
 active_pr_ref: pending
 gate_3_closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/23
 gate_3_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/21
@@ -127,14 +137,14 @@ gate_3_planning_pr_ref: https://github.com/nonononull/inputcodex/pull/18
 transition_pr_ref: https://github.com/nonononull/inputcodex/pull/10
 upstream_sync_pr_ref: https://github.com/nonononull/inputcodex/pull/11
 closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5, https://github.com/nonononull/inputcodex/pull/7, https://github.com/nonononull/inputcodex/pull/10, https://github.com/nonononull/inputcodex/pull/11, https://github.com/nonononull/inputcodex/pull/13, https://github.com/nonononull/inputcodex/pull/15, https://github.com/nonononull/inputcodex/pull/18, https://github.com/nonononull/inputcodex/pull/21, https://github.com/nonononull/inputcodex/pull/23, https://github.com/nonononull/inputcodex/pull/25, https://github.com/nonononull/inputcodex/pull/27, https://github.com/nonononull/inputcodex/pull/36, https://github.com/nonononull/inputcodex/pull/40, https://github.com/nonononull/inputcodex/pull/42, https://github.com/nonononull/inputcodex/pull/44, https://github.com/nonononull/inputcodex/pull/45
-active_report_ref: docs/reports/issue-101-gate-5-context-entry-observation.md
+active_report_ref: docs/reports/issue-105-quick-xml-rustsec-remediation.md
 gate_3_closeout_report_ref: docs/reports/issue-22-gate-3-closeout.md
 gate_3_implementation_report_ref: docs/reports/issue-19-gate-3-rust-workspace-ci.md
 gate_2_watch_report_ref: docs/reports/issue-14-gate-2-upstream-watch.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-decision_status: issue-89-pr-90-review-ci-green-final-merge-not-authorized
+decision_status: issue-105-approved-security-remediation-planning-freeze
 
 ## 当前状态
 
@@ -293,8 +303,8 @@ decision_status: issue-89-pr-90-review-ci-green-final-merge-not-authorized
 - [x] Issue `#100` 已完成上下文能力只读目录观察与完整管理分离决策并按 `COMPLETED` 关闭。
 - [x] Issue `#101` / PR `#102` 已完成第九个 Gate 5 上下文能力只读目录观察切片；Final Head `40494a5881907552d917ad4ced4deb04710b5526` 以单父 Squash 提交 `4032b051f0f18be71d344eded2d6e79595233b65` 进入 `main`，合并后 CI 七 Job、Performance Baseline 四 Job全绿且 Artifact 均为 `0`。
 - [x] Issue `#103` 已完成本地会话目录 A1 一致性决策并按 `COMPLETED` 关闭；观察与删除/备份/恢复管理正式分离。
-- Issue `#104` 是第十个 Gate 5 本地会话目录只读观察切片：只接管 `list_local_sessions`，返回会话 ID、有界标题、归档状态、更新时间、分页和脱敏来源覆盖；固定只读 SQLite、多数据库排序/去重、超时取消和严格失败语义。
-- Issue `#104` 的 Domain、Application、Platform、Parity 与本地二十九路径轻量门禁均已通过；实际范围精确为 `sha256:47dcb2c181daa61a8df073e7f3ada069bf8e3d9b95df0c57f7709bcb6cde211d`。当前下一合法节点为普通 push、非 Draft PR 与 Review/CI，最终 Squash Merge 仍需绑定 Final Head 的独立授权。
+- [x] Issue `#104` / PR `#106` 已完成第十个 Gate 5 本地会话目录只读观察切片；Final Head `72369e0a138da8a6f94819e03d746cbbdb658be0` 以单父 Squash 提交 `060ca045d2c134f8be3c9adc8cdb038842fc3243` 进入 `main`，合并后 CI 七 Job、Performance Baseline 四 Job全绿且 Artifact 均为 `0`。
+- [ ] Issue `#105` 先于后续产品切片修复 `quick-xml 0.39.4` 的两条 high RustSec 公告；只允许 `wayland-scanner 0.31.10 -> 0.31.11` 与 `quick-xml 0.39.4 -> 0.41.0` 的九路径锁文件维护，完成前暂停新的 Gate 5 产品 PR。
 
 ### Gate 6：首个正式版本（锁定）
 
@@ -397,5 +407,5 @@ decision_status: issue-89-pr-90-review-ci-green-final-merge-not-authorized
 - Issue `#47` 出现五路径或 `sha256:dd612ef0c2e5f0f830c40f161b1ef1a85bc58cd1d85458a758c3905ade8db03e` 之外的新增、删除或重命名路径，或在最终 Head 的 Review、CI 和全部对话闭环前请求 Squash Merge。
 - Issue `#32` 出现已批准 28 路径或 `sha256:857f6a8a2070d5ddcb43eaf237448d30302d59e39e1dbb910724cfac2fc81505` 之外的新增、删除或重命名路径，或改动根 Cargo、`apps/`、`parity/`、`upstream/`、Ruleset、发布资产或 AGOS。
 - 在独立性能基线 Issue 中创建性能优化、产品迁移、`parity-exception`、运行上游/半成品或填写绝对性能预算，但没有新的独立 Issue 与项目所有者批准。
-- Issue `#104` 出现二十九路径或 `sha256:47dcb2c181daa61a8df073e7f3ada069bf8e3d9b95df0c57f7709bcb6cde211d` 之外的新增、删除或重命名路径；引入数据库写入/删除/修复/迁移/备份/恢复、任意路径、Provider/正文/Token/模型/账号/凭据披露、UI、网络、子进程、永久线程/Watcher、其他依赖家族或其他 feature，或在 Final Head Review、CI 与 Artifact 闭环和独立授权前请求 Squash Merge。
+- Issue `#105` 出现九路径或 `sha256:0c90d018e06aa640d33a4c65c75aea45c89eb0e365b91fadee803b0426c8c58f` 之外的新增、删除或重命名路径；锁文件出现第三个 package 变化；需要升级 Iced/winit/smithay、修改 `Cargo.toml`、产品、UI、Workflow、Ruleset、Runner、上游缓存或 AGOS；fresh audit 仍有漏洞，或在 Final Head Review、CI 与 Artifact 闭环和独立授权前请求 Squash Merge。
 - Fresh 验证失败、Ruleset 变化、Review 对话未闭环或出现未批准的一致性差异。

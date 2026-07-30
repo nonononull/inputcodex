@@ -8,8 +8,8 @@
 GitHub Issue、PR 与 Actions。
 
 Gate 3 七成员 Rust Workspace、Gate 4 上游审计/功能目录/性能基线，以及 Gate 5 的平台路径、
-应用概览、版本与启动意图、运行时环境冲突、Relay 环境、设置、诊断日志和 Relay 状态只读观察
-能力已经建立。
+应用概览、版本与启动意图、运行时环境冲突、Relay 环境、设置、诊断日志、Relay 状态、上下文
+条目和本地会话目录只读观察能力已经建立。
 该说明只用于选择正确命令，不能替代任务计划和 GitHub 新鲜证据。
 
 ## 文档变更轻量验证
@@ -26,7 +26,7 @@ git diff --check
 
 路径范围、Markdown 链接和任务特有内容守卫由对应 Session Plan 与 Runtime Workflow 定义。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供二十九个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供三十一个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -57,6 +57,8 @@ git diff --check
 27. Issue `#95` 二十四路径、诊断日志尾部有界观察、损坏记录分类、Parity 单入口分拆和最终本地轻量门禁验证。
 28. Issue `#98` 二十七路径、Relay 双文档有界观察、凭据存在事实、配置完整性、Parity 单入口分拆和最终本地轻量门禁验证。
 29. Issue `#101` 二十四路径、上下文能力固定文件有界观察、条目最小投影、严格 TOML 失败语义、Parity 单入口分拆和最终本地轻量门禁验证。
+30. Issue `#104` 二十九路径、只读 SQLite 会话目录、多来源排序/去重、分页、超时取消、最小披露和最终本地轻量门禁验证。
+31. Issue `#105` 九路径、quick-xml 两条 high RustSec 公告、精确两 package 锁文件升级、许可证和 audit RED/GREEN 验证。
 
 当前禁止：
 
@@ -78,6 +80,172 @@ git diff --check
 - 在 Issue `#95` 中接受任意路径/长度/过滤器、读取完整日志、返回正文/字段/事件/detail/PID/时间戳/实际路径/用户名/机器名/凭据、写入或清理日志、复制诊断报告、联网、调用子进程、启动线程/Watcher、打开 UI、注入、使用 `unsafe`、迁移其余诊断总功能、修改 Cargo/Workflow/Ruleset/Release/`upstream/` 或 AGOS。
 - 在 Issue `#98` 中公开任意路径、返回账号/Token/Provider/URL/字段/内容/认证来源/实际路径、写文件、修改环境、联网、调用子进程、启动线程/Watcher、打开 UI、注入、使用 `unsafe`、迁移完整 Relay 文件读取/保存/切换/回填、修改 Workflow/Ruleset/Release/`upstream/` 或 AGOS。
 - 在 Issue `#101` 中接受任意路径或配置正文、返回完整 TOML/摘要/命令/参数/环境变量/Header/URL/Token/账号/实际路径、写文件、联网、调用子进程、启动线程/Watcher、打开 UI、注入、使用 `unsafe`、新增依赖、迁移上下文增加/删除/同步/提取/设置正文解析、修改 Workflow/Ruleset/Release/`upstream/` 或 AGOS。
+- 在 Issue `#105` 中修改 `Cargo.toml`、升级 Iced/winit/smithay、改产品功能/UI/Workflow/Ruleset/Runner/`upstream/`/AGOS，或让 `Cargo.lock` 出现 `wayland-scanner` 与 `quick-xml` 之外的 package 变化。
+
+## Issue #105 quick-xml RustSec 高危公告修复本地轻量验证
+
+在仓库根目录、分支 `codex/issue-105-quick-xml-rustsec-remediation` 执行。完整 Workspace 与
+Windows/macOS/Linux 编译继续交给标准 GitHub-hosted runners；本地只验证锁文件精确差异、
+fresh RustSec 结果、许可证/MSRV、元数据、格式和仓库合同。`cargo audit` 需要网络；若 advisory-db
+直连失败，先按 `err.md` 的已验证当前 shell 代理恢复，再从头重跑本节，不得使用旧数据库结果冒充
+fresh GREEN。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+function Assert-NativeSuccess {
+  param([Parameter(Mandatory)][string]$Label)
+  if ($LASTEXITCODE -ne 0) { throw "$Label 失败：$LASTEXITCODE" }
+}
+
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+$expectedBranch = 'codex/issue-105-quick-xml-rustsec-remediation'
+$branch = git branch --show-current
+Assert-NativeSuccess 'Issue #105 分支读取'
+if ($branch -ne $expectedBranch) { throw "Issue #105 分支错误：$branch" }
+
+$metadataRaw = & cargo metadata --locked --offline --no-deps --format-version 1
+Assert-NativeSuccess 'Issue #105 Cargo metadata'
+$metadata = $metadataRaw | ConvertFrom-Json
+if ($metadata.workspace_members.Count -ne 7) {
+  throw "Issue #105 Workspace 成员数量漂移：$($metadata.workspace_members.Count)"
+}
+
+$lockText = Get-Content -LiteralPath Cargo.lock -Raw -Encoding UTF8
+function Get-LockPackage {
+  param([Parameter(Mandatory)][string]$Name)
+  $escaped = [regex]::Escape($Name)
+  $pattern = "(?ms)^\[\[package\]\]\r?\nname = `"$escaped`"\r?\n(?<body>.*?)(?=^\[\[package\]\]|\z)"
+  $matches = [regex]::Matches($lockText, $pattern)
+  if ($matches.Count -ne 1) { throw "Issue #105 锁文件中 $Name block 数量为 $($matches.Count)" }
+  $body = $matches[0].Groups['body'].Value
+  $version = [regex]::Match($body, '(?m)^version = "(?<value>[^"]+)"$').Groups['value'].Value
+  $source = [regex]::Match($body, '(?m)^source = "(?<value>[^"]+)"$').Groups['value'].Value
+  $checksum = [regex]::Match($body, '(?m)^checksum = "(?<value>[^"]+)"$').Groups['value'].Value
+  [pscustomobject]@{ Name = $Name; Version = $version; Source = $source; Checksum = $checksum }
+}
+
+$quickXml = Get-LockPackage 'quick-xml'
+$waylandScanner = Get-LockPackage 'wayland-scanner'
+$registry = 'registry+https://github.com/rust-lang/crates.io-index'
+if ($quickXml.Version -ne '0.41.0' -or $quickXml.Source -ne $registry -or
+    $quickXml.Checksum -ne 'e660451e55124f798a69a5af3f49ccfbefbd41910eefd25caf2393e1f3473ec1') {
+  throw "Issue #105 quick-xml 锁定漂移：$($quickXml | ConvertTo-Json -Compress)"
+}
+if ($waylandScanner.Version -ne '0.31.11' -or $waylandScanner.Source -ne $registry -or
+    $waylandScanner.Checksum -ne '338e30461b3a2b67d70eb30a6d89f8e0c93a833e07d2ae89085cd070c4a00ac0') {
+  throw "Issue #105 wayland-scanner 锁定漂移：$($waylandScanner | ConvertTo-Json -Compress)"
+}
+if ($lockText.Contains('name = "quick-xml"' + "`r`n" + 'version = "0.39.4"') -or
+    $lockText.Contains('name = "wayland-scanner"' + "`r`n" + 'version = "0.31.10"')) {
+  throw 'Issue #105 旧漏洞依赖版本仍存在。'
+}
+
+$numstat = @(git diff --numstat origin/main -- Cargo.lock)
+Assert-NativeSuccess 'Issue #105 Cargo.lock numstat'
+if ($numstat.Count -ne 1 -or $numstat[0] -ne "4`t4`tCargo.lock") {
+  throw "Issue #105 Cargo.lock 必须精确为 4/4：$($numstat -join '; ')"
+}
+
+$lockDiff = @(git diff --unified=0 origin/main -- Cargo.lock)
+Assert-NativeSuccess 'Issue #105 Cargo.lock diff'
+$actualChanges = @($lockDiff | Where-Object { $_ -match '^[+-](version|checksum) = ' })
+$expectedChanges = @(
+  '-version = "0.39.4"',
+  '-checksum = "cdcc8dd4e2f670d309a5f0e83fe36dfdc05af317008fea29144da1a2ac858e5e"',
+  '+version = "0.41.0"',
+  '+checksum = "e660451e55124f798a69a5af3f49ccfbefbd41910eefd25caf2393e1f3473ec1"',
+  '-version = "0.31.10"',
+  '-checksum = "9c324a910fd86ebdc364a3e61ec1f11737d3b1d6c273c0239ee8ff4bc0d24b4a"',
+  '+version = "0.31.11"',
+  '+checksum = "338e30461b3a2b67d70eb30a6d89f8e0c93a833e07d2ae89085cd070c4a00ac0"'
+)
+if ((Compare-Object ($expectedChanges | Sort-Object) ($actualChanges | Sort-Object)).Count -ne 0) {
+  throw "Issue #105 Cargo.lock package 变化漂移：$($actualChanges -join '; ')"
+}
+
+$quickInfo = @(& cargo info quick-xml@0.41.0 2>&1)
+Assert-NativeSuccess 'Issue #105 quick-xml metadata'
+if (($quickInfo -join "`n") -notmatch '(?m)^license:\s+MIT\s*$' -or
+    ($quickInfo -join "`n") -notmatch '(?m)^rust-version:\s+1\.79\s*$') {
+  throw 'Issue #105 quick-xml 许可证或 MSRV 漂移。'
+}
+$scannerInfo = @(& cargo info wayland-scanner@0.31.11 2>&1)
+Assert-NativeSuccess 'Issue #105 wayland-scanner metadata'
+if (($scannerInfo -join "`n") -notmatch '(?m)^license:\s+MIT\s*$' -or
+    ($scannerInfo -join "`n") -notmatch '(?m)^rust-version:\s+1\.71\s*$') {
+  throw 'Issue #105 wayland-scanner 许可证或 MSRV 漂移。'
+}
+
+$auditRaw = & cargo audit --json
+$auditExit = $LASTEXITCODE
+if ($auditExit -ne 0) { throw "Issue #105 fresh cargo audit 失败：$auditExit" }
+$audit = $auditRaw | ConvertFrom-Json
+if ($audit.vulnerabilities.count -ne 0) {
+  $ids = @($audit.vulnerabilities.list | ForEach-Object { $_.advisory.id })
+  throw "Issue #105 仍有 RustSec 漏洞：$($ids -join ', ')"
+}
+$warningIds = @($audit.warnings.unmaintained | ForEach-Object { $_.advisory.id })
+Write-Output "ISSUE_105_AUDIT_GREEN vulnerabilities=0 warnings=$($warningIds.Count) ids=$($warningIds -join ',')"
+
+cargo fmt --all -- --check
+Assert-NativeSuccess 'Issue #105 rustfmt'
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+Assert-NativeSuccess 'Issue #105 CI 合同'
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #105 仓库政策'
+
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #105 Release Audit'
+
+$approved = @(
+  'AGENTS.md',
+  'build.md',
+  'Cargo.lock',
+  'docs/plans/2026-07-30-issue-105-quick-xml-rustsec-remediation.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-07-30-issue-105-quick-xml-rustsec-remediation.md',
+  'docs/reports/issue-105-quick-xml-rustsec-remediation.md',
+  'docs/workflows/2026-07-30-issue-105-quick-xml-rustsec-remediation-runtime.md',
+  'err.md'
+) | Sort-Object
+$scopePayload = ($approved -join "`n") + "`n"
+$scopeHash = [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData(
+    [Text.UTF8Encoding]::new($false).GetBytes($scopePayload)
+  )
+).ToLowerInvariant()
+if ($approved.Count -ne 9) { throw "Issue #105 路径数量漂移：$($approved.Count)" }
+if ($scopeHash -ne '0c90d018e06aa640d33a4c65c75aea45c89eb0e365b91fadee803b0426c8c58f') {
+  throw "Issue #105 scope_hash 漂移：sha256:$scopeHash"
+}
+
+$actual = @(
+  git -c core.quotePath=false diff --name-only origin/main...HEAD
+  git -c core.quotePath=false diff --name-only
+  git -c core.quotePath=false ls-files --others --exclude-standard
+) | Where-Object { $_ } | Sort-Object -Unique
+$outside = @($actual | Where-Object { $_ -notin $approved })
+if ($outside.Count -ne 0) { throw "Issue #105 越界路径：$($outside -join ', ')" }
+if ($actual.Count -ne 9 -or (Compare-Object $approved $actual).Count -ne 0) {
+  throw "Issue #105 实际路径必须精确为九路径：$($actual -join ', ')"
+}
+$actualPayload = ($actual -join "`n") + "`n"
+$actualHash = [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData(
+    [Text.UTF8Encoding]::new($false).GetBytes($actualPayload)
+  )
+).ToLowerInvariant()
+if ($actualHash -ne $scopeHash) { throw "Issue #105 实际范围 hash 漂移：sha256:$actualHash" }
+
+git diff --check origin/main
+Assert-NativeSuccess 'Issue #105 Git 空白检查'
+
+Write-Output "ISSUE_105_LOCAL_GREEN scope=9 hash=sha256:$actualHash vulnerabilities=0"
+```
 
 ## Issue #104 本地会话目录只读观察本地轻量验证
 
