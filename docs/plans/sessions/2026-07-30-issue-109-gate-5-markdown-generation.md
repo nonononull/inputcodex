@@ -219,11 +219,29 @@ review_correction_tdd: targeted-green-domain-7-platform-21
 review_correction_full_gate: passed-29-paths-four-crate-tests-clippy
 actual_scope: 29-paths-with-err-md
 actual_scope_hash: sha256:b113da5d41514f50e36cef7d4eb9ade89e2562cbcfe8d392a5173d38fd0ebaac
-remote_delivery: pending
+pull_request: github-dynamic-see-pr-110
+post_pr_incremental_review: completed-0-critical-3-important-2-minor
+post_pr_review_disposition: accepted-3-residual-boundary-1-rejected-with-evidence-1
+post_pr_correction_tdd: targeted-green-platform-23
+post_pr_correction_clippy: passed-platform-all-targets
+post_pr_correction_full_gate: passed-29-paths-four-crate-tests-clippy
+remote_delivery: github-dynamic-see-pr-110
 ```
 
 独立评审发现“资源上限晚于分配”与“路径检查/打开分离”两个新可复用根因，已写入 `err.md`，
 因此实际范围合法切换为批准的完整 `29` 路径。测试数据全部现场合成；未读取、复制或提交真实会话。
+
+## PR 后增量评审处置
+
+- SQLite：`ValueRef` 只能避免 Rust 侧提前分配，不能阻止 SQLite C 层物化完整结果文本；已改为
+  `?1` 绑定会话 ID、`?2` 绑定字节上限，并用 `octet_length` 与惰性 `CASE` 先分类超限。
+- rollout：发现式候选在 metadata 匹配后不再按路径重开；已验证 `File` 回卷后直接交给全文解析。
+- 残余边界：Rust 1.97.1 的 Windows 强文件 ID API 仍不稳定，rusqlite 原始连接 handle 需要
+  `unsafe`；批准范围又禁止 `unsafe`、新依赖和 Cargo 改动，因此保留 no-follow、组件复验与稳定
+  metadata fail-closed 比较，并明确不宣称可抵御伪造全部稳定 metadata 的 ABA。
+- 闰秒：继续接受 RFC 3339 允许的六月/十二月月末位置，不引入会拒绝未来闰秒的静态历史表。
+- 远端状态：PR `#110` 的 Head、Checks、Artifact、Review 与最终授权均为 GitHub 动态事实，仓库
+  只记录 `github-dynamic-see-pr-110`。
 
 ## Agent Lifecycle
 

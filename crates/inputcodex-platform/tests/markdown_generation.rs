@@ -6,7 +6,7 @@ use std::{
     mem::size_of,
     path::{Path, PathBuf},
     sync::atomic::{AtomicU64, Ordering},
-    time::Duration,
+    time::{Duration, Instant},
 };
 
 use inputcodex_application::{
@@ -337,6 +337,20 @@ fn sqlite_标题和_rollout_path_在分配前受文本字节上限约束() {
 }
 
 #[test]
+fn sqlite_有界投影在返回文本前检查字节长度() {
+    assert_eq!(
+        subject::bounded_text_projection("title", "display_title"),
+        "CASE WHEN octet_length(title) > ?2 THEN NULL ELSE title END AS display_title, \
+         CASE WHEN octet_length(title) > ?2 THEN 1 ELSE 0 END AS display_title_oversized"
+    );
+    assert_eq!(
+        subject::bounded_text_projection("NULL", "rollout_path"),
+        "CASE WHEN octet_length(NULL) > ?2 THEN NULL ELSE NULL END AS rollout_path, \
+         CASE WHEN octet_length(NULL) > ?2 THEN 1 ELSE 0 END AS rollout_path_oversized"
+    );
+}
+
+#[test]
 fn automation_runs_缺失显式路径时只在固定根发现匹配_rollout() {
     let temp = TestDirectory::new("automation-discovery");
     let rollout = temp.path().join("archived_sessions/2026/07/matched.jsonl");
@@ -652,6 +666,50 @@ fn 文件身份比较检测同一路径在检查后被替换() {
 
     assert!(subject::same_file_identity(&before, &moved_original));
     assert!(!subject::same_file_identity(&before, &replacement));
+}
+
+#[test]
+fn 发现式_rollout_在元数据验证后沿用同一文件句柄() {
+    let temp = TestDirectory::new("stable-discovered-handle");
+    let path = temp.path().join("sessions/current.jsonl");
+    let original = temp.path().join("sessions/original.jsonl");
+    write_rollout(
+        &path,
+        &[
+            r#"{"type":"session_meta","payload":{"id":"private-session-stable-handle"}}"#,
+            r#"{"type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"original body"}]}}"#,
+        ],
+    );
+    let cancellation = MarkdownGenerationCancellation::default();
+    let interruption =
+        subject::InterruptionControl::new(cancellation, Instant::now() + Duration::from_secs(2));
+    let policy = subject::MarkdownGenerationPolicy::default();
+    let file = subject::discover_rollout_file(
+        temp.path(),
+        "private-session-stable-handle",
+        policy,
+        &interruption,
+    )
+    .expect("发现匹配 rollout 应成功")
+    .expect("应返回已验证文件句柄");
+
+    fs::rename(&path, &original).expect("替换前保留已验证文件应成功");
+    write_rollout(
+        &path,
+        &[
+            r#"{"type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"replacement body"}]}}"#,
+        ],
+    );
+
+    let messages = subject::load_rollout_messages_from_file(
+        file,
+        "private-session-stable-handle",
+        policy,
+        &interruption,
+    )
+    .expect("完整读取应继续使用已验证文件句柄");
+    assert_eq!(messages.len(), 1);
+    assert_eq!(messages[0].body(), "original body");
 }
 
 #[test]

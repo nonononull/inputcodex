@@ -2,7 +2,7 @@ use std::{
     collections::HashSet,
     ffi::OsStr,
     fs::{self, File, Metadata},
-    io::{self, BufRead, BufReader, Read},
+    io::{self, BufRead, BufReader, Read, Seek, SeekFrom},
     path::{Component, Path, PathBuf},
     sync::{
         Arc,
@@ -19,7 +19,7 @@ use inputcodex_domain::{
     LocalSessionTitle, MAX_MARKDOWN_MESSAGE_COUNT, MarkdownGenerationError, MarkdownMessage,
     MarkdownMessageRole, MarkdownUtcTimestamp, SessionMarkdownDocument,
 };
-use rusqlite::{Connection, ErrorCode, OpenFlags, OptionalExtension, types::ValueRef};
+use rusqlite::{Connection, ErrorCode, OpenFlags, OptionalExtension, params, types::ValueRef};
 use serde_json::Value;
 
 use crate::{
@@ -253,26 +253,26 @@ pub(super) fn generate_session_markdown_at_roots(
             .then_with(|| left.priority.cmp(&right.priority))
     });
     let record = records.remove(0);
-    let rollout_path = match record.rollout_path {
-        Some(path) => {
-            validate_rollout_path_with_probe(
-                codex_home,
-                &path,
-                &SystemMarkdownGenerationFileProbe,
-            )?;
-            path
-        }
-        None => discover_rollout_path(codex_home, request.session_id(), policy, &interruption)?
-            .ok_or_else(invalid_rollout)?,
+    let rollout = match record.rollout_path {
+        Some(path) => SelectedRollout::Path(path),
+        None => SelectedRollout::File(
+            discover_rollout_file(codex_home, request.session_id(), policy, &interruption)?
+                .ok_or_else(invalid_rollout)?,
+        ),
     };
 
-    let messages = load_rollout_messages(
-        codex_home,
-        &rollout_path,
-        request.session_id(),
-        policy,
-        &interruption,
-    )?;
+    let messages = match rollout {
+        SelectedRollout::Path(path) => load_rollout_messages(
+            codex_home,
+            &path,
+            request.session_id(),
+            policy,
+            &interruption,
+        )?,
+        SelectedRollout::File(file) => {
+            load_rollout_messages_from_file(file, request.session_id(), policy, &interruption)?
+        }
+    };
     if messages.is_empty() {
         return Ok(None);
     }
@@ -290,6 +290,12 @@ struct SessionRecord {
     rollout_path: Option<PathBuf>,
     updated_at_ms: Option<i64>,
     priority: usize,
+}
+
+#[derive(Debug)]
+enum SelectedRollout {
+    Path(PathBuf),
+    File(File),
 }
 
 #[derive(Debug)]
@@ -498,7 +504,9 @@ fn query_threads(
     interruption: &InterruptionControl,
 ) -> Result<Option<SessionRecord>, ApplicationError> {
     let title = optional_expression(columns, "title", "title", "NULL");
+    let title_projection = bounded_text_projection(title, "display_title");
     let rollout_path = optional_expression(columns, "rollout_path", "rollout_path", "NULL");
+    let rollout_path_projection = bounded_text_projection(rollout_path, "rollout_path");
     let updated_at = if columns.contains("updated_at_ms") {
         "updated_at_ms"
     } else if columns.contains("updated_at") {
@@ -511,7 +519,7 @@ fn query_threads(
         "NULL"
     };
     let sql = format!(
-        "SELECT {title} AS display_title, {rollout_path} AS rollout_path, \
+        "SELECT {title_projection}, {rollout_path_projection}, \
          {updated_at} AS updated_at_ms FROM threads WHERE id = ?1 LIMIT 1"
     );
     query_record(
@@ -539,7 +547,9 @@ fn query_automation_runs(
     } else {
         "NULL"
     };
+    let title_projection = bounded_text_projection(title, "display_title");
     let rollout_path = optional_expression(columns, "rollout_path", "rollout_path", "NULL");
+    let rollout_path_projection = bounded_text_projection(rollout_path, "rollout_path");
     let updated_at = if columns.contains("updated_at") && columns.contains("created_at") {
         "COALESCE(updated_at, created_at)"
     } else if columns.contains("updated_at") {
@@ -550,7 +560,7 @@ fn query_automation_runs(
         "NULL"
     };
     let sql = format!(
-        "SELECT {title} AS display_title, {rollout_path} AS rollout_path, \
+        "SELECT {title_projection}, {rollout_path_projection}, \
          {updated_at} AS updated_at_ms FROM automation_runs WHERE thread_id = ?1 LIMIT 1"
     );
     query_record(
@@ -583,8 +593,14 @@ fn query_record(
     max_text_bytes: usize,
     interruption: &InterruptionControl,
 ) -> Result<Option<SessionRecord>, ApplicationError> {
+    let max_text_bytes_parameter = i64::try_from(max_text_bytes).unwrap_or(i64::MAX);
     let result = connection
-        .query_row(sql, [session_id], |row| {
+        .query_row(sql, params![session_id, max_text_bytes_parameter], |row| {
+            let title_oversized = row.get::<_, i64>(1)? != 0;
+            let rollout_path_oversized = row.get::<_, i64>(3)? != 0;
+            if title_oversized || rollout_path_oversized {
+                return Ok(QueriedSessionRecord::ResourceLimit);
+            }
             let raw_title = match read_bounded_optional_text(row.get_ref(0)?, max_text_bytes) {
                 BoundedOptionalText::Value(value) => value,
                 BoundedOptionalText::ResourceLimit => {
@@ -594,7 +610,7 @@ fn query_record(
                     return Ok(QueriedSessionRecord::InvalidContent);
                 }
             };
-            let raw_rollout_path = match read_bounded_optional_text(row.get_ref(1)?, max_text_bytes)
+            let raw_rollout_path = match read_bounded_optional_text(row.get_ref(2)?, max_text_bytes)
             {
                 BoundedOptionalText::Value(value) => value,
                 BoundedOptionalText::ResourceLimit => {
@@ -604,7 +620,7 @@ fn query_record(
                     return Ok(QueriedSessionRecord::InvalidContent);
                 }
             };
-            let updated_at_ms = row.get::<_, Option<i64>>(2)?;
+            let updated_at_ms = row.get::<_, Option<i64>>(4)?;
             Ok(QueriedSessionRecord::Record(SessionRecord {
                 title: raw_title.as_deref().and_then(LocalSessionTitle::from_raw),
                 rollout_path: raw_rollout_path
@@ -623,6 +639,13 @@ fn query_record(
         Some(QueriedSessionRecord::ResourceLimit) => Err(resource_limit()),
         Some(QueriedSessionRecord::InvalidContent) => Err(invalid_content()),
     }
+}
+
+pub(super) fn bounded_text_projection(expression: &str, alias: &str) -> String {
+    format!(
+        "CASE WHEN octet_length({expression}) > ?2 THEN NULL ELSE {expression} END AS {alias}, \
+         CASE WHEN octet_length({expression}) > ?2 THEN 1 ELSE 0 END AS {alias}_oversized"
+    )
 }
 
 fn read_bounded_optional_text(value: ValueRef<'_>, max_bytes: usize) -> BoundedOptionalText {
@@ -718,12 +741,12 @@ fn validate_codex_home_with_probe(
     Ok(())
 }
 
-fn discover_rollout_path(
+pub(super) fn discover_rollout_file(
     codex_home: &Path,
     session_id: &str,
     policy: MarkdownGenerationPolicy,
     interruption: &InterruptionControl,
-) -> Result<Option<PathBuf>, ApplicationError> {
+) -> Result<Option<File>, ApplicationError> {
     let probe = SystemMarkdownGenerationFileProbe;
     validate_codex_home_with_probe(codex_home, &probe)?;
     let mut candidates = Vec::new();
@@ -754,7 +777,7 @@ fn discover_rollout_path(
     let mut matched = None;
     for candidate in candidates {
         interruption.ensure_active()?;
-        if rollout_matches_session(
+        if let Some(file) = open_rollout_if_matches_session(
             codex_home,
             &candidate,
             session_id,
@@ -765,7 +788,7 @@ fn discover_rollout_path(
             if matched.is_some() {
                 return Err(invalid_rollout());
             }
-            matched = Some(candidate);
+            matched = Some(file);
         }
     }
     Ok(matched)
@@ -905,56 +928,64 @@ pub(super) fn same_file_identity(left: &Metadata, right: &Metadata) -> bool {
     left.dev() == right.dev() && left.ino() == right.ino()
 }
 
-fn rollout_matches_session(
+fn open_rollout_if_matches_session(
     codex_home: &Path,
     path: &Path,
     session_id: &str,
     policy: MarkdownGenerationPolicy,
     interruption: &InterruptionControl,
     discovery_bytes: &mut usize,
-) -> Result<bool, ApplicationError> {
-    let file = open_verified_rollout_file(codex_home, path, policy, interruption)?;
+) -> Result<Option<File>, ApplicationError> {
+    let mut file = open_verified_rollout_file(codex_home, path, policy, interruption)?;
     let take_limit = u64::try_from(policy.max_metadata_bytes)
         .unwrap_or(u64::MAX)
         .saturating_add(1);
-    let mut reader = BufReader::new(file.take(take_limit));
-    let mut candidate_bytes = 0_usize;
-    let mut line = String::new();
+    let matched = {
+        let mut reader = BufReader::new((&mut file).take(take_limit));
+        let mut candidate_bytes = 0_usize;
+        let mut line = String::new();
 
-    loop {
-        interruption.ensure_active()?;
-        line.clear();
-        let read = reader.read_line(&mut line).map_err(map_line_read_error)?;
-        if read == 0 {
-            return Ok(false);
-        }
-        candidate_bytes = candidate_bytes.saturating_add(read);
-        *discovery_bytes = discovery_bytes.saturating_add(read);
-        if candidate_bytes > policy.max_metadata_bytes
-            || *discovery_bytes > policy.max_discovery_bytes
-        {
-            return Err(resource_limit());
-        }
+        loop {
+            interruption.ensure_active()?;
+            line.clear();
+            let read = reader.read_line(&mut line).map_err(map_line_read_error)?;
+            if read == 0 {
+                break false;
+            }
+            candidate_bytes = candidate_bytes.saturating_add(read);
+            *discovery_bytes = discovery_bytes.saturating_add(read);
+            if candidate_bytes > policy.max_metadata_bytes
+                || *discovery_bytes > policy.max_discovery_bytes
+            {
+                return Err(resource_limit());
+            }
 
-        let raw = line.trim();
-        if raw.is_empty() {
-            continue;
+            let raw = line.trim();
+            if raw.is_empty() {
+                continue;
+            }
+            let event: Value = serde_json::from_str(raw).map_err(|_| invalid_content())?;
+            let Some(event_type) = event.get("type").and_then(Value::as_str) else {
+                return Err(invalid_content());
+            };
+            if event_type != "session_meta" {
+                continue;
+            }
+            let id = event
+                .get("payload")
+                .and_then(|payload| payload.get("id"))
+                .or_else(|| event.get("id"))
+                .and_then(Value::as_str)
+                .ok_or_else(invalid_content)?;
+            break normalize_session_id(id) == normalize_session_id(session_id);
         }
-        let event: Value = serde_json::from_str(raw).map_err(|_| invalid_content())?;
-        let Some(event_type) = event.get("type").and_then(Value::as_str) else {
-            return Err(invalid_content());
-        };
-        if event_type != "session_meta" {
-            continue;
-        }
-        let id = event
-            .get("payload")
-            .and_then(|payload| payload.get("id"))
-            .or_else(|| event.get("id"))
-            .and_then(Value::as_str)
-            .ok_or_else(invalid_content)?;
-        return Ok(normalize_session_id(id) == normalize_session_id(session_id));
+    };
+
+    if !matched {
+        return Ok(None);
     }
+    file.seek(SeekFrom::Start(0)).map_err(|_| unavailable())?;
+    Ok(Some(file))
 }
 
 fn load_rollout_messages(
@@ -965,6 +996,15 @@ fn load_rollout_messages(
     interruption: &InterruptionControl,
 ) -> Result<Vec<MarkdownMessage>, ApplicationError> {
     let file = open_verified_rollout_file(codex_home, path, policy, interruption)?;
+    load_rollout_messages_from_file(file, session_id, policy, interruption)
+}
+
+pub(super) fn load_rollout_messages_from_file(
+    file: File,
+    session_id: &str,
+    policy: MarkdownGenerationPolicy,
+    interruption: &InterruptionControl,
+) -> Result<Vec<MarkdownMessage>, ApplicationError> {
     let take_limit = u64::try_from(policy.max_rollout_bytes)
         .unwrap_or(u64::MAX)
         .saturating_add(1);
@@ -1293,14 +1333,14 @@ fn map_line_read_error(error: io::Error) -> ApplicationError {
 }
 
 #[derive(Clone)]
-struct InterruptionControl {
+pub(super) struct InterruptionControl {
     cancellation: MarkdownGenerationCancellation,
     deadline: Instant,
     reason: Arc<AtomicU8>,
 }
 
 impl InterruptionControl {
-    fn new(cancellation: MarkdownGenerationCancellation, deadline: Instant) -> Self {
+    pub(super) fn new(cancellation: MarkdownGenerationCancellation, deadline: Instant) -> Self {
         Self {
             cancellation,
             deadline,

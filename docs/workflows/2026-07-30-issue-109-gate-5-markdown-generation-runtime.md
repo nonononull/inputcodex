@@ -10,7 +10,7 @@
 - `baseline_ref`: `88eaf6301f1897cadaf4da830db998078fb06e97`
 - `branch_ref`: `codex/issue-109-gate-5-markdown-generation`
 - `candidate_scope_hash`: `sha256:b113da5d41514f50e36cef7d4eb9ade89e2562cbcfe8d392a5173d38fd0ebaac`
-- `runtime_state`: `review-corrections-local-verified-pr-pending`
+- `runtime_state`: `pr-110-corrective-delivery-dynamic`
 - `paseo_workspace_ref`: `wks_495c490aa88811f1`
 - `agos_status`: `blocked-needs-input-unregistered-bypassed`
 
@@ -27,7 +27,10 @@ Issue #108 owner decision A
   -> local closeout
   -> independent review + correction RED/GREEN
   -> final local gate
-  -> NOW: Review/CI
+  -> PR #110 incremental review correction
+  -> corrective full local gate
+  -> corrective source checkpoint
+  -> NOW: github-dynamic-see-pr-110 Review/CI/Artifact
   -> Final Head independent Squash authorization
 ```
 
@@ -128,10 +131,25 @@ checkpoint `60da5b1`。
 CI 合同 `35/35`、仓库政策、Release Audit、Cargo metadata、静态安全门与
 `29 / sha256:b113da...` 范围门全部通过；review-correction named snapshot 待建立。
 
+### Node 7.6：PR 后增量评审修正
+
+1. Fresh reviewer 复核 PR `#110`，返回 `0 Critical / 3 Important / 2 Minor`。
+2. 接受 SQLite C 层文本物化与发现式 rollout 按路径重开两个 Important；分别以 SQL 返回前
+   限长和同一 `File` 句柄消费测试完成 RED/GREEN。
+3. Windows 强文件 ID 与 SQLite 连接句柄同一性记录为残余边界：Rust 1.97.1 稳定 API 与
+   `unsafe`/依赖/Cargo 禁令下不可在本切片证明，不伪装成已修复。
+4. 驳回静态闰秒历史表；接受动态交付证据归位，统一使用 `github-dynamic-see-pr-110`。
+5. VERIFY：Platform Markdown 专项、Platform all-targets Clippy、完整 Issue #109 本地门禁。
+
+状态：`completed`。两项 RED 已确认，最小 GREEN 后 Platform `23/23` 与 Clippy 通过；完整本地
+门禁再次达到四 crate 全绿、CI 合同 `35/35`、仓库政策零违规、Release Audit current 及
+`29 / sha256:b113da...`。本提交作为 corrective source checkpoint；普通 push 及后续远端状态
+只见 `github-dynamic-see-pr-110`。
+
 ### Node 8：Remote Delivery
 
-1. 普通 push。
-2. 创建关联 #109 的非 Draft PR。
+1. 已创建关联 #109 的非 Draft PR `#110`；动态状态只见 GitHub。
+2. 完整本地门禁后建立 corrective checkpoint，并普通 push 到现有 PR。
 3. Review 对话逐条记录根因、处理和验证证据。
 4. 核验 CI、Performance Baseline 与 Artifact 0。
 5. 绑定 Final Head 请求项目所有者独立 Squash Merge 授权。
@@ -140,8 +158,12 @@ CI 合同 `35/35`、仓库政策、Release Audit、Cargo metadata、静态安全
 
 - `err.md` 先查重；已知 PowerShell `rg` glob、scope hash、WAL SHM 协调和 GitHub 多行正文问题直接复用。
 - `fs::read_to_string`、普通 `Connection::open`、真实路径化错误和本机时区一旦出现立即停止。
-- 目录项必须在 `Vec` 扩张前收到剩余上限；SQLite 文本必须先按借用字节检查再分配。
-- SQLite/rollout 打开必须保留 no-follow、组件复验与打开前后文件一致性；重复匹配必须失败。
+- 目录项必须在 `Vec` 扩张前收到剩余上限；SQLite 文本必须先在 SQL C 层通过 `octet_length`
+  与 `?2` 分类，再由借用 `ValueRef` 二次检查。
+- SQLite/rollout 打开必须保留 no-follow、组件复验与打开前后文件一致性；发现式匹配必须沿用
+  已验证句柄，重复匹配必须失败。
+- Windows 稳定 metadata 比较不能表述成强文件 ID；SQLite handle 同一性需要 `unsafe`，在本任务
+  禁令内作为显式 ABA 残余边界保留。
 - 文件名按 UTF-8 字节边界截断，不得切断字符；Debug 不得派生泄露正文。
 - RFC 3339 手工规范化必须用日期边界测试证明，不能靠样例推测。
 - Source Index 是公开模块一对一映射；不得为保存 UI 发明虚假 source entry。

@@ -956,14 +956,15 @@
 - 验证：修正后 fresh audit 真实执行并返回 `CARGO_AUDIT_EXIT=0`、`DEPENDENCIES=350`、`VULNERABILITIES=0`，两条 unmaintained warning 可正常枚举。
 - 关联：Issue `#105`、`build.md`、cargo-audit JSON 输出。
 
-### 2026-07-30：资源上限晚于目录/SQLite 分配且路径检查与打开分离
+### 2026-07-30：资源上限晚于目录/SQLite C 层物化且 rollout 验证与消费未绑定句柄
 
-- 环境：Issue `#109` 的独立只读评审复核受控 SQLite、rollout 发现和 JSONL 打开边界。
-- 现象：目录项先完整收集到 `Vec` 再检查数量，SQLite `title` / `rollout_path` 先分配完整 `String` 再进入领域截断；rollout 路径种类检查与实际打开分成两个文件系统时刻，发现式重复会话又会按词法首项提前返回。
-- 根因：资源门禁被放在分配之后，路径安全只验证名称而没有把 no-follow 打开、打开前后组件复验和文件身份绑定为同一读取合同；“确定性首项”也被错误当成“唯一权威来源”。
-- 处理：目录读取只收集剩余上限加一项并在继续分配前失败；SQLite 文本通过借用 `ValueRef` 先检查 `8 KiB` 字节上限再构造 `String` / `PathBuf`；SQLite 增加 `SQLITE_OPEN_NOFOLLOW`，rollout 使用平台 no-follow 标志、打开前后组件复验和文件身份/稳定元数据比较；多个匹配 rollout 明确失败，显式路径同步执行四层目录深度上限。
-- 验证：每项先以专项测试取得 RED，再达到 Domain `7/7`、Platform `21/21`，两 crate Clippy `-D warnings`、rustfmt 与 `git diff --check` 通过；完整 Issue `#109` 门禁和 GitHub-hosted 双平台证据仍必须在最终修复 Head 上重新执行。
-- 关联：Issue `#109`、`crates/inputcodex-platform/src/markdown_generation.rs`、`crates/inputcodex-platform/tests/markdown_generation.rs`。
+- 环境：Issue `#109` 的两轮独立只读评审复核受控 SQLite、rollout 发现和 JSONL 打开边界。
+- 现象：目录项曾先完整收集到 `Vec` 再检查数量；SQLite `title` / `rollout_path` 即使改用借用 `ValueRef`，SQLite C 层仍会先把完整结果文本物化；发现式 rollout 验证会话 metadata 后又按路径重新打开全文，验证对象与消费对象可能不是同一文件。
+- 根因：资源门禁必须位于数据库结果文本物化之前，而不是只位于 Rust 字符串分配之前；基于路径的验证结果也不能跨越关闭并重开，必须把已验证的所有权句柄直接传给消费阶段。“确定性首项”同样不能代替唯一权威来源证明。
+- 处理：目录读取只收集剩余上限加一项并在继续分配前失败；SQLite 查询以参数 `?2` 和惰性 `CASE WHEN octet_length(...) > ?2` 在返回文本前生成超限标志，只有未超限分支才返回文本，`ValueRef` 保留为二次字节与类型防线；`?1` 继续只绑定会话 ID。SQLite 保留 `SQLITE_OPEN_NOFOLLOW`；rollout 使用平台 no-follow、打开前后组件复验和文件身份比较，发现式匹配返回已验证的同一 `File`，回卷后直接完成全文解析；多个匹配明确失败，显式路径同步执行四层目录深度上限。
+- 残余边界：本机 `rustc 1.97.1` 的 Windows `MetadataExt::file_index` / `volume_serial_number` 仍不稳定，`rusqlite::Connection::handle` 又要求 `unsafe`。Issue `#109` 明确禁止 `unsafe`、新依赖和 Cargo 改动，因此 Windows 继续以 no-follow、组件复验及稳定 metadata 字段做 fail-closed 比较；恶意替换者伪造全部稳定 metadata 的 ABA，以及 SQLite 连接句柄与路径 metadata 的内核级同一性，不在本切片可证明范围内，禁止把现状表述为强文件 ID 保证。
+- 验证：每项先以专项测试取得 RED；最新 Platform 专项 `23/23` 与 Platform all-targets Clippy `-D warnings` 通过，其中分别固定“SQL 返回前限长”和“metadata 验证后沿用同一文件句柄”。完整本地门禁再次达到四 crate 全绿、CI 合同 `35/35`、仓库政策零违规、Release Audit current 及 `29 / sha256:b113da...`；GitHub-hosted 双平台与 Artifact 证据仍必须在 PR `#110` 的最终修复 Head 上重新执行，动态状态只见 PR。
+- 关联：Issue `#109`、PR `#110`、`crates/inputcodex-platform/src/markdown_generation.rs`、`crates/inputcodex-platform/tests/markdown_generation.rs`。
 
 ### 2026-07-30：macOS 临时目录逻辑路径触发 SQLite NOFOLLOW 拒绝
 

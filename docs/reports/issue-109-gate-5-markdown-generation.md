@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-- `state`: `REVIEW_CORRECTIONS_LOCAL_VERIFIED_PR_PENDING`
+- `state`: `PR_110_CORRECTIVE_DELIVERY_DYNAMIC`
 - `tracking_issue_ref`: `https://github.com/nonononull/inputcodex/issues/109`
 - `approved_decision_ref`: `https://github.com/nonononull/inputcodex/issues/108#issuecomment-5130112866`
 - `implementation_scope_approval_ref`: `https://github.com/nonononull/inputcodex/issues/109#issuecomment-5130373022`
@@ -14,8 +14,10 @@
 - `platform_checkpoint_ref`: `b4a66b5`
 - `parity_checkpoint_ref`: `338359f`
 - `local_verified_checkpoint_ref`: `623e35abfbf94ef667adb368b7995c0f496639d0`
-- `review_correction_checkpoint_ref`: `pending-self-checkpoint`
-- `remote_delivery_started`: `false`
+- `review_correction_checkpoint_ref`: `this-corrective-source-commit`
+- `pull_request_ref`: `https://github.com/nonononull/inputcodex/pull/110`
+- `dynamic_delivery_evidence`: `github-dynamic-see-pr-110`
+- `remote_delivery_started`: `true`
 
 ## 交付结果
 
@@ -43,17 +45,19 @@
 - SQLite 候选最多 `32`，复用平台 `CODEX_HOME` 与合法非空 `CODEX_SQLITE_HOME` 语义。
 - 连接只使用 `SQLITE_OPEN_READ_ONLY | SQLITE_OPEN_NO_MUTEX | SQLITE_OPEN_NOFOLLOW`、
   `query_only=1`、`50 ms` busy timeout 和 `1000` progress interval；SQL 只由固定白名单表达式
-  与参数 `?1` 组成。
+  与参数 `?1` / `?2` 组成，分别绑定会话 ID 与 `8 KiB` 文本字节上限。
 - 任一候选数据库损坏、schema 不支持或查询失败都会阻断生成，较旧重复记录不得冒充权威结果。
 - rollout 只允许位于普通目录 `CODEX_HOME/sessions` 或 `archived_sessions`；相对路径、父目录、
   根越界、符号链接、非普通文件、非 JSONL 和会话元数据不匹配均失败。
 - rollout 深度 `4`、枚举项 `8192`、候选 `4096`、metadata 前缀 `8 KiB`、发现累计
   `32 MiB`、单文件 `16 MiB`、非空记录 `100000`、消息 `20000`、Markdown `16 MiB`。
 - 整体 deadline 为 `2 s`；取消与超时均使用稳定脱敏错误，JSONL 全程经 `BufReader` 流式解析。
-- SQLite title/rollout_path 复用 `8 KiB` metadata 上限，经借用 `ValueRef` 先检查字节再分配；
-  SQLite 与 rollout 目录项均在继续收集前执行剩余条目上限。
+- SQLite title/rollout_path 复用 `8 KiB` metadata 上限；SQL 先用 `octet_length` 与惰性 `CASE`
+  在结果文本物化前分类超限，借用 `ValueRef` 再做类型与字节二次检查；SQLite 与 rollout 目录项
+  均在继续收集前执行剩余条目上限。
 - rollout 使用平台 no-follow 打开、打开前后组件复验和文件身份/稳定元数据比较；发现到多个
-  同会话候选时明确失败，不按词法首项输出旧副本。
+  同会话候选时明确失败，不按词法首项输出旧副本；发现式匹配从 metadata 验证到全文解析沿用
+  同一个已打开 `File`，不再按路径重开。
 
 ## TDD 证据
 
@@ -67,6 +71,9 @@
 - 独立评审修正：reviewer 对 `origin/main..623e35a` 返回 `0 Critical / 5 Important / 3 Minor`；
   父线程逐条复核后接受六项、以证据驳回两项。新增 RED 覆盖目录预分配、SQLite 文本、重复
   rollout、显式深度、路径替换与闰秒位置，最终 Domain `7 passed`、Platform `21 passed`。
+- PR 后增量评审返回 `0 Critical / 3 Important / 2 Minor`；接受 SQL C 层物化、发现式重开竞态
+  和动态证据归位，固定两项新 RED/GREEN 后 Platform `23 passed`。Windows/SQLite ABA 作为约束
+  下的显式残余边界保留；静态闰秒历史表建议以 RFC 3339 语义驳回。
 
 ## 安全审查
 
@@ -78,6 +85,9 @@
   rusqlite、I/O、JSON 错误文本。
 - 测试全部使用现场合成 SQLite/JSONL；未读取、复制或提交真实用户会话。
 - WAL 验证证明主数据库与 WAL 字节、目录清单不变；SHM 只允许既有 reader 协调语义。
+- Windows `MetadataExt` 的强文件 ID 在 Rust 1.97.1 仍不稳定，rusqlite 原始连接 handle 需要
+  `unsafe`；本任务禁止 `unsafe`、新依赖与 Cargo 改动，因此 no-follow、组件复验和稳定 metadata
+  比较是当前 fail-closed 上限，不能声称覆盖伪造全部稳定 metadata 的 ABA 或 SQLite handle 级同一性。
 - 用户/助手文本按批准合同逐字保留；本切片只返回内存数据，不渲染也不联网。未来 renderer 的
   HTML/图片禁网属于文件保存/UI 独立评审，不得在生成层以转义篡改会话正文。
 
@@ -101,6 +111,11 @@ independent_review: completed-0-critical-5-important-3-minor
 review_disposition: accepted-6-rejected-with-evidence-2
 review_correction_tdd: targeted-green-domain-7-platform-21
 review_correction_full_gate: passed-29-paths-four-crate-tests-clippy
+post_pr_incremental_review: completed-0-critical-3-important-2-minor
+post_pr_review_disposition: accepted-3-residual-boundary-1-rejected-with-evidence-1
+post_pr_correction_tdd: targeted-green-platform-23
+post_pr_correction_clippy: passed-platform-all-targets
+post_pr_correction_full_gate: passed-29-paths-four-crate-tests-clippy
 parity_tdd: passed-red-green
 four_crate_tests_all_targets: passed
 four_crate_clippy_all_targets: passed
@@ -119,14 +134,15 @@ forbidden_capability_matches: 0
 git_diff_check: passed
 knowledge_graph: codegraph-not-initialized-skipped-without-init
 agos_default_entry: blocked-needs-input-unregistered-bypassed-no-write
-remote_push: pending
-pull_request: pending
-hosted_ci: pending-pr
+remote_delivery: github-dynamic-see-pr-110
+pull_request: github-dynamic-see-pr-110
+hosted_ci: github-dynamic-see-pr-110
 ```
 
 ## 下一门
 
-1. 重跑完整 Issue #109 本地门禁并建立 review-correction checkpoint。
-2. 普通 push，创建关联 Issue `#109` 的非 Draft PR，进入 Review/CI、Performance Baseline 与
-   Artifact 核验。
-3. Final Head 全绿后请求项目所有者独立 Squash Merge 授权；当前禁止自行合并。
+1. 普通 push 本 corrective source checkpoint 到现有非 Draft PR `#110`。
+2. 核验新 Head 的 Review/CI、Performance Baseline、
+   Review threads 与 Artifact；动态证据只见 `github-dynamic-see-pr-110`。
+3. 对新 Head 完成一次只读增量复评。
+4. Final Head 全绿后请求项目所有者独立 Squash Merge 授权；当前禁止自行合并。

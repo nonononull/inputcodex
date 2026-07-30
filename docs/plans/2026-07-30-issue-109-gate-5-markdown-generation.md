@@ -18,6 +18,8 @@
 - 选中 rollout 最大 `16 MiB`、最多 `100000` 个非空 JSONL 记录、最多 `20000` 条导出消息。
 - Markdown 最大 `16 MiB`，建议文件名最大 `160` UTF-8 字节。
 - SQLite busy timeout `50 ms`、progress interval `1000`、整体 deadline `2 s`。
+- SQL 只由固定白名单表达式组成：`?1` 绑定会话 ID，`?2` 绑定 `8 KiB` 文本字节上限；
+  超限必须在 SQLite 返回文本前分类，Rust `ValueRef` 只作二次防线。
 - 只输出用户/助手文本和 `> Image attachment omitted`；不输出内部角色、data URL、远程图片 URL 或图片字节。
 - 不修改 Cargo、UI、Workflow、Ruleset、Release、上游缓存或 AGOS。
 
@@ -113,8 +115,10 @@ impl MarkdownGenerationPort for SystemMarkdownGeneration { /* 系统入口 */ }
 
 - [x] 先写合成测试：零来源、threads/automation_runs、跨库去重、显式/发现 rollout、根越界、符号链接种类、只读/query_only、WAL 业务不变、malformed JSON、角色过滤、图片占位、UTC 正负偏移与日期边界、所有资源上限、超时/取消和错误脱敏。
 - [x] 运行 `cargo test --locked --offline -p inputcodex-platform --test markdown_generation`，确认因平台模块/API 缺失而 RED。
-- [x] 实现 SQLite 精确参数查询；任何候选数据库失败都阻断生成，避免较旧重复记录冒充权威记录。
-- [x] 实现固定根候选发现和流式 JSONL 解析；不得使用 `read_to_string`。
+- [x] 实现 SQLite 精确参数查询；用 `octet_length` 与惰性 `CASE` 在结果文本物化前执行字节上限，
+  任何候选数据库失败都阻断生成，避免较旧重复记录冒充权威记录。
+- [x] 实现固定根候选发现和流式 JSONL 解析；发现式匹配从 metadata 验证到全文解析沿用同一
+  `File`，不得使用 `read_to_string` 或验证后按路径重开。
 - [x] 实现不依赖本机时区和新依赖的 RFC 3339 → UTC 规范化，并覆盖闰年、跨日/月/年与正负 offset。
 - [x] 运行 Platform 测试、Clippy 与 fmt；确认 GREEN 后建立 `issue-109-platform-green` checkpoint。
 
@@ -154,7 +158,16 @@ impl MarkdownGenerationPort for SystemMarkdownGeneration { /* 系统入口 */ }
 - [x] 以 RED/GREEN 修复六项成立反馈：目录预分配、SQLite 文本、路径打开竞态、重复 rollout、显式深度与闰秒位置。
 - [x] 有证据驳回两项：生成层不得篡改批准保留的用户 Markdown 文本；精确根比较保持 fail-closed，不在大小写敏感卷上放宽。
 - [x] 重跑完整本地门禁，确认 `29 / sha256:b113da...` 与四 crate 全绿。
-- [ ] 建立 review-correction checkpoint，普通 push 并创建关联 #109 的非 Draft PR。
+- [x] 普通 push 并创建关联 #109 的非 Draft PR `#110`；动态 Head、CI、Review 与 Artifact 只以
+  `github-dynamic-see-pr-110` 为真源，不固化进仓库文档。
+- [x] 复核 PR 后增量评审 `0 Critical / 3 Important / 2 Minor`：接受 SQLite C 层物化、发现式
+  rollout 重开竞态和动态证据归位；闰秒静态历史表建议以 RFC 3339 语义驳回。
+- [x] 明确记录 Windows/SQLite ABA 残余边界：Rust 1.97.1 稳定标准库无可用强文件 ID，
+  rusqlite 连接 handle 需要 `unsafe`；本切片约束内不引入 `unsafe`、新依赖或 Cargo 改动。
+- [x] 新增两项 RED/GREEN，Platform 专项达到 `23/23`，Platform all-targets Clippy 通过。
+- [x] 重跑完整本地门禁，确认四 crate 全绿及 `29 / sha256:b113da...`。
+- [x] 本提交形成 corrective source checkpoint；普通 push 及其后 Head、CI、Review、Artifact 状态
+  统一由 `github-dynamic-see-pr-110` 承接，不在仓库固化执行时点。
 
 ## 成功标准
 
