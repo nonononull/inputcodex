@@ -104,7 +104,7 @@ AGOS default-entry 返回 `needs-input/unregistered/missing-owner-scope-manifest
 
 状态：`completed`。`build.md` 完整命令链输出 `ISSUE_105_LOCAL_GREEN`；fresh audit 漏洞 `0`、
 CI contract `35/35`、Repository Policy `0` 违规、Release Audit `current`、九路径/hash 精确。
-报告已落盘，local-verified checkpoint 正在建立。
+报告已落盘，local-verified checkpoint 为 `2d3f37a0b31fcfe10501e14033665f0c14ae4ffd`。
 
 ### Node 6：Remote Delivery
 

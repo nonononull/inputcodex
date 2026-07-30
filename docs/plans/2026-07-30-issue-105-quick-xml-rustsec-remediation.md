@@ -159,7 +159,8 @@ Ordinal 排序、UTF-8 无 BOM、末尾单个 LF 的路径清单哈希固定为�
 
 状态：`completed`。本机 `2026-07-30 17:49:18 +08:00` 开始的完整九路径门禁输出
 `ISSUE_105_LOCAL_GREEN`：audit 漏洞 `0`、warning `2`、CI contract `35/35`、Repository
-Policy `0` 违规、Release Audit `current`、实际 scope/hash 与批准值精确一致。
+Policy `0` 违规、Release Audit `current`、实际 scope/hash 与批准值精确一致。Local-verified
+checkpoint 为 `2d3f37a0b31fcfe10501e14033665f0c14ae4ffd`。
 
 ### Batch 3：远端交付
 
@@ -168,7 +169,7 @@ Policy `0` 违规、Release Audit `current`、实际 scope/hash 与批准值精�
 - 核验 CI、Performance Baseline、Artifact 与 Final Head；
 - 停在项目所有者绑定 Final Head 的独立 Squash Merge 授权门。
 
-状态：`pending`。下一节点是建立 local-verified checkpoint 后普通 push 与非 Draft PR。
+状态：`pending`。下一节点是从 local-verified checkpoint 普通 push 并创建非 Draft PR。
 
 ## 验收与停止门
 

@@ -14,6 +14,7 @@
 - 基线：`origin/main@060ca045d2c134f8be3c9adc8cdb038842fc3243`
 - Planning checkpoint：`c266cab2570ce477bc6079b951cd9e79f5abe4a0`
 - Security checkpoint：`7c890e3137a503cac334e2802bd2441feae41052`
+- Local-verified checkpoint：`2d3f37a0b31fcfe10501e14033665f0c14ae4ffd`
 - candidate scope：`9` 路径，
   `sha256:0c90d018e06aa640d33a4c65c75aea45c89eb0e365b91fadee803b0426c8c58f`
 
@@ -131,8 +132,7 @@ err.md
 
 ## 剩余门禁
 
-1. 建立 local-verified checkpoint；
-2. 普通 push 与关联 Issue #105 的非 Draft PR；
-3. Review conversations 根因闭环；
-4. Final Head Hosted CI、Performance Baseline 与 Artifact 核验；
-5. 项目所有者绑定 Final Head 的独立 Squash Merge 授权。
+1. 普通 push 与关联 Issue #105 的非 Draft PR；
+2. Review conversations 根因闭环；
+3. Final Head Hosted CI、Performance Baseline 与 Artifact 核验；
+4. 项目所有者绑定 Final Head 的独立 Squash Merge 授权。

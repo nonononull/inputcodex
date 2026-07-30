@@ -20,7 +20,7 @@
 - `execution_state`: `LOCAL_VERIFIED_PR_PENDING`
 - `planning_checkpoint_ref`: `c266cab2570ce477bc6079b951cd9e79f5abe4a0`
 - `security_checkpoint_ref`: `7c890e3137a503cac334e2802bd2441feae41052`
-- `local_verified_checkpoint_ref`: `pending`
+- `local_verified_checkpoint_ref`: `2d3f37a0b31fcfe10501e14033665f0c14ae4ffd`
 - `agos_report_only`: `blocked-unregistered-missing-owner-scope-manifest-bypassed`
 - `review_strategy`: `single-main-thread-fresh-local-verification-and-github-review`
 - `ci_expectation`: `standard-hosted-ci-and-performance-no-success-artifacts`
@@ -149,7 +149,8 @@ Markdown 链接和 diff check 通过，checkpoint 为 `c266cab2570ce477bc6079b95
 
 状态：`completed`。本机完整门禁输出 `ISSUE_105_LOCAL_GREEN`；audit 漏洞 `0`、warning `2`、
 CI contract `35/35`、Repository Policy `0` 违规、Release Audit `current`，九路径与 scope hash
-精确匹配。报告已创建，local-verified checkpoint 正在建立。
+精确匹配。报告已创建，local-verified checkpoint 为
+`2d3f37a0b31fcfe10501e14033665f0c14ae4ffd`。
 
 ### Batch 4：Review / CI
 
