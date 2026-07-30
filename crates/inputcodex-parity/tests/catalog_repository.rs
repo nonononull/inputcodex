@@ -1709,12 +1709,183 @@ fn gate5_上下文能力只读目录观察已实现但上下文管理总功能�
 }
 
 #[test]
+fn gate5_本地会话目录只读观察已实现但本地会话管理总功能仍未评估() {
+    let feature_text = read_repository_text("parity/features/session-data.yml");
+    assert!(
+        feature_text.contains("feature.session-data.local-session-directory-observation"),
+        "会话目录观察必须拥有独立 feature"
+    );
+    let observation = yaml_list_item_block(
+        &feature_text,
+        "feature.session-data.local-session-directory-observation",
+    );
+    for expected in [
+        "name: '本地会话目录只读观察'",
+        "status: implemented",
+        "tauri-command:list_local_sessions",
+        "CODEX_SQLITE_HOME",
+        "最多 32",
+        "默认 50",
+        "最大 100",
+        "- issue:103",
+        "- issue:104",
+    ] {
+        assert!(
+            observation.contains(expected),
+            "本地会话目录观察功能条目应包含：{expected}"
+        );
+    }
+    for forbidden in [
+        "tauri-command:delete_local_session",
+        "grouped-undo-token",
+        "database-write",
+        "filesystem-write",
+    ] {
+        assert!(
+            !observation.contains(forbidden),
+            "本地会话目录观察功能禁止能力：{forbidden}"
+        );
+    }
+
+    let umbrella = yaml_list_item_block(
+        &feature_text,
+        "feature.session-data.local-session-management",
+    );
+    for expected in [
+        "status: unassessed",
+        "core-module:codex_sqlite",
+        "data-module:storage",
+        "tauri-command:delete_local_session",
+        "grouped-undo-token",
+        "- issue:103",
+        "- issue:104",
+    ] {
+        assert!(
+            umbrella.contains(expected),
+            "原本地会话管理总功能应继续包含：{expected}"
+        );
+    }
+    assert!(!umbrella.contains("status: implemented"));
+    assert!(!umbrella.contains("tauri-command:list_local_sessions"));
+
+    let contract_text = read_repository_text("parity/contracts/session-data.yml");
+    let contract = yaml_list_item_block(
+        &contract_text,
+        "contract.feature.session-data.local-session-directory-observation.baseline",
+    );
+    for expected in [
+        "filesystem-read",
+        "database-read",
+        "persistence: 'none'",
+        "LoadCompletion::Ready",
+        "LoadCompletion::Empty",
+        "LoadCompletion::Failed",
+        "session_id",
+        "display_title",
+        "title_truncated",
+        "archived",
+        "updated_at_ms",
+        "offset",
+        "limit",
+        "has_more",
+        "Complete",
+        "Partial",
+        "默认 50",
+        "最大 100",
+        "LOCAL_SESSION_DIRECTORY_INVALID_PAGINATION",
+        "LOCAL_SESSION_DIRECTORY_INVALID_SQLITE_HOME",
+        "LOCAL_SESSION_DIRECTORY_TOO_MANY_DATABASES",
+        "LOCAL_SESSION_DIRECTORY_UNSUPPORTED_SCHEMA",
+        "LOCAL_SESSION_DIRECTORY_UNAVAILABLE",
+        "LOCAL_SESSION_DIRECTORY_TIMEOUT",
+        "LOCAL_SESSION_DIRECTORY_CANCELLED",
+        "LOCAL_SESSION_DIRECTORY_UNSUPPORTED",
+        "USER_HOME_UNAVAILABLE",
+        "CODEX_HOME_INVALID",
+        "mode: required",
+        "fixture.feature.session-data.local-session-directory-observation.baseline",
+    ] {
+        assert!(
+            contract.contains(expected),
+            "本地会话目录观察合同应包含：{expected}"
+        );
+    }
+    for forbidden in [
+        "database-write",
+        "filesystem-write",
+        "network-read",
+        "network-write",
+        "process-control",
+        "grouped-undo-token",
+        "delete",
+        "backup",
+        "restore",
+    ] {
+        assert!(
+            !contract.contains(forbidden),
+            "本地会话目录观察合同禁止能力：{forbidden}"
+        );
+    }
+
+    assert_repository_text_contains(
+        "parity/fixtures/feature.session-data.local-session-directory-observation/manifest.yml",
+        &[
+            "feature_id: feature.session-data.local-session-directory-observation",
+            "fixture.feature.session-data.local-session-directory-observation.baseline",
+            "path: baseline.yml",
+            "kind: synthetic",
+        ],
+    );
+    assert_repository_text_contains(
+        "parity/fixtures/feature.session-data.local-session-directory-observation/baseline.yml",
+        &[
+            "schema_version: inputcodex.synthetic.local-session-directory.v1",
+            "coverage: Partial",
+            "session_id: synthetic-session-current",
+            "session_id: synthetic-session-legacy",
+            "title_truncated: true",
+            "database_mode: read-only",
+            "query_only: true",
+            "database_paths_exposed: false",
+        ],
+    );
+
+    let source_text = read_repository_text("parity/features/source-index.yml");
+    let list = yaml_list_item_block(&source_text, "tauri-command:list_local_sessions");
+    assert!(list.contains("side_effects: [filesystem-read, database-read]"));
+    assert!(list.contains("feature_id: feature.session-data.local-session-directory-observation"));
+    assert!(!list.contains("database-write"));
+    assert!(!list.contains("filesystem-write"));
+
+    for source_id in [
+        "core-module:codex_sqlite",
+        "data-module:storage",
+        "tauri-command:delete_local_session",
+    ] {
+        let source = yaml_list_item_block(&source_text, source_id);
+        assert!(source.contains("feature_id: feature.session-data.local-session-management"));
+        assert!(source.contains("database-write"));
+        assert!(source.contains("filesystem-write"));
+    }
+
+    assert_repository_text_contains(
+        "parity/README.md",
+        &[
+            "当前共有 43 个 feature",
+            "`43` 份行为合同",
+            "`12` 个 fixture manifest",
+            "feature.session-data.local-session-directory-observation",
+        ],
+    );
+}
+
+#[test]
 fn 仓库source_index_覆盖锁定上游公开入口() {
     let summary =
         validate_feature_repository(&repository_root()).expect("功能目录应通过仓库级验证");
 
     assert_eq!(summary.source_entry_count(), 133);
-    assert_eq!(summary.feature_count(), 42);
+    assert_eq!(summary.feature_count(), 43);
     assert_eq!(summary.excluded_entry_count(), 3);
     assert_eq!(summary.exception_pending_count(), 10);
     assert_eq!(summary.coverage_gap_count(), 0);
@@ -1725,9 +1896,9 @@ fn 仓库功能目录通过完整引用与安全验证() {
     let summary = validate_repository(&repository_root()).expect("仓库功能目录应通过验证");
 
     assert_eq!(summary.source_entry_count(), 133);
-    assert_eq!(summary.feature_count(), 42);
-    assert_eq!(summary.contract_count(), 42);
-    assert_eq!(summary.fixture_count(), 11);
+    assert_eq!(summary.feature_count(), 43);
+    assert_eq!(summary.contract_count(), 43);
+    assert_eq!(summary.fixture_count(), 12);
     assert_eq!(summary.coverage_gap_count(), 0);
 }
 

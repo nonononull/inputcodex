@@ -1,6 +1,89 @@
 schema_version: inputcodex.behavior-contract.v1
 domain: session-data
 contracts:
+  - id: contract.feature.session-data.local-session-directory-observation.baseline
+    feature_id: feature.session-data.local-session-directory-observation
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.43 证据已锁定，Windows 或 macOS 平台路径适配器可用。'
+    inputs:
+      - name: request
+        data_type: local-session-directory-request
+        required: false
+        description: '可选 offset 与 limit；默认 offset 为 0、limit 为 50，limit 最大 100。'
+    outputs:
+      - name: completion
+        data_type: LoadCompletion<LocalSessionDirectoryPage>
+        description: '有条目返回 LoadCompletion::Ready，无来源或全部可读来源为空返回 LoadCompletion::Empty，不能形成可信结果时返回 LoadCompletion::Failed。'
+      - name: page
+        data_type: local-session-directory-page
+        description: '页面只含 session_id、display_title、title_truncated、archived、updated_at_ms、offset、limit、has_more 和 Complete 或 Partial 来源覆盖。'
+    side_effects:
+      - filesystem-read
+      - database-read
+    persistence: 'none'
+    errors:
+      - code: LOCAL_SESSION_DIRECTORY_INVALID_PAGINATION
+        kind: validation
+        semantics: 'limit 为 0、超过最大 100 或 offset、limit 与探测行组合溢出时明确失败。'
+      - code: LOCAL_SESSION_DIRECTORY_INVALID_SQLITE_HOME
+        kind: validation
+        semantics: '非空显式 CODEX_SQLITE_HOME 不是合法受支持目录时失败且不得回退。'
+      - code: LOCAL_SESSION_DIRECTORY_TOO_MANY_DATABASES
+        kind: policy
+        semantics: '直接普通 SQLite 候选超过 32 个时在打开数据库前失败。'
+      - code: LOCAL_SESSION_DIRECTORY_UNSUPPORTED_SCHEMA
+        kind: validation
+        semantics: '来源不具备受支持 threads 或 automation_runs 最小 schema 时按来源失败处理。'
+      - code: LOCAL_SESSION_DIRECTORY_UNAVAILABLE
+        kind: feature
+        semantics: '目录枚举、文件门禁、数据库打开、锁等待或查询失败时返回脱敏不可用错误。'
+      - code: LOCAL_SESSION_DIRECTORY_TIMEOUT
+        kind: feature
+        semantics: '整体 deadline 到期时停止当前观察并返回稳定超时错误。'
+      - code: LOCAL_SESSION_DIRECTORY_CANCELLED
+        kind: feature
+        semantics: '取消标记生效后停止当前观察，旧请求结果不得发布。'
+      - code: LOCAL_SESSION_DIRECTORY_UNSUPPORTED
+        kind: platform
+        semantics: '非 Windows 与 macOS 平台调用系统适配器时明确报告不支持。'
+      - code: USER_HOME_UNAVAILABLE
+        kind: platform
+        semantics: '默认平台用户目录无法解析时失败，不使用当前目录或相对目录。'
+      - code: CODEX_HOME_INVALID
+        kind: platform
+        semantics: '非空显式 CODEX_HOME 无效时失败且不得自动回退。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次本地会话目录观察请求使用唯一递增标识。'
+      stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
+    timeout:
+      behavior: 超时后进入 Failed 并终止本次有界 SQLite 观察。
+      evidence: 只记录请求标识、耗时和稳定错误类别，不记录会话 ID、标题、数据库文件名或路径。
+    cancellation:
+      behavior: 取消后进入 Cancelling，停止 SQLite 查询并使旧结果失效。
+      evidence: 只记录取消请求、清理完成和旧请求失效，不记录私人数据。
+    isolation: '单个来源失败只能形成 Partial 或整体 Failed，不得污染其他来源、请求或稳定页面。'
+    observability:
+      - request_identity
+      - discovered_source_count
+      - readable_source_count
+      - failed_source_count
+      - source_coverage
+      - entry_count
+      - has_more
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: '从平台 CODEX_HOME 或合法非空 CODEX_SQLITE_HOME 发现最多 32 个直接普通 SQLite 候选，以只读 OpenFlags 和 query_only 观察 threads 或 automation_runs，跨库排序去重后按默认 50、最大 100 分页。'
+      windows: 使用 Windows 平台路径适配器与共享 SQLite 合同；非法显式根明确失败。
+      macos: 使用 macOS 平台路径适配器与共享 SQLite 合同；非法显式根明确失败。
+      differences: []
+    fixture_policy:
+      mode: required
+      reason: '使用合成 fixture 固定分页、最小字段、跨来源去重、Partial 覆盖和隐私边界，不包含真实会话或私人路径。'
+    fixture_refs:
+      - fixture.feature.session-data.local-session-directory-observation.baseline
   - id: contract.feature.session-data.local-session-management.baseline
     feature_id: feature.session-data.local-session-management
     scenario: baseline

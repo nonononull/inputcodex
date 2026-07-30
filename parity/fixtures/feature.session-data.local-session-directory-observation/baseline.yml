@@ -1,0 +1,35 @@
+schema_version: inputcodex.synthetic.local-session-directory.v1
+request:
+  offset: 0
+  limit: 2
+source_summary:
+  discovered: 3
+  readable: 2
+  failed: 1
+  coverage: Partial
+entries:
+  - session_id: synthetic-session-current
+    display_title: '合成当前会话'
+    title_truncated: false
+    archived: false
+    updated_at_ms: 2000
+  - session_id: synthetic-session-legacy
+    display_title: '合成旧会话标题截断样本'
+    title_truncated: true
+    archived: true
+    updated_at_ms: 1000
+pagination:
+  offset: 0
+  limit: 2
+  has_more: false
+deduplication:
+  duplicate_session_id: synthetic-session-current
+  retained_source: current
+source_access:
+  candidate_limit: 32
+  database_mode: read-only
+  query_only: true
+privacy:
+  database_paths_exposed: false
+  database_filenames_exposed: false
+  source_contents_exposed: false

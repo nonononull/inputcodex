@@ -145,14 +145,14 @@
 - [x] 写最小候选发现、只读连接、schema 查询和结果聚合实现；`automation_runs` 时间列按单行 `COALESCE(updated_at, created_at)` 回退。
 - [x] 验证主数据库与 WAL 字节、目录清单保持不变，SHM 长度保持不变且只允许 SQLite reader 协调区字节变化；错误/Debug 不含私人路径、标题或 ID。
 - [x] 运行平台定向测试 GREEN `15 passed`、Platform 全目标测试、格式、Clippy、仓库政策、依赖树和安全字符串门。
-- [ ] 建立 platform Git checkpoint。
+- [x] 建立 platform Git checkpoint：`129e7d57f644ba32fdd46fb669f3e86774c8ae9a`。
 
 ### Batch 4：Parity RED → GREEN
 
-- [ ] 先扩展目录测试，要求新 feature/contract/fixture、source remap、管理总功能继续未评估和副作用收敛。
-- [ ] 运行 `catalog_repository` 并记录 RED。
-- [ ] 写最小 YAML、fixture 和说明更新。
-- [ ] 运行 Parity 测试 GREEN。
+- [x] 先扩展目录测试，要求新 feature/contract/fixture、source remap、管理总功能继续未评估和副作用收敛。
+- [x] 运行定向 `catalog_repository` 并记录预期 RED：缺少独立 observation feature，退出码 `101`。
+- [x] 写最小 YAML、fixture 和说明更新；只重映射 `tauri-command:list_local_sessions`，原管理总功能继续 `unassessed`。
+- [x] 运行 Parity 全目标测试 GREEN；仓库目录测试 `22 passed`，总计 `43` 个 feature、`43` 份合同和 `12` 个 fixture manifest。
 - [ ] 建立 parity Git checkpoint。
 
 ### Batch 5：文档与本地收口

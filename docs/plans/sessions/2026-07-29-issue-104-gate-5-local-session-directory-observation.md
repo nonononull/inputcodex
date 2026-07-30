@@ -17,11 +17,11 @@
 - `candidate_scope_hash`: `sha256:47dcb2c181daa61a8df073e7f3ada069bf8e3d9b95df0c57f7709bcb6cde211d`
 - `normal_scope_without_err`: `sha256:acee55e9539631f6eca4fb557d27999c7815d20ae15a4b4ea932db243079cb8c`
 - `planning_validation`: `PASSED`
-- `execution_state`: `PLATFORM_VERIFIED_PENDING_CHECKPOINT`
+- `execution_state`: `PARITY_VERIFIED_PENDING_CHECKPOINT`
 - `planning_checkpoint_ref`: `7d11a6ff904b7d9bc2ca74bbaf52c122fc31feb9`
 - `domain_checkpoint_ref`: `c684f4bc115ef8d7b406a343876419edb8f2d290`
 - `application_checkpoint_ref`: `bd03cd3a8ba8b6df222c191d75bd672881c32d6a`
-- `platform_checkpoint_ref`: `pending`
+- `platform_checkpoint_ref`: `129e7d57f644ba32fdd46fb669f3e86774c8ae9a`
 - `parity_checkpoint_ref`: `pending`
 - `local_verified_checkpoint_ref`: `pending`
 - `agos_report_only`: `blocked-unregistered-missing-owner-scope-manifest-bypassed`
@@ -188,7 +188,7 @@ GREEN：默认/显式分页、读取上限溢出校验、共享取消标记、�
 
 ### Batch 3：Platform RED → GREEN
 
-状态：`ready-for-checkpoint`。
+状态：`completed`。checkpoint `129e7d57f644ba32fdd46fb669f3e86774c8ae9a`。
 
 RED：定向测试因 Platform 实现文件缺失而失败，退出码 `101`。
 
@@ -196,9 +196,15 @@ GREEN：锁定 `rusqlite 0.40.1` 的 `bundled/hooks`，实现严格根、最多 
 
 排错证据：`automation_runs` 同时存在两个时间列时改为单行 `COALESCE(updated_at, created_at)`；`cargo tree` 增加 `--prefix none` 后做精确版本断言；WAL 模式只读 reader 可修改 SHM 协调区，因此证据固定为主数据库与 WAL 字节、目录清单不变，SHM 长度不变且不把协调字节变化误判为业务写入。
 
+提交后 AGOS `RequireClean` 返回 `GIT_SNAPSHOT_READY`。
+
 ### Batch 4：Parity RED → GREEN
 
-状态：`pending`。
+状态：`ready-for-checkpoint`。
+
+RED：新增目录合同测试后，因 `feature.session-data.local-session-directory-observation` 尚不存在而按预期失败，退出码 `101`；测试尚未读取任何新 fixture，证明失败来自独立 feature 缺失。
+
+GREEN：新增独立 observation feature、baseline contract 与合成 fixture，只把 `tauri-command:list_local_sessions` 重映射为 `[filesystem-read, database-read]`；原 `core-module:codex_sqlite`、`data-module:storage`、删除、备份、恢复和 grouped undo 继续归 `feature.session-data.local-session-management=unassessed`。定向测试通过，Parity 全目标测试中仓库目录 `22 passed`，目录总数更新为 `43` 个 feature、`43` 份合同和 `12` 个 fixture manifest。
 
 产出：新 feature/contract/fixture、source remap 与原总功能继续未评估。
 

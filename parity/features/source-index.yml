@@ -937,10 +937,10 @@ sources:
       path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
       symbol: list_local_sessions
     platforms: [windows, macos]
-    side_effects: [database-read, database-write, filesystem-write]
+    side_effects: [filesystem-read, database-read]
     disposition:
       type: feature
-      feature_id: feature.session-data.local-session-management
+      feature_id: feature.session-data.local-session-directory-observation
   - id: tauri-command:list_zed_remote_projects
     kind: tauri-command
     evidence:

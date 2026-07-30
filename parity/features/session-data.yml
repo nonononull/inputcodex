@@ -4,6 +4,26 @@ release:
   tag_commit: 5036ff056b5c629f19356396b17d6eeb70da664c
 domain: session-data
 features:
+  - id: feature.session-data.local-session-directory-observation
+    name: '本地会话目录只读观察'
+    status: implemented
+    evidence:
+      - path: upstream/CodexPlusPlus/crates/codex-plus-data/src/storage.rs
+        symbol: list_local_sessions
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: list_local_sessions
+    entry_points:
+      - tauri-command:list_local_sessions
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '只读观察 CODEX_HOME 或合法非空 CODEX_SQLITE_HOME 下的直接普通 SQLite 候选，最多 32 个；跨库排序去重后分页，默认 50、最大 100，只返回会话 ID、有界标题、截断、归档、更新时间和来源覆盖。'
+      macos:
+        applicability: supported
+        semantics: '只读观察 CODEX_HOME 或合法非空 CODEX_SQLITE_HOME 下的直接普通 SQLite 候选，最多 32 个；跨库排序去重后分页，默认 50、最大 100，只返回会话 ID、有界标题、截断、归档、更新时间和来源覆盖。'
+    decision_refs:
+      - issue:103
+      - issue:104
   - id: feature.session-data.local-session-management
     name: '本地会话与项目管理'
     status: unassessed
@@ -18,23 +38,22 @@ features:
         symbol: grouped_delete_and_undo
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: delete_local_session
-      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
-        symbol: list_local_sessions
     entry_points:
       - core-module:codex_sqlite
       - data-module:storage
       - tauri-command:delete_local_session
-      - tauri-command:list_local_sessions
     platforms:
       windows:
         applicability: supported
-        semantics: '支持合法 CODEX_SQLITE_HOME，扫描多个候选数据库；跨库删除生成 grouped-undo-token，撤销先全库预检并只写回允许路径，删除期间保留撤销窗口。'
+        semantics: '保留合法 CODEX_SQLITE_HOME、多数据库删除、备份、恢复、全库预检和 grouped-undo-token；只读会话目录观察已拆分。'
       macos:
         applicability: supported
-        semantics: '支持合法 CODEX_SQLITE_HOME，扫描多个候选数据库；跨库删除生成 grouped-undo-token，撤销先全库预检并只写回允许路径，删除期间保留撤销窗口。'
+        semantics: '保留合法 CODEX_SQLITE_HOME、多数据库删除、备份、恢复、全库预检和 grouped-undo-token；只读会话目录观察已拆分。'
     decision_refs:
       - issue:26
       - issue:38
+      - issue:103
+      - issue:104
   - id: feature.session-data.markdown-export
     name: 'Markdown 导出'
     status: unassessed

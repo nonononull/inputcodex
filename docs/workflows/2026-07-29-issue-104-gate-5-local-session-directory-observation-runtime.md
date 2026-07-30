@@ -16,7 +16,7 @@
 - `candidate_scope_hash`: `sha256:47dcb2c181daa61a8df073e7f3ada069bf8e3d9b95df0c57f7709bcb6cde211d`
 - `executor`: `codex-desktop-main-thread`
 - `subagents`: `not-authorized`
-- `current_node`: `platform-checkpoint`
+- `current_node`: `parity-checkpoint`
 
 ## Current Gate
 
@@ -94,7 +94,7 @@
 6. 运行 platform tests/Clippy/fmt。
 7. 建立 `issue-104-platform` checkpoint。
 
-状态：`ready-for-checkpoint`。RED 为实现文件缺失、退出码 `101`；GREEN 为定向 `15 passed`，Platform 全目标测试、Clippy、rustfmt、diff check、仓库政策、`cargo tree --prefix none` 精确依赖断言和安全字符串门通过。实现使用只读 OpenFlags、`query_only`、短 busy timeout、progress handler 与白名单 schema；`automation_runs` 的单行时间回退使用 `COALESCE(updated_at, created_at)`。WAL 证据确认主数据库与 WAL 字节、目录清单不变，SHM 长度不变且协调区字节变化不属于业务写入。
+状态：`completed`。checkpoint `129e7d57f644ba32fdd46fb669f3e86774c8ae9a`；RED 为实现文件缺失、退出码 `101`；GREEN 为定向 `15 passed`，Platform 全目标测试、Clippy、rustfmt、diff check、仓库政策、`cargo tree --prefix none` 精确依赖断言和安全字符串门通过。实现使用只读 OpenFlags、`query_only`、短 busy timeout、progress handler 与白名单 schema；`automation_runs` 的单行时间回退使用 `COALESCE(updated_at, created_at)`。WAL 证据确认主数据库与 WAL 字节、目录清单不变，SHM 长度不变且协调区字节变化不属于业务写入；提交后 AGOS `RequireClean` 返回 `GIT_SNAPSHOT_READY`。
 
 ### Node 6：Parity TDD
 
@@ -104,7 +104,7 @@
 4. 运行 parity tests。
 5. 建立 `issue-104-parity` checkpoint。
 
-状态：`pending`。
+状态：`ready-for-checkpoint`。RED 因独立 observation feature 缺失而按预期失败，退出码 `101`；GREEN 后新 feature/contract/fixture、source remap 和 Parity 说明就绪，原管理总功能继续 `unassessed`。Parity 全目标测试中仓库目录 `22 passed`，总计 `43` 个 feature、`43` 份合同和 `12` 个 fixture manifest。
 
 ### Node 7：Local Closeout
 
