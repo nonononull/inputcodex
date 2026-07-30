@@ -297,7 +297,23 @@ fn is_canonical_utc_timestamp(value: &str) -> bool {
         && (1..=max_day).contains(&day)
         && hour <= 23
         && minute <= 59
-        && second <= 60
+        && is_supported_utc_second(year, month, day, hour, minute, second)
+}
+
+const fn is_supported_utc_second(
+    year: u32,
+    month: u32,
+    day: u32,
+    hour: u32,
+    minute: u32,
+    second: u32,
+) -> bool {
+    second <= 59
+        || (second == 60
+            && hour == 23
+            && minute == 59
+            && matches!(month, 6 | 12)
+            && day == days_in_month(year, month))
 }
 
 fn parse_decimal(bytes: &[u8]) -> u32 {

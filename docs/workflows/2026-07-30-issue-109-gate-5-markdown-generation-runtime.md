@@ -10,7 +10,7 @@
 - `baseline_ref`: `88eaf6301f1897cadaf4da830db998078fb06e97`
 - `branch_ref`: `codex/issue-109-gate-5-markdown-generation`
 - `candidate_scope_hash`: `sha256:b113da5d41514f50e36cef7d4eb9ade89e2562cbcfe8d392a5173d38fd0ebaac`
-- `runtime_state`: `local-verified-pr-pending`
+- `runtime_state`: `review-corrections-local-verified-pr-pending`
 - `paseo_workspace_ref`: `wks_495c490aa88811f1`
 - `agos_status`: `blocked-needs-input-unregistered-bypassed`
 
@@ -25,6 +25,8 @@ Issue #108 owner decision A
   -> Platform RED/GREEN
   -> Parity RED/GREEN
   -> local closeout
+  -> independent review + correction RED/GREEN
+  -> final local gate
   -> NOW: Review/CI
   -> Final Head independent Squash authorization
 ```
@@ -112,6 +114,20 @@ checkpoint `60da5b1`。
 状态：`completed`。Issue #109 本地轻量门禁、安全审查、二十八路径 scope hash、CI 脚本合同、
 仓库政策、Release Audit、Cargo metadata 与 Git 空白检查全部通过；`err.md` 无新根因而未修改。
 
+### Node 7.5：Independent Review Correction
+
+1. 只读 reviewer 审查 `origin/main@88eaf630..623e35a`，不取得写入所有权。
+2. 父线程逐条复核 `0 Critical / 5 Important / 3 Minor`，禁止盲目照单修改。
+3. 接受六项并分别保留 RED/GREEN：目录预分配、SQLite 文本、路径打开竞态、重复 rollout、
+   显式深度和闰秒位置。
+4. 驳回两项：用户/助手文本按批准合同原样保留，未来 renderer 独立禁网；精确根比较保持
+   fail-closed，避免在大小写敏感卷上放宽越界接受。
+5. `err.md` 记录新可复用根因，实际范围切换为完整 `29 / sha256:b113da...`。
+
+状态：`completed`。Domain `7/7`、Platform `21/21`、四 crate 全目标 tests/Clippy、rustfmt、
+CI 合同 `35/35`、仓库政策、Release Audit、Cargo metadata、静态安全门与
+`29 / sha256:b113da...` 范围门全部通过；review-correction named snapshot 待建立。
+
 ### Node 8：Remote Delivery
 
 1. 普通 push。
@@ -124,6 +140,8 @@ checkpoint `60da5b1`。
 
 - `err.md` 先查重；已知 PowerShell `rg` glob、scope hash、WAL SHM 协调和 GitHub 多行正文问题直接复用。
 - `fs::read_to_string`、普通 `Connection::open`、真实路径化错误和本机时区一旦出现立即停止。
+- 目录项必须在 `Vec` 扩张前收到剩余上限；SQLite 文本必须先按借用字节检查再分配。
+- SQLite/rollout 打开必须保留 no-follow、组件复验与打开前后文件一致性；重复匹配必须失败。
 - 文件名按 UTF-8 字节边界截断，不得切断字符；Debug 不得派生泄露正文。
 - RFC 3339 手工规范化必须用日期边界测试证明，不能靠样例推测。
 - Source Index 是公开模块一对一映射；不得为保存 UI 发明虚假 source entry。
@@ -143,5 +161,5 @@ AGOS 只作外部 ReportOnly 辅助。未登记、`needs-input`、接口不兼�
 
 - `workflow_family`: `gate-5-bounded-session-generation`
 - `reusable_path`: strict session ID -> read-only SQLite -> bounded rollout -> deterministic projection
-- `skill_usage`: brainstorming、writing-plans、using-git-worktrees、test-driven-development、security-review、verification-before-completion
+- `skill_usage`: brainstorming、writing-plans、using-git-worktrees、test-driven-development、requesting-code-review、receiving-code-review、security-review、verification-before-completion
 - `record_after_closeout`: 仅在合并后形成可复用增量时评估 rollout 记录

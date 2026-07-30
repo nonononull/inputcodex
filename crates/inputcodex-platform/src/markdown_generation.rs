@@ -1,7 +1,7 @@
 use std::{
     collections::HashSet,
     ffi::OsStr,
-    fs::{self, File},
+    fs::{self, File, Metadata},
     io::{self, BufRead, BufReader, Read},
     path::{Component, Path, PathBuf},
     sync::{
@@ -19,14 +19,14 @@ use inputcodex_domain::{
     LocalSessionTitle, MAX_MARKDOWN_MESSAGE_COUNT, MarkdownGenerationError, MarkdownMessage,
     MarkdownMessageRole, MarkdownUtcTimestamp, SessionMarkdownDocument,
 };
-use rusqlite::{Connection, ErrorCode, OpenFlags, OptionalExtension};
+use rusqlite::{Connection, ErrorCode, OpenFlags, OptionalExtension, types::ValueRef};
 use serde_json::Value;
 
 use crate::{
     SystemPlatformPaths,
     local_session_directory_observation::{
-        LocalSessionDatabaseCandidate, SystemLocalSessionDirectoryFileProbe,
-        discover_local_session_databases_with_probe, resolve_local_session_sqlite_root_with_probe,
+        MAX_LOCAL_SESSION_DATABASES, SystemLocalSessionDirectoryFileProbe,
+        resolve_local_session_sqlite_root_with_probe,
     },
 };
 
@@ -40,6 +40,8 @@ const INVALID_CONTENT_CODE: &str = "MARKDOWN_GENERATION_INVALID_CONTENT";
 const RESOURCE_LIMIT_CODE: &str = "MARKDOWN_GENERATION_RESOURCE_LIMIT";
 const MARKDOWN_GENERATION_TIMEOUT: &str = "MARKDOWN_GENERATION_TIMEOUT";
 const MARKDOWN_GENERATION_CANCELLED: &str = "MARKDOWN_GENERATION_CANCELLED";
+const SQLITE_DIRECTORY: &str = "sqlite";
+const LEGACY_DATABASE: &str = "state_5.sqlite";
 const SESSIONS_DIRECTORY: &str = "sessions";
 const ARCHIVED_SESSIONS_DIRECTORY: &str = "archived_sessions";
 const IMAGE_ATTACHMENT_OMITTED: &str = "> Image attachment omitted";
@@ -69,7 +71,7 @@ pub(super) enum MarkdownGenerationPathKind {
 
 pub(super) trait MarkdownGenerationFileProbe {
     fn kind(&self, path: &Path) -> io::Result<MarkdownGenerationPathKind>;
-    fn direct_entries(&self, path: &Path) -> io::Result<Vec<PathBuf>>;
+    fn direct_entries(&self, path: &Path, max_entries: usize) -> io::Result<Vec<PathBuf>>;
 }
 
 #[derive(Debug, Clone, Copy, Default)]
@@ -97,8 +99,9 @@ impl MarkdownGenerationFileProbe for SystemMarkdownGenerationFileProbe {
         }
     }
 
-    fn direct_entries(&self, path: &Path) -> io::Result<Vec<PathBuf>> {
+    fn direct_entries(&self, path: &Path, max_entries: usize) -> io::Result<Vec<PathBuf>> {
         fs::read_dir(path)?
+            .take(max_entries.saturating_add(1))
             .map(|entry| entry.map(|value| value.path()))
             .collect()
     }
@@ -227,11 +230,7 @@ pub(super) fn generate_session_markdown_at_roots(
     let interruption = InterruptionControl::new(cancellation.clone(), deadline);
     interruption.ensure_active()?;
 
-    let candidates = discover_local_session_databases_with_probe(
-        sqlite_root,
-        &SystemLocalSessionDirectoryFileProbe,
-    )
-    .map_err(map_local_session_discovery_error)?;
+    let candidates = discover_markdown_databases(sqlite_root, policy, &interruption)?;
     if candidates.is_empty() {
         return Ok(None);
     }
@@ -267,8 +266,13 @@ pub(super) fn generate_session_markdown_at_roots(
             .ok_or_else(invalid_rollout)?,
     };
 
-    let messages =
-        load_rollout_messages(&rollout_path, request.session_id(), policy, &interruption)?;
+    let messages = load_rollout_messages(
+        codex_home,
+        &rollout_path,
+        request.session_id(),
+        policy,
+        &interruption,
+    )?;
     if messages.is_empty() {
         return Ok(None);
     }
@@ -288,15 +292,94 @@ struct SessionRecord {
     priority: usize,
 }
 
+#[derive(Debug)]
+struct MarkdownDatabaseCandidate {
+    path: PathBuf,
+    priority: usize,
+}
+
+impl MarkdownDatabaseCandidate {
+    fn path(&self) -> &Path {
+        &self.path
+    }
+
+    const fn priority(&self) -> usize {
+        self.priority
+    }
+}
+
+fn discover_markdown_databases(
+    root: &Path,
+    policy: MarkdownGenerationPolicy,
+    interruption: &InterruptionControl,
+) -> Result<Vec<MarkdownDatabaseCandidate>, ApplicationError> {
+    let probe = SystemMarkdownGenerationFileProbe;
+    let sqlite_directory = root.join(SQLITE_DIRECTORY);
+    let mut current = Vec::new();
+
+    match probe.kind(&sqlite_directory).map_err(|_| unavailable())? {
+        MarkdownGenerationPathKind::Missing => {}
+        MarkdownGenerationPathKind::Directory => {
+            let entries = fs::read_dir(&sqlite_directory).map_err(|_| unavailable())?;
+            for (index, entry) in entries.enumerate() {
+                interruption.ensure_active()?;
+                if index >= policy.max_discovery_entries {
+                    return Err(resource_limit());
+                }
+                let path = entry.map_err(|_| unavailable())?.path();
+                if is_sqlite_candidate(&path)
+                    && probe.kind(&path).map_err(|_| unavailable())?
+                        == MarkdownGenerationPathKind::File
+                {
+                    current.push(path);
+                    if current.len() > MAX_LOCAL_SESSION_DATABASES {
+                        return Err(ApplicationError::unavailable(TOO_MANY_DATABASES_CODE));
+                    }
+                }
+            }
+        }
+        MarkdownGenerationPathKind::File
+        | MarkdownGenerationPathKind::Symlink
+        | MarkdownGenerationPathKind::Other => return Err(unavailable()),
+    }
+
+    current.sort_by(|left, right| left.file_name().cmp(&right.file_name()));
+    let legacy = root.join(LEGACY_DATABASE);
+    if probe.kind(&legacy).map_err(|_| unavailable())? == MarkdownGenerationPathKind::File
+        && !current.iter().any(|candidate| candidate == &legacy)
+    {
+        current.push(legacy);
+    }
+    if current.len() > MAX_LOCAL_SESSION_DATABASES {
+        return Err(ApplicationError::unavailable(TOO_MANY_DATABASES_CODE));
+    }
+
+    Ok(current
+        .into_iter()
+        .enumerate()
+        .map(|(priority, path)| MarkdownDatabaseCandidate { path, priority })
+        .collect())
+}
+
 fn read_session_record(
-    candidate: &LocalSessionDatabaseCandidate,
+    candidate: &MarkdownDatabaseCandidate,
     request: &MarkdownGenerationRequest,
     policy: MarkdownGenerationPolicy,
     interruption: &InterruptionControl,
 ) -> Result<Option<SessionRecord>, ApplicationError> {
-    let flags = OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX;
+    let before_open = fs::symlink_metadata(candidate.path()).map_err(|_| unavailable())?;
+    if !before_open.is_file() {
+        return Err(unavailable());
+    }
+    let flags = OpenFlags::SQLITE_OPEN_READ_ONLY
+        | OpenFlags::SQLITE_OPEN_NO_MUTEX
+        | OpenFlags::SQLITE_OPEN_NOFOLLOW;
     let connection = Connection::open_with_flags(candidate.path(), flags)
         .map_err(|error| map_sqlite_error(&error, interruption, unavailable()))?;
+    let after_open = fs::symlink_metadata(candidate.path()).map_err(|_| unavailable())?;
+    if !after_open.is_file() || !same_file_identity(&before_open, &after_open) {
+        return Err(unavailable());
+    }
     connection
         .busy_timeout(policy.busy_timeout)
         .map_err(|error| map_sqlite_error(&error, interruption, unavailable()))?;
@@ -328,6 +411,7 @@ fn read_session_record(
                 &columns,
                 request.session_id(),
                 candidate.priority(),
+                policy.max_metadata_bytes,
                 interruption,
             )? {
                 return Ok(Some(record));
@@ -344,6 +428,7 @@ fn read_session_record(
                 &columns,
                 request.session_id(),
                 candidate.priority(),
+                policy.max_metadata_bytes,
                 interruption,
             )? {
                 return Ok(Some(record));
@@ -409,6 +494,7 @@ fn query_threads(
     columns: &HashSet<String>,
     session_id: &str,
     priority: usize,
+    max_text_bytes: usize,
     interruption: &InterruptionControl,
 ) -> Result<Option<SessionRecord>, ApplicationError> {
     let title = optional_expression(columns, "title", "title", "NULL");
@@ -428,7 +514,14 @@ fn query_threads(
         "SELECT {title} AS display_title, {rollout_path} AS rollout_path, \
          {updated_at} AS updated_at_ms FROM threads WHERE id = ?1 LIMIT 1"
     );
-    query_record(connection, &sql, session_id, priority, interruption)
+    query_record(
+        connection,
+        &sql,
+        session_id,
+        priority,
+        max_text_bytes,
+        interruption,
+    )
 }
 
 fn query_automation_runs(
@@ -436,6 +529,7 @@ fn query_automation_runs(
     columns: &HashSet<String>,
     session_id: &str,
     priority: usize,
+    max_text_bytes: usize,
     interruption: &InterruptionControl,
 ) -> Result<Option<SessionRecord>, ApplicationError> {
     let title = if columns.contains("thread_title") {
@@ -459,7 +553,26 @@ fn query_automation_runs(
         "SELECT {title} AS display_title, {rollout_path} AS rollout_path, \
          {updated_at} AS updated_at_ms FROM automation_runs WHERE thread_id = ?1 LIMIT 1"
     );
-    query_record(connection, &sql, session_id, priority, interruption)
+    query_record(
+        connection,
+        &sql,
+        session_id,
+        priority,
+        max_text_bytes,
+        interruption,
+    )
+}
+
+enum QueriedSessionRecord {
+    Record(SessionRecord),
+    ResourceLimit,
+    InvalidContent,
+}
+
+enum BoundedOptionalText {
+    Value(Option<String>),
+    ResourceLimit,
+    InvalidContent,
 }
 
 fn query_record(
@@ -467,24 +580,63 @@ fn query_record(
     sql: &str,
     session_id: &str,
     priority: usize,
+    max_text_bytes: usize,
     interruption: &InterruptionControl,
 ) -> Result<Option<SessionRecord>, ApplicationError> {
-    connection
+    let result = connection
         .query_row(sql, [session_id], |row| {
-            let raw_title = row.get::<_, Option<String>>(0)?;
-            let raw_rollout_path = row.get::<_, Option<String>>(1)?;
+            let raw_title = match read_bounded_optional_text(row.get_ref(0)?, max_text_bytes) {
+                BoundedOptionalText::Value(value) => value,
+                BoundedOptionalText::ResourceLimit => {
+                    return Ok(QueriedSessionRecord::ResourceLimit);
+                }
+                BoundedOptionalText::InvalidContent => {
+                    return Ok(QueriedSessionRecord::InvalidContent);
+                }
+            };
+            let raw_rollout_path = match read_bounded_optional_text(row.get_ref(1)?, max_text_bytes)
+            {
+                BoundedOptionalText::Value(value) => value,
+                BoundedOptionalText::ResourceLimit => {
+                    return Ok(QueriedSessionRecord::ResourceLimit);
+                }
+                BoundedOptionalText::InvalidContent => {
+                    return Ok(QueriedSessionRecord::InvalidContent);
+                }
+            };
             let updated_at_ms = row.get::<_, Option<i64>>(2)?;
-            Ok(SessionRecord {
+            Ok(QueriedSessionRecord::Record(SessionRecord {
                 title: raw_title.as_deref().and_then(LocalSessionTitle::from_raw),
                 rollout_path: raw_rollout_path
                     .filter(|value| !value.trim().is_empty())
                     .map(PathBuf::from),
                 updated_at_ms,
                 priority,
-            })
+            }))
         })
         .optional()
-        .map_err(|error| map_sqlite_error(&error, interruption, unsupported_schema()))
+        .map_err(|error| map_sqlite_error(&error, interruption, unsupported_schema()))?;
+
+    match result {
+        None => Ok(None),
+        Some(QueriedSessionRecord::Record(record)) => Ok(Some(record)),
+        Some(QueriedSessionRecord::ResourceLimit) => Err(resource_limit()),
+        Some(QueriedSessionRecord::InvalidContent) => Err(invalid_content()),
+    }
+}
+
+fn read_bounded_optional_text(value: ValueRef<'_>, max_bytes: usize) -> BoundedOptionalText {
+    match value {
+        ValueRef::Null => BoundedOptionalText::Value(None),
+        ValueRef::Text(bytes) if bytes.len() > max_bytes => BoundedOptionalText::ResourceLimit,
+        ValueRef::Text(bytes) => match std::str::from_utf8(bytes) {
+            Ok(value) => BoundedOptionalText::Value(Some(value.to_owned())),
+            Err(_) => BoundedOptionalText::InvalidContent,
+        },
+        ValueRef::Integer(_) | ValueRef::Real(_) | ValueRef::Blob(_) => {
+            BoundedOptionalText::InvalidContent
+        }
+    }
 }
 
 fn optional_expression<'a>(
@@ -531,7 +683,7 @@ pub(super) fn validate_rollout_path_with_probe(
         .strip_prefix(root)
         .map_err(|_| invalid_rollout())?;
     let components = relative.components().collect::<Vec<_>>();
-    if components.is_empty() {
+    if components.is_empty() || components.len().saturating_sub(1) > MAX_ROLLOUT_DEPTH {
         return Err(invalid_rollout());
     }
     let mut current = root.to_path_buf();
@@ -599,19 +751,24 @@ fn discover_rollout_path(
     }
 
     let mut discovery_bytes = 0;
+    let mut matched = None;
     for candidate in candidates {
         interruption.ensure_active()?;
         if rollout_matches_session(
+            codex_home,
             &candidate,
             session_id,
             policy,
             interruption,
             &mut discovery_bytes,
         )? {
-            return Ok(Some(candidate));
+            if matched.is_some() {
+                return Err(invalid_rollout());
+            }
+            matched = Some(candidate);
         }
     }
-    Ok(None)
+    Ok(matched)
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -625,7 +782,13 @@ fn collect_rollout_candidates(
     candidates: &mut Vec<PathBuf>,
 ) -> Result<(), ApplicationError> {
     interruption.ensure_active()?;
-    let mut entries = probe.direct_entries(directory).map_err(|_| unavailable())?;
+    let remaining_entries = policy.max_discovery_entries.saturating_sub(*enumerated);
+    let mut entries = probe
+        .direct_entries(directory, remaining_entries)
+        .map_err(|_| unavailable())?;
+    if entries.len() > remaining_entries {
+        return Err(resource_limit());
+    }
     entries.sort();
     for path in entries {
         interruption.ensure_active()?;
@@ -665,21 +828,92 @@ fn collect_rollout_candidates(
     Ok(())
 }
 
+fn open_verified_rollout_file(
+    codex_home: &Path,
+    path: &Path,
+    policy: MarkdownGenerationPolicy,
+    interruption: &InterruptionControl,
+) -> Result<File, ApplicationError> {
+    interruption.ensure_active()?;
+    validate_rollout_path_with_probe(codex_home, path, &SystemMarkdownGenerationFileProbe)?;
+    let before_open = fs::symlink_metadata(path).map_err(|_| invalid_rollout())?;
+    if !before_open.is_file() {
+        return Err(invalid_rollout());
+    }
+    if before_open.len() > u64::try_from(policy.max_rollout_bytes).unwrap_or(u64::MAX) {
+        return Err(resource_limit());
+    }
+
+    let file = open_file_no_follow(path).map_err(|_| unavailable())?;
+    let opened = file.metadata().map_err(|_| unavailable())?;
+    interruption.ensure_active()?;
+    validate_rollout_path_with_probe(codex_home, path, &SystemMarkdownGenerationFileProbe)?;
+    let after_open = fs::symlink_metadata(path).map_err(|_| invalid_rollout())?;
+    if !opened.is_file() || !after_open.is_file() {
+        return Err(invalid_rollout());
+    }
+    if opened.len() > u64::try_from(policy.max_rollout_bytes).unwrap_or(u64::MAX)
+        || after_open.len() > u64::try_from(policy.max_rollout_bytes).unwrap_or(u64::MAX)
+    {
+        return Err(resource_limit());
+    }
+    if !same_file_identity(&before_open, &opened) || !same_file_identity(&opened, &after_open) {
+        return Err(invalid_rollout());
+    }
+
+    Ok(file)
+}
+
+#[cfg(target_os = "windows")]
+fn open_file_no_follow(path: &Path) -> io::Result<File> {
+    use std::os::windows::fs::*;
+
+    const FILE_FLAG_OPEN_REPARSE_POINT: u32 = 0x0020_0000;
+    File::options()
+        .read(true)
+        .custom_flags(FILE_FLAG_OPEN_REPARSE_POINT)
+        .open(path)
+}
+
+#[cfg(target_os = "macos")]
+fn open_file_no_follow(path: &Path) -> io::Result<File> {
+    use std::os::unix::fs::*;
+
+    const O_NOFOLLOW: i32 = 0x0000_0100;
+    File::options()
+        .read(true)
+        .custom_flags(O_NOFOLLOW)
+        .open(path)
+}
+
+#[cfg(target_os = "windows")]
+pub(super) fn same_file_identity(left: &Metadata, right: &Metadata) -> bool {
+    use std::os::windows::fs::MetadataExt;
+
+    // Windows file IDs remain unstable in std; no-follow open and component revalidation
+    // are paired with all stable metadata fields that can reveal a path replacement.
+    left.file_attributes() == right.file_attributes()
+        && left.creation_time() == right.creation_time()
+        && left.last_write_time() == right.last_write_time()
+        && left.file_size() == right.file_size()
+}
+
+#[cfg(target_os = "macos")]
+pub(super) fn same_file_identity(left: &Metadata, right: &Metadata) -> bool {
+    use std::os::unix::fs::MetadataExt;
+
+    left.dev() == right.dev() && left.ino() == right.ino()
+}
+
 fn rollout_matches_session(
+    codex_home: &Path,
     path: &Path,
     session_id: &str,
     policy: MarkdownGenerationPolicy,
     interruption: &InterruptionControl,
     discovery_bytes: &mut usize,
 ) -> Result<bool, ApplicationError> {
-    if SystemMarkdownGenerationFileProbe
-        .kind(path)
-        .map_err(|_| unavailable())?
-        != MarkdownGenerationPathKind::File
-    {
-        return Err(invalid_rollout());
-    }
-    let file = File::open(path).map_err(|_| unavailable())?;
+    let file = open_verified_rollout_file(codex_home, path, policy, interruption)?;
     let take_limit = u64::try_from(policy.max_metadata_bytes)
         .unwrap_or(u64::MAX)
         .saturating_add(1);
@@ -724,19 +958,13 @@ fn rollout_matches_session(
 }
 
 fn load_rollout_messages(
+    codex_home: &Path,
     path: &Path,
     session_id: &str,
     policy: MarkdownGenerationPolicy,
     interruption: &InterruptionControl,
 ) -> Result<Vec<MarkdownMessage>, ApplicationError> {
-    let metadata = fs::symlink_metadata(path).map_err(|_| invalid_rollout())?;
-    if !metadata.is_file()
-        || metadata.len() > u64::try_from(policy.max_rollout_bytes).unwrap_or(u64::MAX)
-    {
-        return Err(resource_limit());
-    }
-
-    let file = File::open(path).map_err(|_| unavailable())?;
+    let file = open_verified_rollout_file(codex_home, path, policy, interruption)?;
     let take_limit = u64::try_from(policy.max_rollout_bytes)
         .unwrap_or(u64::MAX)
         .saturating_add(1);
@@ -936,8 +1164,11 @@ pub(super) fn normalize_rfc3339_utc(value: &str) -> Option<String> {
     let day_delta = utc_minutes.div_euclid(24 * 60);
     let minute_of_day = utc_minutes.rem_euclid(24 * 60);
     adjust_date(&mut year, &mut month, &mut day, day_delta)?;
-    let utc_hour = minute_of_day / 60;
-    let utc_minute = minute_of_day % 60;
+    let utc_hour = u32::try_from(minute_of_day / 60).ok()?;
+    let utc_minute = u32::try_from(minute_of_day % 60).ok()?;
+    if !is_supported_utc_second(year, month, day, utc_hour, utc_minute, second) {
+        return None;
+    }
 
     if fraction.is_empty() {
         Some(format!(
@@ -948,6 +1179,22 @@ pub(super) fn normalize_rfc3339_utc(value: &str) -> Option<String> {
             "{year:04}-{month:02}-{day:02}T{utc_hour:02}:{utc_minute:02}:{second:02}.{fraction}Z"
         ))
     }
+}
+
+const fn is_supported_utc_second(
+    year: u32,
+    month: u32,
+    day: u32,
+    hour: u32,
+    minute: u32,
+    second: u32,
+) -> bool {
+    second <= 59
+        || (second == 60
+            && hour == 23
+            && minute == 59
+            && matches!(month, 6 | 12)
+            && day == days_in_month(year, month))
 }
 
 fn adjust_date(year: &mut u32, month: &mut u32, day: &mut u32, delta: i32) -> Option<()> {
@@ -1017,6 +1264,16 @@ fn is_jsonl_path(path: &Path) -> bool {
     path.extension()
         .and_then(OsStr::to_str)
         .is_some_and(|extension| extension.eq_ignore_ascii_case("jsonl"))
+}
+
+fn is_sqlite_candidate(path: &Path) -> bool {
+    path.extension()
+        .and_then(OsStr::to_str)
+        .is_some_and(|extension| {
+            extension.eq_ignore_ascii_case("db")
+                || extension.eq_ignore_ascii_case("sqlite")
+                || extension.eq_ignore_ascii_case("sqlite3")
+        })
 }
 
 fn normalize_session_id(value: &str) -> &str {

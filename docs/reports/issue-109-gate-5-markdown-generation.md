@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-- `state`: `LOCAL_VERIFIED_PR_PENDING`
+- `state`: `REVIEW_CORRECTIONS_LOCAL_VERIFIED_PR_PENDING`
 - `tracking_issue_ref`: `https://github.com/nonononull/inputcodex/issues/109`
 - `approved_decision_ref`: `https://github.com/nonononull/inputcodex/issues/108#issuecomment-5130112866`
 - `implementation_scope_approval_ref`: `https://github.com/nonononull/inputcodex/issues/109#issuecomment-5130373022`
@@ -13,7 +13,8 @@
 - `application_checkpoint_ref`: `60da5b1`
 - `platform_checkpoint_ref`: `b4a66b5`
 - `parity_checkpoint_ref`: `338359f`
-- `local_verified_checkpoint_ref`: `pending-self-checkpoint`
+- `local_verified_checkpoint_ref`: `623e35abfbf94ef667adb368b7995c0f496639d0`
+- `review_correction_checkpoint_ref`: `pending-self-checkpoint`
 - `remote_delivery_started`: `false`
 
 ## 交付结果
@@ -40,14 +41,19 @@
 ## 数据源与资源边界
 
 - SQLite 候选最多 `32`，复用平台 `CODEX_HOME` 与合法非空 `CODEX_SQLITE_HOME` 语义。
-- 连接只使用 `SQLITE_OPEN_READ_ONLY | SQLITE_OPEN_NO_MUTEX`、`query_only=1`、`50 ms` busy
-  timeout 和 `1000` progress interval；SQL 只由固定白名单表达式与参数 `?1` 组成。
+- 连接只使用 `SQLITE_OPEN_READ_ONLY | SQLITE_OPEN_NO_MUTEX | SQLITE_OPEN_NOFOLLOW`、
+  `query_only=1`、`50 ms` busy timeout 和 `1000` progress interval；SQL 只由固定白名单表达式
+  与参数 `?1` 组成。
 - 任一候选数据库损坏、schema 不支持或查询失败都会阻断生成，较旧重复记录不得冒充权威结果。
 - rollout 只允许位于普通目录 `CODEX_HOME/sessions` 或 `archived_sessions`；相对路径、父目录、
   根越界、符号链接、非普通文件、非 JSONL 和会话元数据不匹配均失败。
 - rollout 深度 `4`、枚举项 `8192`、候选 `4096`、metadata 前缀 `8 KiB`、发现累计
   `32 MiB`、单文件 `16 MiB`、非空记录 `100000`、消息 `20000`、Markdown `16 MiB`。
 - 整体 deadline 为 `2 s`；取消与超时均使用稳定脱敏错误，JSONL 全程经 `BufReader` 流式解析。
+- SQLite title/rollout_path 复用 `8 KiB` metadata 上限，经借用 `ValueRef` 先检查字节再分配；
+  SQLite 与 rollout 目录项均在继续收集前执行剩余条目上限。
+- rollout 使用平台 no-follow 打开、打开前后组件复验和文件身份/稳定元数据比较；发现到多个
+  同会话候选时明确失败，不按词法首项输出旧副本。
 
 ## TDD 证据
 
@@ -58,6 +64,9 @@
   CODEX_HOME 符号链接、显式 rollout 会话错配和非法 UTF-8 分类，最终专项 `17 passed`。
 - Parity RED：缺少 `feature.session-data.markdown-generation`；GREEN：目录测试通过，总数保持
   `43 features / 43 contracts / 12 fixtures`。
+- 独立评审修正：reviewer 对 `origin/main..623e35a` 返回 `0 Critical / 5 Important / 3 Minor`；
+  父线程逐条复核后接受六项、以证据驳回两项。新增 RED 覆盖目录预分配、SQLite 文本、重复
+  rollout、显式深度、路径替换与闰秒位置，最终 Domain `7 passed`、Platform `21 passed`。
 
 ## 安全审查
 
@@ -69,13 +78,15 @@
   rusqlite、I/O、JSON 错误文本。
 - 测试全部使用现场合成 SQLite/JSONL；未读取、复制或提交真实用户会话。
 - WAL 验证证明主数据库与 WAL 字节、目录清单不变；SHM 只允许既有 reader 协调语义。
+- 用户/助手文本按批准合同逐字保留；本切片只返回内存数据，不渲染也不联网。未来 renderer 的
+  HTML/图片禁网属于文件保存/UI 独立评审，不得在生成层以转义篡改会话正文。
 
 ## 范围冻结
 
 - 候选路径：`29`
 - 候选哈希：`sha256:b113da5d41514f50e36cef7d4eb9ade89e2562cbcfe8d392a5173d38fd0ebaac`
-- 实际路径：无新根因，排除 `err.md` 后精确 `28`
-- 实际哈希：`sha256:3d19b05918c8294f050f3f0c83f9118453705afd8aad016827fafb477e74a50b`
+- 实际路径：独立评审形成新可复用根因，包含 `err.md` 后精确 `29`
+- 实际哈希：`sha256:b113da5d41514f50e36cef7d4eb9ade89e2562cbcfe8d392a5173d38fd0ebaac`
 - UI、Workflow、Ruleset、Release、`upstream/`、`benchmarks/`、Cargo 与 AGOS 修改：`none`
 
 ## 当前验证证据
@@ -86,6 +97,10 @@ implementation_scope_approval: passed
 domain_tdd: passed-red-green
 application_tdd: passed-red-green
 platform_tdd: passed-red-green-17-tests
+independent_review: completed-0-critical-5-important-3-minor
+review_disposition: accepted-6-rejected-with-evidence-2
+review_correction_tdd: targeted-green-domain-7-platform-21
+review_correction_full_gate: passed-29-paths-four-crate-tests-clippy
 parity_tdd: passed-red-green
 four_crate_tests_all_targets: passed
 four_crate_clippy_all_targets: passed
@@ -97,8 +112,8 @@ cargo_metadata: passed-locked-offline-no-deps
 readonly_security_gate: passed
 wal_business_readonly_evidence: passed
 security_review: passed-fixed-sql-readonly-bounded-redacted
-actual_scope: passed-28-paths-without-err-md
-actual_scope_hash: sha256:3d19b05918c8294f050f3f0c83f9118453705afd8aad016827fafb477e74a50b
+actual_scope: passed-29-paths-with-err-md
+actual_scope_hash: sha256:b113da5d41514f50e36cef7d4eb9ade89e2562cbcfe8d392a5173d38fd0ebaac
 privacy_matches: 0
 forbidden_capability_matches: 0
 git_diff_check: passed
@@ -111,6 +126,7 @@ hosted_ci: pending-pr
 
 ## 下一门
 
-1. 建立 `issue-109-local-verified` checkpoint 并普通 push。
-2. 创建关联 Issue `#109` 的非 Draft PR，进入 Review/CI、Performance Baseline 与 Artifact 核验。
+1. 重跑完整 Issue #109 本地门禁并建立 review-correction checkpoint。
+2. 普通 push，创建关联 Issue `#109` 的非 Draft PR，进入 Review/CI、Performance Baseline 与
+   Artifact 核验。
 3. Final Head 全绿后请求项目所有者独立 Squash Merge 授权；当前禁止自行合并。

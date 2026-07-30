@@ -205,6 +205,7 @@ domain_checkpoint_ref: 16d0816
 application_checkpoint_ref: 60da5b1
 platform_checkpoint_ref: b4a66b5
 parity_checkpoint_ref: 338359f
+local_verified_checkpoint_ref: 623e35abfbf94ef667adb368b7995c0f496639d0
 domain_tdd: passed-red-green-7-tests
 application_tdd: passed-red-green-6-tests
 platform_tdd: passed-red-green-17-tests
@@ -212,21 +213,31 @@ parity_tdd: passed-red-green-43-features-43-contracts-12-fixtures
 sibling_regression_guard: passed
 security_review: passed-fixed-sql-readonly-bounded-redacted
 local_gate: passed
-actual_scope: 28-paths-without-err-md
-actual_scope_hash: sha256:3d19b05918c8294f050f3f0c83f9118453705afd8aad016827fafb477e74a50b
+independent_review: completed-0-critical-5-important-3-minor
+review_disposition: accepted-6-rejected-with-evidence-2
+review_correction_tdd: targeted-green-domain-7-platform-21
+review_correction_full_gate: passed-29-paths-four-crate-tests-clippy
+actual_scope: 29-paths-with-err-md
+actual_scope_hash: sha256:b113da5d41514f50e36cef7d4eb9ade89e2562cbcfe8d392a5173d38fd0ebaac
 remote_delivery: pending
 ```
 
-`err.md` 未修改：本次只复用了既有 WAL SHM、精确 scope hash、PowerShell 与文本锚点结论，未发现
-新的可复用根因。测试数据全部现场合成；未读取、复制或提交真实会话。
+独立评审发现“资源上限晚于分配”与“路径检查/打开分离”两个新可复用根因，已写入 `err.md`，
+因此实际范围合法切换为批准的完整 `29` 路径。测试数据全部现场合成；未读取、复制或提交真实会话。
 
 ## Agent Lifecycle
 
-- `agent_strategy`: parent-only
+- `agent_strategy`: parent-implementation-plus-bounded-readonly-reviewer
 - `open_agent_count_before_dispatch`: `0`
 - `reclaim_before_spawn`: `not-required`
 - `claimed_file_owners`: 父任务独占 29 路径
-- `completion_status`: `no-subagents-used`
+- `reviewer_ref`: `019fb30f-c92f-7f32-9176-2440df85d622`
+- `reviewer_scope`: `origin/main@88eaf630..623e35a`
+- `reviewer_write_ownership`: `none-readonly`
+- `reviewer_result`: `0-critical / 5-important / 3-minor`
+- `parent_disposition`: `accepted-6 / rejected-with-evidence-2`
+- `closed_agent_refs`: `019fb30f-c92f-7f32-9176-2440df85d622`
+- `completion_status`: `reviewer-completed-and-closed`
 
 ## Stop Conditions
 

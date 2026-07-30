@@ -193,6 +193,42 @@ fn 无数据库返回_empty_且不创建任何来源() {
 }
 
 #[test]
+fn sqlite_目录枚举在读取第二项时立即触发资源上限() {
+    let temp = TestDirectory::new("sqlite-entry-limit");
+    let rollout = temp.path().join("sessions/limited.jsonl");
+    write_rollout(
+        &rollout,
+        &[
+            r#"{"type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"bounded"}]}}"#,
+        ],
+    );
+    create_threads_database(
+        &temp.path().join("sqlite/current.db"),
+        "private-session-sqlite-entry-limit",
+        "Bounded",
+        Some(&rollout),
+        1,
+    );
+    fs::write(temp.path().join("sqlite/noise.txt"), "noise").expect("写入干扰文件应成功");
+    let policy =
+        subject::MarkdownGenerationPolicy::default().with_discovery_limits(4, 1, 10, 1024, 4096);
+
+    let error = subject::generate_session_markdown_at_roots(
+        temp.path(),
+        temp.path(),
+        &request("private-session-sqlite-entry-limit"),
+        &MarkdownGenerationCancellation::default(),
+        policy,
+    )
+    .expect_err("SQLite 目录项必须在无界收集前受限");
+    assert_error(
+        error,
+        ErrorKind::Unavailable,
+        "MARKDOWN_GENERATION_RESOURCE_LIMIT",
+    );
+}
+
+#[test]
 fn threads_显式_rollout_只生成批准角色文本和不可联网图片占位() {
     let temp = TestDirectory::new("threads-explicit");
     let rollout = temp.path().join("sessions/2026/explicit.jsonl");
@@ -246,6 +282,58 @@ fn threads_显式_rollout_只生成批准角色文本和不可联网图片占位
 }
 
 #[test]
+fn sqlite_标题和_rollout_path_在分配前受文本字节上限约束() {
+    let oversized = "x".repeat(subject::MAX_ROLLOUT_METADATA_BYTES + 1);
+
+    let title_temp = TestDirectory::new("oversized-sqlite-title");
+    let title_rollout = title_temp.path().join("sessions/title.jsonl");
+    write_rollout(
+        &title_rollout,
+        &[
+            r#"{"type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"bounded"}]}}"#,
+        ],
+    );
+    create_threads_database(
+        &title_temp.path().join("sqlite/current.db"),
+        "private-session-oversized-title",
+        &oversized,
+        Some(&title_rollout),
+        1,
+    );
+    let title_error = generate(
+        title_temp.path(),
+        title_temp.path(),
+        "private-session-oversized-title",
+    )
+    .expect_err("超大 SQLite 标题必须在 String 分配前失败");
+    assert_error(
+        title_error,
+        ErrorKind::Unavailable,
+        "MARKDOWN_GENERATION_RESOURCE_LIMIT",
+    );
+
+    let path_temp = TestDirectory::new("oversized-sqlite-path");
+    create_threads_database(
+        &path_temp.path().join("sqlite/current.db"),
+        "private-session-oversized-path",
+        "Bounded",
+        Some(Path::new(&oversized)),
+        1,
+    );
+    let path_error = generate(
+        path_temp.path(),
+        path_temp.path(),
+        "private-session-oversized-path",
+    )
+    .expect_err("超大 SQLite rollout_path 必须在 PathBuf 分配前失败");
+    assert_error(
+        path_error,
+        ErrorKind::Unavailable,
+        "MARKDOWN_GENERATION_RESOURCE_LIMIT",
+    );
+}
+
+#[test]
 fn automation_runs_缺失显式路径时只在固定根发现匹配_rollout() {
     let temp = TestDirectory::new("automation-discovery");
     let rollout = temp.path().join("archived_sessions/2026/07/matched.jsonl");
@@ -282,6 +370,50 @@ fn automation_runs_缺失显式路径时只在固定根发现匹配_rollout() {
         .expect("应生成文档");
     assert_eq!(document.suggested_filename(), "session-Automation.md");
     assert!(document.markdown().contains("Automation reply"));
+}
+
+#[test]
+fn 发现到多个同会话_rollout_时拒绝按词法顺序选择旧副本() {
+    let temp = TestDirectory::new("duplicate-discovery");
+    for (path, body) in [
+        ("sessions/2025/old.jsonl", "Old copy"),
+        ("archived_sessions/2026/new.jsonl", "New copy"),
+    ] {
+        write_rollout(
+            &temp.path().join(path),
+            &[
+                r#"{"type":"session_meta","payload":{"id":"private-session-duplicate-discovery"}}"#,
+                &format!(
+                    r#"{{"type":"response_item","payload":{{"type":"message","role":"assistant","content":[{{"type":"output_text","text":"{body}"}}]}}}}"#
+                ),
+            ],
+        );
+    }
+    let db = database(&temp.path().join("sqlite/automation.sqlite"));
+    db.execute_batch(
+        "CREATE TABLE automation_runs (
+            thread_id TEXT PRIMARY KEY,
+            thread_title TEXT
+        );",
+    )
+    .expect("创建 automation_runs schema 应成功");
+    db.execute(
+        "INSERT INTO automation_runs VALUES (?1, ?2)",
+        ("private-session-duplicate-discovery", "Duplicate"),
+    )
+    .expect("插入 automation_runs 行应成功");
+
+    let error = generate(
+        temp.path(),
+        temp.path(),
+        "private-session-duplicate-discovery",
+    )
+    .expect_err("多个匹配 rollout 必须作为权威来源冲突失败");
+    assert_error(
+        error,
+        ErrorKind::Unavailable,
+        "MARKDOWN_GENERATION_INVALID_ROLLOUT",
+    );
 }
 
 #[test]
@@ -406,7 +538,7 @@ impl subject::MarkdownGenerationFileProbe for MemoryFileProbe {
             .unwrap_or(subject::MarkdownGenerationPathKind::Missing))
     }
 
-    fn direct_entries(&self, _path: &Path) -> io::Result<Vec<PathBuf>> {
+    fn direct_entries(&self, _path: &Path, _max_entries: usize) -> io::Result<Vec<PathBuf>> {
         Ok(Vec::new())
     }
 }
@@ -417,6 +549,7 @@ fn 显式_rollout_拒绝相对路径根越界符号链接和非普通文件() {
     let sessions = home.join("sessions");
     let valid = sessions.join("2026/valid.jsonl");
     let linked = sessions.join("linked.jsonl");
+    let too_deep = sessions.join("a/b/c/d/e/deep.jsonl");
     let outside = home
         .parent()
         .expect("临时目录应有父目录")
@@ -433,6 +566,27 @@ fn 显式_rollout_拒绝相对路径根越界符号链接和非普通文件() {
         )
         .with_kind(valid.clone(), subject::MarkdownGenerationPathKind::File)
         .with_kind(linked.clone(), subject::MarkdownGenerationPathKind::Symlink)
+        .with_kind(
+            sessions.join("a"),
+            subject::MarkdownGenerationPathKind::Directory,
+        )
+        .with_kind(
+            sessions.join("a/b"),
+            subject::MarkdownGenerationPathKind::Directory,
+        )
+        .with_kind(
+            sessions.join("a/b/c"),
+            subject::MarkdownGenerationPathKind::Directory,
+        )
+        .with_kind(
+            sessions.join("a/b/c/d"),
+            subject::MarkdownGenerationPathKind::Directory,
+        )
+        .with_kind(
+            sessions.join("a/b/c/d/e"),
+            subject::MarkdownGenerationPathKind::Directory,
+        )
+        .with_kind(too_deep.clone(), subject::MarkdownGenerationPathKind::File)
         .with_kind(outside.clone(), subject::MarkdownGenerationPathKind::File);
 
     subject::validate_rollout_path_with_probe(&home, &valid, &probe)
@@ -441,6 +595,7 @@ fn 显式_rollout_拒绝相对路径根越界符号链接和非普通文件() {
         PathBuf::from("sessions/relative.jsonl"),
         sessions.join("../outside.jsonl"),
         linked,
+        too_deep,
         outside,
         sessions.join("missing.jsonl"),
         sessions.clone(),
@@ -478,6 +633,22 @@ fn 显式_rollout_拒绝相对路径根越界符号链接和非普通文件() {
         ErrorKind::Unavailable,
         "MARKDOWN_GENERATION_INVALID_ROLLOUT",
     );
+}
+
+#[test]
+fn 文件身份比较检测同一路径在检查后被替换() {
+    let temp = TestDirectory::new("file-identity");
+    let path = temp.path().join("sessions/current.jsonl");
+    let original = temp.path().join("sessions/original.jsonl");
+    write_rollout(&path, &[r#"{"type":"session_meta"}"#]);
+    let before = fs::metadata(&path).expect("读取原文件身份应成功");
+    fs::rename(&path, &original).expect("保留原文件以避免身份复用应成功");
+    write_rollout(&path, &[r#"{"type":"response_item"}"#]);
+    let replacement = fs::metadata(&path).expect("读取替换文件身份应成功");
+    let moved_original = fs::metadata(&original).expect("读取移动后原文件身份应成功");
+
+    assert!(subject::same_file_identity(&before, &moved_original));
+    assert!(!subject::same_file_identity(&before, &replacement));
 }
 
 #[test]
@@ -605,6 +776,7 @@ fn rfc3339_时间戳不依赖本机时区并覆盖日期边界() {
         ("2024-03-01T00:15:00+01:00", "2024-02-29T23:15:00Z"),
         ("2024-02-29T23:15:00-02:00", "2024-03-01T01:15:00Z"),
         ("2026-07-30T11:14:29.120000000Z", "2026-07-30T11:14:29.12Z"),
+        ("2017-01-01T00:59:60+01:00", "2016-12-31T23:59:60Z"),
     ] {
         assert_eq!(
             subject::normalize_rfc3339_utc(input).as_deref(),
@@ -616,6 +788,7 @@ fn rfc3339_时间戳不依赖本机时区并覆盖日期边界() {
         "2026-02-29T00:00:00Z",
         "2026-07-30 11:14:29Z",
         "2026-07-30T11:14:29-00:00",
+        "2026-07-30T11:14:60Z",
         "2026-07-30T11:14:61Z",
         "not-a-time",
     ] {

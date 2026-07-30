@@ -956,6 +956,15 @@
 - 验证：修正后 fresh audit 真实执行并返回 `CARGO_AUDIT_EXIT=0`、`DEPENDENCIES=350`、`VULNERABILITIES=0`，两条 unmaintained warning 可正常枚举。
 - 关联：Issue `#105`、`build.md`、cargo-audit JSON 输出。
 
+### 2026-07-30：资源上限晚于目录/SQLite 分配且路径检查与打开分离
+
+- 环境：Issue `#109` 的独立只读评审复核受控 SQLite、rollout 发现和 JSONL 打开边界。
+- 现象：目录项先完整收集到 `Vec` 再检查数量，SQLite `title` / `rollout_path` 先分配完整 `String` 再进入领域截断；rollout 路径种类检查与实际打开分成两个文件系统时刻，发现式重复会话又会按词法首项提前返回。
+- 根因：资源门禁被放在分配之后，路径安全只验证名称而没有把 no-follow 打开、打开前后组件复验和文件身份绑定为同一读取合同；“确定性首项”也被错误当成“唯一权威来源”。
+- 处理：目录读取只收集剩余上限加一项并在继续分配前失败；SQLite 文本通过借用 `ValueRef` 先检查 `8 KiB` 字节上限再构造 `String` / `PathBuf`；SQLite 增加 `SQLITE_OPEN_NOFOLLOW`，rollout 使用平台 no-follow 标志、打开前后组件复验和文件身份/稳定元数据比较；多个匹配 rollout 明确失败，显式路径同步执行四层目录深度上限。
+- 验证：每项先以专项测试取得 RED，再达到 Domain `7/7`、Platform `21/21`，两 crate Clippy `-D warnings`、rustfmt 与 `git diff --check` 通过；完整 Issue `#109` 门禁和 GitHub-hosted 双平台证据仍必须在最终修复 Head 上重新执行。
+- 关联：Issue `#109`、`crates/inputcodex-platform/src/markdown_generation.rs`、`crates/inputcodex-platform/tests/markdown_generation.rs`。
+
 ## 记录模板
 
 ```text

@@ -57,11 +57,15 @@ fn utc_时间戳只接受有效的规范零时区格式() {
     let timestamp = MarkdownUtcTimestamp::new("2024-02-29T23:59:59.123456789Z".to_owned())
         .expect("闰日与纳秒精度应合法");
     assert_eq!(timestamp.as_str(), "2024-02-29T23:59:59.123456789Z");
+    let leap_second =
+        MarkdownUtcTimestamp::new("2016-12-31T23:59:60Z".to_owned()).expect("UTC 月末闰秒应合法");
+    assert_eq!(leap_second.as_str(), "2016-12-31T23:59:60Z");
 
     for invalid in [
         "2026-02-29T00:00:00Z",
         "2026-07-30T11:14:29+08:00",
         "2026-07-30 11:14:29Z",
+        "2026-07-30T11:14:60Z",
         "2026-07-30T11:14:61Z",
         "2026-07-30T11:14:29z",
         "",

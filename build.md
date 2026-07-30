@@ -140,6 +140,7 @@ $platform = Get-Content crates/inputcodex-platform/src/markdown_generation.rs -R
 foreach ($required in @(
   'SQLITE_OPEN_READ_ONLY',
   'SQLITE_OPEN_NO_MUTEX',
+  'SQLITE_OPEN_NOFOLLOW',
   'query_only',
   'MAX_ROLLOUT_DISCOVERY_ENTRIES',
   'MAX_ROLLOUT_CANDIDATES',
@@ -149,6 +150,9 @@ foreach ($required in @(
   'MAX_MARKDOWN_MESSAGE_COUNT',
   'symlink_metadata',
   'BufReader',
+  'open_file_no_follow',
+  'same_file_identity',
+  'read_bounded_optional_text',
   'MARKDOWN_GENERATION_TIMEOUT',
   'MARKDOWN_GENERATION_CANCELLED'
 )) {

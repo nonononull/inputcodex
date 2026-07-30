@@ -149,7 +149,12 @@ impl MarkdownGenerationPort for SystemMarkdownGeneration { /* 系统入口 */ }
 - [x] 运行 `build.md` 的 Issue #109 完整本地轻量门禁。
 - [x] 执行安全审查：路径、SQL 参数、边界、Debug/错误、真实数据和禁止能力逐项核对。
 - [x] 执行 AGOS ReportOnly；`needs-input/unregistered` 记录后绕过，不修改外部控制面。
-- [ ] 建立 `issue-109-local-verified` checkpoint，普通 push 并创建关联 #109 的非 Draft PR。
+- [x] 建立 `issue-109-local-verified` checkpoint `623e35a`。
+- [x] 执行 `origin/main..623e35a` 独立只读评审，取得 `0 Critical / 5 Important / 3 Minor`。
+- [x] 以 RED/GREEN 修复六项成立反馈：目录预分配、SQLite 文本、路径打开竞态、重复 rollout、显式深度与闰秒位置。
+- [x] 有证据驳回两项：生成层不得篡改批准保留的用户 Markdown 文本；精确根比较保持 fail-closed，不在大小写敏感卷上放宽。
+- [x] 重跑完整本地门禁，确认 `29 / sha256:b113da...` 与四 crate 全绿。
+- [ ] 建立 review-correction checkpoint，普通 push 并创建关联 #109 的非 Draft PR。
 
 ## 成功标准
 
