@@ -4,6 +4,7 @@ mod application_overview;
 mod context_entry_observation;
 mod diagnostic_log_observation;
 mod local_session_directory_observation;
+mod markdown_generation;
 mod platform_paths;
 mod relay_environment_observation;
 mod relay_status_observation;
@@ -27,6 +28,11 @@ pub use local_session_directory_observation::{
     LocalSessionDirectoryPageError, LocalSessionSourceCoverage, LocalSessionSourceSummary,
     LocalSessionSourceSummaryError, LocalSessionTitle, MAX_LOCAL_SESSION_DIRECTORY_PAGE_SIZE,
     MAX_LOCAL_SESSION_ID_BYTES, MAX_LOCAL_SESSION_TITLE_CHARS,
+};
+pub use markdown_generation::{
+    MAX_MARKDOWN_FILENAME_BYTES, MAX_MARKDOWN_MESSAGE_COUNT, MAX_MARKDOWN_OUTPUT_BYTES,
+    MarkdownGenerationError, MarkdownMessage, MarkdownMessageRole, MarkdownUtcTimestamp,
+    SessionMarkdownDocument,
 };
 
 pub use platform_paths::{
