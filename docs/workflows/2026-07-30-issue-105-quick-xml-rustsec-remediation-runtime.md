@@ -114,7 +114,8 @@ CI contract `35/35`、Repository Policy `0` 违规、Release Audit `current`、�
 4. 核验 Final Head 的 CI 七 Job、Performance Baseline 四 Job、Artifact 与 conversations。
 5. 只在所有门禁通过后请求绑定 Final Head 的独立 Squash Merge 授权。
 
-状态：`pending`。
+状态：`github-dynamic`。本地文档冻结于 remote delivery 入口，后续 Head、Review、CI、Artifact
+与授权证据只保留在 GitHub。
 
 ## Scope Enforcement
 

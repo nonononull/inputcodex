@@ -17,7 +17,7 @@
 - `delivery_contract`: `agos.issue-pr-merge.v1`
 - `planning_scope_hash`: `sha256:25337a6cb90386439878af2bd8be7d00af0276e102663ab6add7e3d3b4621a09`
 - `candidate_scope_hash`: `sha256:0c90d018e06aa640d33a4c65c75aea45c89eb0e365b91fadee803b0426c8c58f`
-- `execution_state`: `LOCAL_VERIFIED_PR_PENDING`
+- `execution_state`: `LOCAL_VERIFIED_REMOTE_DELIVERY`
 - `planning_checkpoint_ref`: `c266cab2570ce477bc6079b951cd9e79f5abe4a0`
 - `security_checkpoint_ref`: `7c890e3137a503cac334e2802bd2441feae41052`
 - `local_verified_checkpoint_ref`: `2d3f37a0b31fcfe10501e14033665f0c14ae4ffd`
@@ -154,8 +154,8 @@ CI contract `35/35`、Repository Policy `0` 违规、Release Audit `current`，�
 
 ### Batch 4：Review / CI
 
-状态：`pending`。普通 push、非 Draft PR、Review 根因闭环、CI/Performance/Artifact 核验，形成
-稳定 Final Head 并停在独立 Squash Merge 授权门。
+状态：`github-dynamic`。普通 push、非 Draft PR、Review 根因闭环、CI/Performance/Artifact、
+Final Head 与授权只保留在 GitHub；本地文档不为每个远端事件产生递归状态提交。
 
 ## Agent Lifecycle
 

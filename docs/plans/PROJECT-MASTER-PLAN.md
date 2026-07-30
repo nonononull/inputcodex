@@ -6,7 +6,7 @@ active_gate: Gate 5 前十个产品切片已进入 main；当前先执行 Issue 
 last_verified_gate: Issue #104 / PR #106 已以单父 Squash 提交 060ca045d2c134f8be3c9adc8cdb038842fc3243 进入 main；合并后 CI Run 30528235591 七 Job与 Performance Baseline Run 30528233052 四 Job全绿且 Artifact 均为 0，Issue #104 已按 COMPLETED 关闭
 next_legal_gate: 在 Issue #105 九路径内精确升级 wayland-scanner 0.31.10 到 0.31.11 与 quick-xml 0.39.4 到 0.41.0；fresh audit、本地轻量门禁、Review/CI 与 Artifact 闭环后，才能请求绑定 Final Head 的独立 Squash Merge 授权
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/105
-active_pr_ref: pending
+active_pr_ref: github-dynamic
 gate_5_platform_paths_exception_ref: https://github.com/nonononull/inputcodex/issues/74
 gate_5_platform_paths_scope_hash: sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37
 gate_5_platform_paths_branch_ref: codex/issue-75-gate-5-platform-paths
@@ -130,7 +130,6 @@ transition_branch_ref: codex/issue-8-gate-2-transition
 active_plan_ref: docs/plans/2026-07-30-issue-105-quick-xml-rustsec-remediation.md
 active_session_plan_ref: docs/plans/sessions/2026-07-30-issue-105-quick-xml-rustsec-remediation.md
 active_runtime_workflow_ref: docs/workflows/2026-07-30-issue-105-quick-xml-rustsec-remediation-runtime.md
-active_pr_ref: pending
 gate_3_closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/23
 gate_3_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/21
 gate_3_planning_pr_ref: https://github.com/nonononull/inputcodex/pull/18
@@ -144,7 +143,7 @@ gate_2_watch_report_ref: docs/reports/issue-14-gate-2-upstream-watch.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-decision_status: issue-105-security-green-local-verified-pr-pending
+decision_status: issue-105-security-green-remote-delivery-gated
 
 ## 当前状态
 

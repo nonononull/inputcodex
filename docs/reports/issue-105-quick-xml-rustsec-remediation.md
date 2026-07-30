@@ -2,9 +2,10 @@
 
 ## 当前状态
 
-`LOCAL_VERIFIED_PR_PENDING`。批准的最小锁文件修复已经实施，fresh `cargo audit` 的漏洞数量
-从 `2` 降为 `0`；九路径完整本地轻量验证已通过。普通 push、非 Draft PR、Review/CI、Artifact
-与 Final Head 独立合并授权尚未开始，不能把当前分支状态表述为 `main` 已修复。
+`LOCAL_VERIFIED_REMOTE_DELIVERY`。批准的最小锁文件修复已经实施，fresh `cargo audit` 的漏洞
+数量从 `2` 降为 `0`；九路径完整本地轻量验证已通过。本报告冻结于远端交付入口，后续 push、
+PR、Review/CI、Artifact、Final Head 与授权状态只保留在 GitHub；Squash Merge 前不能把当前分支
+状态表述为 `main` 已修复。
 
 ## 基线与批准
 

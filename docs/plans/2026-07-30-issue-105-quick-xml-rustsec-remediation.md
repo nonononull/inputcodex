@@ -169,7 +169,8 @@ checkpoint 为 `2d3f37a0b31fcfe10501e14033665f0c14ae4ffd`。
 - 核验 CI、Performance Baseline、Artifact 与 Final Head；
 - 停在项目所有者绑定 Final Head 的独立 Squash Merge 授权门。
 
-状态：`pending`。下一节点是从 local-verified checkpoint 普通 push 并创建非 Draft PR。
+状态：`github-dynamic-after-local-verified`。本地控制面冻结于 local-verified checkpoint；普通 push、
+PR、Review/CI、Artifact、Final Head 与授权状态只写入 GitHub，不再用递归文档提交追逐远端事件。
 
 ## 验收与停止门
 
