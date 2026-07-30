@@ -5,7 +5,32 @@ use inputcodex_application::{ApplicationError, PlatformKind, PlatformPort};
 mod application_overview;
 mod context_entry_observation;
 mod diagnostic_log_observation;
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 mod local_session_directory_observation;
+#[cfg(not(any(target_os = "windows", target_os = "macos")))]
+mod local_session_directory_observation {
+    use inputcodex_application::{
+        ApplicationError, LocalSessionDirectoryCancellation, LocalSessionDirectoryObservationPort,
+        LocalSessionDirectoryRequest,
+    };
+    use inputcodex_domain::LocalSessionDirectoryPage;
+
+    #[derive(Debug, Clone, Copy, Default)]
+    pub struct SystemLocalSessionDirectoryObservation;
+
+    impl LocalSessionDirectoryObservationPort for SystemLocalSessionDirectoryObservation {
+        fn observe(
+            &self,
+            request: &LocalSessionDirectoryRequest,
+            cancellation: &LocalSessionDirectoryCancellation,
+        ) -> Result<Option<LocalSessionDirectoryPage>, ApplicationError> {
+            let _ = (request, cancellation);
+            Err(ApplicationError::unsupported(
+                "LOCAL_SESSION_DIRECTORY_UNSUPPORTED",
+            ))
+        }
+    }
+}
 mod platform_paths;
 mod relay_environment_observation;
 mod relay_status_observation;
