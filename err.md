@@ -965,6 +965,15 @@
 - 验证：每项先以专项测试取得 RED，再达到 Domain `7/7`、Platform `21/21`，两 crate Clippy `-D warnings`、rustfmt 与 `git diff --check` 通过；完整 Issue `#109` 门禁和 GitHub-hosted 双平台证据仍必须在最终修复 Head 上重新执行。
 - 关联：Issue `#109`、`crates/inputcodex-platform/src/markdown_generation.rs`、`crates/inputcodex-platform/tests/markdown_generation.rs`。
 
+### 2026-07-30：macOS 临时目录逻辑路径触发 SQLite NOFOLLOW 拒绝
+
+- 环境：PR `#110` 的 GitHub-hosted macOS Runner，Platform Markdown 生成专项测试使用 `std::env::temp_dir()` 创建合成 SQLite/JSONL。
+- 现象：Windows 与 Linux 通过，但 macOS 专项为 `9 passed / 12 failed`；所有需要打开正常合成 SQLite 的用例均提前返回 `MARKDOWN_GENERATION_UNAVAILABLE`。
+- 根因：macOS 临时目录通常以 `/var/folders/...` 返回，而 `/var` 是指向 `/private/var` 的符号链接；`SQLITE_OPEN_NOFOLLOW` 会检查完整数据库路径中的符号链接组件，因此测试夹具的逻辑临时路径违反了生产 fail-closed 合同。
+- 处理：保留生产 `SQLITE_OPEN_NOFOLLOW` 和路径复验；仅在 macOS 测试夹具创建目录后将根 canonicalize 为物理路径，再派生合成 SQLite 与 rollout。
+- 验证：初始 CI Run `30549071963` 稳定复现共享失败；修正后继续执行 Platform `21/21`、四 crate 本地门禁与 GitHub-hosted macOS Workspace 全目标测试，最终远端证据保留在 PR `#110`。
+- 关联：Issue `#109`、PR `#110`、`crates/inputcodex-platform/tests/markdown_generation.rs`。
+
 ## 记录模板
 
 ```text

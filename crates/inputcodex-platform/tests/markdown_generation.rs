@@ -41,6 +41,9 @@ impl TestDirectory {
             fs::remove_dir_all(&path).expect("清理旧测试目录应成功");
         }
         fs::create_dir_all(&path).expect("创建测试目录应成功");
+        // macOS 临时目录通常经 /var 符号链接暴露，测试需使用物理路径匹配 NOFOLLOW 合同。
+        #[cfg(target_os = "macos")]
+        let path = fs::canonicalize(path).expect("规范化 macOS 测试目录应成功");
         Self { path }
     }
 
