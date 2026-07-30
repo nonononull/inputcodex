@@ -1,0 +1,10 @@
+schema_version: inputcodex.fixture-manifest.v1
+feature_id: feature.session-data.local-session-directory-observation
+fixtures:
+  - id: fixture.feature.session-data.local-session-directory-observation.baseline
+    scenario: baseline
+    kind: synthetic
+    files:
+      - path: baseline.yml
+        format: yaml
+        description: '合成双来源目录页面、Partial 覆盖、排序去重、分页和只读隐私证据，不含真实会话或私人路径。'

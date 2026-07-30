@@ -5,6 +5,7 @@ use inputcodex_domain::DiagnosticCode;
 mod application_overview;
 mod context_entry_observation;
 mod diagnostic_log_observation;
+mod local_session_directory_observation;
 mod platform_paths;
 mod relay_environment_observation;
 mod relay_status_observation;
@@ -20,6 +21,10 @@ pub use context_entry_observation::{
 };
 pub use diagnostic_log_observation::{
     DiagnosticLogObservationPort, DiagnosticLogObservationRequest, ObserveDiagnosticLog,
+};
+pub use local_session_directory_observation::{
+    LocalSessionDirectoryCancellation, LocalSessionDirectoryObservationPort,
+    LocalSessionDirectoryRequest, ObserveLocalSessionDirectory,
 };
 pub use platform_paths::{PlatformPathsPort, PlatformPathsRequest, ResolvePlatformPaths};
 pub use relay_environment_observation::{
@@ -92,6 +97,11 @@ impl ApplicationError {
     #[must_use]
     pub const fn timeout(code: &'static str) -> Self {
         Self::new(ErrorKind::Timeout, DiagnosticCode::new(code))
+    }
+
+    #[must_use]
+    pub const fn cancelled(code: &'static str) -> Self {
+        Self::new(ErrorKind::Cancelled, DiagnosticCode::new(code))
     }
 
     #[must_use]

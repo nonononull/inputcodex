@@ -919,6 +919,25 @@
 - 验证：顺序 RED 从 `writer, reviewer, context7, local` 转为批准的 `writer, context7, local, reviewer`；Platform 全目标测试、Clippy `-D warnings` 与 `cargo fmt --check` 均通过，隐私断言确认 Debug 不含摘要、命令、参数、环境、Token、URL 或路径。
 - 关联：Issue `#101`、`crates/inputcodex-platform/src/context_entry_observation.rs`、`toml_edit 0.25.13`。
 
+
+### 2026-07-29：`cargo tree` 默认树形前缀使行首版本断言误报依赖缺失
+
+- 环境：Issue `#104` 已在 Workspace 精确锁定 `rusqlite = 0.40.1`，Platform 依赖树实际包含该版本；本地验证按 `build.md` 读取默认 `cargo tree --locked --offline -p inputcodex-platform` 输出。
+- 现象：Cargo 输出为 `├── rusqlite v0.40.1`，而验证器使用 `^rusqlite v0\.40\.1$`；依赖已正确解析仍稳定抛出“必须锁定 rusqlite v0.40.1”。
+- 根因：断言把 `cargo tree` 的默认展示格式误当成无前缀 package 列表，行首锚点与树形连接符必然冲突；这不是依赖版本、Cargo.lock 或网络解析失败。
+- 处理：命令增加 `--prefix none`，继续保留精确行首/行尾版本断言和完整依赖树的禁止家族扫描；不放宽为模糊子串，不修改依赖版本。
+- 验证：修正后输出包含独立行 `rusqlite v0.40.1`，精确正则返回 `True`，`tokio|async-std|sqlx|diesel|deadpool` 扫描保持零命中。
+- 关联：Issue `#104`、`build.md`、`Cargo.toml`、`crates/inputcodex-platform/Cargo.toml`、`Cargo.lock`。
+
+### 2026-07-29：SQLite WAL 只读 reader 会更新 SHM 协调区，逐字节不变断言误报业务写入
+
+- 环境：Issue `#104` 使用 `rusqlite 0.40.1` 以 `SQLITE_OPEN_READ_ONLY` 和 `PRAGMA query_only=1` 观察处于 WAL 模式的现场合成 SQLite 数据库，并在观察前后比较主数据库、`-wal`、`-shm` 与目录清单。
+- 现象：主数据库字节、WAL 字节、目录清单和 SHM 长度均保持不变，但 SHM 的少量字节发生变化；原测试把整份 SHM 逐字节相等作为只读成功条件，因此将正常 reader 协调行为误判为业务写入。
+- 根因：SQLite 的 `-shm` 是 WAL-index 与 reader 协调区；只读连接进入或离开读事务时可以更新其中的锁和 read-mark 等协调状态，这不等于修改主数据库或 WAL 中的业务数据。`immutable=1` 不适用于仍可能被其他进程更新的活跃 Codex 数据库，强行使用可能得到错误结果。
+- 处理：继续严格断言主数据库与 WAL 逐字节不变、目录清单不变；对 SHM 只断言文件仍存在且长度不变，允许 reader 协调字节变化。保持只读 OpenFlags、`query_only`、短 busy timeout 和 progress handler，不用 `immutable=1` 掩盖正常 WAL 协调语义。
+- 验证：强化后的 focused 测试返回 `WAL_BUSINESS_READONLY_EVIDENCE=READY`，Platform 定向测试 `15 passed`，全目标测试与 Clippy 通过；没有创建新业务文件，也没有改变主数据库或 WAL 字节。
+- 关联：Issue `#104`、`crates/inputcodex-platform/src/local_session_directory_observation.rs`、`crates/inputcodex-platform/tests/local_session_directory_observation.rs`、SQLite WAL/WAL-index 与 URI immutable 官方说明。
+
 ## 记录模板
 
 ```text
