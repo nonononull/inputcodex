@@ -213,6 +213,52 @@ if ($workflows.Count -ne $workflowExpectations.Count) {
     Add-Violation 'WORKFLOW_GATE' 'required_workflows 只能包含 CI 与 Performance Baseline'
 }
 
+$upstreamSync = Get-PropertyValue $policy 'upstream_sync'
+$upstreamSyncTaskKindProperty = $null
+$upstreamSyncTaskMarkerProperty = $null
+$upstreamSyncAllowedReleaseAuditProperty = $null
+$upstreamSyncRequiredWorkflowProperty = $null
+$upstreamSyncRequiredJobProperty = $null
+if ($null -ne $upstreamSync) {
+    $upstreamSyncTaskKindProperty = $upstreamSync.PSObject.Properties['task_kind']
+    $upstreamSyncTaskMarkerProperty = $upstreamSync.PSObject.Properties['task_marker']
+    $upstreamSyncAllowedReleaseAuditProperty = $upstreamSync.PSObject.Properties['allowed_release_audit']
+    $upstreamSyncRequiredWorkflowProperty = $upstreamSync.PSObject.Properties['required_workflow']
+    $upstreamSyncRequiredJobProperty = $upstreamSync.PSObject.Properties['required_job']
+}
+$upstreamSyncTaskKind = $null
+$upstreamSyncTaskMarker = $null
+$upstreamSyncAllowedReleaseAudit = $null
+$upstreamSyncRequiredWorkflow = $null
+$upstreamSyncRequiredJob = $null
+if ($null -ne $upstreamSyncTaskKindProperty) { $upstreamSyncTaskKind = $upstreamSyncTaskKindProperty.Value }
+if ($null -ne $upstreamSyncTaskMarkerProperty) { $upstreamSyncTaskMarker = $upstreamSyncTaskMarkerProperty.Value }
+if ($null -ne $upstreamSyncAllowedReleaseAuditProperty) { $upstreamSyncAllowedReleaseAudit = $upstreamSyncAllowedReleaseAuditProperty.Value }
+if ($null -ne $upstreamSyncRequiredWorkflowProperty) { $upstreamSyncRequiredWorkflow = $upstreamSyncRequiredWorkflowProperty.Value }
+if ($null -ne $upstreamSyncRequiredJobProperty) { $upstreamSyncRequiredJob = $upstreamSyncRequiredJobProperty.Value }
+$upstreamSyncStringsValid = $upstreamSync -is [pscustomobject] -and
+    $upstreamSyncTaskKind -is [string] -and
+    $upstreamSyncTaskMarker -is [string] -and
+    $upstreamSyncAllowedReleaseAudit -is [string] -and
+    $upstreamSyncRequiredWorkflow -is [string] -and
+    $upstreamSyncRequiredJob -is [string]
+$upstreamSyncWorkflowMatches = @()
+if ($upstreamSyncRequiredWorkflow -is [string]) {
+    $upstreamSyncWorkflowMatches = @($workflows | Where-Object {
+        (Get-PropertyValue $_ 'name') -ceq $upstreamSyncRequiredWorkflow
+    })
+}
+if (-not $upstreamSyncStringsValid -or
+    $upstreamSyncTaskKind -cne 'upstream-sync' -or
+    $upstreamSyncTaskMarker -cne '<!-- inputcodex:autonomous-refactor-task-kind:upstream-sync:v1 -->' -or
+    $upstreamSyncAllowedReleaseAudit -cne 'stale-re-audit-required' -or
+    $upstreamSyncRequiredWorkflow -cne 'CI' -or
+    $upstreamSyncRequiredJob -cne 'release-audit' -or
+    $upstreamSyncWorkflowMatches.Count -ne 1 -or
+    @(Get-PropertyValue $upstreamSyncWorkflowMatches[0] 'jobs') -cnotcontains $upstreamSyncRequiredJob) {
+    Add-Violation 'UPSTREAM_SYNC_POLICY' 'upstream-sync stale 例外必须绑定精确 marker、状态和成功 release-audit Job'
+}
+
 $retry = Get-PropertyValue $policy 'retry'
 $maxAttempts = Get-PropertyValue $retry 'max_attempts'
 $maxIterationMinutes = Get-PropertyValue $retry 'max_iteration_minutes'
@@ -260,6 +306,13 @@ $result = [pscustomobject][ordered]@{
     ok = ($violations.Count -eq 0)
     policy_path = $resolvedPolicyPath
     policy_sha256 = "sha256:$policyHash"
+    upstream_sync = [pscustomobject][ordered]@{
+        task_kind = $upstreamSyncTaskKind
+        task_marker = $upstreamSyncTaskMarker
+        allowed_release_audit = $upstreamSyncAllowedReleaseAudit
+        required_workflow = $upstreamSyncRequiredWorkflow
+        required_job = $upstreamSyncRequiredJob
+    }
     violation_count = $violations.Count
     violations = @($violations)
 }

@@ -35,6 +35,23 @@ function Get-PropertyValue {
     return $property.Value
 }
 
+function Get-PropertyProjection {
+    param(
+        [AllowNull()]$Value,
+        [Parameter(Mandatory)][string]$Name
+    )
+
+    $property = if ($null -eq $Value) { $null } else { $Value.PSObject.Properties[$Name] }
+    $projection = [pscustomobject][ordered]@{
+        exists = ($null -ne $property)
+        value = $null
+    }
+    if ($null -ne $property) {
+        $projection.value = $property.Value
+    }
+    return $projection
+}
+
 function ConvertFrom-StrictJsonArrayOutput {
     param(
         [AllowEmptyCollection()][object[]]$Output,
@@ -111,6 +128,36 @@ function ConvertFrom-StrictPagedObjectOutput {
     return [pscustomobject]@{ Pages = $pages.Items }
 }
 
+function Get-AutonomousIssueTaskKind {
+    param(
+        [AllowNull()]$Body,
+        [Parameter(Mandatory)][string]$UpstreamSyncTaskMarker
+    )
+
+    if ($Body -isnot [string]) {
+        return 'refactor'
+    }
+    $matches = [regex]::Matches(
+        $Body,
+        '<!--\s*inputcodex:autonomous-refactor-task-kind:[^>]*-->',
+        [Text.RegularExpressions.RegexOptions]::CultureInvariant
+    )
+    if ($matches.Count -eq 0) {
+        return 'refactor'
+    }
+    if ($matches.Count -ne 1 -or
+        $matches[0].Value -cne $UpstreamSyncTaskMarker) {
+        return 'invalid'
+    }
+    $normalizedBody = $Body.Replace("`r`n", "`n").Replace("`r", "`n")
+    $expectedHeader = "<!-- inputcodex:autonomous-refactor-task:v1 -->`n$UpstreamSyncTaskMarker"
+    if ($normalizedBody -cne $expectedHeader -and
+        -not $normalizedBody.StartsWith("$expectedHeader`n", [StringComparison]::Ordinal)) {
+        return 'invalid'
+    }
+    return 'upstream-sync'
+}
+
 function Get-AutonomousPrBodyEvidence {
     param([AllowNull()]$Body)
 
@@ -130,6 +177,13 @@ function Get-AutonomousPrBodyEvidence {
     } catch {
         return $invalid
     }
+    $taskKindProjection = Get-PropertyProjection $evidence 'task_kind'
+    $taskKind = $taskKindProjection.value
+    if (-not $taskKindProjection.exists) {
+        $taskKind = 'refactor'
+    } elseif ($taskKind -isnot [string] -or $taskKind -cnotin @('refactor', 'upstream-sync')) {
+        return $invalid
+    }
     if ($evidence -isnot [pscustomobject] -or
         (Get-PropertyValue $evidence 'schema_version') -cne 'inputcodex.autonomous-refactor-evidence.v1' -or
         (Get-PropertyValue $evidence 'tracking_issue_ref') -isnot [string] -or
@@ -145,6 +199,7 @@ function Get-AutonomousPrBodyEvidence {
     }
     return [pscustomobject][ordered]@{
         valid = $true
+        task_kind = $taskKind
         tracking_issue_ref = Get-PropertyValue $evidence 'tracking_issue_ref'
         standing_authorization_ref = Get-PropertyValue $evidence 'standing_authorization_ref'
         policy_sha256 = Get-PropertyValue $evidence 'policy_sha256'
@@ -197,11 +252,23 @@ function Get-GitHubPlanningEvidence {
         $body = [string](Get-PropertyValue $comment 'body')
         $countMatch = [regex]::Match($body, '(?m)^- candidate_scope:\s*([0-9]+)\s*$')
         $hashMatch = [regex]::Match($body, '(?m)^- candidate_scope_hash:\s*(sha256:[0-9a-f]{64})\s*$')
+        $taskKindMatches = [regex]::Matches($body, '(?m)^- task_kind:\s*(\S+)\s*$')
+        $taskKind = 'refactor'
+        if ($taskKindMatches.Count -gt 1) {
+            continue
+        }
+        if ($taskKindMatches.Count -eq 1) {
+            $taskKind = $taskKindMatches[0].Groups[1].Value
+            if ($taskKind -cnotin @('refactor', 'upstream-sync')) {
+                continue
+            }
+        }
         $scopeCount = 0L
         if ($countMatch.Success -and $hashMatch.Success -and
             [long]::TryParse($countMatch.Groups[1].Value, [ref]$scopeCount)) {
             return [pscustomobject][ordered]@{
                 valid = $true
+                task_kind = $taskKind
                 scope_count = $scopeCount
                 scope_hash = $hashMatch.Groups[1].Value
                 ref = Get-PropertyValue $comment 'html_url'
@@ -516,7 +583,8 @@ function Get-AutonomousPostMergeGateEvaluation {
         [Parameter(Mandatory)]$MergedPullRequest,
         [Parameter(Mandatory)]$Issue,
         [Parameter(Mandatory)]$Snapshot,
-        [Parameter(Mandatory)][string]$PolicySha256
+        [Parameter(Mandatory)][string]$PolicySha256,
+        [Parameter(Mandatory)][string]$TaskKind
     )
 
     $pending = [System.Collections.Generic.List[string]]::new()
@@ -530,6 +598,8 @@ function Get-AutonomousPostMergeGateEvaluation {
     $mergeCommitOid = Get-PropertyValue $MergedPullRequest 'merge_commit_oid'
     $evidence = Get-PropertyValue $MergedPullRequest 'evidence'
     $planningEvidence = Get-PropertyValue $Issue 'planning_evidence'
+    $evidenceTaskKind = (Get-PropertyProjection $evidence 'task_kind').value
+    $planningTaskKind = (Get-PropertyProjection $planningEvidence 'task_kind').value
     if ([string]$mergeCommitOid -cnotmatch '^[0-9a-f]{40}$' -or
         (Get-PropertyValue $Snapshot 'observed_remote_main') -cne $mergeCommitOid -or
         $null -eq $evidence -or
@@ -543,7 +613,11 @@ function Get-AutonomousPostMergeGateEvaluation {
         (Get-PropertyValue $planningEvidence 'scope_count') -ne (Get-PropertyValue $Snapshot 'actual_scope_count') -or
         (Get-PropertyValue $planningEvidence 'scope_hash') -cne (Get-PropertyValue $Snapshot 'actual_scope_hash') -or
         (Get-PropertyValue $evidence 'scope_count') -ne (Get-PropertyValue $Snapshot 'actual_scope_count') -or
-        (Get-PropertyValue $evidence 'scope_hash') -cne (Get-PropertyValue $Snapshot 'actual_scope_hash')) {
+        (Get-PropertyValue $evidence 'scope_hash') -cne (Get-PropertyValue $Snapshot 'actual_scope_hash') -or
+        $evidenceTaskKind -isnot [string] -or
+        $evidenceTaskKind -cne $TaskKind -or
+        $planningTaskKind -isnot [string] -or
+        $planningTaskKind -cne $TaskKind) {
         Add-PostMergePendingCode 'POST_MERGE_EVIDENCE'
     }
     if ((Get-PropertyValue $Snapshot 'observed_origin_main') -cne $mergeCommitOid) {
@@ -605,7 +679,8 @@ function Get-AutonomousMergeGateEvaluation {
         [Parameter(Mandatory)]$PullRequest,
         [Parameter(Mandatory)]$Issue,
         [Parameter(Mandatory)]$Snapshot,
-        [Parameter(Mandatory)][string]$PolicySha256
+        [Parameter(Mandatory)][string]$PolicySha256,
+        [Parameter(Mandatory)][string]$TaskKind
     )
 
     $pending = [System.Collections.Generic.List[string]]::new()
@@ -676,6 +751,14 @@ function Get-AutonomousMergeGateEvaluation {
         (Get-PropertyValue $evidence 'scope_count') -ne $actualScopeCount -or
         (Get-PropertyValue $evidence 'scope_hash') -cne $actualScopeHash) {
         Add-PendingCode 'EVIDENCE_SCOPE'
+    }
+    $evidenceTaskKind = (Get-PropertyProjection $evidence 'task_kind').value
+    $planningTaskKind = (Get-PropertyProjection $planningEvidence 'task_kind').value
+    if ($evidenceTaskKind -isnot [string] -or
+        $evidenceTaskKind -cne $TaskKind -or
+        $planningTaskKind -isnot [string] -or
+        $planningTaskKind -cne $TaskKind) {
+        Add-PendingCode 'EVIDENCE_TASK_KIND'
     }
     $reviewAttestation = Get-PropertyValue $PullRequest 'review_attestation'
     if ($null -eq $evidence -or
@@ -844,6 +927,8 @@ function Invoke-GitRead {
 }
 
 function Get-LiveSnapshot {
+    param([Parameter(Mandatory)][string]$UpstreamSyncTaskMarker)
+
     $originMain = ((Invoke-GitRead @('rev-parse', 'origin/main')) -join '').Trim()
     $worktreeHead = ((Invoke-GitRead @('rev-parse', 'HEAD')) -join '').Trim()
     $branch = ((Invoke-GitRead @('branch', '--show-current')) -join '').Trim()
@@ -939,6 +1024,9 @@ function Get-LiveSnapshot {
                         url = Get-PropertyValue $_ 'html_url'
                         author_login = Get-PropertyValue (Get-PropertyValue $_ 'user') 'login'
                         github_state = Get-PropertyValue $_ 'state'
+                        task_kind = Get-AutonomousIssueTaskKind `
+                            -Body (Get-PropertyValue $_ 'body') `
+                            -UpstreamSyncTaskMarker $UpstreamSyncTaskMarker
                         planning_evidence = [pscustomobject][ordered]@{ valid = $false }
                     }
                 })
@@ -1190,7 +1278,8 @@ if (-not [string]::IsNullOrWhiteSpace($SnapshotPath)) {
     }
 } else {
     try {
-        $snapshot = Get-LiveSnapshot
+        $snapshot = Get-LiveSnapshot `
+            -UpstreamSyncTaskMarker ([string](Get-PropertyValue (Get-PropertyValue $policyResult 'upstream_sync') 'task_marker'))
     } catch {
         Write-Result -ExitCode 11 -Value ([pscustomobject][ordered]@{
             schema_version = 1
@@ -1300,6 +1389,17 @@ $ignoredUntrustedPrMarkers = $markerPrs.Count - $activePrs.Count
 $ignoredUntrustedMergedPrMarkers = $markerMergedPrs.Count - $trustedMergedPrs.Count
 $activeWriterCount = Get-PropertyValue $snapshot 'active_writer_count'
 $reasonCodes = [System.Collections.Generic.List[string]]::new()
+$activeTaskKind = $null
+if ($activeIssues.Count -eq 1) {
+    $activeTaskKindProjection = Get-PropertyProjection $activeIssues[0] 'task_kind'
+    $activeTaskKind = $activeTaskKindProjection.value
+    if (-not $activeTaskKindProjection.exists) {
+        $activeTaskKind = 'refactor'
+    } elseif ($activeTaskKind -isnot [string] -or
+        $activeTaskKind -cnotin @('refactor', 'upstream-sync')) {
+        $reasonCodes.Add('INVALID_TASK_KIND') | Out-Null
+    }
+}
 
 if ($activeWriterCount -isnot [long] -or $activeWriterCount -lt 0) {
     Write-Result -ExitCode 11 -Value ([pscustomobject][ordered]@{
@@ -1330,7 +1430,13 @@ $isPostMergeTransition = $linkedMergedPrs.Count -eq 1 -and
 if ($linkedMergedPrs.Count -eq 1 -and -not $isPostMergeTransition) {
     $reasonCodes.Add('MERGED_PR_MAIN_DRIFT') | Out-Null
 }
-if ((Get-PropertyValue $snapshot 'release_audit') -cne 'current') {
+$upstreamSyncPolicy = Get-PropertyValue $policyResult 'upstream_sync'
+$isAllowedUpstreamSyncStale = $activeIssues.Count -eq 1 -and
+    $activeTaskKind -ceq (Get-PropertyValue $upstreamSyncPolicy 'task_kind') -and
+    (Get-PropertyValue $snapshot 'release_audit') -ceq
+        (Get-PropertyValue $upstreamSyncPolicy 'allowed_release_audit')
+if ((Get-PropertyValue $snapshot 'release_audit') -cne 'current' -and
+    -not $isAllowedUpstreamSyncStale) {
     $reasonCodes.Add('RELEASE_AUDIT_STALE') | Out-Null
 }
 if (-not $isPostMergeTransition -and
@@ -1386,21 +1492,23 @@ if ((Get-PropertyValue $snapshot 'paseo_available') -ne $true) {
 }
 
 $mergeGatePending = @()
-if ($activeIssues.Count -eq 1 -and $activePrs.Count -eq 1) {
+if ($reasonCodes.Count -eq 0 -and $activeIssues.Count -eq 1 -and $activePrs.Count -eq 1) {
     $mergeGateEvaluation = Get-AutonomousMergeGateEvaluation `
         -PullRequest $activePrs[0] `
         -Issue $activeIssues[0] `
         -Snapshot $snapshot `
-        -PolicySha256 ([string](Get-PropertyValue $policyResult 'policy_sha256'))
+        -PolicySha256 ([string](Get-PropertyValue $policyResult 'policy_sha256')) `
+        -TaskKind $activeTaskKind
     $mergeGatePending = @($mergeGateEvaluation.Pending)
 }
 $postMergeGatePending = @()
-if ($isPostMergeTransition) {
+if ($reasonCodes.Count -eq 0 -and $isPostMergeTransition) {
     $postMergeGateEvaluation = Get-AutonomousPostMergeGateEvaluation `
         -MergedPullRequest $linkedMergedPrs[0] `
         -Issue $activeIssues[0] `
         -Snapshot $snapshot `
-        -PolicySha256 ([string](Get-PropertyValue $policyResult 'policy_sha256'))
+        -PolicySha256 ([string](Get-PropertyValue $policyResult 'policy_sha256')) `
+        -TaskKind $activeTaskKind
     $postMergeGatePending = @($postMergeGateEvaluation.Pending)
 }
 

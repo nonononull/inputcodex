@@ -1029,6 +1029,15 @@
 - 验证：生产 helper 合同先因函数缺失稳定 RED；GREEN 后 exact closed/open 两条路径通过，stale main、错误 Head、非 owner PR 与重复候选均保持零恢复，完整 CI 合同为 68/68。Issue #113 的关联 PR 合并后还必须以 `Closes #113` 完成无需人工 reopen 的真实 live 验收。
 - 关联：Issue #111、PR #112、Issue #113、scripts/automation/Get-AutonomousRefactorState.ps1、scripts/ci/Test-CiScripts.ps1。
 
+### 2026-07-31：stale 快照目录覆盖与自治硬停形成上游同步循环依赖
+
+- 环境：Issue #116 将活动上游快照从 `v1.2.43` 合法推进到 `v1.2.44`，功能目录按独立重审合同继续锁定旧 Release，并把 `release_audit.status` 设为 `stale-re-audit-required`。
+- 现象：Parity 在同步分支立即报告 `MissingSourceEntry: core-module:sub2api` 与 `MissingSourceEntry: tauri-command:fetch_sub2api_billing`；自治状态解析器同时对所有 stale 状态返回 `RELEASE_AUDIT_STALE`，纯缓存同步无法进入 PR、合并和合并后验证。
+- 根因：仓库验证器虽然接受合法 stale 结构，仍用活动新快照要求旧目录立即完成公开入口双向覆盖和证据文件存在性；自治策略又没有机器可验证的任务类型，无法把只更新来源事实的 upstream-sync 与普通重构区分开。
+- 处理：合法 stale 继续严格验证 release audit 结构、目录 Release、feature/source 内部映射和状态，只暂停依赖活动新快照的双向公开入口覆盖与证据文件存在性；`current` 保持全部严格检查。自治策略增加精确 `upstream-sync` task kind/marker，唯一允许 `stale-re-audit-required`，并继续绑定 `CI` 的成功 `release-audit` Job；typed marker 只能紧随 owner task marker 出现在正文顶部，Planning 与 PR evidence 必须绑定同一 task kind，未知、重复、大小写漂移、版本漂移或数组伪装全部 fail-closed，普通 stale 任务继续硬停。任何硬停止原因均先于强类型 merge/post-merge gate 计算，避免无效投影触发参数绑定异常而丢失结构化状态。
+- 验证：Rust RED 在合成新 command、core module 和缺失旧证据下稳定报告活动快照差异，GREEN 后合法 stale 通过且 `requires_reaudit=true`；四个 current 反例继续分别拒绝缺失、意外、错误来源入口和缺失证据文件。PowerShell RED 精确暴露策略投影、typed marker、stale 推进、代码块误识别、evidence 未绑定和单元素数组枚举缺口，GREEN 后完整 CI 合同为 `73/73`，Parity 定向套件为 `28/28`，规范化策略 hash 为 `sha256:cb65b94cd5ef876e9049b4795eca992ac8ac2d9bd9aead03df48b373988f25d1`。
+- 关联：Issue #115、Issue #116、Issue #117、`.github/autonomous-refactor-policy.json`、`crates/inputcodex-parity/src/validation.rs`、`scripts/automation/Get-AutonomousRefactorState.ps1`。
+
 ## 记录模板
 
 ```text

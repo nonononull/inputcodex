@@ -721,7 +721,7 @@ fn load_feature_repository(
             for evidence in feature.evidence() {
                 if !crate::catalog::is_locked_upstream_path(evidence.path())
                     || evidence.symbol().trim().is_empty()
-                    || !repository_root.join(evidence.path()).is_file()
+                    || (!requires_reaudit && !repository_root.join(evidence.path()).is_file())
                 {
                     issues.push(ValidationIssue::new(
                         ValidationCode::InvalidEvidencePath,
@@ -739,39 +739,48 @@ fn load_feature_repository(
         &source_lock.release_audit.catalog_release.commit,
     ));
 
-    let expected_sources = enumerate_expected_sources(repository_root)?;
+    let expected_sources = if requires_reaudit {
+        None
+    } else {
+        Some(enumerate_expected_sources(repository_root)?)
+    };
     let source_entries = source_index
         .sources()
         .iter()
         .map(|source| (source.id(), source))
         .collect::<BTreeMap<_, _>>();
 
-    for (source_id, expected) in &expected_sources {
-        match source_entries.get(source_id.as_str()) {
-            Some(source)
-                if source.kind() == expected.kind
-                    && source.evidence().path() == expected.path
-                    && source.evidence().symbol() == expected.symbol => {}
-            Some(_) => issues.push(ValidationIssue::new(
-                ValidationCode::SourceEvidenceMismatch,
-                source_id,
-            )),
-            None => issues.push(ValidationIssue::new(
-                ValidationCode::MissingSourceEntry,
-                source_id,
-            )),
+    if let Some(expected_sources) = &expected_sources {
+        for (source_id, expected) in expected_sources {
+            match source_entries.get(source_id.as_str()) {
+                Some(source)
+                    if source.kind() == expected.kind
+                        && source.evidence().path() == expected.path
+                        && source.evidence().symbol() == expected.symbol => {}
+                Some(_) => issues.push(ValidationIssue::new(
+                    ValidationCode::SourceEvidenceMismatch,
+                    source_id,
+                )),
+                None => issues.push(ValidationIssue::new(
+                    ValidationCode::MissingSourceEntry,
+                    source_id,
+                )),
+            }
         }
     }
 
     for source in source_index.sources() {
-        if !expected_sources.contains_key(source.id()) {
+        if expected_sources
+            .as_ref()
+            .is_some_and(|expected| !expected.contains_key(source.id()))
+        {
             issues.push(ValidationIssue::new(
                 ValidationCode::UnexpectedSourceEntry,
                 source.id(),
             ));
         }
 
-        if !repository_root.join(source.evidence().path()).is_file() {
+        if !requires_reaudit && !repository_root.join(source.evidence().path()).is_file() {
             issues.push(ValidationIssue::new(
                 ValidationCode::InvalidEvidencePath,
                 format!("{}:{}", source.id(), source.evidence().path()),
