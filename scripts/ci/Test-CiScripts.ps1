@@ -10,6 +10,8 @@ $classifierScript = Join-Path $scriptDirectory 'Classify-Changes.ps1'
 $policyScript = Join-Path $scriptDirectory 'Verify-RepositoryPolicy.ps1'
 $collectorScript = Join-Path $scriptDirectory 'Collect-Changes.ps1'
 $releaseAuditGateScript = Join-Path $scriptDirectory 'Verify-ReleaseAuditGate.ps1'
+$autonomousPolicyScript = Join-Path $scriptDirectory 'Verify-AutonomousRefactorPolicy.ps1'
+$autonomousPolicyPath = Join-Path $repositoryRoot '.github/autonomous-refactor-policy.json'
 $workflowPath = Join-Path $repositoryRoot '.github/workflows/ci.yml'
 $performanceWorkflowPath = Join-Path $repositoryRoot '.github/workflows/performance-baseline.yml'
 $performanceInvokeScript = Join-Path $repositoryRoot 'scripts/performance/Invoke-InputcodexBaseline.ps1'
@@ -20,6 +22,8 @@ $missingImplementations = @(
         $classifierScript
         $policyScript
         $releaseAuditGateScript
+        $autonomousPolicyScript
+        $autonomousPolicyPath
     ) | Where-Object { -not (Test-Path -LiteralPath $_ -PathType Leaf) }
 )
 
@@ -147,6 +151,192 @@ function Write-JsonFile {
 
     $json = ConvertTo-Json -InputObject $Value -Depth 20
     Set-Content -LiteralPath $Path -Value $json -Encoding utf8NoBOM
+}
+
+function New-ValidAutonomousRefactorPolicy {
+    [pscustomobject][ordered]@{
+        schema_version = 'inputcodex.autonomous-refactor-policy.v1'
+        enabled = $true
+        authorization = [pscustomobject][ordered]@{
+            mode = 'bounded-standing-v1'
+            owner_authorization_ref = 'https://github.com/nonononull/inputcodex/issues/111'
+            exact_head_binding = $true
+            policy_hash_binding = $true
+            refresh_on_head_change = $true
+        }
+        execution = [pscustomobject][ordered]@{
+            base_ref = 'origin/main'
+            max_active_writers = 1
+            max_active_product_issues = 1
+            max_active_product_prs = 1
+            local_full_workspace_build = $false
+            github_hosted_full_validation = $true
+            decision_order = @(
+                'performance-first'
+                'release-parity'
+                'minimal-read-only-slice'
+                'typed-owner-before-side-effects'
+                'fail-closed-and-continue'
+            )
+        }
+        merge_gate = [pscustomobject][ordered]@{
+            method = 'squash'
+            github_native_auto_merge = $false
+            required_mergeable_state = 'CLEAN'
+            required_release_audit = 'current'
+            required_review_threads = 0
+            required_artifacts = 0
+            require_origin_main_freshness = $true
+            require_tree_equivalence = $true
+            require_single_parent = $true
+            require_valid_github_signature = $true
+            required_workflows = @(
+                [pscustomobject][ordered]@{
+                    name = 'CI'
+                    jobs = @(
+                        'classify'
+                        'governance'
+                        'release-audit'
+                        'linux-quality'
+                        'windows'
+                        'macos'
+                        'required'
+                    )
+                }
+                [pscustomobject][ordered]@{
+                    name = 'Performance Baseline'
+                    jobs = @('contract', 'windows', 'macos', 'required')
+                }
+            )
+        }
+        retry = [pscustomobject][ordered]@{
+            max_attempts = 3
+            max_iteration_minutes = 180
+            external_wait_seconds = 120
+        }
+        ui = [pscustomobject][ordered]@{
+            owner = 'Gemini'
+            fallback_allowed = $false
+        }
+        hard_stops = @(
+            'paid-runner'
+            'self-hosted-runner'
+            'secret-or-signing'
+            'formal-release'
+            'license-conflict'
+            'force-push-main'
+            'delete-main'
+            'ruleset-bypass'
+        )
+        first_candidate = 'feature.session-data.token-usage-history'
+    }
+}
+
+function Copy-AutonomousRefactorPolicy {
+    param([Parameter(Mandatory)]$Policy)
+
+    return ($Policy | ConvertTo-Json -Depth 30 | ConvertFrom-Json -Depth 30)
+}
+
+function Invoke-AutonomousPolicyCase {
+    param(
+        [Parameter(Mandatory)][string]$Name,
+        [Parameter(Mandatory)]$Policy
+    )
+
+    $caseRoot = Join-Path $testRoot ("autonomous-policy-{0}" -f $Name)
+    New-Item -ItemType Directory -Path $caseRoot -Force | Out-Null
+    $policyPath = Join-Path $caseRoot 'policy.json'
+    Write-JsonFile -Path $policyPath -Value $Policy
+    Invoke-ChildScript -Path $autonomousPolicyScript -Arguments @(
+        '-RepositoryRoot', $caseRoot,
+        '-PolicyPath', $policyPath
+    )
+}
+
+function Assert-AutonomousPolicyFailure {
+    param(
+        [Parameter(Mandatory)]$Result,
+        [Parameter(Mandatory)][string]$ExpectedCode
+    )
+
+    Assert-Equal -Expected 12 -Actual $Result.ExitCode -Message "自治策略应失败，输出=$($Result.Output)"
+    Assert-True -Condition ($null -ne $Result.Json) -Message "自治策略失败必须输出 JSON，输出=$($Result.Output)"
+    Assert-Equal -Expected $false -Actual $Result.Json.ok -Message '自治策略失败必须标记 ok=false'
+    Assert-Contains -Collection @($Result.Json.violations.code) -Expected $ExpectedCode -Message '自治策略失败码必须稳定'
+}
+
+Invoke-ContractTest -Name '合法无人值守重构策略通过并输出规范化哈希' -Body {
+    $result = Invoke-ChildScript -Path $autonomousPolicyScript -Arguments @(
+        '-RepositoryRoot', $repositoryRoot,
+        '-PolicyPath', $autonomousPolicyPath
+    )
+    Assert-Equal -Expected 0 -Actual $result.ExitCode -Message "合法自治策略应通过，输出=$($result.Output)"
+    Assert-True -Condition ($null -ne $result.Json) -Message "合法自治策略必须输出 JSON，输出=$($result.Output)"
+    Assert-Equal -Expected $true -Actual $result.Json.ok -Message '合法自治策略必须标记 ok=true'
+    Assert-True -Condition ([string]$result.Json.policy_sha256 -match '^sha256:[0-9a-f]{64}$') -Message '自治策略必须输出规范化 SHA-256'
+}
+
+Invoke-ContractTest -Name '拒绝缺失的无人值守重构策略文件' -Body {
+    $missingPath = Join-Path $testRoot 'missing-autonomous-policy.json'
+    $result = Invoke-ChildScript -Path $autonomousPolicyScript -Arguments @(
+        '-RepositoryRoot', $testRoot,
+        '-PolicyPath', $missingPath
+    )
+    Assert-Equal -Expected 10 -Actual $result.ExitCode -Message "缺失策略应使用稳定退出码，输出=$($result.Output)"
+    Assert-Equal -Expected 'AUTONOMOUS_POLICY_MISSING' -Actual $result.Json.error_code -Message '缺失策略错误码必须稳定'
+}
+
+Invoke-ContractTest -Name '拒绝非 bounded standing authorization' -Body {
+    $policy = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
+    $policy.authorization.mode = 'per-pr-owner'
+    Assert-AutonomousPolicyFailure -Result (Invoke-AutonomousPolicyCase -Name 'authorization' -Policy $policy) -ExpectedCode 'AUTHORIZATION_MODE'
+}
+
+Invoke-ContractTest -Name '拒绝 GitHub 原生 auto-merge' -Body {
+    $policy = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
+    $policy.merge_gate.github_native_auto_merge = $true
+    Assert-AutonomousPolicyFailure -Result (Invoke-AutonomousPolicyCase -Name 'auto-merge' -Policy $policy) -ExpectedCode 'GITHUB_AUTO_MERGE'
+}
+
+Invoke-ContractTest -Name '拒绝非 Squash 或非精确 Head 合并' -Body {
+    $policy = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
+    $policy.merge_gate.method = 'rebase'
+    $policy.authorization.exact_head_binding = $false
+    $result = Invoke-AutonomousPolicyCase -Name 'merge-method' -Policy $policy
+    Assert-AutonomousPolicyFailure -Result $result -ExpectedCode 'MERGE_METHOD'
+    Assert-Contains -Collection @($result.Json.violations.code) -Expected 'EXACT_HEAD_BINDING' -Message '精确 Head 缺失必须被拒绝'
+}
+
+Invoke-ContractTest -Name '拒绝多个写入者或无界重试' -Body {
+    $policy = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
+    $policy.execution.max_active_writers = 2
+    $policy.retry.max_attempts = 0
+    $result = Invoke-AutonomousPolicyCase -Name 'writer-retry' -Policy $policy
+    Assert-AutonomousPolicyFailure -Result $result -ExpectedCode 'SINGLE_WRITER'
+    Assert-Contains -Collection @($result.Json.violations.code) -Expected 'RETRY_BOUND' -Message '重试上限缺失必须被拒绝'
+}
+
+Invoke-ContractTest -Name '拒绝缺失的 CI Performance 与零 Artifact 门' -Body {
+    $policy = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
+    $policy.merge_gate.required_artifacts = 1
+    $policy.merge_gate.required_workflows = @($policy.merge_gate.required_workflows | Where-Object { $_.name -ne 'Performance Baseline' })
+    $result = Invoke-AutonomousPolicyCase -Name 'merge-gates' -Policy $policy
+    Assert-AutonomousPolicyFailure -Result $result -ExpectedCode 'ARTIFACT_GATE'
+    Assert-Contains -Collection @($result.Json.violations.code) -Expected 'WORKFLOW_GATE' -Message 'Performance 门缺失必须被拒绝'
+}
+
+Invoke-ContractTest -Name '拒绝非 Gemini UI owner 或 UI fallback' -Body {
+    $policy = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
+    $policy.ui.owner = 'Codex'
+    $policy.ui.fallback_allowed = $true
+    Assert-AutonomousPolicyFailure -Result (Invoke-AutonomousPolicyCase -Name 'ui-owner' -Policy $policy) -ExpectedCode 'UI_OWNER'
+}
+
+Invoke-ContractTest -Name '拒绝缺失永久主干保护的硬停止集合' -Body {
+    $policy = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
+    $policy.hard_stops = @($policy.hard_stops | Where-Object { $_ -notin @('force-push-main', 'delete-main', 'ruleset-bypass') })
+    Assert-AutonomousPolicyFailure -Result (Invoke-AutonomousPolicyCase -Name 'hard-stops' -Policy $policy) -ExpectedCode 'HARD_STOPS'
 }
 
 function New-ReleaseAuditSourceLock {
