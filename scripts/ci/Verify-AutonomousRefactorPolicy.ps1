@@ -39,9 +39,49 @@ function Test-ExactStringSet {
         [Parameter(Mandatory)][string[]]$Expected
     )
 
-    $actualValues = @($Actual | ForEach-Object { [string]$_ } | Sort-Object -Unique)
+    $rawActualValues = @($Actual)
+    if (@($rawActualValues | Where-Object { $_ -isnot [string] }).Count -ne 0) {
+        return $false
+    }
+    $actualValues = @($rawActualValues | Sort-Object -Unique)
     $expectedValues = @($Expected | Sort-Object -Unique)
     return [string]::Join([char]10, $actualValues) -ceq [string]::Join([char]10, $expectedValues)
+}
+
+function Test-ExactStringSequence {
+    param(
+        [AllowNull()]$Actual,
+        [Parameter(Mandatory)][string[]]$Expected
+    )
+
+    $actualValues = @($Actual)
+    if ($actualValues.Count -ne $Expected.Count) {
+        return $false
+    }
+    for ($index = 0; $index -lt $Expected.Count; $index += 1) {
+        if ($actualValues[$index] -isnot [string] -or $actualValues[$index] -cne $Expected[$index]) {
+            return $false
+        }
+    }
+    return $true
+}
+
+function Test-ExactJsonBoolean {
+    param(
+        [AllowNull()]$Actual,
+        [Parameter(Mandatory)][bool]$Expected
+    )
+
+    return ($Actual -is [bool] -and $Actual -eq $Expected)
+}
+
+function Test-ExactJsonInt64 {
+    param(
+        [AllowNull()]$Actual,
+        [Parameter(Mandatory)][long]$Expected
+    )
+
+    return ($Actual -is [long] -and $Actual -eq $Expected)
 }
 
 $root = [System.IO.Path]::GetFullPath($RepositoryRoot)
@@ -88,7 +128,7 @@ function Add-Violation {
 if ((Get-PropertyValue $policy 'schema_version') -cne 'inputcodex.autonomous-refactor-policy.v1') {
     Add-Violation 'SCHEMA_VERSION' 'schema_version 必须为 inputcodex.autonomous-refactor-policy.v1'
 }
-if ((Get-PropertyValue $policy 'enabled') -ne $true) {
+if (-not (Test-ExactJsonBoolean -Actual (Get-PropertyValue $policy 'enabled') -Expected $true)) {
     Add-Violation 'POLICY_ENABLED' '自治策略必须显式 enabled=true'
 }
 
@@ -99,11 +139,11 @@ if ((Get-PropertyValue $authorization 'mode') -cne 'bounded-standing-v1') {
 if ((Get-PropertyValue $authorization 'owner_authorization_ref') -cne 'https://github.com/nonononull/inputcodex/issues/111') {
     Add-Violation 'OWNER_AUTHORIZATION_REF' 'owner authorization 必须固定指向 Issue #111'
 }
-if ((Get-PropertyValue $authorization 'exact_head_binding') -ne $true) {
+if (-not (Test-ExactJsonBoolean -Actual (Get-PropertyValue $authorization 'exact_head_binding') -Expected $true)) {
     Add-Violation 'EXACT_HEAD_BINDING' '每次合并必须绑定精确 Final Head'
 }
-if ((Get-PropertyValue $authorization 'policy_hash_binding') -ne $true -or
-    (Get-PropertyValue $authorization 'refresh_on_head_change') -ne $true) {
+if (-not (Test-ExactJsonBoolean -Actual (Get-PropertyValue $authorization 'policy_hash_binding') -Expected $true) -or
+    -not (Test-ExactJsonBoolean -Actual (Get-PropertyValue $authorization 'refresh_on_head_change') -Expected $true)) {
     Add-Violation 'AUTHORIZATION_REFRESH' '策略 hash 必须绑定，Head 变化后必须刷新授权证据'
 }
 
@@ -111,13 +151,13 @@ $execution = Get-PropertyValue $policy 'execution'
 if ((Get-PropertyValue $execution 'base_ref') -cne 'origin/main') {
     Add-Violation 'BASE_REF' '自治任务必须从 origin/main 开始'
 }
-if ((Get-PropertyValue $execution 'max_active_writers') -ne 1 -or
-    (Get-PropertyValue $execution 'max_active_product_issues') -ne 1 -or
-    (Get-PropertyValue $execution 'max_active_product_prs') -ne 1) {
+if (-not (Test-ExactJsonInt64 -Actual (Get-PropertyValue $execution 'max_active_writers') -Expected 1) -or
+    -not (Test-ExactJsonInt64 -Actual (Get-PropertyValue $execution 'max_active_product_issues') -Expected 1) -or
+    -not (Test-ExactJsonInt64 -Actual (Get-PropertyValue $execution 'max_active_product_prs') -Expected 1)) {
     Add-Violation 'SINGLE_WRITER' '写入者、active 产品 Issue 和 active 产品 PR 都必须最多一个'
 }
-if ((Get-PropertyValue $execution 'local_full_workspace_build') -ne $false -or
-    (Get-PropertyValue $execution 'github_hosted_full_validation') -ne $true) {
+if (-not (Test-ExactJsonBoolean -Actual (Get-PropertyValue $execution 'local_full_workspace_build') -Expected $false) -or
+    -not (Test-ExactJsonBoolean -Actual (Get-PropertyValue $execution 'github_hosted_full_validation') -Expected $true)) {
     Add-Violation 'BUILD_PLACEMENT' '本地不得跑全量 Workspace，完整验证必须使用 GitHub-hosted runners'
 }
 $expectedDecisionOrder = @(
@@ -127,7 +167,7 @@ $expectedDecisionOrder = @(
     'typed-owner-before-side-effects',
     'fail-closed-and-continue'
 )
-if (-not (Test-ExactStringSet -Actual (Get-PropertyValue $execution 'decision_order') -Expected $expectedDecisionOrder)) {
+if (-not (Test-ExactStringSequence -Actual (Get-PropertyValue $execution 'decision_order') -Expected $expectedDecisionOrder)) {
     Add-Violation 'DECISION_ORDER' '自动决策顺序必须完整且不可漂移'
 }
 
@@ -135,15 +175,15 @@ $mergeGate = Get-PropertyValue $policy 'merge_gate'
 if ((Get-PropertyValue $mergeGate 'method') -cne 'squash') {
     Add-Violation 'MERGE_METHOD' 'main 只允许 Squash Merge'
 }
-if ((Get-PropertyValue $mergeGate 'github_native_auto_merge') -ne $false) {
+if (-not (Test-ExactJsonBoolean -Actual (Get-PropertyValue $mergeGate 'github_native_auto_merge') -Expected $false)) {
     Add-Violation 'GITHUB_AUTO_MERGE' 'GitHub 原生 auto-merge 必须保持关闭'
 }
 if ((Get-PropertyValue $mergeGate 'required_mergeable_state') -cne 'CLEAN' -or
     (Get-PropertyValue $mergeGate 'required_release_audit') -cne 'current' -or
-    (Get-PropertyValue $mergeGate 'required_review_threads') -ne 0) {
+    -not (Test-ExactJsonInt64 -Actual (Get-PropertyValue $mergeGate 'required_review_threads') -Expected 0)) {
     Add-Violation 'REVIEW_GATE' 'mergeable、release audit 或 Review thread 门漂移'
 }
-if ((Get-PropertyValue $mergeGate 'required_artifacts') -ne 0) {
+if (-not (Test-ExactJsonInt64 -Actual (Get-PropertyValue $mergeGate 'required_artifacts') -Expected 0)) {
     Add-Violation 'ARTIFACT_GATE' '成功 CI 和 Performance Artifact 必须为 0'
 }
 foreach ($requiredFlag in @(
@@ -152,7 +192,7 @@ foreach ($requiredFlag in @(
     'require_single_parent',
     'require_valid_github_signature'
 )) {
-    if ((Get-PropertyValue $mergeGate $requiredFlag) -ne $true) {
+    if (-not (Test-ExactJsonBoolean -Actual (Get-PropertyValue $mergeGate $requiredFlag) -Expected $true)) {
         Add-Violation 'POST_MERGE_GATE' "缺少合并门：$requiredFlag"
     }
 }
@@ -185,7 +225,7 @@ if ($maxAttempts -isnot [long] -or $maxAttempts -lt 1 -or $maxAttempts -gt 3 -or
 
 $ui = Get-PropertyValue $policy 'ui'
 if ((Get-PropertyValue $ui 'owner') -cne 'Gemini' -or
-    (Get-PropertyValue $ui 'fallback_allowed') -ne $false) {
+    -not (Test-ExactJsonBoolean -Actual (Get-PropertyValue $ui 'fallback_allowed') -Expected $false)) {
     Add-Violation 'UI_OWNER' 'UI owner 必须为 Gemini 且不得静默 fallback'
 }
 

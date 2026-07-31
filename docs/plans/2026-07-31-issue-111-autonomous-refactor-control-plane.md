@@ -46,8 +46,8 @@
 - [x] 建立 Issue #111 并记录项目所有者 standing authorization。
 - [x] 从 origin/main@86a7dd837652f63198c7682b84d82180b8558e3a 创建 Paseo 隔离 worktree。
 - [x] 记录七路径规划范围与十二路径候选实现范围。
-- [ ] 运行规划范围、CI 合同、仓库政策与 Git 空白验证。
-- [ ] 建立普通 planning checkpoint 并普通 push。
+- [x] 运行规划范围、CI 合同、仓库政策与 Git 空白验证。
+- [x] 建立普通 planning checkpoint 并普通 push。
 
 规划范围：
 
@@ -64,29 +64,36 @@
 
 ## Task 2：自治策略 RED 到 GREEN
 
-- [ ] 先在 Test-CiScripts.ps1 增加缺失策略文件、错误授权模式、启用 GitHub auto-merge、非 Squash、写入者大于一、门禁缺失、UI owner 非 Gemini 和硬停止缺失的失败测试。
-- [ ] 运行专项测试并确认因策略与验证器缺失而 RED。
-- [ ] 创建最小 JSON 策略和 Verify-AutonomousRefactorPolicy.ps1。
-- [ ] 重跑专项与完整 CI 合同，确认 GREEN。
-- [ ] 建立 policy-green checkpoint。
+- [x] 先在 Test-CiScripts.ps1 增加缺失策略文件、错误授权模式、启用 GitHub auto-merge、非 Squash、写入者大于一、门禁缺失、UI owner 非 Gemini 和硬停止缺失的失败测试。
+- [x] 运行专项测试并确认因策略与验证器缺失而 RED。
+- [x] 创建最小 JSON 策略和 Verify-AutonomousRefactorPolicy.ps1。
+- [x] 重跑专项与完整 CI 合同，确认 GREEN。
+- [x] 建立 policy-green checkpoint。
 
 ## Task 3：状态解析 RED 到 GREEN
 
-- [ ] 为无活动任务、单一 active Issue、单一 active PR、重复 active writer、release audit stale、main freshness 漂移和不可恢复输入编写失败/成功夹具。
-- [ ] 先确认状态解析器缺失的 RED。
-- [ ] 实现只读 Get-AutonomousRefactorState.ps1；默认只读，ReportOnly 明确禁止 mutation。
-- [ ] 输出稳定 JSON：state、next_action、reason_codes、active_issue、active_pr、expected_base、observed_head。
-- [ ] 重跑专项与完整 CI 合同，确认 GREEN。
-- [ ] 建立 state-green checkpoint。
+- [x] 为无活动任务、单一 active Issue、单一 active PR、重复 active writer、release audit stale、main freshness 漂移和不可恢复输入编写失败/成功夹具。
+- [x] 先确认状态解析器缺失的 RED。
+- [x] 实现只读 Get-AutonomousRefactorState.ps1；默认只读，ReportOnly 明确禁止 mutation。
+- [x] 输出稳定 JSON：state、next_action、reason_codes、active_issue、active_pr、expected_base、observed_head。
+- [x] 重跑专项与完整 CI 合同，确认 GREEN。
+- [x] 建立 state-green checkpoint。
 
 ## Task 4：本地收口
 
-- [ ] 完成 AGENTS、Master Plan、build 和报告的稳定内容。
-- [ ] err.md 只在形成新可复用根因时修改。
-- [ ] 运行 build.md 的 Issue #111 完整轻量门禁。
-- [ ] 执行独立只读 review 与安全审查，逐项处置发现。
-- [ ] 核对实际路径不越过候选范围。
+- [x] 完成 AGENTS、Master Plan、build 和报告的稳定内容。
+- [x] err.md 只在形成新可复用根因时修改。
+- [x] 运行 build.md 的 Issue #111 完整轻量门禁。
+- [x] 执行独立只读 review 与安全审查，逐项处置发现。
+- [x] 核对实际路径不越过候选范围。
 - [ ] 建立 local-verified checkpoint 并普通 push。
+
+本地收口证据：首轮独立只读 Reviewer 返回 `0 Critical / 5 Important / FAIL`。五项均由主线程
+独立复现或论证后处置：严格 JSON 类型与有序决策、全量分页与外部 schema、分支来源与脏树优先、
+非 owner marker 安全忽略语义，以及可执行的 exact-head / post-merge 状态门。最终十二路径轻量门禁
+返回 `CI_CONTRACT_GREEN passed=65` 与 `ISSUE_111_LOCAL_GREEN scope=12`。第二轮独立只读复审绑定
+冻结聚合 `sha256:2a33a1d7b43fc5b00afdbc5a5e367d0f0d1f5ec0f40cccccc384e679cac481db`，结论为
+`PASS - 0 Critical / 0 Important`；主线程在复审后复算同一哈希并确认无 agent 写入。
 
 ## Task 5：远端交付与自治合并
 

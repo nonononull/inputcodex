@@ -10,6 +10,10 @@ session_plan_ref: docs/plans/sessions/2026-07-31-issue-111-autonomous-refactor-c
 approved_decision_ref: https://github.com/nonononull/inputcodex/issues/111
 baseline_ref: origin/main@86a7dd837652f63198c7682b84d82180b8558e3a
 branch_ref: codex/issue-111-autonomous-refactor-control-plane
+planning_checkpoint_ref: edcd066bfa9a4fe24c8bd63a5d079854b0402922
+policy_checkpoint_ref: aefa02f0f9b3c884178214baa808ccfd9f95c5c0
+state_checkpoint_ref: eaca92e9b70b804f5ed55b97296c0a2d28d3212e
+policy_sha256: sha256:2cb8467153892fcb1510c86cdcb186cd9dabc3d4f08055ec9c503b823d760275
 mutation_intent: governance
 allowed_operations:
   - issue-111-planning-and-control-docs
@@ -160,6 +164,30 @@ release audit stale 或 main freshness 漂移必须 fail-closed。
 9. paseo-loop-activation-and-recovery-proof
 
 每个批次结束必须提交普通 Git checkpoint；禁止 amend、rebase、force push 和 main 直接写入。
+
+## Local Execution Evidence
+
+- planning freeze：七路径与 sha256:4c33c759...，CI 合同 35/35，checkpoint edcd066。
+- policy RED：CI_CONTRACT_RED_MISSING_IMPLEMENTATION，精确缺策略 JSON 与验证器。
+- policy GREEN：九条自治策略合同通过，完整 CI 合同 44/44，checkpoint aefa02f。
+- state RED：CI_CONTRACT_RED_MISSING_IMPLEMENTATION，精确缺状态解析器。
+- state GREEN：十条状态分类合同通过，完整 CI 合同 54/54，checkpoint eaca92e。
+- live recovery：脏工作树返回 active-worktree-execution / resume-worktree；clean 工作树返回 active-issue-planning / resume-issue。
+- reusable fix：live Int32 Count 与 JSON Int64 快照差异已记录 err.md，采集边界归一化后通过。
+- safety RED/GREEN：字符串伪装 JSON 类型、决策顺序重排、CLI 截断/错误形状、PR 脏树优先级、
+  分支来源、owner marker、Final Head 合并门、Planning/Review 双来源绑定和 post-merge origin freshness
+  均先取得失败证据再修复；完整 CI 合同为 65/65。
+- first review：独立只读 Reviewer 返回 0 Critical / 5 Important / FAIL；五项均已纳入上述
+  RED/GREEN。旧 Reviewer 已归档，不复用旧结论。
+- final local gate：完整 CI 合同 65/65、策略/仓库政策/Release Audit 均通过，实际范围为
+  12 / sha256:5d1f609ca2a5913e4e5df21f0fd04d6de2c6731cdd71d641812fbee80b5ad713；AST、只读
+  execution surface、secret scan 与 Git 空白检查均通过，PSScriptAnalyzer 因本机未安装而未执行。
+- second review：两次 Codex reviewer 分别因外部 503/429 未形成结论，随后 Claude plan-mode 备用
+  Reviewer 在冻结聚合 sha256:2a33a1d7b43fc5b00afdbc5a5e367d0f0d1f5ec0f40cccccc384e679cac481db
+  上返回 0 Critical / 0 Important / PASS。权限请求被拒绝，复审后哈希复算一致且无文件写入。
+- live evidence：REST 与 GraphQL 均使用全量分页和严格 schema；当前 live 返回
+  active-worktree-execution / resume-worktree，并从 owner Planning Freeze 评论解析出
+  12 / sha256:5d1f609c...。
 
 ## Stop Conditions
 

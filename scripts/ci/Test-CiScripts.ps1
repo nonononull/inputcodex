@@ -295,6 +295,49 @@ Invoke-ContractTest -Name '拒绝非 bounded standing authorization' -Body {
     Assert-AutonomousPolicyFailure -Result (Invoke-AutonomousPolicyCase -Name 'authorization' -Policy $policy) -ExpectedCode 'AUTHORIZATION_MODE'
 }
 
+Invoke-ContractTest -Name '拒绝字符串伪装自治策略布尔与整数类型' -Body {
+    $policy = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
+    $policy.enabled = 'true'
+    $policy.authorization.exact_head_binding = 'true'
+    $policy.authorization.policy_hash_binding = 'true'
+    $policy.authorization.refresh_on_head_change = 'true'
+    $policy.execution.max_active_writers = '1'
+    $policy.execution.local_full_workspace_build = 'false'
+    $policy.merge_gate.github_native_auto_merge = 'false'
+    $policy.merge_gate.required_review_threads = '0'
+    $policy.merge_gate.required_artifacts = '0'
+    $policy.merge_gate.require_single_parent = 'true'
+    $policy.ui.fallback_allowed = 'false'
+
+    $result = Invoke-AutonomousPolicyCase -Name 'strict-json-types' -Policy $policy
+    foreach ($code in @(
+        'POLICY_ENABLED',
+        'EXACT_HEAD_BINDING',
+        'AUTHORIZATION_REFRESH',
+        'SINGLE_WRITER',
+        'BUILD_PLACEMENT',
+        'GITHUB_AUTO_MERGE',
+        'REVIEW_GATE',
+        'ARTIFACT_GATE',
+        'POST_MERGE_GATE',
+        'UI_OWNER'
+    )) {
+        Assert-AutonomousPolicyFailure -Result $result -ExpectedCode $code
+    }
+}
+
+Invoke-ContractTest -Name '拒绝无人值守决策优先级重排' -Body {
+    $policy = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
+    $policy.execution.decision_order = @(
+        'release-parity',
+        'performance-first',
+        'minimal-read-only-slice',
+        'typed-owner-before-side-effects',
+        'fail-closed-and-continue'
+    )
+    Assert-AutonomousPolicyFailure -Result (Invoke-AutonomousPolicyCase -Name 'decision-order' -Policy $policy) -ExpectedCode 'DECISION_ORDER'
+}
+
 Invoke-ContractTest -Name '拒绝 GitHub 原生 auto-merge' -Body {
     $policy = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
     $policy.merge_gate.github_native_auto_merge = $true
@@ -348,14 +391,132 @@ function New-ValidAutonomousStateSnapshot {
         paseo_available = $true
         release_audit = 'current'
         observed_origin_main = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+        observed_remote_main = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
         expected_base = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
         worktree_head = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
         branch = 'codex/issue-111-autonomous-refactor-control-plane'
         worktree_clean = $true
         active_writer_count = 0
+        repository_settings = [pscustomobject][ordered]@{
+            allow_auto_merge = $false
+            allow_squash_merge = $true
+            allow_merge_commit = $false
+            allow_rebase_merge = $false
+            default_branch = 'main'
+        }
+        actual_scope_count = 12
+        actual_scope_hash = 'sha256:5d1f609ca2a5913e4e5df21f0fd04d6de2c6731cdd71d641812fbee80b5ad713'
         active_issues = @()
         active_prs = @()
+        merged_prs = @()
     }
+}
+
+function New-SuccessfulAutonomousWorkflowEvidence {
+    param(
+        [Parameter(Mandatory)][string]$Name,
+        [Parameter(Mandatory)][string[]]$Jobs,
+        [Parameter(Mandatory)][long]$RunId,
+        [string]$HeadOid = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+    )
+
+    [pscustomobject][ordered]@{
+        name = $Name
+        run_id = $RunId
+        head_oid = $HeadOid
+        status = 'completed'
+        conclusion = 'success'
+        artifact_count = 0
+        jobs = @($Jobs | ForEach-Object {
+            [pscustomobject][ordered]@{
+                name = $_
+                status = 'completed'
+                conclusion = 'success'
+                head_oid = $HeadOid
+            }
+        })
+    }
+}
+
+function New-MergeReadyAutonomousPr {
+    [pscustomobject][ordered]@{
+        number = 112
+        url = 'https://github.com/nonononull/inputcodex/pull/112'
+        base_ref = 'main'
+        head_oid = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+        author_login = 'nonononull'
+        head_owner_login = 'nonononull'
+        is_draft = $false
+        merge_state = 'CLEAN'
+        review_thread_count = 0
+        evidence = [pscustomobject][ordered]@{
+            valid = $true
+            tracking_issue_ref = 'https://github.com/nonononull/inputcodex/issues/111'
+            standing_authorization_ref = 'https://github.com/nonononull/inputcodex/issues/111'
+            policy_sha256 = 'sha256:2cb8467153892fcb1510c86cdcb186cd9dabc3d4f08055ec9c503b823d760275'
+            scope_count = 12
+            scope_hash = 'sha256:5d1f609ca2a5913e4e5df21f0fd04d6de2c6731cdd71d641812fbee80b5ad713'
+            final_head = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+            independent_review_status = 'passed'
+            independent_review_ref = 'https://github.com/nonononull/inputcodex/pull/112#issuecomment-1'
+        }
+        review_attestation = [pscustomobject][ordered]@{
+            valid = $true
+            final_head = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+            status = 'passed'
+            ref = 'https://github.com/nonononull/inputcodex/pull/112#issuecomment-1'
+        }
+        workflow_runs = @(
+            (New-SuccessfulAutonomousWorkflowEvidence -Name 'CI' -RunId 1001 -Jobs @('classify', 'governance', 'release-audit', 'linux-quality', 'windows', 'macos', 'required')),
+            (New-SuccessfulAutonomousWorkflowEvidence -Name 'Performance Baseline' -RunId 1002 -Jobs @('contract', 'windows', 'macos', 'required'))
+        )
+    }
+}
+
+function New-MergeReadyAutonomousStateSnapshot {
+    $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
+    $snapshot.active_issues = @([pscustomobject]@{
+        number = 111
+        url = 'https://github.com/nonononull/inputcodex/issues/111'
+        author_login = 'nonononull'
+        planning_evidence = [pscustomobject][ordered]@{
+            valid = $true
+            scope_count = 12
+            scope_hash = 'sha256:5d1f609ca2a5913e4e5df21f0fd04d6de2c6731cdd71d641812fbee80b5ad713'
+            ref = 'https://github.com/nonononull/inputcodex/issues/111#issuecomment-5139215915'
+        }
+    })
+    $snapshot.active_prs = @(New-MergeReadyAutonomousPr)
+    return $snapshot
+}
+
+function New-PostMergeAutonomousStateSnapshot {
+    $snapshot = New-MergeReadyAutonomousStateSnapshot
+    $sourcePr = New-MergeReadyAutonomousPr
+    $snapshot.active_prs = @()
+    $snapshot.observed_origin_main = 'cccccccccccccccccccccccccccccccccccccccc'
+    $snapshot.observed_remote_main = 'cccccccccccccccccccccccccccccccccccccccc'
+    $snapshot.merged_prs = @([pscustomobject][ordered]@{
+        number = 112
+        url = 'https://github.com/nonononull/inputcodex/pull/112'
+        head_oid = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+        merge_commit_oid = 'cccccccccccccccccccccccccccccccccccccccc'
+        author_login = 'nonononull'
+        head_owner_login = 'nonononull'
+        evidence = $sourcePr.evidence
+        review_attestation = $sourcePr.review_attestation
+        post_merge = [pscustomobject][ordered]@{
+            parent_count = 1
+            merge_tree_oid = 'dddddddddddddddddddddddddddddddddddddddd'
+            head_tree_oid = 'dddddddddddddddddddddddddddddddddddddddd'
+            signature_valid = $true
+        }
+        workflow_runs = @(
+            (New-SuccessfulAutonomousWorkflowEvidence -Name 'CI' -RunId 2001 -HeadOid 'cccccccccccccccccccccccccccccccccccccccc' -Jobs @('classify', 'governance', 'release-audit', 'linux-quality', 'windows', 'macos', 'required')),
+            (New-SuccessfulAutonomousWorkflowEvidence -Name 'Performance Baseline' -RunId 2002 -HeadOid 'cccccccccccccccccccccccccccccccccccccccc' -Jobs @('contract', 'windows', 'macos', 'required'))
+        )
+    })
+    return $snapshot
 }
 
 function Copy-AutonomousStateSnapshot {
@@ -396,14 +557,34 @@ function Assert-AutonomousState {
     Assert-Equal -Expected $ExpectedAction -Actual $Result.Json.next_action -Message '自治下一动作漂移'
 }
 
+Invoke-ContractTest -Name '无人值守拒绝伪装或缺失类型的状态快照字段' -Body {
+    foreach ($case in @(
+        [pscustomobject]@{ Name = 'github-bool'; Property = 'github_available'; Value = 'true' },
+        [pscustomobject]@{ Name = 'paseo-bool'; Property = 'paseo_available'; Value = 'true' },
+        [pscustomobject]@{ Name = 'worktree-bool'; Property = 'worktree_clean'; Value = 'true' },
+        [pscustomobject]@{ Name = 'release-audit-string'; Property = 'release_audit'; Value = 1 },
+        [pscustomobject]@{ Name = 'branch-string'; Property = 'branch'; Value = $null },
+        [pscustomobject]@{ Name = 'issues-array'; Property = 'active_issues'; Value = $null },
+        [pscustomobject]@{ Name = 'prs-array'; Property = 'active_prs'; Value = $null }
+    )) {
+        $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
+        $snapshot.($case.Property) = $case.Value
+        $result = Invoke-AutonomousStateCase -Name "invalid-type-$($case.Name)" -Snapshot $snapshot
+        Assert-Equal -Expected 11 -Actual $result.ExitCode -Message "状态字段类型错误必须拒绝：$($case.Name)，输出=$($result.Output)"
+        Assert-Equal -Expected 'AUTONOMOUS_STATE_INVALID_SNAPSHOT' -Actual $result.Json.error_code -Message "状态字段类型错误码必须稳定：$($case.Name)"
+    }
+}
+
 Invoke-ContractTest -Name '无人值守空闲状态选择下一候选' -Body {
-    $result = Invoke-AutonomousStateCase -Name 'idle' -Snapshot (New-ValidAutonomousStateSnapshot)
+    $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
+    $snapshot.branch = 'main'
+    $result = Invoke-AutonomousStateCase -Name 'idle' -Snapshot $snapshot
     Assert-AutonomousState -Result $result -ExpectedState 'idle-select-candidate' -ExpectedAction 'select-candidate'
 }
 
 Invoke-ContractTest -Name '无人值守单一活动 Issue 恢复规划' -Body {
     $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
-    $snapshot.active_issues = @([pscustomobject]@{ number = 111; url = 'https://github.com/nonononull/inputcodex/issues/111' })
+    $snapshot.active_issues = @([pscustomobject]@{ number = 111; url = 'https://github.com/nonononull/inputcodex/issues/111'; author_login = 'nonononull' })
     $result = Invoke-AutonomousStateCase -Name 'issue' -Snapshot $snapshot
     Assert-AutonomousState -Result $result -ExpectedState 'active-issue-planning' -ExpectedAction 'resume-issue'
     Assert-Equal -Expected 111 -Actual $result.Json.active_issue.number -Message '活动 Issue 编号必须保留'
@@ -412,22 +593,116 @@ Invoke-ContractTest -Name '无人值守单一活动 Issue 恢复规划' -Body {
 Invoke-ContractTest -Name '无人值守脏工作树恢复执行而不重复建任务' -Body {
     $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
     $snapshot.worktree_clean = $false
-    $snapshot.active_issues = @([pscustomobject]@{ number = 111; url = 'https://github.com/nonononull/inputcodex/issues/111' })
+    $snapshot.active_issues = @([pscustomobject]@{ number = 111; url = 'https://github.com/nonononull/inputcodex/issues/111'; author_login = 'nonononull' })
     Assert-AutonomousState -Result (Invoke-AutonomousStateCase -Name 'worktree' -Snapshot $snapshot) -ExpectedState 'active-worktree-execution' -ExpectedAction 'resume-worktree'
 }
 
 Invoke-ContractTest -Name '无人值守单一活动 PR 恢复 Review CI' -Body {
     $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
-    $snapshot.active_issues = @([pscustomobject]@{ number = 111; url = 'https://github.com/nonononull/inputcodex/issues/111' })
+    $snapshot.active_issues = @([pscustomobject]@{ number = 111; url = 'https://github.com/nonononull/inputcodex/issues/111'; author_login = 'nonononull' })
     $snapshot.active_prs = @([pscustomobject]@{
         number = 112
         url = 'https://github.com/nonononull/inputcodex/pull/112'
         base_ref = 'main'
         head_oid = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+        author_login = 'nonononull'
+        head_owner_login = 'nonononull'
     })
     $result = Invoke-AutonomousStateCase -Name 'pr' -Snapshot $snapshot
     Assert-AutonomousState -Result $result -ExpectedState 'active-pr-review-ci' -ExpectedAction 'resume-pr'
     Assert-Equal -Expected 112 -Actual $result.Json.active_pr.number -Message '活动 PR 编号必须保留'
+}
+
+Invoke-ContractTest -Name '无人值守完整 Final Head 证据进入精确合并就绪' -Body {
+    $result = Invoke-AutonomousStateCase -Name 'merge-ready' -Snapshot (New-MergeReadyAutonomousStateSnapshot)
+    Assert-AutonomousState -Result $result -ExpectedState 'merge-ready-exact-head' -ExpectedAction 'squash-merge-exact-head'
+    Assert-Equal -Expected 0 -Actual @($result.Json.merge_gate_pending).Count -Message '精确合并就绪不得残留 pending gate'
+}
+
+Invoke-ContractTest -Name '无人值守任一 Final Head 合并门失败均只恢复 PR' -Body {
+    foreach ($case in @(
+        [pscustomobject]@{ Name = 'draft'; Code = 'PR_DRAFT' },
+        [pscustomobject]@{ Name = 'merge-state'; Code = 'PR_MERGE_STATE' },
+        [pscustomobject]@{ Name = 'review-thread'; Code = 'REVIEW_THREADS' },
+        [pscustomobject]@{ Name = 'repository-settings'; Code = 'REPOSITORY_MERGE_SETTINGS' },
+        [pscustomobject]@{ Name = 'evidence-head'; Code = 'EVIDENCE_HEAD' },
+        [pscustomobject]@{ Name = 'evidence-policy'; Code = 'EVIDENCE_POLICY' },
+        [pscustomobject]@{ Name = 'evidence-scope'; Code = 'EVIDENCE_SCOPE' },
+        [pscustomobject]@{ Name = 'approved-scope'; Code = 'EVIDENCE_SCOPE' },
+        [pscustomobject]@{ Name = 'independent-review'; Code = 'INDEPENDENT_REVIEW' },
+        [pscustomobject]@{ Name = 'review-attestation'; Code = 'INDEPENDENT_REVIEW' },
+        [pscustomobject]@{ Name = 'ci-artifact'; Code = 'WORKFLOW_CI' },
+        [pscustomobject]@{ Name = 'performance-job'; Code = 'WORKFLOW_PERFORMANCE_BASELINE' }
+    )) {
+        $snapshot = New-MergeReadyAutonomousStateSnapshot
+        switch ($case.Name) {
+            'draft' { $snapshot.active_prs[0].is_draft = $true }
+            'merge-state' { $snapshot.active_prs[0].merge_state = 'BLOCKED' }
+            'review-thread' { $snapshot.active_prs[0].review_thread_count = 1 }
+            'repository-settings' { $snapshot.repository_settings.allow_auto_merge = $true }
+            'evidence-head' { $snapshot.active_prs[0].evidence.final_head = 'cccccccccccccccccccccccccccccccccccccccc' }
+            'evidence-policy' { $snapshot.active_prs[0].evidence.policy_sha256 = 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' }
+            'evidence-scope' { $snapshot.active_prs[0].evidence.scope_count = 11 }
+            'approved-scope' { $snapshot.active_issues[0].planning_evidence.scope_count = 11 }
+            'independent-review' { $snapshot.active_prs[0].evidence.independent_review_status = 'failed' }
+            'review-attestation' { $snapshot.active_prs[0].review_attestation.final_head = 'cccccccccccccccccccccccccccccccccccccccc' }
+            'ci-artifact' { $snapshot.active_prs[0].workflow_runs[0].artifact_count = 1 }
+            'performance-job' { $snapshot.active_prs[0].workflow_runs[1].jobs[0].conclusion = 'failure' }
+        }
+        $result = Invoke-AutonomousStateCase -Name "merge-gate-$($case.Name)" -Snapshot $snapshot
+        Assert-AutonomousState -Result $result -ExpectedState 'active-pr-review-ci' -ExpectedAction 'resume-pr'
+        Assert-Contains -Collection @($result.Json.merge_gate_pending) -Expected $case.Code -Message "Final Head 合并门失败必须可诊断：$($case.Name)"
+    }
+}
+
+Invoke-ContractTest -Name '无人值守识别合并后主干验证与收口就绪' -Body {
+    $ready = Invoke-AutonomousStateCase -Name 'post-merge-ready' -Snapshot (New-PostMergeAutonomousStateSnapshot)
+    Assert-AutonomousState -Result $ready -ExpectedState 'post-merge-verification' -ExpectedAction 'close-issue-and-archive'
+    Assert-Equal -Expected 0 -Actual @($ready.Json.post_merge_gate_pending).Count -Message '合并后收口就绪不得残留 pending gate'
+
+    $pendingSnapshot = New-PostMergeAutonomousStateSnapshot
+    $pendingSnapshot.merged_prs[0].workflow_runs[1].artifact_count = 1
+    $pending = Invoke-AutonomousStateCase -Name 'post-merge-pending' -Snapshot $pendingSnapshot
+    Assert-AutonomousState -Result $pending -ExpectedState 'post-merge-verification' -ExpectedAction 'verify-main'
+    Assert-Contains -Collection @($pending.Json.post_merge_gate_pending) -Expected 'POST_MERGE_WORKFLOW_PERFORMANCE_BASELINE' -Message '合并后 Performance Artifact 漂移必须保持验证状态'
+
+    $originPendingSnapshot = New-PostMergeAutonomousStateSnapshot
+    $originPendingSnapshot.observed_origin_main = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+    $originPending = Invoke-AutonomousStateCase -Name 'post-merge-origin-pending' -Snapshot $originPendingSnapshot
+    Assert-AutonomousState -Result $originPending -ExpectedState 'post-merge-verification' -ExpectedAction 'verify-main'
+    Assert-Contains -Collection @($originPending.Json.post_merge_gate_pending) -Expected 'POST_MERGE_ORIGIN_MAIN' -Message '合并后 origin/main 未刷新不得关闭 Issue'
+}
+
+Invoke-ContractTest -Name '无人值守 PR 存在时脏工作树优先恢复执行' -Body {
+    $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
+    $snapshot.worktree_clean = $false
+    $snapshot.active_issues = @([pscustomobject]@{ number = 111; url = 'https://github.com/nonononull/inputcodex/issues/111'; author_login = 'nonononull' })
+    $snapshot.active_prs = @([pscustomobject]@{
+        number = 112
+        url = 'https://github.com/nonononull/inputcodex/pull/112'
+        base_ref = 'main'
+        head_oid = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+        author_login = 'nonononull'
+        head_owner_login = 'nonononull'
+    })
+    Assert-AutonomousState -Result (Invoke-AutonomousStateCase -Name 'dirty-pr' -Snapshot $snapshot) -ExpectedState 'active-worktree-execution' -ExpectedAction 'resume-worktree'
+}
+
+Invoke-ContractTest -Name '无人值守阻断受保护或无关活动分支写入' -Body {
+    $protected = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
+    $protected.branch = 'main'
+    $protected.worktree_clean = $false
+    $protected.active_issues = @([pscustomobject]@{ number = 111; url = 'https://github.com/nonononull/inputcodex/issues/111'; author_login = 'nonononull' })
+    $protectedResult = Invoke-AutonomousStateCase -Name 'protected-dirty' -Snapshot $protected
+    Assert-AutonomousState -Result $protectedResult -ExpectedState 'blocked-hard-stop' -ExpectedAction 'stop'
+    Assert-Contains -Collection @($protectedResult.Json.reason_codes) -Expected 'PROTECTED_BRANCH_DIRTY' -Message 'main 脏树必须阻断'
+
+    $unrelated = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
+    $unrelated.branch = 'codex/unrelated-task'
+    $unrelated.active_issues = @([pscustomobject]@{ number = 111; url = 'https://github.com/nonononull/inputcodex/issues/111'; author_login = 'nonononull' })
+    $unrelatedResult = Invoke-AutonomousStateCase -Name 'unrelated-branch' -Snapshot $unrelated
+    Assert-AutonomousState -Result $unrelatedResult -ExpectedState 'blocked-hard-stop' -ExpectedAction 'stop'
+    Assert-Contains -Collection @($unrelatedResult.Json.reason_codes) -Expected 'ISSUE_BRANCH_MISMATCH' -Message '活动 Issue 与分支不一致必须阻断'
 }
 
 Invoke-ContractTest -Name '无人值守拒绝多个活动 writer' -Body {
@@ -441,12 +716,12 @@ Invoke-ContractTest -Name '无人值守拒绝多个活动 writer' -Body {
 Invoke-ContractTest -Name '无人值守拒绝重复活动 Issue 或 PR' -Body {
     $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
     $snapshot.active_issues = @(
-        [pscustomobject]@{ number = 111; url = 'issue-111' },
-        [pscustomobject]@{ number = 113; url = 'issue-113' }
+        [pscustomobject]@{ number = 111; url = 'issue-111'; author_login = 'nonononull' },
+        [pscustomobject]@{ number = 113; url = 'issue-113'; author_login = 'nonononull' }
     )
     $snapshot.active_prs = @(
-        [pscustomobject]@{ number = 112; url = 'pr-112'; base_ref = 'main'; head_oid = 'b' * 40 },
-        [pscustomobject]@{ number = 114; url = 'pr-114'; base_ref = 'main'; head_oid = 'c' * 40 }
+        [pscustomobject]@{ number = 112; url = 'pr-112'; base_ref = 'main'; head_oid = 'b' * 40; author_login = 'nonononull'; head_owner_login = 'nonononull' },
+        [pscustomobject]@{ number = 114; url = 'pr-114'; base_ref = 'main'; head_oid = 'c' * 40; author_login = 'nonononull'; head_owner_login = 'nonononull' }
     )
     $result = Invoke-AutonomousStateCase -Name 'duplicates' -Snapshot $snapshot
     Assert-AutonomousState -Result $result -ExpectedState 'blocked-hard-stop' -ExpectedAction 'stop'
@@ -473,7 +748,42 @@ Invoke-ContractTest -Name '无人值守阻断 origin main freshness 漂移' -Bod
 Invoke-ContractTest -Name '无人值守外部 GitHub 不可用时有限重试' -Body {
     $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
     $snapshot.github_available = $false
+    $snapshot.worktree_clean = $false
     Assert-AutonomousState -Result (Invoke-AutonomousStateCase -Name 'github-down' -Snapshot $snapshot) -ExpectedState 'blocked-external-retry' -ExpectedAction 'retry-external'
+}
+
+Invoke-ContractTest -Name '无人值守阻断本地 tracking ref 落后 GitHub main' -Body {
+    $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
+    $snapshot.observed_remote_main = 'cccccccccccccccccccccccccccccccccccccccc'
+    $result = Invoke-AutonomousStateCase -Name 'remote-main-drift' -Snapshot $snapshot
+    Assert-AutonomousState -Result $result -ExpectedState 'blocked-hard-stop' -ExpectedAction 'stop'
+    Assert-Contains -Collection @($result.Json.reason_codes) -Expected 'REMOTE_MAIN_DRIFT' -Message '远端 main 漂移必须稳定阻断'
+}
+
+Invoke-ContractTest -Name '无人值守安全忽略非 owner marker Issue 与 PR' -Body {
+    $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
+    $snapshot.branch = 'main'
+    $snapshot.active_issues = @([pscustomobject]@{ number = 900; url = 'issue-900'; author_login = 'external-user' })
+    $snapshot.active_prs = @([pscustomobject]@{
+        number = 901
+        url = 'pr-901'
+        base_ref = 'main'
+        head_oid = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+        author_login = 'external-user'
+        head_owner_login = 'external-user'
+    })
+    $result = Invoke-AutonomousStateCase -Name 'untrusted-marker' -Snapshot $snapshot
+    Assert-AutonomousState -Result $result -ExpectedState 'idle-select-candidate' -ExpectedAction 'select-candidate'
+    Assert-Equal -Expected 1 -Actual $result.Json.ignored_untrusted_issue_markers -Message '非 owner Issue marker 必须被计数并忽略'
+    Assert-Equal -Expected 1 -Actual $result.Json.ignored_untrusted_pr_markers -Message '非 owner PR marker 必须被计数并忽略'
+}
+
+Invoke-ContractTest -Name '无人值守 live 外部列表使用全量分页和严格数组解析' -Body {
+    $source = Get-Content -LiteralPath $autonomousStateScript -Raw
+    foreach ($required in @('--paginate', '--slurp', 'ConvertFrom-Json -Depth 100 -NoEnumerate')) {
+        Assert-True -Condition $source.Contains($required) -Message "live 外部列表缺少严格分页合同：$required"
+    }
+    Assert-True -Condition (-not $source.Contains('--limit 100')) -Message 'live 外部列表不得截断前 100 项'
 }
 
 Invoke-ContractTest -Name '无人值守拒绝未知状态快照 schema' -Body {

@@ -61,7 +61,8 @@ GitHub 原生 auto-merge、付费/self-hosted Runner、密钥/签名、force pus
 4. 运行规划范围与文档轻量验证。
 5. 建立 planning checkpoint 并普通 push。
 
-状态：in-progress。
+状态：completed。规划范围 7 / sha256:4c33c759...，CI 合同 35/35、仓库政策、Release Audit 与
+Git 空白检查通过；planning checkpoint 为 edcd066bfa9a4fe24c8bd63a5d079854b0402922。
 
 ## Node 3：Policy TDD
 
@@ -79,6 +80,15 @@ GitHub 原生 auto-merge、付费/self-hosted Runner、密钥/签名、force pus
 4. VERIFY GREEN：输出稳定 JSON，ReportOnly 无 Git/GitHub mutation。
 5. CHECKPOINT：issue-111-state-green。
 
+Node 3 状态：completed。缺失策略与验证器的 RED 为稳定退出码 10；九条新增策略合同和完整
+CI 合同 44/44 通过，policy checkpoint 为 aefa02f0f9b3c884178214baa808ccfd9f95c5c0，
+规范化策略 hash 为 sha256:2cb8467153892fcb1510c86cdcb186cd9dabc3d4f08055ec9c503b823d760275。
+
+Node 4 状态：completed。缺失状态解析器的 RED 为稳定退出码 10；十条状态分类合同和完整
+CI 合同 54/54 通过，state checkpoint 为 eaca92e9b70b804f5ed55b97296c0a2d28d3212e。
+live 模式先复现 Int32/Int64 类型差异，再在采集边界归一化；脏/clean 工作树分别稳定返回
+resume-worktree 与 resume-issue。
+
 ## Node 5：Local Closeout
 
 1. 更新稳定控制面与报告；err.md 只记录新可复用根因。
@@ -86,6 +96,11 @@ GitHub 原生 auto-merge、付费/self-hosted Runner、密钥/签名、force pus
 3. 执行独立只读 reviewer 和安全审查。
 4. 父线程逐项复核发现，接受项必须有 RED/GREEN；不成立项必须有证据。
 5. 建立 issue-111-local-verified checkpoint 并普通 push。
+
+状态：ready-for-checkpoint。首轮只读 Review 为 0 Critical / 5 Important / FAIL；五项已用专项
+RED/GREEN 处置。最终十二路径门禁为 CI 65/65 与 ISSUE_111_LOCAL_GREEN scope=12；第二轮备用
+只读 Reviewer 绑定冻结聚合 sha256:2a33a1d7b43fc5b00afdbc5a5e367d0f0d1f5ec0f40cccccc384e679cac481db，
+返回 0 Critical / 0 Important / PASS，复审后哈希复算一致。当前只待 local-verified checkpoint 与普通 push。
 
 ## Node 6：Remote Delivery
 

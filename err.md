@@ -984,6 +984,24 @@
 - 验证：修复前 live 命令稳定失败；修复后返回 active-worktree-execution / resume-worktree，保留 Issue #111、base/head 和策略 hash；完整 CI 合同为 54/54。
 - 关联：Issue #111、scripts/automation/Get-AutonomousRefactorState.ps1、scripts/ci/Test-CiScripts.ps1。
 
+### 2026-07-31：PowerShell 宽松比较与集合比较会削弱机器策略 schema
+
+- 环境：Issue #111 的自治策略验证器通过 `ConvertFrom-Json` 读取机器策略，并用 PowerShell 比较布尔、整数和有序决策列表。
+- 现象：把 JSON 布尔与整数改成字符串 `"true"`、`"false"`、`"1"`、`"0"` 后仍返回 `ok=true`；交换 `performance-first` 与 `release-parity` 后也通过验证。
+- 根因：PowerShell 的 `-eq` / `-ne` 会按左操作数类型执行宽松转换，字符串可与布尔或整数比较为相等；原 `Test-ExactStringSet` 会排序后比较，只验证成员集合，无法证明决策优先级顺序。
+- 处理：对 JSON 布尔和整数同时校验运行时类型与精确值；新增有序字符串序列比较用于 `decision_order`，工作流 Job 继续按无序集合验证。
+- 验证：两条专项合同先稳定 RED，分别证明字符串伪装和顺序重排被错误接受；修复后完整 CI 合同为 58/58，合法策略 hash 仍为 `sha256:2cb8467153892fcb1510c86cdcb186cd9dabc3d4f08055ec9c503b823d760275`。
+- 关联：Issue #111、scripts/ci/Verify-AutonomousRefactorPolicy.ps1、scripts/ci/Test-CiScripts.ps1。
+
+### 2026-07-31：PowerShell 会展开集合返回值并自动转换 ISO JSON 时间
+
+- 环境：Issue #111 的状态解析器以函数封装 JSON 属性读取，并通过 GitHub REST `--paginate --slurp` 同时处理空数组、单元素数组和已合并 PR 时间。
+- 现象：函数返回空数组时调用方得到 `$null`，单元素数组时得到标量，严格数组门误拒合法 live 快照；切换到全状态 PR 后，GitHub 的 `merged_at` JSON 字符串又被 PowerShell 7 自动解析为 `System.DateTime`，导致字符串 schema 拒绝全部历史 merged PR。
+- 根因：PowerShell 函数输出和 `if { @() }` 表达式会经管道枚举集合，无法保留零/一元素数组身份；`ConvertFrom-Json` 会对 ISO 8601 字符串应用日期推断，运行时类型不必等于 JSON 词法类型。
+- 处理：数组属性通过 `PSPropertyInfo.Value` 直接读取并先显式初始化后赋值；外部 JSON 使用 `-NoEnumerate` 和严格 root/page schema；`merged_at` 仅在采集边界接受 `string|DateTime` 并规范化为 UTC ISO 字符串。
+- 验证：各问题均先由 live 或专项合同稳定复现；修复后 live 返回 active-worktree-execution / resume-worktree，Planning Freeze 为有效 owner 证据，完整 CI 合同为 65/65。
+- 关联：Issue #111、scripts/automation/Get-AutonomousRefactorState.ps1、scripts/ci/Test-CiScripts.ps1。
+
 ## 记录模板
 
 ```text
