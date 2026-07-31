@@ -4243,6 +4243,70 @@ if ($scopeHash -ne 'sha256:82234e7aacce0bd6c57994529ccf74371052ed906dc8371324b90
 
 期望目录测试为 `12 passed; 0 failed`，来源、feature、合同、fixture、例外、排除与覆盖缺口计数分别保持 `133/36/36/11/10/3/0`；`release_audit.status=current` 且 stale 字段为 `null`。
 
+## Issue #120：Workflow 强身份与上游快照完整性门
+
+本任务只修改九个治理路径，不运行本地完整 Workspace。Release Audit 从提交的 `HEAD` 读取
+`upstream/CodexPlusPlus` Git tree、blob 与 mode，因此上游同步任务必须先形成普通 Git 检查点，再执行本门；
+不得用受 `core.autocrlf` 影响的工作树文本字节替代 Git blob 证据。
+
+```powershell
+$expectedPaths = [string[]]@(
+  '.github/autonomous-refactor-policy.json',
+  '.github/workflows/ci.yml',
+  '.github/workflows/performance-baseline.yml',
+  'build.md',
+  'err.md',
+  'scripts/automation/Get-AutonomousRefactorState.ps1',
+  'scripts/ci/Test-CiScripts.ps1',
+  'scripts/ci/Verify-AutonomousRefactorPolicy.ps1',
+  'scripts/ci/Verify-ReleaseAuditGate.ps1'
+)
+$scope = [System.Collections.Generic.SortedSet[string]]::new([System.StringComparer]::Ordinal)
+foreach ($path in $expectedPaths) { [void]$scope.Add($path) }
+$payload = [string]::Join("`n", [string[]]$scope) + "`n"
+$scopeHash = 'sha256:' + [Convert]::ToHexString(
+  [System.Security.Cryptography.SHA256]::HashData(
+    [System.Text.UTF8Encoding]::new($false).GetBytes($payload)
+  )
+).ToLowerInvariant()
+if ($scope.Count -ne 9 -or $scopeHash -ne 'sha256:8bb38471ee696baaf526da70c6907a3f08d9fdfab7ac5fc0686d2069dbc3bf10') {
+  throw "Issue #120 范围漂移：count=$($scope.Count), hash=$scopeHash"
+}
+
+$scriptPaths = @(
+  'scripts/automation/Get-AutonomousRefactorState.ps1',
+  'scripts/ci/Test-CiScripts.ps1',
+  'scripts/ci/Verify-AutonomousRefactorPolicy.ps1',
+  'scripts/ci/Verify-ReleaseAuditGate.ps1'
+)
+foreach ($scriptPath in $scriptPaths) {
+  $tokens = $null
+  $errors = $null
+  [void][System.Management.Automation.Language.Parser]::ParseFile(
+    (Resolve-Path -LiteralPath $scriptPath).Path,
+    [ref]$tokens,
+    [ref]$errors
+  )
+  if (@($errors).Count -ne 0) { throw "$scriptPath AST 失败：$($errors.Message -join '；')" }
+}
+
+pwsh -NoProfile -File scripts/ci/Verify-AutonomousRefactorPolicy.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw '自治策略验证失败。' }
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw 'Release Audit 与上游快照完整性验证失败。' }
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+if ($LASTEXITCODE -ne 0) { throw 'CI 合同验证失败。' }
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+if ($LASTEXITCODE -ne 0) { throw '仓库政策验证失败。' }
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'git diff --check 失败。' }
+```
+
+期望：策略输出固定 CI `318067078/.github/workflows/ci.yml` 与 Performance Baseline
+`320393981/.github/workflows/performance-baseline.yml`，事件集合均为 `pull_request/push`；
+Release Audit 对路径集、tree、blob、mode、逐文件 SHA-256、manifest、计数和总字节 fail-closed；
+CI 合同输出 `CI_CONTRACT_GREEN passed=76`。
+
 ## 外部 AGOS 使用边界
 
 Issue `#17` 曾以 report-only 运行 AGOS 默认入口，结果为 `needs-input/unregistered`；已按项目规则记录并绕过。AGOS 不属于环境要求或合并门禁；不得在本规划 PR 中修改、修复或优化其 Registry、脚本、规则、Workflow 或 Vault。
