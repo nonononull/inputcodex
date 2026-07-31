@@ -1,11 +1,11 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-109-gate-5-markdown-generation
-active_gate: Gate 5 前十个产品切片与 Issue #105 依赖安全修复已进入 main；Issue #108 已批准方案 A，当前执行第十一个受控会话 Markdown 生成切片
-last_verified_gate: Issue #105 / PR #107 已以单父 Squash 提交 88eaf6301f1897cadaf4da830db998078fb06e97 进入 main；合并后 CI Run 30534052555 七 Job与 Performance Baseline Run 30534052538 四 Job全绿且 Artifact 均为 0，Issue #105 已按 COMPLETED 关闭
-next_legal_gate: 在 Issue #109 二十九路径内完成严格只读 SQLite、受控 rollout、确定性 Markdown、TDD 与本地轻量门禁；普通 push、Review/CI 与 Artifact 闭环后，才能请求绑定 Final Head 的独立 Squash Merge 授权
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/109
+active_task: issue-111-autonomous-refactor-control-plane
+active_gate: Gate 5 前十一个产品切片与 Issue #105 依赖安全修复已进入 main；当前建立无人值守重构控制面
+last_verified_gate: Issue #109 / PR #110 已以单父 Squash 提交 86a7dd837652f63198c7682b84d82180b8558e3a 进入 main；合并后 CI Run 30559880826 七 Job与 Performance Baseline Run 30559880720 四 Job全绿且 Artifact 均为 0，Issue #109 已按 COMPLETED 关闭
+next_legal_gate: 在 Issue #111 十二路径候选范围内完成自治策略、离线验证器、状态解析、恢复合同与本地门禁；随后进入普通 push、非 Draft PR、独立复审、Hosted CI、精确 Head 自治 Squash 和主干验证
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/111
 active_pr_ref: pending
 gate_5_platform_paths_exception_ref: https://github.com/nonononull/inputcodex/issues/74
 gate_5_platform_paths_scope_hash: sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37
@@ -305,7 +305,8 @@ decision_status: issue-105-security-green-remote-delivery-gated
 - [x] Issue `#104` / PR `#106` 已完成第十个 Gate 5 本地会话目录只读观察切片；Final Head `72369e0a138da8a6f94819e03d746cbbdb658be0` 以单父 Squash 提交 `060ca045d2c134f8be3c9adc8cdb038842fc3243` 进入 `main`，合并后 CI 七 Job、Performance Baseline 四 Job全绿且 Artifact 均为 `0`。
 - [x] Issue `#105` / PR `#107` 已完成 `quick-xml` 两条 high RustSec 公告修复；Final Head `0e4af42b86c2ffce8704228198fab13447443d38` 以单父 Squash 提交 `88eaf6301f1897cadaf4da830db998078fb06e97` 进入 `main`。
 - [x] Issue `#108` 已批准 Markdown 方案 A 并按 `COMPLETED` 关闭；内存生成与文件保存/UI 正式分离。
-- [ ] Issue `#109` 执行第十一个 Gate 5 受控会话 Markdown 生成切片；只允许严格只读 SQLite、受控 rollout、用户/助手文本、UTC、LF、不可联网图片占位与内存结果，文件写入和 UI 继续禁止。
+- [x] Issue `#109` / PR `#110` 已完成第十一个 Gate 5 受控会话 Markdown 生成切片、独立复审、精确 Head Squash Merge 与主干双套验证。
+- [ ] Issue `#111` 建立 Gate 5 无人值守重构控制面；只交付自治策略、离线验证器、状态解析、恢复合同和外部 Paseo 循环，不迁移第十二个产品功能。
 
 ### Gate 6：首个正式版本（锁定）
 
@@ -410,3 +411,4 @@ decision_status: issue-105-security-green-remote-delivery-gated
 - 在独立性能基线 Issue 中创建性能优化、产品迁移、`parity-exception`、运行上游/半成品或填写绝对性能预算，但没有新的独立 Issue 与项目所有者批准。
 - Issue `#105` 出现九路径或 `sha256:0c90d018e06aa640d33a4c65c75aea45c89eb0e365b91fadee803b0426c8c58f` 之外的新增、删除或重命名路径；锁文件出现第三个 package 变化；需要升级 Iced/winit/smithay、修改 `Cargo.toml`、产品、UI、Workflow、Ruleset、Runner、上游缓存或 AGOS；fresh audit 仍有漏洞，或在 Final Head Review、CI 与 Artifact 闭环和独立授权前请求 Squash Merge。
 - Fresh 验证失败、Ruleset 变化、Review 对话未闭环或出现未批准的一致性差异。
+- Issue `#111` 越过十二路径或 `sha256:5d1f609ca2a5913e4e5df21f0fd04d6de2c6731cdd71d641812fbee80b5ad713`，修改产品代码、Cargo、Workflow、Runner、Release、`upstream/`、Ruleset 或 AGOS，启用 GitHub 原生 auto-merge，或削弱精确 Head、CI、Artifact、Review thread、release audit 与 origin/main freshness 任一合并门。
