@@ -1038,6 +1038,15 @@
 - 验证：Rust RED 在合成新 command、core module 和缺失旧证据下稳定报告活动快照差异，GREEN 后合法 stale 通过且 `requires_reaudit=true`；四个 current 反例继续分别拒绝缺失、意外、错误来源入口和缺失证据文件。Issue #116 + #117 隔离预演先稳定得到 `27 passed; 1 failed`，删除无效正向块后为 `28 passed; 0 failed`。PowerShell RED 精确暴露策略投影、typed marker、stale 推进、代码块误识别、evidence 未绑定和单元素数组枚举缺口，GREEN 后完整 CI 合同为 `73/73`，Parity 定向套件为 `28/28`，规范化策略 hash 为 `sha256:cb65b94cd5ef876e9049b4795eca992ac8ac2d9bd9aead03df48b373988f25d1`。
 - 关联：Issue #115、Issue #116、Issue #117、`.github/autonomous-refactor-policy.json`、`crates/inputcodex-parity/src/validation.rs`、`scripts/automation/Get-AutonomousRefactorState.ps1`。
 
+### 2026-07-31：macOS 并行测试复用临时功能目录
+
+- 环境：PR #118 Final Head `b95467771c3f134a1e4660d1ba9f530c6cf990a7`，GitHub-hosted CI Run `30636113976` 的 macOS Workspace 全目标测试。
+- 现象：`current_继续拒绝目录中的意外来源入口` 在复制夹具时返回 `NotFound`，同时 `current_继续拒绝缺失证据文件` 删除证据后反而验证成功；同一 Run 的 Windows 与 Linux 通过，macOS 为 `26 passed; 2 failed`。
+- 根因：`FeatureRepositoryFixture::new` 仅使用 `SystemTime::now().as_nanos()` 与进程 ID 组成目录名；macOS 并行测试可能在系统时钟分辨率内取得同一值，两个夹具因此共享目录，一个夹具的修改或 `Drop` 会破坏另一个夹具。
+- 处理：改用进程内 `AtomicU64` 为每个夹具分配唯一序号，并以原子创建目录；若进程 ID 复用后遇到遗留目录，只对 `AlreadyExists` 继续分配，其他文件系统错误保持明确失败。
+- 验证：原 Run 的两个互补失败与共享目录竞态一致；修复后定向套件为 `28/28`，并以 `32` 线程连续执行 `20` 轮、共 `560` 个测试全部通过。Final Head 的 hosted 复验、Job 与 Artifact 证据继续只保留在 PR #118 和 Actions。
+- 关联：Issue #117、PR #118、CI Run `30636113976`、Job `91174083500`、`crates/inputcodex-parity/tests/catalog_repository.rs`。
+
 ## 记录模板
 
 ```text

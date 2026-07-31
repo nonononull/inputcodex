@@ -2,7 +2,7 @@ use std::{
     collections::BTreeSet,
     fs,
     path::{Path, PathBuf},
-    time::{SystemTime, UNIX_EPOCH},
+    sync::atomic::{AtomicU64, Ordering},
 };
 
 use inputcodex_parity::{
@@ -15,6 +15,7 @@ const RELEASE_COMMIT: &str = "5036ff056b5c629f19356396b17d6eeb70da664c";
 const PREVIOUS_RELEASE_TAG: &str = "v1.2.42";
 const PREVIOUS_RELEASE_COMMIT: &str = "657cd33e009ad02515d30db6492cd4e669b06318";
 const RE_AUDIT_ISSUE_URL: &str = "https://github.com/nonononull/inputcodex/issues/65";
+static NEXT_FIXTURE_ID: AtomicU64 = AtomicU64::new(0);
 
 const VALID_SOURCE_INDEX: &str = r#"
 schema_version: inputcodex.source-index.v1
@@ -89,16 +90,21 @@ struct SourceLockState<'a> {
 
 impl FeatureRepositoryFixture {
     fn new() -> Self {
-        let nonce = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .expect("系统时间必须晚于 Unix epoch")
-            .as_nanos();
-        let root = repository_root().join("target").join(format!(
-            "inputcodex-release-audit-{}-{nonce}",
-            std::process::id()
-        ));
+        let target_root = repository_root().join("target");
+        fs::create_dir_all(&target_root).expect("应能创建临时功能目录父目录");
+        let root = loop {
+            let fixture_id = NEXT_FIXTURE_ID.fetch_add(1, Ordering::Relaxed);
+            let candidate = target_root.join(format!(
+                "inputcodex-release-audit-{}-{fixture_id}",
+                std::process::id()
+            ));
+            match fs::create_dir(&candidate) {
+                Ok(()) => break candidate,
+                Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => {}
+                Err(error) => panic!("应能创建临时功能目录夹具：{error}"),
+            }
+        };
 
-        fs::create_dir_all(&root).expect("应能创建临时功能目录夹具");
         copy_tree(
             &repository_root().join("parity/features"),
             &root.join("parity/features"),
