@@ -760,6 +760,75 @@ function Get-AutonomousScopeProjection {
     }
 }
 
+function Resolve-AutonomousTaskLink {
+    param(
+        [AllowEmptyCollection()][object[]]$MarkedIssues,
+        [AllowEmptyCollection()][object[]]$MergedPullRequests,
+        [Parameter(Mandatory)][string]$ObservedRemoteMain,
+        [Parameter(Mandatory)][string]$WorktreeHead
+    )
+
+    $openIssues = @($MarkedIssues | Where-Object {
+        (Get-PropertyValue $_ 'github_state') -ceq 'open'
+    })
+    $trustedOpenIssues = @($openIssues | Where-Object {
+        (Get-PropertyValue $_ 'author_login') -ceq 'nonononull'
+    })
+    $trustedMergedPullRequests = @($MergedPullRequests | Where-Object {
+        (Get-PropertyValue $_ 'author_login') -ceq 'nonononull' -and
+        (Get-PropertyValue $_ 'head_owner_login') -ceq 'nonononull'
+    })
+
+    if ($trustedOpenIssues.Count -eq 1) {
+        $linkedMergedPullRequests = @($trustedMergedPullRequests | Where-Object {
+            $evidence = Get-PropertyValue $_ 'evidence'
+            $null -ne $evidence -and
+            (Get-PropertyValue $evidence 'valid') -eq $true -and
+            (Get-PropertyValue $evidence 'tracking_issue_ref') -ceq
+                (Get-PropertyValue $trustedOpenIssues[0] 'url')
+        })
+        return [pscustomobject][ordered]@{
+            active_issues = [object[]]$openIssues
+            linked_merged_prs = [object[]]$linkedMergedPullRequests
+        }
+    }
+
+    if ($trustedOpenIssues.Count -eq 0) {
+        $trustedClosedIssues = @($MarkedIssues | Where-Object {
+            (Get-PropertyValue $_ 'github_state') -ceq 'closed' -and
+            (Get-PropertyValue $_ 'author_login') -ceq 'nonononull'
+        })
+        $recoveryCandidates = @(
+            foreach ($issue in $trustedClosedIssues) {
+                foreach ($pullRequest in $trustedMergedPullRequests) {
+                    $evidence = Get-PropertyValue $pullRequest 'evidence'
+                    if ($null -ne $evidence -and
+                        (Get-PropertyValue $evidence 'valid') -eq $true -and
+                        (Get-PropertyValue $evidence 'tracking_issue_ref') -ceq (Get-PropertyValue $issue 'url') -and
+                        (Get-PropertyValue $pullRequest 'merge_commit_oid') -ceq $ObservedRemoteMain -and
+                        (Get-PropertyValue $pullRequest 'head_oid') -ceq $WorktreeHead) {
+                        [pscustomobject][ordered]@{
+                            issue = $issue
+                            pull_request = $pullRequest
+                        }
+                    }
+                }
+            }
+        )
+        if ($recoveryCandidates.Count -eq 1) {
+            return [pscustomobject][ordered]@{
+                active_issues = [object[]]@($openIssues + $recoveryCandidates[0].issue)
+                linked_merged_prs = [object[]]@($recoveryCandidates[0].pull_request)
+            }
+        }
+    }
+
+    return [pscustomobject][ordered]@{
+        active_issues = [object[]]$openIssues
+        linked_merged_prs = [object[]]@()
+    }
+}
+
 function Invoke-GitRead {
     param([Parameter(Mandatory)][string[]]$Arguments)
 
@@ -838,7 +907,7 @@ function Get-LiveSnapshot {
             $remoteMain = $remoteMainCandidate
 
             $issueOutput = @(
-                & $ghCommand.Source api --paginate --slurp 'repos/nonononull/inputcodex/issues?state=open&per_page=100' 2>$null
+                & $ghCommand.Source api --paginate --slurp 'repos/nonononull/inputcodex/issues?state=all&per_page=100' 2>$null
             )
             if ($LASTEXITCODE -ne 0) { throw 'gh issue list failed' }
             $issues = (ConvertFrom-StrictPagedArrayOutput -Output $issueOutput -Label 'gh issue list').Items
@@ -849,11 +918,12 @@ function Get-LiveSnapshot {
                     (Get-PropertyValue $issue 'number') -lt 1 -or
                     (Get-PropertyValue $issue 'html_url') -isnot [string] -or
                     (Get-PropertyValue $issueUser 'login') -isnot [string] -or
+                    (Get-PropertyValue $issue 'state') -isnot [string] -or
                     ($null -ne $issueBody -and $issueBody -isnot [string])) {
                     throw 'gh issue item schema invalid'
                 }
             }
-            $activeIssues = @($issues |
+            $markedIssues = @($issues |
                 Where-Object {
                     $null -eq $_.PSObject.Properties['pull_request'] -and
                     [string](Get-PropertyValue $_ 'body') -match
@@ -864,18 +934,10 @@ function Get-LiveSnapshot {
                         number = Get-PropertyValue $_ 'number'
                         url = Get-PropertyValue $_ 'html_url'
                         author_login = Get-PropertyValue (Get-PropertyValue $_ 'user') 'login'
+                        github_state = Get-PropertyValue $_ 'state'
                         planning_evidence = [pscustomobject][ordered]@{ valid = $false }
                     }
                 })
-            $trustedIssuesForEvidence = @($activeIssues | Where-Object {
-                (Get-PropertyValue $_ 'author_login') -ceq 'nonononull'
-            })
-            if ($trustedIssuesForEvidence.Count -eq 1) {
-                $trustedIssue = $trustedIssuesForEvidence[0]
-                $trustedIssue.planning_evidence = Get-GitHubPlanningEvidence `
-                    -GhExecutable $ghCommand.Source `
-                    -IssueNumber ([long](Get-PropertyValue $trustedIssue 'number'))
-            }
 
             $prOutput = @(
                 & $ghCommand.Source api --paginate --slurp 'repos/nonononull/inputcodex/pulls?state=all&per_page=100' 2>$null
@@ -971,17 +1033,18 @@ function Get-LiveSnapshot {
                 $trustedPr.workflow_runs = $workflowEvidence.Runs
             }
 
-            $trustedMergedPrs = @($mergedPrs | Where-Object {
-                (Get-PropertyValue $_ 'author_login') -ceq 'nonononull' -and
-                (Get-PropertyValue $_ 'head_owner_login') -ceq 'nonononull' -and
-                (Get-PropertyValue (Get-PropertyValue $_ 'evidence') 'valid') -eq $true
+            $taskLink = Resolve-AutonomousTaskLink -MarkedIssues $markedIssues `
+                -MergedPullRequests $mergedPrs -ObservedRemoteMain $remoteMain -WorktreeHead $worktreeHead
+            $activeIssues = @($taskLink.active_issues)
+            $linkedMergedPrs = @($taskLink.linked_merged_prs)
+            $trustedIssuesForEvidence = @($activeIssues | Where-Object {
+                (Get-PropertyValue $_ 'author_login') -ceq 'nonononull'
             })
-            $linkedMergedPrs = @()
             if ($trustedIssuesForEvidence.Count -eq 1) {
-                $linkedMergedPrs = @($trustedMergedPrs | Where-Object {
-                    (Get-PropertyValue (Get-PropertyValue $_ 'evidence') 'tracking_issue_ref') -ceq
-                        (Get-PropertyValue $trustedIssuesForEvidence[0] 'url')
-                })
+                $trustedIssue = $trustedIssuesForEvidence[0]
+                $trustedIssue.planning_evidence = Get-GitHubPlanningEvidence `
+                    -GhExecutable $ghCommand.Source `
+                    -IssueNumber ([long](Get-PropertyValue $trustedIssue 'number'))
             }
             if ($linkedMergedPrs.Count -eq 1) {
                 $mergedPr = $linkedMergedPrs[0]

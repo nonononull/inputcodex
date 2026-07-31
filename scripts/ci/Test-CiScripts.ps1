@@ -819,6 +819,108 @@ Invoke-ContractTest -Name '无人值守 live 空范围保持数组身份与确�
         -Actual $projection.scope_hash -Message '空范围必须使用 LF 空载荷的确定哈希'
 }
 
+Invoke-ContractTest -Name '无人值守 live 精确恢复自动关闭的合并后 Issue' -Body {
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyValue')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Resolve-AutonomousTaskLink')
+
+    function New-TestTaskIssue {
+        param(
+            [string]$State = 'closed',
+            [string]$Url = 'https://github.com/nonononull/inputcodex/issues/113',
+            [string]$Author = 'nonononull'
+        )
+        [pscustomobject][ordered]@{
+            number = 113L
+            url = $Url
+            author_login = $Author
+            github_state = $State
+            planning_evidence = [pscustomobject][ordered]@{ valid = $false }
+        }
+    }
+
+    function New-TestMergedTaskPr {
+        param(
+            [string]$IssueUrl = 'https://github.com/nonononull/inputcodex/issues/113',
+            [string]$Author = 'nonononull'
+        )
+        [pscustomobject][ordered]@{
+            number = 114L
+            head_oid = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+            merge_commit_oid = 'cccccccccccccccccccccccccccccccccccccccc'
+            author_login = $Author
+            head_owner_login = 'nonononull'
+            evidence = [pscustomobject][ordered]@{
+                valid = $true
+                tracking_issue_ref = $IssueUrl
+            }
+        }
+    }
+
+    $closedIssue = New-TestTaskIssue
+    $mergedPr = New-TestMergedTaskPr
+    $exact = Resolve-AutonomousTaskLink -MarkedIssues @($closedIssue) -MergedPullRequests @($mergedPr) `
+        -ObservedRemoteMain 'cccccccccccccccccccccccccccccccccccccccc' `
+        -WorktreeHead 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+    Assert-Equal -Expected 1 -Actual $exact.active_issues.Count -Message 'exact closed Issue 必须恢复为 workflow-active'
+    Assert-Equal -Expected 113L -Actual $exact.active_issues[0].number -Message '恢复的 Issue 必须保持原编号'
+    Assert-Equal -Expected 1 -Actual $exact.linked_merged_prs.Count -Message 'exact merged PR 必须同步恢复'
+
+    $openIssue = New-TestTaskIssue -State 'open'
+    $open = Resolve-AutonomousTaskLink -MarkedIssues @($openIssue) -MergedPullRequests @($mergedPr) `
+        -ObservedRemoteMain 'cccccccccccccccccccccccccccccccccccccccc' `
+        -WorktreeHead 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+    Assert-Equal -Expected 1 -Actual $open.active_issues.Count -Message 'open Issue 既有行为不得漂移'
+    Assert-Equal -Expected 1 -Actual $open.linked_merged_prs.Count -Message 'open Issue 必须继续关联 merged PR'
+
+    foreach ($blocked in @(
+        [pscustomobject]@{
+            Name = 'stale-main'
+            Issues = @($closedIssue)
+            PullRequests = @($mergedPr)
+            RemoteMain = 'dddddddddddddddddddddddddddddddddddddddd'
+            WorktreeHead = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+        },
+        [pscustomobject]@{
+            Name = 'wrong-head'
+            Issues = @($closedIssue)
+            PullRequests = @($mergedPr)
+            RemoteMain = 'cccccccccccccccccccccccccccccccccccccccc'
+            WorktreeHead = 'dddddddddddddddddddddddddddddddddddddddd'
+        },
+        [pscustomobject]@{
+            Name = 'untrusted-pr'
+            Issues = @($closedIssue)
+            PullRequests = @((New-TestMergedTaskPr -Author 'attacker'))
+            RemoteMain = 'cccccccccccccccccccccccccccccccccccccccc'
+            WorktreeHead = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+        },
+        [pscustomobject]@{
+            Name = 'duplicate'
+            Issues = @($closedIssue, (New-TestTaskIssue -Url 'https://github.com/nonononull/inputcodex/issues/115'))
+            PullRequests = @($mergedPr, (New-TestMergedTaskPr -IssueUrl 'https://github.com/nonononull/inputcodex/issues/115'))
+            RemoteMain = 'cccccccccccccccccccccccccccccccccccccccc'
+            WorktreeHead = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+        }
+    )) {
+        $result = Resolve-AutonomousTaskLink -MarkedIssues $blocked.Issues `
+            -MergedPullRequests $blocked.PullRequests -ObservedRemoteMain $blocked.RemoteMain `
+            -WorktreeHead $blocked.WorktreeHead
+        Assert-Equal -Expected 0 -Actual $result.active_issues.Count `
+            -Message "非 exact closed Issue 不得恢复：$($blocked.Name)"
+        Assert-Equal -Expected 0 -Actual $result.linked_merged_prs.Count `
+            -Message "非 exact merged PR 不得恢复：$($blocked.Name)"
+    }
+
+    $source = Get-Content -LiteralPath $autonomousStateScript -Raw
+    Assert-True -Condition $source.Contains('issues?state=all&per_page=100') `
+        -Message 'closed Issue 恢复必须采集全状态 Issue'
+    Assert-True -Condition (-not $source.Contains('issues?state=open&per_page=100')) `
+        -Message 'live Issue 采集不得继续截断为 open'
+    $liveSource = Get-AutonomousStateFunctionSource -Name 'Get-LiveSnapshot'
+    Assert-True -Condition $liveSource.Contains('Resolve-AutonomousTaskLink') `
+        -Message 'live 生产采集必须消费精确 task-link helper'
+}
+
 Invoke-ContractTest -Name '无人值守 live PR 投影不得覆盖工作树 Head' -Body {
     $source = Get-Content -LiteralPath $autonomousStateScript -Raw
     $tokens = $null
