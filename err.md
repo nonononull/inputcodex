@@ -1011,6 +1011,24 @@
 - 验证：新增合同先单独 RED，错误为“live 工作树 Head 必须使用独立变量采集”；最小修复后完整 CI 合同为 66/66。真实 PR #112 live 再次退出 0，`observed_head` 恢复为 40 位当前已提交 Head，并按脏工作树优先级返回 active-worktree-execution / resume-worktree；内存变异进一步证明同名、仅大小写不同的二次赋值均被拒绝，而安全改名通过。
 - 关联：Issue #111、PR #112、scripts/automation/Get-AutonomousRefactorState.ps1、scripts/ci/Test-CiScripts.ps1。
 
+### 2026-07-31：PowerShell 空管道把自治范围数组折叠为 null
+
+- 环境：Issue #113 从刚合并的 `origin/main` 创建 clean Paseo worktree，尚无任何已提交任务 diff。
+- 现象：策略、仓库政策、Release Audit 与 66 条离线合同均通过，但 live 状态在分类前返回 `AUTONOMOUS_STATE_LIVE_COLLECTION_FAILED`；只读内存诊断显示 `[string]::Join` 收到 null `values`。
+- 根因：`Get-LiveSnapshot` 用 `@(...) | Where-Object | Sort-Object` 给 `$actualScopePaths` 赋值；PowerShell 在最终管道无输出时把赋值结果折叠为 `$null`，外层数组语法没有跨越后续管道保留数组身份。
+- 处理：新增纯 `Get-AutonomousScopeProjection`，以 `StringComparer.Ordinal` 的 `SortedSet<string>` 对路径做大小写敏感的稳定去重排序，并统一返回数组、Int64 count 与带前缀 scope hash；live 只消费该投影。
+- 验证：生产 helper 合同先因函数缺失稳定 RED；GREEN 后空输入返回 count `0`、空数组和 LF 空载荷哈希 `sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b`，单路径及大小写不同的多路径在 `en-US`、`sv-SE`、`tr-TR` 下保持同一 Ordinal 顺序与 hash；完整 CI 合同为 68/68，真实 live 恢复为 active-worktree-execution / resume-worktree。
+- 关联：Issue #113、scripts/automation/Get-AutonomousRefactorState.ps1、scripts/ci/Test-CiScripts.ps1。
+
+### 2026-07-31：GitHub 自动关闭 Issue 切断合并后恢复关联
+
+- 环境：PR #112 使用 `Closes #111` 并精确 Squash Merge；GitHub 在主干 CI/Performance 完成前自动把 Issue #111 设为 closed。
+- 现象：单父、tree 等价、签名与主干 Run 均正常，但 live 只采集 open Issue，无法把已合并 PR evidence 关联到任务，因而 fail-closed 返回 `ORIGIN_MAIN_DRIFT`、`REMOTE_MAIN_DRIFT` 与 `ORPHANED_TASK_BRANCH`；临时重开 #111 后立即进入 post-merge-verification。
+- 根因：Issue REST 固定 `state=open`，且 merged PR enrichment 依赖唯一 active Issue；标准 GitHub auto-close 发生后，正确 evidence、Final Head 和 merge commit 仍存在，却没有只读恢复入口。
+- 处理：Issue REST 改为严格全状态分页；新增纯 `Resolve-AutonomousTaskLink`。open owner Issue 继续使用既有语义；closed Issue 仅在 owner、merged PR evidence、remote main、worktree Final Head 四方精确匹配且候选唯一时恢复为 workflow-active，任何 stale、错误 Head、非 owner 或重复候选均不恢复，状态脚本仍无 mutation。
+- 验证：生产 helper 合同先因函数缺失稳定 RED；GREEN 后 exact closed/open 两条路径通过，stale main、错误 Head、非 owner PR 与重复候选均保持零恢复，完整 CI 合同为 68/68。Issue #113 的关联 PR 合并后还必须以 `Closes #113` 完成无需人工 reopen 的真实 live 验收。
+- 关联：Issue #111、PR #112、Issue #113、scripts/automation/Get-AutonomousRefactorState.ps1、scripts/ci/Test-CiScripts.ps1。
+
 ## 记录模板
 
 ```text

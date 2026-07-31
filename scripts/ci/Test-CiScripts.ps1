@@ -113,6 +113,28 @@ function Assert-Contains {
     }
 }
 
+function Get-AutonomousStateFunctionSource {
+    param([Parameter(Mandatory)][string]$Name)
+
+    $source = Get-Content -LiteralPath $autonomousStateScript -Raw
+    $tokens = $null
+    $parseErrors = $null
+    $ast = [System.Management.Automation.Language.Parser]::ParseInput(
+        $source,
+        [ref]$tokens,
+        [ref]$parseErrors
+    )
+    Assert-Equal -Expected 0 -Actual @($parseErrors).Count -Message '自治状态脚本必须可供真实 helper 合同提取'
+
+    $functions = @($ast.FindAll({
+        param($node)
+        $node -is [System.Management.Automation.Language.FunctionDefinitionAst] -and
+        $node.Name -ceq $Name
+    }, $true))
+    Assert-Equal -Expected 1 -Actual $functions.Count -Message "自治状态脚本必须存在唯一生产 helper：$Name"
+    return $functions[0].Extent.Text
+}
+
 function Invoke-ChildScript {
     param(
         [Parameter(Mandatory)]
@@ -784,6 +806,154 @@ Invoke-ContractTest -Name '无人值守 live 外部列表使用全量分页和�
         Assert-True -Condition $source.Contains($required) -Message "live 外部列表缺少严格分页合同：$required"
     }
     Assert-True -Condition (-not $source.Contains('--limit 100')) -Message 'live 外部列表不得截断前 100 项'
+}
+
+Invoke-ContractTest -Name '无人值守 live 空范围保持数组身份与确定哈希' -Body {
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-AutonomousScopeProjection')
+
+    $projection = Get-AutonomousScopeProjection -Paths @()
+    Assert-True -Condition ($projection.paths -is [System.Array]) -Message '空范围路径必须保留数组身份'
+    Assert-Equal -Expected 0 -Actual $projection.paths.Count -Message '空范围不得产生伪路径'
+    Assert-Equal -Expected 0L -Actual $projection.count -Message '空范围计数必须归一化为 Int64 零'
+    Assert-Equal -Expected 'sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b' `
+        -Actual $projection.scope_hash -Message '空范围必须使用 LF 空载荷的确定哈希'
+
+    $single = Get-AutonomousScopeProjection -Paths @('single/path.txt')
+    Assert-True -Condition ($single.paths -is [System.Array]) -Message '单路径必须保留数组身份'
+    Assert-Equal -Expected 1L -Actual $single.count -Message '单路径计数必须归一化为 Int64 一'
+    Assert-Equal -Expected 'single/path.txt' -Actual $single.paths[0] -Message '单路径内容不得漂移'
+    Assert-Equal -Expected 'sha256:d2e8ff22b0918f8c8bedc32b99272db8a20c1a036d02135cfd9359c4782119bb' `
+        -Actual $single.scope_hash -Message '单路径必须使用 LF 末尾的确定哈希'
+
+    $originalCulture = [Threading.Thread]::CurrentThread.CurrentCulture
+    $originalUiCulture = [Threading.Thread]::CurrentThread.CurrentUICulture
+    try {
+        $mixedPaths = [string[]]@('I.txt', 'i.txt', 'İ.txt', 'ı.txt', 'A.txt', 'a.txt', 'I.txt')
+        $expectedPaths = [string[]]@('A.txt', 'I.txt', 'a.txt', 'i.txt', 'İ.txt', 'ı.txt')
+        foreach ($cultureName in @('en-US', 'sv-SE', 'tr-TR')) {
+            $culture = [Globalization.CultureInfo]::GetCultureInfo($cultureName)
+            [Threading.Thread]::CurrentThread.CurrentCulture = $culture
+            [Threading.Thread]::CurrentThread.CurrentUICulture = $culture
+
+            $mixed = Get-AutonomousScopeProjection -Paths $mixedPaths
+            Assert-True -Condition ($mixed.paths -is [System.Array]) `
+                -Message "多路径必须在 $cultureName 保留数组身份"
+            Assert-Equal -Expected 6L -Actual $mixed.count `
+                -Message "大小写不同路径不得在 $cultureName 被合并"
+            Assert-True -Condition ([string]::Equals(
+                [string]::Join("`n", $expectedPaths),
+                [string]::Join("`n", [string[]]$mixed.paths),
+                [StringComparison]::Ordinal
+            )) -Message "多路径必须在 $cultureName 使用 Ordinal 顺序"
+            Assert-Equal -Expected 'sha256:33d03dd10bc0a0f97b747bdb48f4954834a9f04fc74a242bd69fd62bcc4f7635' `
+                -Actual $mixed.scope_hash -Message "多路径 hash 不得受 $cultureName 影响"
+        }
+    } finally {
+        [Threading.Thread]::CurrentThread.CurrentCulture = $originalCulture
+        [Threading.Thread]::CurrentThread.CurrentUICulture = $originalUiCulture
+    }
+}
+
+Invoke-ContractTest -Name '无人值守 live 精确恢复自动关闭的合并后 Issue' -Body {
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyValue')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Resolve-AutonomousTaskLink')
+
+    function New-TestTaskIssue {
+        param(
+            [string]$State = 'closed',
+            [string]$Url = 'https://github.com/nonononull/inputcodex/issues/113',
+            [string]$Author = 'nonononull'
+        )
+        [pscustomobject][ordered]@{
+            number = 113L
+            url = $Url
+            author_login = $Author
+            github_state = $State
+            planning_evidence = [pscustomobject][ordered]@{ valid = $false }
+        }
+    }
+
+    function New-TestMergedTaskPr {
+        param(
+            [string]$IssueUrl = 'https://github.com/nonononull/inputcodex/issues/113',
+            [string]$Author = 'nonononull'
+        )
+        [pscustomobject][ordered]@{
+            number = 114L
+            head_oid = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+            merge_commit_oid = 'cccccccccccccccccccccccccccccccccccccccc'
+            author_login = $Author
+            head_owner_login = 'nonononull'
+            evidence = [pscustomobject][ordered]@{
+                valid = $true
+                tracking_issue_ref = $IssueUrl
+            }
+        }
+    }
+
+    $closedIssue = New-TestTaskIssue
+    $mergedPr = New-TestMergedTaskPr
+    $exact = Resolve-AutonomousTaskLink -MarkedIssues @($closedIssue) -MergedPullRequests @($mergedPr) `
+        -ObservedRemoteMain 'cccccccccccccccccccccccccccccccccccccccc' `
+        -WorktreeHead 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+    Assert-Equal -Expected 1 -Actual $exact.active_issues.Count -Message 'exact closed Issue 必须恢复为 workflow-active'
+    Assert-Equal -Expected 113L -Actual $exact.active_issues[0].number -Message '恢复的 Issue 必须保持原编号'
+    Assert-Equal -Expected 1 -Actual $exact.linked_merged_prs.Count -Message 'exact merged PR 必须同步恢复'
+
+    $openIssue = New-TestTaskIssue -State 'open'
+    $open = Resolve-AutonomousTaskLink -MarkedIssues @($openIssue) -MergedPullRequests @($mergedPr) `
+        -ObservedRemoteMain 'cccccccccccccccccccccccccccccccccccccccc' `
+        -WorktreeHead 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+    Assert-Equal -Expected 1 -Actual $open.active_issues.Count -Message 'open Issue 既有行为不得漂移'
+    Assert-Equal -Expected 1 -Actual $open.linked_merged_prs.Count -Message 'open Issue 必须继续关联 merged PR'
+
+    foreach ($blocked in @(
+        [pscustomobject]@{
+            Name = 'stale-main'
+            Issues = @($closedIssue)
+            PullRequests = @($mergedPr)
+            RemoteMain = 'dddddddddddddddddddddddddddddddddddddddd'
+            WorktreeHead = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+        },
+        [pscustomobject]@{
+            Name = 'wrong-head'
+            Issues = @($closedIssue)
+            PullRequests = @($mergedPr)
+            RemoteMain = 'cccccccccccccccccccccccccccccccccccccccc'
+            WorktreeHead = 'dddddddddddddddddddddddddddddddddddddddd'
+        },
+        [pscustomobject]@{
+            Name = 'untrusted-pr'
+            Issues = @($closedIssue)
+            PullRequests = @((New-TestMergedTaskPr -Author 'attacker'))
+            RemoteMain = 'cccccccccccccccccccccccccccccccccccccccc'
+            WorktreeHead = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+        },
+        [pscustomobject]@{
+            Name = 'duplicate'
+            Issues = @($closedIssue, (New-TestTaskIssue -Url 'https://github.com/nonononull/inputcodex/issues/115'))
+            PullRequests = @($mergedPr, (New-TestMergedTaskPr -IssueUrl 'https://github.com/nonononull/inputcodex/issues/115'))
+            RemoteMain = 'cccccccccccccccccccccccccccccccccccccccc'
+            WorktreeHead = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+        }
+    )) {
+        $result = Resolve-AutonomousTaskLink -MarkedIssues $blocked.Issues `
+            -MergedPullRequests $blocked.PullRequests -ObservedRemoteMain $blocked.RemoteMain `
+            -WorktreeHead $blocked.WorktreeHead
+        Assert-Equal -Expected 0 -Actual $result.active_issues.Count `
+            -Message "非 exact closed Issue 不得恢复：$($blocked.Name)"
+        Assert-Equal -Expected 0 -Actual $result.linked_merged_prs.Count `
+            -Message "非 exact merged PR 不得恢复：$($blocked.Name)"
+    }
+
+    $source = Get-Content -LiteralPath $autonomousStateScript -Raw
+    Assert-True -Condition $source.Contains('issues?state=all&per_page=100') `
+        -Message 'closed Issue 恢复必须采集全状态 Issue'
+    Assert-True -Condition (-not $source.Contains('issues?state=open&per_page=100')) `
+        -Message 'live Issue 采集不得继续截断为 open'
+    $liveSource = Get-AutonomousStateFunctionSource -Name 'Get-LiveSnapshot'
+    Assert-True -Condition $liveSource.Contains('Resolve-AutonomousTaskLink') `
+        -Message 'live 生产采集必须消费精确 task-link helper'
 }
 
 Invoke-ContractTest -Name '无人值守 live PR 投影不得覆盖工作树 Head' -Body {
