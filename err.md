@@ -1047,6 +1047,15 @@
 - 验证：原 Run 的两个互补失败与共享目录竞态一致；修复后定向套件为 `28/28`，并以 `32` 线程连续执行 `20` 轮、共 `560` 个测试全部通过。Final Head 的 hosted 复验、Job 与 Artifact 证据继续只保留在 PR #118 和 Actions。
 - 关联：Issue #117、PR #118、CI Run `30636113976`、Job `91174083500`、`crates/inputcodex-parity/tests/catalog_repository.rs`。
 
+### 2026-08-01：上游同步缺少可达的 Performance 与强身份、快照完整性证据
+
+- 环境：Issue `#116` / PR `#119` 只更新上游审计缓存、`source-lock` 与同步报告；自治控制面要求 Final Head 的 CI 与 Performance Baseline。
+- 现象：Performance Baseline 的 PR/push `paths` 与 44 路径同步范围交集为 `0`；手工 `workflow_dispatch` 成功仍不属于生产 PR/push 证据。同名伪 Workflow 可仅凭显示名和 Head 被采集；篡改 `source-lock.files[].sha256` 时 Release Audit 仍返回通过。
+- 根因：Performance 路径过滤遗漏唯一稳定同步入口 `upstream/source-lock.json`；Workflow Run 投影未绑定仓库固定 `workflow_id`、path、event 和关联 PR；Release Audit 只验证 `release_audit` 状态迁移与产品路径边界，没有复算提交中的上游 tree/blob/mode/manifest。Windows 工作树又会受 `core.autocrlf` 影响，当前 `v1.2.43` 有 `227/280` 个文本工作树哈希不同，不能作为跨平台 Git 内容证据。
+- 处理：Performance 的 PR 与 main push 同时加入 `upstream/source-lock.json`；自治策略和状态解析器绑定两个固定 Workflow ID/path、`pull_request/push` 事件及 PR 编号；Release Audit 从提交 `HEAD` 的 Git tree 读取每个 blob 原始字节，复算 Ordinal 路径集、mode、Git SHA-1、SHA-256、大小、manifest、largest file、目录与 tree 统计，不读取会被换行转换的工作树文本。
+- 验证：新增合同先稳定得到六组预期 RED，随后 live collector 纯函数合同继续证明原实现缺少强身份入口；GREEN 后伪 ID/path/event/PR 与快照内容/mode/额外路径/manifest 漂移均被拒绝，真实 `v1.2.43` 的 `280` 个 blob 验证通过，CI 合同为 `76/76`，策略 hash 为 `sha256:3531b5dafe6f396fa986928dcdc16c0dc20a03678c662b7aa5df39bc9f1cd5d6`。Final Head hosted CI、Performance 与 Artifact 证据保留在 Issue `#120` 的关联 PR。
+- 关联：Issue #116、PR #119、Issue #120、`.github/workflows/performance-baseline.yml`、`scripts/automation/Get-AutonomousRefactorState.ps1`、`scripts/ci/Verify-ReleaseAuditGate.ps1`。
+
 ## 记录模板
 
 ```text

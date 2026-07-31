@@ -37,6 +37,12 @@
     "required_workflows": [
       {
         "name": "CI",
+        "workflow_id": 318067078,
+        "path": ".github/workflows/ci.yml",
+        "events": [
+          "pull_request",
+          "push"
+        ],
         "jobs": [
           "classify",
           "governance",
@@ -49,6 +55,12 @@
       },
       {
         "name": "Performance Baseline",
+        "workflow_id": 320393981,
+        "path": ".github/workflows/performance-baseline.yml",
+        "events": [
+          "pull_request",
+          "push"
+        ],
         "jobs": [
           "contract",
           "windows",

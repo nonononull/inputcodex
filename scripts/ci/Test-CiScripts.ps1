@@ -41,6 +41,7 @@ if ($missingImplementations.Count -gt 0) {
 $script:PowerShellExecutable = (Get-Process -Id $PID).Path
 $script:PassedCount = 0
 $script:Failures = [System.Collections.Generic.List[string]]::new()
+$script:AutonomousPolicySha256 = $null
 $testRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("inputcodex-ci-contract-{0}" -f [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $testRoot -Force | Out-Null
 
@@ -217,6 +218,9 @@ function New-ValidAutonomousRefactorPolicy {
             required_workflows = @(
                 [pscustomobject][ordered]@{
                     name = 'CI'
+                    workflow_id = 318067078
+                    path = '.github/workflows/ci.yml'
+                    events = @('pull_request', 'push')
                     jobs = @(
                         'classify'
                         'governance'
@@ -229,6 +233,9 @@ function New-ValidAutonomousRefactorPolicy {
                 }
                 [pscustomobject][ordered]@{
                     name = 'Performance Baseline'
+                    workflow_id = 320393981
+                    path = '.github/workflows/performance-baseline.yml'
+                    events = @('pull_request', 'push')
                     jobs = @('contract', 'windows', 'macos', 'required')
                 }
             )
@@ -306,6 +313,7 @@ Invoke-ContractTest -Name '合法无人值守重构策略通过并输出规范�
     Assert-True -Condition ($null -ne $result.Json) -Message "合法自治策略必须输出 JSON，输出=$($result.Output)"
     Assert-Equal -Expected $true -Actual $result.Json.ok -Message '合法自治策略必须标记 ok=true'
     Assert-True -Condition ([string]$result.Json.policy_sha256 -match '^sha256:[0-9a-f]{64}$') -Message '自治策略必须输出规范化 SHA-256'
+    $script:AutonomousPolicySha256 = [string]$result.Json.policy_sha256
     Assert-Equal -Expected 'upstream-sync' -Actual $result.Json.upstream_sync.task_kind `
         -Message '策略输出必须投影 typed upstream-sync task kind'
     Assert-Equal -Expected '<!-- inputcodex:autonomous-refactor-task-kind:upstream-sync:v1 -->' `
@@ -316,6 +324,15 @@ Invoke-ContractTest -Name '合法无人值守重构策略通过并输出规范�
         -Message '策略输出必须投影承载 release-audit 的 Workflow'
     Assert-Equal -Expected 'release-audit' -Actual $result.Json.upstream_sync.required_job `
         -Message '策略输出必须投影成功 release-audit Job 要求'
+    Assert-Equal -Expected 2 -Actual @($result.Json.required_workflows).Count `
+        -Message '策略输出必须投影两个强身份 Workflow'
+    Assert-Equal -Expected 318067078 -Actual $result.Json.required_workflows[0].workflow_id `
+        -Message '策略输出必须投影 CI workflow_id'
+    Assert-Equal -Expected '.github/workflows/ci.yml' -Actual $result.Json.required_workflows[0].path `
+        -Message '策略输出必须投影 CI path'
+    Assert-Equal -Expected ([string]::Join([char]10, @('pull_request', 'push'))) `
+        -Actual ([string]::Join([char]10, @($result.Json.required_workflows[0].events))) `
+        -Message '策略输出必须投影 CI 的 PR/push 事件集合'
 }
 
 Invoke-ContractTest -Name '拒绝缺失的无人值守重构策略文件' -Body {
@@ -410,6 +427,20 @@ Invoke-ContractTest -Name '拒绝缺失的 CI Performance 与零 Artifact 门' -
     Assert-Contains -Collection @($result.Json.violations.code) -Expected 'WORKFLOW_GATE' -Message 'Performance 门缺失必须被拒绝'
 }
 
+Invoke-ContractTest -Name '拒绝漂移的 Workflow 强身份绑定' -Body {
+    foreach ($case in @(
+        [pscustomobject]@{ Name = 'id'; Property = 'workflow_id'; Value = 999 },
+        [pscustomobject]@{ Name = 'path'; Property = 'path'; Value = '.github/workflows/fake.yml' },
+        [pscustomobject]@{ Name = 'events'; Property = 'events'; Value = @('workflow_dispatch') }
+    )) {
+        $policy = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
+        $policy.merge_gate.required_workflows[0].($case.Property) = $case.Value
+        Assert-AutonomousPolicyFailure `
+            -Result (Invoke-AutonomousPolicyCase -Name "workflow-identity-$($case.Name)" -Policy $policy) `
+            -ExpectedCode 'WORKFLOW_IDENTITY'
+    }
+}
+
 Invoke-ContractTest -Name '拒绝漂移的 upstream-sync stale 例外' -Body {
     $cases = @(
         [pscustomobject]@{ Name = 'kind'; Property = 'task_kind'; Value = 'refactor' },
@@ -488,11 +519,24 @@ function New-SuccessfulAutonomousWorkflowEvidence {
         [Parameter(Mandatory)][string]$Name,
         [Parameter(Mandatory)][string[]]$Jobs,
         [Parameter(Mandatory)][long]$RunId,
-        [string]$HeadOid = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+        [string]$HeadOid = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+        [ValidateSet('pull_request', 'push')][string]$Event = 'pull_request',
+        [long]$PullRequestNumber = 112
     )
+
+    $workflowId = if ($Name -ceq 'CI') { 318067078L } else { 320393981L }
+    $workflowPath = if ($Name -ceq 'CI') {
+        '.github/workflows/ci.yml'
+    } else {
+        '.github/workflows/performance-baseline.yml'
+    }
 
     [pscustomobject][ordered]@{
         name = $Name
+        workflow_id = $workflowId
+        workflow_path = $workflowPath
+        event = $Event
+        pull_request_number = $PullRequestNumber
         run_id = $RunId
         head_oid = $HeadOid
         status = 'completed'
@@ -525,7 +569,7 @@ function New-MergeReadyAutonomousPr {
             task_kind = 'refactor'
             tracking_issue_ref = 'https://github.com/nonononull/inputcodex/issues/111'
             standing_authorization_ref = 'https://github.com/nonononull/inputcodex/issues/111'
-            policy_sha256 = 'sha256:cb65b94cd5ef876e9049b4795eca992ac8ac2d9bd9aead03df48b373988f25d1'
+            policy_sha256 = $script:AutonomousPolicySha256
             scope_count = 12
             scope_hash = 'sha256:5d1f609ca2a5913e4e5df21f0fd04d6de2c6731cdd71d641812fbee80b5ad713'
             final_head = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
@@ -585,8 +629,8 @@ function New-PostMergeAutonomousStateSnapshot {
             signature_valid = $true
         }
         workflow_runs = @(
-            (New-SuccessfulAutonomousWorkflowEvidence -Name 'CI' -RunId 2001 -HeadOid 'cccccccccccccccccccccccccccccccccccccccc' -Jobs @('classify', 'governance', 'release-audit', 'linux-quality', 'windows', 'macos', 'required')),
-            (New-SuccessfulAutonomousWorkflowEvidence -Name 'Performance Baseline' -RunId 2002 -HeadOid 'cccccccccccccccccccccccccccccccccccccccc' -Jobs @('contract', 'windows', 'macos', 'required'))
+            (New-SuccessfulAutonomousWorkflowEvidence -Name 'CI' -RunId 2001 -HeadOid 'cccccccccccccccccccccccccccccccccccccccc' -Event push -PullRequestNumber 0 -Jobs @('classify', 'governance', 'release-audit', 'linux-quality', 'windows', 'macos', 'required')),
+            (New-SuccessfulAutonomousWorkflowEvidence -Name 'Performance Baseline' -RunId 2002 -HeadOid 'cccccccccccccccccccccccccccccccccccccccc' -Event push -PullRequestNumber 0 -Jobs @('contract', 'windows', 'macos', 'required'))
         )
     })
     return $snapshot
@@ -709,6 +753,50 @@ Invoke-ContractTest -Name '无人值守 live 仅接受精确 upstream-sync typed
         -Message 'live Issue 投影必须消费 typed task kind helper'
 }
 
+Invoke-ContractTest -Name '无人值守 live Workflow Run 必须绑定强身份与关联 PR' -Body {
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyValue')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-GitHubWorkflowPullRequestAssociation')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-GitHubWorkflowRunIdentity')
+
+    $expectation = [pscustomobject][ordered]@{
+        name = 'CI'
+        workflow_id = 318067078L
+        path = '.github/workflows/ci.yml'
+    }
+    $run = [pscustomobject][ordered]@{
+        name = 'CI'
+        workflow_id = 318067078L
+        path = '.github/workflows/ci.yml'
+        event = 'pull_request'
+        head_sha = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+        pull_requests = @([pscustomobject][ordered]@{
+            number = 112L
+            head = [pscustomobject]@{ sha = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' }
+            base = [pscustomobject]@{ ref = 'main' }
+        })
+    }
+    Assert-Equal -Expected $true -Actual (Test-GitHubWorkflowRunIdentity `
+        -Run $run -Expectation $expectation -HeadOid $run.head_sha -Event pull_request -PullRequestNumber 112) `
+        -Message '真实 CI Run 身份必须匹配'
+
+    foreach ($case in @(
+        [pscustomobject]@{ Name = 'id'; Property = 'workflow_id'; Value = 999L },
+        [pscustomobject]@{ Name = 'path'; Property = 'path'; Value = '.github/workflows/fake.yml' },
+        [pscustomobject]@{ Name = 'event'; Property = 'event'; Value = 'push' }
+    )) {
+        $fake = $run | ConvertTo-Json -Depth 20 | ConvertFrom-Json -Depth 20
+        $fake.($case.Property) = $case.Value
+        Assert-Equal -Expected $false -Actual (Test-GitHubWorkflowRunIdentity `
+            -Run $fake -Expectation $expectation -HeadOid $run.head_sha -Event pull_request -PullRequestNumber 112) `
+            -Message "伪 Workflow Run 必须被拒绝：$($case.Name)"
+    }
+    $wrongPr = $run | ConvertTo-Json -Depth 20 | ConvertFrom-Json -Depth 20
+    $wrongPr.pull_requests[0].number = 999L
+    Assert-Equal -Expected $false -Actual (Test-GitHubWorkflowRunIdentity `
+        -Run $wrongPr -Expectation $expectation -HeadOid $run.head_sha -Event pull_request -PullRequestNumber 112) `
+        -Message '错误关联 PR 必须被拒绝'
+}
+
 Invoke-ContractTest -Name '无人值守 PR evidence 拒绝数组伪装 task kind' -Body {
     Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyValue')
     Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyProjection')
@@ -719,7 +807,7 @@ Invoke-ContractTest -Name '无人值守 PR evidence 拒绝数组伪装 task kind
         task_kind = [object[]]@('upstream-sync')
         tracking_issue_ref = 'https://github.com/nonononull/inputcodex/issues/116'
         standing_authorization_ref = 'https://github.com/nonononull/inputcodex/issues/111'
-        policy_sha256 = 'sha256:cb65b94cd5ef876e9049b4795eca992ac8ac2d9bd9aead03df48b373988f25d1'
+        policy_sha256 = $script:AutonomousPolicySha256
         scope_count = 44L
         scope_hash = 'sha256:d321e4b09e887e7f84ed7047d37ab49c2708a14314813bc20d452615ad4ea8bc'
         final_head = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
@@ -781,7 +869,11 @@ Invoke-ContractTest -Name '无人值守任一 Final Head 合并门失败均只�
         [pscustomobject]@{ Name = 'independent-review'; Code = 'INDEPENDENT_REVIEW' },
         [pscustomobject]@{ Name = 'review-attestation'; Code = 'INDEPENDENT_REVIEW' },
         [pscustomobject]@{ Name = 'ci-artifact'; Code = 'WORKFLOW_CI' },
-        [pscustomobject]@{ Name = 'performance-job'; Code = 'WORKFLOW_PERFORMANCE_BASELINE' }
+        [pscustomobject]@{ Name = 'performance-job'; Code = 'WORKFLOW_PERFORMANCE_BASELINE' },
+        [pscustomobject]@{ Name = 'ci-workflow-id'; Code = 'WORKFLOW_CI' },
+        [pscustomobject]@{ Name = 'ci-workflow-path'; Code = 'WORKFLOW_CI' },
+        [pscustomobject]@{ Name = 'ci-workflow-event'; Code = 'WORKFLOW_CI' },
+        [pscustomobject]@{ Name = 'ci-workflow-pr'; Code = 'WORKFLOW_CI' }
     )) {
         $snapshot = New-MergeReadyAutonomousStateSnapshot
         switch ($case.Name) {
@@ -797,6 +889,10 @@ Invoke-ContractTest -Name '无人值守任一 Final Head 合并门失败均只�
             'review-attestation' { $snapshot.active_prs[0].review_attestation.final_head = 'cccccccccccccccccccccccccccccccccccccccc' }
             'ci-artifact' { $snapshot.active_prs[0].workflow_runs[0].artifact_count = 1 }
             'performance-job' { $snapshot.active_prs[0].workflow_runs[1].jobs[0].conclusion = 'failure' }
+            'ci-workflow-id' { $snapshot.active_prs[0].workflow_runs[0].workflow_id = 999 }
+            'ci-workflow-path' { $snapshot.active_prs[0].workflow_runs[0].workflow_path = '.github/workflows/fake.yml' }
+            'ci-workflow-event' { $snapshot.active_prs[0].workflow_runs[0].event = 'push' }
+            'ci-workflow-pr' { $snapshot.active_prs[0].workflow_runs[0].pull_request_number = 999 }
         }
         $result = Invoke-AutonomousStateCase -Name "merge-gate-$($case.Name)" -Snapshot $snapshot
         Assert-AutonomousState -Result $result -ExpectedState 'active-pr-review-ci' -ExpectedAction 'resume-pr'
@@ -814,6 +910,13 @@ Invoke-ContractTest -Name '无人值守识别合并后主干验证与收口就�
     $pending = Invoke-AutonomousStateCase -Name 'post-merge-pending' -Snapshot $pendingSnapshot
     Assert-AutonomousState -Result $pending -ExpectedState 'post-merge-verification' -ExpectedAction 'verify-main'
     Assert-Contains -Collection @($pending.Json.post_merge_gate_pending) -Expected 'POST_MERGE_WORKFLOW_PERFORMANCE_BASELINE' -Message '合并后 Performance Artifact 漂移必须保持验证状态'
+
+    $identityPendingSnapshot = New-PostMergeAutonomousStateSnapshot
+    $identityPendingSnapshot.merged_prs[0].workflow_runs[0].event = 'pull_request'
+    $identityPending = Invoke-AutonomousStateCase -Name 'post-merge-workflow-identity' -Snapshot $identityPendingSnapshot
+    Assert-AutonomousState -Result $identityPending -ExpectedState 'post-merge-verification' -ExpectedAction 'verify-main'
+    Assert-Contains -Collection @($identityPending.Json.post_merge_gate_pending) -Expected 'POST_MERGE_WORKFLOW_CI' `
+        -Message '合并后 CI 必须绑定 push 事件'
 
     $originPendingSnapshot = New-PostMergeAutonomousStateSnapshot
     $originPendingSnapshot.observed_origin_main = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
@@ -1299,18 +1402,85 @@ function Invoke-ReleaseAuditGateCase {
 
         [Parameter(Mandatory)]
         [AllowEmptyCollection()]
-        [object[]]$Changes
+        [object[]]$Changes,
+
+        [scriptblock]$MutateFixture
     )
 
     $caseRoot = Join-Path $testRoot ("release-audit-{0}" -f $Name)
     $upstreamRoot = Join-Path $caseRoot 'upstream'
-    New-Item -ItemType Directory -Path $upstreamRoot -Force | Out-Null
+    $snapshotRoot = Join-Path $upstreamRoot 'CodexPlusPlus'
+    New-Item -ItemType Directory -Path $snapshotRoot -Force | Out-Null
+
+    $fixturePath = Join-Path $snapshotRoot 'README.md'
+    [System.IO.File]::WriteAllText($fixturePath, "fixture`n", [Text.UTF8Encoding]::new($false))
+    $gitOutput = @(& git -C $caseRoot init --quiet 2>&1 | ForEach-Object { $_.ToString() })
+    if ($LASTEXITCODE -ne 0) { throw "Release Audit 夹具 git init 失败：$($gitOutput -join [Environment]::NewLine)" }
+    $gitOutput = @(& git -C $caseRoot add -- 'upstream/CodexPlusPlus/README.md' 2>&1 | ForEach-Object { $_.ToString() })
+    if ($LASTEXITCODE -ne 0) { throw "Release Audit 夹具 git add 失败：$($gitOutput -join [Environment]::NewLine)" }
+    & git -C $caseRoot -c user.name=inputcodex-ci -c user.email=ci@inputcodex.invalid commit --quiet -m fixture
+    if ($LASTEXITCODE -ne 0) { throw 'Release Audit 夹具初始提交失败' }
+
+    $headFixture = $HeadSourceLock | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 100
+    $fixtureBytes = [System.IO.File]::ReadAllBytes($fixturePath)
+    $fixtureSha256 = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($fixtureBytes)).ToLowerInvariant()
+    $fixtureBlob = (& git -C $caseRoot hash-object -- 'upstream/CodexPlusPlus/README.md').Trim()
+    if ($LASTEXITCODE -ne 0 -or $fixtureBlob -notmatch '^[0-9a-f]{40}$') { throw 'Release Audit 夹具 blob 计算失败' }
+    $fixtureTree = (& git -C $caseRoot rev-parse 'HEAD:upstream/CodexPlusPlus').Trim()
+    if ($LASTEXITCODE -ne 0 -or $fixtureTree -notmatch '^[0-9a-f]{40}$') { throw 'Release Audit 夹具 tree 计算失败' }
+    $manifestPayload = "$fixtureSha256  README.md`n"
+    $manifestSha256 = [Convert]::ToHexString(
+        [Security.Cryptography.SHA256]::HashData([Text.UTF8Encoding]::new($false).GetBytes($manifestPayload))
+    ).ToLowerInvariant()
+    $headFixture.snapshot | Add-Member -NotePropertyName path -NotePropertyValue 'upstream/CodexPlusPlus' -Force
+    $headFixture.snapshot | Add-Member -NotePropertyName commit_tree -NotePropertyValue $fixtureTree -Force
+    $headFixture | Add-Member -NotePropertyName schema_version -NotePropertyValue 'inputcodex.source-lock.v1' -Force
+    $headFixture | Add-Member -NotePropertyName manifest -NotePropertyValue ([pscustomobject][ordered]@{
+        algorithm = 'sha256'
+        format = '<sha256><two spaces><posix path><newline>'
+        sha256 = $manifestSha256
+        file_count = 1
+        total_bytes = [long]$fixtureBytes.Length
+        largest_file = [pscustomobject][ordered]@{
+            path = 'README.md'
+            mode = '100644'
+            size = [long]$fixtureBytes.Length
+            git_blob_sha1 = $fixtureBlob
+            sha256 = $fixtureSha256
+        }
+    }) -Force
+    $headFixture | Add-Member -NotePropertyName tree -NotePropertyValue ([pscustomobject][ordered]@{
+        sha = $fixtureTree
+        entry_count = 1
+        directory_count = 0
+        file_count = 1
+        submodule_count = 0
+    }) -Force
+    $headFixture | Add-Member -NotePropertyName files -NotePropertyValue @([pscustomobject][ordered]@{
+        path = 'README.md'
+        mode = '100644'
+        size = [long]$fixtureBytes.Length
+        git_blob_sha1 = $fixtureBlob
+        sha256 = $fixtureSha256
+    }) -Force
+
+    if ($null -ne $MutateFixture) {
+        & $MutateFixture $caseRoot $headFixture
+        & git -C $caseRoot diff --cached --quiet
+        $cachedDiffExitCode = $LASTEXITCODE
+        if ($cachedDiffExitCode -eq 1) {
+            & git -C $caseRoot -c user.name=inputcodex-ci -c user.email=ci@inputcodex.invalid commit --quiet -m mutation
+            if ($LASTEXITCODE -ne 0) { throw 'Release Audit 夹具漂移提交失败' }
+        } elseif ($cachedDiffExitCode -ne 0) {
+            throw 'Release Audit 夹具 staged diff 检查失败'
+        }
+    }
 
     $baseSourceLockPath = Join-Path $caseRoot 'base-source-lock.json'
     $headSourceLockPath = Join-Path $upstreamRoot 'source-lock.json'
     $changesPath = Join-Path $caseRoot 'changes.json'
     Write-JsonFile -Path $baseSourceLockPath -Value $BaseSourceLock
-    Write-JsonFile -Path $headSourceLockPath -Value $HeadSourceLock
+    Write-JsonFile -Path $headSourceLockPath -Value $headFixture
     Write-JsonFile -Path $changesPath -Value $Changes
 
     Invoke-ChildScript -Path $releaseAuditGateScript -Arguments @(
@@ -1576,6 +1746,58 @@ Invoke-ContractTest -Name 'Release 审计门区分 current 与 stale 并阻断�
     Assert-ReleaseAuditFailureCode -Result $result -Code 'RELEASE_AUDIT_INVALID'
 }
 
+Invoke-ContractTest -Name 'Release 审计门验证完整上游快照' -Body {
+    $current = New-ReleaseAuditSourceLock `
+        -SnapshotTag 'v1.2.41' `
+        -SnapshotCommit '3dafffcafb2566a1e8bce4b35671656d6adb3eda' `
+        -CatalogTag 'v1.2.41' `
+        -CatalogCommit '3dafffcafb2566a1e8bce4b35671656d6adb3eda' `
+        -Status 'current' `
+        -StaleReason $null `
+        -ReAuditIssueRef $null
+
+    $valid = Invoke-ReleaseAuditGateCase -Name 'snapshot-valid' -BaseSourceLock $current -HeadSourceLock $current -Changes @()
+    Assert-ReleaseAuditSuccess -Result $valid -ExpectedStatus 'current' -ExpectedReaudit $false
+
+    $cases = @(
+        [pscustomobject]@{
+            Name = 'content'
+            Mutate = {
+                param($root, $lock)
+                [System.IO.File]::WriteAllText((Join-Path $root 'upstream/CodexPlusPlus/README.md'), "tampered`n", [Text.UTF8Encoding]::new($false))
+                & git -C $root add -- 'upstream/CodexPlusPlus/README.md' | Out-Null
+                if ($LASTEXITCODE -ne 0) { throw 'Release Audit 内容漂移夹具 git add 失败' }
+            }
+        },
+        [pscustomobject]@{
+            Name = 'mode'
+            Mutate = { param($root, $lock) $lock.files[0].mode = '100755' }
+        },
+        [pscustomobject]@{
+            Name = 'manifest'
+            Mutate = { param($root, $lock) $lock.manifest.sha256 = ('0' * 64) }
+        },
+        [pscustomobject]@{
+            Name = 'path-set'
+            Mutate = {
+                param($root, $lock)
+                [System.IO.File]::WriteAllText((Join-Path $root 'upstream/CodexPlusPlus/EXTRA.txt'), "extra`n", [Text.UTF8Encoding]::new($false))
+                & git -C $root add -- 'upstream/CodexPlusPlus/EXTRA.txt' | Out-Null
+                if ($LASTEXITCODE -ne 0) { throw 'Release Audit 额外路径夹具 git add 失败' }
+            }
+        }
+    )
+    foreach ($case in $cases) {
+        $result = Invoke-ReleaseAuditGateCase `
+            -Name "snapshot-$($case.Name)" `
+            -BaseSourceLock $current `
+            -HeadSourceLock $current `
+            -Changes @() `
+            -MutateFixture $case.Mutate
+        Assert-ReleaseAuditFailureCode -Result $result -Code 'UPSTREAM_SNAPSHOT_INTEGRITY_INVALID'
+    }
+}
+
 Invoke-ContractTest -Name '冷构建指标同时写入日志与摘要' -Body {
     Assert-True -Condition (Test-Path -LiteralPath $workflowPath -PathType Leaf) -Message 'CI Workflow 必须存在'
     $workflow = Get-Content -LiteralPath $workflowPath -Raw
@@ -1595,6 +1817,8 @@ Invoke-ContractTest -Name 'Release 审计门接入 PR 与 required 汇总' -Body
 
     foreach ($variant in $workflowVariants.GetEnumerator()) {
         Assert-True -Condition ($variant.Value -match '(?m)^  release-audit:\r?$') -Message "$($variant.Key) Workflow 必须存在独立 release-audit Job"
+        Assert-True -Condition ($variant.Value -match '(?ms)^  release-audit:.*?ref: \$\{\{ github\.event\.pull_request\.head\.sha \|\| github\.sha \}\}.*?^  governance:') `
+            -Message "$($variant.Key) release-audit Job 必须检出精确 PR Head 或 main push SHA"
         Assert-True -Condition ($variant.Value -match 'Verify-ReleaseAuditGate\.ps1') -Message "$($variant.Key) release-audit Job 必须执行审计门脚本"
         Assert-True -Condition ($variant.Value -match '(?s)required:.*?needs:.*?- release-audit') -Message "$($variant.Key) required Job 必须依赖 release-audit Job"
     }
@@ -1607,6 +1831,8 @@ Invoke-ContractTest -Name '性能基线 Workflow 固定治理与测量合同' -B
     Assert-True -Condition (Test-Path -LiteralPath $performanceObserverScript -PathType Leaf) -Message '性能预算观察器必须存在'
 
     $workflow = Get-Content -LiteralPath $performanceWorkflowPath -Raw -Encoding utf8
+    Assert-Equal -Expected 2 -Actual ([regex]::Matches($workflow, "(?m)^      - 'upstream/source-lock\.json'\r?$").Count) `
+        -Message 'Performance Baseline 的 PR 与 main push 必须都由 source-lock 触发'
     $manualModeInputPattern = '(?ms)^  workflow_dispatch:\r?\n    inputs:\r?\n      mode:\r?\n        description: .+\r?\n        required: true\r?\n        default: evidence\r?\n        type: choice\r?\n        options:\r?\n          - evidence\r?\n          - measure\r?\n          - observation\r?$'
     Assert-True -Condition ($workflow -match $manualModeInputPattern) -Message '性能基线手工触发必须声明默认 evidence 的受约束 mode 输入'
     Assert-True -Condition ($workflow.Contains('$eventName = ''${{ github.event_name }}''')) -Message '性能基线必须显式区分手工 dispatch 与自动事件'

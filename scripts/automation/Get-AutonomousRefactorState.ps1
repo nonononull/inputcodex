@@ -377,12 +377,69 @@ query($owner:String!,$name:String!,$number:Int!,$endCursor:String){
     }
 }
 
+function Test-GitHubWorkflowPullRequestAssociation {
+    param(
+        [Parameter(Mandatory)]$Run,
+        [Parameter(Mandatory)][long]$PullRequestNumber,
+        [Parameter(Mandatory)][string]$HeadOid
+    )
+
+    $pullRequestsProperty = $Run.PSObject.Properties['pull_requests']
+    if ($null -eq $pullRequestsProperty -or $pullRequestsProperty.Value -isnot [System.Array]) {
+        throw 'gh workflow pull_requests schema invalid'
+    }
+    $matches = @($pullRequestsProperty.Value | Where-Object {
+        $head = Get-PropertyValue $_ 'head'
+        $base = Get-PropertyValue $_ 'base'
+        (Get-PropertyValue $_ 'number') -is [long] -and
+        (Get-PropertyValue $_ 'number') -eq $PullRequestNumber -and
+        (Get-PropertyValue $head 'sha') -ceq $HeadOid -and
+        (Get-PropertyValue $base 'ref') -ceq 'main'
+    })
+    return $matches.Count -eq 1
+}
+
+function Test-GitHubWorkflowRunIdentity {
+    param(
+        [Parameter(Mandatory)]$Run,
+        [Parameter(Mandatory)]$Expectation,
+        [Parameter(Mandatory)][string]$HeadOid,
+        [Parameter(Mandatory)][ValidateSet('pull_request', 'push')][string]$Event,
+        [Parameter(Mandatory)][long]$PullRequestNumber
+    )
+
+    if (($Event -ceq 'pull_request' -and $PullRequestNumber -lt 1) -or
+        ($Event -ceq 'push' -and $PullRequestNumber -ne 0)) {
+        return $false
+    }
+    if ((Get-PropertyValue $Run 'name') -cne (Get-PropertyValue $Expectation 'name') -or
+        (Get-PropertyValue $Run 'workflow_id') -isnot [long] -or
+        (Get-PropertyValue $Run 'workflow_id') -ne (Get-PropertyValue $Expectation 'workflow_id') -or
+        (Get-PropertyValue $Run 'path') -cne (Get-PropertyValue $Expectation 'path') -or
+        (Get-PropertyValue $Run 'event') -cne $Event -or
+        (Get-PropertyValue $Run 'head_sha') -cne $HeadOid) {
+        return $false
+    }
+    return ($Event -ceq 'push' -or
+        (Test-GitHubWorkflowPullRequestAssociation `
+            -Run $Run `
+            -PullRequestNumber $PullRequestNumber `
+            -HeadOid $HeadOid))
+}
+
 function Get-GitHubWorkflowEvidence {
     param(
         [Parameter(Mandatory)][string]$GhExecutable,
         [Parameter(Mandatory)][string]$HeadOid,
-        [ValidateSet('pull_request', 'push')][string]$Event = 'pull_request'
+        [Parameter(Mandatory)][System.Array]$RequiredWorkflows,
+        [ValidateSet('pull_request', 'push')][string]$Event = 'pull_request',
+        [long]$PullRequestNumber = 0
     )
+
+    if (($Event -ceq 'pull_request' -and $PullRequestNumber -lt 1) -or
+        ($Event -ceq 'push' -and $PullRequestNumber -ne 0)) {
+        throw 'gh workflow event binding invalid'
+    }
 
     $runsEndpoint = "repos/nonononull/inputcodex/actions/runs?head_sha=$HeadOid&event=$Event&per_page=100"
     $runOutput = @(& $GhExecutable api --paginate --slurp $runsEndpoint 2>$null)
@@ -397,6 +454,9 @@ function Get-GitHubWorkflowEvidence {
         foreach ($run in $runsProperty.Value) {
             if ((Get-PropertyValue $run 'id') -isnot [long] -or
                 (Get-PropertyValue $run 'name') -isnot [string] -or
+                (Get-PropertyValue $run 'workflow_id') -isnot [long] -or
+                (Get-PropertyValue $run 'path') -isnot [string] -or
+                (Get-PropertyValue $run 'event') -isnot [string] -or
                 [string](Get-PropertyValue $run 'head_sha') -cnotmatch '^[0-9a-f]{40}$' -or
                 (Get-PropertyValue $run 'status') -isnot [string] -or
                 ($null -ne (Get-PropertyValue $run 'conclusion') -and
@@ -407,19 +467,33 @@ function Get-GitHubWorkflowEvidence {
         }
     }
 
-    $expectations = [ordered]@{
-        'CI' = @('classify', 'governance', 'release-audit', 'linux-quality', 'windows', 'macos', 'required')
-        'Performance Baseline' = @('contract', 'windows', 'macos', 'required')
-    }
     $evidence = [System.Collections.Generic.List[object]]::new()
-    foreach ($workflowName in $expectations.Keys) {
+    foreach ($expectation in $RequiredWorkflows) {
+        $workflowName = Get-PropertyValue $expectation 'name'
+        $workflowId = Get-PropertyValue $expectation 'workflow_id'
+        $workflowPath = Get-PropertyValue $expectation 'path'
+        $expectedEvents = @(Get-PropertyValue $expectation 'events')
+        if ($workflowName -isnot [string] -or
+            $workflowId -isnot [long] -or
+            $workflowPath -isnot [string] -or
+            $Event -notin $expectedEvents) {
+            throw 'required workflow expectation invalid'
+        }
         $matches = @($allRuns | Where-Object {
-            (Get-PropertyValue $_ 'name') -ceq $workflowName -and
-            (Get-PropertyValue $_ 'head_sha') -ceq $HeadOid
+            Test-GitHubWorkflowRunIdentity `
+                -Run $_ `
+                -Expectation $expectation `
+                -HeadOid $HeadOid `
+                -Event $Event `
+                -PullRequestNumber $PullRequestNumber
         } | Sort-Object { Get-PropertyValue $_ 'id' } -Descending)
         if ($matches.Count -eq 0) {
             $evidence.Add([pscustomobject][ordered]@{
                 name = $workflowName
+                workflow_id = [long]$workflowId
+                workflow_path = $workflowPath
+                event = $Event
+                pull_request_number = [long]$PullRequestNumber
                 run_id = 0L
                 head_oid = $HeadOid
                 status = 'missing'
@@ -476,6 +550,10 @@ function Get-GitHubWorkflowEvidence {
 
         $evidence.Add([pscustomobject][ordered]@{
             name = $workflowName
+            workflow_id = [long](Get-PropertyValue $run 'workflow_id')
+            workflow_path = Get-PropertyValue $run 'path'
+            event = Get-PropertyValue $run 'event'
+            pull_request_number = [long]$PullRequestNumber
             run_id = $runId
             head_oid = Get-PropertyValue $run 'head_sha'
             status = Get-PropertyValue $run 'status'
@@ -543,12 +621,17 @@ function Test-ExactStringSet {
 
 function Test-AutonomousWorkflowRunEvidence {
     param(
-        [Parameter(Mandatory)][System.Array]$WorkflowRuns,
-        [Parameter(Mandatory)][string]$WorkflowName,
-        [Parameter(Mandatory)][string[]]$ExpectedJobs,
-        [Parameter(Mandatory)][string]$HeadOid
+        [Parameter(Mandatory)][AllowEmptyCollection()][System.Array]$WorkflowRuns,
+        [Parameter(Mandatory)]$WorkflowExpectation,
+        [Parameter(Mandatory)][string]$HeadOid,
+        [Parameter(Mandatory)][ValidateSet('pull_request', 'push')][string]$ExpectedEvent,
+        [Parameter(Mandatory)][long]$PullRequestNumber
     )
 
+    $workflowName = Get-PropertyValue $WorkflowExpectation 'name'
+    $workflowId = Get-PropertyValue $WorkflowExpectation 'workflow_id'
+    $workflowPath = Get-PropertyValue $WorkflowExpectation 'path'
+    $expectedJobs = @(Get-PropertyValue $WorkflowExpectation 'jobs')
     $matches = @($WorkflowRuns | Where-Object { (Get-PropertyValue $_ 'name') -ceq $WorkflowName })
     if ($matches.Count -ne 1) {
         return $false
@@ -571,6 +654,12 @@ function Test-AutonomousWorkflowRunEvidence {
     }
     return ((Get-PropertyValue $run 'run_id') -is [long] -and
         (Get-PropertyValue $run 'run_id') -gt 0 -and
+        (Get-PropertyValue $run 'workflow_id') -is [long] -and
+        (Get-PropertyValue $run 'workflow_id') -eq $workflowId -and
+        (Get-PropertyValue $run 'workflow_path') -ceq $workflowPath -and
+        (Get-PropertyValue $run 'event') -ceq $ExpectedEvent -and
+        (Get-PropertyValue $run 'pull_request_number') -is [long] -and
+        (Get-PropertyValue $run 'pull_request_number') -eq $PullRequestNumber -and
         (Get-PropertyValue $run 'head_oid') -ceq $HeadOid -and
         (Get-PropertyValue $run 'status') -ceq 'completed' -and
         (Get-PropertyValue $run 'conclusion') -ceq 'success' -and
@@ -584,7 +673,8 @@ function Get-AutonomousPostMergeGateEvaluation {
         [Parameter(Mandatory)]$Issue,
         [Parameter(Mandatory)]$Snapshot,
         [Parameter(Mandatory)][string]$PolicySha256,
-        [Parameter(Mandatory)][string]$TaskKind
+        [Parameter(Mandatory)][string]$TaskKind,
+        [Parameter(Mandatory)][System.Array]$RequiredWorkflows
     )
 
     $pending = [System.Collections.Generic.List[string]]::new()
@@ -658,17 +748,23 @@ function Get-AutonomousPostMergeGateEvaluation {
     if ($null -ne $workflowProperty -and $workflowProperty.Value -is [System.Array]) {
         $workflowRuns = @($workflowProperty.Value)
     }
-    if (-not (Test-AutonomousWorkflowRunEvidence -WorkflowRuns $workflowRuns -WorkflowName 'CI' `
-        -ExpectedJobs @('classify', 'governance', 'release-audit', 'linux-quality', 'windows', 'macos', 'required') `
-        -HeadOid $mergeCommitOid)) {
-        Add-PostMergePendingCode 'POST_MERGE_WORKFLOW_CI'
+    foreach ($workflowExpectation in $RequiredWorkflows) {
+        $workflowName = Get-PropertyValue $workflowExpectation 'name'
+        $code = if ($workflowName -ceq 'CI') {
+            'POST_MERGE_WORKFLOW_CI'
+        } else {
+            'POST_MERGE_WORKFLOW_PERFORMANCE_BASELINE'
+        }
+        if (-not (Test-AutonomousWorkflowRunEvidence `
+            -WorkflowRuns $workflowRuns `
+            -WorkflowExpectation $workflowExpectation `
+            -HeadOid $mergeCommitOid `
+            -ExpectedEvent push `
+            -PullRequestNumber 0)) {
+            Add-PostMergePendingCode $code
+        }
     }
-    if (-not (Test-AutonomousWorkflowRunEvidence -WorkflowRuns $workflowRuns -WorkflowName 'Performance Baseline' `
-        -ExpectedJobs @('contract', 'windows', 'macos', 'required') `
-        -HeadOid $mergeCommitOid)) {
-        Add-PostMergePendingCode 'POST_MERGE_WORKFLOW_PERFORMANCE_BASELINE'
-    }
-    if ($workflowRuns.Count -ne 2) {
+    if ($workflowRuns.Count -ne $RequiredWorkflows.Count) {
         Add-PostMergePendingCode 'POST_MERGE_WORKFLOW_SET'
     }
     return [pscustomobject]@{ Pending = $pending.ToArray() }
@@ -680,7 +776,8 @@ function Get-AutonomousMergeGateEvaluation {
         [Parameter(Mandatory)]$Issue,
         [Parameter(Mandatory)]$Snapshot,
         [Parameter(Mandatory)][string]$PolicySha256,
-        [Parameter(Mandatory)][string]$TaskKind
+        [Parameter(Mandatory)][string]$TaskKind,
+        [Parameter(Mandatory)][System.Array]$RequiredWorkflows
     )
 
     $pending = [System.Collections.Generic.List[string]]::new()
@@ -779,44 +876,19 @@ function Get-AutonomousMergeGateEvaluation {
     if ($null -ne $workflowProperty -and $workflowProperty.Value -is [System.Array]) {
         $workflowRuns = @($workflowProperty.Value)
     }
-    $workflowExpectations = [ordered]@{
-        'CI' = @('classify', 'governance', 'release-audit', 'linux-quality', 'windows', 'macos', 'required')
-        'Performance Baseline' = @('contract', 'windows', 'macos', 'required')
-    }
-    foreach ($workflowName in $workflowExpectations.Keys) {
+    foreach ($workflowExpectation in $RequiredWorkflows) {
+        $workflowName = Get-PropertyValue $workflowExpectation 'name'
         $code = if ($workflowName -ceq 'CI') { 'WORKFLOW_CI' } else { 'WORKFLOW_PERFORMANCE_BASELINE' }
-        $matches = @($workflowRuns | Where-Object { (Get-PropertyValue $_ 'name') -ceq $workflowName })
-        if ($matches.Count -ne 1) {
-            Add-PendingCode $code
-            continue
-        }
-        $run = $matches[0]
-        $jobsProperty = $run.PSObject.Properties['jobs']
-        $jobs = @()
-        if ($null -ne $jobsProperty -and $jobsProperty.Value -is [System.Array]) {
-            $jobs = @($jobsProperty.Value)
-        }
-        $jobNames = @($jobs | ForEach-Object { Get-PropertyValue $_ 'name' })
-        $jobsValid = Test-ExactStringSet -Actual $jobNames -Expected $workflowExpectations[$workflowName]
-        foreach ($job in $jobs) {
-            if ((Get-PropertyValue $job 'status') -cne 'completed' -or
-                (Get-PropertyValue $job 'conclusion') -cne 'success' -or
-                (Get-PropertyValue $job 'head_oid') -cne (Get-PropertyValue $PullRequest 'head_oid')) {
-                $jobsValid = $false
-            }
-        }
-        if ((Get-PropertyValue $run 'run_id') -isnot [long] -or
-            (Get-PropertyValue $run 'run_id') -lt 1 -or
-            (Get-PropertyValue $run 'head_oid') -cne (Get-PropertyValue $PullRequest 'head_oid') -or
-            (Get-PropertyValue $run 'status') -cne 'completed' -or
-            (Get-PropertyValue $run 'conclusion') -cne 'success' -or
-            (Get-PropertyValue $run 'artifact_count') -isnot [long] -or
-            (Get-PropertyValue $run 'artifact_count') -ne 0 -or
-            -not $jobsValid) {
+        if (-not (Test-AutonomousWorkflowRunEvidence `
+            -WorkflowRuns $workflowRuns `
+            -WorkflowExpectation $workflowExpectation `
+            -HeadOid ([string](Get-PropertyValue $PullRequest 'head_oid')) `
+            -ExpectedEvent pull_request `
+            -PullRequestNumber ([long](Get-PropertyValue $PullRequest 'number')))) {
             Add-PendingCode $code
         }
     }
-    if ($workflowRuns.Count -ne $workflowExpectations.Count) {
+    if ($workflowRuns.Count -ne $RequiredWorkflows.Count) {
         Add-PendingCode 'WORKFLOW_SET'
     }
 
@@ -927,7 +999,10 @@ function Invoke-GitRead {
 }
 
 function Get-LiveSnapshot {
-    param([Parameter(Mandatory)][string]$UpstreamSyncTaskMarker)
+    param(
+        [Parameter(Mandatory)][string]$UpstreamSyncTaskMarker,
+        [Parameter(Mandatory)][System.Array]$RequiredWorkflows
+    )
 
     $originMain = ((Invoke-GitRead @('rev-parse', 'origin/main')) -join '').Trim()
     $worktreeHead = ((Invoke-GitRead @('rev-parse', 'HEAD')) -join '').Trim()
@@ -1121,7 +1196,9 @@ function Get-LiveSnapshot {
                     -PullRequestNumber ([long](Get-PropertyValue $trustedPr 'number'))
                 $workflowEvidence = Get-GitHubWorkflowEvidence `
                     -GhExecutable $ghCommand.Source `
-                    -HeadOid ([string](Get-PropertyValue $trustedPr 'head_oid'))
+                    -HeadOid ([string](Get-PropertyValue $trustedPr 'head_oid')) `
+                    -RequiredWorkflows $RequiredWorkflows `
+                    -PullRequestNumber ([long](Get-PropertyValue $trustedPr 'number'))
                 $trustedPr.workflow_runs = $workflowEvidence.Runs
             }
 
@@ -1150,6 +1227,7 @@ function Get-LiveSnapshot {
                 $mainWorkflowEvidence = Get-GitHubWorkflowEvidence `
                     -GhExecutable $ghCommand.Source `
                     -HeadOid ([string](Get-PropertyValue $mergedPr 'merge_commit_oid')) `
+                    -RequiredWorkflows $RequiredWorkflows `
                     -Event push
                 $mergedPr.workflow_runs = $mainWorkflowEvidence.Runs
             }
@@ -1250,6 +1328,15 @@ if ($policyExitCode -ne 0 -or $null -eq $policyResult -or $policyResult.ok -ne $
         error_code = 'AUTONOMOUS_STATE_POLICY_INVALID'
     })
 }
+$requiredWorkflowsProperty = $policyResult.PSObject.Properties['required_workflows']
+if ($null -eq $requiredWorkflowsProperty -or $requiredWorkflowsProperty.Value -isnot [System.Array]) {
+    Write-Result -ExitCode 12 -Value ([pscustomobject][ordered]@{
+        schema_version = 1
+        ok = $false
+        error_code = 'AUTONOMOUS_STATE_POLICY_INVALID'
+    })
+}
+$requiredWorkflows = @($requiredWorkflowsProperty.Value)
 
 $snapshotSource = 'live'
 if (-not [string]::IsNullOrWhiteSpace($SnapshotPath)) {
@@ -1279,7 +1366,8 @@ if (-not [string]::IsNullOrWhiteSpace($SnapshotPath)) {
 } else {
     try {
         $snapshot = Get-LiveSnapshot `
-            -UpstreamSyncTaskMarker ([string](Get-PropertyValue (Get-PropertyValue $policyResult 'upstream_sync') 'task_marker'))
+            -UpstreamSyncTaskMarker ([string](Get-PropertyValue (Get-PropertyValue $policyResult 'upstream_sync') 'task_marker')) `
+            -RequiredWorkflows $requiredWorkflows
     } catch {
         Write-Result -ExitCode 11 -Value ([pscustomobject][ordered]@{
             schema_version = 1
@@ -1498,7 +1586,8 @@ if ($reasonCodes.Count -eq 0 -and $activeIssues.Count -eq 1 -and $activePrs.Coun
         -Issue $activeIssues[0] `
         -Snapshot $snapshot `
         -PolicySha256 ([string](Get-PropertyValue $policyResult 'policy_sha256')) `
-        -TaskKind $activeTaskKind
+        -TaskKind $activeTaskKind `
+        -RequiredWorkflows $requiredWorkflows
     $mergeGatePending = @($mergeGateEvaluation.Pending)
 }
 $postMergeGatePending = @()
@@ -1508,7 +1597,8 @@ if ($reasonCodes.Count -eq 0 -and $isPostMergeTransition) {
         -Issue $activeIssues[0] `
         -Snapshot $snapshot `
         -PolicySha256 ([string](Get-PropertyValue $policyResult 'policy_sha256')) `
-        -TaskKind $activeTaskKind
+        -TaskKind $activeTaskKind `
+        -RequiredWorkflows $requiredWorkflows
     $postMergeGatePending = @($postMergeGateEvaluation.Pending)
 }
 
