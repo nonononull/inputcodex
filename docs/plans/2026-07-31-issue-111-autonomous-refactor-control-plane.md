@@ -86,23 +86,25 @@
 - [x] 运行 build.md 的 Issue #111 完整轻量门禁。
 - [x] 执行独立只读 review 与安全审查，逐项处置发现。
 - [x] 核对实际路径不越过候选范围。
-- [ ] 建立 local-verified checkpoint 并普通 push。
+- [x] 建立 local-verified checkpoint 并普通 push。
 
 本地收口证据：首轮独立只读 Reviewer 返回 `0 Critical / 5 Important / FAIL`。五项均由主线程
 独立复现或论证后处置：严格 JSON 类型与有序决策、全量分页与外部 schema、分支来源与脏树优先、
-非 owner marker 安全忽略语义，以及可执行的 exact-head / post-merge 状态门。最终十二路径轻量门禁
-返回 `CI_CONTRACT_GREEN passed=65` 与 `ISSUE_111_LOCAL_GREEN scope=12`。第二轮独立只读复审绑定
+非 owner marker 安全忽略语义，以及可执行的 exact-head / post-merge 状态门。十二路径轻量门禁
+返回 `CI_CONTRACT_GREEN passed=66` 与 `ISSUE_111_LOCAL_GREEN scope=12`。第二轮独立只读复审绑定
 冻结聚合 `sha256:2a33a1d7b43fc5b00afdbc5a5e367d0f0d1f5ec0f40cccccc384e679cac481db`，结论为
-`PASS - 0 Critical / 0 Important`；主线程在复审后复算同一哈希并确认无 agent 写入。
+`PASS - 0 Critical / 0 Important`；最终文档增量复核绑定 `sha256:66653e4876d85cb8837205a6ce0a4bfd26d6f72265b63f59827544a4bf907764`
+并再次返回 0/0。PR #112 的首轮真实 live 恢复随后发现 PR 投影覆盖工作树 Head，已按新增 RED/GREEN
+合同修复；新 Final Head 必须重新复审并重跑 Hosted CI，旧 Head 证据不得复用。
 
 ## Task 5：远端交付与自治合并
 
-- [ ] 创建关联 Issue #111 的非 Draft PR。
+- [x] 创建关联 Issue #111 的非 Draft PR。
 - [ ] 核验 Final Head、scope hash、独立 review、Review threads、CI 七 Job、Performance 四 Job、Artifact 0、release audit 和 origin/main freshness。
 - [ ] 在 PR 回写 standing authorization ref、精确 Final Head 与策略 hash。
 - [ ] 使用精确 Head 约束执行 Squash Merge；禁止 GitHub原生 auto-merge。
 - [ ] 验证 Squash 单父、tree 等价、GitHub 签名、Issue 状态与合并后主干双套 Actions。
-- [ ] 将仓库 merge/rebase 开关加固为关闭，保留 squash；动态设置证据只写 GitHub。
+- [x] 将仓库 merge/rebase 开关加固为关闭，保留 squash；动态设置证据只写 GitHub。
 - [ ] 归档 Paseo worktree。
 
 ## Task 6：启动自治循环

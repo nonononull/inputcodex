@@ -176,17 +176,19 @@ release audit stale 或 main freshness 漂移必须 fail-closed。
 - reusable fix：live Int32 Count 与 JSON Int64 快照差异已记录 err.md，采集边界归一化后通过。
 - safety RED/GREEN：字符串伪装 JSON 类型、决策顺序重排、CLI 截断/错误形状、PR 脏树优先级、
   分支来源、owner marker、Final Head 合并门、Planning/Review 双来源绑定和 post-merge origin freshness
-  均先取得失败证据再修复；完整 CI 合同为 65/65。
+  均先取得失败证据再修复；完整 CI 合同为 66/66。
 - first review：独立只读 Reviewer 返回 0 Critical / 5 Important / FAIL；五项均已纳入上述
   RED/GREEN。旧 Reviewer 已归档，不复用旧结论。
-- final local gate：完整 CI 合同 65/65、策略/仓库政策/Release Audit 均通过，实际范围为
+- final local gate：完整 CI 合同 66/66、策略/仓库政策/Release Audit 均通过，实际范围为
   12 / sha256:5d1f609ca2a5913e4e5df21f0fd04d6de2c6731cdd71d641812fbee80b5ad713；AST、只读
   execution surface、secret scan 与 Git 空白检查均通过，PSScriptAnalyzer 因本机未安装而未执行。
 - second review：两次 Codex reviewer 分别因外部 503/429 未形成结论，随后 Claude plan-mode 备用
   Reviewer 在冻结聚合 sha256:2a33a1d7b43fc5b00afdbc5a5e367d0f0d1f5ec0f40cccccc384e679cac481db
   上返回 0 Critical / 0 Important / PASS。权限请求被拒绝，复审后哈希复算一致且无文件写入。
+- live PR corrective：PR #112 首次真实恢复稳定复现 `worktree_head` 被 PR head 对象覆盖；新增专项合同先
+  RED，再以独立 `$worktreeHead` 变量修复。完整合同 66/66，真实 live 退出 0 并返回 40 位 observed_head。
 - live evidence：REST 与 GraphQL 均使用全量分页和严格 schema；当前 live 返回
-  active-worktree-execution / resume-worktree，并从 owner Planning Freeze 评论解析出
+  active-worktree-execution / resume-worktree，关联 Issue #111 / PR #112，并从 owner Planning Freeze 评论解析出
   12 / sha256:5d1f609c...。
 
 ## Stop Conditions

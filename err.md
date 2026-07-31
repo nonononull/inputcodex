@@ -1002,6 +1002,15 @@
 - 验证：各问题均先由 live 或专项合同稳定复现；修复后 live 返回 active-worktree-execution / resume-worktree，Planning Freeze 为有效 owner 证据，完整 CI 合同为 65/65。
 - 关联：Issue #111、scripts/automation/Get-AutonomousRefactorState.ps1、scripts/ci/Test-CiScripts.ps1。
 
+### 2026-07-31：PowerShell PR 投影变量覆盖工作树 Head
+
+- 环境：Issue #111 已创建 PR #112，状态解析器首次在同一次 live 采集中同时处理本地 Git Head 和活动 PR 的 GitHub head 对象。
+- 现象：离线合同 65/65、无 PR 的 live 状态和 PR 两套 Actions 均正常，但 `Get-AutonomousRefactorState.ps1 -ReportOnly` 稳定以退出码 11 返回 `AUTONOMOUS_STATE_INVALID_SNAPSHOT`。类型追踪显示 `worktree_head` 从 40 位 SHA 变成了 PR head `PSCustomObject`。
+- 根因：`Get-LiveSnapshot` 先把 `git rev-parse HEAD` 保存到函数级 `$head`；随后 `ForEach-Object` 的 PR 投影再次执行 `$head = Get-PropertyValue $_ 'head'`。PowerShell 脚本块共享调用作用域，后一次赋值覆盖前者，最终快照把 PR 对象写入 `worktree_head`。
+- 处理：把本地 Git Head 改存到专用 `$worktreeHead`，快照只引用该变量；新增 AST 数据流合同，自动识别 `rev-parse HEAD` 的目标变量，按 PowerShell 大小写不敏感语义要求全函数含嵌套脚本块只写一次，并要求快照回写同一变量。
+- 验证：新增合同先单独 RED，错误为“live 工作树 Head 必须使用独立变量采集”；最小修复后完整 CI 合同为 66/66。真实 PR #112 live 再次退出 0，`observed_head` 恢复为 40 位当前已提交 Head，并按脏工作树优先级返回 active-worktree-execution / resume-worktree；内存变异进一步证明同名、仅大小写不同的二次赋值均被拒绝，而安全改名通过。
+- 关联：Issue #111、PR #112、scripts/automation/Get-AutonomousRefactorState.ps1、scripts/ci/Test-CiScripts.ps1。
+
 ## 记录模板
 
 ```text

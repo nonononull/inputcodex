@@ -752,7 +752,7 @@ function Invoke-GitRead {
 
 function Get-LiveSnapshot {
     $originMain = ((Invoke-GitRead @('rev-parse', 'origin/main')) -join '').Trim()
-    $head = ((Invoke-GitRead @('rev-parse', 'HEAD')) -join '').Trim()
+    $worktreeHead = ((Invoke-GitRead @('rev-parse', 'HEAD')) -join '').Trim()
     $branch = ((Invoke-GitRead @('branch', '--show-current')) -join '').Trim()
     $expectedBase = ((Invoke-GitRead @('merge-base', 'HEAD', 'origin/main')) -join '').Trim()
     $worktreeClean = @((Invoke-GitRead @('status', '--porcelain=v1'))).Count -eq 0
@@ -1036,7 +1036,7 @@ function Get-LiveSnapshot {
         observed_origin_main = $originMain
         observed_remote_main = $remoteMain
         expected_base = $expectedBase
-        worktree_head = $head
+        worktree_head = $worktreeHead
         branch = $branch
         worktree_clean = $worktreeClean
         active_writer_count = [long]$activeWriterCount

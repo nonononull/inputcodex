@@ -786,6 +786,47 @@ Invoke-ContractTest -Name '无人值守 live 外部列表使用全量分页和�
     Assert-True -Condition (-not $source.Contains('--limit 100')) -Message 'live 外部列表不得截断前 100 项'
 }
 
+Invoke-ContractTest -Name '无人值守 live PR 投影不得覆盖工作树 Head' -Body {
+    $source = Get-Content -LiteralPath $autonomousStateScript -Raw
+    $tokens = $null
+    $parseErrors = $null
+    $ast = [System.Management.Automation.Language.Parser]::ParseInput(
+        $source,
+        [ref]$tokens,
+        [ref]$parseErrors
+    )
+    Assert-Equal -Expected 0 -Actual @($parseErrors).Count -Message 'live 状态脚本必须可供 AST 数据流检查'
+
+    $liveFunctions = @($ast.FindAll({
+        param($node)
+        $node -is [System.Management.Automation.Language.FunctionDefinitionAst] -and
+        $node.Name -ceq 'Get-LiveSnapshot'
+    }, $true))
+    Assert-Equal -Expected 1 -Actual $liveFunctions.Count -Message '必须存在唯一 Get-LiveSnapshot'
+
+    $headCaptures = @($liveFunctions[0].Body.FindAll({
+        param($node)
+        $node -is [System.Management.Automation.Language.AssignmentStatementAst] -and
+        $node.Left -is [System.Management.Automation.Language.VariableExpressionAst] -and
+        $node.Extent.Text.Contains("Invoke-GitRead @('rev-parse', 'HEAD')")
+    }, $true))
+    Assert-Equal -Expected 1 -Actual $headCaptures.Count -Message 'live 工作树 Head 必须唯一采集'
+
+    $headVariableName = $headCaptures[0].Left.VariablePath.UserPath
+    $headWrites = @($liveFunctions[0].Body.FindAll({
+        param($node)
+        $node -is [System.Management.Automation.Language.AssignmentStatementAst] -and
+        $node.Left -is [System.Management.Automation.Language.VariableExpressionAst] -and
+        $node.Left.VariablePath.UserPath -ieq $headVariableName
+    }, $true))
+    Assert-Equal -Expected 1 -Actual $headWrites.Count -Message '工作树 Head 变量在嵌套 PR 投影中不得再次赋值'
+
+    $snapshotBindingPattern = '(?m)^\s*worktree_head\s*=\s*\$' +
+        [regex]::Escape($headVariableName) + '\s*$'
+    Assert-True -Condition ([regex]::IsMatch($liveFunctions[0].Extent.Text, $snapshotBindingPattern)) `
+        -Message 'live 快照必须返回唯一采集的工作树 Head 变量'
+}
+
 Invoke-ContractTest -Name '无人值守拒绝未知状态快照 schema' -Body {
     $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
     $snapshot.schema_version = 'unknown'

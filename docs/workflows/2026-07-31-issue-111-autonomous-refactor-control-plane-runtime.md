@@ -97,10 +97,10 @@ resume-worktree 与 resume-issue。
 4. 父线程逐项复核发现，接受项必须有 RED/GREEN；不成立项必须有证据。
 5. 建立 issue-111-local-verified checkpoint 并普通 push。
 
-状态：ready-for-checkpoint。首轮只读 Review 为 0 Critical / 5 Important / FAIL；五项已用专项
-RED/GREEN 处置。最终十二路径门禁为 CI 65/65 与 ISSUE_111_LOCAL_GREEN scope=12；第二轮备用
-只读 Reviewer 绑定冻结聚合 sha256:2a33a1d7b43fc5b00afdbc5a5e367d0f0d1f5ec0f40cccccc384e679cac481db，
-返回 0 Critical / 0 Important / PASS，复审后哈希复算一致。当前只待 local-verified checkpoint 与普通 push。
+状态：corrective-in-progress。local-verified checkpoint 已普通 push 并创建 PR #112；仓库已加固为
+auto-merge=false、squash=true、merge/rebase=false。首轮真实 PR live 恢复发现 `$head` 被 PR 投影覆盖，
+已新增 RED 合同并以独立 `$worktreeHead` 修复；完整 CI 合同为 66/66，真实 live 退出 0。当前只待
+校正提交、Final Head 独立复审、PR evidence 刷新和新 Head Hosted CI。
 
 ## Node 6：Remote Delivery
 
