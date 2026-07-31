@@ -2,7 +2,7 @@ use std::{
     collections::BTreeSet,
     fs,
     path::{Path, PathBuf},
-    time::{SystemTime, UNIX_EPOCH},
+    sync::atomic::{AtomicU64, Ordering},
 };
 
 use inputcodex_parity::{
@@ -15,6 +15,7 @@ const RELEASE_COMMIT: &str = "5036ff056b5c629f19356396b17d6eeb70da664c";
 const PREVIOUS_RELEASE_TAG: &str = "v1.2.42";
 const PREVIOUS_RELEASE_COMMIT: &str = "657cd33e009ad02515d30db6492cd4e669b06318";
 const RE_AUDIT_ISSUE_URL: &str = "https://github.com/nonononull/inputcodex/issues/65";
+static NEXT_FIXTURE_ID: AtomicU64 = AtomicU64::new(0);
 
 const VALID_SOURCE_INDEX: &str = r#"
 schema_version: inputcodex.source-index.v1
@@ -89,16 +90,21 @@ struct SourceLockState<'a> {
 
 impl FeatureRepositoryFixture {
     fn new() -> Self {
-        let nonce = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .expect("系统时间必须晚于 Unix epoch")
-            .as_nanos();
-        let root = repository_root().join("target").join(format!(
-            "inputcodex-release-audit-{}-{nonce}",
-            std::process::id()
-        ));
+        let target_root = repository_root().join("target");
+        fs::create_dir_all(&target_root).expect("应能创建临时功能目录父目录");
+        let root = loop {
+            let fixture_id = NEXT_FIXTURE_ID.fetch_add(1, Ordering::Relaxed);
+            let candidate = target_root.join(format!(
+                "inputcodex-release-audit-{}-{fixture_id}",
+                std::process::id()
+            ));
+            match fs::create_dir(&candidate) {
+                Ok(()) => break candidate,
+                Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => {}
+                Err(error) => panic!("应能创建临时功能目录夹具：{error}"),
+            }
+        };
 
-        fs::create_dir_all(&root).expect("应能创建临时功能目录夹具");
         copy_tree(
             &repository_root().join("parity/features"),
             &root.join("parity/features"),
@@ -158,6 +164,18 @@ impl FeatureRepositoryFixture {
         fs::write(source_lock_path, source_lock).expect("应能写入临时 source-lock");
     }
 
+    fn write_current_source_lock(&self) {
+        self.write_source_lock(SourceLockState {
+            snapshot_tag: RELEASE_TAG,
+            snapshot_commit: RELEASE_COMMIT,
+            catalog_tag: RELEASE_TAG,
+            catalog_commit: RELEASE_COMMIT,
+            status: "current",
+            stale_reason: None,
+            re_audit_issue_ref: None,
+        });
+    }
+
     fn write_catalog_release(&self, tag: &str, commit: &str) {
         let feature_directory = self.root.join("parity/features");
         for entry in fs::read_dir(feature_directory).expect("应能枚举临时功能目录") {
@@ -183,6 +201,26 @@ impl FeatureRepositoryFixture {
                 );
             fs::write(path, updated).expect("应能更新临时功能目录 Release");
         }
+    }
+
+    fn append_text(&self, relative_path: &str, suffix: &str) {
+        let path = self.root.join(relative_path);
+        let mut text = fs::read_to_string(&path).expect("应能读取待追加的临时文本");
+        text.push_str(suffix);
+        fs::write(path, text).expect("应能追加临时文本");
+    }
+
+    fn replace_text(&self, relative_path: &str, expected: &str, replacement: &str) {
+        let path = self.root.join(relative_path);
+        let text = fs::read_to_string(&path)
+            .expect("应能读取待替换的临时文本")
+            .replace("\r\n", "\n");
+        assert!(text.contains(expected), "临时文本必须包含待替换片段");
+        fs::write(path, text.replacen(expected, replacement, 1)).expect("应能替换临时文本");
+    }
+
+    fn remove_file(&self, relative_path: &str) {
+        fs::remove_file(self.root.join(relative_path)).expect("应能删除临时证据文件");
     }
 }
 
@@ -320,19 +358,6 @@ fn source_index_证据路径必须位于锁定上游快照() {
 fn release_audit_显式解耦快照与功能目录审计基线() {
     let fixture = FeatureRepositoryFixture::new();
 
-    fixture.write_source_lock(SourceLockState {
-        snapshot_tag: RELEASE_TAG,
-        snapshot_commit: RELEASE_COMMIT,
-        catalog_tag: RELEASE_TAG,
-        catalog_commit: RELEASE_COMMIT,
-        status: "current",
-        stale_reason: None,
-        re_audit_issue_ref: None,
-    });
-    let summary =
-        validate_feature_repository(fixture.root()).expect("current 审计基线必须通过功能目录验证");
-    assert!(!summary.requires_reaudit());
-
     fixture.write_catalog_release(PREVIOUS_RELEASE_TAG, PREVIOUS_RELEASE_COMMIT);
     fixture.write_source_lock(SourceLockState {
         snapshot_tag: RELEASE_TAG,
@@ -401,6 +426,117 @@ fn release_audit_显式解耦快照与功能目录审计基线() {
             .issues()
             .iter()
             .any(|issue| issue.code() == ValidationCode::ReleaseMismatch)
+    );
+}
+
+#[test]
+fn stale_允许活动新快照入口与旧证据等待独立重审() {
+    let fixture = FeatureRepositoryFixture::new();
+    fixture.write_catalog_release(PREVIOUS_RELEASE_TAG, PREVIOUS_RELEASE_COMMIT);
+    fixture.write_source_lock(SourceLockState {
+        snapshot_tag: RELEASE_TAG,
+        snapshot_commit: RELEASE_COMMIT,
+        catalog_tag: PREVIOUS_RELEASE_TAG,
+        catalog_commit: PREVIOUS_RELEASE_COMMIT,
+        status: "stale-re-audit-required",
+        stale_reason: Some("活动快照已有新入口，功能目录等待独立重审"),
+        re_audit_issue_ref: Some(RE_AUDIT_ISSUE_URL),
+    });
+    fixture.append_text(
+        "upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs",
+        "\n#[tauri::command]\npub async fn newly_released_command() {}\n",
+    );
+    fixture.append_text(
+        "upstream/CodexPlusPlus/crates/codex-plus-core/src/lib.rs",
+        "\npub mod newly_released_module;\n",
+    );
+    fixture.remove_file("upstream/CodexPlusPlus/crates/codex-plus-core/src/app_paths.rs");
+
+    let summary = validate_feature_repository(fixture.root())
+        .expect("合法 stale 只应验证目录内部合同，新快照覆盖等待独立重审");
+    assert!(summary.requires_reaudit());
+}
+
+#[test]
+fn current_继续拒绝活动快照缺失来源入口() {
+    let fixture = FeatureRepositoryFixture::new();
+    fixture.write_current_source_lock();
+    fixture.append_text(
+        "upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs",
+        "\n#[tauri::command]\npub async fn newly_released_command() {}\n",
+    );
+    fixture.append_text(
+        "upstream/CodexPlusPlus/crates/codex-plus-core/src/lib.rs",
+        "\npub mod newly_released_module;\n",
+    );
+
+    let error = validate_feature_repository(fixture.root())
+        .expect_err("current 必须拒绝活动快照中尚未进入 source-index 的入口");
+    assert!(
+        error
+            .issues()
+            .iter()
+            .any(|issue| issue.code() == ValidationCode::MissingSourceEntry),
+        "实际错误：{error:?}"
+    );
+}
+
+#[test]
+fn current_继续拒绝目录中的意外来源入口() {
+    let fixture = FeatureRepositoryFixture::new();
+    fixture.write_current_source_lock();
+    fixture.replace_text(
+        "upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs",
+        "#[tauri::command]\npub async fn load_overview",
+        "pub async fn load_overview",
+    );
+
+    let error = validate_feature_repository(fixture.root())
+        .expect_err("current 必须拒绝 source-index 中已不再公开的入口");
+    assert!(
+        error
+            .issues()
+            .iter()
+            .any(|issue| issue.code() == ValidationCode::UnexpectedSourceEntry),
+        "实际错误：{error:?}"
+    );
+}
+
+#[test]
+fn current_继续拒绝错误来源证据() {
+    let fixture = FeatureRepositoryFixture::new();
+    fixture.write_current_source_lock();
+    fixture.replace_text(
+        "parity/features/source-index.yml",
+        "  - id: tauri-command:load_overview\n    kind: tauri-command\n    evidence:\n      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs",
+        "  - id: tauri-command:load_overview\n    kind: tauri-command\n    evidence:\n      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/lib.rs",
+    );
+
+    let error = validate_feature_repository(fixture.root())
+        .expect_err("current 必须拒绝与活动快照不一致的来源证据");
+    assert!(
+        error
+            .issues()
+            .iter()
+            .any(|issue| issue.code() == ValidationCode::SourceEvidenceMismatch),
+        "实际错误：{error:?}"
+    );
+}
+
+#[test]
+fn current_继续拒绝缺失证据文件() {
+    let fixture = FeatureRepositoryFixture::new();
+    fixture.write_current_source_lock();
+    fixture.remove_file("upstream/CodexPlusPlus/crates/codex-plus-core/src/app_paths.rs");
+
+    let error = validate_feature_repository(fixture.root())
+        .expect_err("current 必须拒绝活动快照中缺失的证据文件");
+    assert!(
+        error
+            .issues()
+            .iter()
+            .any(|issue| issue.code() == ValidationCode::InvalidEvidencePath),
+        "实际错误：{error:?}"
     );
 }
 

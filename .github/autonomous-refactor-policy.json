@@ -58,6 +58,13 @@
       }
     ]
   },
+  "upstream_sync": {
+    "task_kind": "upstream-sync",
+    "task_marker": "<!-- inputcodex:autonomous-refactor-task-kind:upstream-sync:v1 -->",
+    "allowed_release_audit": "stale-re-audit-required",
+    "required_workflow": "CI",
+    "required_job": "release-audit"
+  },
   "retry": {
     "max_attempts": 3,
     "max_iteration_minutes": 180,
