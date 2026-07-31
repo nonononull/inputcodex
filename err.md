@@ -975,6 +975,15 @@
 - 验证：初始 CI Run `30549071963` 稳定复现共享失败；修正后继续执行 Platform `21/21`、四 crate 本地门禁与 GitHub-hosted macOS Workspace 全目标测试，最终远端证据保留在 PR `#110`。
 - 关联：Issue `#109`、PR `#110`、`crates/inputcodex-platform/tests/markdown_generation.rs`。
 
+### 2026-07-31：PowerShell live Count 与 JSON 快照整数类型不同导致严格状态校验误报
+
+- 环境：Issue #111 的只读自治状态解析器同时支持 live 内存快照和 JSON 夹具；脚本使用 Set-StrictMode，并要求 active_writer_count 为有界整数。
+- 现象：十组 JSON 快照合同全部通过，但 live ReportOnly 稳定返回 AUTONOMOUS_STATE_INVALID_SNAPSHOT；Git、GitHub、Release Audit、Paseo 和三个 SHA 字段均正常。
+- 根因：Paseo CLI 空数组的 .Count 在 live PowerShell 对象中是 System.Int32；同一数字经 ConvertFrom-Json 后是 System.Int64。解析器只接受 Int64，导致 live 与测试输入在值相同的情况下类型不同。
+- 处理：保持严格整数 schema，不扩大为任意字符串或浮点；只在 live 采集边界将 writer count 显式转换为 Int64，再进入共享状态分类。
+- 验证：修复前 live 命令稳定失败；修复后返回 active-worktree-execution / resume-worktree，保留 Issue #111、base/head 和策略 hash；完整 CI 合同为 54/54。
+- 关联：Issue #111、scripts/automation/Get-AutonomousRefactorState.ps1、scripts/ci/Test-CiScripts.ps1。
+
 ## 记录模板
 
 ```text

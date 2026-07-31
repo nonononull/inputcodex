@@ -12,6 +12,7 @@ $collectorScript = Join-Path $scriptDirectory 'Collect-Changes.ps1'
 $releaseAuditGateScript = Join-Path $scriptDirectory 'Verify-ReleaseAuditGate.ps1'
 $autonomousPolicyScript = Join-Path $scriptDirectory 'Verify-AutonomousRefactorPolicy.ps1'
 $autonomousPolicyPath = Join-Path $repositoryRoot '.github/autonomous-refactor-policy.json'
+$autonomousStateScript = Join-Path $repositoryRoot 'scripts/automation/Get-AutonomousRefactorState.ps1'
 $workflowPath = Join-Path $repositoryRoot '.github/workflows/ci.yml'
 $performanceWorkflowPath = Join-Path $repositoryRoot '.github/workflows/performance-baseline.yml'
 $performanceInvokeScript = Join-Path $repositoryRoot 'scripts/performance/Invoke-InputcodexBaseline.ps1'
@@ -24,6 +25,7 @@ $missingImplementations = @(
         $releaseAuditGateScript
         $autonomousPolicyScript
         $autonomousPolicyPath
+        $autonomousStateScript
     ) | Where-Object { -not (Test-Path -LiteralPath $_ -PathType Leaf) }
 )
 
@@ -337,6 +339,149 @@ Invoke-ContractTest -Name '拒绝缺失永久主干保护的硬停止集合' -Bo
     $policy = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
     $policy.hard_stops = @($policy.hard_stops | Where-Object { $_ -notin @('force-push-main', 'delete-main', 'ruleset-bypass') })
     Assert-AutonomousPolicyFailure -Result (Invoke-AutonomousPolicyCase -Name 'hard-stops' -Policy $policy) -ExpectedCode 'HARD_STOPS'
+}
+
+function New-ValidAutonomousStateSnapshot {
+    [pscustomobject][ordered]@{
+        schema_version = 'inputcodex.autonomous-refactor-state-snapshot.v1'
+        github_available = $true
+        paseo_available = $true
+        release_audit = 'current'
+        observed_origin_main = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+        expected_base = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+        worktree_head = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+        branch = 'codex/issue-111-autonomous-refactor-control-plane'
+        worktree_clean = $true
+        active_writer_count = 0
+        active_issues = @()
+        active_prs = @()
+    }
+}
+
+function Copy-AutonomousStateSnapshot {
+    param([Parameter(Mandatory)]$Snapshot)
+
+    return ($Snapshot | ConvertTo-Json -Depth 30 | ConvertFrom-Json -Depth 30)
+}
+
+function Invoke-AutonomousStateCase {
+    param(
+        [Parameter(Mandatory)][string]$Name,
+        [Parameter(Mandatory)]$Snapshot
+    )
+
+    $caseRoot = Join-Path $testRoot ("autonomous-state-{0}" -f $Name)
+    New-Item -ItemType Directory -Path $caseRoot -Force | Out-Null
+    $snapshotPath = Join-Path $caseRoot 'snapshot.json'
+    Write-JsonFile -Path $snapshotPath -Value $Snapshot
+    Invoke-ChildScript -Path $autonomousStateScript -Arguments @(
+        '-RepositoryRoot', $repositoryRoot,
+        '-PolicyPath', $autonomousPolicyPath,
+        '-SnapshotPath', $snapshotPath,
+        '-ReportOnly'
+    )
+}
+
+function Assert-AutonomousState {
+    param(
+        [Parameter(Mandatory)]$Result,
+        [Parameter(Mandatory)][string]$ExpectedState,
+        [Parameter(Mandatory)][string]$ExpectedAction
+    )
+
+    Assert-Equal -Expected 0 -Actual $Result.ExitCode -Message "自治状态解析应成功，输出=$($Result.Output)"
+    Assert-True -Condition ($null -ne $Result.Json) -Message "自治状态解析必须输出 JSON，输出=$($Result.Output)"
+    Assert-Equal -Expected $true -Actual $Result.Json.ok -Message '自治状态解析必须标记 ok=true'
+    Assert-Equal -Expected $ExpectedState -Actual $Result.Json.state -Message '自治状态分类漂移'
+    Assert-Equal -Expected $ExpectedAction -Actual $Result.Json.next_action -Message '自治下一动作漂移'
+}
+
+Invoke-ContractTest -Name '无人值守空闲状态选择下一候选' -Body {
+    $result = Invoke-AutonomousStateCase -Name 'idle' -Snapshot (New-ValidAutonomousStateSnapshot)
+    Assert-AutonomousState -Result $result -ExpectedState 'idle-select-candidate' -ExpectedAction 'select-candidate'
+}
+
+Invoke-ContractTest -Name '无人值守单一活动 Issue 恢复规划' -Body {
+    $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
+    $snapshot.active_issues = @([pscustomobject]@{ number = 111; url = 'https://github.com/nonononull/inputcodex/issues/111' })
+    $result = Invoke-AutonomousStateCase -Name 'issue' -Snapshot $snapshot
+    Assert-AutonomousState -Result $result -ExpectedState 'active-issue-planning' -ExpectedAction 'resume-issue'
+    Assert-Equal -Expected 111 -Actual $result.Json.active_issue.number -Message '活动 Issue 编号必须保留'
+}
+
+Invoke-ContractTest -Name '无人值守脏工作树恢复执行而不重复建任务' -Body {
+    $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
+    $snapshot.worktree_clean = $false
+    $snapshot.active_issues = @([pscustomobject]@{ number = 111; url = 'https://github.com/nonononull/inputcodex/issues/111' })
+    Assert-AutonomousState -Result (Invoke-AutonomousStateCase -Name 'worktree' -Snapshot $snapshot) -ExpectedState 'active-worktree-execution' -ExpectedAction 'resume-worktree'
+}
+
+Invoke-ContractTest -Name '无人值守单一活动 PR 恢复 Review CI' -Body {
+    $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
+    $snapshot.active_issues = @([pscustomobject]@{ number = 111; url = 'https://github.com/nonononull/inputcodex/issues/111' })
+    $snapshot.active_prs = @([pscustomobject]@{
+        number = 112
+        url = 'https://github.com/nonononull/inputcodex/pull/112'
+        base_ref = 'main'
+        head_oid = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+    })
+    $result = Invoke-AutonomousStateCase -Name 'pr' -Snapshot $snapshot
+    Assert-AutonomousState -Result $result -ExpectedState 'active-pr-review-ci' -ExpectedAction 'resume-pr'
+    Assert-Equal -Expected 112 -Actual $result.Json.active_pr.number -Message '活动 PR 编号必须保留'
+}
+
+Invoke-ContractTest -Name '无人值守拒绝多个活动 writer' -Body {
+    $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
+    $snapshot.active_writer_count = 2
+    $result = Invoke-AutonomousStateCase -Name 'writers' -Snapshot $snapshot
+    Assert-AutonomousState -Result $result -ExpectedState 'blocked-hard-stop' -ExpectedAction 'stop'
+    Assert-Contains -Collection @($result.Json.reason_codes) -Expected 'MULTIPLE_WRITERS' -Message '多个 writer 必须稳定阻断'
+}
+
+Invoke-ContractTest -Name '无人值守拒绝重复活动 Issue 或 PR' -Body {
+    $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
+    $snapshot.active_issues = @(
+        [pscustomobject]@{ number = 111; url = 'issue-111' },
+        [pscustomobject]@{ number = 113; url = 'issue-113' }
+    )
+    $snapshot.active_prs = @(
+        [pscustomobject]@{ number = 112; url = 'pr-112'; base_ref = 'main'; head_oid = 'b' * 40 },
+        [pscustomobject]@{ number = 114; url = 'pr-114'; base_ref = 'main'; head_oid = 'c' * 40 }
+    )
+    $result = Invoke-AutonomousStateCase -Name 'duplicates' -Snapshot $snapshot
+    Assert-AutonomousState -Result $result -ExpectedState 'blocked-hard-stop' -ExpectedAction 'stop'
+    Assert-Contains -Collection @($result.Json.reason_codes) -Expected 'MULTIPLE_ACTIVE_ISSUES' -Message '重复 Issue 必须稳定阻断'
+    Assert-Contains -Collection @($result.Json.reason_codes) -Expected 'MULTIPLE_ACTIVE_PRS' -Message '重复 PR 必须稳定阻断'
+}
+
+Invoke-ContractTest -Name '无人值守阻断 stale release audit' -Body {
+    $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
+    $snapshot.release_audit = 'stale-re-audit-required'
+    $result = Invoke-AutonomousStateCase -Name 'release-audit' -Snapshot $snapshot
+    Assert-AutonomousState -Result $result -ExpectedState 'blocked-hard-stop' -ExpectedAction 'stop'
+    Assert-Contains -Collection @($result.Json.reason_codes) -Expected 'RELEASE_AUDIT_STALE' -Message 'stale release audit 必须稳定阻断'
+}
+
+Invoke-ContractTest -Name '无人值守阻断 origin main freshness 漂移' -Body {
+    $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
+    $snapshot.expected_base = 'cccccccccccccccccccccccccccccccccccccccc'
+    $result = Invoke-AutonomousStateCase -Name 'base-drift' -Snapshot $snapshot
+    Assert-AutonomousState -Result $result -ExpectedState 'blocked-hard-stop' -ExpectedAction 'stop'
+    Assert-Contains -Collection @($result.Json.reason_codes) -Expected 'ORIGIN_MAIN_DRIFT' -Message 'main freshness 漂移必须稳定阻断'
+}
+
+Invoke-ContractTest -Name '无人值守外部 GitHub 不可用时有限重试' -Body {
+    $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
+    $snapshot.github_available = $false
+    Assert-AutonomousState -Result (Invoke-AutonomousStateCase -Name 'github-down' -Snapshot $snapshot) -ExpectedState 'blocked-external-retry' -ExpectedAction 'retry-external'
+}
+
+Invoke-ContractTest -Name '无人值守拒绝未知状态快照 schema' -Body {
+    $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
+    $snapshot.schema_version = 'unknown'
+    $result = Invoke-AutonomousStateCase -Name 'schema' -Snapshot $snapshot
+    Assert-Equal -Expected 11 -Actual $result.ExitCode -Message "未知快照 schema 应使用稳定退出码，输出=$($result.Output)"
+    Assert-Equal -Expected 'AUTONOMOUS_STATE_INVALID_SNAPSHOT' -Actual $result.Json.error_code -Message '未知快照错误码必须稳定'
 }
 
 function New-ReleaseAuditSourceLock {
