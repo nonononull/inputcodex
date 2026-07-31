@@ -740,6 +740,26 @@ function Get-AutonomousMergeGateEvaluation {
     return [pscustomobject]@{ Pending = $pending.ToArray() }
 }
 
+function Get-AutonomousScopeProjection {
+    param([AllowEmptyCollection()][string[]]$Paths)
+
+    $normalizedPaths = @($Paths |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+        Sort-Object -Unique)
+    $payload = [string]::Join([char]10, [string[]]$normalizedPaths) + [char]10
+    $hash = [Convert]::ToHexString(
+        [Security.Cryptography.SHA256]::HashData(
+            [Text.UTF8Encoding]::new($false).GetBytes($payload)
+        )
+    ).ToLowerInvariant()
+
+    return [pscustomobject][ordered]@{
+        paths = [string[]]$normalizedPaths
+        count = [long]$normalizedPaths.Count
+        scope_hash = "sha256:$hash"
+    }
+}
+
 function Invoke-GitRead {
     param([Parameter(Mandatory)][string[]]$Arguments)
 
@@ -756,15 +776,9 @@ function Get-LiveSnapshot {
     $branch = ((Invoke-GitRead @('branch', '--show-current')) -join '').Trim()
     $expectedBase = ((Invoke-GitRead @('merge-base', 'HEAD', 'origin/main')) -join '').Trim()
     $worktreeClean = @((Invoke-GitRead @('status', '--porcelain=v1'))).Count -eq 0
-    $actualScopePaths = @(
+    $actualScope = Get-AutonomousScopeProjection -Paths @(
         Invoke-GitRead @('diff', '--no-renames', '--name-only', 'origin/main...HEAD')
-    ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Sort-Object -Unique
-    $actualScopePayload = [string]::Join([char]10, $actualScopePaths) + [char]10
-    $actualScopeHash = [Convert]::ToHexString(
-        [Security.Cryptography.SHA256]::HashData(
-            [Text.UTF8Encoding]::new($false).GetBytes($actualScopePayload)
-        )
-    ).ToLowerInvariant()
+    )
 
     $sourceLockPath = Join-Path $script:Root 'upstream/source-lock.json'
     $releaseAudit = 'missing'
@@ -1041,8 +1055,8 @@ function Get-LiveSnapshot {
         worktree_clean = $worktreeClean
         active_writer_count = [long]$activeWriterCount
         repository_settings = $repositorySettings
-        actual_scope_count = [long]$actualScopePaths.Count
-        actual_scope_hash = "sha256:$actualScopeHash"
+        actual_scope_count = $actualScope.count
+        actual_scope_hash = $actualScope.scope_hash
         active_issues = @($activeIssues)
         active_prs = @($activePrs)
         merged_prs = @($mergedPrs)

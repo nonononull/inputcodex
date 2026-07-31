@@ -113,6 +113,28 @@ function Assert-Contains {
     }
 }
 
+function Get-AutonomousStateFunctionSource {
+    param([Parameter(Mandatory)][string]$Name)
+
+    $source = Get-Content -LiteralPath $autonomousStateScript -Raw
+    $tokens = $null
+    $parseErrors = $null
+    $ast = [System.Management.Automation.Language.Parser]::ParseInput(
+        $source,
+        [ref]$tokens,
+        [ref]$parseErrors
+    )
+    Assert-Equal -Expected 0 -Actual @($parseErrors).Count -Message '自治状态脚本必须可供真实 helper 合同提取'
+
+    $functions = @($ast.FindAll({
+        param($node)
+        $node -is [System.Management.Automation.Language.FunctionDefinitionAst] -and
+        $node.Name -ceq $Name
+    }, $true))
+    Assert-Equal -Expected 1 -Actual $functions.Count -Message "自治状态脚本必须存在唯一生产 helper：$Name"
+    return $functions[0].Extent.Text
+}
+
 function Invoke-ChildScript {
     param(
         [Parameter(Mandatory)]
@@ -784,6 +806,17 @@ Invoke-ContractTest -Name '无人值守 live 外部列表使用全量分页和�
         Assert-True -Condition $source.Contains($required) -Message "live 外部列表缺少严格分页合同：$required"
     }
     Assert-True -Condition (-not $source.Contains('--limit 100')) -Message 'live 外部列表不得截断前 100 项'
+}
+
+Invoke-ContractTest -Name '无人值守 live 空范围保持数组身份与确定哈希' -Body {
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-AutonomousScopeProjection')
+
+    $projection = Get-AutonomousScopeProjection -Paths @()
+    Assert-True -Condition ($projection.paths -is [System.Array]) -Message '空范围路径必须保留数组身份'
+    Assert-Equal -Expected 0 -Actual $projection.paths.Count -Message '空范围不得产生伪路径'
+    Assert-Equal -Expected 0L -Actual $projection.count -Message '空范围计数必须归一化为 Int64 零'
+    Assert-Equal -Expected 'sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b' `
+        -Actual $projection.scope_hash -Message '空范围必须使用 LF 空载荷的确定哈希'
 }
 
 Invoke-ContractTest -Name '无人值守 live PR 投影不得覆盖工作树 Head' -Body {
