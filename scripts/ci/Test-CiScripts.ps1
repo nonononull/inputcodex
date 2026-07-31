@@ -233,6 +233,13 @@ function New-ValidAutonomousRefactorPolicy {
                 }
             )
         }
+        upstream_sync = [pscustomobject][ordered]@{
+            task_kind = 'upstream-sync'
+            task_marker = '<!-- inputcodex:autonomous-refactor-task-kind:upstream-sync:v1 -->'
+            allowed_release_audit = 'stale-re-audit-required'
+            required_workflow = 'CI'
+            required_job = 'release-audit'
+        }
         retry = [pscustomobject][ordered]@{
             max_attempts = 3
             max_iteration_minutes = 180
@@ -299,6 +306,16 @@ Invoke-ContractTest -Name '合法无人值守重构策略通过并输出规范�
     Assert-True -Condition ($null -ne $result.Json) -Message "合法自治策略必须输出 JSON，输出=$($result.Output)"
     Assert-Equal -Expected $true -Actual $result.Json.ok -Message '合法自治策略必须标记 ok=true'
     Assert-True -Condition ([string]$result.Json.policy_sha256 -match '^sha256:[0-9a-f]{64}$') -Message '自治策略必须输出规范化 SHA-256'
+    Assert-Equal -Expected 'upstream-sync' -Actual $result.Json.upstream_sync.task_kind `
+        -Message '策略输出必须投影 typed upstream-sync task kind'
+    Assert-Equal -Expected '<!-- inputcodex:autonomous-refactor-task-kind:upstream-sync:v1 -->' `
+        -Actual $result.Json.upstream_sync.task_marker -Message '策略输出必须投影精确 upstream-sync marker'
+    Assert-Equal -Expected 'stale-re-audit-required' -Actual $result.Json.upstream_sync.allowed_release_audit `
+        -Message '策略输出必须投影唯一允许的 stale 状态'
+    Assert-Equal -Expected 'CI' -Actual $result.Json.upstream_sync.required_workflow `
+        -Message '策略输出必须投影承载 release-audit 的 Workflow'
+    Assert-Equal -Expected 'release-audit' -Actual $result.Json.upstream_sync.required_job `
+        -Message '策略输出必须投影成功 release-audit Job 要求'
 }
 
 Invoke-ContractTest -Name '拒绝缺失的无人值守重构策略文件' -Body {
@@ -393,6 +410,38 @@ Invoke-ContractTest -Name '拒绝缺失的 CI Performance 与零 Artifact 门' -
     Assert-Contains -Collection @($result.Json.violations.code) -Expected 'WORKFLOW_GATE' -Message 'Performance 门缺失必须被拒绝'
 }
 
+Invoke-ContractTest -Name '拒绝漂移的 upstream-sync stale 例外' -Body {
+    $cases = @(
+        [pscustomobject]@{ Name = 'kind'; Property = 'task_kind'; Value = 'refactor' },
+        [pscustomobject]@{ Name = 'marker'; Property = 'task_marker'; Value = '<!-- inputcodex:upstream-sync:v1 -->' },
+        [pscustomobject]@{ Name = 'status'; Property = 'allowed_release_audit'; Value = 'current' },
+        [pscustomobject]@{ Name = 'workflow'; Property = 'required_workflow'; Value = 'Performance Baseline' },
+        [pscustomobject]@{ Name = 'job'; Property = 'required_job'; Value = 'required' }
+    )
+    foreach ($case in $cases) {
+        $policy = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
+        $policy.upstream_sync.($case.Property) = $case.Value
+        Assert-AutonomousPolicyFailure `
+            -Result (Invoke-AutonomousPolicyCase -Name "upstream-sync-$($case.Name)" -Policy $policy) `
+            -ExpectedCode 'UPSTREAM_SYNC_POLICY'
+    }
+    foreach ($case in $cases) {
+        $policy = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
+        $policy.upstream_sync.($case.Property) = [object[]]@(
+            (New-ValidAutonomousRefactorPolicy).upstream_sync.($case.Property)
+        )
+        Assert-AutonomousPolicyFailure `
+            -Result (Invoke-AutonomousPolicyCase -Name "upstream-sync-array-$($case.Name)" -Policy $policy) `
+            -ExpectedCode 'UPSTREAM_SYNC_POLICY'
+    }
+    $invalidShapes = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
+    $invalidShapes.upstream_sync.task_kind = $null
+    $invalidShapes.upstream_sync.task_marker = [pscustomobject]@{ value = 'upstream-sync' }
+    Assert-AutonomousPolicyFailure `
+        -Result (Invoke-AutonomousPolicyCase -Name 'upstream-sync-null-object' -Policy $invalidShapes) `
+        -ExpectedCode 'UPSTREAM_SYNC_POLICY'
+}
+
 Invoke-ContractTest -Name '拒绝非 Gemini UI owner 或 UI fallback' -Body {
     $policy = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
     $policy.ui.owner = 'Codex'
@@ -473,9 +522,10 @@ function New-MergeReadyAutonomousPr {
         review_thread_count = 0
         evidence = [pscustomobject][ordered]@{
             valid = $true
+            task_kind = 'refactor'
             tracking_issue_ref = 'https://github.com/nonononull/inputcodex/issues/111'
             standing_authorization_ref = 'https://github.com/nonononull/inputcodex/issues/111'
-            policy_sha256 = 'sha256:2cb8467153892fcb1510c86cdcb186cd9dabc3d4f08055ec9c503b823d760275'
+            policy_sha256 = 'sha256:cb65b94cd5ef876e9049b4795eca992ac8ac2d9bd9aead03df48b373988f25d1'
             scope_count = 12
             scope_hash = 'sha256:5d1f609ca2a5913e4e5df21f0fd04d6de2c6731cdd71d641812fbee80b5ad713'
             final_head = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
@@ -503,6 +553,7 @@ function New-MergeReadyAutonomousStateSnapshot {
         author_login = 'nonononull'
         planning_evidence = [pscustomobject][ordered]@{
             valid = $true
+            task_kind = 'refactor'
             scope_count = 12
             scope_hash = 'sha256:5d1f609ca2a5913e4e5df21f0fd04d6de2c6731cdd71d641812fbee80b5ad713'
             ref = 'https://github.com/nonononull/inputcodex/issues/111#issuecomment-5139215915'
@@ -610,6 +661,82 @@ Invoke-ContractTest -Name '无人值守单一活动 Issue 恢复规划' -Body {
     $result = Invoke-AutonomousStateCase -Name 'issue' -Snapshot $snapshot
     Assert-AutonomousState -Result $result -ExpectedState 'active-issue-planning' -ExpectedAction 'resume-issue'
     Assert-Equal -Expected 111 -Actual $result.Json.active_issue.number -Message '活动 Issue 编号必须保留'
+}
+
+Invoke-ContractTest -Name '无人值守 live 仅接受精确 upstream-sync typed marker' -Body {
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-AutonomousIssueTaskKind')
+    $marker = '<!-- inputcodex:autonomous-refactor-task-kind:upstream-sync:v1 -->'
+    $codeBlockBody = [string]::Join("`n", @(
+        '<!-- inputcodex:autonomous-refactor-task:v1 -->',
+        '```md',
+        $marker,
+        '```'
+    ))
+    $lateMarkerBody = [string]::Join("`n", @(
+        '<!-- inputcodex:autonomous-refactor-task:v1 -->',
+        '正文',
+        $marker
+    ))
+
+    Assert-Equal -Expected 'refactor' `
+        -Actual (Get-AutonomousIssueTaskKind -Body '<!-- inputcodex:autonomous-refactor-task:v1 -->' -UpstreamSyncTaskMarker $marker) `
+        -Message '普通自治 Issue 不得得到 upstream-sync task kind'
+    Assert-Equal -Expected 'upstream-sync' `
+        -Actual (Get-AutonomousIssueTaskKind -Body "<!-- inputcodex:autonomous-refactor-task:v1 -->`n$marker" -UpstreamSyncTaskMarker $marker) `
+        -Message '精确 typed marker 必须得到 upstream-sync task kind'
+    Assert-Equal -Expected 'invalid' `
+        -Actual (Get-AutonomousIssueTaskKind -Body '<!-- inputcodex:autonomous-refactor-task-kind:unknown:v1 -->' -UpstreamSyncTaskMarker $marker) `
+        -Message '未知 typed marker 必须 fail-closed'
+    Assert-Equal -Expected 'invalid' `
+        -Actual (Get-AutonomousIssueTaskKind -Body '<!-- inputcodex:autonomous-refactor-task-kind:upstream-sync:v2 -->' -UpstreamSyncTaskMarker $marker) `
+        -Message '未知 marker 版本必须 fail-closed'
+    Assert-Equal -Expected 'invalid' `
+        -Actual (Get-AutonomousIssueTaskKind -Body "$marker`n$marker" -UpstreamSyncTaskMarker $marker) `
+        -Message '重复 typed marker 必须 fail-closed'
+    Assert-Equal -Expected 'invalid' `
+        -Actual (Get-AutonomousIssueTaskKind `
+            -Body $codeBlockBody `
+            -UpstreamSyncTaskMarker $marker) `
+        -Message 'Markdown 代码块中的 typed marker 必须 fail-closed'
+    Assert-Equal -Expected 'invalid' `
+        -Actual (Get-AutonomousIssueTaskKind `
+            -Body $lateMarkerBody `
+            -UpstreamSyncTaskMarker $marker) `
+        -Message '非顶部 header 的 typed marker 必须 fail-closed'
+
+    $liveSource = Get-AutonomousStateFunctionSource -Name 'Get-LiveSnapshot'
+    Assert-True -Condition $liveSource.Contains('Get-AutonomousIssueTaskKind') `
+        -Message 'live Issue 投影必须消费 typed task kind helper'
+}
+
+Invoke-ContractTest -Name '无人值守 PR evidence 拒绝数组伪装 task kind' -Body {
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyValue')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyProjection')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-AutonomousPrBodyEvidence')
+
+    $evidence = [pscustomobject][ordered]@{
+        schema_version = 'inputcodex.autonomous-refactor-evidence.v1'
+        task_kind = [object[]]@('upstream-sync')
+        tracking_issue_ref = 'https://github.com/nonononull/inputcodex/issues/116'
+        standing_authorization_ref = 'https://github.com/nonononull/inputcodex/issues/111'
+        policy_sha256 = 'sha256:cb65b94cd5ef876e9049b4795eca992ac8ac2d9bd9aead03df48b373988f25d1'
+        scope_count = 44L
+        scope_hash = 'sha256:d321e4b09e887e7f84ed7047d37ab49c2708a14314813bc20d452615ad4ea8bc'
+        final_head = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+        independent_review_status = 'passed'
+        independent_review_ref = 'https://github.com/nonononull/inputcodex/pull/118#issuecomment-1'
+    }
+    $json = $evidence | ConvertTo-Json -Depth 10 -Compress
+    $body = "<!-- inputcodex:autonomous-refactor-evidence:v1 $json -->"
+    Assert-Equal -Expected $false -Actual (Get-AutonomousPrBodyEvidence -Body $body).valid `
+        -Message 'PR evidence 的单元素数组不得伪装 task kind 字符串'
+
+    $evidence.task_kind = 'upstream-sync'
+    $json = $evidence | ConvertTo-Json -Depth 10 -Compress
+    $body = "<!-- inputcodex:autonomous-refactor-evidence:v1 $json -->"
+    $valid = Get-AutonomousPrBodyEvidence -Body $body
+    Assert-Equal -Expected $true -Actual $valid.valid -Message '标量 upstream-sync PR evidence 必须通过'
+    Assert-Equal -Expected 'upstream-sync' -Actual $valid.task_kind -Message 'PR evidence 必须保留标量 task kind'
 }
 
 Invoke-ContractTest -Name '无人值守脏工作树恢复执行而不重复建任务' -Body {
@@ -759,6 +886,97 @@ Invoke-ContractTest -Name '无人值守阻断 stale release audit' -Body {
     Assert-Contains -Collection @($result.Json.reason_codes) -Expected 'RELEASE_AUDIT_STALE' -Message 'stale release audit 必须稳定阻断'
 }
 
+Invoke-ContractTest -Name '无人值守仅允许 typed upstream-sync 在 stale 下推进' -Body {
+    $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
+    $snapshot.release_audit = 'stale-re-audit-required'
+    $snapshot.branch = 'codex/issue-116-upstream-v1-2-44-sync'
+    $snapshot.worktree_clean = $false
+    $snapshot.active_issues = @([pscustomobject]@{
+        number = 116
+        url = 'https://github.com/nonononull/inputcodex/issues/116'
+        author_login = 'nonononull'
+        task_kind = 'upstream-sync'
+    })
+    Assert-AutonomousState -Result (Invoke-AutonomousStateCase -Name 'stale-upstream-sync' -Snapshot $snapshot) `
+        -ExpectedState 'active-worktree-execution' -ExpectedAction 'resume-worktree'
+
+    $invalid = Copy-AutonomousStateSnapshot $snapshot
+    $invalid.active_issues[0].task_kind = 'unknown'
+    $invalidResult = Invoke-AutonomousStateCase -Name 'stale-unknown-task-kind' -Snapshot $invalid
+    Assert-AutonomousState -Result $invalidResult -ExpectedState 'blocked-hard-stop' -ExpectedAction 'stop'
+    Assert-Contains -Collection @($invalidResult.Json.reason_codes) -Expected 'INVALID_TASK_KIND' `
+        -Message '未知 task kind 必须显式 fail-closed'
+
+    $caseDrift = Copy-AutonomousStateSnapshot $snapshot
+    $caseDrift.release_audit = 'current'
+    $caseDrift.active_issues[0].task_kind = 'UPSTREAM-SYNC'
+    $caseDriftResult = Invoke-AutonomousStateCase -Name 'current-case-drift-task-kind' -Snapshot $caseDrift
+    Assert-AutonomousState -Result $caseDriftResult -ExpectedState 'blocked-hard-stop' -ExpectedAction 'stop'
+    Assert-Contains -Collection @($caseDriftResult.Json.reason_codes) -Expected 'INVALID_TASK_KIND' `
+        -Message 'task kind 大小写漂移必须显式 fail-closed'
+
+    $arrayKind = Copy-AutonomousStateSnapshot $snapshot
+    $arrayKind.release_audit = 'current'
+    $arrayKind.active_issues[0].task_kind = [object[]]@('upstream-sync')
+    $arrayKindResult = Invoke-AutonomousStateCase -Name 'current-array-task-kind' -Snapshot $arrayKind
+    Assert-AutonomousState -Result $arrayKindResult -ExpectedState 'blocked-hard-stop' -ExpectedAction 'stop'
+    Assert-Contains -Collection @($arrayKindResult.Json.reason_codes) -Expected 'INVALID_TASK_KIND' `
+        -Message 'task kind 单元素数组必须显式 fail-closed'
+
+    $arrayKindWithPr = New-MergeReadyAutonomousStateSnapshot
+    $arrayKindWithPr.active_issues[0] | Add-Member -NotePropertyName task_kind `
+        -NotePropertyValue ([object[]]@('refactor'))
+    $arrayKindWithPrResult = Invoke-AutonomousStateCase -Name 'current-array-task-kind-with-pr' -Snapshot $arrayKindWithPr
+    Assert-AutonomousState -Result $arrayKindWithPrResult -ExpectedState 'blocked-hard-stop' -ExpectedAction 'stop'
+    Assert-Contains -Collection @($arrayKindWithPrResult.Json.reason_codes) -Expected 'INVALID_TASK_KIND' `
+        -Message '无效 task kind 与活动 PR 并存时仍必须返回结构化硬停止'
+}
+
+Invoke-ContractTest -Name '无人值守 stale upstream-sync 仍绑定完整 Final Head 与 release-audit Job' -Body {
+    $unbound = New-MergeReadyAutonomousStateSnapshot
+    $unbound.release_audit = 'stale-re-audit-required'
+    $unbound.active_issues[0] | Add-Member -NotePropertyName task_kind -NotePropertyValue 'upstream-sync'
+    $unboundResult = Invoke-AutonomousStateCase -Name 'stale-upstream-sync-unbound-task-kind' -Snapshot $unbound
+    Assert-AutonomousState -Result $unboundResult -ExpectedState 'active-pr-review-ci' -ExpectedAction 'resume-pr'
+    Assert-Contains -Collection @($unboundResult.Json.merge_gate_pending) -Expected 'EVIDENCE_TASK_KIND' `
+        -Message 'upstream-sync task kind 必须同时绑定 Planning 与 PR evidence'
+
+    $ready = New-MergeReadyAutonomousStateSnapshot
+    $ready.release_audit = 'stale-re-audit-required'
+    $ready.active_issues[0] | Add-Member -NotePropertyName task_kind -NotePropertyValue 'upstream-sync'
+    $ready.active_issues[0].planning_evidence.task_kind = 'upstream-sync'
+    $ready.active_prs[0].evidence.task_kind = 'upstream-sync'
+    Assert-AutonomousState -Result (Invoke-AutonomousStateCase -Name 'stale-upstream-sync-merge-ready' -Snapshot $ready) `
+        -ExpectedState 'merge-ready-exact-head' -ExpectedAction 'squash-merge-exact-head'
+
+    $arrayEvidence = Copy-AutonomousStateSnapshot $ready
+    $arrayEvidence.active_issues[0].planning_evidence.task_kind = [object[]]@('upstream-sync')
+    $arrayEvidenceResult = Invoke-AutonomousStateCase -Name 'stale-upstream-sync-array-evidence' -Snapshot $arrayEvidence
+    Assert-AutonomousState -Result $arrayEvidenceResult -ExpectedState 'active-pr-review-ci' -ExpectedAction 'resume-pr'
+    Assert-Contains -Collection @($arrayEvidenceResult.Json.merge_gate_pending) -Expected 'EVIDENCE_TASK_KIND' `
+        -Message 'Planning task kind 单元素数组不得通过 Final Head 门'
+
+    $failedJob = New-MergeReadyAutonomousStateSnapshot
+    $failedJob.release_audit = 'stale-re-audit-required'
+    $failedJob.active_issues[0] | Add-Member -NotePropertyName task_kind -NotePropertyValue 'upstream-sync'
+    $failedJob.active_issues[0].planning_evidence.task_kind = 'upstream-sync'
+    $failedJob.active_prs[0].evidence.task_kind = 'upstream-sync'
+    $releaseAuditJob = @($failedJob.active_prs[0].workflow_runs[0].jobs | Where-Object { $_.name -ceq 'release-audit' })[0]
+    $releaseAuditJob.conclusion = 'failure'
+    $failedResult = Invoke-AutonomousStateCase -Name 'stale-upstream-sync-release-audit-failed' -Snapshot $failedJob
+    Assert-AutonomousState -Result $failedResult -ExpectedState 'active-pr-review-ci' -ExpectedAction 'resume-pr'
+    Assert-Contains -Collection @($failedResult.Json.merge_gate_pending) -Expected 'WORKFLOW_CI' `
+        -Message 'stale upstream-sync 不得绕过失败的 release-audit Job'
+
+    $postMerge = New-PostMergeAutonomousStateSnapshot
+    $postMerge.release_audit = 'stale-re-audit-required'
+    $postMerge.active_issues[0] | Add-Member -NotePropertyName task_kind -NotePropertyValue 'upstream-sync'
+    $postMerge.active_issues[0].planning_evidence.task_kind = 'upstream-sync'
+    $postMerge.merged_prs[0].evidence.task_kind = 'upstream-sync'
+    Assert-AutonomousState -Result (Invoke-AutonomousStateCase -Name 'stale-upstream-sync-post-merge' -Snapshot $postMerge) `
+        -ExpectedState 'post-merge-verification' -ExpectedAction 'close-issue-and-archive'
+}
+
 Invoke-ContractTest -Name '无人值守阻断 origin main freshness 漂移' -Body {
     $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
     $snapshot.expected_base = 'cccccccccccccccccccccccccccccccccccccccc'
@@ -862,13 +1080,15 @@ Invoke-ContractTest -Name '无人值守 live 精确恢复自动关闭的合并�
         param(
             [string]$State = 'closed',
             [string]$Url = 'https://github.com/nonononull/inputcodex/issues/113',
-            [string]$Author = 'nonononull'
+            [string]$Author = 'nonononull',
+            [string]$TaskKind = 'refactor'
         )
         [pscustomobject][ordered]@{
             number = 113L
             url = $Url
             author_login = $Author
             github_state = $State
+            task_kind = $TaskKind
             planning_evidence = [pscustomobject][ordered]@{ valid = $false }
         }
     }
@@ -891,13 +1111,15 @@ Invoke-ContractTest -Name '无人值守 live 精确恢复自动关闭的合并�
         }
     }
 
-    $closedIssue = New-TestTaskIssue
+    $closedIssue = New-TestTaskIssue -TaskKind 'upstream-sync'
     $mergedPr = New-TestMergedTaskPr
     $exact = Resolve-AutonomousTaskLink -MarkedIssues @($closedIssue) -MergedPullRequests @($mergedPr) `
         -ObservedRemoteMain 'cccccccccccccccccccccccccccccccccccccccc' `
         -WorktreeHead 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
     Assert-Equal -Expected 1 -Actual $exact.active_issues.Count -Message 'exact closed Issue 必须恢复为 workflow-active'
     Assert-Equal -Expected 113L -Actual $exact.active_issues[0].number -Message '恢复的 Issue 必须保持原编号'
+    Assert-Equal -Expected 'upstream-sync' -Actual $exact.active_issues[0].task_kind `
+        -Message 'closed Issue 恢复必须保留 live 投影的 task kind'
     Assert-Equal -Expected 1 -Actual $exact.linked_merged_prs.Count -Message 'exact merged PR 必须同步恢复'
 
     $openIssue = New-TestTaskIssue -State 'open'
