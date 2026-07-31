@@ -743,9 +743,13 @@ function Get-AutonomousMergeGateEvaluation {
 function Get-AutonomousScopeProjection {
     param([AllowEmptyCollection()][string[]]$Paths)
 
-    $normalizedPaths = @($Paths |
-        Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
-        Sort-Object -Unique)
+    $pathSet = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($path in $Paths) {
+        if (-not [string]::IsNullOrWhiteSpace($path)) {
+            [void]$pathSet.Add($path)
+        }
+    }
+    $normalizedPaths = [string[]]@($pathSet)
     $payload = [string]::Join([char]10, [string[]]$normalizedPaths) + [char]10
     $hash = [Convert]::ToHexString(
         [Security.Cryptography.SHA256]::HashData(

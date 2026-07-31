@@ -817,6 +817,41 @@ Invoke-ContractTest -Name '无人值守 live 空范围保持数组身份与确�
     Assert-Equal -Expected 0L -Actual $projection.count -Message '空范围计数必须归一化为 Int64 零'
     Assert-Equal -Expected 'sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b' `
         -Actual $projection.scope_hash -Message '空范围必须使用 LF 空载荷的确定哈希'
+
+    $single = Get-AutonomousScopeProjection -Paths @('single/path.txt')
+    Assert-True -Condition ($single.paths -is [System.Array]) -Message '单路径必须保留数组身份'
+    Assert-Equal -Expected 1L -Actual $single.count -Message '单路径计数必须归一化为 Int64 一'
+    Assert-Equal -Expected 'single/path.txt' -Actual $single.paths[0] -Message '单路径内容不得漂移'
+    Assert-Equal -Expected 'sha256:d2e8ff22b0918f8c8bedc32b99272db8a20c1a036d02135cfd9359c4782119bb' `
+        -Actual $single.scope_hash -Message '单路径必须使用 LF 末尾的确定哈希'
+
+    $originalCulture = [Threading.Thread]::CurrentThread.CurrentCulture
+    $originalUiCulture = [Threading.Thread]::CurrentThread.CurrentUICulture
+    try {
+        $mixedPaths = [string[]]@('I.txt', 'i.txt', 'İ.txt', 'ı.txt', 'A.txt', 'a.txt', 'I.txt')
+        $expectedPaths = [string[]]@('A.txt', 'I.txt', 'a.txt', 'i.txt', 'İ.txt', 'ı.txt')
+        foreach ($cultureName in @('en-US', 'sv-SE', 'tr-TR')) {
+            $culture = [Globalization.CultureInfo]::GetCultureInfo($cultureName)
+            [Threading.Thread]::CurrentThread.CurrentCulture = $culture
+            [Threading.Thread]::CurrentThread.CurrentUICulture = $culture
+
+            $mixed = Get-AutonomousScopeProjection -Paths $mixedPaths
+            Assert-True -Condition ($mixed.paths -is [System.Array]) `
+                -Message "多路径必须在 $cultureName 保留数组身份"
+            Assert-Equal -Expected 6L -Actual $mixed.count `
+                -Message "大小写不同路径不得在 $cultureName 被合并"
+            Assert-True -Condition ([string]::Equals(
+                [string]::Join("`n", $expectedPaths),
+                [string]::Join("`n", [string[]]$mixed.paths),
+                [StringComparison]::Ordinal
+            )) -Message "多路径必须在 $cultureName 使用 Ordinal 顺序"
+            Assert-Equal -Expected 'sha256:33d03dd10bc0a0f97b747bdb48f4954834a9f04fc74a242bd69fd62bcc4f7635' `
+                -Actual $mixed.scope_hash -Message "多路径 hash 不得受 $cultureName 影响"
+        }
+    } finally {
+        [Threading.Thread]::CurrentThread.CurrentCulture = $originalCulture
+        [Threading.Thread]::CurrentThread.CurrentUICulture = $originalUiCulture
+    }
 }
 
 Invoke-ContractTest -Name '无人值守 live 精确恢复自动关闭的合并后 Issue' -Body {
