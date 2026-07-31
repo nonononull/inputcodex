@@ -217,6 +217,283 @@ function Get-ChangedPaths {
     @($paths | Sort-Object -Unique)
 }
 
+function Test-SafeSnapshotRelativePath {
+    param($Value)
+
+    if ($Value -isnot [string] -or [string]::IsNullOrWhiteSpace($Value) -or
+        $Value.StartsWith('/', [StringComparison]::Ordinal) -or
+        $Value.Contains('\') -or
+        $Value -match '^[A-Za-z]:' -or
+        $Value.IndexOfAny([char[]]@(0..31)) -ge 0) {
+        return $false
+    }
+    $segments = $Value.Split('/')
+    return @($segments | Where-Object { $_ -in @('', '.', '..') }).Count -eq 0
+}
+
+function Invoke-GitText {
+    param(
+        [Parameter(Mandatory)][string]$RepositoryRoot,
+        [Parameter(Mandatory)][string[]]$Arguments
+    )
+
+    $output = @(& git -C $RepositoryRoot @Arguments 2>&1 | ForEach-Object { $_.ToString() })
+    if ($LASTEXITCODE -ne 0) {
+        throw "git $($Arguments -join ' ') 失败：$($output -join [Environment]::NewLine)"
+    }
+    [string[]]$output
+}
+
+function Get-GitBlobBytes {
+    param(
+        [Parameter(Mandatory)][string]$RepositoryRoot,
+        [Parameter(Mandatory)][string]$BlobOid
+    )
+
+    $startInfo = [Diagnostics.ProcessStartInfo]::new()
+    $startInfo.FileName = 'git'
+    $startInfo.UseShellExecute = $false
+    $startInfo.RedirectStandardOutput = $true
+    $startInfo.RedirectStandardError = $true
+    foreach ($argument in @('-C', $RepositoryRoot, 'cat-file', 'blob', $BlobOid)) {
+        $startInfo.ArgumentList.Add($argument)
+    }
+
+    $process = [Diagnostics.Process]::new()
+    $process.StartInfo = $startInfo
+    $buffer = [IO.MemoryStream]::new()
+    try {
+        if (-not $process.Start()) { throw '无法启动 git cat-file' }
+        $stderrTask = $process.StandardError.ReadToEndAsync()
+        $process.StandardOutput.BaseStream.CopyTo($buffer)
+        $process.WaitForExit()
+        $stderr = $stderrTask.GetAwaiter().GetResult()
+        if ($process.ExitCode -ne 0) {
+            throw "git cat-file 失败：$stderr"
+        }
+        return ,$buffer.ToArray()
+    }
+    finally {
+        $buffer.Dispose()
+        $process.Dispose()
+    }
+}
+
+function Get-GitSnapshotProjection {
+    param(
+        [Parameter(Mandatory)][string]$RepositoryRoot,
+        [Parameter(Mandatory)][string]$SnapshotPath
+    )
+
+    $treeOutput = @(Invoke-GitText -RepositoryRoot $RepositoryRoot -Arguments @('rev-parse', "HEAD:$SnapshotPath"))
+    if ($treeOutput.Count -ne 1 -or $treeOutput[0] -cnotmatch '^[0-9a-f]{40}$') {
+        throw '无法解析快照 Git tree'
+    }
+
+    $prefix = "$SnapshotPath/"
+    $entries = [Collections.Generic.List[object]]::new()
+    foreach ($line in @(Invoke-GitText -RepositoryRoot $RepositoryRoot -Arguments @(
+        '-c', 'core.quotepath=false', 'ls-tree', '-r', '--full-tree', 'HEAD', '--', $SnapshotPath
+    ))) {
+        if ($line -notmatch '^(?<mode>[0-9]{6}) (?<type>[a-z]+) (?<oid>[0-9a-f]{40})\t(?<path>.+)$') {
+            throw "无法解析快照 Git entry：$line"
+        }
+        $gitPath = $Matches.path
+        if (-not $gitPath.StartsWith($prefix, [StringComparison]::Ordinal)) {
+            throw "快照 Git entry 越界：$gitPath"
+        }
+        $entries.Add([pscustomobject][ordered]@{
+            path = $gitPath.Substring($prefix.Length)
+            mode = $Matches.mode
+            type = $Matches.type
+            git_blob_sha1 = $Matches.oid
+        }) | Out-Null
+    }
+    [pscustomobject][ordered]@{
+        tree_oid = $treeOutput[0]
+        entries = $entries.ToArray()
+    }
+}
+
+function Test-UpstreamSnapshotIntegrity {
+    param(
+        [Parameter(Mandatory)][string]$RepositoryRoot,
+        $SourceLock
+    )
+
+    $problems = [Collections.Generic.List[string]]::new()
+    $problemPaths = [Collections.Generic.List[string]]::new()
+    function Add-IntegrityProblem {
+        param([Parameter(Mandatory)][string]$Message, [string]$Path)
+        $problems.Add($Message) | Out-Null
+        if (-not [string]::IsNullOrWhiteSpace($Path) -and -not $problemPaths.Contains($Path)) {
+            $problemPaths.Add($Path) | Out-Null
+        }
+    }
+
+    $snapshotPath = Get-ObjectPropertyValue -Object (Get-ObjectPropertyValue -Object $SourceLock -Name 'snapshot') -Name 'path'
+    if ((Get-ObjectPropertyValue -Object $SourceLock -Name 'schema_version') -cne 'inputcodex.source-lock.v1' -or
+        $snapshotPath -cne 'upstream/CodexPlusPlus') {
+        Add-IntegrityProblem 'source-lock schema 或 snapshot.path 漂移'
+    }
+
+    $filesProperty = if ($null -ne $SourceLock) { $SourceLock.PSObject.Properties['files'] } else { $null }
+    if ($null -eq $filesProperty -or $filesProperty.Value -isnot [System.Array] -or $filesProperty.Value.Count -eq 0) {
+        Add-IntegrityProblem 'source-lock files 必须为非空数组'
+    }
+    $files = if ($null -ne $filesProperty -and $filesProperty.Value -is [System.Array]) {
+        @($filesProperty.Value)
+    } else {
+        @()
+    }
+
+    $expected = [Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)
+    $previousPath = $null
+    foreach ($file in $files) {
+        $path = Get-ObjectPropertyValue -Object $file -Name 'path'
+        $mode = Get-ObjectPropertyValue -Object $file -Name 'mode'
+        $size = Get-ObjectPropertyValue -Object $file -Name 'size'
+        $blob = Get-ObjectPropertyValue -Object $file -Name 'git_blob_sha1'
+        $sha256 = Get-ObjectPropertyValue -Object $file -Name 'sha256'
+        if (-not (Test-SafeSnapshotRelativePath $path) -or
+            $mode -isnot [string] -or $mode -notin @('100644', '100755') -or
+            $size -isnot [long] -or $size -lt 0 -or
+            [string]$blob -cnotmatch '^[0-9a-f]{40}$' -or
+            [string]$sha256 -cnotmatch '^[0-9a-f]{64}$') {
+            Add-IntegrityProblem 'source-lock file 记录 schema 无效' ([string]$path)
+            continue
+        }
+        if ($null -ne $previousPath -and [StringComparer]::Ordinal.Compare($previousPath, $path) -ge 0) {
+            Add-IntegrityProblem 'source-lock files 必须按 Ordinal 严格递增且无重复' $path
+        }
+        $previousPath = $path
+        if ($expected.ContainsKey($path)) {
+            Add-IntegrityProblem 'source-lock files 包含重复路径' $path
+            continue
+        }
+        $expected.Add($path, $file)
+    }
+
+    $projection = $null
+    try {
+        $projection = Get-GitSnapshotProjection -RepositoryRoot $RepositoryRoot -SnapshotPath 'upstream/CodexPlusPlus'
+    }
+    catch {
+        Add-IntegrityProblem "无法读取快照 Git 投影：$($_.Exception.Message)"
+    }
+    $actual = [Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)
+    if ($null -ne $projection) {
+        foreach ($entry in @($projection.entries)) {
+            if (-not (Test-SafeSnapshotRelativePath $entry.path) -or $entry.type -cne 'blob' -or
+                $entry.mode -notin @('100644', '100755') -or $actual.ContainsKey($entry.path)) {
+                Add-IntegrityProblem 'Git 快照包含非法、非 blob 或重复 entry' $entry.path
+                continue
+            }
+            $actual.Add($entry.path, $entry)
+        }
+    }
+
+    foreach ($path in $expected.Keys) {
+        if (-not $actual.ContainsKey($path)) { Add-IntegrityProblem 'Git 快照缺少 source-lock 路径' $path }
+    }
+    foreach ($path in $actual.Keys) {
+        if (-not $expected.ContainsKey($path)) { Add-IntegrityProblem 'Git 快照包含 source-lock 外路径' $path }
+    }
+
+    $manifestBuilder = [Text.StringBuilder]::new()
+    $totalBytes = 0L
+    $largest = $null
+    $directorySet = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($file in $files) {
+        $path = Get-ObjectPropertyValue -Object $file -Name 'path'
+        if ($path -isnot [string] -or -not $expected.ContainsKey($path) -or -not $actual.ContainsKey($path)) { continue }
+        $entry = $actual[$path]
+        if ($entry.mode -cne (Get-ObjectPropertyValue -Object $file -Name 'mode')) {
+            Add-IntegrityProblem 'Git mode 与 source-lock 不一致' $path
+        }
+        if ($entry.git_blob_sha1 -cne (Get-ObjectPropertyValue -Object $file -Name 'git_blob_sha1')) {
+            Add-IntegrityProblem 'Git blob 与 source-lock 不一致' $path
+        }
+        try {
+            [byte[]]$blobBytes = Get-GitBlobBytes -RepositoryRoot $RepositoryRoot -BlobOid $entry.git_blob_sha1
+            $actualSize = [long]$blobBytes.Length
+            $actualSha256 = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($blobBytes)).ToLowerInvariant()
+            if ($actualSize -ne (Get-ObjectPropertyValue -Object $file -Name 'size')) {
+                Add-IntegrityProblem 'Git blob 字节数与 source-lock 不一致' $path
+            }
+            if ($actualSha256 -cne (Get-ObjectPropertyValue -Object $file -Name 'sha256')) {
+                Add-IntegrityProblem 'Git blob SHA-256 与 source-lock 不一致' $path
+            }
+            [void]$manifestBuilder.Append($actualSha256).Append('  ').Append($path).Append("`n")
+            $totalBytes += $actualSize
+            if ($null -eq $largest -or $actualSize -gt $largest.size -or
+                ($actualSize -eq $largest.size -and [StringComparer]::Ordinal.Compare($path, $largest.path) -lt 0)) {
+                $largest = [pscustomobject][ordered]@{
+                    path = $path
+                    mode = $entry.mode
+                    size = $actualSize
+                    git_blob_sha1 = $entry.git_blob_sha1
+                    sha256 = $actualSha256
+                }
+            }
+        }
+        catch {
+            Add-IntegrityProblem "无法读取 Git blob：$($_.Exception.Message)" $path
+        }
+
+        $segments = $path.Split('/')
+        for ($depth = 1; $depth -lt $segments.Length; $depth += 1) {
+            [void]$directorySet.Add([string]::Join('/', $segments[0..($depth - 1)]))
+        }
+    }
+
+    $manifest = Get-ObjectPropertyValue -Object $SourceLock -Name 'manifest'
+    $manifestHash = [Convert]::ToHexString(
+        [Security.Cryptography.SHA256]::HashData([Text.UTF8Encoding]::new($false).GetBytes($manifestBuilder.ToString()))
+    ).ToLowerInvariant()
+    if ((Get-ObjectPropertyValue -Object $manifest -Name 'algorithm') -cne 'sha256' -or
+        (Get-ObjectPropertyValue -Object $manifest -Name 'format') -cne '<sha256><two spaces><posix path><newline>' -or
+        (Get-ObjectPropertyValue -Object $manifest -Name 'sha256') -cne $manifestHash -or
+        (Get-ObjectPropertyValue -Object $manifest -Name 'file_count') -isnot [long] -or
+        (Get-ObjectPropertyValue -Object $manifest -Name 'file_count') -ne $files.Count -or
+        (Get-ObjectPropertyValue -Object $manifest -Name 'total_bytes') -isnot [long] -or
+        (Get-ObjectPropertyValue -Object $manifest -Name 'total_bytes') -ne $totalBytes) {
+        Add-IntegrityProblem 'manifest hash、计数或总字节漂移'
+    }
+    $largestFile = Get-ObjectPropertyValue -Object $manifest -Name 'largest_file'
+    if ($null -eq $largest -or $null -eq $largestFile -or
+        (Get-ObjectPropertyValue -Object $largestFile -Name 'path') -cne $largest.path -or
+        (Get-ObjectPropertyValue -Object $largestFile -Name 'mode') -cne $largest.mode -or
+        (Get-ObjectPropertyValue -Object $largestFile -Name 'size') -ne $largest.size -or
+        (Get-ObjectPropertyValue -Object $largestFile -Name 'git_blob_sha1') -cne $largest.git_blob_sha1 -or
+        (Get-ObjectPropertyValue -Object $largestFile -Name 'sha256') -cne $largest.sha256) {
+        Add-IntegrityProblem 'manifest largest_file 漂移'
+    }
+
+    $tree = Get-ObjectPropertyValue -Object $SourceLock -Name 'tree'
+    $snapshot = Get-ObjectPropertyValue -Object $SourceLock -Name 'snapshot'
+    if ($null -eq $projection -or
+        (Get-ObjectPropertyValue -Object $tree -Name 'sha') -cne $projection.tree_oid -or
+        (Get-ObjectPropertyValue -Object $snapshot -Name 'commit_tree') -cne $projection.tree_oid -or
+        (Get-ObjectPropertyValue -Object $tree -Name 'file_count') -isnot [long] -or
+        (Get-ObjectPropertyValue -Object $tree -Name 'file_count') -ne $files.Count -or
+        (Get-ObjectPropertyValue -Object $tree -Name 'directory_count') -isnot [long] -or
+        (Get-ObjectPropertyValue -Object $tree -Name 'directory_count') -ne $directorySet.Count -or
+        (Get-ObjectPropertyValue -Object $tree -Name 'entry_count') -isnot [long] -or
+        (Get-ObjectPropertyValue -Object $tree -Name 'entry_count') -ne ($files.Count + $directorySet.Count) -or
+        (Get-ObjectPropertyValue -Object $tree -Name 'submodule_count') -isnot [long] -or
+        (Get-ObjectPropertyValue -Object $tree -Name 'submodule_count') -ne 0) {
+        Add-IntegrityProblem 'Git tree 与 source-lock tree 统计漂移'
+    }
+
+    if ($problems.Count -ne 0) {
+        Add-ReleaseAuditError `
+            -Code 'UPSTREAM_SNAPSHOT_INTEGRITY_INVALID' `
+            -Message ([string]::Join('；', $problems)) `
+            -Paths $problemPaths.ToArray()
+    }
+}
+
 function Test-BlockedProductPath {
     param(
         [Parameter(Mandatory)]
@@ -274,6 +551,7 @@ $headSourceLock = Read-JsonObject `
     -ErrorCode 'RELEASE_AUDIT_INVALID' `
     -ErrorMessage '无法读取当前 source-lock'
 $headState = Get-ReleaseAuditState -SourceLock $headSourceLock -Location '当前 source-lock'
+Test-UpstreamSnapshotIntegrity -RepositoryRoot $resolvedRepositoryRoot -SourceLock $headSourceLock
 
 if (-not $hasInputFile) {
     Write-Result `

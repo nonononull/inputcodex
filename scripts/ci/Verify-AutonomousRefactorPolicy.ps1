@@ -198,15 +198,34 @@ foreach ($requiredFlag in @(
 }
 
 $workflowExpectations = [ordered]@{
-    'CI' = @('classify', 'governance', 'release-audit', 'linux-quality', 'windows', 'macos', 'required')
-    'Performance Baseline' = @('contract', 'windows', 'macos', 'required')
+    'CI' = [pscustomobject][ordered]@{
+        workflow_id = 318067078L
+        path = '.github/workflows/ci.yml'
+        events = @('pull_request', 'push')
+        jobs = @('classify', 'governance', 'release-audit', 'linux-quality', 'windows', 'macos', 'required')
+    }
+    'Performance Baseline' = [pscustomobject][ordered]@{
+        workflow_id = 320393981L
+        path = '.github/workflows/performance-baseline.yml'
+        events = @('pull_request', 'push')
+        jobs = @('contract', 'windows', 'macos', 'required')
+    }
 }
 $workflows = @(Get-PropertyValue $mergeGate 'required_workflows')
 foreach ($workflowName in $workflowExpectations.Keys) {
     $matches = @($workflows | Where-Object { (Get-PropertyValue $_ 'name') -ceq $workflowName })
-    if ($matches.Count -ne 1 -or
-        -not (Test-ExactStringSet -Actual (Get-PropertyValue $matches[0] 'jobs') -Expected $workflowExpectations[$workflowName])) {
+    if ($matches.Count -ne 1) {
         Add-Violation 'WORKFLOW_GATE' "Workflow Job 集合漂移：$workflowName"
+        continue
+    }
+    $expectation = $workflowExpectations[$workflowName]
+    if (-not (Test-ExactStringSet -Actual (Get-PropertyValue $matches[0] 'jobs') -Expected $expectation.jobs)) {
+        Add-Violation 'WORKFLOW_GATE' "Workflow Job 集合漂移：$workflowName"
+    }
+    if (-not (Test-ExactJsonInt64 -Actual (Get-PropertyValue $matches[0] 'workflow_id') -Expected $expectation.workflow_id) -or
+        (Get-PropertyValue $matches[0] 'path') -cne $expectation.path -or
+        -not (Test-ExactStringSet -Actual (Get-PropertyValue $matches[0] 'events') -Expected $expectation.events)) {
+        Add-Violation 'WORKFLOW_IDENTITY' "Workflow ID、path 或事件集合漂移：$workflowName"
     }
 }
 if ($workflows.Count -ne $workflowExpectations.Count) {
@@ -313,6 +332,7 @@ $result = [pscustomobject][ordered]@{
         required_workflow = $upstreamSyncRequiredWorkflow
         required_job = $upstreamSyncRequiredJob
     }
+    required_workflows = @($workflows)
     violation_count = $violations.Count
     violations = @($violations)
 }
