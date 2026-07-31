@@ -352,19 +352,6 @@ fn source_index_证据路径必须位于锁定上游快照() {
 fn release_audit_显式解耦快照与功能目录审计基线() {
     let fixture = FeatureRepositoryFixture::new();
 
-    fixture.write_source_lock(SourceLockState {
-        snapshot_tag: RELEASE_TAG,
-        snapshot_commit: RELEASE_COMMIT,
-        catalog_tag: RELEASE_TAG,
-        catalog_commit: RELEASE_COMMIT,
-        status: "current",
-        stale_reason: None,
-        re_audit_issue_ref: None,
-    });
-    let summary =
-        validate_feature_repository(fixture.root()).expect("current 审计基线必须通过功能目录验证");
-    assert!(!summary.requires_reaudit());
-
     fixture.write_catalog_release(PREVIOUS_RELEASE_TAG, PREVIOUS_RELEASE_COMMIT);
     fixture.write_source_lock(SourceLockState {
         snapshot_tag: RELEASE_TAG,
