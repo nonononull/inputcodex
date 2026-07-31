@@ -26,7 +26,7 @@ git diff --check
 
 路径范围、Markdown 链接和任务特有内容守卫由对应 Session Plan 与 Runtime Workflow 定义。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供三十二个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供三十三个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -60,6 +60,7 @@ git diff --check
 30. Issue `#104` 二十九路径、只读 SQLite 会话目录、多来源排序/去重、分页、超时取消、最小披露和最终本地轻量门禁验证。
 31. Issue `#105` 九路径、quick-xml 两条 high RustSec 公告、精确两 package 锁文件升级、许可证和 audit RED/GREEN 验证。
 32. Issue `#109` 二十九路径、严格只读 SQLite、受控 rollout、确定性 Markdown、隐私边界和最终本地轻量门禁验证。
+33. Issue `#111` 十二路径、bounded standing authorization、离线自治策略、单写者、精确 Head 合并门、状态恢复和最终本地轻量门禁验证。
 
 当前禁止：
 
@@ -83,6 +84,97 @@ git diff --check
 - 在 Issue `#101` 中接受任意路径或配置正文、返回完整 TOML/摘要/命令/参数/环境变量/Header/URL/Token/账号/实际路径、写文件、联网、调用子进程、启动线程/Watcher、打开 UI、注入、使用 `unsafe`、新增依赖、迁移上下文增加/删除/同步/提取/设置正文解析、修改 Workflow/Ruleset/Release/`upstream/` 或 AGOS。
 - 在 Issue `#105` 中修改 `Cargo.toml`、升级 Iced/winit/smithay、改产品功能/UI/Workflow/Ruleset/Runner/`upstream/`/AGOS，或让 `Cargo.lock` 出现 `wayland-scanner` 与 `quick-xml` 之外的 package 变化。
 - 在 Issue `#109` 中接受任意 SQLite、rollout、输出路径或 Markdown 正文，写文件，打开 UI，联网，调用子进程，启动永久线程/Watcher，返回内部角色、远程图片 URL、完整会话 ID、真实路径或原始错误，新增依赖家族，迁移第二个 feature，或修改 Cargo/Workflow/Ruleset/Runner/Release/`upstream/`/AGOS。
+
+- 在 Issue `#111` 中修改产品代码、Cargo、Workflow、Runner、Release、`upstream/`、Ruleset 或 AGOS，启用 GitHub 原生 auto-merge，创建付费/self-hosted Runner，迁移产品功能，或削弱精确 Final Head、scope hash、独立复审、Review thread、Hosted CI、Artifact、release audit、origin/main freshness 和主干验证。
+
+## Issue #111 无人值守重构控制面本地轻量验证
+
+在仓库根目录、分支 `codex/issue-111-autonomous-refactor-control-plane` 执行。该任务不编译 Rust
+Workspace，也不创建或运行付费/self-hosted Runner；完整三平台验证继续由标准 GitHub-hosted
+Actions 执行。
+
+    $ErrorActionPreference = 'Stop'
+
+    function Assert-NativeSuccess {
+      param([Parameter(Mandatory)][string]$Label)
+      if ($LASTEXITCODE -ne 0) { throw "$Label 失败：$LASTEXITCODE" }
+    }
+
+    Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+    $branch = git branch --show-current
+    Assert-NativeSuccess 'Issue #111 分支读取'
+    if ($branch -ne 'codex/issue-111-autonomous-refactor-control-plane') {
+      throw "Issue #111 分支错误：$branch"
+    }
+
+    pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+    Assert-NativeSuccess 'Issue #111 CI 合同'
+
+    pwsh -NoProfile -File scripts/ci/Verify-AutonomousRefactorPolicy.ps1 -RepositoryRoot . -PolicyPath .github/autonomous-refactor-policy.json
+    Assert-NativeSuccess 'Issue #111 自治策略'
+
+    pwsh -NoProfile -File scripts/automation/Get-AutonomousRefactorState.ps1 -RepositoryRoot . -PolicyPath .github/autonomous-refactor-policy.json -ReportOnly | Out-Null
+    Assert-NativeSuccess 'Issue #111 状态解析'
+
+    pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+    Assert-NativeSuccess 'Issue #111 仓库政策'
+
+    pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+    Assert-NativeSuccess 'Issue #111 Release Audit'
+
+    $approved = @(
+      '.github/autonomous-refactor-policy.json',
+      'AGENTS.md',
+      'build.md',
+      'docs/plans/2026-07-31-issue-111-autonomous-refactor-control-plane.md',
+      'docs/plans/PROJECT-MASTER-PLAN.md',
+      'docs/plans/sessions/2026-07-31-issue-111-autonomous-refactor-control-plane.md',
+      'docs/reports/issue-111-autonomous-refactor-control-plane.md',
+      'docs/workflows/2026-07-31-issue-111-autonomous-refactor-control-plane-runtime.md',
+      'err.md',
+      'scripts/automation/Get-AutonomousRefactorState.ps1',
+      'scripts/ci/Test-CiScripts.ps1',
+      'scripts/ci/Verify-AutonomousRefactorPolicy.ps1'
+    ) | Sort-Object
+    $scopePayload = [string]::Join([char]10, $approved) + [char]10
+    $scopeHash = [Convert]::ToHexString(
+      [Security.Cryptography.SHA256]::HashData(
+        [Text.UTF8Encoding]::new($false).GetBytes($scopePayload)
+      )
+    ).ToLowerInvariant()
+    if ($approved.Count -ne 12) { throw "Issue #111 路径数量漂移：$($approved.Count)" }
+    if ($scopeHash -ne '5d1f609ca2a5913e4e5df21f0fd04d6de2c6731cdd71d641812fbee80b5ad713') {
+      throw "Issue #111 scope_hash 漂移：sha256:$scopeHash"
+    }
+
+    $actual = @(
+      git -c core.quotePath=false diff --no-renames --name-only origin/main...HEAD
+      git -c core.quotePath=false diff --cached --no-renames --name-only
+      git -c core.quotePath=false diff --no-renames --name-only
+      git -c core.quotePath=false ls-files --others --exclude-standard
+    ) | Where-Object { $_ } | Sort-Object -Unique
+    $outside = @($actual | Where-Object { $_ -notin $approved })
+    if ($outside.Count -ne 0) { throw "Issue #111 越界路径：$($outside -join ', ')" }
+
+    foreach ($forbidden in @(
+      'Cargo.toml',
+      'Cargo.lock',
+      '.github/workflows/',
+      'apps/',
+      'crates/',
+      'parity/',
+      'upstream/'
+    )) {
+      if (@($actual | Where-Object { $_ -eq $forbidden -or $_.StartsWith($forbidden) }).Count -ne 0) {
+        throw "Issue #111 触及禁止表面：$forbidden"
+      }
+    }
+
+    git diff --check origin/main
+    Assert-NativeSuccess 'Issue #111 Git 空白检查'
+
+    Write-Output "ISSUE_111_LOCAL_GREEN scope=$($actual.Count) candidate_hash=sha256:$scopeHash"
 
 ## Issue #109 受控会话 Markdown 生成本地轻量验证
 

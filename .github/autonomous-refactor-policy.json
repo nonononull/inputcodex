@@ -1,0 +1,81 @@
+{
+  "schema_version": "inputcodex.autonomous-refactor-policy.v1",
+  "enabled": true,
+  "authorization": {
+    "mode": "bounded-standing-v1",
+    "owner_authorization_ref": "https://github.com/nonononull/inputcodex/issues/111",
+    "exact_head_binding": true,
+    "policy_hash_binding": true,
+    "refresh_on_head_change": true
+  },
+  "execution": {
+    "base_ref": "origin/main",
+    "max_active_writers": 1,
+    "max_active_product_issues": 1,
+    "max_active_product_prs": 1,
+    "local_full_workspace_build": false,
+    "github_hosted_full_validation": true,
+    "decision_order": [
+      "performance-first",
+      "release-parity",
+      "minimal-read-only-slice",
+      "typed-owner-before-side-effects",
+      "fail-closed-and-continue"
+    ]
+  },
+  "merge_gate": {
+    "method": "squash",
+    "github_native_auto_merge": false,
+    "required_mergeable_state": "CLEAN",
+    "required_release_audit": "current",
+    "required_review_threads": 0,
+    "required_artifacts": 0,
+    "require_origin_main_freshness": true,
+    "require_tree_equivalence": true,
+    "require_single_parent": true,
+    "require_valid_github_signature": true,
+    "required_workflows": [
+      {
+        "name": "CI",
+        "jobs": [
+          "classify",
+          "governance",
+          "release-audit",
+          "linux-quality",
+          "windows",
+          "macos",
+          "required"
+        ]
+      },
+      {
+        "name": "Performance Baseline",
+        "jobs": [
+          "contract",
+          "windows",
+          "macos",
+          "required"
+        ]
+      }
+    ]
+  },
+  "retry": {
+    "max_attempts": 3,
+    "max_iteration_minutes": 180,
+    "external_wait_seconds": 120
+  },
+  "ui": {
+    "owner": "Gemini",
+    "fallback_allowed": false
+  },
+  "hard_stops": [
+    "paid-runner",
+    "self-hosted-runner",
+    "secret-or-signing",
+    "formal-release",
+    "license-conflict",
+    "force-push-main",
+    "delete-main",
+    "ruleset-bypass"
+  ],
+  "first_candidate": "feature.session-data.token-usage-history"
+}

@@ -975,6 +975,42 @@
 - 验证：初始 CI Run `30549071963` 稳定复现共享失败；修正后继续执行 Platform `21/21`、四 crate 本地门禁与 GitHub-hosted macOS Workspace 全目标测试，最终远端证据保留在 PR `#110`。
 - 关联：Issue `#109`、PR `#110`、`crates/inputcodex-platform/tests/markdown_generation.rs`。
 
+### 2026-07-31：PowerShell live Count 与 JSON 快照整数类型不同导致严格状态校验误报
+
+- 环境：Issue #111 的只读自治状态解析器同时支持 live 内存快照和 JSON 夹具；脚本使用 Set-StrictMode，并要求 active_writer_count 为有界整数。
+- 现象：十组 JSON 快照合同全部通过，但 live ReportOnly 稳定返回 AUTONOMOUS_STATE_INVALID_SNAPSHOT；Git、GitHub、Release Audit、Paseo 和三个 SHA 字段均正常。
+- 根因：Paseo CLI 空数组的 .Count 在 live PowerShell 对象中是 System.Int32；同一数字经 ConvertFrom-Json 后是 System.Int64。解析器只接受 Int64，导致 live 与测试输入在值相同的情况下类型不同。
+- 处理：保持严格整数 schema，不扩大为任意字符串或浮点；只在 live 采集边界将 writer count 显式转换为 Int64，再进入共享状态分类。
+- 验证：修复前 live 命令稳定失败；修复后返回 active-worktree-execution / resume-worktree，保留 Issue #111、base/head 和策略 hash；完整 CI 合同为 54/54。
+- 关联：Issue #111、scripts/automation/Get-AutonomousRefactorState.ps1、scripts/ci/Test-CiScripts.ps1。
+
+### 2026-07-31：PowerShell 宽松比较与集合比较会削弱机器策略 schema
+
+- 环境：Issue #111 的自治策略验证器通过 `ConvertFrom-Json` 读取机器策略，并用 PowerShell 比较布尔、整数和有序决策列表。
+- 现象：把 JSON 布尔与整数改成字符串 `"true"`、`"false"`、`"1"`、`"0"` 后仍返回 `ok=true`；交换 `performance-first` 与 `release-parity` 后也通过验证。
+- 根因：PowerShell 的 `-eq` / `-ne` 会按左操作数类型执行宽松转换，字符串可与布尔或整数比较为相等；原 `Test-ExactStringSet` 会排序后比较，只验证成员集合，无法证明决策优先级顺序。
+- 处理：对 JSON 布尔和整数同时校验运行时类型与精确值；新增有序字符串序列比较用于 `decision_order`，工作流 Job 继续按无序集合验证。
+- 验证：两条专项合同先稳定 RED，分别证明字符串伪装和顺序重排被错误接受；修复后完整 CI 合同为 58/58，合法策略 hash 仍为 `sha256:2cb8467153892fcb1510c86cdcb186cd9dabc3d4f08055ec9c503b823d760275`。
+- 关联：Issue #111、scripts/ci/Verify-AutonomousRefactorPolicy.ps1、scripts/ci/Test-CiScripts.ps1。
+
+### 2026-07-31：PowerShell 会展开集合返回值并自动转换 ISO JSON 时间
+
+- 环境：Issue #111 的状态解析器以函数封装 JSON 属性读取，并通过 GitHub REST `--paginate --slurp` 同时处理空数组、单元素数组和已合并 PR 时间。
+- 现象：函数返回空数组时调用方得到 `$null`，单元素数组时得到标量，严格数组门误拒合法 live 快照；切换到全状态 PR 后，GitHub 的 `merged_at` JSON 字符串又被 PowerShell 7 自动解析为 `System.DateTime`，导致字符串 schema 拒绝全部历史 merged PR。
+- 根因：PowerShell 函数输出和 `if { @() }` 表达式会经管道枚举集合，无法保留零/一元素数组身份；`ConvertFrom-Json` 会对 ISO 8601 字符串应用日期推断，运行时类型不必等于 JSON 词法类型。
+- 处理：数组属性通过 `PSPropertyInfo.Value` 直接读取并先显式初始化后赋值；外部 JSON 使用 `-NoEnumerate` 和严格 root/page schema；`merged_at` 仅在采集边界接受 `string|DateTime` 并规范化为 UTC ISO 字符串。
+- 验证：各问题均先由 live 或专项合同稳定复现；修复后 live 返回 active-worktree-execution / resume-worktree，Planning Freeze 为有效 owner 证据，完整 CI 合同为 65/65。
+- 关联：Issue #111、scripts/automation/Get-AutonomousRefactorState.ps1、scripts/ci/Test-CiScripts.ps1。
+
+### 2026-07-31：PowerShell PR 投影变量覆盖工作树 Head
+
+- 环境：Issue #111 已创建 PR #112，状态解析器首次在同一次 live 采集中同时处理本地 Git Head 和活动 PR 的 GitHub head 对象。
+- 现象：离线合同 65/65、无 PR 的 live 状态和 PR 两套 Actions 均正常，但 `Get-AutonomousRefactorState.ps1 -ReportOnly` 稳定以退出码 11 返回 `AUTONOMOUS_STATE_INVALID_SNAPSHOT`。类型追踪显示 `worktree_head` 从 40 位 SHA 变成了 PR head `PSCustomObject`。
+- 根因：`Get-LiveSnapshot` 先把 `git rev-parse HEAD` 保存到函数级 `$head`；随后 `ForEach-Object` 的 PR 投影再次执行 `$head = Get-PropertyValue $_ 'head'`。PowerShell 脚本块共享调用作用域，后一次赋值覆盖前者，最终快照把 PR 对象写入 `worktree_head`。
+- 处理：把本地 Git Head 改存到专用 `$worktreeHead`，快照只引用该变量；新增 AST 数据流合同，自动识别 `rev-parse HEAD` 的目标变量，按 PowerShell 大小写不敏感语义要求全函数含嵌套脚本块只写一次，并要求快照回写同一变量。
+- 验证：新增合同先单独 RED，错误为“live 工作树 Head 必须使用独立变量采集”；最小修复后完整 CI 合同为 66/66。真实 PR #112 live 再次退出 0，`observed_head` 恢复为 40 位当前已提交 Head，并按脏工作树优先级返回 active-worktree-execution / resume-worktree；内存变异进一步证明同名、仅大小写不同的二次赋值均被拒绝，而安全改名通过。
+- 关联：Issue #111、PR #112、scripts/automation/Get-AutonomousRefactorState.ps1、scripts/ci/Test-CiScripts.ps1。
+
 ## 记录模板
 
 ```text

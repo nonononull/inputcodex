@@ -40,6 +40,8 @@
 - 永久禁止删除 `main`，项目所有者和管理员也不例外；若发生误删，必须从删除前最后一个权威提交恢复同名分支并建立事故 Issue，不得借恢复改写历史。
 - 所有 Review 对话必须在合并 PR 前解决；每条解决记录必须写明根因、处理方式和验证证据。若反馈被判定为不成立，必须提供可复核证据并取得 reviewer 或项目所有者确认；禁止仅点击 `Resolve conversation`、忽略根因或带着未解决对话合并。
 - 仓库只有一名具备合并权限的人类维护者时，平台 required approvals 设为 `0`，但每次合并前必须在关联 Issue 或 PR 中保留项目所有者的明确决策证据。
+- Issue #111 合并后的 bounded standing authorization 可替代常规重构逐 PR 的即时人工意见；每次自动合并仍必须在关联 PR 绑定精确 Final Head、自治策略版本和 owner authorization ref，Head 或策略变化后必须重新计算并回写证据。
+- 常规重构的自动 Squash Merge 只能由项目自治执行器在本地门禁、独立只读复审、Review 对话、Hosted CI、Artifact、release audit、scope hash 和 origin/main freshness 全部通过后执行；GitHub 原生 auto-merge 保持关闭。
 - 当第二名具备 `write`、`maintain` 或 `admin` 权限的人类维护者加入时，必须在下一次 PR 合并前把 required approvals 提升为 `1`；Bot、GitHub App 和自动化账号不计入维护者人数。
 - 上游缓存同步 PR 只能更新 `upstream/` 与同步报告；功能重构必须使用独立 Issue 和 PR。
 - 客户端更新、安装包、签名和下载地址只能指向 `nonononull/inputcodex`。
@@ -126,3 +128,5 @@
 - Issue `#108` 已批准 Markdown 方案 A 并按 `COMPLETED` 关闭：受控会话 Markdown 内存生成与文件保存/UI 分离，真正的保存对话框、覆盖确认和原子文件写入不得进入首个生成切片。
 - Issue `#109` 是第十一个 Gate 5 产品切片：只接管 `feature.session-data.markdown-generation`，输入既有本地会话 ID，经严格只读 SQLite 与受控 rollout 生成确定性 Markdown；禁止任意路径、文件写入、UI、网络、内部角色、远程图片 URL、真实路径或原始错误披露。
 - Issue `#109` 固定二十九路径与 `sha256:b113da5d41514f50e36cef7d4eb9ade89e2562cbcfe8d392a5173d38fd0ebaac`；无新可复用根因时实际范围排除 `err.md`，为二十八路径与 `sha256:3d19b05918c8294f050f3f0c83f9118453705afd8aad016827fafb477e74a50b`。最终 Squash Merge 仍需绑定 Final Head 的独立授权。
+- Issue #109 / PR #110 已完成第十一个 Gate 5 受控会话 Markdown 生成切片；Final Head 5d65375a0517204bed961b82f0672e08abe7df60 以单父 Squash 提交 86a7dd837652f63198c7682b84d82180b8558e3a 进入 main，Issue 已按 COMPLETED 关闭，合并后 CI 七 Job、Performance Baseline 四 Job 全绿且 Artifact 均为 0。
+- Issue #111 是 Gate 5 无人值守重构控制面任务；只允许治理文档、机器策略、离线验证器和自治状态解析器，不得迁移产品功能、修改 Cargo、Workflow、Runner、Release、upstream、Ruleset 或 AGOS。候选范围为十二路径与 sha256:5d1f609ca2a5913e4e5df21f0fd04d6de2c6731cdd71d641812fbee80b5ad713。
