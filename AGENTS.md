@@ -137,3 +137,7 @@
 - Issue `#123` / PR `#124` 已完成上述一致性例外纠正；Final Head `6a356fb0179fba026c75812664e2adb4b1b3ef7f` 以单父 Squash 提交 `43ace17de1505f251812e4ead3035ef3274a8455` 进入 `main`，合并后主干 CI Run `30694668765` 七 Job、Performance Baseline Run `30694668773` 四 Job全绿且 Artifact 均为 `0`。
 - Issue `#125` 与 `#126` 已分别证明 rollout Token 历史缺少独立 source owner、Sub2API 缺少 typed Relay profile/credential owner 与共享 HTTP transport；两项均按 standing authorization 采用零改动延期，不得把 Discovery 解释为产品能力已实现。
 - Issue `#127` 已批准只把 `tauri-command:load_watcher_state` 拆为 Watcher 偏好状态只读观察；Issue `#128` 固定二十四路径与 `sha256:0be3dd45ed7e91d1cb7f633da369bb2b9052cefc512852d80362775da7e81699`，只允许检查 `inputcodex_state_root/watcher.disabled` 的元数据，不得读取内容、回显路径、写文件、控制进程或冒充安装/运行状态。
+- Issue `#128` / PR `#129` 已完成第十二个 Gate 5 Watcher 偏好状态只读观察切片；Final Head `79351f72572c86d41db63657771e5f8c6194b45f` 以单父 Squash 提交 `da035b3a6e8ddab9b7c6948ef115ed8b561aa1f4` 进入 `main`。
+- Issue `#130` 已证明会话索引清理预览虽可安全重写，但扫描面和依赖成本高于当前最小候选；按性能优先零改动延期，不得解释为永久拒绝或已经实现。
+- Issue `#131` 已批准从完整 Zed Remote 工作流中只拆出 `list_zed_remote_projects`：排除 legacy Recent registry，只返回 SHA-256 稳定假名、来源、选择提示和来源覆盖；完整打开、记忆、遗忘、启动与进程控制继续 `unassessed`。
+- Issue `#132` 固定二十八路径与 `sha256:7ee5d47dca72d0d2f1ec683cc45e4bbac0e3ce40af1e57417d39608c8c0c26bb`；唯一新增直接依赖为 `sha2 = 0.10.9`，禁止返回 label、SSH 目标、远程路径、URL、时间戳、实际路径、内容、凭据或原始错误。

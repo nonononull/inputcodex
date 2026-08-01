@@ -9,7 +9,7 @@ GitHub Issue、PR 与 Actions。
 
 Gate 3 七成员 Rust Workspace、Gate 4 上游审计/功能目录/性能基线，以及 Gate 5 的平台路径、
 应用概览、版本与启动意图、运行时环境冲突、Relay 环境、设置、诊断日志、Relay 状态、上下文
-条目、本地会话目录和受控会话 Markdown 能力已经建立；Watcher 偏好状态观察正在 Issue `#128` 中实施。
+条目、本地会话目录、受控会话 Markdown 和 Watcher 偏好状态观察已经建立；Zed 远程项目只读观察正在 Issue `#132` 中实施。
 该说明只用于选择正确命令，不能替代任务计划和 GitHub 新鲜证据。
 
 ## 文档变更轻量验证
@@ -26,7 +26,7 @@ git diff --check
 
 路径范围、Markdown 链接和任务特有内容守卫由对应 Session Plan 与 Runtime Workflow 定义。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供三十六个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供三十七个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -64,6 +64,7 @@ git diff --check
 34. Issue `#115` 三十二路径、`v1.2.44` 目录重审、Sub2API 独立能力、受影响行为与脱敏 fixture、Release Audit 恢复验证。
 35. Issue `#123` 十六路径、Local Storage 模型后缀清理重分类、CDP 写入例外、错误 fixture 删除与精确计数验证。
 36. Issue `#128` 二十四路径、固定 Watcher 偏好标记元数据、fail-closed 文件类型、最小披露与单 command Parity 分拆验证。
+37. Issue `#132` 二十八路径、Zed 远程项目固定来源、SHA-256 稳定假名、严格只读 SQLite、来源覆盖与单 command Parity 分拆验证。
 
 当前禁止：
 
@@ -90,6 +91,7 @@ git diff --check
 
 - 在 Issue `#111` 中修改产品代码、Cargo、Workflow、Runner、Release、`upstream/`、Ruleset 或 AGOS，启用 GitHub 原生 auto-merge，创建付费/self-hosted Runner，迁移产品功能，或削弱精确 Final Head、scope hash、独立复审、Review thread、Hosted CI、Artifact、release audit、origin/main freshness 和主干验证。
 - 在 Issue `#128` 中接受任意路径、读取 `watcher.disabled` 内容、返回实际路径、把偏好冒充安装/运行状态、写文件、安装/卸载或启停 Watcher、控制进程、联网、调用子进程、启动线程/真实 Watcher、打开 UI、使用 `unsafe`、新增依赖，或修改 Cargo/Workflow/Ruleset/Release/upstream/AGOS。
+- 在 Issue `#132` 中读取 legacy `zed_remote_projects.json`、SSH config、`auth.json`、私钥、agent 或 Keychain，返回 label/SSH 目标/远程路径/URL/hostId/时间戳/实际路径/内容/凭据/原始错误，写文件或数据库，联网、调用子进程、启动 Zed、使用 `unsafe`，新增 `sha2 0.10.9` 之外的直接依赖，或修改 Workflow/Ruleset/Release/upstream/UI/AGOS。
 
 ## Issue #111 无人值守重构控制面本地轻量验证
 
@@ -4597,6 +4599,129 @@ Write-Output "ISSUE128_LOCAL_VERIFY_OK scope_hash=$scopeHash paths=$($actual.Cou
 期望：四 crate tests/Clippy、rustfmt、CI 合同、自治策略、仓库政策与 Release Audit 全部通过；
 目录计数为 `135/45/45/12/11/3/0`；实际范围精确为 24 路径；生产实现只有固定标记的
 `symlink_metadata`，不读取内容、不返回路径、不写入、不控制进程且不新增依赖。
+
+## Issue #132：Zed 远程项目只读观察本地轻量验证
+
+在 `codex/issue-132-gate-5-zed-remote-project-observation` 分支运行。本机只验证四个受影响 crate、
+唯一依赖差异、治理合同、精确范围和隐私边界；完整 Workspace、Windows/macOS 编译与
+Performance Baseline 交给标准 GitHub-hosted runners。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+function Assert-NativeSuccess {
+  param([Parameter(Mandatory)][string]$Label)
+  if ($LASTEXITCODE -ne 0) { throw "$Label 失败：$LASTEXITCODE" }
+}
+
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+$branch = git branch --show-current
+Assert-NativeSuccess 'Issue #132 分支读取'
+if ($branch -cne 'codex/issue-132-gate-5-zed-remote-project-observation') {
+  throw "Issue #132 分支错误：$branch"
+}
+
+cargo test -p inputcodex-domain -p inputcodex-application -p inputcodex-platform -p inputcodex-parity --all-targets --offline
+Assert-NativeSuccess 'Issue #132 四 crate 测试'
+
+cargo clippy -p inputcodex-domain -p inputcodex-application -p inputcodex-platform -p inputcodex-parity --all-targets --offline -- -D warnings
+Assert-NativeSuccess 'Issue #132 四 crate Clippy'
+
+cargo fmt --all -- --check
+Assert-NativeSuccess 'Issue #132 rustfmt'
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+Assert-NativeSuccess 'Issue #132 CI 合同'
+
+pwsh -NoProfile -File scripts/ci/Verify-AutonomousRefactorPolicy.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #132 自治策略'
+
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #132 Release Audit'
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #132 仓库政策'
+
+cargo metadata --locked --offline --no-deps --format-version 1 | Out-Null
+Assert-NativeSuccess 'Issue #132 Cargo metadata'
+
+$expected = [string[]]@(
+  'AGENTS.md',
+  'CONTEXT.md',
+  'Cargo.lock',
+  'Cargo.toml',
+  'README.md',
+  'build.md',
+  'crates/inputcodex-application/src/lib.rs',
+  'crates/inputcodex-application/src/zed_remote_project_observation.rs',
+  'crates/inputcodex-application/tests/zed_remote_project_observation.rs',
+  'crates/inputcodex-domain/src/lib.rs',
+  'crates/inputcodex-domain/src/zed_remote_project_observation.rs',
+  'crates/inputcodex-domain/tests/zed_remote_project_observation.rs',
+  'crates/inputcodex-parity/tests/catalog_repository.rs',
+  'crates/inputcodex-platform/Cargo.toml',
+  'crates/inputcodex-platform/src/lib.rs',
+  'crates/inputcodex-platform/src/zed_remote_project_observation.rs',
+  'crates/inputcodex-platform/tests/zed_remote_project_observation.rs',
+  'docs/plans/2026-08-02-issue-132-gate-5-zed-remote-project-observation.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-08-02-issue-132-gate-5-zed-remote-project-observation.md',
+  'docs/reports/issue-132-gate-5-zed-remote-project-observation.md',
+  'docs/workflows/2026-08-02-issue-132-gate-5-zed-remote-project-observation-runtime.md',
+  'parity/README.md',
+  'parity/contracts/remote-install.yml',
+  'parity/features/remote-install.yml',
+  'parity/features/source-index.yml',
+  'parity/fixtures/feature.remote-install.zed-remote-project-observation/baseline.yml',
+  'parity/fixtures/feature.remote-install.zed-remote-project-observation/manifest.yml'
+)
+$scope = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+foreach ($path in $expected) {
+  if (-not $scope.Add($path)) { throw "Issue #132 重复路径：$path" }
+}
+$payload = [string]::Join("`n", [string[]]$scope) + "`n"
+$scopeHash = 'sha256:' + [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData([Text.UTF8Encoding]::new($false).GetBytes($payload))
+).ToLowerInvariant()
+if ($scope.Count -ne 28 -or $scopeHash -cne 'sha256:7ee5d47dca72d0d2f1ec683cc45e4bbac0e3ce40af1e57417d39608c8c0c26bb') {
+  throw "Issue #132 批准范围漂移：count=$($scope.Count) hash=$scopeHash"
+}
+
+$actual = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+@(
+  git -c core.quotePath=false diff --no-renames --name-only origin/main...HEAD
+  git -c core.quotePath=false diff --cached --no-renames --name-only
+  git -c core.quotePath=false diff --no-renames --name-only
+  git -c core.quotePath=false ls-files --others --exclude-standard
+) | Where-Object { $_ } | ForEach-Object { [void]$actual.Add($_) }
+if (-not [Linq.Enumerable]::SequenceEqual([string[]]$scope, [string[]]$actual, [StringComparer]::Ordinal)) {
+  throw "Issue #132 实际路径漂移：$([string]::Join(', ', [string[]]$actual))"
+}
+
+$cargoDelta = git diff origin/main -- Cargo.toml crates/inputcodex-platform/Cargo.toml Cargo.lock
+if (($cargoDelta -join "`n") -notmatch 'sha2' -or ($cargoDelta -join "`n") -match '(?i)tokio|async-std|reqwest|url|uuid|hmac') {
+  throw 'Issue #132 Cargo 差异必须只引入 sha2 0.10.9 依赖闭包'
+}
+
+$product = @(
+  'crates/inputcodex-domain/src/zed_remote_project_observation.rs',
+  'crates/inputcodex-application/src/zed_remote_project_observation.rs',
+  'crates/inputcodex-platform/src/zed_remote_project_observation.rs'
+)
+$forbidden = rg -n -i 'zed_remote_projects\.json|auth\.json|ssh/config|private.?key|Keychain|Command::new|TcpStream|reqwest|tokio|std::fs::write|remove_file|create_dir|unsafe' @product
+if ($LASTEXITCODE -eq 0) { throw "Issue #132 禁止能力命中：$($forbidden -join '; ')" }
+if ($LASTEXITCODE -ne 1) { throw "Issue #132 禁止能力扫描失败：$LASTEXITCODE" }
+
+git diff --check origin/main
+Assert-NativeSuccess 'Issue #132 Git 空白检查'
+
+Write-Output "ISSUE132_LOCAL_VERIFY_OK scope_hash=$scopeHash paths=$($actual.Count)"
+```
+
+期望：四 crate tests/Clippy、rustfmt、CI 合同、自治策略、仓库政策与 Release Audit 全部通过；
+目录计数为 `135/46/46/13/11/3/0`；实际范围精确为 28 路径；锁文件只增加 `sha2 0.10.9`
+及其许可证兼容依赖闭包。生产结果只包含稳定假名、origin、选择提示和来源覆盖。
 
 ## 外部 AGOS 使用边界
 

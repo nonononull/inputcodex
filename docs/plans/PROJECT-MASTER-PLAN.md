@@ -1,11 +1,11 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-128-gate-5-watcher-preference-observation
-active_gate: Gate 5 前十一个产品切片、自治控制面、v1.2.44 重审与 Local Storage 例外已进入 main；当前迁移第十二个产品切片
-last_verified_gate: Issue #123 / PR #124 已以单父 Squash 提交 43ace17de1505f251812e4ead3035ef3274a8455 完成 Local Storage 模型后缀清理例外，主干 CI 与 Performance 全绿且 Artifact 为 0
-next_legal_gate: Issue #128 仅在二十四路径内实现 Watcher 偏好状态只读观察；完整 Watcher 管理、rollout Token 历史与 Sub2API 继续等待各自 typed owner
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/128
+active_task: issue-132-gate-5-zed-remote-project-observation
+active_gate: Gate 5 前十二个产品切片、自治控制面、v1.2.44 重审与两项一致性例外已进入 main；当前迁移第十三个产品切片
+last_verified_gate: Issue #128 / PR #129 已以单父 Squash 提交 da035b3a6e8ddab9b7c6948ef115ed8b561aa1f4 完成 Watcher 偏好状态只读观察并通过主干双 Workflow
+next_legal_gate: Issue #132 仅在二十八路径内实现 Zed 远程项目只读观察；完整 Zed Remote 管理、会话索引清理预览、rollout Token 历史与 Sub2API 继续等待各自后续节点
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/132
 active_pr_ref: none
 gate_5_platform_paths_exception_ref: https://github.com/nonononull/inputcodex/issues/74
 gate_5_platform_paths_scope_hash: sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37
@@ -315,7 +315,10 @@ decision_status: issue-123-local-storage-sanitization-exception-approved
 - [x] Issue `#123` / PR `#124` 已纠正 Local Storage 模型后缀清理的真实 CDP/注入写入语义并固定为 `exception-pending`。
 - [x] Issue `#125`、`#126` 已分别把 rollout Token 历史与 Sub2API 延期到 typed source/profile/transport owner 就绪后。
 - [x] Issue `#127` 已批准从 Watcher 管理总功能拆出固定标记元数据观察。
-- [ ] Issue `#128` 在二十四路径内迁移 `feature.foundation-platform.watcher-preference-observation`；只接管 `load_watcher_state`，完整 Watcher 管理继续 `unassessed`。
+- [x] Issue `#128` / PR `#129` 已完成 `feature.foundation-platform.watcher-preference-observation`；只接管 `load_watcher_state`，完整 Watcher 管理继续 `unassessed`。
+- [x] Issue `#130` 已按性能优先把会话索引清理预览零改动延期为后续候选。
+- [x] Issue `#131` 已批准 Zed 远程项目 command-only 安全观察方案 B。
+- [ ] Issue `#132` 在二十八路径内迁移 `feature.remote-install.zed-remote-project-observation`；只接管 `list_zed_remote_projects`，完整 Zed Remote 管理继续 `unassessed`。
 
 ### Gate 6：首个正式版本（锁定）
 
@@ -358,6 +361,9 @@ decision_status: issue-123-local-storage-sanitization-exception-approved
 - Issue `#128` 实施计划：`docs/plans/2026-08-01-issue-128-gate-5-watcher-preference-observation.md`。
 - Issue `#128` Session Plan：`docs/plans/sessions/2026-08-01-issue-128-gate-5-watcher-preference-observation.md`。
 - Issue `#128` Runtime Workflow：`docs/workflows/2026-08-01-issue-128-gate-5-watcher-preference-observation-runtime.md`。
+- Issue `#132` 实施计划：`docs/plans/2026-08-02-issue-132-gate-5-zed-remote-project-observation.md`。
+- Issue `#132` Session Plan：`docs/plans/sessions/2026-08-02-issue-132-gate-5-zed-remote-project-observation.md`。
+- Issue `#132` Runtime Workflow：`docs/workflows/2026-08-02-issue-132-gate-5-zed-remote-project-observation-runtime.md`。
 - Issue `#75` 平台路径设计：`docs/plans/2026-07-27-issue-75-gate-5-platform-paths.md`。
 - Issue `#75` Session Plan：`docs/plans/sessions/2026-07-27-issue-75-gate-5-platform-paths.md`。
 - Issue `#75` Runtime Workflow：`docs/workflows/2026-07-27-issue-75-gate-5-platform-paths-runtime.md`。
@@ -435,3 +441,4 @@ decision_status: issue-123-local-storage-sanitization-exception-approved
 - Issue `#111` 越过十二路径或 `sha256:5d1f609ca2a5913e4e5df21f0fd04d6de2c6731cdd71d641812fbee80b5ad713`，修改产品代码、Cargo、Workflow、Runner、Release、`upstream/`、Ruleset 或 AGOS，启用 GitHub 原生 auto-merge，或削弱精确 Head、CI、Artifact、Review thread、release audit 与 origin/main freshness 任一合并门。
 - Issue `#123` 越过十六路径或 `sha256:aa27e2551cfa743248ef7a2ab53fad5f1a1954b369ae40bf3485ada2099f7bdc`，执行或迁移 CDP、JavaScript、Local Storage/诊断日志写入、rollout Token 历史，修改产品 Rust/Cargo、Workflow、Ruleset、上游快照、README、UI、Release 或 AGOS，或在 Final Head Review/CI/Artifact 闭环前执行 Squash Merge。
 - Issue `#128` 越过二十四路径或 `sha256:0be3dd45ed7e91d1cb7f633da369bb2b9052cefc512852d80362775da7e81699`，读取 `watcher.disabled` 内容或任意路径，回显实际路径，写文件，安装/启停 Watcher，控制进程，新增依赖，修改 Cargo/Workflow/Ruleset/upstream/UI/Release/AGOS，或在 Final Head Review/CI/Artifact 闭环前执行 Squash Merge。
+- Issue `#132` 越过二十八路径或 `sha256:7ee5d47dca72d0d2f1ec683cc45e4bbac0e3ce40af1e57417d39608c8c0c26bb`，读取 legacy Recent registry/SSH config/认证材料，返回 label/SSH 目标/远程路径/URL/时间戳/实际路径/内容/原始错误，引入 `sha2 0.10.9` 之外的直接依赖，写入、网络、进程/UI/unsafe，修改 Workflow/Ruleset/upstream/Release/AGOS，或在 Final Head Review/CI/Artifact 闭环前执行 Squash Merge。

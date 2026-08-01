@@ -102,6 +102,10 @@
 一次只读检查平台路径能力定位的 `inputcodex_state_root/watcher.disabled` 元数据；标记缺失只表示 `EnabledByDefault`，普通文件存在只表示 `ExplicitlyDisabled`。它不读取文件内容、不返回实际路径，也不表示 Watcher 已安装、正在运行或已控制任何进程。
 避免用语：Watcher 运行状态、Watcher 已启用、后台守护已安装
 
+**Zed 远程项目只读观察**：
+从固定 Codex 全局状态和受控 SQLite 中识别远程项目，只返回完整 SHA-256 稳定假名、来源、`SelectedHostHint` / `NotObserved` 与来源覆盖。选择提示不表示 Zed 正在运行、项目已打开或远端可达；稳定假名也不是不可猜测匿名标识。
+避免用语：Zed 当前项目、远程目标详情、SSH 连接状态、匿名项目 ID
+
 **设置文档观察**：
 一次只读解析平台路径能力定位的设置文件，只保留 JSON object 顶层条目数量；不接受任意路径，不返回字段名称、字段值、原始内容、脚本或实际路径。
 避免用语：设置详情、设置快照、配置内容
