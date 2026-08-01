@@ -1071,7 +1071,7 @@
 - 现象：上游使用 `!flag.exists()` 直接形成 `enabled`，同时把实际 `disabled_flag` 路径返回给调用方；功能目录又因入口位于 Watcher 管理模块，把 `load_watcher_state` 误记为 `[filesystem-write, process-control]`。权限失败、损坏链接或非普通文件会被折叠为“标记缺失”，只读入口也无法独立评估。
 - 根因：`Path::exists` 只返回布尔值，会把部分元数据 I/O 错误折叠为 `false`；按模块总体副作用给每个公开入口统一分类，又会把相邻写入/进程能力错误传播到只读命令。文件名和模块归属都不能替代逐入口调用链与系统调用边界审计。
 - 处理：新能力只接受平台路径能力定位的 `inputcodex_state_root`，拼接固定 `watcher.disabled` 并执行一次 `symlink_metadata`；NotFound 映射为 `EnabledByDefault`，普通文件映射为 `ExplicitlyDisabled`，symlink/目录/其他类型返回 `WATCHER_PREFERENCE_INVALID`，其他 I/O 返回 `WATCHER_PREFERENCE_UNREADABLE`。结果不含路径、内容、安装或运行状态；原 Watcher core 与四个写入/进程 command 继续 `unassessed`。
-- 验证：Platform RED 分别证明内部 Probe/API 与公开 System adapter 缺失；GREEN 私有矩阵 `4/4`、公开适配器 `1/1`、Platform all-targets 和 Clippy 通过。Parity RED 证明新 feature 缺失并暴露前缀 ID helper 缺陷；GREEN 目录测试 `30/30`，计数为 `135/45/45/12/11/3/0`，`load_watcher_state` 精确为单一 `filesystem-read`。
+- 验证：Platform RED 分别证明内部 Probe/API 与公开 System adapter 缺失；GREEN 私有矩阵 `4/4`、公开适配器 `1/1`、Platform all-targets 和 Clippy 通过。Parity RED 证明新 feature 缺失并暴露前缀 ID helper 缺陷；GREEN 目录测试 `31/31`，计数为 `135/45/45/12/11/3/0`，`load_watcher_state` 精确为单一 `filesystem-read`。
 - 关联：Issue `#127`、Issue `#128`、`upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs`、`upstream/CodexPlusPlus/crates/codex-plus-core/src/watcher.rs`、`crates/inputcodex-platform/src/watcher_preference_observation.rs`、`parity/features/source-index.yml`。
 
 ## 记录模板

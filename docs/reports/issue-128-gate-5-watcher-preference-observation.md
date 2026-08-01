@@ -37,7 +37,7 @@
 - Application RED：`E0432`，只缺 Request、Port 与 UseCase；GREEN 目标测试 `3/3`。
 - Platform RED：私有矩阵只缺 Probe/分类/helper，公开测试只缺 System adapter；GREEN 私有 `4/4`、公开 `1/1`。
 - Parity RED：新 feature 条目缺失；第二轮 RED 暴露 YAML ID 前缀误匹配，收紧为完整 ID 行后专项 GREEN。
-- Parity all-targets：目录测试 `30/30`；计数固定为 `135/45/45/12/11/3/0`。
+- Parity all-targets：目录测试 `31/31`；计数固定为 `135/45/45/12/11/3/0`。
 
 ## 范围冻结
 
