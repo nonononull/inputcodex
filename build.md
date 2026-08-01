@@ -9,7 +9,7 @@ GitHub Issue、PR 与 Actions。
 
 Gate 3 七成员 Rust Workspace、Gate 4 上游审计/功能目录/性能基线，以及 Gate 5 的平台路径、
 应用概览、版本与启动意图、运行时环境冲突、Relay 环境、设置、诊断日志、Relay 状态、上下文
-条目和本地会话目录只读观察能力已经建立。
+条目、本地会话目录和受控会话 Markdown 能力已经建立；Watcher 偏好状态观察正在 Issue `#128` 中实施。
 该说明只用于选择正确命令，不能替代任务计划和 GitHub 新鲜证据。
 
 ## 文档变更轻量验证
@@ -26,7 +26,7 @@ git diff --check
 
 路径范围、Markdown 链接和任务特有内容守卫由对应 Session Plan 与 Runtime Workflow 定义。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供三十四个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供三十六个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -63,6 +63,7 @@ git diff --check
 33. Issue `#111` 十二路径、bounded standing authorization、离线自治策略、单写者、精确 Head 合并门、状态恢复和最终本地轻量门禁验证。
 34. Issue `#115` 三十二路径、`v1.2.44` 目录重审、Sub2API 独立能力、受影响行为与脱敏 fixture、Release Audit 恢复验证。
 35. Issue `#123` 十六路径、Local Storage 模型后缀清理重分类、CDP 写入例外、错误 fixture 删除与精确计数验证。
+36. Issue `#128` 二十四路径、固定 Watcher 偏好标记元数据、fail-closed 文件类型、最小披露与单 command Parity 分拆验证。
 
 当前禁止：
 
@@ -88,6 +89,7 @@ git diff --check
 - 在 Issue `#109` 中接受任意 SQLite、rollout、输出路径或 Markdown 正文，写文件，打开 UI，联网，调用子进程，启动永久线程/Watcher，返回内部角色、远程图片 URL、完整会话 ID、真实路径或原始错误，新增依赖家族，迁移第二个 feature，或修改 Cargo/Workflow/Ruleset/Runner/Release/`upstream/`/AGOS。
 
 - 在 Issue `#111` 中修改产品代码、Cargo、Workflow、Runner、Release、`upstream/`、Ruleset 或 AGOS，启用 GitHub 原生 auto-merge，创建付费/self-hosted Runner，迁移产品功能，或削弱精确 Final Head、scope hash、独立复审、Review thread、Hosted CI、Artifact、release audit、origin/main freshness 和主干验证。
+- 在 Issue `#128` 中接受任意路径、读取 `watcher.disabled` 内容、返回实际路径、把偏好冒充安装/运行状态、写文件、安装/卸载或启停 Watcher、控制进程、联网、调用子进程、启动线程/真实 Watcher、打开 UI、使用 `unsafe`、新增依赖，或修改 Cargo/Workflow/Ruleset/Release/upstream/AGOS。
 
 ## Issue #111 无人值守重构控制面本地轻量验证
 
@@ -4481,6 +4483,120 @@ if (-not [Linq.Enumerable]::SequenceEqual([string[]]$scope, [string[]]$actual, [
 期望目录测试为 `29 passed; 0 failed`；来源、feature、合同、fixture、例外、排除与覆盖缺口计数为
 `135/44/44/12/11/3/0`；旧 `token-usage-history` feature/contract 与两份 fixture 文件必须不存在，
 `release_audit.status=current`。
+
+## Issue #128：Watcher 偏好状态只读观察本地轻量验证
+
+在 `codex/issue-128-gate-5-watcher-preference-observation` 分支运行。本机只验证四个受影响 crate、
+治理合同、精确范围和隐私边界；完整 Workspace、Windows/macOS 编译与 Performance Baseline 交给
+标准 GitHub-hosted runners。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+function Assert-NativeSuccess {
+  param([Parameter(Mandatory)][string]$Label)
+  if ($LASTEXITCODE -ne 0) { throw "$Label 失败：$LASTEXITCODE" }
+}
+
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+$branch = git branch --show-current
+Assert-NativeSuccess 'Issue #128 分支读取'
+if ($branch -cne 'codex/issue-128-gate-5-watcher-preference-observation') {
+  throw "Issue #128 分支错误：$branch"
+}
+
+cargo test -p inputcodex-domain -p inputcodex-application -p inputcodex-platform -p inputcodex-parity --all-targets --offline
+Assert-NativeSuccess 'Issue #128 四 crate 测试'
+
+cargo clippy -p inputcodex-domain -p inputcodex-application -p inputcodex-platform -p inputcodex-parity --all-targets --offline -- -D warnings
+Assert-NativeSuccess 'Issue #128 四 crate Clippy'
+
+cargo fmt --all -- --check
+Assert-NativeSuccess 'Issue #128 rustfmt'
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+Assert-NativeSuccess 'Issue #128 CI 合同'
+
+pwsh -NoProfile -File scripts/ci/Verify-AutonomousRefactorPolicy.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #128 自治策略'
+
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #128 Release Audit'
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #128 仓库政策'
+
+cargo metadata --locked --offline --format-version 1 | Out-Null
+Assert-NativeSuccess 'Issue #128 Cargo metadata'
+
+$expected = [string[]]@(
+  'AGENTS.md',
+  'CONTEXT.md',
+  'README.md',
+  'build.md',
+  'crates/inputcodex-application/src/lib.rs',
+  'crates/inputcodex-application/src/watcher_preference_observation.rs',
+  'crates/inputcodex-application/tests/watcher_preference_observation.rs',
+  'crates/inputcodex-domain/src/lib.rs',
+  'crates/inputcodex-domain/src/watcher_preference_observation.rs',
+  'crates/inputcodex-domain/tests/watcher_preference_observation.rs',
+  'crates/inputcodex-parity/tests/catalog_repository.rs',
+  'crates/inputcodex-platform/src/lib.rs',
+  'crates/inputcodex-platform/src/watcher_preference_observation.rs',
+  'crates/inputcodex-platform/tests/watcher_preference_observation.rs',
+  'docs/plans/2026-08-01-issue-128-gate-5-watcher-preference-observation.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-08-01-issue-128-gate-5-watcher-preference-observation.md',
+  'docs/reports/issue-128-gate-5-watcher-preference-observation.md',
+  'docs/workflows/2026-08-01-issue-128-gate-5-watcher-preference-observation-runtime.md',
+  'err.md',
+  'parity/README.md',
+  'parity/contracts/foundation-platform.yml',
+  'parity/features/foundation-platform.yml',
+  'parity/features/source-index.yml'
+)
+$scope = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+foreach ($path in $expected) {
+  if (-not $scope.Add($path)) { throw "Issue #128 重复路径：$path" }
+}
+$payload = [string]::Join("`n", [string[]]$scope) + "`n"
+$scopeHash = 'sha256:' + [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData([Text.UTF8Encoding]::new($false).GetBytes($payload))
+).ToLowerInvariant()
+if ($scope.Count -ne 24 -or $scopeHash -cne 'sha256:0be3dd45ed7e91d1cb7f633da369bb2b9052cefc512852d80362775da7e81699') {
+  throw "Issue #128 批准范围漂移：count=$($scope.Count) hash=$scopeHash"
+}
+
+$actual = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+@(
+  git -c core.quotePath=false diff --no-renames --name-only origin/main...HEAD
+  git -c core.quotePath=false diff --cached --no-renames --name-only
+  git -c core.quotePath=false diff --no-renames --name-only
+  git -c core.quotePath=false ls-files --others --exclude-standard
+) | Where-Object { $_ } | ForEach-Object { [void]$actual.Add($_) }
+if (-not [Linq.Enumerable]::SequenceEqual([string[]]$scope, [string[]]$actual, [StringComparer]::Ordinal)) {
+  throw "Issue #128 实际路径漂移：$([string]::Join(', ', [string[]]$actual))"
+}
+
+$product = @(
+  'crates/inputcodex-domain/src/watcher_preference_observation.rs',
+  'crates/inputcodex-application/src/watcher_preference_observation.rs',
+  'crates/inputcodex-platform/src/watcher_preference_observation.rs'
+)
+$forbidden = rg -n -i 'read_to_string|File::open|std::fs::write|remove_file|create_dir|Command::new|TcpStream|reqwest|tokio|iced|unsafe' @product
+if ($LASTEXITCODE -eq 0) { throw "Issue #128 禁止能力命中：$($forbidden -join '; ')" }
+if ($LASTEXITCODE -ne 1) { throw "Issue #128 禁止能力扫描失败：$LASTEXITCODE" }
+
+git diff --check origin/main
+Assert-NativeSuccess 'Issue #128 Git 空白检查'
+
+Write-Output "ISSUE128_LOCAL_VERIFY_OK scope_hash=$scopeHash paths=$($actual.Count)"
+```
+
+期望：四 crate tests/Clippy、rustfmt、CI 合同、自治策略、仓库政策与 Release Audit 全部通过；
+目录计数为 `135/45/45/12/11/3/0`；实际范围精确为 24 路径；生产实现只有固定标记的
+`symlink_metadata`，不读取内容、不返回路径、不写入、不控制进程且不新增依赖。
 
 ## 外部 AGOS 使用边界
 

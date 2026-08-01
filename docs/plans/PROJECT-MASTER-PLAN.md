@@ -1,11 +1,11 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-123-local-storage-sanitization-exception
-active_gate: Gate 5 前十一个产品切片与自治控制面已进入 main；当前先纠正首候选的 CDP Local Storage 写入语义
-last_verified_gate: Issue #115 / PR #122 已以单父 Squash 提交 29f5317d66b9f16cf64797420bf2fd7e2aec45f7 完成 v1.2.44 功能目录重审，主干 CI 与 Performance 全绿且 Artifact 为 0
-next_legal_gate: Issue #123 在十六路径内完成 exception-pending 纠正和精确 Head 合并后，按 #111 决策顺序选择下一个最小安全候选；真正的 rollout Token 历史必须独立 Discovery
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/123
+active_task: issue-128-gate-5-watcher-preference-observation
+active_gate: Gate 5 前十一个产品切片、自治控制面、v1.2.44 重审与 Local Storage 例外已进入 main；当前迁移第十二个产品切片
+last_verified_gate: Issue #123 / PR #124 已以单父 Squash 提交 43ace17de1505f251812e4ead3035ef3274a8455 完成 Local Storage 模型后缀清理例外，主干 CI 与 Performance 全绿且 Artifact 为 0
+next_legal_gate: Issue #128 仅在二十四路径内实现 Watcher 偏好状态只读观察；完整 Watcher 管理、rollout Token 历史与 Sub2API 继续等待各自 typed owner
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/128
 active_pr_ref: none
 gate_5_platform_paths_exception_ref: https://github.com/nonononull/inputcodex/issues/74
 gate_5_platform_paths_scope_hash: sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37
@@ -310,7 +310,12 @@ decision_status: issue-123-local-storage-sanitization-exception-approved
 - [x] Issue `#105` / PR `#107` 已完成 `quick-xml` 两条 high RustSec 公告修复；Final Head `0e4af42b86c2ffce8704228198fab13447443d38` 以单父 Squash 提交 `88eaf6301f1897cadaf4da830db998078fb06e97` 进入 `main`。
 - [x] Issue `#108` 已批准 Markdown 方案 A 并按 `COMPLETED` 关闭；内存生成与文件保存/UI 正式分离。
 - [x] Issue `#109` / PR `#110` 已完成第十一个 Gate 5 受控会话 Markdown 生成切片、独立复审、精确 Head Squash Merge 与主干双套验证。
-- [ ] Issue `#111` 建立 Gate 5 无人值守重构控制面；只交付自治策略、离线验证器、状态解析、恢复合同和外部 Paseo 循环，不迁移第十二个产品功能。
+- [x] Issue `#111` / PR `#112` 已建立 Gate 5 无人值守重构控制面；bounded standing authorization、精确 Final Head 合并门和中断恢复已进入 `main`。
+- [x] Issue `#115` / PR `#122` 已完成 `v1.2.44` 功能目录重审；`release_audit=current`。
+- [x] Issue `#123` / PR `#124` 已纠正 Local Storage 模型后缀清理的真实 CDP/注入写入语义并固定为 `exception-pending`。
+- [x] Issue `#125`、`#126` 已分别把 rollout Token 历史与 Sub2API 延期到 typed source/profile/transport owner 就绪后。
+- [x] Issue `#127` 已批准从 Watcher 管理总功能拆出固定标记元数据观察。
+- [ ] Issue `#128` 在二十四路径内迁移 `feature.foundation-platform.watcher-preference-observation`；只接管 `load_watcher_state`，完整 Watcher 管理继续 `unassessed`。
 
 ### Gate 6：首个正式版本（锁定）
 
@@ -350,6 +355,9 @@ decision_status: issue-123-local-storage-sanitization-exception-approved
 - Issue `#123` Session Plan：`docs/plans/sessions/2026-08-01-issue-123-local-storage-sanitization-exception.md`。
 - Issue `#123` Runtime Workflow：`docs/workflows/2026-08-01-issue-123-local-storage-sanitization-exception-runtime.md`。
 - Issue `#123` Discovery 报告：`docs/reports/issue-123-local-storage-sanitization-exception.md`。
+- Issue `#128` 实施计划：`docs/plans/2026-08-01-issue-128-gate-5-watcher-preference-observation.md`。
+- Issue `#128` Session Plan：`docs/plans/sessions/2026-08-01-issue-128-gate-5-watcher-preference-observation.md`。
+- Issue `#128` Runtime Workflow：`docs/workflows/2026-08-01-issue-128-gate-5-watcher-preference-observation-runtime.md`。
 - Issue `#75` 平台路径设计：`docs/plans/2026-07-27-issue-75-gate-5-platform-paths.md`。
 - Issue `#75` Session Plan：`docs/plans/sessions/2026-07-27-issue-75-gate-5-platform-paths.md`。
 - Issue `#75` Runtime Workflow：`docs/workflows/2026-07-27-issue-75-gate-5-platform-paths-runtime.md`。
@@ -426,3 +434,4 @@ decision_status: issue-123-local-storage-sanitization-exception-approved
 - Fresh 验证失败、Ruleset 变化、Review 对话未闭环或出现未批准的一致性差异。
 - Issue `#111` 越过十二路径或 `sha256:5d1f609ca2a5913e4e5df21f0fd04d6de2c6731cdd71d641812fbee80b5ad713`，修改产品代码、Cargo、Workflow、Runner、Release、`upstream/`、Ruleset 或 AGOS，启用 GitHub 原生 auto-merge，或削弱精确 Head、CI、Artifact、Review thread、release audit 与 origin/main freshness 任一合并门。
 - Issue `#123` 越过十六路径或 `sha256:aa27e2551cfa743248ef7a2ab53fad5f1a1954b369ae40bf3485ada2099f7bdc`，执行或迁移 CDP、JavaScript、Local Storage/诊断日志写入、rollout Token 历史，修改产品 Rust/Cargo、Workflow、Ruleset、上游快照、README、UI、Release 或 AGOS，或在 Final Head Review/CI/Artifact 闭环前执行 Squash Merge。
+- Issue `#128` 越过二十四路径或 `sha256:0be3dd45ed7e91d1cb7f633da369bb2b9052cefc512852d80362775da7e81699`，读取 `watcher.disabled` 内容或任意路径，回显实际路径，写文件，安装/启停 Watcher，控制进程，新增依赖，修改 Cargo/Workflow/Ruleset/upstream/UI/Release/AGOS，或在 Final Head Review/CI/Artifact 闭环前执行 Squash Merge。
