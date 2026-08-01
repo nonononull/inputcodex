@@ -121,7 +121,7 @@ docs/workflows/2026-08-01-issue-128-gate-5-watcher-preference-observation-runtim
 ### Batch 4：Parity TDD
 
 - 先取得新 feature/contract/source 缺失 RED，再只移动一个 command。
-- 状态：`pending`。
+- 状态：`completed`。
 
 ### Batch 5：Local Closeout
 

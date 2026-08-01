@@ -113,12 +113,12 @@ pub trait WatcherPreferenceObservationPort {
 - 修改：`parity/features/source-index.yml`
 - 修改：`parity/README.md`
 
-- [ ] RED：新增测试要求新 feature/contract、单一入口、单一 `filesystem-read`，并禁止原 Watcher feature/contract 残留 `load_watcher_state`。
-- [ ] 运行 Parity 目录专项，确认新目录条目缺失导致 RED。
-- [ ] GREEN：新增 implemented 子能力和无 fixture 合同，只重映射一个 command。
-- [ ] 原 Watcher 总功能保持 `unassessed`，其 core 与四个写入/进程入口不变。
-- [ ] 运行 Parity 专项、全目标 Clippy、Release Audit 和 rustfmt。
-- [ ] 建立 `issue-128-parity-green` checkpoint。
+- [x] RED：新增测试要求新 feature/contract、单一入口、单一 `filesystem-read`，并禁止原 Watcher feature/contract 残留 `load_watcher_state`。
+- [x] 运行 Parity 目录专项，确认新目录条目缺失导致 RED。
+- [x] GREEN：新增 implemented 子能力和无 fixture 合同，只重映射一个 command。
+- [x] 原 Watcher 总功能保持 `unassessed`，其 core 与四个写入/进程入口不变。
+- [x] 运行 Parity 专项、全目标 Clippy、Release Audit 和 rustfmt。
+- [x] 建立 `issue-128-parity-green` checkpoint。
 
 ## Task 5：文档与本地收口
 

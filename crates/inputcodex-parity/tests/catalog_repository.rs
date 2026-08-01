@@ -65,7 +65,13 @@ fn assert_repository_text_contains(relative_path: &str, expected: &[&str]) {
 fn yaml_list_item_block<'a>(text: &'a str, id: &str) -> &'a str {
     let marker = format!("  - id: {id}");
     let start = text
-        .find(&marker)
+        .match_indices(&marker)
+        .find_map(|(start, _)| {
+            text.as_bytes()
+                .get(start + marker.len())
+                .is_some_and(|byte| matches!(*byte, b'\r' | b'\n'))
+                .then_some(start)
+        })
         .unwrap_or_else(|| panic!("YAML 应包含条目：{id}"));
     let tail = &text[start..];
     let end = tail[marker.len()..]
@@ -2051,8 +2057,8 @@ fn gate5_本地会话目录只读观察已实现但本地会话管理总功能�
     assert_repository_text_contains(
         "parity/README.md",
         &[
-            "当前共有 44 个 feature",
-            "`44` 份行为合同",
+            "当前共有 45 个 feature",
+            "`45` 份行为合同",
             "`12` 个 fixture manifest",
             "feature.session-data.local-session-directory-observation",
         ],
@@ -2376,12 +2382,130 @@ fn gate5_token_用量首候选必须按真实_cdp_写入语义隔离() {
 }
 
 #[test]
+fn gate5_watcher_偏好观察只移动只读入口而管理总功能保持未评估() {
+    let feature_text = read_repository_text("parity/features/foundation-platform.yml");
+    let observation = yaml_list_item_block(
+        &feature_text,
+        "feature.foundation-platform.watcher-preference-observation",
+    );
+    for expected in [
+        "name: 'Watcher 偏好状态观察'",
+        "status: implemented",
+        "symbol: load_watcher_state",
+        "tauri-command:load_watcher_state",
+        "watcher.disabled",
+        "EnabledByDefault",
+        "ExplicitlyDisabled",
+        "- issue:127",
+        "- issue:128",
+    ] {
+        assert!(
+            observation.contains(expected),
+            "Watcher 偏好观察应包含：{expected}"
+        );
+    }
+    for forbidden in [
+        "core-module:watcher",
+        "tauri-command:disable_watcher",
+        "tauri-command:enable_watcher",
+        "tauri-command:install_watcher",
+        "tauri-command:uninstall_watcher",
+        "filesystem-write",
+        "process-control",
+    ] {
+        assert!(
+            !observation.contains(forbidden),
+            "Watcher 偏好观察禁止能力：{forbidden}"
+        );
+    }
+
+    let management = yaml_list_item_block(&feature_text, "feature.foundation-platform.watcher");
+    for expected in [
+        "status: unassessed",
+        "core-module:watcher",
+        "tauri-command:disable_watcher",
+        "tauri-command:enable_watcher",
+        "tauri-command:install_watcher",
+        "tauri-command:uninstall_watcher",
+    ] {
+        assert!(
+            management.contains(expected),
+            "Watcher 管理应保留：{expected}"
+        );
+    }
+    assert!(!management.contains("tauri-command:load_watcher_state"));
+
+    let contract_text = read_repository_text("parity/contracts/foundation-platform.yml");
+    let contract = yaml_list_item_block(
+        &contract_text,
+        "contract.feature.foundation-platform.watcher-preference-observation.baseline",
+    );
+    for expected in [
+        "feature_id: feature.foundation-platform.watcher-preference-observation",
+        "WATCHER_PREFERENCE_INVALID",
+        "WATCHER_PREFERENCE_UNREADABLE",
+        "WATCHER_PREFERENCE_UNSUPPORTED",
+        "EnabledByDefault",
+        "ExplicitlyDisabled",
+        "states: [Idle, Loading, Ready, Empty, Failed, Cancelling]",
+        "mode: none",
+    ] {
+        assert!(
+            contract.contains(expected),
+            "Watcher 偏好合同应包含：{expected}"
+        );
+    }
+    assert_eq!(
+        yaml_field_block(contract, "side_effects", "persistence"),
+        "    side_effects:\n      - filesystem-read",
+        "Watcher 偏好合同副作用必须精确为单一 filesystem-read"
+    );
+    for forbidden in ["filesystem-write", "process-control", "network-read"] {
+        assert!(
+            !contract.contains(forbidden),
+            "Watcher 偏好合同禁止能力：{forbidden}"
+        );
+    }
+
+    let source_text = read_repository_text("parity/features/source-index.yml");
+    let source = yaml_list_item_block(&source_text, "tauri-command:load_watcher_state");
+    assert!(source.contains("side_effects: [filesystem-read]"));
+    assert!(
+        source.contains("feature_id: feature.foundation-platform.watcher-preference-observation")
+    );
+    assert!(!source.contains("filesystem-write"));
+    assert!(!source.contains("process-control"));
+
+    for source_id in [
+        "core-module:watcher",
+        "tauri-command:disable_watcher",
+        "tauri-command:enable_watcher",
+        "tauri-command:install_watcher",
+        "tauri-command:uninstall_watcher",
+    ] {
+        let source = yaml_list_item_block(&source_text, source_id);
+        assert!(source.contains("feature_id: feature.foundation-platform.watcher"));
+        assert!(source.contains("filesystem-write"));
+        assert!(source.contains("process-control"));
+    }
+
+    assert_repository_text_contains(
+        "parity/README.md",
+        &[
+            "当前共有 45 个 feature",
+            "`45` 份行为合同",
+            "feature.foundation-platform.watcher-preference-observation",
+        ],
+    );
+}
+
+#[test]
 fn 仓库source_index_覆盖锁定上游公开入口() {
     let summary =
         validate_feature_repository(&repository_root()).expect("功能目录应通过仓库级验证");
 
     assert_eq!(summary.source_entry_count(), 135);
-    assert_eq!(summary.feature_count(), 44);
+    assert_eq!(summary.feature_count(), 45);
     assert_eq!(summary.excluded_entry_count(), 3);
     assert_eq!(summary.exception_pending_count(), 11);
     assert_eq!(summary.coverage_gap_count(), 0);
@@ -2392,8 +2516,8 @@ fn 仓库功能目录通过完整引用与安全验证() {
     let summary = validate_repository(&repository_root()).expect("仓库功能目录应通过验证");
 
     assert_eq!(summary.source_entry_count(), 135);
-    assert_eq!(summary.feature_count(), 44);
-    assert_eq!(summary.contract_count(), 44);
+    assert_eq!(summary.feature_count(), 45);
+    assert_eq!(summary.contract_count(), 45);
     assert_eq!(summary.fixture_count(), 12);
     assert_eq!(summary.coverage_gap_count(), 0);
 }

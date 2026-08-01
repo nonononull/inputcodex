@@ -590,6 +590,60 @@ contracts:
       mode: none
       reason: '输入只来自当前进程且结果只含编译版本与枚举意图；纯解析测试足以固定结构和错误语义。'
     fixture_refs: []
+  - id: contract.feature.foundation-platform.watcher-preference-observation.baseline
+    feature_id: feature.foundation-platform.watcher-preference-observation
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.44 证据已锁定，Issue #127 已批准只拆分固定 Watcher 偏好标记观察。'
+      - '平台路径能力可定位 inputcodex_state_root，调用方不提供任意路径。'
+    inputs:
+      - name: request
+        data_type: watcher-preference-observation-request
+        required: true
+        description: '零字段同步请求，不携带路径、文件名、进程、debug port 或操作类型。'
+    outputs:
+      - name: result
+        data_type: watcher-preference-observation
+        description: '成功只返回 Ready(EnabledByDefault) 或 Ready(ExplicitlyDisabled)；标记缺失不是 Empty，也不表示 Watcher 已安装或运行。'
+    side_effects:
+      - filesystem-read
+    persistence: '不读取文件内容、不写文件、不缓存、不持久化路径、偏好、进程或运行状态。'
+    errors:
+      - code: WATCHER_PREFERENCE_INVALID
+        kind: invalid-input
+        semantics: '固定标记是符号链接、目录或其他非普通文件类型时失败，不跟随链接且不回显路径。'
+      - code: WATCHER_PREFERENCE_UNREADABLE
+        kind: unavailable
+        semantics: '固定标记元数据发生 NotFound 之外的 I/O 错误时失败，不把不可读伪装成标记缺失。'
+      - code: WATCHER_PREFERENCE_UNSUPPORTED
+        kind: unsupported
+        semantics: '非 Windows/macOS 系统入口明确失败，不回退到其他平台或伪造偏好。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次 Watcher 偏好观察请求使用唯一递增标识。'
+      stale_result_rule: '旧请求结果不得覆盖更新请求；取消后的同步结果必须按既有协调器规则视为过期。'
+    timeout:
+      behavior: '同步元数据观察不启动线程或真实 Watcher；外层超时只使本次请求失效。'
+      evidence: '只记录请求标识、耗时、结果类别与稳定诊断码，不记录路径、文件内容、进程或 debug port。'
+    cancellation:
+      behavior: '取消后进入 Cancelling，完成清理后回到 Idle；已完成的同步结果不得覆盖取消状态。'
+      evidence: '记录取消请求、清理完成与过期结果，不记录路径或运行状态。'
+    isolation: '只观察 inputcodex_state_root/watcher.disabled 的一次 symlink_metadata；单次失败不得污染其他 feature、请求或稳定状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+      - diagnostic_code
+      - preference
+    platforms:
+      shared_semantics: 'Windows 与 macOS 使用相同固定文件名、文件类型分类、缺失语义和稳定错误码；均不读取内容、不写入、不控制进程。'
+      windows: '使用 Windows 平台路径适配器定位状态根并执行一次 symlink_metadata；不支持时明确失败。'
+      macos: '使用 macOS 平台路径适配器定位状态根并执行一次 symlink_metadata；不支持时明确失败。'
+      differences: []
+    fixture_policy:
+      mode: none
+      reason: '输入为固定元数据类型矩阵，合成单元测试已覆盖缺失、普通文件、链接、目录、其他类型和 I/O 错误，无需结构 fixture。'
+    fixture_refs: []
   - id: contract.feature.foundation-platform.watcher.baseline
     feature_id: feature.foundation-platform.watcher
     scenario: baseline
