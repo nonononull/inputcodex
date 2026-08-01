@@ -2088,9 +2088,9 @@ fn gate5_本地会话目录只读观察已实现但本地会话管理总功能�
     assert_repository_text_contains(
         "parity/README.md",
         &[
-            "当前共有 45 个 feature",
-            "`45` 份行为合同",
-            "`12` 个 fixture manifest",
+            "当前共有 46 个 feature",
+            "`46` 份行为合同",
+            "`13` 个 fixture manifest",
             "feature.session-data.local-session-directory-observation",
         ],
     );
@@ -2523,9 +2523,191 @@ fn gate5_watcher_偏好观察只移动只读入口而管理总功能保持未评
     assert_repository_text_contains(
         "parity/README.md",
         &[
-            "当前共有 45 个 feature",
-            "`45` 份行为合同",
+            "当前共有 46 个 feature",
+            "`46` 份行为合同",
             "feature.foundation-platform.watcher-preference-observation",
+        ],
+    );
+}
+
+#[test]
+fn gate5_zed_远程项目观察只移动列表入口且管理能力保持未评估() {
+    let feature_text = read_repository_text("parity/features/remote-install.yml");
+    let observation = yaml_list_item_block(
+        &feature_text,
+        "feature.remote-install.zed-remote-project-observation",
+    );
+    for expected in [
+        "name: 'Zed 远程项目只读观察'",
+        "status: implemented",
+        "symbol: list_zed_remote_projects",
+        "tauri-command:list_zed_remote_projects",
+        "SHA-256",
+        "SelectedHostHint",
+        "NotObserved",
+        "- issue:131",
+        "- issue:132",
+    ] {
+        assert!(
+            observation.contains(expected),
+            "Zed 远程项目观察应包含：{expected}"
+        );
+    }
+    for forbidden in [
+        "core-module:zed_remote",
+        "tauri-command:forget_zed_remote_project",
+        "tauri-command:open_zed_remote",
+        "process-control",
+        "filesystem-write",
+        "network-read",
+    ] {
+        assert!(
+            !observation.contains(forbidden),
+            "Zed 远程项目观察禁止能力：{forbidden}"
+        );
+    }
+
+    let management = yaml_list_item_block(&feature_text, "feature.remote-install.zed-remote");
+    for expected in [
+        "status: unassessed",
+        "core-module:zed_remote",
+        "tauri-command:forget_zed_remote_project",
+        "tauri-command:open_zed_remote",
+    ] {
+        assert!(management.contains(expected), "Zed 管理应保留：{expected}");
+    }
+    assert!(!management.contains("tauri-command:list_zed_remote_projects"));
+
+    let contract_text = read_repository_text("parity/contracts/remote-install.yml");
+    let contract = yaml_list_item_block(
+        &contract_text,
+        "contract.feature.remote-install.zed-remote-project-observation.baseline",
+    );
+    for expected in [
+        "feature_id: feature.remote-install.zed-remote-project-observation",
+        "LoadCompletion<ZedRemoteProjectObservation>",
+        "SelectedHostHint",
+        "NotObserved",
+        "ZED_REMOTE_PROJECT_OBSERVATION_INVALID_STATE",
+        "ZED_REMOTE_PROJECT_OBSERVATION_RESOURCE_LIMIT",
+        "ZED_REMOTE_PROJECT_OBSERVATION_TIMEOUT",
+        "ZED_REMOTE_PROJECT_OBSERVATION_CANCELLED",
+        "ZED_REMOTE_PROJECT_ID_COLLISION",
+        "READ_ONLY",
+        "NOFOLLOW",
+        "query_only",
+        "mode: required",
+        "fixture.feature.remote-install.zed-remote-project-observation.baseline",
+    ] {
+        assert!(
+            contract.contains(expected),
+            "Zed 观察合同应包含：{expected}"
+        );
+    }
+    assert_eq!(
+        yaml_field_block(contract, "side_effects", "persistence"),
+        "    side_effects:\n      - filesystem-read\n      - database-read",
+        "Zed 观察合同副作用必须精确为只读文件和数据库"
+    );
+    for forbidden in [
+        "filesystem-write",
+        "database-write",
+        "network-read",
+        "process-control",
+    ] {
+        assert!(
+            !contract.contains(forbidden),
+            "Zed 观察合同禁止能力：{forbidden}"
+        );
+    }
+
+    let source_text = read_repository_text("parity/features/source-index.yml");
+    let list = yaml_list_item_block(&source_text, "tauri-command:list_zed_remote_projects");
+    assert!(list.contains("side_effects: [filesystem-read, database-read]"));
+    assert!(list.contains("feature_id: feature.remote-install.zed-remote-project-observation"));
+    assert!(!list.contains("process-control"));
+    for source_id in [
+        "core-module:zed_remote",
+        "tauri-command:forget_zed_remote_project",
+        "tauri-command:open_zed_remote",
+    ] {
+        let source = yaml_list_item_block(&source_text, source_id);
+        assert!(source.contains("feature_id: feature.remote-install.zed-remote"));
+        assert!(source.contains("process-control"));
+    }
+
+    assert_repository_text_contains(
+        "parity/fixtures/feature.remote-install.zed-remote-project-observation/manifest.yml",
+        &[
+            "feature_id: feature.remote-install.zed-remote-project-observation",
+            "fixture.feature.remote-install.zed-remote-project-observation.baseline",
+            "kind: synthetic",
+            "不包含真实主机、用户、路径、URL 或凭据",
+        ],
+    );
+    assert_repository_text_contains(
+        "parity/fixtures/feature.remote-install.zed-remote-project-observation/baseline.yml",
+        &[
+            "schema_version: inputcodex.synthetic.zed-remote-project-observation.v1",
+            "coverage: Partial",
+            "origin: CodexRemoteProject",
+            "selection_hint: SelectedHostHint",
+            "database_mode: READ_ONLY",
+            "query_only: true",
+            "raw_identity_exposed: false",
+            "stable_id_is_anonymous: false",
+        ],
+    );
+    assert!(
+        repository_root()
+            .join("parity/fixtures/feature.remote-install.zed-remote/manifest.yml")
+            .is_file(),
+        "旧完整 Zed Remote fixture 必须保留"
+    );
+
+    let production =
+        read_repository_text("crates/inputcodex-platform/src/zed_remote_project_observation.rs");
+    for required in [
+        "SQLITE_OPEN_READ_ONLY",
+        "SQLITE_OPEN_NOFOLLOW",
+        "query_only",
+        "progress_handler",
+        "FILE_FLAG_OPEN_REPARSE_POINT",
+        "O_NOFOLLOW",
+        "MAX_GLOBAL_STATE_BYTES",
+        "MAX_SQLITE_DATABASES",
+        "MAX_SQLITE_CWDS_PER_DATABASE",
+        "Sha256::digest",
+    ] {
+        assert!(
+            production.contains(required),
+            "Zed 生产适配器应包含：{required}"
+        );
+    }
+    for forbidden in [
+        "zed_remote_projects.json",
+        "auth.json",
+        "Command::new",
+        "TcpStream",
+        "reqwest",
+        "std::fs::write",
+        "remove_file",
+        "create_dir",
+        "unsafe {",
+    ] {
+        assert!(
+            !production.contains(forbidden),
+            "Zed 生产适配器禁止能力：{forbidden}"
+        );
+    }
+
+    assert_repository_text_contains(
+        "parity/README.md",
+        &[
+            "当前共有 46 个 feature",
+            "`46` 份行为合同",
+            "`13` 个 fixture manifest",
+            "feature.remote-install.zed-remote-project-observation",
         ],
     );
 }
@@ -2536,7 +2718,7 @@ fn 仓库source_index_覆盖锁定上游公开入口() {
         validate_feature_repository(&repository_root()).expect("功能目录应通过仓库级验证");
 
     assert_eq!(summary.source_entry_count(), 135);
-    assert_eq!(summary.feature_count(), 45);
+    assert_eq!(summary.feature_count(), 46);
     assert_eq!(summary.excluded_entry_count(), 3);
     assert_eq!(summary.exception_pending_count(), 11);
     assert_eq!(summary.coverage_gap_count(), 0);
@@ -2547,9 +2729,9 @@ fn 仓库功能目录通过完整引用与安全验证() {
     let summary = validate_repository(&repository_root()).expect("仓库功能目录应通过验证");
 
     assert_eq!(summary.source_entry_count(), 135);
-    assert_eq!(summary.feature_count(), 45);
-    assert_eq!(summary.contract_count(), 45);
-    assert_eq!(summary.fixture_count(), 12);
+    assert_eq!(summary.feature_count(), 46);
+    assert_eq!(summary.contract_count(), 46);
+    assert_eq!(summary.fixture_count(), 13);
     assert_eq!(summary.coverage_gap_count(), 0);
 }
 

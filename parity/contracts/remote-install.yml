@@ -188,3 +188,87 @@ contracts:
       reason: '使用合成 fixture 固定结构字段、边界值与引用关系。'
     fixture_refs:
       - fixture.feature.remote-install.zed-remote.baseline
+  - id: contract.feature.remote-install.zed-remote-project-observation.baseline
+    feature_id: feature.remote-install.zed-remote-project-observation
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.44 证据已锁定，Issue #131 已批准只拆分 list_zed_remote_projects。'
+      - '平台路径 owner 可定位合法 CODEX_HOME；合法非空 CODEX_SQLITE_HOME 必须是现存绝对普通目录。'
+    inputs:
+      - name: request
+        data_type: zed-remote-project-observation-request
+        required: true
+        description: '零字段请求；调用方不得提供路径、主机、用户、端口、URL、凭据、标签或查询。'
+    outputs:
+      - name: completion
+        data_type: LoadCompletion<ZedRemoteProjectObservation>
+        description: '有项目返回 Ready；来源全部缺失或合法但无项目返回 Empty；无项目且存在来源失败返回 Failed；Partial 只存在于 Ready snapshot 的来源覆盖。'
+      - name: projects
+        data_type: zed-remote-project-entry-list
+        description: '每项只含 zed-remote-project:v1:sha256: 前缀的完整 64 位小写十六进制稳定假名、CodexRemoteProject / ThreadWorkspaceHint / SqliteThreadCwd 来源，以及 SelectedHostHint / NotObserved。稳定假名不是不可猜测匿名标识。'
+      - name: source_summary
+        data_type: zed-remote-project-source-summary
+        description: '只含 discovered、readable、failed、Complete 或 Partial 和项目数量，不含文件名、数据库名或实际路径。'
+    side_effects:
+      - filesystem-read
+      - database-read
+    persistence: 'none；身份原值、稳定假名、来源结果、错误详情和 SQLite 协调状态均不缓存、不记录、不持久化。'
+    errors:
+      - code: ZED_REMOTE_PROJECT_OBSERVATION_INVALID_STATE
+        kind: invalid-input
+        semantics: '固定全局状态不是合法有界 object、字段类型漂移、身份材料非法或无法形成可信映射时失败，不回显原值。'
+      - code: ZED_REMOTE_PROJECT_OBSERVATION_INVALID_SQLITE_HOME
+        kind: unavailable
+        semantics: '非空显式 SQLite 根不是现存绝对普通目录或包含链接组件时失败，禁止回退。'
+      - code: ZED_REMOTE_PROJECT_OBSERVATION_UNSUPPORTED_SCHEMA
+        kind: unsupported
+        semantics: '受控数据库缺少 threads.cwd 时作为来源失败，不把未知 schema 解释为空。'
+      - code: ZED_REMOTE_PROJECT_OBSERVATION_UNAVAILABLE
+        kind: unavailable
+        semantics: '来源不可读、被替换、链接、锁定、损坏或查询失败时使用脱敏错误；有其他可信项目时只形成 Partial。'
+      - code: ZED_REMOTE_PROJECT_OBSERVATION_RESOURCE_LIMIT
+        kind: unavailable
+        semantics: '全局状态超过 1 MiB、库超过 32 个、单库超过 1 GiB、每库 cwd 超过 80、单值超过 4 KiB、内部候选超过 512 或最终项目超过 256 时整体失败。'
+      - code: ZED_REMOTE_PROJECT_OBSERVATION_TIMEOUT
+        kind: timeout
+        semantics: '整体 2 秒 deadline 到达时终止读取并失败，不发布部分候选。'
+      - code: ZED_REMOTE_PROJECT_OBSERVATION_CANCELLED
+        kind: cancelled
+        semantics: '预取消或协作式取消时终止读取并失败，迟到结果由 LoadCoordinator 标记 Stale。'
+      - code: ZED_REMOTE_PROJECT_ID_COLLISION
+        kind: internal
+        semantics: '同轮不同规范身份得到相同完整摘要时整体失败，不选择任一候选。'
+      - code: ZED_REMOTE_PROJECT_OBSERVATION_UNSUPPORTED
+        kind: unsupported
+        semantics: '非 Windows/macOS 质量目标的系统入口明确失败。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次观察使用唯一递增标识；Partial 仍是 Ready，不扩展通用 LoadCompletion。'
+      stale_result_rule: '取消或更新请求后，旧观察结果不得覆盖当前状态。'
+    timeout:
+      behavior: '固定 2 秒整体 deadline、50 ms SQLite busy timeout 与每 1000 progress step 协作检查；超时进入 Failed。'
+      evidence: '只记录请求标识、耗时、结果类别和稳定诊断码，不记录稳定假名或身份原值。'
+    cancellation:
+      behavior: '取消后进入 Cancelling；预取消不调用平台，读取和 SQLite progress handler 协作终止，迟到结果为 Stale。'
+      evidence: '只记录取消请求、清理完成和旧请求失效。'
+    isolation: '单库失败可形成 Ready(Partial)；无可信项目时任一来源失败必须整体 Failed；取消、超时、碰撞、总量超限和来源变化始终整体 Failed。'
+    observability:
+      - request_identity
+      - discovered_source_count
+      - readable_source_count
+      - failed_source_count
+      - source_coverage
+      - project_count
+      - duration_ms
+      - outcome_class
+      - diagnostic_code
+    platforms:
+      shared_semantics: '固定读取 CODEX_HOME/.codex-global-state.json 与最多 32 个受控 SQLite；JSON 同句柄限读并复验，SQLite 使用 READ_ONLY | NOFOLLOW | query_only 与 progress_handler；完整 SHA-256 输入使用域分隔和长度前缀，None 端口与显式 22 不同。'
+      windows: '逐组件拒绝符号链接与 reparse point，最终文件用 FILE_FLAG_OPEN_REPARSE_POINT 打开并复验稳定元数据。'
+      macos: '逐组件拒绝符号链接，最终文件使用 O_NOFOLLOW 并以设备号和 inode 复验；测试临时根使用物理路径。'
+      differences: []
+    fixture_policy:
+      mode: required
+      reason: '使用脱敏合成 fixture 固定稳定假名格式、来源、选择提示、Partial 覆盖、只读资源上限和非匿名语义；不保存身份原值。'
+    fixture_refs:
+      - fixture.feature.remote-install.zed-remote-project-observation.baseline

@@ -1,0 +1,38 @@
+schema_version: inputcodex.synthetic.zed-remote-project-observation.v1
+request_fields: 0
+source_summary:
+  discovered: 2
+  readable: 1
+  failed: 1
+  coverage: Partial
+projects:
+  - id: zed-remote-project:v1:sha256:d75b0c8cc035934d8078d15553305a9fed6f3a70862bfcab0b55715b2a73b39e
+    origin: CodexRemoteProject
+    selection_hint: SelectedHostHint
+  - id: zed-remote-project:v1:sha256:b69c8abbcf5a203deba7d16965e202646e786f7d723f9cda30d6e3663788e472
+    origin: SqliteThreadCwd
+    selection_hint: NotObserved
+source_access:
+  global_state_limit_bytes: 1048576
+  database_limit: 32
+  database_size_limit_bytes: 1073741824
+  cwd_limit_per_database: 80
+  cwd_limit_bytes: 4096
+  internal_candidate_limit: 512
+  project_limit: 256
+  database_mode: READ_ONLY
+  nofollow: true
+  query_only: true
+  observation_timeout_ms: 2000
+  busy_timeout_ms: 50
+privacy:
+  raw_identity_exposed: false
+  label_exposed: false
+  host_id_exposed: false
+  source_path_exposed: false
+  raw_error_exposed: false
+  stable_id_persisted: false
+semantics:
+  selected_host_hint_is_runtime_state: false
+  stable_id_is_anonymous: false
+  none_port_differs_from_explicit_22: true

@@ -1,0 +1,10 @@
+schema_version: inputcodex.fixture-manifest.v1
+feature_id: feature.remote-install.zed-remote-project-observation
+fixtures:
+  - id: fixture.feature.remote-install.zed-remote-project-observation.baseline
+    scenario: baseline
+    kind: synthetic
+    files:
+      - path: baseline.yml
+        format: yaml
+        description: '脱敏合成 Zed 远程项目观察，只固定稳定假名、来源、选择提示、Partial 覆盖和只读边界，不包含真实主机、用户、路径、URL 或凭据。'
