@@ -8,7 +8,9 @@ use inputcodex_application::{
 };
 #[cfg(any(target_os = "windows", target_os = "macos"))]
 use inputcodex_application::{PlatformPathsPort, PlatformPathsRequest};
-use inputcodex_domain::{WatcherPreference, WatcherPreferenceObservation};
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
+use inputcodex_domain::WatcherPreference;
+use inputcodex_domain::WatcherPreferenceObservation;
 
 #[cfg(any(target_os = "windows", target_os = "macos"))]
 use crate::SystemPlatformPaths;
