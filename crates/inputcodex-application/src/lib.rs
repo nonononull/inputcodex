@@ -13,6 +13,7 @@ mod relay_status_observation;
 mod runtime_environment_observation;
 mod settings_observation;
 mod version_startup;
+mod watcher_preference_observation;
 
 pub use application_overview::{
     ApplicationOverviewPort, ApplicationOverviewRequest, LoadApplicationOverview,
@@ -46,6 +47,9 @@ pub use settings_observation::{
     ObserveSettings, SettingsObservationPort, SettingsObservationRequest,
 };
 pub use version_startup::{LoadVersionStartup, VersionStartupPort, VersionStartupRequest};
+pub use watcher_preference_observation::{
+    ObserveWatcherPreference, WatcherPreferenceObservationPort, WatcherPreferenceObservationRequest,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct RequestId(u64);

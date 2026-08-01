@@ -98,6 +98,10 @@
 使用受控 Relay profile 的 Base URL 与 API key 发起一次有界网络读取，只返回经过 schema、token scope 与非负有限值校验的倍率和观测时间；不接受独立任意 URL，不返回或持久化凭据、账号、Header、原始响应或实际端点。
 避免用语：账单管理、费用结算、倍率已保存
 
+**Watcher 偏好状态观察**：
+一次只读检查平台路径能力定位的 `inputcodex_state_root/watcher.disabled` 元数据；标记缺失只表示 `EnabledByDefault`，普通文件存在只表示 `ExplicitlyDisabled`。它不读取文件内容、不返回实际路径，也不表示 Watcher 已安装、正在运行或已控制任何进程。
+避免用语：Watcher 运行状态、Watcher 已启用、后台守护已安装
+
 **设置文档观察**：
 一次只读解析平台路径能力定位的设置文件，只保留 JSON object 顶层条目数量；不接受任意路径，不返回字段名称、字段值、原始内容、脚本或实际路径。
 避免用语：设置详情、设置快照、配置内容

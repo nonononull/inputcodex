@@ -11,6 +11,7 @@ mod relay_status_observation;
 mod runtime_environment_observation;
 mod settings_observation;
 mod version_startup;
+mod watcher_preference_observation;
 
 pub use application_overview::{
     ApplicationOverview, ApplicationVersion, ApplicationVersionError, CollectedAtUnixMs,
@@ -54,6 +55,7 @@ pub use runtime_environment_observation::{
 };
 pub use settings_observation::SettingsDocumentObservation;
 pub use version_startup::{StartupIntent, VersionStartupSnapshot};
+pub use watcher_preference_observation::{WatcherPreference, WatcherPreferenceObservation};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct DiagnosticCode(&'static str);

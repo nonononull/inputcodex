@@ -1054,10 +1054,10 @@ sources:
       path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
       symbol: load_watcher_state
     platforms: [windows, macos]
-    side_effects: [filesystem-write, process-control]
+    side_effects: [filesystem-read]
     disposition:
       type: feature
-      feature_id: feature.foundation-platform.watcher
+      feature_id: feature.foundation-platform.watcher-preference-observation
   - id: tauri-command:open_external_url
     kind: tauri-command
     evidence:

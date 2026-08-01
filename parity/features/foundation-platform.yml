@@ -260,6 +260,25 @@ features:
       - issue:26
       - issue:80
       - issue:81
+  - id: feature.foundation-platform.watcher-preference-observation
+    name: 'Watcher 偏好状态观察'
+    status: implemented
+    evidence:
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: load_watcher_state
+    entry_points:
+      - tauri-command:load_watcher_state
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '只读检查平台路径定位的 inputcodex_state_root/watcher.disabled 元数据；缺失返回 EnabledByDefault，普通文件返回 ExplicitlyDisabled，不读取内容、写入或控制进程。'
+      macos:
+        applicability: supported
+        semantics: '只读检查平台路径定位的 inputcodex_state_root/watcher.disabled 元数据；缺失返回 EnabledByDefault，普通文件返回 ExplicitlyDisabled，不读取内容、写入或控制进程。'
+    decision_refs:
+      - issue:26
+      - issue:127
+      - issue:128
   - id: feature.foundation-platform.watcher
     name: 'Watcher 管理'
     status: unassessed
@@ -275,15 +294,12 @@ features:
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: install_watcher
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
-        symbol: load_watcher_state
-      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: uninstall_watcher
     entry_points:
       - core-module:watcher
       - tauri-command:disable_watcher
       - tauri-command:enable_watcher
       - tauri-command:install_watcher
-      - tauri-command:load_watcher_state
       - tauri-command:uninstall_watcher
     platforms:
       windows:
