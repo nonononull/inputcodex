@@ -5,7 +5,7 @@ contracts:
     feature_id: feature.plugin-script.dream-skin-library
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.44 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: dream-skin-library-request
@@ -137,7 +137,7 @@ contracts:
       - duration_ms
       - outcome_class
     platforms:
-      shared_semantics: 'companion 显示仍依赖 renderer 注入、DOM 定位和变更监听，需决定 Rust/Iced 无注入等价语义。'
+      shared_semantics: 'companion 按渲染高度对齐，但显示仍依赖 renderer 注入、DOM 定位和变更监听，需决定 Rust/Iced 无注入等价语义。'
       windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
       macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
       differences: []
@@ -272,7 +272,7 @@ contracts:
       - duration_ms
       - outcome_class
     platforms:
-      shared_semantics: '远程推荐列表与注入式插件解锁不得直接迁移。'
+      shared_semantics: '远端认证失败时可返回隔离的本地 fallback；远程推荐列表与注入式插件解锁不得直接迁移。'
       windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
       macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
       differences: []
@@ -317,7 +317,7 @@ contracts:
       - duration_ms
       - outcome_class
     platforms:
-      shared_semantics: '粘贴修复、中文化、Goals、覆盖层与 companion 显示仍依赖 renderer 注入，不进入 Rust/Iced 运行面。'
+      shared_semantics: 'Quick Chat 目标排除、app-server/Fast 兼容、data bridge 重注入、粘贴修复、覆盖层与 companion 仍依赖 renderer 注入，不进入 Rust/Iced 运行面。'
       windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
       macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
       differences: []
@@ -452,7 +452,7 @@ contracts:
       - duration_ms
       - outcome_class
     platforms:
-      shared_semantics: 'v1.2.43 可合并 renderer 的 status 与 error，但运行状态仍来自 renderer 注入链，不得伪造运行成功。'
+      shared_semantics: 'v1.2.44 可合并 renderer 的 status 与 error，但运行状态仍来自 renderer 注入链，不得伪造运行成功。'
       windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
       macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
       differences: []

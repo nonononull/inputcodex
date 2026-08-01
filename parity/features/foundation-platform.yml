@@ -1,7 +1,7 @@
 schema_version: inputcodex.feature-catalog.v1
 release:
-  tag: v1.2.43
-  tag_commit: 5036ff056b5c629f19356396b17d6eeb70da664c
+  tag: v1.2.44
+  tag_commit: 77091ccaee4423f35a1b2c51c4ecd703e6201092
 domain: foundation-platform
 features:
   - id: feature.foundation-platform.advertising
@@ -18,13 +18,14 @@ features:
     platforms:
       windows:
         applicability: exception-pending
-        semantics: 'v1.2.43 新增 sponsor、expires_at 和本地素材；项目禁止广告、推广位和付费导流，仅保留上游证据。'
+        semantics: 'v1.2.44 延续 sponsor、expires_at 和本地素材并更新推广文案；项目禁止广告、推广位和付费导流，仅保留上游证据。'
       macos:
         applicability: exception-pending
-        semantics: 'v1.2.43 新增 sponsor、expires_at 和本地素材；项目禁止广告、推广位和付费导流，仅保留上游证据。'
+        semantics: 'v1.2.44 延续 sponsor、expires_at 和本地素材并更新推广文案；项目禁止广告、推广位和付费导流，仅保留上游证据。'
     decision_refs:
       - issue:26
       - issue:65
+      - issue:115
       - rule:AGENTS-product-constraints
   - id: feature.foundation-platform.application-lifecycle
     name: '应用生命周期'
@@ -36,6 +37,10 @@ features:
         symbol: launch_codex_plus
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: restart_codex_plus
+      - path: upstream/CodexPlusPlus/apps/codex-plus-launcher/src/main.rs
+        symbol: launcher_target_alive
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/launcher.rs
+        symbol: run_bridge_reinjector
     entry_points:
       - core-module:status
       - tauri-command:launch_codex_plus
@@ -43,13 +48,14 @@ features:
     platforms:
       windows:
         applicability: supported
-        semantics: '启动或重启受管 Codex 进程并维护生命周期状态；状态文件读写不得冒充应用概览的实时进程观察。'
+        semantics: '启动或重启受管 Codex 进程并维护生命周期状态；Windows 保留端口遇到既有 CDP 时复用可用目标，重注入优先恢复 data bridge；状态文件读写不得冒充实时观察。'
       macos:
         applicability: supported
-        semantics: '启动或重启受管 Codex 进程并维护生命周期状态；状态文件读写不得冒充应用概览的实时进程观察。'
+        semantics: '启动或重启受管 Codex 进程并维护生命周期状态；既有 CDP 恢复与重注入必须保留 data bridge；状态文件读写不得冒充实时观察。'
     decision_refs:
       - issue:26
       - issue:77
+      - issue:115
   - id: feature.foundation-platform.application-overview
     name: '应用概览与检测'
     status: implemented

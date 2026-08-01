@@ -38,7 +38,7 @@ contracts:
       - duration_ms
       - outcome_class
     platforms:
-      shared_semantics: 'v1.2.43 的 sponsor、expires_at 和本地素材只作为审计输入；不得加载、下载或展示 sponsor。'
+      shared_semantics: 'v1.2.44 的 sponsor、expires_at、本地素材和推广文案只作为审计输入；不得加载、下载或展示 sponsor。'
       windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
       macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
       differences: []
@@ -50,7 +50,7 @@ contracts:
     feature_id: feature.foundation-platform.application-lifecycle
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.44 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: application-lifecycle-request
@@ -83,7 +83,7 @@ contracts:
       - duration_ms
       - outcome_class
     platforms:
-      shared_semantics: '启动或重启受管 Codex 进程，明确超时、取消和进程隔离。'
+      shared_semantics: '启动或重启受管 Codex 进程；Windows 保留端口可复用已验证 CDP，重注入必须保留 data bridge，并明确超时、取消和进程隔离。'
       windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
       macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
       differences: []
@@ -95,7 +95,7 @@ contracts:
     feature_id: feature.foundation-platform.application-overview
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，Issue #77 方案 A 与 Issue #78 只读实现范围已经批准。'
+      - '上游 Release v1.2.44 证据已锁定，Issue #77 方案 A 与 Issue #78 只读实现范围已经批准。'
       - 'Windows 最多读取一个 version 文件和 256 bytes；macOS 最多读取一个 Info.plist 和 65536 bytes。'
     inputs:
       - name: request
@@ -157,7 +157,7 @@ contracts:
     feature_id: feature.foundation-platform.diagnostics
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.44 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: diagnostics-request
@@ -204,7 +204,7 @@ contracts:
     feature_id: feature.foundation-platform.diagnostic-log-observation
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，Issue #94 方案 1 与 Issue #95 二十四路径范围已经批准。'
+      - '上游 Release v1.2.44 证据已锁定，Issue #94 方案 1 与 Issue #95 二十四路径范围已经批准。'
       - '请求不接受任意路径、读取长度或过滤器，诊断日志只通过平台路径解析能力定位。'
     inputs:
       - name: request
@@ -262,7 +262,7 @@ contracts:
     feature_id: feature.foundation-platform.environment-conflicts
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.44 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: environment-conflicts-request
@@ -308,7 +308,7 @@ contracts:
     feature_id: feature.foundation-platform.runtime-environment-conflict-observation
     scenario: baseline
     preconditions:
-      - 'Issue #85 已批准观察与清理分离；上游 Release v1.2.43 证据已锁定，Windows 或 macOS 平台适配器可用。'
+      - 'Issue #85 已批准观察与清理分离；上游 Release v1.2.44 证据已锁定，Windows 或 macOS 平台适配器可用。'
       - '当前切片只观察 inputcodex 进程继承的环境，用户级与系统级持久化来源均不在本次观察范围。'
     inputs:
       - name: request
@@ -362,7 +362,7 @@ contracts:
     feature_id: feature.foundation-platform.platform-paths
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.44 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: platform-paths-request
@@ -423,7 +423,7 @@ contracts:
     feature_id: feature.foundation-platform.settings-observation
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，Issue #91 方案 A 与 Issue #92 只读实现范围已经批准。'
+      - '上游 Release v1.2.44 证据已锁定，Issue #91 方案 A 与 Issue #92 只读实现范围已经批准。'
       - '请求不接受任意路径，设置文件只通过平台路径解析能力定位，单文件上限为 256 KiB。'
     inputs:
       - name: request
@@ -485,7 +485,7 @@ contracts:
     feature_id: feature.foundation-platform.settings-management
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，Issue #91 已将只读 load_settings 入口拆出。'
+      - '上游 Release v1.2.44 证据已锁定，Issue #91 已将只读 load_settings 入口拆出。'
     inputs:
       - name: request
         data_type: settings-management-request
@@ -532,7 +532,7 @@ contracts:
     feature_id: feature.foundation-platform.version-and-startup
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，Windows 或 macOS 平台适配器可用。'
+      - '上游 Release v1.2.44 证据已锁定，Windows 或 macOS 平台适配器可用。'
       - 'inputcodex 编译版本只能来自 CARGO_PKG_VERSION，并通过既有 ApplicationVersion 校验。'
     inputs:
       - name: request
@@ -594,7 +594,7 @@ contracts:
     feature_id: feature.foundation-platform.watcher
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.44 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: watcher-request
@@ -632,10 +632,10 @@ contracts:
       - outcome_class
     platforms:
       shared_semantics: '重启只处理目标实例，等待旧进程退出并对超时留证；不得把上游平台差异带入 inputcodex。'
-      windows: '上游 v1.2.43 仍为粗粒度停止；inputcodex 实现前必须补齐与 macOS 等价的目标隔离。'
+      windows: '上游 v1.2.44 仍为粗粒度停止；inputcodex 实现前必须补齐与 macOS 等价的目标隔离。'
       macos: '按 remote-debugging-port 精确筛选 Codex 主进程，排除 Helpers，等待退出后再重启。'
       differences:
-        - '上游 v1.2.43 仅 macOS 按 debug port 精确筛选；该差异不得成为 inputcodex 产品差异。'
+        - '上游 v1.2.44 仅 macOS 按 debug port 精确筛选；该差异不得成为 inputcodex 产品差异。'
     fixture_policy:
       mode: none
       reason: '基线只约束状态、副作用和错误语义，不需要结构样本。'

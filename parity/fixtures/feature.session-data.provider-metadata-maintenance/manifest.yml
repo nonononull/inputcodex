@@ -7,4 +7,4 @@ fixtures:
     files:
       - path: baseline.yml
         format: yaml
-        description: '合成 Provider metadata、SQLite catalog 修复计数与同步状态水位。'
+        description: '合成 CODEX_HOME 定位、Provider metadata、SQLite catalog 修复计数与同步状态水位。'

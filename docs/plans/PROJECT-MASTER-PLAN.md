@@ -1,12 +1,12 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-111-autonomous-refactor-control-plane
-active_gate: Gate 5 前十一个产品切片与 Issue #105 依赖安全修复已进入 main；当前建立无人值守重构控制面
-last_verified_gate: Issue #109 / PR #110 已以单父 Squash 提交 86a7dd837652f63198c7682b84d82180b8558e3a 进入 main；合并后 CI Run 30559880826 七 Job与 Performance Baseline Run 30559880720 四 Job全绿且 Artifact 均为 0，Issue #109 已按 COMPLETED 关闭
-next_legal_gate: 在 Issue #111 十二路径候选范围内完成自治策略、离线验证器、状态解析、恢复合同与本地门禁；随后进入普通 push、非 Draft PR、独立复审、Hosted CI、精确 Head 自治 Squash 和主干验证
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/111
-active_pr_ref: pending
+active_task: none-awaiting-next-gate-5-candidate
+active_gate: Gate 5 前十一个产品切片与自治控制面已进入 main；v1.2.44 功能目录审计恢复 current 后继续候选队列
+last_verified_gate: Issue #116 / PR #119 已以单父 Squash 提交 057c7e08de5c1e30198881a7f548a49453fb1ac6 同步 v1.2.44 完整快照，主干 CI 与 Performance 全绿且 Artifact 为 0
+next_legal_gate: Issue #115 精确 Head 合并并完成主干验证后，按 #111 决策顺序恢复 Gate 5 最小安全候选；动态任务状态只保留在 GitHub
+tracking_issue_ref: none
+active_pr_ref: none
 gate_5_platform_paths_exception_ref: https://github.com/nonononull/inputcodex/issues/74
 gate_5_platform_paths_scope_hash: sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37
 gate_5_platform_paths_branch_ref: codex/issue-75-gate-5-platform-paths
@@ -112,8 +112,8 @@ performance_budget_discovery_merge_ref: fea8824c652665df710a7e6ef941854060eb6e1f
 performance_budget_discovery_main_ci_ref: https://github.com/nonononull/inputcodex/actions/runs/30175592979
 performance_baseline_issue_ref: https://github.com/nonononull/inputcodex/issues/32
 performance_baseline_pr_ref: https://github.com/nonononull/inputcodex/pull/49
-release_audit_reaudit_issue_ref: https://github.com/nonononull/inputcodex/issues/65
-release_audit_reaudit_pr_ref: https://github.com/nonononull/inputcodex/pull/72
+release_audit_reaudit_issue_ref: https://github.com/nonononull/inputcodex/issues/115
+release_audit_reaudit_pr_ref: github-dynamic-see-issue-115
 catalog_reaudit_closeout_issue_ref: https://github.com/nonononull/inputcodex/issues/47
 ci_incident_issue_ref: https://github.com/nonononull/inputcodex/issues/46
 release_watch_issue_ref: https://github.com/nonononull/inputcodex/issues/33
@@ -125,25 +125,25 @@ gate_3_planning_issue_ref: https://github.com/nonononull/inputcodex/issues/17
 upstream_watch_issue_ref: https://github.com/nonononull/inputcodex/issues/14
 transition_issue_ref: https://github.com/nonononull/inputcodex/issues/8
 upstream_sync_issue_ref: https://github.com/nonononull/inputcodex/issues/9
-active_branch_ref: codex/issue-105-quick-xml-rustsec-remediation
+active_branch_ref: none
 transition_branch_ref: codex/issue-8-gate-2-transition
-active_plan_ref: docs/plans/2026-07-30-issue-105-quick-xml-rustsec-remediation.md
-active_session_plan_ref: docs/plans/sessions/2026-07-30-issue-105-quick-xml-rustsec-remediation.md
-active_runtime_workflow_ref: docs/workflows/2026-07-30-issue-105-quick-xml-rustsec-remediation-runtime.md
+active_plan_ref: none
+active_session_plan_ref: none
+active_runtime_workflow_ref: none
 gate_3_closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/23
 gate_3_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/21
 gate_3_planning_pr_ref: https://github.com/nonononull/inputcodex/pull/18
 transition_pr_ref: https://github.com/nonononull/inputcodex/pull/10
 upstream_sync_pr_ref: https://github.com/nonononull/inputcodex/pull/11
 closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5, https://github.com/nonononull/inputcodex/pull/7, https://github.com/nonononull/inputcodex/pull/10, https://github.com/nonononull/inputcodex/pull/11, https://github.com/nonononull/inputcodex/pull/13, https://github.com/nonononull/inputcodex/pull/15, https://github.com/nonononull/inputcodex/pull/18, https://github.com/nonononull/inputcodex/pull/21, https://github.com/nonononull/inputcodex/pull/23, https://github.com/nonononull/inputcodex/pull/25, https://github.com/nonononull/inputcodex/pull/27, https://github.com/nonononull/inputcodex/pull/36, https://github.com/nonononull/inputcodex/pull/40, https://github.com/nonononull/inputcodex/pull/42, https://github.com/nonononull/inputcodex/pull/44, https://github.com/nonononull/inputcodex/pull/45
-active_report_ref: docs/reports/issue-105-quick-xml-rustsec-remediation.md
+active_report_ref: none
 gate_3_closeout_report_ref: docs/reports/issue-22-gate-3-closeout.md
 gate_3_implementation_report_ref: docs/reports/issue-19-gate-3-rust-workspace-ci.md
 gate_2_watch_report_ref: docs/reports/issue-14-gate-2-upstream-watch.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-decision_status: issue-105-security-green-remote-delivery-gated
+decision_status: v1.2.44-catalog-current-awaiting-next-gate5-candidate
 
 ## 当前状态
 
@@ -151,9 +151,9 @@ decision_status: issue-105-security-green-remote-delivery-gated
 - PR `#7` 合并提交为 `c74b66422ba47f96bd3eb2b2385cdfb90541808e`，由 GitHub 生成有效签名；只有一个父提交 `b7404b0c63f2d2ba65474c077182c42a01cc9a64`，tree 为 `00f0f7fe0e408a1e6f218ee8e1be0d8442ed1e65`。
 - PR `#7` 的 Review 对话总数、未解决数与 Checks 数量均为 `0`；`0 Checks` 只表示当前尚未配置 CI。
 - `main-protection` Ruleset（ID `19395456`）仍为 `active`，只命中 `main`，禁止删除与 Force Push，要求解决全部 Review 对话，只允许 Squash Merge，单人阶段 required approvals 为 `0`。
-- `main` 已将完整审计缓存与功能目录审计基线对齐 `v1.2.43 @ 5036ff056b5c629f19356396b17d6eeb70da664c`，tree 为 `d478a9fcda7f22a7c8167cb567777ad9148cf328`；`release_audit=current`，Issue `#63/#65` 均已关闭，Gate 5 前置条件已满足。
+- `main` 的目标稳定面将完整审计缓存与功能目录审计基线对齐 `v1.2.44 @ 77091ccaee4423f35a1b2c51c4ecd703e6201092`，tree 为 `d417f2775adfe61798c6676024edce1a236e576f`；`release_audit=current` 后 Gate 5 候选队列方可恢复。
 - Issue `#9` / PR `#11` 已完成 Gate 2 上游基线导入；PR `#11` 于 `2026-07-21T19:01:02Z` Squash Merge，合并提交为 `dde08b725eb2bf4add7fbcfa955f3eaf4eb1bbc6`，Issue `#9` 已关闭。
-- `upstream/CodexPlusPlus/` 当前包含 `277` 个审计文件，`upstream/source-lock.json` 记录 `24,196,123` 字节、manifest SHA-256 `330bee0284837c4c3a463d73ea79383cd3d01924b62f669def79276b60f21628` 和 `7` 份许可证/声明。
+- `upstream/CodexPlusPlus/` 当前包含 `281` 个审计文件，`upstream/source-lock.json` 记录 `24,481,110` 字节、manifest SHA-256 `a9d0cb6b35dfd47899ae9a7ca66e1ac1ba43bfbc7ccf1c3137695f4366f2a8a0` 和 `7` 份许可证/声明。
 - Issue `#12` / PR `#13` 已完成上游基线 closeout；PR `#13` 的 Squash Merge 提交为 `5e64015075ddf2adef4bf685f50977b47b7f72e7`，Issue `#12` 已关闭。
 - Issue `#14` / PR `#15` 已完成每 6 小时上游监控；最终 PR CI、两次 `main` 真实运行、唯一状态 Issue `#16`、分支清理和有效 GitHub 签名均已闭环。
 - Issue `#17` / PR `#18` 已完成 Gate 3 规划交付；PR `#18` 的 Squash Merge 提交为 `477d110a9b284e127af365f5278901bcfa69e093`，Issue `#17` 已关闭。
@@ -169,6 +169,9 @@ decision_status: issue-105-security-green-remote-delivery-gated
 - Issue `#38` / PR `#45` 已完成二十六路径重新审计：最终 Head `d3df8759bdb9c6378497a3a0c8f409c3968f4d4f` 精确包含 `26` 路径，CI Run `30157623932` 七 Job 全绿且 Artifact 为 `0`；单父 Squash 提交 `5fd337fb7ceb9b0ef53e2e694cc5ddd81ea0a98c` 的 tree 为 `5273d0e42483bbb5c629a2243fc24f0a892b3db3`、GitHub 签名 `valid`，Issue `#38` 已按 `COMPLETED` 关闭。
 - Issue `#64` / PR `#66` 已将 `v1.2.43` 完整快照缓存为只读审计输入；Squash 提交为 `15e91708b41548f523e26ede4c7ca4de41badf77`，主干 CI Run `30214249228` 七 Job 全绿且 Artifact 为 `0`。
 - Issue `#65` / PR `#72` 已完成二十四路径与 `sha256:82234e7aacce0bd6c57994529ccf74371052ed906dc8371324b90e41f697d7b7` 的 TDD、Review/CI、全部对话闭环与单独 Squash 授权；合并提交为 `fc1683aabda4afb27ca333387ec954b6a405d2df`，Issue 已按 `COMPLETED` 关闭。
+- Issue `#111` / PR `#112` 已建立 bounded standing authorization、精确 Head 合并门和中断恢复；单父 Squash 提交为 `6ebed165327fcdd749bea19ae781150f2163a594`。
+- Issue `#116` / PR `#119` 已将 `v1.2.44` 完整快照作为只读审计输入同步到 main；单父 Squash 提交为 `057c7e08de5c1e30198881a7f548a49453fb1ac6`，目录审计保持 stale 并指向 Issue `#115`。
+- Issue `#115` 固定三十二路径与 `sha256:b8d42285dc7cfca080f9fbf683c9c8176a0faae633c5971b1827837059898b83`，目标为 `135/44/44/13/10/3/0`，新增独立 Sub2API 账单倍率观察事实并恢复 `release_audit=current`；动态 PR/CI/合并证据只保留在 GitHub。
 - Issue `#74` 已确认平台路径安全差异：无效显式路径与非空 `CODEX_HOME` 必须失败，禁止相对目录或静默回退；Issue 已按 `COMPLETED` 关闭。
 - Issue `#75` / PR `#76` 已在三十路径与 `sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37` 内完成首个 Gate 5 平台路径迁移；Final Head `ba082669cd6d491cce26e29efcaa249786973a39` 以单父 Squash 提交 `a06a97fd59ce125306a13202c8f1a07656c797a0` 进入 `main`，tree 为 `b669aa6610e976542a74f404ff4f87b36864816b`，Issue 已关闭。合并后主干 CI Run `30276472184` 七 Job、Performance Baseline Run `30276476891` 四 Job全绿且 Artifact 均为 `0`。
 - Issue `#77` 已批准应用概览方案 A 并按 `COMPLETED` 关闭；历史启动记录不得冒充实时运行状态，损坏状态不得静默视为无记录。
@@ -333,10 +336,15 @@ decision_status: issue-105-security-green-remote-delivery-gated
 - 已完成 Issue `#35` 报告：`docs/reports/issue-35-release-catalog-decoupling.md`。
 - `v1.2.42` 缓存同步报告：`docs/reports/2026-07-23-upstream-v1.2.42-sync.md`。
 - `v1.2.43` 缓存同步报告：`docs/reports/2026-07-26-upstream-v1.2.43-sync.md`。
+- `v1.2.44` 缓存同步报告：`docs/reports/2026-07-31-upstream-v1.2.44-sync.md`。
 - Issue `#65` 重新审计计划：`docs/plans/2026-07-27-issue-65-v1.2.43-catalog-reaudit.md`。
 - Issue `#65` Session Plan：`docs/plans/sessions/2026-07-27-issue-65-v1.2.43-catalog-reaudit.md`。
 - Issue `#65` Runtime Workflow：`docs/workflows/2026-07-27-issue-65-v1.2.43-catalog-reaudit-runtime.md`。
 - Issue `#65` Discovery 报告：`docs/reports/issue-65-v1.2.43-catalog-reaudit-discovery.md`。
+- Issue `#115` 重新审计计划：`docs/plans/2026-08-01-issue-115-v1.2.44-catalog-reaudit.md`。
+- Issue `#115` Session Plan：`docs/plans/sessions/2026-08-01-issue-115-v1.2.44-catalog-reaudit.md`。
+- Issue `#115` Runtime Workflow：`docs/workflows/2026-08-01-issue-115-v1.2.44-catalog-reaudit-runtime.md`。
+- Issue `#115` Discovery 报告：`docs/reports/issue-115-v1.2.44-catalog-reaudit-discovery.md`。
 - Issue `#75` 平台路径设计：`docs/plans/2026-07-27-issue-75-gate-5-platform-paths.md`。
 - Issue `#75` Session Plan：`docs/plans/sessions/2026-07-27-issue-75-gate-5-platform-paths.md`。
 - Issue `#75` Runtime Workflow：`docs/workflows/2026-07-27-issue-75-gate-5-platform-paths-runtime.md`。
@@ -402,7 +410,7 @@ decision_status: issue-105-security-green-remote-delivery-gated
 
 ## 停止条件
 
-- 上游最新正式 Release 或已核验的 `v1.2.43` / `5036ff056b5c629f19356396b17d6eeb70da664c` / `d478a9fcda7f22a7c8167cb567777ad9148cf328` 事实发生变化。
+- 上游最新正式 Release 或已核验的 `v1.2.44` / `77091ccaee4423f35a1b2c51c4ecd703e6201092` / `d417f2775adfe61798c6676024edce1a236e576f` 事实发生变化。
 - Issue `#89` 出现三十路径或 `sha256:0adc20d0ed4d73ae645a5ffb23d7208f7aaabfea92c4d6fd62e0da3a120e8f77` 之外的新增、删除或重命名路径；把 `core-module:proxy` 或原网络环境总功能迁入新子能力；引入网络、写入、子进程、线程、UI、注入、`unsafe` 或敏感值/路径泄露；或在最终 Head Review、CI 与全部对话闭环前请求 Squash Merge。
 - 需要修改 `upstream/CodexPlusPlus/` 或 `source-lock.json` 的来源快照字段，但没有新的独立 upstream-sync Issue/PR 与项目所有者批准。
 - `release_audit` 为 stale 时修改 `benchmarks/`、`apps/`、产品 crate、`Cargo.toml` 或 `Cargo.lock`，或在同一 PR 同时更新实际 audit 与受阻产品路径。

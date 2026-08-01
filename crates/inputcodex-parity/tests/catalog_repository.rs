@@ -579,13 +579,7 @@ fn 仓库v1_2_44目录重新审计证据保持固定() {
 fn 仓库v1_2_44受影响行为证据被固定() {
     assert_repository_text_contains(
         "parity/features/foundation-platform.yml",
-        &[
-            "CDP",
-            "data bridge",
-            "保留端口",
-            "expires_at",
-            "issue:115",
-        ],
+        &["CDP", "data bridge", "保留端口", "expires_at", "issue:115"],
     );
     assert_repository_text_contains(
         "parity/contracts/foundation-platform.yml",
@@ -2043,9 +2037,9 @@ fn gate5_本地会话目录只读观察已实现但本地会话管理总功能�
     assert_repository_text_contains(
         "parity/README.md",
         &[
-            "当前共有 43 个 feature",
-            "`43` 份行为合同",
-            "`12` 个 fixture manifest",
+            "当前共有 44 个 feature",
+            "`44` 份行为合同",
+            "`13` 个 fixture manifest",
             "feature.session-data.local-session-directory-observation",
         ],
     );

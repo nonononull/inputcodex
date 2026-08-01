@@ -5,7 +5,7 @@ contracts:
     feature_id: feature.session-data.local-session-directory-observation
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，Windows 或 macOS 平台路径适配器可用。'
+      - '上游 Release v1.2.44 证据已锁定，Windows 或 macOS 平台路径适配器可用。'
     inputs:
       - name: request
         data_type: local-session-directory-request
@@ -88,7 +88,7 @@ contracts:
     feature_id: feature.session-data.local-session-management
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.44 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: local-session-management-request
@@ -149,7 +149,7 @@ contracts:
     feature_id: feature.session-data.markdown-generation
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，Windows 或 macOS 平台路径适配器可用。'
+      - '上游 Release v1.2.44 证据已锁定，Windows 或 macOS 平台路径适配器可用。'
       - '调用方提交的 session_id 来自既有本地会话目录。'
     inputs:
       - name: session_id
@@ -242,7 +242,7 @@ contracts:
     feature_id: feature.session-data.provider-metadata-maintenance
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.44 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: provider-metadata-maintenance-request
@@ -285,7 +285,7 @@ contracts:
       - duration_ms
       - outcome_class
     platforms:
-      shared_semantics: '同步 metadata、从 threads 修复 local_thread_catalog、返回 sqlite_catalog_rows_inserted、维护 observation_sequence 并生成本地备份。'
+      shared_semantics: '未显式传入路径时遵循 CODEX_HOME；同步 metadata、从 threads 修复 local_thread_catalog、返回 sqlite_catalog_rows_inserted、维护 observation_sequence 并生成本地备份。'
       windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
       macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
       differences: []
@@ -298,7 +298,7 @@ contracts:
     feature_id: feature.session-data.token-usage-history
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.44 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: token-usage-history-request

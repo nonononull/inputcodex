@@ -1,7 +1,7 @@
 schema_version: inputcodex.feature-catalog.v1
 release:
-  tag: v1.2.43
-  tag_commit: 5036ff056b5c629f19356396b17d6eeb70da664c
+  tag: v1.2.44
+  tag_commit: 77091ccaee4423f35a1b2c51c4ecd703e6201092
 domain: plugin-script
 features:
   - id: feature.plugin-script.dream-skin-library
@@ -108,13 +108,14 @@ features:
     platforms:
       windows:
         applicability: exception-pending
-        semantics: 'companion 显示仍依赖 renderer 注入和 DOM 定位，需另行决定 Rust/Iced 无注入等价语义。'
+        semantics: 'companion 按渲染高度对齐，但显示仍依赖 renderer 注入和 DOM 定位，需另行决定 Rust/Iced 无注入等价语义。'
       macos:
         applicability: exception-pending
-        semantics: 'companion 显示仍依赖 renderer 注入和 DOM 定位，需另行决定 Rust/Iced 无注入等价语义。'
+        semantics: 'companion 按渲染高度对齐，但显示仍依赖 renderer 注入和 DOM 定位，需另行决定 Rust/Iced 无注入等价语义。'
     decision_refs:
       - issue:26
       - issue:38
+      - issue:115
       - rule:AGENTS-product-constraints
   - id: feature.plugin-script.image-analysis
     name: '图片分析增强'
@@ -175,12 +176,13 @@ features:
     platforms:
       windows:
         applicability: exception-pending
-        semantics: '远程推荐列表与注入式插件解锁不得直接迁移。'
+        semantics: '远端认证失败时可回退本地 fallback 插件目录，但远程推荐列表与注入式插件解锁不得直接迁移。'
       macos:
         applicability: exception-pending
-        semantics: '远程推荐列表与注入式插件解锁不得直接迁移。'
+        semantics: '远端认证失败时可回退本地 fallback 插件目录，但远程推荐列表与注入式插件解锁不得直接迁移。'
     decision_refs:
       - issue:26
+      - issue:115
       - rule:AGENTS-product-constraints
   - id: feature.plugin-script.renderer-enhancements
     name: 'Codex 界面增强'
@@ -208,15 +210,16 @@ features:
     platforms:
       windows:
         applicability: exception-pending
-        semantics: '粘贴修复、中文化、Goals、覆盖层、companion 显示与 saveMarkdown 文件保存依赖 renderer 注入，不进入 Rust/Iced 运行面。'
+        semantics: 'Quick Chat 目标排除、app-server/Fast 兼容、data bridge 重注入、粘贴修复、覆盖层、companion 与 saveMarkdown 文件保存仍依赖 renderer 注入，不进入 Rust/Iced 运行面。'
       macos:
         applicability: exception-pending
-        semantics: '粘贴修复、中文化、Goals、覆盖层、companion 显示与 saveMarkdown 文件保存依赖 renderer 注入，不进入 Rust/Iced 运行面。'
+        semantics: 'Quick Chat 目标排除、app-server/Fast 兼容、data bridge 重注入、粘贴修复、覆盖层、companion 与 saveMarkdown 文件保存仍依赖 renderer 注入，不进入 Rust/Iced 运行面。'
     decision_refs:
       - issue:26
       - issue:38
       - issue:108
       - issue:109
+      - issue:115
       - rule:AGENTS-product-constraints
   - id: feature.plugin-script.script-marketplace
     name: '脚本市场'
@@ -282,10 +285,10 @@ features:
     platforms:
       windows:
         applicability: exception-pending
-        semantics: 'v1.2.43 可合并 renderer 提供的 runtime status、status 与 error；真实执行仍依赖注入，仅作为审计证据。'
+        semantics: 'v1.2.44 可合并 renderer 提供的 runtime status、status 与 error；真实执行仍依赖注入，仅作为审计证据。'
       macos:
         applicability: exception-pending
-        semantics: 'v1.2.43 可合并 renderer 提供的 runtime status、status 与 error；真实执行仍依赖注入，仅作为审计证据。'
+        semantics: 'v1.2.44 可合并 renderer 提供的 runtime status、status 与 error；真实执行仍依赖注入，仅作为审计证据。'
     decision_refs:
       - issue:26
       - issue:65

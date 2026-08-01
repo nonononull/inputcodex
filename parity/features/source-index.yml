@@ -1,7 +1,7 @@
 schema_version: inputcodex.source-index.v1
 release:
-  tag: v1.2.43
-  tag_commit: 5036ff056b5c629f19356396b17d6eeb70da664c
+  tag: v1.2.44
+  tag_commit: 77091ccaee4423f35a1b2c51c4ecd703e6201092
 sources:
   - id: core-module:ads
     kind: core-module
@@ -13,7 +13,7 @@ sources:
     disposition:
       type: exception-pending
       feature_id: feature.foundation-platform.advertising
-      reason: '项目禁止广告、推广位和付费导流；v1.2.43 sponsor 与 expires_at 仅作审计输入。'
+      reason: '项目禁止广告、推广位和付费导流；v1.2.44 sponsor 与 expires_at 仅作审计输入。'
       decision_refs:
         - issue:26
         - issue:65
@@ -432,6 +432,16 @@ sources:
       decision_refs:
         - issue:26
         - rule:AGENTS-product-constraints
+  - id: core-module:sub2api
+    kind: core-module
+    evidence:
+      path: upstream/CodexPlusPlus/crates/codex-plus-core/src/sub2api.rs
+      symbol: sub2api
+    platforms: [windows, macos]
+    side_effects: [network-read]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.sub2api-billing-observation
   - id: core-module:update
     kind: core-module
     evidence:
@@ -462,7 +472,7 @@ sources:
     disposition:
       type: exception-pending
       feature_id: feature.plugin-script.user-scripts
-      reason: '用户脚本执行及 v1.2.43 runtime status/error 仍依赖注入链。'
+      reason: '用户脚本执行及 v1.2.44 runtime status/error 仍依赖注入链。'
       decision_refs:
         - issue:26
         - issue:65
@@ -823,6 +833,16 @@ sources:
     disposition:
       type: feature
       feature_id: feature.provider-network.model-catalog
+  - id: tauri-command:fetch_sub2api_billing
+    kind: tauri-command
+    evidence:
+      path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+      symbol: fetch_sub2api_billing
+    platforms: [windows, macos]
+    side_effects: [network-read]
+    disposition:
+      type: feature
+      feature_id: feature.provider-network.sub2api-billing-observation
   - id: tauri-command:forget_zed_remote_project
     kind: tauri-command
     evidence:
