@@ -5,3 +5,5 @@ profile:
   api_token: synthetic-redacted-token
   protocol: responses
   models: [gpt-synthetic]
+  common_config_credentials: excluded
+  profile_credentials: retained

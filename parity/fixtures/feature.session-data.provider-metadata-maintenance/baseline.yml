@@ -2,6 +2,7 @@ schema_version: inputcodex.synthetic.provider-metadata.v1
 targets:
   - id: synthetic-target
     selected: true
+codex_home_source: CODEX_HOME
 cleanup_candidates:
   - session_id: synthetic-session-archived
     reason: missing-provider

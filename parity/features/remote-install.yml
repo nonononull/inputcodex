@@ -1,7 +1,7 @@
 schema_version: inputcodex.feature-catalog.v1
 release:
-  tag: v1.2.43
-  tag_commit: 5036ff056b5c629f19356396b17d6eeb70da664c
+  tag: v1.2.44
+  tag_commit: 77091ccaee4423f35a1b2c51c4ecd703e6201092
 domain: remote-install
 features:
   - id: feature.remote-install.application-update

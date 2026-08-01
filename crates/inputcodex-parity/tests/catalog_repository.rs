@@ -10,18 +10,18 @@ use inputcodex_parity::{
     validate_source_index,
 };
 
-const RELEASE_TAG: &str = "v1.2.43";
-const RELEASE_COMMIT: &str = "5036ff056b5c629f19356396b17d6eeb70da664c";
-const PREVIOUS_RELEASE_TAG: &str = "v1.2.42";
-const PREVIOUS_RELEASE_COMMIT: &str = "657cd33e009ad02515d30db6492cd4e669b06318";
-const RE_AUDIT_ISSUE_URL: &str = "https://github.com/nonononull/inputcodex/issues/65";
+const RELEASE_TAG: &str = "v1.2.44";
+const RELEASE_COMMIT: &str = "77091ccaee4423f35a1b2c51c4ecd703e6201092";
+const PREVIOUS_RELEASE_TAG: &str = "v1.2.43";
+const PREVIOUS_RELEASE_COMMIT: &str = "5036ff056b5c629f19356396b17d6eeb70da664c";
+const RE_AUDIT_ISSUE_URL: &str = "https://github.com/nonononull/inputcodex/issues/115";
 static NEXT_FIXTURE_ID: AtomicU64 = AtomicU64::new(0);
 
 const VALID_SOURCE_INDEX: &str = r#"
 schema_version: inputcodex.source-index.v1
 release:
-  tag: v1.2.43
-  tag_commit: 5036ff056b5c629f19356396b17d6eeb70da664c
+  tag: v1.2.44
+  tag_commit: 77091ccaee4423f35a1b2c51c4ecd703e6201092
 sources:
   - id: tauri-command:load_overview
     kind: tauri-command
@@ -365,7 +365,7 @@ fn release_audit_显式解耦快照与功能目录审计基线() {
         catalog_tag: PREVIOUS_RELEASE_TAG,
         catalog_commit: PREVIOUS_RELEASE_COMMIT,
         status: "stale-re-audit-required",
-        stale_reason: Some("上游 v1.2.43 已缓存，功能目录仍为 v1.2.42"),
+        stale_reason: Some("上游 v1.2.44 已缓存，功能目录仍为 v1.2.43"),
         re_audit_issue_ref: Some(RE_AUDIT_ISSUE_URL),
     });
     let summary = validate_feature_repository(fixture.root())
@@ -416,7 +416,7 @@ fn release_audit_显式解耦快照与功能目录审计基线() {
         catalog_tag: PREVIOUS_RELEASE_TAG,
         catalog_commit: PREVIOUS_RELEASE_COMMIT,
         status: "stale-re-audit-required",
-        stale_reason: Some("上游 v1.2.42 已缓存，功能目录尚未完成复审"),
+        stale_reason: Some("上游 v1.2.43 已缓存，功能目录尚未完成复审"),
         re_audit_issue_ref: Some("https://github.com/nonononull/inputcodex/pull/34"),
     });
     let error = validate_feature_repository(fixture.root())
@@ -541,8 +541,8 @@ fn current_继续拒绝缺失证据文件() {
 }
 
 #[test]
-fn 仓库v1_2_43目录重新审计证据保持固定() {
-    validate_repository(&repository_root()).expect("v1.2.43 功能目录证据应通过完整验证");
+fn 仓库v1_2_44目录重新审计证据保持固定() {
+    validate_repository(&repository_root()).expect("v1.2.44 功能目录证据应通过完整验证");
 
     for relative_path in [
         "parity/features/foundation-platform.yml",
@@ -555,7 +555,7 @@ fn 仓库v1_2_43目录重新审计证据保持固定() {
         assert_repository_text_contains(relative_path, &[RELEASE_TAG, RELEASE_COMMIT]);
         assert!(
             !read_repository_text(relative_path).contains(PREVIOUS_RELEASE_TAG),
-            "{relative_path} 不得保留 v1.2.42 Release 元数据"
+            "{relative_path} 不得保留 v1.2.43 Release 元数据"
         );
     }
 
@@ -570,29 +570,23 @@ fn 仓库v1_2_43目录重新审计证据保持固定() {
         assert_repository_text_contains(relative_path, &[RELEASE_TAG]);
         assert!(
             !read_repository_text(relative_path).contains(PREVIOUS_RELEASE_TAG),
-            "{relative_path} 不得保留 v1.2.42 合同描述"
+            "{relative_path} 不得保留 v1.2.43 合同描述"
         );
     }
 }
 
 #[test]
-fn 仓库v1_2_43受影响行为证据被固定() {
+fn 仓库v1_2_44受影响行为证据被固定() {
     assert_repository_text_contains(
         "parity/features/foundation-platform.yml",
-        &[
-            "OpenAI.ChatGPT-Desktop",
-            "remote-debugging-port",
-            "等待目标进程退出",
-            "expires_at",
-            "issue:65",
-        ],
+        &["CDP", "data bridge", "保留端口", "expires_at", "issue:115"],
     );
     assert_repository_text_contains(
         "parity/contracts/foundation-platform.yml",
         &[
-            "OpenAI.ChatGPT-Desktop",
-            "debug port",
-            "等待旧进程退出",
+            "CDP",
+            "data bridge",
+            "保留端口",
             "不得加载、下载或展示 sponsor",
         ],
     );
@@ -600,78 +594,114 @@ fn 仓库v1_2_43受影响行为证据被固定() {
     assert_repository_text_contains(
         "parity/features/session-data.yml",
         &[
-            "CODEX_SQLITE_HOME",
-            "grouped-undo-token",
+            "CODEX_HOME",
             "local_thread_catalog",
             "sqliteCatalogRowsInserted",
-            "issue:65",
+            "issue:115",
         ],
     );
     assert_repository_text_contains(
         "parity/contracts/session-data.yml",
         &[
-            "CODEX_SQLITE_HOME",
-            "grouped-undo-token",
-            "LOCAL_SESSION_UNDO_PREFLIGHT_FAILED",
-            "LOCAL_SESSION_UNDO_PATH_REJECTED",
+            "CODEX_HOME",
             "sqlite_catalog_rows_inserted",
             "local_thread_catalog",
             "observation_sequence",
         ],
     );
     assert_repository_text_contains(
-        "parity/fixtures/feature.session-data.local-session-management/baseline.yml",
+        "parity/fixtures/feature.session-data.provider-metadata-maintenance/baseline.yml",
         &[
-            "database_count: 2",
-            "all_databases_checked: true",
-            "allowed_paths_only: true",
-            "undo_window_retained: true",
+            "codex_home_source: CODEX_HOME",
+            "sqlite_catalog_rows_inserted: 1",
+            "observation_sequence: 1",
         ],
     );
 
     assert_repository_text_contains(
         "parity/features/plugin-script.yml",
         &[
-            "companion",
-            "renderer-inject.js",
-            "runtime status",
-            "status 与 error",
-            "issue:65",
+            "远端认证失败",
+            "本地 fallback",
+            "Quick Chat",
+            "data bridge",
+            "issue:115",
         ],
     );
     assert_repository_text_contains(
         "parity/contracts/plugin-script.yml",
         &[
-            "data:image/png;base64",
-            "DREAM_SKIN_COMPANION_INVALID",
-            "companion 显示仍依赖 renderer 注入",
-            "运行状态仍来自 renderer 注入链",
-            "不得伪造运行成功",
+            "远端认证失败",
+            "本地 fallback",
+            "Quick Chat",
+            "data bridge",
+            "renderer 注入",
         ],
     );
     assert_repository_text_contains(
-        "parity/fixtures/feature.plugin-script.dream-skin-library/baseline.yml",
+        "parity/features/provider-network.yml",
         &[
-            "data_url: data:image/webp;base64,UklGRg==",
-            "width: 96",
-            "side: right",
+            "feature.provider-network.sub2api-billing-observation",
+            "core-module:sub2api",
+            "tauri-command:fetch_sub2api_billing",
+            "Responses compact",
+            "zstd",
+            "Web Search",
+            "Responses Lite",
+            "issue:115",
         ],
     );
 
     assert_repository_text_contains(
-        "parity/fixtures/feature.session-data.provider-metadata-maintenance/baseline.yml",
+        "parity/contracts/provider-network.yml",
         &[
-            "sqlite_catalog_rows_inserted: 1",
-            "display_title: Thread One",
-            "source_created_at: 100.0",
-            "source_updated_at: 200.0",
-            "initial_build_complete: true",
-            "observation_sequence: 1",
+            "SUB2API_BILLING_OBSERVATION_FAILED",
+            "network-read",
+            "Responses compact",
+            "zstd",
+            "Web Search",
+            "Responses Lite",
+            "pending import",
+            "common config",
         ],
     );
     assert_repository_text_contains(
-        "parity/fixtures/feature.session-data.provider-metadata-maintenance/manifest.yml",
-        &["SQLite catalog", "同步状态水位"],
+        "parity/features/source-index.yml",
+        &[
+            "core-module:sub2api",
+            "tauri-command:fetch_sub2api_billing",
+            "feature.provider-network.sub2api-billing-observation",
+        ],
+    );
+    assert_repository_text_contains(
+        "parity/fixtures/feature.provider-network.model-catalog/baseline.yml",
+        &["supports_search_tool: true", "use_responses_lite: false"],
+    );
+    assert_repository_text_contains(
+        "parity/fixtures/feature.provider-network.provider-import/baseline.yml",
+        &[
+            "pending_credentials_persisted: false",
+            "url_credentials_redacted: true",
+        ],
+    );
+    assert_repository_text_contains(
+        "parity/fixtures/feature.provider-network.relay-profile-management/baseline.yml",
+        &[
+            "common_config_credentials: excluded",
+            "profile_credentials: retained",
+        ],
+    );
+    assert_repository_text_contains(
+        "parity/fixtures/feature.provider-network.sub2api-billing-observation/baseline.yml",
+        &[
+            "group_rate_multiplier: 0.8",
+            "effective_rate_multiplier: 0.9",
+            "observed_at: '2026-07-30T10:00:00Z'",
+        ],
+    );
+    assert_repository_text_contains(
+        "parity/fixtures/feature.provider-network.sub2api-billing-observation/manifest.yml",
+        &["合成 Sub2API", "不包含真实凭据"],
     );
 }
 
@@ -2007,9 +2037,9 @@ fn gate5_本地会话目录只读观察已实现但本地会话管理总功能�
     assert_repository_text_contains(
         "parity/README.md",
         &[
-            "当前共有 43 个 feature",
-            "`43` 份行为合同",
-            "`12` 个 fixture manifest",
+            "当前共有 44 个 feature",
+            "`44` 份行为合同",
+            "`13` 个 fixture manifest",
             "feature.session-data.local-session-directory-observation",
         ],
     );
@@ -2209,8 +2239,8 @@ fn 仓库source_index_覆盖锁定上游公开入口() {
     let summary =
         validate_feature_repository(&repository_root()).expect("功能目录应通过仓库级验证");
 
-    assert_eq!(summary.source_entry_count(), 133);
-    assert_eq!(summary.feature_count(), 43);
+    assert_eq!(summary.source_entry_count(), 135);
+    assert_eq!(summary.feature_count(), 44);
     assert_eq!(summary.excluded_entry_count(), 3);
     assert_eq!(summary.exception_pending_count(), 10);
     assert_eq!(summary.coverage_gap_count(), 0);
@@ -2220,10 +2250,10 @@ fn 仓库source_index_覆盖锁定上游公开入口() {
 fn 仓库功能目录通过完整引用与安全验证() {
     let summary = validate_repository(&repository_root()).expect("仓库功能目录应通过验证");
 
-    assert_eq!(summary.source_entry_count(), 133);
-    assert_eq!(summary.feature_count(), 43);
-    assert_eq!(summary.contract_count(), 43);
-    assert_eq!(summary.fixture_count(), 12);
+    assert_eq!(summary.source_entry_count(), 135);
+    assert_eq!(summary.feature_count(), 44);
+    assert_eq!(summary.contract_count(), 44);
+    assert_eq!(summary.fixture_count(), 13);
     assert_eq!(summary.coverage_gap_count(), 0);
 }
 

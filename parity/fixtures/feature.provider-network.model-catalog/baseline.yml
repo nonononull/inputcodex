@@ -3,4 +3,6 @@ models:
   - id: gpt-synthetic
     context_window: 200000
     auto_compact_threshold: 180000
+    supports_search_tool: true
+    use_responses_lite: false
     enabled: true

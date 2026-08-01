@@ -7,4 +7,4 @@ fixtures:
     files:
       - path: baseline.yml
         format: yaml
-        description: '合成供应商导入记录，凭据使用显式占位值。'
+        description: '合成供应商导入记录，固定 pending import 不持久化凭据与 URL 脱敏；凭据只使用显式占位值。'

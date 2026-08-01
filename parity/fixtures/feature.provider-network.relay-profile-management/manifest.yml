@@ -7,4 +7,4 @@ fixtures:
     files:
       - path: baseline.yml
         format: yaml
-        description: '合成 Relay profile，覆盖协议、模型与占位凭据。'
+        description: '合成 Relay profile，覆盖协议、模型、占位凭据及 common/profile config 凭据隔离。'

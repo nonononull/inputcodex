@@ -7,4 +7,4 @@ fixtures:
     files:
       - path: baseline.yml
         format: yaml
-        description: '合成模型目录，覆盖上下文窗口与压缩阈值。'
+        description: '合成模型目录，覆盖上下文窗口、压缩阈值、Web Search 与 Responses Lite capability。'

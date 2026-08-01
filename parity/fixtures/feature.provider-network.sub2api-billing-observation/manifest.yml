@@ -1,0 +1,10 @@
+schema_version: inputcodex.fixture-manifest.v1
+feature_id: feature.provider-network.sub2api-billing-observation
+fixtures:
+  - id: fixture.feature.provider-network.sub2api-billing-observation.baseline
+    scenario: baseline
+    kind: synthetic
+    files:
+      - path: baseline.yml
+        format: yaml
+        description: '合成 Sub2API 账单倍率响应，只固定非敏感结构和边界值，不包含真实凭据、URL 或账号。'

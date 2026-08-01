@@ -26,7 +26,7 @@ git diff --check
 
 路径范围、Markdown 链接和任务特有内容守卫由对应 Session Plan 与 Runtime Workflow 定义。
 
-仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供三十三个检查点：
+仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供三十四个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
 2. PR `#11` Squash Merge、Issue `#9` 关闭和 `main` tree 验证。
@@ -61,6 +61,7 @@ git diff --check
 31. Issue `#105` 九路径、quick-xml 两条 high RustSec 公告、精确两 package 锁文件升级、许可证和 audit RED/GREEN 验证。
 32. Issue `#109` 二十九路径、严格只读 SQLite、受控 rollout、确定性 Markdown、隐私边界和最终本地轻量门禁验证。
 33. Issue `#111` 十二路径、bounded standing authorization、离线自治策略、单写者、精确 Head 合并门、状态恢复和最终本地轻量门禁验证。
+34. Issue `#115` 三十二路径、`v1.2.44` 目录重审、Sub2API 独立能力、受影响行为与脱敏 fixture、Release Audit 恢复验证。
 
 当前禁止：
 
@@ -4242,6 +4243,93 @@ if ($scopeHash -ne 'sha256:82234e7aacce0bd6c57994529ccf74371052ed906dc8371324b90
 ```
 
 期望目录测试为 `12 passed; 0 failed`，来源、feature、合同、fixture、例外、排除与覆盖缺口计数分别保持 `133/36/36/11/10/3/0`；`release_audit.status=current` 且 stale 字段为 `null`。
+
+## Issue #115：`v1.2.44` 功能目录重新审计
+
+在 `codex/issue-115-v1-2-44-catalog-reaudit` 分支运行。任务只更新静态一致性事实、任务文档和
+`release_audit`，不编译或运行上游 Tauri/React/注入代码，也不修改产品 Rust/Cargo、Workflow、
+Ruleset、README、err 或 AGOS。完整 Workspace 与三平台构建交给标准 GitHub-hosted CI。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+function Assert-NativeSuccess {
+  param([Parameter(Mandatory)][string]$Label)
+  if ($LASTEXITCODE -ne 0) { throw "$Label 失败：$LASTEXITCODE" }
+}
+
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+cargo test -p inputcodex-parity --test catalog_repository --offline
+Assert-NativeSuccess 'Issue #115 目录测试'
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+Assert-NativeSuccess 'Issue #115 CI 合同'
+
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #115 Release Audit'
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #115 仓库政策'
+
+git diff --check
+Assert-NativeSuccess 'Issue #115 空白检查'
+```
+
+三十二路径使用 `StringComparer.Ordinal` 去重排序，以 UTF-8 无 BOM、LF 拼接并保留末尾 LF：
+
+```powershell
+$expected = [string[]]@(
+  'AGENTS.md',
+  'CONTEXT.md',
+  'build.md',
+  'crates/inputcodex-parity/tests/catalog_repository.rs',
+  'docs/plans/2026-08-01-issue-115-v1.2.44-catalog-reaudit.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-08-01-issue-115-v1.2.44-catalog-reaudit.md',
+  'docs/reports/issue-115-v1.2.44-catalog-reaudit-discovery.md',
+  'docs/workflows/2026-08-01-issue-115-v1.2.44-catalog-reaudit-runtime.md',
+  'parity/README.md',
+  'parity/contracts/foundation-platform.yml',
+  'parity/contracts/plugin-script.yml',
+  'parity/contracts/provider-network.yml',
+  'parity/contracts/remote-install.yml',
+  'parity/contracts/session-data.yml',
+  'parity/features/foundation-platform.yml',
+  'parity/features/plugin-script.yml',
+  'parity/features/provider-network.yml',
+  'parity/features/remote-install.yml',
+  'parity/features/session-data.yml',
+  'parity/features/source-index.yml',
+  'parity/fixtures/feature.provider-network.model-catalog/baseline.yml',
+  'parity/fixtures/feature.provider-network.model-catalog/manifest.yml',
+  'parity/fixtures/feature.provider-network.provider-import/baseline.yml',
+  'parity/fixtures/feature.provider-network.provider-import/manifest.yml',
+  'parity/fixtures/feature.provider-network.relay-profile-management/baseline.yml',
+  'parity/fixtures/feature.provider-network.relay-profile-management/manifest.yml',
+  'parity/fixtures/feature.provider-network.sub2api-billing-observation/baseline.yml',
+  'parity/fixtures/feature.provider-network.sub2api-billing-observation/manifest.yml',
+  'parity/fixtures/feature.session-data.provider-metadata-maintenance/baseline.yml',
+  'parity/fixtures/feature.session-data.provider-metadata-maintenance/manifest.yml',
+  'upstream/source-lock.json'
+)
+$scope = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+foreach ($path in $expected) {
+  if (-not $scope.Add($path)) { throw "Issue #115 重复路径：$path" }
+}
+$ordered = [string[]]$scope
+$payload = [string]::Join("`n", $ordered) + "`n"
+$hash = 'sha256:' + [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData([Text.UTF8Encoding]::new($false).GetBytes($payload))
+).ToLowerInvariant()
+if ($ordered.Count -ne 32 -or $hash -cne 'sha256:b8d42285dc7cfca080f9fbf683c9c8176a0faae633c5971b1827837059898b83') {
+  throw "Issue #115 范围漂移：count=$($ordered.Count) hash=$hash"
+}
+```
+
+期望目录测试为 `28 passed; 0 failed`；来源、feature、合同、fixture、例外、排除与覆盖缺口计数为
+`135/44/44/13/10/3/0`；`release_audit.status=current`，`stale_reason` 与
+`re_audit_issue_ref` 均为 `null`。
 
 ## Issue #120：Workflow 强身份与上游快照完整性门
 

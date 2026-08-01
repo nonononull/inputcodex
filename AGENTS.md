@@ -130,3 +130,6 @@
 - Issue `#109` 固定二十九路径与 `sha256:b113da5d41514f50e36cef7d4eb9ade89e2562cbcfe8d392a5173d38fd0ebaac`；无新可复用根因时实际范围排除 `err.md`，为二十八路径与 `sha256:3d19b05918c8294f050f3f0c83f9118453705afd8aad016827fafb477e74a50b`。最终 Squash Merge 仍需绑定 Final Head 的独立授权。
 - Issue #109 / PR #110 已完成第十一个 Gate 5 受控会话 Markdown 生成切片；Final Head 5d65375a0517204bed961b82f0672e08abe7df60 以单父 Squash 提交 86a7dd837652f63198c7682b84d82180b8558e3a 进入 main，Issue 已按 COMPLETED 关闭，合并后 CI 七 Job、Performance Baseline 四 Job 全绿且 Artifact 均为 0。
 - Issue #111 是 Gate 5 无人值守重构控制面任务；只允许治理文档、机器策略、离线验证器和自治状态解析器，不得迁移产品功能、修改 Cargo、Workflow、Runner、Release、upstream、Ruleset 或 AGOS。候选范围为十二路径与 sha256:5d1f609ca2a5913e4e5df21f0fd04d6de2c6731cdd71d641812fbee80b5ad713。
+- Issue `#111` / PR `#112` 已以单父 Squash 提交 `6ebed165327fcdd749bea19ae781150f2163a594` 建立 bounded standing authorization、精确 Head 合并门与中断恢复控制面；常规重构无需逐项征询，但所有机器门禁仍必须逐项成立。
+- Issue `#116` / PR `#119` 已将正式 Release `v1.2.44 @ 77091ccaee4423f35a1b2c51c4ecd703e6201092` 作为完整只读审计快照同步到 `main`；单父 Squash 提交为 `057c7e08de5c1e30198881a7f548a49453fb1ac6`，同步只建立 stale 输入，不完成目录重审。
+- Issue `#115` 的目录重审固定为三十二路径与 `sha256:b8d42285dc7cfca080f9fbf683c9c8176a0faae633c5971b1827837059898b83`：新增 `feature.provider-network.sub2api-billing-observation`，入口/feature/contract/fixture 计数目标为 `135/44/44/13`；产品 Rust/Cargo、Workflow、Ruleset、上游快照、README、err 与 AGOS 均不得修改。

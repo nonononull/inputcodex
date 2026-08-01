@@ -2,7 +2,7 @@
 
 ## 作用
 
-`parity/` 保存上游正式 Release `v1.2.43` 的静态审计事实，不参与桌面产品运行，也不复用 Tauri、React、WebView 或注入脚本。
+`parity/` 保存上游正式 Release `v1.2.44` 的静态审计事实，不参与桌面产品运行，也不复用 Tauri、React、WebView 或注入脚本。
 
 ## 五个领域
 
@@ -14,13 +14,19 @@
 
 ## source-index 边界
 
-- 锁定来源：`BigPizzaV3/CodexPlusPlus` Release `v1.2.43`，tag commit `5036ff056b5c629f19356396b17d6eeb70da664c`。
-- 当前机器验证范围：84 个 Tauri command、45 个 `codex-plus-core` 公开模块、4 个 `codex-plus-data` 公开模块，共 133 个入口。
+- 锁定来源：`BigPizzaV3/CodexPlusPlus` Release `v1.2.44`，tag commit `77091ccaee4423f35a1b2c51c4ecd703e6201092`。
+- 当前机器验证范围：85 个 Tauri command、46 个 `codex-plus-core` 公开模块、4 个 `codex-plus-data` 公开模块，共 135 个入口。
 - 每个入口映射到稳定 feature、显式排除项或 `exception-pending`；当前显式排除 3 个旧适配入口。
-- 当前共有 43 个 feature，其中 10 个为 `exception-pending`。
-- 这 133 条覆盖只证明上述三类公开入口已枚举，不等于所有私有函数、React 交互或隐式副作用已经完成审计。
+- 当前共有 44 个 feature，其中 10 个为 `exception-pending`。
+- 这 135 条覆盖只证明上述三类公开入口已枚举，不等于所有私有函数、React 交互或隐式副作用已经完成审计。
 
-## `v1.2.43` 定向复审结论
+## `v1.2.44` 定向复审结论
+
+- 新增 `feature.provider-network.sub2api-billing-observation`，只登记 `core-module:sub2api` 与 `tauri-command:fetch_sub2api_billing` 的有凭据网络读取、倍率校验、超时/取消和最小披露合同；初始状态为 `unassessed`，不并入供应商诊断或 Relay 配置管理。
+- `feature.provider-network.provider-import` 固定 URL 导入脱敏与 pending import 不持久化 config/auth 凭据；`feature.provider-network.relay-profile-management` 固定 provider URL、API key 与 provider 表不得进入 common config。
+- `feature.provider-network.model-catalog` 固定自定义 Responses 的 Web Search 与按 wire capability 控制 Responses Lite；`feature.provider-network.protocol-proxy` 固定 Responses compact、zstd 请求体和不支持的 WebSocket upgrade 错误语义。
+- `feature.foundation-platform.application-lifecycle` 固定 Windows 保留端口、既有 CDP 恢复和重注入保留 data bridge；`feature.session-data.provider-metadata-maintenance` 默认遵循 `CODEX_HOME`。
+- 插件远端认证失败的本地 fallback、Quick Chat renderer 排除、当前 app-server/Fast asset 兼容和 companion 高度对齐仍依赖 renderer/React/UI，只补审计证据并维持既有 `exception-pending`。
 
 - `feature.foundation-platform.platform-paths` 纳入 Windows 包身份 `OpenAI.ChatGPT-Desktop`，macOS 保持等价原生路径语义。
 - Issue `#75` 已将 `feature.foundation-platform.platform-paths` 固定为 `implemented`：未安装受支持 Codex 时返回 `Ready + installation=None`，不使用 `Empty`；三个来源入口只增加 `process-read` 环境读取，不增加写入、网络、广告或远程推荐副作用。
@@ -46,7 +52,7 @@
 
 - 正常能力首次登记为 `unassessed`，不宣称已经实现或验证。
 - 广告、远程推荐列表、renderer 注入、用户脚本注入及依赖注入的增强能力登记为 `exception-pending`。
-- `apps/codex-plus-mobile-relay` 不属于该 Release 的 Workspace 与 README 正式结构，不计入 133 条入口；保留为 `not-part-of-release-workspace` 审计备注。
+- `apps/codex-plus-mobile-relay` 不属于该 Release 的 Workspace 与 README 正式结构，不计入 135 条入口；保留为 `not-part-of-release-workspace` 审计备注。
 
 ## 显式排除
 
@@ -58,6 +64,6 @@
 
 - 行为合同按同名五域文件保存于 `parity/contracts/`。
 - 夹具仅允许合成或不可逆脱敏数据，保存于 `parity/fixtures/<feature-id>/`。
-- 当前五域共保存 `43` 份行为合同，并为 `12` 个需要结构数据的 feature 保存 `12` 个 fixture manifest；其余场景以合同中的 `fixture_policy: none` 说明无需 fixture。
+- 当前五域共保存 `44` 份行为合同，并为 `13` 个需要结构数据的 feature 保存 `13` 个 fixture manifest；其余场景以合同中的 `fixture_policy: none` 说明无需 fixture。
 - 合同与 fixture 必须由 `inputcodex-parity` 完整仓库验证共同检查 domain、稳定 ID、引用、目录归属、路径安全、敏感 payload 和文本控制字节。
 - `exception-pending` 只有在独立一致性例外 Issue 获得项目所有者决定后才能改变状态。

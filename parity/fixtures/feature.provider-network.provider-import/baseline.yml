@@ -5,3 +5,5 @@ providers:
     base_url: https://api.example.invalid/v1
     api_token: synthetic-redacted-token
     protocol: responses
+    pending_credentials_persisted: false
+    url_credentials_redacted: true

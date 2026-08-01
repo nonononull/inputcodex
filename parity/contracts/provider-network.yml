@@ -5,7 +5,7 @@ contracts:
     feature_id: feature.provider-network.aggregate-routing
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.44 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: aggregate-routing-request
@@ -51,7 +51,7 @@ contracts:
     feature_id: feature.provider-network.context-entry-observation
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，Issue #100 方案 A 与 Issue #101 二十四路径范围已经批准。'
+      - '上游 Release v1.2.44 证据已锁定，Issue #100 方案 A 与 Issue #101 二十四路径范围已经批准。'
       - '请求不接受任意路径、配置正文、读取上限或上下文类型输入。'
     inputs:
       - name: request
@@ -133,7 +133,7 @@ contracts:
     feature_id: feature.provider-network.context-entry-management
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.44 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: context-entry-management-request
@@ -179,7 +179,7 @@ contracts:
     feature_id: feature.provider-network.model-catalog
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.44 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: model-catalog-request
@@ -213,7 +213,7 @@ contracts:
       - duration_ms
       - outcome_class
     platforms:
-      shared_semantics: '维护模型列表、上下文窗口、自动压缩阈值与 model_catalog_json。'
+      shared_semantics: '维护模型列表、上下文窗口、自动压缩阈值与 model_catalog_json；自定义 Responses 必须保留 Web Search，并按 provider wire capability 固定 Responses Lite。'
       windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
       macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
       differences: []
@@ -226,7 +226,7 @@ contracts:
     feature_id: feature.provider-network.network-environment
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.44 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: network-environment-request
@@ -272,7 +272,7 @@ contracts:
     feature_id: feature.provider-network.relay-environment-observation
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，Issue #88 的只读拆分语义已获批准。'
+      - '上游 Release v1.2.44 证据已锁定，Issue #88 的只读拆分语义已获批准。'
       - '用户目录、CODEX_HOME 与目标平台只读适配器遵守平台路径失败语义。'
     inputs:
       - name: request
@@ -334,7 +334,7 @@ contracts:
     feature_id: feature.provider-network.protocol-proxy
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.44 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: protocol-proxy-request
@@ -368,7 +368,7 @@ contracts:
       - duration_ms
       - outcome_class
     platforms:
-      shared_semantics: '转换 Responses 与 Chat Completions，请求隔离且不污染语义。'
+      shared_semantics: '转换 Responses 与 Chat Completions；Responses compact 保持原路径，zstd 请求体有界解码，不支持的 Responses WebSocket upgrade 返回明确错误。'
       windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
       macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
       differences: []
@@ -380,7 +380,7 @@ contracts:
     feature_id: feature.provider-network.provider-configuration-application
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.44 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: provider-configuration-application-request
@@ -414,7 +414,7 @@ contracts:
       - duration_ms
       - outcome_class
     platforms:
-      shared_semantics: '以纯 Rust 配置写入实现供应商切换，不复用注入脚本。'
+      shared_semantics: '以纯 Rust 配置写入实现供应商切换；Remote Control 使用 mixed relay，禁用 profile switching 时仍保持代理，不复用注入脚本。'
       windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
       macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
       differences: []
@@ -426,7 +426,7 @@ contracts:
     feature_id: feature.provider-network.provider-diagnostics
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.44 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: provider-diagnostics-request
@@ -471,7 +471,7 @@ contracts:
     feature_id: feature.provider-network.provider-import
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.44 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: provider-import-request
@@ -484,7 +484,7 @@ contracts:
     side_effects:
       - filesystem-read
       - filesystem-write
-    persistence: '文件写入原子化，失败不得留下半成品或凭据日志。'
+    persistence: 'pending import 不得持久化 config/auth 凭据；确认写入保持原子化，失败不得留下半成品、URL 凭据或凭据日志。'
     errors:
       - code: PROVIDER_IMPORT_FAILED
         kind: feature
@@ -505,7 +505,7 @@ contracts:
       - duration_ms
       - outcome_class
     platforms:
-      shared_semantics: '读取供应商配置，预览后再确认写入并禁止泄漏凭据。'
+      shared_semantics: '从文件或 URL 读取供应商配置；pending import 清空 config/auth 内容，URL 凭据在预览与错误中脱敏，确认后才写入。'
       windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
       macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
       differences: []
@@ -518,7 +518,7 @@ contracts:
     feature_id: feature.provider-network.relay-status-observation
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，Issue #97 方案 A 与 Issue #98 二十七路径范围已经批准。'
+      - '上游 Release v1.2.44 证据已锁定，Issue #97 方案 A 与 Issue #98 二十七路径范围已经批准。'
       - '请求不接受任意路径、文件名、读取上限、Provider ID 或认证来源输入。'
     inputs:
       - name: request
@@ -575,7 +575,7 @@ contracts:
     feature_id: feature.provider-network.relay-profile-management
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.43 证据已锁定，所需平台适配器可用。'
+      - '上游 Release v1.2.44 证据已锁定，所需平台适配器可用。'
     inputs:
       - name: request
         data_type: relay-profile-management-request
@@ -609,7 +609,7 @@ contracts:
       - duration_ms
       - outcome_class
     platforms:
-      shared_semantics: '读取、保存、切换和回填 Relay 配置，切换前保存当前状态。'
+      shared_semantics: '读取、保存、切换和回填 Relay 配置；provider URL、API key 与 provider 表不得进入 common config，切换前保存当前状态。'
       windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
       macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
       differences: []
@@ -618,3 +618,49 @@ contracts:
       reason: '使用合成 fixture 固定结构字段、边界值与引用关系。'
     fixture_refs:
       - fixture.feature.provider-network.relay-profile-management.baseline
+  - id: contract.feature.provider-network.sub2api-billing-observation.baseline
+    feature_id: feature.provider-network.sub2api-billing-observation
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.44 证据已锁定，Relay profile 的 Base URL 与 API key 均为显式受控输入。'
+    inputs:
+      - name: request
+        data_type: sub2api-billing-observation-request
+        required: true
+        description: '包含受控 Relay profile；不接受独立任意 URL、Header 或输出路径。'
+    outputs:
+      - name: result
+        data_type: sub2api-billing-observation-result
+        description: '返回 group/user/resolved/peak/effective 倍率与 observed_at，不返回 API key、账号或原始响应。'
+    side_effects:
+      - network-read
+    persistence: 'none；倍率只作为本次观察结果，合同不持久化 API key、URL、Header 或原始响应。'
+    errors:
+      - code: SUB2API_BILLING_OBSERVATION_FAILED
+        kind: feature
+        semantics: 'Base URL/API key 缺失、网络失败、非成功 HTTP、错误 schema、非 token scope、负数/非有限倍率或缺少 observed_at 时明确失败。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次 Sub2API 账单倍率观察使用唯一递增标识。'
+      stale_result_rule: '取消、超时或新请求产生后，旧结果不得覆盖当前状态。'
+    timeout:
+      behavior: '超时后进入 Failed 并终止本次网络请求；不得返回缓存倍率冒充新观测。'
+      evidence: '只记录请求标识、耗时与错误分类，不记录 API key、URL、Header 或响应正文。'
+    cancellation:
+      behavior: '取消后进入 Cancelling，清理完成回到 Idle，迟到结果失效。'
+      evidence: '只记录取消请求、清理完成和旧请求失效。'
+    isolation: '单个 profile 的读取失败不得污染其他 Relay profile、配置管理或协议代理状态。'
+    observability:
+      - request_identity
+      - duration_ms
+      - outcome_class
+    platforms:
+      shared_semantics: 'Windows 与 macOS 使用同一 /v1/sub2api/billing 解析、token scope 与非负有限倍率校验合同。'
+      windows: 使用共享 HTTP 适配器与 Relay proxy 语义；不支持时明确失败。
+      macos: 使用共享 HTTP 适配器与 Relay proxy 语义；不支持时明确失败。
+      differences: []
+    fixture_policy:
+      mode: required
+      reason: '使用合成 fixture 固定倍率字段、峰值语义与观测时间，不包含真实凭据、URL、账号或响应正文。'
+    fixture_refs:
+      - fixture.feature.provider-network.sub2api-billing-observation.baseline
