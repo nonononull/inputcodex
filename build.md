@@ -62,6 +62,7 @@ git diff --check
 32. Issue `#109` 二十九路径、严格只读 SQLite、受控 rollout、确定性 Markdown、隐私边界和最终本地轻量门禁验证。
 33. Issue `#111` 十二路径、bounded standing authorization、离线自治策略、单写者、精确 Head 合并门、状态恢复和最终本地轻量门禁验证。
 34. Issue `#115` 三十二路径、`v1.2.44` 目录重审、Sub2API 独立能力、受影响行为与脱敏 fixture、Release Audit 恢复验证。
+35. Issue `#123` 十六路径、Local Storage 模型后缀清理重分类、CDP 写入例外、错误 fixture 删除与精确计数验证。
 
 当前禁止：
 
@@ -4394,6 +4395,92 @@ if ($LASTEXITCODE -ne 0) { throw 'git diff --check 失败。' }
 `320393981/.github/workflows/performance-baseline.yml`，事件集合均为 `pull_request/push`；
 Release Audit 对路径集、tree、blob、mode、逐文件 SHA-256、manifest、计数和总字节 fail-closed；
 CI 合同输出 `CI_CONTRACT_GREEN passed=76`。
+
+## Issue #123：Local Storage 模型后缀清理一致性例外
+
+在 `codex/issue-123-local-storage-sanitization-exception` 分支运行。本任务只纠正静态 Parity
+目录与任务文档，不编译或运行上游 Tauri/React/CDP/注入代码，也不修改产品 Rust/Cargo、
+Workflow、Ruleset、上游快照、根 README、UI、Release 或 AGOS。完整 Workspace 与三平台构建
+交给标准 GitHub-hosted CI。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+function Assert-NativeSuccess {
+  param([Parameter(Mandatory)][string]$Label)
+  if ($LASTEXITCODE -ne 0) { throw "$Label 失败：$LASTEXITCODE" }
+}
+
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+cargo test -p inputcodex-parity --test catalog_repository --offline
+Assert-NativeSuccess 'Issue #123 目录测试'
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+Assert-NativeSuccess 'Issue #123 CI 合同'
+
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #123 Release Audit'
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #123 仓库政策'
+
+cargo fmt --all -- --check
+Assert-NativeSuccess 'Issue #123 rustfmt'
+
+git diff --check
+Assert-NativeSuccess 'Issue #123 空白检查'
+```
+
+十六路径使用 `StringComparer.Ordinal` 去重排序，以 UTF-8 无 BOM、LF 拼接并保留末尾 LF：
+
+```powershell
+$expected = [string[]]@(
+  'AGENTS.md',
+  'CONTEXT.md',
+  'build.md',
+  'crates/inputcodex-parity/tests/catalog_repository.rs',
+  'docs/plans/2026-08-01-issue-123-local-storage-sanitization-exception.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-08-01-issue-123-local-storage-sanitization-exception.md',
+  'docs/reports/issue-123-local-storage-sanitization-exception.md',
+  'docs/workflows/2026-08-01-issue-123-local-storage-sanitization-exception-runtime.md',
+  'err.md',
+  'parity/README.md',
+  'parity/contracts/session-data.yml',
+  'parity/features/session-data.yml',
+  'parity/features/source-index.yml',
+  'parity/fixtures/feature.session-data.token-usage-history/baseline.yml',
+  'parity/fixtures/feature.session-data.token-usage-history/manifest.yml'
+)
+$scope = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+foreach ($path in $expected) {
+  if (-not $scope.Add($path)) { throw "Issue #123 重复路径：$path" }
+}
+$ordered = [string[]]$scope
+$payload = [string]::Join("`n", $ordered) + "`n"
+$hash = 'sha256:' + [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData([Text.UTF8Encoding]::new($false).GetBytes($payload))
+).ToLowerInvariant()
+if ($ordered.Count -ne 16 -or $hash -cne 'sha256:aa27e2551cfa743248ef7a2ab53fad5f1a1954b369ae40bf3485ada2099f7bdc') {
+  throw "Issue #123 范围漂移：count=$($ordered.Count) hash=$hash"
+}
+
+$actual = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+@(
+  git -c core.quotePath=false diff --no-renames --name-only origin/main...HEAD
+  git -c core.quotePath=false diff --cached --no-renames --name-only
+  git -c core.quotePath=false diff --no-renames --name-only
+  git -c core.quotePath=false ls-files --others --exclude-standard
+) | Where-Object { $_ } | ForEach-Object { [void]$actual.Add($_) }
+if (-not [Linq.Enumerable]::SequenceEqual([string[]]$scope, [string[]]$actual, [StringComparer]::Ordinal)) {
+  throw "Issue #123 实际路径漂移：$([string]::Join(', ', [string[]]$actual))"
+}
+```
+
+期望目录测试为 `29 passed; 0 failed`；来源、feature、合同、fixture、例外、排除与覆盖缺口计数为
+`135/44/44/12/11/3/0`；旧 `token-usage-history` feature/contract 与两份 fixture 文件必须不存在，
+`release_audit.status=current`。
 
 ## 外部 AGOS 使用边界
 

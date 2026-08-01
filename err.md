@@ -1056,6 +1056,15 @@
 - 验证：新增合同先稳定得到六组预期 RED，随后 live collector 纯函数合同继续证明原实现缺少强身份入口；GREEN 后伪 ID/path/event/PR 与快照内容/mode/额外路径/manifest 漂移均被拒绝，真实 `v1.2.43` 的 `280` 个 blob 验证通过，CI 合同为 `76/76`，策略 hash 为 `sha256:3531b5dafe6f396fa986928dcdc16c0dc20a03678c662b7aa5df39bc9f1cd5d6`。Final Head hosted CI、Performance 与 Artifact 证据保留在 Issue `#120` 的关联 PR。
 - 关联：Issue #116、PR #119、Issue #120、`.github/workflows/performance-baseline.yml`、`scripts/automation/Get-AutonomousRefactorState.ps1`、`scripts/ci/Verify-ReleaseAuditGate.ps1`。
 
+### 2026-08-01：来源模块名称掩盖真实 CDP 写入副作用
+
+- 环境：Issue `#123` 从 `v1.2.44` 已完成重审的功能目录选择下一个 Gate 5 候选；`core-module:codex_local_storage` 被登记为只读 `feature.session-data.token-usage-history`。
+- 现象：source-index 声明 `[filesystem-read, database-read]`，feature/contract 宣称无 WebView 或注入的只读 Token 历史，并保存 synthetic fixture；但缓存源码没有从 SQLite 或 rollout 读取历史。
+- 根因：目录按模块名和 `__codexDailyTokenUsageV1` 键推断能力，没有沿 `launcher -> sanitize_local_storage_model_suffixes_nonfatal -> CDP target/WebSocket -> JavaScript -> localStorage.setItem` 调用链核验真实副作用；成功和失败诊断日志及 nonfatal 吞错语义也被漏记。
+- 处理：将入口重命名为 `feature.session-data.local-storage-model-suffix-sanitization`，来源副作用固定为 `[network-read, filesystem-write, injection]`，disposition/feature 固定为 `exception-pending`；合同只返回 `PARITY_EXCEPTION_PENDING` 并声明零执行副作用，删除错误 fixture。真正的 `codex-plus-data` rollout Token 历史留给独立 Discovery。
+- 验证：RED 提交 `e4b134953d802e6968511b241e669b1fb67d4ed9` 为 `26/29`，分别暴露错误来源副作用、例外计数和 fixture 计数；修正后目录测试为 `29/29`，目标计数为 `135/44/44/12/11/3/0`。
+- 关联：Issue #123、`upstream/CodexPlusPlus/crates/codex-plus-core/src/codex_local_storage.rs`、`upstream/CodexPlusPlus/crates/codex-plus-core/src/launcher.rs`、`parity/features/source-index.yml`。
+
 ## 记录模板
 
 ```text

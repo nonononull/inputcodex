@@ -2039,7 +2039,7 @@ fn gate5_本地会话目录只读观察已实现但本地会话管理总功能�
         &[
             "当前共有 44 个 feature",
             "`44` 份行为合同",
-            "`13` 个 fixture manifest",
+            "`12` 个 fixture manifest",
             "feature.session-data.local-session-directory-observation",
         ],
     );
@@ -2256,9 +2256,8 @@ fn gate5_token_用量首候选必须按真实_cdp_写入语义隔离() {
         "codex_local_storage 模块不得冒充 rollout Token 历史读取"
     );
 
-    let launcher = read_repository_text(
-        "upstream/CodexPlusPlus/crates/codex-plus-core/src/launcher.rs",
-    );
+    let launcher =
+        read_repository_text("upstream/CodexPlusPlus/crates/codex-plus-core/src/launcher.rs");
     for expected in [
         "if injection_ready",
         "sanitize_local_storage_model_suffixes_nonfatal",
@@ -2275,13 +2274,19 @@ fn gate5_token_用量首候选必须按真实_cdp_写入语义隔离() {
         "side_effects: [network-read, filesystem-write, injection]",
         "feature_id: feature.session-data.local-storage-model-suffix-sanitization",
     ] {
-        assert!(source.contains(expected), "Local Storage 来源应包含：{expected}");
+        assert!(
+            source.contains(expected),
+            "Local Storage 来源应包含：{expected}"
+        );
     }
     for forbidden in [
         "side_effects: [filesystem-read, database-read]",
         "feature.session-data.token-usage-history",
     ] {
-        assert!(!source.contains(forbidden), "Local Storage 来源禁止旧语义：{forbidden}");
+        assert!(
+            !source.contains(forbidden),
+            "Local Storage 来源禁止旧语义：{forbidden}"
+        );
     }
 
     let feature_text = read_repository_text("parity/features/session-data.yml");
@@ -2299,7 +2304,10 @@ fn gate5_token_用量首候选必须按真实_cdp_写入语义隔离() {
         "Local Storage",
         "- issue:123",
     ] {
-        assert!(feature.contains(expected), "Local Storage 例外应包含：{expected}");
+        assert!(
+            feature.contains(expected),
+            "Local Storage 例外应包含：{expected}"
+        );
     }
     assert!(!feature.contains("status: implemented"));
 
@@ -2317,22 +2325,30 @@ fn gate5_token_用量首候选必须按真实_cdp_写入语义隔离() {
         "mode: none",
         "禁止执行上游实现",
     ] {
-        assert!(contract.contains(expected), "Local Storage 例外合同应包含：{expected}");
+        assert!(
+            contract.contains(expected),
+            "Local Storage 例外合同应包含：{expected}"
+        );
     }
     for forbidden in [
         "filesystem-read",
         "database-read",
         "fixture.feature.session-data.token-usage-history.baseline",
     ] {
-        assert!(!contract.contains(forbidden), "Local Storage 例外合同禁止能力：{forbidden}");
+        assert!(
+            !contract.contains(forbidden),
+            "Local Storage 例外合同禁止能力：{forbidden}"
+        );
     }
 
-    assert!(
-        !repository_root()
-            .join("parity/fixtures/feature.session-data.token-usage-history")
-            .exists(),
-        "错误的 Token 用量 synthetic fixture 必须删除"
-    );
+    let obsolete_fixture =
+        repository_root().join("parity/fixtures/feature.session-data.token-usage-history");
+    for file_name in ["manifest.yml", "baseline.yml"] {
+        assert!(
+            !obsolete_fixture.join(file_name).exists(),
+            "错误的 Token 用量 synthetic fixture 文件必须删除：{file_name}"
+        );
+    }
 }
 
 #[test]

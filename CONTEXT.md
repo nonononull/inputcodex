@@ -142,6 +142,14 @@
 受控会话 Markdown 随结果返回的有界、跨平台安全名称；它不含完整会话标识，也不是调用方可传入的输出路径。
 避免用语：目标路径、已写入文件、原始会话名
 
+**Local Storage 模型后缀清理例外**：
+上游在 renderer 注入成功后通过 CDP 执行 JavaScript，读取并改写 Electron Local Storage 中历史 Token 数据的模型名，同时尝试写诊断日志；inputcodex 未批准迁移该副作用链，目录状态固定为 `exception-pending`。
+避免用语：Token 历史只读观察、无注入规范化、自动安全清理
+
+**rollout Token 历史候选**：
+上游 `codex-plus-data` 从受控 SQLite 定位 rollout，再解析 `token_count` 事件形成逐轮用量历史的另一项能力；它不属于 `core-module:codex_local_storage`，必须独立评估会话标识、路径、资源上限和最小披露后才能迁移。
+避免用语：已实现 Token 历史、Local Storage Token 读取、完整用量导出
+
 ## 版本与发布
 
 **上游基础版本**：

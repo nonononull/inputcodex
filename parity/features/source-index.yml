@@ -106,10 +106,13 @@ sources:
       path: upstream/CodexPlusPlus/crates/codex-plus-core/src/codex_local_storage.rs
       symbol: codex_local_storage
     platforms: [windows, macos]
-    side_effects: [filesystem-read, database-read]
+    side_effects: [network-read, filesystem-write, injection]
     disposition:
-      type: feature
-      feature_id: feature.session-data.token-usage-history
+      type: exception-pending
+      feature_id: feature.session-data.local-storage-model-suffix-sanitization
+      reason: '该入口依赖 CDP 执行 JavaScript，改写 Electron Local Storage 并写诊断日志；产品迁移未获批准。'
+      decision_refs:
+        - issue:123
   - id: core-module:codex_sqlite
     kind: core-module
     evidence:
