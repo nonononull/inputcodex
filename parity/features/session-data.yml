@@ -109,20 +109,25 @@ features:
       - issue:26
       - issue:65
       - issue:115
-  - id: feature.session-data.token-usage-history
-    name: 'Token 用量历史'
-    status: unassessed
+  - id: feature.session-data.local-storage-model-suffix-sanitization
+    name: 'Local Storage 模型后缀清理'
+    status: exception-pending
     evidence:
       - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/codex_local_storage.rs
-        symbol: codex_local_storage
+        symbol: sanitize_local_storage_model_suffixes
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/codex_local_storage.rs
+        symbol: sanitize_local_storage_model_suffixes_nonfatal
+      - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/launcher.rs
+        symbol: injection_ready
     entry_points:
       - core-module:codex_local_storage
     platforms:
       windows:
         applicability: supported
-        semantics: '读取并规范化本地 Token 用量历史，不依赖 WebView 或注入。'
+        semantics: '上游在 renderer 注入成功后通过 CDP 执行 JavaScript，读取并改写 Electron Local Storage 中的模型名，还写入诊断日志；未获独立例外决定前禁止迁移。'
       macos:
         applicability: supported
-        semantics: '读取并规范化本地 Token 用量历史，不依赖 WebView 或注入。'
+        semantics: '上游在 renderer 注入成功后通过 CDP 执行 JavaScript，读取并改写 Electron Local Storage 中的模型名，还写入诊断日志；未获独立例外决定前禁止迁移。'
     decision_refs:
       - issue:26
+      - issue:123

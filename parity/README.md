@@ -8,7 +8,7 @@
 
 - `foundation-platform`：应用检测与生命周期、设置、路径、Watcher、环境冲突和诊断。
 - `provider-network`：供应商、Relay、模型目录、协议代理、路由和网络诊断。
-- `session-data`：本地会话、Markdown、Token 历史、Provider metadata、索引清理与备份。
+- `session-data`：本地会话、Markdown、Provider metadata、索引清理、备份与 Local Storage 副作用审计。
 - `plugin-script`：用户脚本、插件、主题、Stepwise 和界面增强的审计输入。
 - `remote-install`：入口安装、应用更新、Zed Remote 与 Upstream worktree。
 
@@ -17,7 +17,7 @@
 - 锁定来源：`BigPizzaV3/CodexPlusPlus` Release `v1.2.44`，tag commit `77091ccaee4423f35a1b2c51c4ecd703e6201092`。
 - 当前机器验证范围：85 个 Tauri command、46 个 `codex-plus-core` 公开模块、4 个 `codex-plus-data` 公开模块，共 135 个入口。
 - 每个入口映射到稳定 feature、显式排除项或 `exception-pending`；当前显式排除 3 个旧适配入口。
-- 当前共有 44 个 feature，其中 10 个为 `exception-pending`。
+- 当前共有 44 个 feature，其中 11 个为 `exception-pending`。
 - 这 135 条覆盖只证明上述三类公开入口已枚举，不等于所有私有函数、React 交互或隐式副作用已经完成审计。
 
 ## `v1.2.44` 定向复审结论
@@ -40,6 +40,7 @@
 - Issue `#101` 已将 `feature.provider-network.context-entry-observation` 固定为上下文能力只读目录观察切片：只接管 `tauri-command:read_live_context_entries`，有界解析固定 `CODEX_HOME/config.toml`，只返回条目 ID、`McpServer / Skill / Plugin`、启用状态和分类计数；原上下文管理总功能与五个写入/完整管理入口继续 `unassessed`。
 - Issue `#104` 已将 `feature.session-data.local-session-directory-observation` 固定为本地会话目录只读观察切片：只接管 `tauri-command:list_local_sessions`，最多观察 32 个受控 SQLite 候选，跨库排序去重后按默认 50、最大 100 分页；原删除、备份、恢复和 grouped undo 总功能继续 `unassessed`。
 - Issue `#109` 已将误命名的后端目录项重分类为 `feature.session-data.markdown-generation`：只按既有会话 ID 严格只读 SQLite 与受控 rollout，生成 UTC、LF、仅 user/assistant 文本和不可联网图片占位的内存 Markdown；`saveMarkdown` 文件保存继续属于 `feature.plugin-script.renderer-enhancements` 的 renderer 注入例外。
+- Issue `#123` 已将错误登记的只读 Token 历史候选重分类为 `feature.session-data.local-storage-model-suffix-sanitization`：真实上游入口只在注入成功后通过 CDP 执行 JavaScript，读取并改写 Electron Local Storage 且写诊断日志，因此保持 `exception-pending`；真正只读的 rollout Token 历史必须另建独立 Discovery。
 - `feature.session-data.local-session-management` 纳入合法 `CODEX_SQLITE_HOME`、多数据库删除、`grouped-undo-token`、全库恢复预检、允许路径保护和撤销窗口。
 - `feature.plugin-script.dream-skin-library` 只纳入受限本地 companion data URL 与布局配置；fixture 使用合成图片数据。
 - `feature.plugin-script.dream-skin-runtime` 与 `feature.plugin-script.renderer-enhancements` 的 companion 显示仍依赖 renderer 注入，继续保持 `exception-pending`，不得进入 Rust/Iced 运行面。
@@ -64,6 +65,6 @@
 
 - 行为合同按同名五域文件保存于 `parity/contracts/`。
 - 夹具仅允许合成或不可逆脱敏数据，保存于 `parity/fixtures/<feature-id>/`。
-- 当前五域共保存 `44` 份行为合同，并为 `13` 个需要结构数据的 feature 保存 `13` 个 fixture manifest；其余场景以合同中的 `fixture_policy: none` 说明无需 fixture。
+- 当前五域共保存 `44` 份行为合同，并为 `12` 个需要结构数据的 feature 保存 `12` 个 fixture manifest；其余场景以合同中的 `fixture_policy: none` 说明无需 fixture。
 - 合同与 fixture 必须由 `inputcodex-parity` 完整仓库验证共同检查 domain、稳定 ID、引用、目录归属、路径安全、敏感 payload 和文本控制字节。
 - `exception-pending` 只有在独立一致性例外 Issue 获得项目所有者决定后才能改变状态。

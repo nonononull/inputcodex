@@ -74,6 +74,20 @@ fn yaml_list_item_block<'a>(text: &'a str, id: &str) -> &'a str {
     &tail[..end]
 }
 
+fn yaml_field_block(block: &str, field: &str, next_field: &str) -> String {
+    let normalized = block.replace("\r\n", "\n");
+    let marker = format!("    {field}:");
+    let start = normalized
+        .find(&marker)
+        .unwrap_or_else(|| panic!("YAML 条目应包含字段：{field}"));
+    let tail = &normalized[start..];
+    let next_marker = format!("\n    {next_field}:");
+    let end = tail
+        .find(&next_marker)
+        .unwrap_or_else(|| panic!("YAML 字段 {field} 后应包含字段：{next_field}"));
+    tail[..end].to_owned()
+}
+
 struct FeatureRepositoryFixture {
     root: PathBuf,
 }
@@ -2039,7 +2053,7 @@ fn gate5_本地会话目录只读观察已实现但本地会话管理总功能�
         &[
             "当前共有 44 个 feature",
             "`44` 份行为合同",
-            "`13` 个 fixture manifest",
+            "`12` 个 fixture manifest",
             "feature.session-data.local-session-directory-observation",
         ],
     );
@@ -2235,6 +2249,133 @@ fn gate5_会话_markdown_生成已实现但文件保存继续留在_renderer_例
 }
 
 #[test]
+fn gate5_token_用量首候选必须按真实_cdp_写入语义隔离() {
+    let upstream = read_repository_text(
+        "upstream/CodexPlusPlus/crates/codex-plus-core/src/codex_local_storage.rs",
+    );
+    for expected in [
+        "localStorage.getItem",
+        "localStorage.setItem",
+        "evaluate_script_with_await_promise",
+        "append_diagnostic_log",
+        "sanitize_local_storage_model_suffixes_nonfatal",
+    ] {
+        assert!(
+            upstream.contains(expected),
+            "上游 Local Storage 清理证据应包含：{expected}"
+        );
+    }
+    assert!(
+        !upstream.contains("codex_thread_usage_history"),
+        "codex_local_storage 模块不得冒充 rollout Token 历史读取"
+    );
+
+    let launcher =
+        read_repository_text("upstream/CodexPlusPlus/crates/codex-plus-core/src/launcher.rs");
+    for expected in [
+        "if injection_ready",
+        "sanitize_local_storage_model_suffixes_nonfatal",
+    ] {
+        assert!(
+            launcher.contains(expected),
+            "launcher 应证明清理发生在注入成功后：{expected}"
+        );
+    }
+
+    let source_text = read_repository_text("parity/features/source-index.yml");
+    let source = yaml_list_item_block(&source_text, "core-module:codex_local_storage");
+    for expected in [
+        "side_effects: [network-read, filesystem-write, injection]",
+        "feature_id: feature.session-data.local-storage-model-suffix-sanitization",
+    ] {
+        assert!(
+            source.contains(expected),
+            "Local Storage 来源应包含：{expected}"
+        );
+    }
+    for forbidden in [
+        "side_effects: [filesystem-read, database-read]",
+        "feature.session-data.token-usage-history",
+    ] {
+        assert!(
+            !source.contains(forbidden),
+            "Local Storage 来源禁止旧语义：{forbidden}"
+        );
+    }
+
+    let feature_text = read_repository_text("parity/features/session-data.yml");
+    assert!(!feature_text.contains("feature.session-data.token-usage-history"));
+    let feature = yaml_list_item_block(
+        &feature_text,
+        "feature.session-data.local-storage-model-suffix-sanitization",
+    );
+    for expected in [
+        "status: exception-pending",
+        "symbol: sanitize_local_storage_model_suffixes",
+        "symbol: sanitize_local_storage_model_suffixes_nonfatal",
+        "CDP",
+        "JavaScript",
+        "Local Storage",
+        "- issue:123",
+    ] {
+        assert!(
+            feature.contains(expected),
+            "Local Storage 例外应包含：{expected}"
+        );
+    }
+    assert!(!feature.contains("status: implemented"));
+
+    let contract_text = read_repository_text("parity/contracts/session-data.yml");
+    assert!(!contract_text.contains("contract.feature.session-data.token-usage-history.baseline"));
+    let contract = yaml_list_item_block(
+        &contract_text,
+        "contract.feature.session-data.local-storage-model-suffix-sanitization.baseline",
+    );
+    for expected in [
+        "feature_id: feature.session-data.local-storage-model-suffix-sanitization",
+        "PARITY_EXCEPTION_PENDING",
+        "mode: none",
+        "禁止执行上游实现",
+    ] {
+        assert!(
+            contract.contains(expected),
+            "Local Storage 例外合同应包含：{expected}"
+        );
+    }
+    assert_eq!(
+        yaml_field_block(contract, "side_effects", "persistence"),
+        "    side_effects:\n      - none",
+        "Local Storage 例外合同的副作用必须精确为 none"
+    );
+
+    let mutation = contract.replacen("      - none", "      - none\n      - filesystem-write", 1);
+    assert_ne!(
+        yaml_field_block(&mutation, "side_effects", "persistence"),
+        "    side_effects:\n      - none",
+        "none 与写入副作用并存时必须被专项合同拒绝"
+    );
+    for forbidden in [
+        "filesystem-read",
+        "database-read",
+        "fixture.feature.session-data.token-usage-history.baseline",
+    ] {
+        assert!(
+            !contract.contains(forbidden),
+            "Local Storage 例外合同禁止能力：{forbidden}"
+        );
+    }
+
+    let obsolete_fixture =
+        repository_root().join("parity/fixtures/feature.session-data.token-usage-history");
+    for file_name in ["manifest.yml", "baseline.yml"] {
+        assert!(
+            !obsolete_fixture.join(file_name).exists(),
+            "错误的 Token 用量 synthetic fixture 文件必须删除：{file_name}"
+        );
+    }
+}
+
+#[test]
 fn 仓库source_index_覆盖锁定上游公开入口() {
     let summary =
         validate_feature_repository(&repository_root()).expect("功能目录应通过仓库级验证");
@@ -2242,7 +2383,7 @@ fn 仓库source_index_覆盖锁定上游公开入口() {
     assert_eq!(summary.source_entry_count(), 135);
     assert_eq!(summary.feature_count(), 44);
     assert_eq!(summary.excluded_entry_count(), 3);
-    assert_eq!(summary.exception_pending_count(), 10);
+    assert_eq!(summary.exception_pending_count(), 11);
     assert_eq!(summary.coverage_gap_count(), 0);
 }
 
@@ -2253,7 +2394,7 @@ fn 仓库功能目录通过完整引用与安全验证() {
     assert_eq!(summary.source_entry_count(), 135);
     assert_eq!(summary.feature_count(), 44);
     assert_eq!(summary.contract_count(), 44);
-    assert_eq!(summary.fixture_count(), 13);
+    assert_eq!(summary.fixture_count(), 12);
     assert_eq!(summary.coverage_gap_count(), 0);
 }
 

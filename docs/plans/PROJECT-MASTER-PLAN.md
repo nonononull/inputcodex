@@ -1,11 +1,11 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: none-awaiting-next-gate-5-candidate
-active_gate: Gate 5 前十一个产品切片与自治控制面已进入 main；v1.2.44 功能目录审计恢复 current 后继续候选队列
-last_verified_gate: Issue #116 / PR #119 已以单父 Squash 提交 057c7e08de5c1e30198881a7f548a49453fb1ac6 同步 v1.2.44 完整快照，主干 CI 与 Performance 全绿且 Artifact 为 0
-next_legal_gate: Issue #115 精确 Head 合并并完成主干验证后，按 #111 决策顺序恢复 Gate 5 最小安全候选；动态任务状态只保留在 GitHub
-tracking_issue_ref: none
+active_task: issue-123-local-storage-sanitization-exception
+active_gate: Gate 5 前十一个产品切片与自治控制面已进入 main；当前先纠正首候选的 CDP Local Storage 写入语义
+last_verified_gate: Issue #115 / PR #122 已以单父 Squash 提交 29f5317d66b9f16cf64797420bf2fd7e2aec45f7 完成 v1.2.44 功能目录重审，主干 CI 与 Performance 全绿且 Artifact 为 0
+next_legal_gate: Issue #123 在十六路径内完成 exception-pending 纠正和精确 Head 合并后，按 #111 决策顺序选择下一个最小安全候选；真正的 rollout Token 历史必须独立 Discovery
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/123
 active_pr_ref: none
 gate_5_platform_paths_exception_ref: https://github.com/nonononull/inputcodex/issues/74
 gate_5_platform_paths_scope_hash: sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37
@@ -143,7 +143,7 @@ gate_2_watch_report_ref: docs/reports/issue-14-gate-2-upstream-watch.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-decision_status: v1.2.44-catalog-current-awaiting-next-gate5-candidate
+decision_status: issue-123-local-storage-sanitization-exception-approved
 
 ## 当前状态
 
@@ -151,7 +151,7 @@ decision_status: v1.2.44-catalog-current-awaiting-next-gate5-candidate
 - PR `#7` 合并提交为 `c74b66422ba47f96bd3eb2b2385cdfb90541808e`，由 GitHub 生成有效签名；只有一个父提交 `b7404b0c63f2d2ba65474c077182c42a01cc9a64`，tree 为 `00f0f7fe0e408a1e6f218ee8e1be0d8442ed1e65`。
 - PR `#7` 的 Review 对话总数、未解决数与 Checks 数量均为 `0`；`0 Checks` 只表示当前尚未配置 CI。
 - `main-protection` Ruleset（ID `19395456`）仍为 `active`，只命中 `main`，禁止删除与 Force Push，要求解决全部 Review 对话，只允许 Squash Merge，单人阶段 required approvals 为 `0`。
-- `main` 的目标稳定面将完整审计缓存与功能目录审计基线对齐 `v1.2.44 @ 77091ccaee4423f35a1b2c51c4ecd703e6201092`，tree 为 `d417f2775adfe61798c6676024edce1a236e576f`；`release_audit=current` 后 Gate 5 候选队列方可恢复。
+- `main` 已将完整审计缓存与功能目录审计基线对齐 `v1.2.44 @ 77091ccaee4423f35a1b2c51c4ecd703e6201092`，tree 为 `d417f2775adfe61798c6676024edce1a236e576f`，`release_audit=current`。
 - Issue `#9` / PR `#11` 已完成 Gate 2 上游基线导入；PR `#11` 于 `2026-07-21T19:01:02Z` Squash Merge，合并提交为 `dde08b725eb2bf4add7fbcfa955f3eaf4eb1bbc6`，Issue `#9` 已关闭。
 - `upstream/CodexPlusPlus/` 当前包含 `281` 个审计文件，`upstream/source-lock.json` 记录 `24,481,110` 字节、manifest SHA-256 `a9d0cb6b35dfd47899ae9a7ca66e1ac1ba43bfbc7ccf1c3137695f4366f2a8a0` 和 `7` 份许可证/声明。
 - Issue `#12` / PR `#13` 已完成上游基线 closeout；PR `#13` 的 Squash Merge 提交为 `5e64015075ddf2adef4bf685f50977b47b7f72e7`，Issue `#12` 已关闭。
@@ -171,7 +171,8 @@ decision_status: v1.2.44-catalog-current-awaiting-next-gate5-candidate
 - Issue `#65` / PR `#72` 已完成二十四路径与 `sha256:82234e7aacce0bd6c57994529ccf74371052ed906dc8371324b90e41f697d7b7` 的 TDD、Review/CI、全部对话闭环与单独 Squash 授权；合并提交为 `fc1683aabda4afb27ca333387ec954b6a405d2df`，Issue 已按 `COMPLETED` 关闭。
 - Issue `#111` / PR `#112` 已建立 bounded standing authorization、精确 Head 合并门和中断恢复；单父 Squash 提交为 `6ebed165327fcdd749bea19ae781150f2163a594`。
 - Issue `#116` / PR `#119` 已将 `v1.2.44` 完整快照作为只读审计输入同步到 main；单父 Squash 提交为 `057c7e08de5c1e30198881a7f548a49453fb1ac6`，目录审计保持 stale 并指向 Issue `#115`。
-- Issue `#115` 固定三十二路径与 `sha256:b8d42285dc7cfca080f9fbf683c9c8176a0faae633c5971b1827837059898b83`，目标为 `135/44/44/13/10/3/0`，新增独立 Sub2API 账单倍率观察事实并恢复 `release_audit=current`；动态 PR/CI/合并证据只保留在 GitHub。
+- Issue `#115` / PR `#122` 已在三十二路径内新增独立 Sub2API 账单倍率观察事实并恢复 `release_audit=current`；Final Head `c1b1a173f8a0b1fe986d7238219a75214aa01a86` 以单父 Squash 提交 `29f5317d66b9f16cf64797420bf2fd7e2aec45f7` 进入 main，计数为 `135/44/44/13/10/3/0`。
+- Issue `#123` 已冻结十六路径与 `sha256:aa27e2551cfa743248ef7a2ab53fad5f1a1954b369ae40bf3485ada2099f7bdc`：将错误的只读 Token 历史候选重分类为 `feature.session-data.local-storage-model-suffix-sanitization`，固定 CDP/JavaScript/Local Storage/诊断日志副作用并保持 `exception-pending`；rollout Token 历史不在本任务实现。
 - Issue `#74` 已确认平台路径安全差异：无效显式路径与非空 `CODEX_HOME` 必须失败，禁止相对目录或静默回退；Issue 已按 `COMPLETED` 关闭。
 - Issue `#75` / PR `#76` 已在三十路径与 `sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37` 内完成首个 Gate 5 平台路径迁移；Final Head `ba082669cd6d491cce26e29efcaa249786973a39` 以单父 Squash 提交 `a06a97fd59ce125306a13202c8f1a07656c797a0` 进入 `main`，tree 为 `b669aa6610e976542a74f404ff4f87b36864816b`，Issue 已关闭。合并后主干 CI Run `30276472184` 七 Job、Performance Baseline Run `30276476891` 四 Job全绿且 Artifact 均为 `0`。
 - Issue `#77` 已批准应用概览方案 A 并按 `COMPLETED` 关闭；历史启动记录不得冒充实时运行状态，损坏状态不得静默视为无记录。
@@ -345,6 +346,10 @@ decision_status: v1.2.44-catalog-current-awaiting-next-gate5-candidate
 - Issue `#115` Session Plan：`docs/plans/sessions/2026-08-01-issue-115-v1.2.44-catalog-reaudit.md`。
 - Issue `#115` Runtime Workflow：`docs/workflows/2026-08-01-issue-115-v1.2.44-catalog-reaudit-runtime.md`。
 - Issue `#115` Discovery 报告：`docs/reports/issue-115-v1.2.44-catalog-reaudit-discovery.md`。
+- Issue `#123` 实施计划：`docs/plans/2026-08-01-issue-123-local-storage-sanitization-exception.md`。
+- Issue `#123` Session Plan：`docs/plans/sessions/2026-08-01-issue-123-local-storage-sanitization-exception.md`。
+- Issue `#123` Runtime Workflow：`docs/workflows/2026-08-01-issue-123-local-storage-sanitization-exception-runtime.md`。
+- Issue `#123` Discovery 报告：`docs/reports/issue-123-local-storage-sanitization-exception.md`。
 - Issue `#75` 平台路径设计：`docs/plans/2026-07-27-issue-75-gate-5-platform-paths.md`。
 - Issue `#75` Session Plan：`docs/plans/sessions/2026-07-27-issue-75-gate-5-platform-paths.md`。
 - Issue `#75` Runtime Workflow：`docs/workflows/2026-07-27-issue-75-gate-5-platform-paths-runtime.md`。
@@ -420,3 +425,4 @@ decision_status: v1.2.44-catalog-current-awaiting-next-gate5-candidate
 - Issue `#105` 出现九路径或 `sha256:0c90d018e06aa640d33a4c65c75aea45c89eb0e365b91fadee803b0426c8c58f` 之外的新增、删除或重命名路径；锁文件出现第三个 package 变化；需要升级 Iced/winit/smithay、修改 `Cargo.toml`、产品、UI、Workflow、Ruleset、Runner、上游缓存或 AGOS；fresh audit 仍有漏洞，或在 Final Head Review、CI 与 Artifact 闭环和独立授权前请求 Squash Merge。
 - Fresh 验证失败、Ruleset 变化、Review 对话未闭环或出现未批准的一致性差异。
 - Issue `#111` 越过十二路径或 `sha256:5d1f609ca2a5913e4e5df21f0fd04d6de2c6731cdd71d641812fbee80b5ad713`，修改产品代码、Cargo、Workflow、Runner、Release、`upstream/`、Ruleset 或 AGOS，启用 GitHub 原生 auto-merge，或削弱精确 Head、CI、Artifact、Review thread、release audit 与 origin/main freshness 任一合并门。
+- Issue `#123` 越过十六路径或 `sha256:aa27e2551cfa743248ef7a2ab53fad5f1a1954b369ae40bf3485ada2099f7bdc`，执行或迁移 CDP、JavaScript、Local Storage/诊断日志写入、rollout Token 历史，修改产品 Rust/Cargo、Workflow、Ruleset、上游快照、README、UI、Release 或 AGOS，或在 Final Head Review/CI/Artifact 闭环前执行 Squash Merge。

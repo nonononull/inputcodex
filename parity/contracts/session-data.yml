@@ -294,31 +294,30 @@ contracts:
       reason: '使用合成 fixture 固定结构字段、边界值与引用关系。'
     fixture_refs:
       - fixture.feature.session-data.provider-metadata-maintenance.baseline
-  - id: contract.feature.session-data.token-usage-history.baseline
-    feature_id: feature.session-data.token-usage-history
+  - id: contract.feature.session-data.local-storage-model-suffix-sanitization.baseline
+    feature_id: feature.session-data.local-storage-model-suffix-sanitization
     scenario: baseline
     preconditions:
-      - '上游 Release v1.2.44 证据已锁定，所需平台适配器可用。'
+      - 'Issue #123 已确认上游入口依赖 CDP、JavaScript、Electron Local Storage 写入和诊断日志写入，产品迁移未获批准。'
     inputs:
-      - name: request
-        data_type: token-usage-history-request
+      - name: decision_ref
+        data_type: decision-reference
         required: false
-        description: '结构化请求；无参数时为空对象。'
+        description: '可选的一致性例外决定引用；缺失时保持 pending。'
     outputs:
-      - name: result
-        data_type: token-usage-history-result
-        description: 'Token 用量历史的稳定结果或明确空结果。'
+      - name: exception_status
+        data_type: parity-exception-status
+        description: '只返回待决策状态，不连接 CDP、不执行脚本，也不改写 Local Storage。'
     side_effects:
-      - database-read
-      - filesystem-read
-    persistence: '不持久化私人路径、凭据或真实会话内容。'
+      - none
+    persistence: '只保存审计决定引用，禁止执行上游实现、写入 Electron Local Storage 或诊断日志。'
     errors:
-      - code: TOKEN_USAGE_HISTORY_FAILED
-        kind: feature
-        semantics: 'Token 用量历史失败时返回稳定错误分类，不伪造空成功。'
+      - code: PARITY_EXCEPTION_PENDING
+        kind: policy
+        semantics: '没有独立 owner 例外决定时明确失败，禁止把 best-effort CDP 写入静默迁移为产品能力。'
     loading:
       states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
-      request_identity: '每次Token 用量历史请求使用唯一递增标识。'
+      request_identity: '每次 Local Storage 模型后缀清理决定查询使用唯一递增标识。'
       stale_result_rule: 旧请求结果不得覆盖更新请求的状态或数据。
     timeout:
       behavior: 超时后进入 Failed，终止本次工作并保留稳定错误分类。
@@ -326,18 +325,17 @@ contracts:
     cancellation:
       behavior: 取消后进入 Cancelling，完成清理后回到 Idle，旧结果失效。
       evidence: 记录取消请求、清理完成和旧请求失效。
-    isolation: 'Token 用量历史单次失败不得污染其他 feature、请求或稳定状态。'
+    isolation: '例外状态查询不得连接 Codex renderer、修改本地数据或污染其他 feature。'
     observability:
       - request_identity
       - duration_ms
       - outcome_class
     platforms:
-      shared_semantics: '读取并规范化本地 Token 用量历史，不依赖 WebView 或注入。'
-      windows: 使用 Windows 平台适配器遵循共享语义；不支持时明确失败。
-      macos: 使用 macOS 平台适配器遵循共享语义；不支持时明确失败。
+      shared_semantics: 'Windows 与 macOS 均保持 exception-pending；不得执行上游 CDP、JavaScript、Local Storage 写入或 nonfatal 错误吞没。'
+      windows: 只返回共享例外状态，不执行上游实现。
+      macos: 只返回共享例外状态，不执行上游实现。
       differences: []
     fixture_policy:
-      mode: required
-      reason: '使用合成 fixture 固定结构字段、边界值与引用关系。'
-    fixture_refs:
-      - fixture.feature.session-data.token-usage-history.baseline
+      mode: none
+      reason: '只记录待决策状态，禁止执行上游实现。'
+    fixture_refs: []
