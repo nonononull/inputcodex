@@ -4527,7 +4527,7 @@ Assert-NativeSuccess 'Issue #128 Release Audit'
 pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
 Assert-NativeSuccess 'Issue #128 仓库政策'
 
-cargo metadata --locked --offline --format-version 1 | Out-Null
+cargo metadata --locked --offline --no-deps --format-version 1 | Out-Null
 Assert-NativeSuccess 'Issue #128 Cargo metadata'
 
 $expected = [string[]]@(

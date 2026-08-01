@@ -126,7 +126,7 @@ docs/workflows/2026-08-01-issue-128-gate-5-watcher-preference-observation-runtim
 ### Batch 5：Local Closeout
 
 - 更新稳定文档/报告，运行完整本地轻量门禁并建立 named checkpoint。
-- 状态：`pending`。
+- 状态：`completed`。
 
 ### Batch 6：Review / CI / Merge
 

@@ -10,7 +10,7 @@
 - `baseline_ref`: `43ace17de1505f251812e4ead3035ef3274a8455`
 - `branch_ref`: `codex/issue-128-gate-5-watcher-preference-observation`
 - `candidate_scope_hash`: `sha256:0be3dd45ed7e91d1cb7f633da369bb2b9052cefc512852d80362775da7e81699`
-- `runtime_state`: `local-closeout-ready`
+- `runtime_state`: `remote-delivery-ready`
 
 ## Current Gate
 
@@ -22,8 +22,8 @@ Issue #127 decision completed
   -> Application RED/GREEN completed
   -> Platform RED/GREEN completed
   -> Parity RED/GREEN completed
-  -> NEXT: Local verification
-  -> Review / CI / exact-head Squash
+  -> Local verification completed
+  -> NEXT: Review / CI / exact-head Squash
 ```
 
 当前 `ALLOWED_OPS`：二十四路径内 TDD、文档、验证、checkpoint、普通 push、PR、只读复审与门禁合并。
@@ -84,7 +84,7 @@ RED -> GREEN -> Parity tests/Release Audit/Clippy/fmt -> `issue-128-parity-green
 
 更新 README/报告/err，运行四 crate、治理、范围、隐私和 diff 门禁，建立 `issue-128-local-verified`。
 
-状态：`pending`。
+状态：`completed`。
 
 ### Node 8：Remote Delivery
 

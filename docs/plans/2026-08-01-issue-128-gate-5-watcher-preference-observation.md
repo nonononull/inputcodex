@@ -1,6 +1,6 @@
 # Issue #128 Gate 5 Watcher 偏好状态只读观察实施计划
 
-> **状态：** `planning-frozen-implementation-active`
+> **状态：** `local-verified-remote-delivery-active`
 >
 > **执行纪律：** 当前会话按 `superpowers:test-driven-development` 执行 RED -> GREEN -> VERIFY，
 > 不向其他 agent 委派写入；Final Head 必须另行独立只读复审。
@@ -128,10 +128,10 @@ pub trait WatcherPreferenceObservationPort {
 - 新增：`docs/reports/issue-128-gate-5-watcher-preference-observation.md`
 - 修改：`err.md`，记录已确认的 `Path::exists` fail-open 与目录副作用误分类根因
 
-- [ ] 更新稳定产品能力、术语、Gate、构建命令、Parity 计数和报告。
-- [ ] 运行四 crate tests/Clippy、rustfmt、CI 合同、仓库政策、Release Audit 和 Cargo metadata。
-- [ ] 复算实际 24 路径 Ordinal hash，执行隐私/禁止能力扫描与 `git diff --check`。
-- [ ] 建立 `issue-128-local-verified` checkpoint。
+- [x] 更新稳定产品能力、术语、Gate、构建命令、Parity 计数和报告。
+- [x] 运行四 crate tests/Clippy、rustfmt、CI 合同、仓库政策、Release Audit 和 Cargo metadata。
+- [x] 复算实际 24 路径 Ordinal hash，执行隐私/禁止能力扫描与 `git diff --check`。
+- [x] 建立 `issue-128-local-verified` checkpoint。
 
 ## Task 6：远端交付
 
