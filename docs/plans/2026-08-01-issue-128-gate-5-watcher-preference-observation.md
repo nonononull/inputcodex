@@ -2,8 +2,8 @@
 
 > **状态：** `local-verified-remote-delivery-active`
 >
-> **执行纪律：** 当前会话按 `superpowers:test-driven-development` 执行 RED -> GREEN -> VERIFY，
-> 不向其他 agent 委派写入；Final Head 必须另行独立只读复审。
+> **执行纪律：** 当前会话按项目原生 TDD 与 `build.md` 定向命令执行 RED -> GREEN -> VERIFY，
+> 当前 Codex 执行器保持唯一写入；Final Head 必须另行独立只读复审。
 
 **目标：** 只读观察固定 `inputcodex_state_root/watcher.disabled` 的元数据，把缺失与普通文件映射为稳定偏好状态，不泄露路径，也不接管完整 Watcher 管理。
 

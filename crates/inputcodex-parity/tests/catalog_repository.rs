@@ -62,22 +62,53 @@ fn assert_repository_text_contains(relative_path: &str, expected: &[&str]) {
     }
 }
 
+fn yaml_list_item_start(text: &str, id: &str) -> Option<usize> {
+    let marker = format!("  - id: {id}");
+    let bytes = text.as_bytes();
+    text.match_indices(&marker).find_map(|(start, _)| {
+        let end = start + marker.len();
+        let starts_line = start == 0 || bytes[start - 1] == b'\n';
+        let ends_line = match bytes.get(end) {
+            Some(&b'\n') => true,
+            Some(&b'\r') => bytes.get(end + 1) == Some(&b'\n'),
+            _ => false,
+        };
+        (starts_line && ends_line).then_some(start)
+    })
+}
+
 fn yaml_list_item_block<'a>(text: &'a str, id: &str) -> &'a str {
     let marker = format!("  - id: {id}");
-    let start = text
-        .match_indices(&marker)
-        .find_map(|(start, _)| {
-            text.as_bytes()
-                .get(start + marker.len())
-                .is_some_and(|byte| matches!(*byte, b'\r' | b'\n'))
-                .then_some(start)
-        })
-        .unwrap_or_else(|| panic!("YAML 应包含条目：{id}"));
+    let start = yaml_list_item_start(text, id).unwrap_or_else(|| panic!("YAML 应包含条目：{id}"));
     let tail = &text[start..];
     let end = tail[marker.len()..]
         .find("\n  - id: ")
         .map_or(tail.len(), |offset| marker.len() + offset);
     &tail[..end]
+}
+
+#[test]
+fn yaml_id_helper_只接受完整顶层行() {
+    for text in [
+        "  - id: target\n    status: implemented\n  - id: other\n",
+        "catalog:\r\n  - id: target\r\n    status: implemented\r\n  - id: other\r\n",
+    ] {
+        let block = yaml_list_item_block(text, "target");
+        assert!(block.contains("status: implemented"));
+        assert!(!block.contains("id: other"));
+    }
+
+    for text in [
+        "  - id: target-suffix\n",
+        "catalog:\n    - id: target\n",
+        "#   - id: target\n",
+        "note: \"  - id: target\n",
+    ] {
+        assert!(
+            yaml_list_item_start(text, "target").is_none(),
+            "前缀、嵌套、注释或标量中的同名文本不得冒充顶层 ID：{text:?}"
+        );
+    }
 }
 
 fn yaml_field_block(block: &str, field: &str, next_field: &str) -> String {
