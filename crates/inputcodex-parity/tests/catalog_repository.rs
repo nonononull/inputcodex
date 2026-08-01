@@ -74,6 +74,20 @@ fn yaml_list_item_block<'a>(text: &'a str, id: &str) -> &'a str {
     &tail[..end]
 }
 
+fn yaml_field_block(block: &str, field: &str, next_field: &str) -> String {
+    let normalized = block.replace("\r\n", "\n");
+    let marker = format!("    {field}:");
+    let start = normalized
+        .find(&marker)
+        .unwrap_or_else(|| panic!("YAML 条目应包含字段：{field}"));
+    let tail = &normalized[start..];
+    let next_marker = format!("\n    {next_field}:");
+    let end = tail
+        .find(&next_marker)
+        .unwrap_or_else(|| panic!("YAML 字段 {field} 后应包含字段：{next_field}"));
+    tail[..end].to_owned()
+}
+
 struct FeatureRepositoryFixture {
     root: PathBuf,
 }
@@ -2320,8 +2334,6 @@ fn gate5_token_用量首候选必须按真实_cdp_写入语义隔离() {
     for expected in [
         "feature_id: feature.session-data.local-storage-model-suffix-sanitization",
         "PARITY_EXCEPTION_PENDING",
-        "side_effects:",
-        "- none",
         "mode: none",
         "禁止执行上游实现",
     ] {
@@ -2330,6 +2342,18 @@ fn gate5_token_用量首候选必须按真实_cdp_写入语义隔离() {
             "Local Storage 例外合同应包含：{expected}"
         );
     }
+    assert_eq!(
+        yaml_field_block(contract, "side_effects", "persistence"),
+        "    side_effects:\n      - none",
+        "Local Storage 例外合同的副作用必须精确为 none"
+    );
+
+    let mutation = contract.replacen("      - none", "      - none\n      - filesystem-write", 1);
+    assert_ne!(
+        yaml_field_block(&mutation, "side_effects", "persistence"),
+        "    side_effects:\n      - none",
+        "none 与写入副作用并存时必须被专项合同拒绝"
+    );
     for forbidden in [
         "filesystem-read",
         "database-read",
