@@ -64,6 +64,32 @@ mod runtime_environment_observation;
 mod settings_observation;
 mod version_startup;
 mod watcher_preference_observation;
+#[cfg(any(target_os = "windows", target_os = "macos"))]
+mod zed_remote_project_observation;
+#[cfg(not(any(target_os = "windows", target_os = "macos")))]
+mod zed_remote_project_observation {
+    use inputcodex_application::{
+        ApplicationError, ZedRemoteProjectObservationCancellation, ZedRemoteProjectObservationPort,
+        ZedRemoteProjectObservationRequest,
+    };
+    use inputcodex_domain::ZedRemoteProjectObservation;
+
+    #[derive(Debug, Clone, Copy, Default)]
+    pub struct SystemZedRemoteProjectObservation;
+
+    impl ZedRemoteProjectObservationPort for SystemZedRemoteProjectObservation {
+        fn observe(
+            &self,
+            request: &ZedRemoteProjectObservationRequest,
+            cancellation: &ZedRemoteProjectObservationCancellation,
+        ) -> Result<Option<ZedRemoteProjectObservation>, ApplicationError> {
+            let _ = (request, cancellation);
+            Err(ApplicationError::unsupported(
+                "ZED_REMOTE_PROJECT_OBSERVATION_UNSUPPORTED",
+            ))
+        }
+    }
+}
 
 pub use application_overview::SystemApplicationOverview;
 pub use context_entry_observation::SystemContextEntryObservation;
@@ -80,6 +106,21 @@ pub use runtime_environment_observation::{
 pub use settings_observation::SystemSettingsObservation;
 pub use version_startup::{SystemVersionStartup, resolve_version_startup};
 pub use watcher_preference_observation::SystemWatcherPreferenceObservation;
+pub use zed_remote_project_observation::SystemZedRemoteProjectObservation;
+
+#[cfg(any(target_os = "windows", target_os = "macos"))]
+pub(crate) fn resolve_codex_home_for_observation() -> Result<std::path::PathBuf, ApplicationError> {
+    #[cfg(target_os = "windows")]
+    let user_home = std::env::var_os("USERPROFILE").map(std::path::PathBuf::from);
+    #[cfg(target_os = "macos")]
+    let user_home = std::env::var_os("HOME").map(std::path::PathBuf::from);
+
+    platform_paths::resolve_codex_home(
+        user_home,
+        std::env::var_os("CODEX_HOME"),
+        &platform_paths::SystemPathProbe,
+    )
+}
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct SystemPlatform;
