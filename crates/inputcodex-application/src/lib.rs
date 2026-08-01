@@ -14,6 +14,7 @@ mod runtime_environment_observation;
 mod settings_observation;
 mod version_startup;
 mod watcher_preference_observation;
+mod zed_remote_project_observation;
 
 pub use application_overview::{
     ApplicationOverviewPort, ApplicationOverviewRequest, LoadApplicationOverview,
@@ -49,6 +50,10 @@ pub use settings_observation::{
 pub use version_startup::{LoadVersionStartup, VersionStartupPort, VersionStartupRequest};
 pub use watcher_preference_observation::{
     ObserveWatcherPreference, WatcherPreferenceObservationPort, WatcherPreferenceObservationRequest,
+};
+pub use zed_remote_project_observation::{
+    ObserveZedRemoteProjects, ZedRemoteProjectObservationCancellation,
+    ZedRemoteProjectObservationPort, ZedRemoteProjectObservationRequest,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
