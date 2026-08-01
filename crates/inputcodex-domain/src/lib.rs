@@ -12,6 +12,7 @@ mod runtime_environment_observation;
 mod settings_observation;
 mod version_startup;
 mod watcher_preference_observation;
+mod zed_remote_project_observation;
 
 pub use application_overview::{
     ApplicationOverview, ApplicationVersion, ApplicationVersionError, CollectedAtUnixMs,
@@ -56,6 +57,13 @@ pub use runtime_environment_observation::{
 pub use settings_observation::SettingsDocumentObservation;
 pub use version_startup::{StartupIntent, VersionStartupSnapshot};
 pub use watcher_preference_observation::{WatcherPreference, WatcherPreferenceObservation};
+pub use zed_remote_project_observation::{
+    MAX_ZED_REMOTE_PROJECT_SOURCES, MAX_ZED_REMOTE_PROJECTS, ZedRemoteProjectEntry,
+    ZedRemoteProjectId, ZedRemoteProjectIdError, ZedRemoteProjectObservation,
+    ZedRemoteProjectObservationError, ZedRemoteProjectOrigin, ZedRemoteProjectSelectionHint,
+    ZedRemoteProjectSourceCoverage, ZedRemoteProjectSourceSummary,
+    ZedRemoteProjectSourceSummaryError,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct DiagnosticCode(&'static str);
