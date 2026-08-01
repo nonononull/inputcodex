@@ -116,7 +116,7 @@ docs/workflows/2026-08-01-issue-128-gate-5-watcher-preference-observation-runtim
 ### Batch 3：Platform TDD
 
 - 先取得固定文件名、元数据类型和 fail-closed 错误矩阵 RED，再实现单探针适配器。
-- 状态：`pending`。
+- 状态：`completed`。
 
 ### Batch 4：Parity TDD
 

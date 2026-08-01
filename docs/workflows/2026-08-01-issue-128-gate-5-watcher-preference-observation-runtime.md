@@ -10,7 +10,7 @@
 - `baseline_ref`: `43ace17de1505f251812e4ead3035ef3274a8455`
 - `branch_ref`: `codex/issue-128-gate-5-watcher-preference-observation`
 - `candidate_scope_hash`: `sha256:0be3dd45ed7e91d1cb7f633da369bb2b9052cefc512852d80362775da7e81699`
-- `runtime_state`: `platform-red-ready`
+- `runtime_state`: `parity-red-ready`
 
 ## Current Gate
 
@@ -20,8 +20,8 @@ Issue #127 decision completed
   -> Planning control plane completed
   -> Domain RED/GREEN completed
   -> Application RED/GREEN completed
-  -> NEXT: Platform RED
-  -> Parity RED/GREEN
+  -> Platform RED/GREEN completed
+  -> NEXT: Parity RED
   -> Local verification
   -> Review / CI / exact-head Squash
 ```
@@ -72,7 +72,7 @@ RED -> GREEN -> Application tests/Clippy/fmt -> `issue-128-application-green`。
 
 RED -> GREEN -> Platform tests/Clippy/fmt -> `issue-128-platform-green`。
 
-状态：`pending`。
+状态：`completed`。
 
 ### Node 6：Parity TDD
 

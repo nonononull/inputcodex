@@ -95,13 +95,13 @@ pub trait WatcherPreferenceObservationPort {
 - 新增：`crates/inputcodex-platform/src/watcher_preference_observation.rs`
 - 修改：`crates/inputcodex-platform/src/lib.rs`
 
-- [ ] RED：内存 probe 覆盖 NotFound、普通文件、symlink、other、PermissionDenied；记录被访问文件名与 metadata 调用次数。
-- [ ] RED：断言固定文件名只能是 `watcher.disabled`，任何路径与错误 Debug 均不得包含私有片段。
-- [ ] 运行 Platform 专项，确认只因目标 API 缺失失败。
-- [ ] GREEN：System adapter 先解析平台路径，再拼接固定文件名并执行一次 `symlink_metadata`。
-- [ ] 非发布平台返回稳定 Unsupported；没有文件内容读取 API。
-- [ ] 运行 Platform 专项、全目标 Clippy 和 rustfmt。
-- [ ] 建立 `issue-128-platform-green` checkpoint。
+- [x] RED：内存 probe 覆盖 NotFound、普通文件、symlink、other、PermissionDenied；记录被访问文件名与 metadata 调用次数。
+- [x] RED：断言固定文件名只能是 `watcher.disabled`，任何路径与错误 Debug 均不得包含私有片段。
+- [x] 运行 Platform 专项，确认只因目标 API 缺失失败。
+- [x] GREEN：System adapter 先解析平台路径，再拼接固定文件名并执行一次 `symlink_metadata`。
+- [x] 非发布平台返回稳定 Unsupported；没有文件内容读取 API。
+- [x] 运行 Platform 专项、全目标 Clippy 和 rustfmt。
+- [x] 建立 `issue-128-platform-green` checkpoint。
 
 ## Task 4：Parity RED -> GREEN
 
