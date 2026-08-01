@@ -69,12 +69,12 @@ pub struct WatcherPreferenceObservation {
 - 新增：`crates/inputcodex-application/src/watcher_preference_observation.rs`
 - 修改：`crates/inputcodex-application/src/lib.rs`
 
-- [ ] RED：测试 Request、Port、UseCase 的 Ready、Failed 和取消后迟到结果 `Stale`。
-- [ ] 运行 Application 专项，确认只因目标 API 缺失失败。
-- [ ] GREEN：实现零字段 request、同步只读 port 和 `ObserveWatcherPreference<P>`。
-- [ ] 端口返回领域值而不是 `Option`，避免把缺失标记错误映射为 `Empty`。
-- [ ] 运行 Application 专项、全目标 Clippy 和 rustfmt。
-- [ ] 建立 `issue-128-application-green` checkpoint。
+- [x] RED：测试 Request、Port、UseCase 的 Ready、Failed 和取消后迟到结果 `Stale`。
+- [x] 运行 Application 专项，确认只因目标 API 缺失失败。
+- [x] GREEN：实现零字段 request、同步只读 port 和 `ObserveWatcherPreference<P>`。
+- [x] 端口返回领域值而不是 `Option`，避免把缺失标记错误映射为 `Empty`。
+- [x] 运行 Application 专项、全目标 Clippy 和 rustfmt。
+- [x] 建立 `issue-128-application-green` checkpoint。
 
 目标 Port：
 

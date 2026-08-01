@@ -111,7 +111,7 @@ docs/workflows/2026-08-01-issue-128-gate-5-watcher-preference-observation-runtim
 ### Batch 2：Application TDD
 
 - 先取得 Request/Port/UseCase 缺失 RED，再实现稳定映射。
-- 状态：`pending`。
+- 状态：`completed`。
 
 ### Batch 3：Platform TDD
 

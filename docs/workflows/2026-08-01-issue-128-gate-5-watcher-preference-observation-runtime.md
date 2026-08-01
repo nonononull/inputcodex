@@ -10,7 +10,7 @@
 - `baseline_ref`: `43ace17de1505f251812e4ead3035ef3274a8455`
 - `branch_ref`: `codex/issue-128-gate-5-watcher-preference-observation`
 - `candidate_scope_hash`: `sha256:0be3dd45ed7e91d1cb7f633da369bb2b9052cefc512852d80362775da7e81699`
-- `runtime_state`: `application-red-ready`
+- `runtime_state`: `platform-red-ready`
 
 ## Current Gate
 
@@ -19,8 +19,8 @@ Issue #127 decision completed
   -> Issue #128 scope and planning evidence frozen
   -> Planning control plane completed
   -> Domain RED/GREEN completed
-  -> NEXT: Application RED
-  -> Platform RED/GREEN
+  -> Application RED/GREEN completed
+  -> NEXT: Platform RED
   -> Parity RED/GREEN
   -> Local verification
   -> Review / CI / exact-head Squash
@@ -66,7 +66,7 @@ RED -> GREEN -> Domain tests/Clippy/fmt -> `issue-128-domain-green`。
 
 RED -> GREEN -> Application tests/Clippy/fmt -> `issue-128-application-green`。
 
-状态：`pending`。
+状态：`completed`。
 
 ### Node 5：Platform TDD
 
