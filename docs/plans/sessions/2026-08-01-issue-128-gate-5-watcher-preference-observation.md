@@ -106,7 +106,7 @@ docs/workflows/2026-08-01-issue-128-gate-5-watcher-preference-observation-runtim
 ### Batch 1：Domain TDD
 
 - 先取得目标类型缺失 RED，再实现两个纯领域类型。
-- 状态：`pending`。
+- 状态：`completed`。
 
 ### Batch 2：Application TDD
 

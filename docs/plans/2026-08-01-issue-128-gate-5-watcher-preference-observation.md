@@ -42,11 +42,11 @@
 - 新增：`crates/inputcodex-domain/src/watcher_preference_observation.rs`
 - 修改：`crates/inputcodex-domain/src/lib.rs`
 
-- [ ] RED：测试引用尚不存在的 `WatcherPreference` 与 `WatcherPreferenceObservation`，分别断言两个状态和脱敏 Debug。
-- [ ] 运行 `cargo test -p inputcodex-domain --test watcher_preference_observation --offline`，确认只因目标 API 缺失失败。
-- [ ] GREEN：实现两个 `Copy + Eq` 领域类型、构造器和只读 getter，不引入路径或字符串字段。
-- [ ] 运行 Domain 专项、全目标 Clippy 和 rustfmt。
-- [ ] 建立 `issue-128-domain-green` checkpoint。
+- [x] RED：测试引用尚不存在的 `WatcherPreference` 与 `WatcherPreferenceObservation`，分别断言两个状态和脱敏 Debug。
+- [x] 运行 `cargo test -p inputcodex-domain --test watcher_preference_observation --offline`，确认只因目标 API 缺失失败。
+- [x] GREEN：实现两个 `Copy + Eq` 领域类型、构造器和只读 getter，不引入路径或字符串字段。
+- [x] 运行 Domain 专项、全目标 Clippy 和 rustfmt。
+- [x] 建立 `issue-128-domain-green` checkpoint。
 
 目标 API：
 

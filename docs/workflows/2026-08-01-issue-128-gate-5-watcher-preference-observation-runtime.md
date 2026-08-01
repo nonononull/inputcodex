@@ -10,7 +10,7 @@
 - `baseline_ref`: `43ace17de1505f251812e4ead3035ef3274a8455`
 - `branch_ref`: `codex/issue-128-gate-5-watcher-preference-observation`
 - `candidate_scope_hash`: `sha256:0be3dd45ed7e91d1cb7f633da369bb2b9052cefc512852d80362775da7e81699`
-- `runtime_state`: `domain-red-ready`
+- `runtime_state`: `application-red-ready`
 
 ## Current Gate
 
@@ -18,8 +18,8 @@
 Issue #127 decision completed
   -> Issue #128 scope and planning evidence frozen
   -> Planning control plane completed
-  -> NEXT: Domain RED
-  -> Application RED/GREEN
+  -> Domain RED/GREEN completed
+  -> NEXT: Application RED
   -> Platform RED/GREEN
   -> Parity RED/GREEN
   -> Local verification
@@ -60,7 +60,7 @@ Issue #127 采用方案 B：只拆分偏好标记观察，完整 Watcher 管理�
 
 RED -> GREEN -> Domain tests/Clippy/fmt -> `issue-128-domain-green`。
 
-状态：`pending`。
+状态：`completed`。
 
 ### Node 4：Application TDD
 
