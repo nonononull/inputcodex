@@ -1087,9 +1087,13 @@
   current 时返回 `blocked-candidate-exhausted / await-owner-decision`。label、仓库或交付漂移使用三个稳定
   reason code fail-closed。真实 live 预检发现 label 空数组/单元素数组被函数输出展开，按既有
   “PowerShell 会展开集合返回值”条目改用属性投影保留数组身份，未另建第二套数组处理。
+- 复审纠正：首轮 Final Head 复审继续发现检测正则大小写敏感、hard-stop 使用宽松 `-notin`，以及同族
+  candidate 对象容器/额外字段和 live 预筛缺口。检测阶段改为大小写不敏感地发现所有 typed marker，
+  接受阶段继续精确比较；candidate 对象固定五字段，hard stop 固定为字符串数组并逐项精确匹配。
 - 验证：RED 保留既有 `76` 条通过并稳定暴露 `5` 个失败面；GREEN 后完整 CI 脚本合同为 `80/80`，
   策略哈希为 `sha256:c907410a535020e9276fd8de5f448fca38a91ebd84aa26e8768a51818f300d53`；真实
-  Issue `#138` live 预检继续返回 `active-worktree-execution / resume-worktree`。
+  Issue `#138` live 预检继续返回 `active-worktree-execution / resume-worktree`。复审纠正另以
+  `77 PASS / 3 FAIL` 形成 RED，修复后再次达到 `80/80`。
 - 关联：Issue `#111`、Issue `#137`、Issue `#138`、`.github/autonomous-refactor-policy.json`、
   `scripts/automation/Get-AutonomousRefactorState.ps1`、`scripts/ci/Test-CiScripts.ps1`。
 

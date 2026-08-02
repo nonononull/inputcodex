@@ -94,3 +94,6 @@ rebase、force push 或修改 main。
 - PowerShell 空数组与单元素数组使用属性投影保留身份，禁止把数组伪装成标量。
 - 完整 CI 脚本合同为 `80/80`，真实 #138 live 预检仍返回 `active-worktree-execution / resume-worktree`。
 - 规范化策略哈希为 `sha256:c907410a535020e9276fd8de5f448fca38a91ebd84aa26e8768a51818f300d53`。
+- 首轮 Final Head 独立复审为 `0 Critical / 2 Important / FAIL`，暴露 typed marker 前缀大小写与 hard-stop
+  大小写检查未 fail-closed；同族变异继续覆盖 candidate 对象数组/额外字段和 live typed-only 预筛。
+- 纠正 RED 精确为 `77 PASS / 3 FAIL`，最小修复后恢复 `80/80`，并再次通过真实 #138 live 预检。

@@ -39,6 +39,11 @@
   三方 Head、零 scope、Release Audit、活动或已交付 PR 均有 fail-closed 负例。
 - 首次真实 live 预检暴露 label 数组被 PowerShell 函数展开；改用属性投影并加入空/单 label 回归后，
   #138 继续正确返回 `active-worktree-execution / resume-worktree`。
+- 首轮 Final Head 独立复审为 `0 Critical / 2 Important / FAIL`：typed marker 前缀大小写被降级为普通
+  `refactor`，`candidate-exhausted` hard stop 的大小写漂移又被宽松成员比较接受。
+- 同族变异进一步证明 candidate 对象的单元素数组包装和额外字段会被静默接受，只有 typed marker 的
+  Issue 会在严格解析前被 live 预筛忽略。纠正合同稳定得到 `77 PASS / 3 FAIL`，修复后恢复 `80/80`；
+  candidate 对象固定为五字段、hard stop 固定字符串数组和精确大小写，所有 typed marker 均进入严格解析。
 
 ## 待完成
 

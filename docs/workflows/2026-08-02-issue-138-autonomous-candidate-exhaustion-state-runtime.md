@@ -82,7 +82,9 @@ branch、clean、Head、scope、Release、活动或已交付 PR 均有专用 har
 3. 独立 reviewer 只读复核 Final Head 候选，关闭全部 Critical/Important。
 4. 建立 local-verified checkpoint 并普通 push。
 
-状态：in-progress。稳定文档与 err 根因已更新，下一节点为十二路径完整门禁和独立只读复审。
+状态：in-progress。首轮十二路径门禁通过；独立复审以 `0 Critical / 2 Important / FAIL` 暴露 marker 前缀
+与 hard-stop 大小写缺口。同族 shape/预筛 RED 为 `77 PASS / 3 FAIL`，纠正后恢复 `80/80` 和真实 live
+回归；下一节点为重新执行完整门禁并绑定新 Head 的独立只读复审。
 
 ## Node 5：Remote Delivery
 

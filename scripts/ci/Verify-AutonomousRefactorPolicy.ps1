@@ -278,7 +278,9 @@ if (-not $upstreamSyncStringsValid -or
     Add-Violation 'UPSTREAM_SYNC_POLICY' 'upstream-sync stale 例外必须绑定精确 marker、状态和成功 release-audit Job'
 }
 
-$candidateExhaustion = Get-PropertyValue $policy 'candidate_exhaustion'
+$candidateExhaustionProperty = $policy.PSObject.Properties['candidate_exhaustion']
+$candidateExhaustion = $null
+if ($null -ne $candidateExhaustionProperty) { $candidateExhaustion = $candidateExhaustionProperty.Value }
 $candidateExhaustionTaskKindProperty = $null
 $candidateExhaustionTaskMarkerProperty = $null
 $candidateExhaustionRequiredLabelProperty = $null
@@ -301,7 +303,11 @@ if ($null -ne $candidateExhaustionTaskMarkerProperty) { $candidateExhaustionTask
 if ($null -ne $candidateExhaustionRequiredLabelProperty) { $candidateExhaustionRequiredLabel = $candidateExhaustionRequiredLabelProperty.Value }
 if ($null -ne $candidateExhaustionStateProperty) { $candidateExhaustionState = $candidateExhaustionStateProperty.Value }
 if ($null -ne $candidateExhaustionNextActionProperty) { $candidateExhaustionNextAction = $candidateExhaustionNextActionProperty.Value }
-$candidateExhaustionStringsValid = $candidateExhaustion -is [pscustomobject] -and
+$candidateExhaustionShapeValid = $candidateExhaustion -is [pscustomobject] -and
+    (Test-ExactStringSet `
+        -Actual @($candidateExhaustion.PSObject.Properties.Name) `
+        -Expected @('task_kind', 'task_marker', 'required_label', 'state', 'next_action'))
+$candidateExhaustionStringsValid = $candidateExhaustionShapeValid -and
     $candidateExhaustionTaskKind -is [string] -and
     $candidateExhaustionTaskMarker -is [string] -and
     $candidateExhaustionRequiredLabel -is [string] -and
@@ -343,10 +349,22 @@ $requiredHardStops = @(
     'ruleset-bypass',
     'candidate-exhausted'
 )
-$hardStops = @(Get-PropertyValue $policy 'hard_stops')
-$missingHardStops = @($requiredHardStops | Where-Object { $_ -notin $hardStops })
-if ($missingHardStops.Count -ne 0) {
-    Add-Violation 'HARD_STOPS' "缺少硬停止：$($missingHardStops -join ',')"
+$hardStopsProperty = $policy.PSObject.Properties['hard_stops']
+$hardStops = @()
+if ($null -ne $hardStopsProperty -and $hardStopsProperty.Value -is [System.Array]) {
+    $hardStops = [object[]]$hardStopsProperty.Value
+}
+$hardStopsShapeValid = $null -ne $hardStopsProperty -and
+    $hardStopsProperty.Value -is [System.Array] -and
+    @($hardStops | Where-Object { $_ -isnot [string] }).Count -eq 0
+$missingHardStops = @($requiredHardStops | Where-Object {
+    $requiredHardStop = $_
+    @($hardStops | Where-Object {
+        $_ -is [string] -and $_ -ceq $requiredHardStop
+    }).Count -eq 0
+})
+if (-not $hardStopsShapeValid -or $missingHardStops.Count -ne 0) {
+    Add-Violation 'HARD_STOPS' "hard stop 集合必须为字符串数组并包含精确值；缺少：$($missingHardStops -join ',')"
 }
 if ((Get-PropertyValue $policy 'first_candidate') -cne 'feature.session-data.token-usage-history') {
     Add-Violation 'FIRST_CANDIDATE' '首个候选必须为 token-usage-history'

@@ -502,6 +502,18 @@ Invoke-ContractTest -Name '拒绝漂移的候选耗尽终态策略' -Body {
     Assert-AutonomousPolicyFailure `
         -Result (Invoke-AutonomousPolicyCase -Name 'candidate-exhaustion-array' -Policy $arrayValue) `
         -ExpectedCode 'CANDIDATE_EXHAUSTION_POLICY'
+
+    $objectArray = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
+    $objectArray.candidate_exhaustion = [object[]]@($objectArray.candidate_exhaustion)
+    Assert-AutonomousPolicyFailure `
+        -Result (Invoke-AutonomousPolicyCase -Name 'candidate-exhaustion-object-array' -Policy $objectArray) `
+        -ExpectedCode 'CANDIDATE_EXHAUSTION_POLICY'
+
+    $extraField = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
+    $extraField.candidate_exhaustion | Add-Member -NotePropertyName gate_5_product_complete -NotePropertyValue $true
+    Assert-AutonomousPolicyFailure `
+        -Result (Invoke-AutonomousPolicyCase -Name 'candidate-exhaustion-extra-field' -Policy $extraField) `
+        -ExpectedCode 'CANDIDATE_EXHAUSTION_POLICY'
 }
 
 Invoke-ContractTest -Name '拒绝非 Gemini UI owner 或 UI fallback' -Body {
@@ -522,6 +534,20 @@ Invoke-ContractTest -Name '拒绝缺失候选耗尽硬停止' -Body {
     $policy.hard_stops = @($policy.hard_stops | Where-Object { $_ -cne 'candidate-exhausted' })
     Assert-AutonomousPolicyFailure `
         -Result (Invoke-AutonomousPolicyCase -Name 'candidate-exhaustion-hard-stop' -Policy $policy) `
+        -ExpectedCode 'HARD_STOPS'
+
+    $caseDrift = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
+    $caseDrift.hard_stops = @($caseDrift.hard_stops | ForEach-Object {
+        if ($_ -ceq 'candidate-exhausted') { 'Candidate-Exhausted' } else { $_ }
+    })
+    Assert-AutonomousPolicyFailure `
+        -Result (Invoke-AutonomousPolicyCase -Name 'candidate-exhaustion-hard-stop-case' -Policy $caseDrift) `
+        -ExpectedCode 'HARD_STOPS'
+
+    $invalidMember = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
+    $invalidMember.hard_stops = [object[]]@($invalidMember.hard_stops + [pscustomobject]@{ value = 'extra-stop' })
+    Assert-AutonomousPolicyFailure `
+        -Result (Invoke-AutonomousPolicyCase -Name 'candidate-exhaustion-hard-stop-object' -Policy $invalidMember) `
         -ExpectedCode 'HARD_STOPS'
 }
 
@@ -846,9 +872,11 @@ Invoke-ContractTest -Name '无人值守候选耗尽漂移必须 fail closed' -Bo
 
 Invoke-ContractTest -Name '无人值守 live 仅接受精确 typed marker' -Body {
     Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyProjection')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-AutonomousIssueTaskMarkerPresence')
     Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-AutonomousIssueTaskKind')
     $upstreamMarker = '<!-- inputcodex:autonomous-refactor-task-kind:upstream-sync:v1 -->'
     $candidateMarker = '<!-- inputcodex:autonomous-refactor-task-kind:candidate-exhausted:v1 -->'
+    $uppercasePrefixMarker = '<!-- INPUTCODEX:AUTONOMOUS-REFACTOR-TASK-KIND:CANDIDATE-EXHAUSTED:V1 -->'
     $codeBlockBody = [string]::Join("`n", @(
         '<!-- inputcodex:autonomous-refactor-task:v1 -->',
         '```md',
@@ -867,6 +895,18 @@ Invoke-ContractTest -Name '无人值守 live 仅接受精确 typed marker' -Body
         -Message '空 label 数组不得折叠为 null'
     Assert-True -Condition ($singleLabels -is [System.Array] -and $singleLabels.Count -eq 1) `
         -Message '单 label 数组不得折叠为标量'
+    Assert-Equal -Expected $true `
+        -Actual (Test-AutonomousIssueTaskMarkerPresence -Body $candidateMarker) `
+        -Message '只有 typed marker 的 Issue 也必须进入解析器并 fail-closed'
+    Assert-Equal -Expected $true `
+        -Actual (Test-AutonomousIssueTaskMarkerPresence -Body '<!-- inputcodex:autonomous-refactor-task-kind:unknown:v1 -->') `
+        -Message '未知 typed marker 不得被 live 预筛忽略'
+    Assert-Equal -Expected $true `
+        -Actual (Test-AutonomousIssueTaskMarkerPresence -Body $uppercasePrefixMarker) `
+        -Message '大小写漂移 marker 不得被 live 预筛忽略'
+    Assert-Equal -Expected $false `
+        -Actual (Test-AutonomousIssueTaskMarkerPresence -Body '普通 Issue 正文') `
+        -Message '无自治 marker 的普通 Issue 不得进入状态控制面'
 
     Assert-Equal -Expected 'refactor' `
         -Actual (Get-AutonomousIssueTaskKind -Body '<!-- inputcodex:autonomous-refactor-task:v1 -->' -UpstreamSyncTaskMarker $upstreamMarker -CandidateExhaustedTaskMarker $candidateMarker) `
@@ -887,6 +927,9 @@ Invoke-ContractTest -Name '无人值守 live 仅接受精确 typed marker' -Body
         -Actual (Get-AutonomousIssueTaskKind -Body '<!-- inputcodex:autonomous-refactor-task-kind:Candidate-Exhausted:v1 -->' -UpstreamSyncTaskMarker $upstreamMarker -CandidateExhaustedTaskMarker $candidateMarker) `
         -Message 'marker 大小写漂移必须 fail-closed'
     Assert-Equal -Expected 'invalid' `
+        -Actual (Get-AutonomousIssueTaskKind -Body $uppercasePrefixMarker -UpstreamSyncTaskMarker $upstreamMarker -CandidateExhaustedTaskMarker $candidateMarker) `
+        -Message 'marker 前缀大小写漂移必须 fail-closed'
+    Assert-Equal -Expected 'invalid' `
         -Actual (Get-AutonomousIssueTaskKind -Body "$candidateMarker`n$candidateMarker" -UpstreamSyncTaskMarker $upstreamMarker -CandidateExhaustedTaskMarker $candidateMarker) `
         -Message '重复 typed marker 必须 fail-closed'
     Assert-Equal -Expected 'invalid' `
@@ -903,6 +946,8 @@ Invoke-ContractTest -Name '无人值守 live 仅接受精确 typed marker' -Body
         -Message '非顶部 header 的 typed marker 必须 fail-closed'
 
     $liveSource = Get-AutonomousStateFunctionSource -Name 'Get-LiveSnapshot'
+    Assert-True -Condition $liveSource.Contains('Test-AutonomousIssueTaskMarkerPresence') `
+        -Message 'live Issue 预筛必须把 typed marker 交给严格解析器'
     Assert-True -Condition $liveSource.Contains('Get-AutonomousIssueTaskKind') `
         -Message 'live Issue 投影必须消费 typed task kind helper'
     Assert-True -Condition $liveSource.Contains("Get-PropertyProjection `$issue 'labels'") `

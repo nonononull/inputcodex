@@ -128,6 +128,25 @@ function ConvertFrom-StrictPagedObjectOutput {
     return [pscustomobject]@{ Pages = $pages.Items }
 }
 
+function Test-AutonomousIssueTaskMarkerPresence {
+    param([AllowNull()]$Body)
+
+    if ($Body -isnot [string]) {
+        return $false
+    }
+    $options = [Text.RegularExpressions.RegexOptions]::CultureInvariant -bor
+        [Text.RegularExpressions.RegexOptions]::IgnoreCase
+    return [regex]::IsMatch(
+        $Body,
+        '<!--\s*inputcodex:autonomous-refactor-(?:bootstrap|task):v1\s*-->',
+        $options
+    ) -or [regex]::IsMatch(
+        $Body,
+        '<!--\s*inputcodex:autonomous-refactor-task-kind:[^>]*-->',
+        $options
+    )
+}
+
 function Get-AutonomousIssueTaskKind {
     param(
         [AllowNull()]$Body,
@@ -141,7 +160,8 @@ function Get-AutonomousIssueTaskKind {
     $matches = [regex]::Matches(
         $Body,
         '<!--\s*inputcodex:autonomous-refactor-task-kind:[^>]*-->',
-        [Text.RegularExpressions.RegexOptions]::CultureInvariant
+        [Text.RegularExpressions.RegexOptions]::CultureInvariant -bor
+            [Text.RegularExpressions.RegexOptions]::IgnoreCase
     )
     if ($matches.Count -eq 0) {
         return 'refactor'
@@ -1106,8 +1126,7 @@ function Get-LiveSnapshot {
             $markedIssues = @($issues |
                 Where-Object {
                     $null -eq $_.PSObject.Properties['pull_request'] -and
-                    [string](Get-PropertyValue $_ 'body') -match
-                        'inputcodex:autonomous-refactor-(bootstrap|task):v1'
+                    (Test-AutonomousIssueTaskMarkerPresence -Body (Get-PropertyValue $_ 'body'))
                 } |
                 ForEach-Object {
                     $issueLabels = (Get-PropertyProjection $_ 'labels').value
