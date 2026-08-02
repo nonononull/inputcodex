@@ -77,6 +77,13 @@
     "required_workflow": "CI",
     "required_job": "release-audit"
   },
+  "candidate_exhaustion": {
+    "task_kind": "candidate-exhausted",
+    "task_marker": "<!-- inputcodex:autonomous-refactor-task-kind:candidate-exhausted:v1 -->",
+    "required_label": "status:needs-owner-decision",
+    "state": "blocked-candidate-exhausted",
+    "next_action": "await-owner-decision"
+  },
   "retry": {
     "max_attempts": 3,
     "max_iteration_minutes": 180,
@@ -94,7 +101,8 @@
     "license-conflict",
     "force-push-main",
     "delete-main",
-    "ruleset-bypass"
+    "ruleset-bypass",
+    "candidate-exhausted"
   ],
   "first_candidate": "feature.session-data.token-usage-history"
 }

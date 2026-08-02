@@ -278,6 +278,50 @@ if (-not $upstreamSyncStringsValid -or
     Add-Violation 'UPSTREAM_SYNC_POLICY' 'upstream-sync stale 例外必须绑定精确 marker、状态和成功 release-audit Job'
 }
 
+$candidateExhaustionProperty = $policy.PSObject.Properties['candidate_exhaustion']
+$candidateExhaustion = $null
+if ($null -ne $candidateExhaustionProperty) { $candidateExhaustion = $candidateExhaustionProperty.Value }
+$candidateExhaustionTaskKindProperty = $null
+$candidateExhaustionTaskMarkerProperty = $null
+$candidateExhaustionRequiredLabelProperty = $null
+$candidateExhaustionStateProperty = $null
+$candidateExhaustionNextActionProperty = $null
+if ($candidateExhaustion -is [pscustomobject]) {
+    $candidateExhaustionTaskKindProperty = $candidateExhaustion.PSObject.Properties['task_kind']
+    $candidateExhaustionTaskMarkerProperty = $candidateExhaustion.PSObject.Properties['task_marker']
+    $candidateExhaustionRequiredLabelProperty = $candidateExhaustion.PSObject.Properties['required_label']
+    $candidateExhaustionStateProperty = $candidateExhaustion.PSObject.Properties['state']
+    $candidateExhaustionNextActionProperty = $candidateExhaustion.PSObject.Properties['next_action']
+}
+$candidateExhaustionTaskKind = $null
+$candidateExhaustionTaskMarker = $null
+$candidateExhaustionRequiredLabel = $null
+$candidateExhaustionState = $null
+$candidateExhaustionNextAction = $null
+if ($null -ne $candidateExhaustionTaskKindProperty) { $candidateExhaustionTaskKind = $candidateExhaustionTaskKindProperty.Value }
+if ($null -ne $candidateExhaustionTaskMarkerProperty) { $candidateExhaustionTaskMarker = $candidateExhaustionTaskMarkerProperty.Value }
+if ($null -ne $candidateExhaustionRequiredLabelProperty) { $candidateExhaustionRequiredLabel = $candidateExhaustionRequiredLabelProperty.Value }
+if ($null -ne $candidateExhaustionStateProperty) { $candidateExhaustionState = $candidateExhaustionStateProperty.Value }
+if ($null -ne $candidateExhaustionNextActionProperty) { $candidateExhaustionNextAction = $candidateExhaustionNextActionProperty.Value }
+$candidateExhaustionShapeValid = $candidateExhaustion -is [pscustomobject] -and
+    (Test-ExactStringSet `
+        -Actual @($candidateExhaustion.PSObject.Properties.Name) `
+        -Expected @('task_kind', 'task_marker', 'required_label', 'state', 'next_action'))
+$candidateExhaustionStringsValid = $candidateExhaustionShapeValid -and
+    $candidateExhaustionTaskKind -is [string] -and
+    $candidateExhaustionTaskMarker -is [string] -and
+    $candidateExhaustionRequiredLabel -is [string] -and
+    $candidateExhaustionState -is [string] -and
+    $candidateExhaustionNextAction -is [string]
+if (-not $candidateExhaustionStringsValid -or
+    $candidateExhaustionTaskKind -cne 'candidate-exhausted' -or
+    $candidateExhaustionTaskMarker -cne '<!-- inputcodex:autonomous-refactor-task-kind:candidate-exhausted:v1 -->' -or
+    $candidateExhaustionRequiredLabel -cne 'status:needs-owner-decision' -or
+    $candidateExhaustionState -cne 'blocked-candidate-exhausted' -or
+    $candidateExhaustionNextAction -cne 'await-owner-decision') {
+    Add-Violation 'CANDIDATE_EXHAUSTION_POLICY' '候选耗尽终态必须绑定精确 task kind、marker、label、state 和 next action'
+}
+
 $retry = Get-PropertyValue $policy 'retry'
 $maxAttempts = Get-PropertyValue $retry 'max_attempts'
 $maxIterationMinutes = Get-PropertyValue $retry 'max_iteration_minutes'
@@ -302,12 +346,25 @@ $requiredHardStops = @(
     'license-conflict',
     'force-push-main',
     'delete-main',
-    'ruleset-bypass'
+    'ruleset-bypass',
+    'candidate-exhausted'
 )
-$hardStops = @(Get-PropertyValue $policy 'hard_stops')
-$missingHardStops = @($requiredHardStops | Where-Object { $_ -notin $hardStops })
-if ($missingHardStops.Count -ne 0) {
-    Add-Violation 'HARD_STOPS' "缺少硬停止：$($missingHardStops -join ',')"
+$hardStopsProperty = $policy.PSObject.Properties['hard_stops']
+$hardStops = @()
+if ($null -ne $hardStopsProperty -and $hardStopsProperty.Value -is [System.Array]) {
+    $hardStops = [object[]]$hardStopsProperty.Value
+}
+$hardStopsShapeValid = $null -ne $hardStopsProperty -and
+    $hardStopsProperty.Value -is [System.Array] -and
+    @($hardStops | Where-Object { $_ -isnot [string] }).Count -eq 0
+$missingHardStops = @($requiredHardStops | Where-Object {
+    $requiredHardStop = $_
+    @($hardStops | Where-Object {
+        $_ -is [string] -and $_ -ceq $requiredHardStop
+    }).Count -eq 0
+})
+if (-not $hardStopsShapeValid -or $missingHardStops.Count -ne 0) {
+    Add-Violation 'HARD_STOPS' "hard stop 集合必须为字符串数组并包含精确值；缺少：$($missingHardStops -join ',')"
 }
 if ((Get-PropertyValue $policy 'first_candidate') -cne 'feature.session-data.token-usage-history') {
     Add-Violation 'FIRST_CANDIDATE' '首个候选必须为 token-usage-history'
@@ -331,6 +388,13 @@ $result = [pscustomobject][ordered]@{
         allowed_release_audit = $upstreamSyncAllowedReleaseAudit
         required_workflow = $upstreamSyncRequiredWorkflow
         required_job = $upstreamSyncRequiredJob
+    }
+    candidate_exhaustion = [pscustomobject][ordered]@{
+        task_kind = $candidateExhaustionTaskKind
+        task_marker = $candidateExhaustionTaskMarker
+        required_label = $candidateExhaustionRequiredLabel
+        state = $candidateExhaustionState
+        next_action = $candidateExhaustionNextAction
     }
     required_workflows = @($workflows)
     violation_count = $violations.Count

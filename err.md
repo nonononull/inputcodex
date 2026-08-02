@@ -1074,6 +1074,29 @@
 - 验证：Platform RED 分别证明内部 Probe/API 与公开 System adapter 缺失；GREEN 私有矩阵 `4/4`、公开适配器 `1/1`、Platform all-targets 和 Clippy 通过。Parity RED 证明新 feature 缺失并暴露前缀 ID helper 缺陷；GREEN 目录测试 `31/31`，计数为 `135/45/45/12/11/3/0`，`load_watcher_state` 精确为单一 `filesystem-read`。
 - 关联：Issue `#127`、Issue `#128`、`upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs`、`upstream/CodexPlusPlus/crates/codex-plus-core/src/watcher.rs`、`crates/inputcodex-platform/src/watcher_preference_observation.rs`、`parity/features/source-index.yml`。
 
+### 2026-08-02：候选耗尽缺少机器终态导致自治重复选取候选
+
+- 环境：Issue `#137` 已由所有者确认当前 Release 与目录基线下的只读候选前沿饱和，但 Issue `#111`
+  的自治策略仍只认识传统越权 hard stop，状态解析器在无活动任务时固定返回 `idle-select-candidate`。
+- 现象：普通 OPEN owner Issue 只能恢复为 `active-issue-planning / resume-issue`；关闭临时闩锁后又会继续
+  选择候选，无法稳定表达“等待所有者决定下一阶段”。
+- 根因：机器策略没有版本化的 candidate exhaustion task kind、marker、required label、state 和 next action；
+  live snapshot 也没有结构化投影 Issue labels，因此候选耗尽事实无法与普通规划任务区分。
+- 处理：新增唯一 `candidate-exhausted` typed marker 和 hard stop；仅在 owner 单一 OPEN Issue、required
+  label、clean main、`HEAD == origin/main == remote main`、零 scope、无活动或已交付 PR 且 Release Audit
+  current 时返回 `blocked-candidate-exhausted / await-owner-decision`。label、仓库或交付漂移使用三个稳定
+  reason code fail-closed。真实 live 预检发现 label 空数组/单元素数组被函数输出展开，按既有
+  “PowerShell 会展开集合返回值”条目改用属性投影保留数组身份，未另建第二套数组处理。
+- 复审纠正：首轮 Final Head 复审继续发现检测正则大小写敏感、hard-stop 使用宽松 `-notin`，以及同族
+  candidate 对象容器/额外字段和 live 预筛缺口。检测阶段改为大小写不敏感地发现所有 typed marker，
+  接受阶段继续精确比较；candidate 对象固定五字段，hard stop 固定为字符串数组并逐项精确匹配。
+- 验证：RED 保留既有 `76` 条通过并稳定暴露 `5` 个失败面；GREEN 后完整 CI 脚本合同为 `80/80`，
+  策略哈希为 `sha256:c907410a535020e9276fd8de5f448fca38a91ebd84aa26e8768a51818f300d53`；真实
+  Issue `#138` live 预检继续返回 `active-worktree-execution / resume-worktree`。复审纠正另以
+  `77 PASS / 3 FAIL` 形成 RED，修复后再次达到 `80/80`。
+- 关联：Issue `#111`、Issue `#137`、Issue `#138`、`.github/autonomous-refactor-policy.json`、
+  `scripts/automation/Get-AutonomousRefactorState.ps1`、`scripts/ci/Test-CiScripts.ps1`。
+
 ## 记录模板
 
 ```text

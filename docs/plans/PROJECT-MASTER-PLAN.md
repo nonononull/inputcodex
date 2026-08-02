@@ -315,7 +315,9 @@ decision_status: issue-123-local-storage-sanitization-exception-approved
 - [x] Issue `#123` / PR `#124` 已纠正 Local Storage 模型后缀清理的真实 CDP/注入写入语义并固定为 `exception-pending`。
 - [x] Issue `#125`、`#126` 已分别把 rollout Token 历史与 Sub2API 延期到 typed source/profile/transport owner 就绪后。
 - [x] Issue `#127` 已批准从 Watcher 管理总功能拆出固定标记元数据观察。
-- [ ] Issue `#128` 在二十四路径内迁移 `feature.foundation-platform.watcher-preference-observation`；只接管 `load_watcher_state`，完整 Watcher 管理继续 `unassessed`。
+- [x] Issue `#128` / PR `#129` 已完成 `feature.foundation-platform.watcher-preference-observation`；只接管 `load_watcher_state`，完整 Watcher 管理继续 `unassessed`。
+- [x] Issue `#130` 至 `#137` 已完成剩余只读候选、SQLite 保证强度、Watcher typed owner 与候选前沿饱和决策；稳定结论是当前基线下只读前沿饱和，但 Gate 5 产品尚未完成且 Gate 6 不解锁。
+- [x] Issue `#138` 已修正自治状态机无法表达候选耗尽的控制面根因；只增加精确 typed marker、零 scope/无 PR 门和 `blocked-candidate-exhausted / await-owner-decision` 终态，不迁移产品功能。
 
 ### Gate 6：首个正式版本（锁定）
 
