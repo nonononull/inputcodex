@@ -45,8 +45,8 @@ unsafe、FFI/VFS、网络、进程控制、签名、安装、付费资源、forc
 3. 运行文档、范围、仓库政策、Release Audit 和 Git 空白验证。
 4. 建立普通 planning checkpoint，push 后在 Issue 写入 Planning Freeze。
 
-状态：validated-checkpoint-pending。CI 合同 `76/76`、仓库政策零违规、Release Audit current、
-7/7 规划路径和 Git 空白检查已通过；首次 120 秒工具上限未返回失败断言，原命令以 300 秒上限重跑通过。
+状态：completed。CI 合同 `76/76`、仓库政策零违规、Release Audit current、7/7 规划路径和 Git 空白检查
+通过；planning checkpoint 与 Planning Freeze 已建立。
 
 ## Node 2：Policy And Marker TDD
 
@@ -57,6 +57,9 @@ unsafe、FFI/VFS、网络、进程控制、签名、安装、付费资源、forc
 
 RED 状态：completed。完整合同保留原有 76 条通过，并稳定得到 5 个新失败面：策略漂移未拒绝、
 候选耗尽 hard stop 缺失、正确终态未分类、required label 无专用 reason，以及 parser 缺少新 marker 参数。
+
+GREEN 状态：completed。策略验证器严格保留 JSON 标量类型，task kind parser 只接受顶部唯一精确 marker；
+未知、重复、大小写/版本、代码块和后置 marker 均 fail-closed。
 
 ## Node 3：Terminal State TDD
 
@@ -69,12 +72,17 @@ RED 状态：completed。完整合同保留原有 76 条通过，并稳定得到
 RED 状态：completed。正确候选耗尽 snapshot 当前落入普通 blocked-hard-stop；label、仓库状态和 delivery
 负例尚无候选耗尽专用 reason code。
 
+GREEN 状态：completed。合法 snapshot 返回 `blocked-candidate-exhausted / await-owner-decision`；label、
+branch、clean、Head、scope、Release、活动或已交付 PR 均有专用 hard stop，完整合同为 `80/80`。
+
 ## Node 4：Local Closeout
 
 1. 更新稳定文档、报告与 err 根因。
 2. 执行 build.md Issue #138 完整轻量门禁。
 3. 独立 reviewer 只读复核 Final Head 候选，关闭全部 Critical/Important。
 4. 建立 local-verified checkpoint 并普通 push。
+
+状态：in-progress。稳定文档与 err 根因已更新，下一节点为十二路径完整门禁和独立只读复审。
 
 ## Node 5：Remote Delivery
 

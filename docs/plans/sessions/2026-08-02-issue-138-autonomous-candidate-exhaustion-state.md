@@ -85,3 +85,12 @@ candidate_scope_hash: sha256:aac82afc513192fa9adbe1ed6b85f81c56fa3bd8cd3ea20e718
 
 每批结束运行 Git snapshot governance ReportOnly；RED/GREEN 与稳定验证面分别建立普通提交，禁止 amend、
 rebase、force push 或修改 main。
+
+## Local Green Evidence
+
+- candidate exhaustion 策略、typed marker、required label、专用 state/action 与 hard stop 已形成单一严格合同。
+- 合法 terminal snapshot 返回 `blocked-candidate-exhausted / await-owner-decision`；label、Release、仓库状态、
+  活动或已交付 PR 任一漂移均返回稳定 hard stop reason。
+- PowerShell 空数组与单元素数组使用属性投影保留身份，禁止把数组伪装成标量。
+- 完整 CI 脚本合同为 `80/80`，真实 #138 live 预检仍返回 `active-worktree-execution / resume-worktree`。
+- 规范化策略哈希为 `sha256:c907410a535020e9276fd8de5f448fca38a91ebd84aa26e8768a51818f300d53`。

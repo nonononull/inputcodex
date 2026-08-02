@@ -29,7 +29,7 @@
 - [x] 建立 Paseo 隔离 worktree 与分支 `codex/issue-138-autonomous-candidate-exhaustion-state`。
 - [x] 冻结七路径规划范围与十二路径候选范围。
 - [x] 完成规划轻量验证：CI 合同 `76/76`、仓库政策零违规、Release Audit current、7/7 路径和 Git 空白检查通过。
-- [ ] 建立普通 planning checkpoint、push 和 Planning Freeze 评论。
+- [x] 建立普通 planning checkpoint、push 和 Planning Freeze 评论。
 
 规划范围：7 路径，`sha256:2b264858d4a3bcde53885c7121e2ef65e3c9b04cf7f685bf1095a583de32604a`。
 
@@ -39,20 +39,20 @@
 
 - [x] RED：有效策略缺少 candidate exhaustion 合同时失败。
 - [x] RED：未知、重复、大小写/版本漂移、代码块和后置 typed marker 均失败。
-- [ ] GREEN：策略、验证器和 task-kind parser 只接受唯一精确合同。
-- [ ] 建立 policy-marker-green checkpoint。
+- [x] GREEN：策略、验证器和 task-kind parser 只接受唯一精确合同。
+- [x] 建立 policy-marker-green checkpoint。
 
 ## Task 3：状态终态 RED/GREEN
 
 - [x] RED：候选耗尽 snapshot 当前因未知 task kind 落入普通 `blocked-hard-stop`，无法返回专用终态。
 - [x] 覆盖正确终态、required label 缺失、非 main、脏树、Head 漂移、非零 scope、活动或已交付 PR。
-- [ ] GREEN：正确状态返回 `blocked-candidate-exhausted / await-owner-decision`，所有负例 fail-closed。
-- [ ] 保持普通 refactor、upstream-sync、外部重试、PR 与 post-merge 语义不变。
-- [ ] 建立 state-green checkpoint。
+- [x] GREEN：正确状态返回 `blocked-candidate-exhausted / await-owner-decision`，所有负例 fail-closed。
+- [x] 保持普通 refactor、upstream-sync、外部重试、PR 与 post-merge 语义不变。
+- [x] 建立 state-green checkpoint。
 
 ## Task 4：本地收口与交付
 
-- [ ] 更新稳定规则、构建入口、Master Plan、报告和新根因记录。
+- [x] 更新稳定规则、构建入口、Master Plan、报告和新根因记录。
 - [ ] 执行 Issue #138 十二路径本地轻量门禁。
 - [ ] 完成独立只读复审并关闭全部 Critical/Important。
 - [ ] 创建非 Draft PR，核验 Hosted CI、Performance、Artifact、Review thread 和精确 Head。

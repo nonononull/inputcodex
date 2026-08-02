@@ -749,6 +749,7 @@ Invoke-ContractTest -Name '无人值守单一活动 Issue 恢复规划' -Body {
 Invoke-ContractTest -Name '无人值守候选耗尽进入所有者决策终态' -Body {
     $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
     $snapshot.branch = 'main'
+    $snapshot.worktree_head = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
     $snapshot.actual_scope_count = 0L
     $snapshot.actual_scope_hash = 'sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b'
     $snapshot.active_issues = @([pscustomobject][ordered]@{
@@ -771,6 +772,7 @@ Invoke-ContractTest -Name '无人值守候选耗尽漂移必须 fail closed' -Bo
     function New-CandidateExhaustedSnapshot {
         $value = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
         $value.branch = 'main'
+        $value.worktree_head = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
         $value.actual_scope_count = 0L
         $value.actual_scope_hash = 'sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b'
         $value.active_issues = @([pscustomobject][ordered]@{
@@ -791,7 +793,7 @@ Invoke-ContractTest -Name '无人值守候选耗尽漂移必须 fail closed' -Bo
         -Expected 'CANDIDATE_EXHAUSTED_LABEL_INVALID' `
         -Message 'required label 缺失必须稳定阻断'
 
-    foreach ($case in @('branch', 'dirty', 'head', 'scope')) {
+    foreach ($case in @('branch', 'dirty', 'head', 'scope', 'release')) {
         $snapshot = New-CandidateExhaustedSnapshot
         switch ($case) {
             'branch' { $snapshot.branch = 'codex/issue-900-invalid' }
@@ -801,6 +803,7 @@ Invoke-ContractTest -Name '无人值守候选耗尽漂移必须 fail closed' -Bo
                 $snapshot.actual_scope_count = 1L
                 $snapshot.actual_scope_hash = 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
             }
+            'release' { $snapshot.release_audit = 'stale-re-audit-required' }
         }
         $result = Invoke-AutonomousStateCase -Name "candidate-exhausted-$case" -Snapshot $snapshot
         Assert-AutonomousState -Result $result -ExpectedState 'blocked-hard-stop' -ExpectedAction 'stop'
@@ -823,9 +826,26 @@ Invoke-ContractTest -Name '无人值守候选耗尽漂移必须 fail closed' -Bo
     Assert-Contains -Collection @($deliveryResult.Json.reason_codes) `
         -Expected 'CANDIDATE_EXHAUSTED_DELIVERY_PRESENT' `
         -Message '候选耗尽 Issue 不得绑定 PR'
+
+    $delivered = New-CandidateExhaustedSnapshot
+    $delivered.merged_prs = @([pscustomobject][ordered]@{
+        author_login = 'nonononull'
+        head_owner_login = 'nonononull'
+        merge_commit_oid = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+        evidence = [pscustomobject][ordered]@{
+            valid = $true
+            tracking_issue_ref = 'https://github.com/nonononull/inputcodex/issues/900'
+        }
+    })
+    $deliveredResult = Invoke-AutonomousStateCase -Name 'candidate-exhausted-delivered' -Snapshot $delivered
+    Assert-AutonomousState -Result $deliveredResult -ExpectedState 'blocked-hard-stop' -ExpectedAction 'stop'
+    Assert-Contains -Collection @($deliveredResult.Json.reason_codes) `
+        -Expected 'CANDIDATE_EXHAUSTED_DELIVERY_PRESENT' `
+        -Message '候选耗尽 Issue 不得关联已交付 PR'
 }
 
 Invoke-ContractTest -Name '无人值守 live 仅接受精确 typed marker' -Body {
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyProjection')
     Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-AutonomousIssueTaskKind')
     $upstreamMarker = '<!-- inputcodex:autonomous-refactor-task-kind:upstream-sync:v1 -->'
     $candidateMarker = '<!-- inputcodex:autonomous-refactor-task-kind:candidate-exhausted:v1 -->'
@@ -840,6 +860,13 @@ Invoke-ContractTest -Name '无人值守 live 仅接受精确 typed marker' -Body
         '正文',
         $candidateMarker
     ))
+    $emptyLabels = (Get-PropertyProjection ([pscustomobject]@{ labels = [object[]]@() }) 'labels').value
+    $singleLabels = (Get-PropertyProjection ([pscustomobject]@{ labels = [object[]]@('gate:5') }) 'labels').value
+
+    Assert-True -Condition ($emptyLabels -is [System.Array] -and $emptyLabels.Count -eq 0) `
+        -Message '空 label 数组不得折叠为 null'
+    Assert-True -Condition ($singleLabels -is [System.Array] -and $singleLabels.Count -eq 1) `
+        -Message '单 label 数组不得折叠为标量'
 
     Assert-Equal -Expected 'refactor' `
         -Actual (Get-AutonomousIssueTaskKind -Body '<!-- inputcodex:autonomous-refactor-task:v1 -->' -UpstreamSyncTaskMarker $upstreamMarker -CandidateExhaustedTaskMarker $candidateMarker) `
@@ -856,6 +883,9 @@ Invoke-ContractTest -Name '无人值守 live 仅接受精确 typed marker' -Body
     Assert-Equal -Expected 'invalid' `
         -Actual (Get-AutonomousIssueTaskKind -Body '<!-- inputcodex:autonomous-refactor-task-kind:candidate-exhausted:v2 -->' -UpstreamSyncTaskMarker $upstreamMarker -CandidateExhaustedTaskMarker $candidateMarker) `
         -Message '未知 marker 版本必须 fail-closed'
+    Assert-Equal -Expected 'invalid' `
+        -Actual (Get-AutonomousIssueTaskKind -Body '<!-- inputcodex:autonomous-refactor-task-kind:Candidate-Exhausted:v1 -->' -UpstreamSyncTaskMarker $upstreamMarker -CandidateExhaustedTaskMarker $candidateMarker) `
+        -Message 'marker 大小写漂移必须 fail-closed'
     Assert-Equal -Expected 'invalid' `
         -Actual (Get-AutonomousIssueTaskKind -Body "$candidateMarker`n$candidateMarker" -UpstreamSyncTaskMarker $upstreamMarker -CandidateExhaustedTaskMarker $candidateMarker) `
         -Message '重复 typed marker 必须 fail-closed'
@@ -875,7 +905,7 @@ Invoke-ContractTest -Name '无人值守 live 仅接受精确 typed marker' -Body
     $liveSource = Get-AutonomousStateFunctionSource -Name 'Get-LiveSnapshot'
     Assert-True -Condition $liveSource.Contains('Get-AutonomousIssueTaskKind') `
         -Message 'live Issue 投影必须消费 typed task kind helper'
-    Assert-True -Condition $liveSource.Contains("Get-PropertyValue `$issue 'labels'") `
+    Assert-True -Condition $liveSource.Contains("Get-PropertyProjection `$issue 'labels'") `
         -Message 'live Issue 投影必须结构化读取 label'
 }
 

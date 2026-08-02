@@ -4689,7 +4689,7 @@ Assert-NativeSuccess 'Issue #138 Git 空白检查'
 Write-Output "ISSUE138_LOCAL_VERIFY_OK scope_hash=$scopeHash paths=$($actual.Count)"
 ```
 
-期望：策略与状态解析合同全部通过；精确 owner marker、label、main/Head/scope/PR 门形成
+期望：CI 脚本合同为 `80/80`；策略与状态解析合同全部通过；精确 owner marker、label、main/Head/scope/PR 门形成
 `blocked-candidate-exhausted / await-owner-decision`，所有漂移均 fail-closed；实际范围精确为十二路径。
 
 ## 外部 AGOS 使用边界

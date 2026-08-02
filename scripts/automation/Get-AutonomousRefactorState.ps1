@@ -131,7 +131,8 @@ function ConvertFrom-StrictPagedObjectOutput {
 function Get-AutonomousIssueTaskKind {
     param(
         [AllowNull()]$Body,
-        [Parameter(Mandatory)][string]$UpstreamSyncTaskMarker
+        [Parameter(Mandatory)][string]$UpstreamSyncTaskMarker,
+        [Parameter(Mandatory)][string]$CandidateExhaustedTaskMarker
     )
 
     if ($Body -isnot [string]) {
@@ -145,17 +146,23 @@ function Get-AutonomousIssueTaskKind {
     if ($matches.Count -eq 0) {
         return 'refactor'
     }
-    if ($matches.Count -ne 1 -or
-        $matches[0].Value -cne $UpstreamSyncTaskMarker) {
+    if ($matches.Count -ne 1) {
+        return 'invalid'
+    }
+    $taskKind = if ($matches[0].Value -ceq $UpstreamSyncTaskMarker) {
+        'upstream-sync'
+    } elseif ($matches[0].Value -ceq $CandidateExhaustedTaskMarker) {
+        'candidate-exhausted'
+    } else {
         return 'invalid'
     }
     $normalizedBody = $Body.Replace("`r`n", "`n").Replace("`r", "`n")
-    $expectedHeader = "<!-- inputcodex:autonomous-refactor-task:v1 -->`n$UpstreamSyncTaskMarker"
+    $expectedHeader = "<!-- inputcodex:autonomous-refactor-task:v1 -->`n$($matches[0].Value)"
     if ($normalizedBody -cne $expectedHeader -and
         -not $normalizedBody.StartsWith("$expectedHeader`n", [StringComparison]::Ordinal)) {
         return 'invalid'
     }
-    return 'upstream-sync'
+    return $taskKind
 }
 
 function Get-AutonomousPrBodyEvidence {
@@ -1001,6 +1008,7 @@ function Invoke-GitRead {
 function Get-LiveSnapshot {
     param(
         [Parameter(Mandatory)][string]$UpstreamSyncTaskMarker,
+        [Parameter(Mandatory)][string]$CandidateExhaustedTaskMarker,
         [Parameter(Mandatory)][System.Array]$RequiredWorkflows
     )
 
@@ -1078,12 +1086,20 @@ function Get-LiveSnapshot {
             foreach ($issue in $issues) {
                 $issueUser = Get-PropertyValue $issue 'user'
                 $issueBody = Get-PropertyValue $issue 'body'
+                $issueLabelsProjection = Get-PropertyProjection $issue 'labels'
+                $issueLabels = $issueLabelsProjection.value
                 if ((Get-PropertyValue $issue 'number') -isnot [long] -or
                     (Get-PropertyValue $issue 'number') -lt 1 -or
                     (Get-PropertyValue $issue 'html_url') -isnot [string] -or
                     (Get-PropertyValue $issueUser 'login') -isnot [string] -or
                     (Get-PropertyValue $issue 'state') -isnot [string] -or
-                    ($null -ne $issueBody -and $issueBody -isnot [string])) {
+                    ($null -ne $issueBody -and $issueBody -isnot [string]) -or
+                    -not $issueLabelsProjection.exists -or
+                    $issueLabels -isnot [System.Array] -or
+                    @($issueLabels | Where-Object {
+                        $_ -isnot [pscustomobject] -or
+                        (Get-PropertyValue $_ 'name') -isnot [string]
+                    }).Count -ne 0) {
                     throw 'gh issue item schema invalid'
                 }
             }
@@ -1094,6 +1110,7 @@ function Get-LiveSnapshot {
                         'inputcodex:autonomous-refactor-(bootstrap|task):v1'
                 } |
                 ForEach-Object {
+                    $issueLabels = (Get-PropertyProjection $_ 'labels').value
                     [pscustomobject][ordered]@{
                         number = Get-PropertyValue $_ 'number'
                         url = Get-PropertyValue $_ 'html_url'
@@ -1101,7 +1118,11 @@ function Get-LiveSnapshot {
                         github_state = Get-PropertyValue $_ 'state'
                         task_kind = Get-AutonomousIssueTaskKind `
                             -Body (Get-PropertyValue $_ 'body') `
-                            -UpstreamSyncTaskMarker $UpstreamSyncTaskMarker
+                            -UpstreamSyncTaskMarker $UpstreamSyncTaskMarker `
+                            -CandidateExhaustedTaskMarker $CandidateExhaustedTaskMarker
+                        labels = [object[]]@($issueLabels | ForEach-Object {
+                            Get-PropertyValue $_ 'name'
+                        })
                         planning_evidence = [pscustomobject][ordered]@{ valid = $false }
                     }
                 })
@@ -1367,6 +1388,7 @@ if (-not [string]::IsNullOrWhiteSpace($SnapshotPath)) {
     try {
         $snapshot = Get-LiveSnapshot `
             -UpstreamSyncTaskMarker ([string](Get-PropertyValue (Get-PropertyValue $policyResult 'upstream_sync') 'task_marker')) `
+            -CandidateExhaustedTaskMarker ([string](Get-PropertyValue (Get-PropertyValue $policyResult 'candidate_exhaustion') 'task_marker')) `
             -RequiredWorkflows $requiredWorkflows
     } catch {
         Write-Result -ExitCode 11 -Value ([pscustomobject][ordered]@{
@@ -1484,10 +1506,13 @@ if ($activeIssues.Count -eq 1) {
     if (-not $activeTaskKindProjection.exists) {
         $activeTaskKind = 'refactor'
     } elseif ($activeTaskKind -isnot [string] -or
-        $activeTaskKind -cnotin @('refactor', 'upstream-sync')) {
+        $activeTaskKind -cnotin @('refactor', 'upstream-sync', 'candidate-exhausted')) {
         $reasonCodes.Add('INVALID_TASK_KIND') | Out-Null
     }
 }
+$candidateExhaustionPolicy = Get-PropertyValue $policyResult 'candidate_exhaustion'
+$isCandidateExhaustedTask = $activeIssues.Count -eq 1 -and
+    $activeTaskKind -ceq (Get-PropertyValue $candidateExhaustionPolicy 'task_kind')
 
 if ($activeWriterCount -isnot [long] -or $activeWriterCount -lt 0) {
     Write-Result -ExitCode 11 -Value ([pscustomobject][ordered]@{
@@ -1570,6 +1595,32 @@ if ((Get-PropertyValue $snapshot 'github_available') -eq $true -and
     (Get-PropertyValue $snapshot 'worktree_clean') -ne $true) {
     $reasonCodes.Add('ORPHANED_DIRTY_WORKTREE') | Out-Null
 }
+if ($isCandidateExhaustedTask) {
+    $candidateLabelsProjection = Get-PropertyProjection $activeIssues[0] 'labels'
+    $candidateLabels = $candidateLabelsProjection.value
+    $requiredCandidateLabel = Get-PropertyValue $candidateExhaustionPolicy 'required_label'
+    if (-not $candidateLabelsProjection.exists -or
+        $candidateLabels -isnot [System.Array] -or
+        @($candidateLabels | Where-Object { $_ -isnot [string] }).Count -ne 0 -or
+        @($candidateLabels | Where-Object { $_ -ceq $requiredCandidateLabel }).Count -ne 1) {
+        $reasonCodes.Add('CANDIDATE_EXHAUSTED_LABEL_INVALID') | Out-Null
+    }
+
+    $emptyScopeHash = 'sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b'
+    if ($branchValue -cne 'main' -or
+        $worktreeClean -ne $true -or
+        (Get-PropertyValue $snapshot 'worktree_head') -cne (Get-PropertyValue $snapshot 'observed_origin_main') -or
+        (Get-PropertyValue $snapshot 'worktree_head') -cne (Get-PropertyValue $snapshot 'observed_remote_main') -or
+        (Get-PropertyValue $snapshot 'worktree_head') -cne (Get-PropertyValue $snapshot 'expected_base') -or
+        $actualScopeCount -ne 0L -or
+        $actualScopeHash -cne $emptyScopeHash -or
+        $releaseAudit -cne 'current') {
+        $reasonCodes.Add('CANDIDATE_EXHAUSTED_REPOSITORY_STATE_INVALID') | Out-Null
+    }
+    if ($activePrs.Count -ne 0 -or $linkedMergedPrs.Count -ne 0) {
+        $reasonCodes.Add('CANDIDATE_EXHAUSTED_DELIVERY_PRESENT') | Out-Null
+    }
+}
 
 $externalReasons = [System.Collections.Generic.List[string]]::new()
 if ((Get-PropertyValue $snapshot 'github_available') -ne $true) {
@@ -1611,6 +1662,10 @@ if ($hardStopReasons.Count -ne 0) {
     $state = 'blocked-external-retry'
     $nextAction = 'retry-external'
     $allReasons = @($externalReasons)
+} elseif ($isCandidateExhaustedTask) {
+    $state = Get-PropertyValue $candidateExhaustionPolicy 'state'
+    $nextAction = Get-PropertyValue $candidateExhaustionPolicy 'next_action'
+    $allReasons = @()
 } elseif ($activeIssues.Count -eq 1 -and (Get-PropertyValue $snapshot 'worktree_clean') -ne $true) {
     $state = 'active-worktree-execution'
     $nextAction = 'resume-worktree'

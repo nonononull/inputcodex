@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-- state: POLICY_AND_TERMINAL_RED
+- state: LOCAL_GREEN_PENDING_DELIVERY
 - tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/138
 - approved_decision_ref: https://github.com/nonononull/inputcodex/issues/137#issuecomment-5157787716
 - baseline_ref: origin/main@da035b3a6e8ddab9b7c6948ef115ed8b561aa1f4
@@ -33,12 +33,15 @@
 - 规划门为 CI 合同 `76/76`、仓库政策零违规、Release Audit current、7/7 路径与 Git 空白检查通过。
 - RED 保留 76 条既有合同通过，并精确失败 5 项：candidate exhaustion 策略未验证、hard stop 未要求、
   正确 snapshot 无专用终态、required label 无专用 reason、task-kind helper 无新 marker 参数。
+- GREEN 后完整 CI 脚本合同为 `80/80`，策略验证通过，规范化策略哈希为
+  `sha256:c907410a535020e9276fd8de5f448fca38a91ebd84aa26e8768a51818f300d53`。
+- 合法 terminal snapshot 返回 `blocked-candidate-exhausted / await-owner-decision`；label、main、clean、
+  三方 Head、零 scope、Release Audit、活动或已交付 PR 均有 fail-closed 负例。
+- 首次真实 live 预检暴露 label 数组被 PowerShell 函数展开；改用属性投影并加入空/单 label 回归后，
+  #138 继续正确返回 `active-worktree-execution / resume-worktree`。
 
 ## 待完成
 
-1. planning checkpoint 与 GitHub Planning Freeze。
-2. policy/marker RED-GREEN。
-3. terminal state RED-GREEN。
-4. 本地门禁与独立 review。
-5. PR、Hosted CI、精确 Head Squash 与主干验证。
-6. 真实 live 候选耗尽终态证明。
+1. 十二路径本地门禁与独立 review。
+2. PR、Hosted CI、精确 Head Squash 与主干验证。
+3. 真实 live 候选耗尽终态证明。
