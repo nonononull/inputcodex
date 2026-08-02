@@ -274,7 +274,27 @@ function New-ValidAutonomousRefactorPolicy {
             'ruleset-bypass'
             'candidate-exhausted'
         )
-        first_candidate = 'feature.session-data.token-usage-history'
+        fixed_file_mutation_tranche = [pscustomobject][ordered]@{
+            schema_version = 'inputcodex.fixed-file-mutation-tranche.v1'
+            decision_id = 'gate5-fixed-file-mutation-tranche-v1'
+            owner_decision_ref = 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159072214'
+            retry_resume_ref = 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159471091'
+            standing_authorization_ref = 'https://github.com/nonononull/inputcodex/issues/111'
+            repository_batches_max = 2
+            product_deliveries_max = 1
+            candidate_features = @('feature.foundation-platform.watcher-preference-mutation')
+            expected_source_delta = [pscustomobject][ordered]@{
+                implemented = 2
+                unassessed = -2
+            }
+            terminal = [pscustomobject][ordered]@{
+                owner_issue_ref = 'https://github.com/nonononull/inputcodex/issues/140'
+                reopen_on = @('completed', 'hard-stop')
+                action = 'reopen-owner-decision-issue'
+                state = 'blocked-candidate-exhausted'
+                next_action = 'await-owner-decision'
+            }
+        }
     }
 }
 
@@ -341,6 +361,104 @@ Invoke-ContractTest -Name '合法无人值守重构策略通过并输出规范�
     Assert-Equal -Expected ([string]::Join([char]10, @('pull_request', 'push'))) `
         -Actual ([string]::Join([char]10, @($result.Json.required_workflows[0].events))) `
         -Message '策略输出必须投影 CI 的 PR/push 事件集合'
+    Assert-Equal -Expected 'inputcodex.fixed-file-mutation-tranche.v1' `
+        -Actual $result.Json.fixed_file_mutation_tranche.schema_version `
+        -Message '策略输出必须投影版本化 fixed-file mutation tranche'
+    Assert-Equal -Expected 'feature.foundation-platform.watcher-preference-mutation' `
+        -Actual $result.Json.fixed_file_mutation_tranche.candidate_features[0] `
+        -Message 'tranche 只能投影 Watcher preference mutation'
+    Assert-Equal -Expected 2 -Actual $result.Json.fixed_file_mutation_tranche.repository_batches_max `
+        -Message 'tranche 必须投影两批上限'
+    Assert-Equal -Expected 1 -Actual $result.Json.fixed_file_mutation_tranche.product_deliveries_max `
+        -Message 'tranche 必须投影单产品交付上限'
+}
+
+Invoke-ContractTest -Name '固定文件 mutation tranche 生产策略真实变异必须 fail closed' -Body {
+    $productionPolicy = [System.IO.File]::ReadAllText(
+        $autonomousPolicyPath,
+        [Text.UTF8Encoding]::new($false)
+    ) | ConvertFrom-Json -Depth 100
+
+    foreach ($case in @(
+        'schema',
+        'decision',
+        'owner',
+        'batch-cap',
+        'delivery-cap',
+        'candidate',
+        'candidate-count',
+        'implemented-delta',
+        'unassessed-delta',
+        'terminal-issue',
+        'terminal-trigger',
+        'terminal-action',
+        'extra-field'
+    )) {
+        $policy = Copy-AutonomousRefactorPolicy $productionPolicy
+        switch ($case) {
+            'schema' { $policy.fixed_file_mutation_tranche.schema_version = 'inputcodex.fixed-file-mutation-tranche.v2' }
+            'decision' { $policy.fixed_file_mutation_tranche.decision_id = 'other-decision' }
+            'owner' { $policy.fixed_file_mutation_tranche.owner_decision_ref = 'https://github.com/nonononull/inputcodex/issues/140' }
+            'batch-cap' { $policy.fixed_file_mutation_tranche.repository_batches_max = 3 }
+            'delivery-cap' { $policy.fixed_file_mutation_tranche.product_deliveries_max = 2 }
+            'candidate' { $policy.fixed_file_mutation_tranche.candidate_features[0] = 'feature.session-data.token-usage-history' }
+            'candidate-count' {
+                $policy.fixed_file_mutation_tranche.candidate_features = @(
+                    $policy.fixed_file_mutation_tranche.candidate_features + 'feature.foundation-platform.other-mutation'
+                )
+            }
+            'implemented-delta' { $policy.fixed_file_mutation_tranche.expected_source_delta.implemented = 1 }
+            'unassessed-delta' { $policy.fixed_file_mutation_tranche.expected_source_delta.unassessed = -1 }
+            'terminal-issue' { $policy.fixed_file_mutation_tranche.terminal.owner_issue_ref = 'https://github.com/nonononull/inputcodex/issues/141' }
+            'terminal-trigger' { $policy.fixed_file_mutation_tranche.terminal.reopen_on = @('completed') }
+            'terminal-action' { $policy.fixed_file_mutation_tranche.terminal.action = 'create-new-owner-issue' }
+            'extra-field' {
+                $policy.fixed_file_mutation_tranche | Add-Member -NotePropertyName fallback_candidate -NotePropertyValue 'forbidden'
+            }
+        }
+
+        Assert-AutonomousPolicyFailure `
+            -Result (Invoke-AutonomousPolicyCase -Name "fixed-file-tranche-$case" -Policy $policy) `
+            -ExpectedCode 'FIXED_FILE_MUTATION_TRANCHE'
+    }
+
+    $legacy = Copy-AutonomousRefactorPolicy $productionPolicy
+    $legacy | Add-Member -NotePropertyName first_candidate -NotePropertyValue 'feature.session-data.token-usage-history'
+    Assert-AutonomousPolicyFailure `
+        -Result (Invoke-AutonomousPolicyCase -Name 'legacy-first-candidate' -Policy $legacy) `
+        -ExpectedCode 'LEGACY_FIRST_CANDIDATE'
+}
+
+Invoke-ContractTest -Name '固定文件 mutation tranche 生产 helper 真实变异必须 fail closed' -Body {
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyValue')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyProjection')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-ExactStringSet')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-FixedFileMutationTrancheProjection')
+
+    $productionPolicy = [System.IO.File]::ReadAllText(
+        $autonomousPolicyPath,
+        [Text.UTF8Encoding]::new($false)
+    ) | ConvertFrom-Json -Depth 100
+    $valid = Get-FixedFileMutationTrancheProjection $productionPolicy.fixed_file_mutation_tranche
+    Assert-Equal -Expected $true -Actual $valid.valid -Message '生产 tranche 必须通过生产 helper'
+    Assert-Equal -Expected 'feature.foundation-platform.watcher-preference-mutation' `
+        -Actual $valid.candidate -Message '生产 helper 必须只返回固定 Watcher mutation 候选'
+
+    foreach ($case in @('candidate', 'batch-cap', 'source-delta', 'terminal-trigger', 'extra-field')) {
+        $policy = Copy-AutonomousRefactorPolicy $productionPolicy
+        switch ($case) {
+            'candidate' { $policy.fixed_file_mutation_tranche.candidate_features[0] = 'feature.session-data.token-usage-history' }
+            'batch-cap' { $policy.fixed_file_mutation_tranche.repository_batches_max = 3 }
+            'source-delta' { $policy.fixed_file_mutation_tranche.expected_source_delta.unassessed = -1 }
+            'terminal-trigger' { $policy.fixed_file_mutation_tranche.terminal.reopen_on = @('hard-stop', 'completed') }
+            'extra-field' {
+                $policy.fixed_file_mutation_tranche.terminal | Add-Member -NotePropertyName fallback -NotePropertyValue $true
+            }
+        }
+        $projection = Get-FixedFileMutationTrancheProjection $policy.fixed_file_mutation_tranche
+        Assert-Equal -Expected $false -Actual $projection.valid `
+            -Message "生产 helper 必须拒绝真实 tranche 变异：$case"
+    }
 }
 
 Invoke-ContractTest -Name '拒绝缺失的无人值守重构策略文件' -Body {
@@ -761,7 +879,16 @@ Invoke-ContractTest -Name '无人值守空闲状态选择下一候选' -Body {
     $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
     $snapshot.branch = 'main'
     $result = Invoke-AutonomousStateCase -Name 'idle' -Snapshot $snapshot
-    Assert-AutonomousState -Result $result -ExpectedState 'idle-select-candidate' -ExpectedAction 'select-candidate'
+    Assert-AutonomousState `
+        -Result $result `
+        -ExpectedState 'idle-select-candidate' `
+        -ExpectedAction 'select-fixed-file-mutation-candidate'
+    Assert-Equal -Expected 'feature.foundation-platform.watcher-preference-mutation' `
+        -Actual $result.Json.selected_candidate `
+        -Message '空闲状态只能选择 tranche 中的 Watcher preference mutation'
+    Assert-Equal -Expected 'https://github.com/nonononull/inputcodex/issues/140' `
+        -Actual $result.Json.fixed_file_mutation_tranche.terminal.owner_issue_ref `
+        -Message 'live 状态必须投影完成或硬停止后重开的 owner Issue'
 }
 
 Invoke-ContractTest -Name '无人值守单一活动 Issue 恢复规划' -Body {
@@ -1317,7 +1444,10 @@ Invoke-ContractTest -Name '无人值守安全忽略非 owner marker Issue 与 PR
         head_owner_login = 'external-user'
     })
     $result = Invoke-AutonomousStateCase -Name 'untrusted-marker' -Snapshot $snapshot
-    Assert-AutonomousState -Result $result -ExpectedState 'idle-select-candidate' -ExpectedAction 'select-candidate'
+    Assert-AutonomousState `
+        -Result $result `
+        -ExpectedState 'idle-select-candidate' `
+        -ExpectedAction 'select-fixed-file-mutation-candidate'
     Assert-Equal -Expected 1 -Actual $result.Json.ignored_untrusted_issue_markers -Message '非 owner Issue marker 必须被计数并忽略'
     Assert-Equal -Expected 1 -Actual $result.Json.ignored_untrusted_pr_markers -Message '非 owner PR marker 必须被计数并忽略'
 }

@@ -104,5 +104,30 @@
     "ruleset-bypass",
     "candidate-exhausted"
   ],
-  "first_candidate": "feature.session-data.token-usage-history"
+  "fixed_file_mutation_tranche": {
+    "schema_version": "inputcodex.fixed-file-mutation-tranche.v1",
+    "decision_id": "gate5-fixed-file-mutation-tranche-v1",
+    "owner_decision_ref": "https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159072214",
+    "retry_resume_ref": "https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159471091",
+    "standing_authorization_ref": "https://github.com/nonononull/inputcodex/issues/111",
+    "repository_batches_max": 2,
+    "product_deliveries_max": 1,
+    "candidate_features": [
+      "feature.foundation-platform.watcher-preference-mutation"
+    ],
+    "expected_source_delta": {
+      "implemented": 2,
+      "unassessed": -2
+    },
+    "terminal": {
+      "owner_issue_ref": "https://github.com/nonononull/inputcodex/issues/140",
+      "reopen_on": [
+        "completed",
+        "hard-stop"
+      ],
+      "action": "reopen-owner-decision-issue",
+      "state": "blocked-candidate-exhausted",
+      "next_action": "await-owner-decision"
+    }
+  }
 }

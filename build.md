@@ -4692,6 +4692,172 @@ Write-Output "ISSUE138_LOCAL_VERIFY_OK scope_hash=$scopeHash paths=$($actual.Cou
 期望：CI 脚本合同为 `80/80`；策略与状态解析合同全部通过；精确 owner marker、label、main/Head/scope/PR 门形成
 `blocked-candidate-exhausted / await-owner-decision`，所有漂移均 fail-closed；实际范围精确为十二路径。
 
+## Issue #141：固定文件 mutation tranche 治理 bootstrap 本地轻量验证
+
+本任务只修改机器策略、PowerShell 状态解析与治理文档，不编译 Rust Workspace。完整 Windows/macOS
+验证继续交给标准 GitHub-hosted runners；本地同时验证真实 live 状态和 synthetic snapshot 状态。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+function Assert-NativeSuccess {
+  param([Parameter(Mandatory)][string]$Label)
+  if ($LASTEXITCODE -ne 0) { throw "$Label 失败：$LASTEXITCODE" }
+}
+
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+$branch = git branch --show-current
+Assert-NativeSuccess 'Issue #141 分支读取'
+if ($branch -cne 'codex/issue-141-gate-5-fixed-file-mutation-bootstrap') {
+  throw "Issue #141 分支错误：$branch"
+}
+
+foreach ($scriptPath in @(
+  'scripts/automation/Get-AutonomousRefactorState.ps1',
+  'scripts/ci/Test-CiScripts.ps1',
+  'scripts/ci/Verify-AutonomousRefactorPolicy.ps1'
+)) {
+  $tokens = $null
+  $errors = $null
+  [void][Management.Automation.Language.Parser]::ParseFile(
+    (Resolve-Path -LiteralPath $scriptPath).Path,
+    [ref]$tokens,
+    [ref]$errors
+  )
+  if (@($errors).Count -ne 0) { throw "$scriptPath AST 失败：$($errors.Message -join '；')" }
+}
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+Assert-NativeSuccess 'Issue #141 CI 合同'
+
+$policyOutput = @(
+  pwsh -NoProfile -File scripts/ci/Verify-AutonomousRefactorPolicy.ps1 `
+    -RepositoryRoot . -PolicyPath .github/autonomous-refactor-policy.json
+)
+Assert-NativeSuccess 'Issue #141 自治策略'
+$policy = ($policyOutput -join [Environment]::NewLine) | ConvertFrom-Json -Depth 100
+if ($policy.policy_sha256 -cne 'sha256:e19914a62c09e212ab47dfb350d99af2b3f05a5de3467f82b29dc8dec57a843a' -or
+    $policy.fixed_file_mutation_tranche.candidate_features.Count -ne 1 -or
+    $policy.fixed_file_mutation_tranche.candidate_features[0] -cne 'feature.foundation-platform.watcher-preference-mutation') {
+  throw 'Issue #141 自治策略投影漂移'
+}
+
+$liveOutput = @(
+  pwsh -NoProfile -File scripts/automation/Get-AutonomousRefactorState.ps1 `
+    -RepositoryRoot . -PolicyPath .github/autonomous-refactor-policy.json -ReportOnly
+)
+Assert-NativeSuccess 'Issue #141 live 状态'
+$live = ($liveOutput -join [Environment]::NewLine) | ConvertFrom-Json -Depth 100
+if ($live.ok -ne $true -or $live.active_issue.number -ne 141 -or
+    @($live.reason_codes).Count -ne 0 -or
+    $live.fixed_file_mutation_tranche.valid -ne $true -or
+    $live.fixed_file_mutation_tranche.repository_batches_max -ne 2 -or
+    $live.fixed_file_mutation_tranche.product_deliveries_max -ne 1 -or
+    $live.fixed_file_mutation_tranche.terminal.owner_issue_ref -cne 'https://github.com/nonononull/inputcodex/issues/140') {
+  throw 'Issue #141 live 状态漂移'
+}
+
+$snapshotPath = Join-Path ([IO.Path]::GetTempPath()) ("inputcodex-issue-141-{0}.json" -f [guid]::NewGuid().ToString('N'))
+$snapshot = [ordered]@{
+  schema_version = 'inputcodex.autonomous-refactor-state-snapshot.v1'
+  github_available = $true
+  paseo_available = $true
+  release_audit = 'current'
+  observed_origin_main = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+  observed_remote_main = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+  expected_base = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+  worktree_head = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+  branch = 'main'
+  worktree_clean = $true
+  active_writer_count = 0
+  repository_settings = [ordered]@{
+    allow_auto_merge = $false
+    allow_squash_merge = $true
+    allow_merge_commit = $false
+    allow_rebase_merge = $false
+    default_branch = 'main'
+  }
+  actual_scope_count = 0
+  actual_scope_hash = 'sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b'
+  active_issues = @()
+  active_prs = @()
+  merged_prs = @()
+}
+try {
+  [IO.File]::WriteAllText(
+    $snapshotPath,
+    ($snapshot | ConvertTo-Json -Depth 30),
+    [Text.UTF8Encoding]::new($false)
+  )
+  $snapshotOutput = @(
+    pwsh -NoProfile -File scripts/automation/Get-AutonomousRefactorState.ps1 `
+      -RepositoryRoot . -PolicyPath .github/autonomous-refactor-policy.json `
+      -SnapshotPath $snapshotPath -ReportOnly
+  )
+  Assert-NativeSuccess 'Issue #141 snapshot 状态'
+  $snapshotState = ($snapshotOutput -join [Environment]::NewLine) | ConvertFrom-Json -Depth 100
+  if ($snapshotState.state -cne 'idle-select-candidate' -or
+      $snapshotState.next_action -cne 'select-fixed-file-mutation-candidate' -or
+      $snapshotState.selected_candidate -cne 'feature.foundation-platform.watcher-preference-mutation' -or
+      @($snapshotState.reason_codes).Count -ne 0) {
+    throw 'Issue #141 snapshot 候选状态漂移'
+  }
+} finally {
+  if (Test-Path -LiteralPath $snapshotPath) { Remove-Item -LiteralPath $snapshotPath -Force }
+}
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #141 仓库政策'
+
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #141 Release Audit'
+
+$expected = [string[]]@(
+  '.github/autonomous-refactor-policy.json',
+  'build.md',
+  'docs/plans/2026-08-03-issue-141-gate-5-fixed-file-mutation-bootstrap.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-08-03-issue-141-gate-5-fixed-file-mutation-bootstrap.md',
+  'docs/reports/issue-141-gate-5-fixed-file-mutation-bootstrap.md',
+  'docs/workflows/2026-08-03-issue-141-gate-5-fixed-file-mutation-bootstrap-runtime.md',
+  'err.md',
+  'scripts/automation/Get-AutonomousRefactorState.ps1',
+  'scripts/ci/Test-CiScripts.ps1',
+  'scripts/ci/Verify-AutonomousRefactorPolicy.ps1'
+)
+$scope = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+foreach ($path in $expected) {
+  if (-not $scope.Add($path)) { throw "Issue #141 重复路径：$path" }
+}
+$payload = [string]::Join("`n", [string[]]$scope) + "`n"
+$scopeHash = 'sha256:' + [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData([Text.UTF8Encoding]::new($false).GetBytes($payload))
+).ToLowerInvariant()
+if ($scope.Count -ne 11 -or $scopeHash -cne 'sha256:9b0c24a9844ff02143624843e0762d6f0ed5cc84c618d8ff1b3bea16c76bbce3') {
+  throw "Issue #141 范围漂移：count=$($scope.Count) hash=$scopeHash"
+}
+
+$actual = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+@(
+  git -c core.quotePath=false diff --no-renames --name-only origin/main...HEAD
+  git -c core.quotePath=false diff --cached --no-renames --name-only
+  git -c core.quotePath=false diff --no-renames --name-only
+  git -c core.quotePath=false ls-files --others --exclude-standard
+) | Where-Object { $_ } | ForEach-Object { [void]$actual.Add($_) }
+if (-not [Linq.Enumerable]::SequenceEqual([string[]]$scope, [string[]]$actual, [StringComparer]::Ordinal)) {
+  throw "Issue #141 实际路径漂移：$([string]::Join(', ', [string[]]$actual))"
+}
+
+git diff --check origin/main
+Assert-NativeSuccess 'Issue #141 Git 空白检查'
+
+Write-Output "ISSUE141_LOCAL_VERIFY_OK scope_hash=$scopeHash paths=$($actual.Count) policy_hash=$($policy.policy_sha256)"
+```
+
+期望：CI 脚本合同为 `82/82`；策略真实变异、生产 helper 真实变异、live/snapshot 状态、仓库政策与
+Release Audit 全部通过；实际范围精确为十一路径。本批不修改产品、Cargo 或 Parity，产品计数保持不变。
+
 ## 外部 AGOS 使用边界
 
 Issue `#17` 曾以 report-only 运行 AGOS 默认入口，结果为 `needs-input/unregistered`；已按项目规则记录并绕过。AGOS 不属于环境要求或合并门禁；不得在本规划 PR 中修改、修复或优化其 Registry、脚本、规则、Workflow 或 Vault。
