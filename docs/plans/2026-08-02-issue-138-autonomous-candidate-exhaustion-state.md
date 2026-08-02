@@ -37,15 +37,15 @@
 
 ## Task 2：策略与 marker RED/GREEN
 
-- [ ] RED：有效策略缺少 candidate exhaustion 合同时失败。
-- [ ] RED：未知、重复、大小写/版本漂移、代码块和后置 typed marker 均失败。
+- [x] RED：有效策略缺少 candidate exhaustion 合同时失败。
+- [x] RED：未知、重复、大小写/版本漂移、代码块和后置 typed marker 均失败。
 - [ ] GREEN：策略、验证器和 task-kind parser 只接受唯一精确合同。
 - [ ] 建立 policy-marker-green checkpoint。
 
 ## Task 3：状态终态 RED/GREEN
 
-- [ ] RED：候选耗尽 Issue 当前错误返回 `active-issue-planning / resume-issue`。
-- [ ] 覆盖正确终态、required label 缺失、非 main、脏树、Head 漂移、非零 scope、活动或已交付 PR。
+- [x] RED：候选耗尽 snapshot 当前因未知 task kind 落入普通 `blocked-hard-stop`，无法返回专用终态。
+- [x] 覆盖正确终态、required label 缺失、非 main、脏树、Head 漂移、非零 scope、活动或已交付 PR。
 - [ ] GREEN：正确状态返回 `blocked-candidate-exhausted / await-owner-decision`，所有负例 fail-closed。
 - [ ] 保持普通 refactor、upstream-sync、外部重试、PR 与 post-merge 语义不变。
 - [ ] 建立 state-green checkpoint。

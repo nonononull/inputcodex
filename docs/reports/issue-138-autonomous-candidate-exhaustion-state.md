@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-- state: PLANNING_VALIDATED_CHECKPOINT_PENDING
+- state: POLICY_AND_TERMINAL_RED
 - tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/138
 - approved_decision_ref: https://github.com/nonononull/inputcodex/issues/137#issuecomment-5157787716
 - baseline_ref: origin/main@da035b3a6e8ddab9b7c6948ef115ed8b561aa1f4
@@ -31,6 +31,8 @@
 - AGOS 为 unregistered/needs-input，项目原生入口 ready，已按规则绕过。
 - 规划与候选范围均由 Ordinal/LF/UTF-8 无 BOM 算法复算。
 - 规划门为 CI 合同 `76/76`、仓库政策零违规、Release Audit current、7/7 路径与 Git 空白检查通过。
+- RED 保留 76 条既有合同通过，并精确失败 5 项：candidate exhaustion 策略未验证、hard stop 未要求、
+  正确 snapshot 无专用终态、required label 无专用 reason、task-kind helper 无新 marker 参数。
 
 ## 待完成
 

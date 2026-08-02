@@ -247,6 +247,13 @@ function New-ValidAutonomousRefactorPolicy {
             required_workflow = 'CI'
             required_job = 'release-audit'
         }
+        candidate_exhaustion = [pscustomobject][ordered]@{
+            task_kind = 'candidate-exhausted'
+            task_marker = '<!-- inputcodex:autonomous-refactor-task-kind:candidate-exhausted:v1 -->'
+            required_label = 'status:needs-owner-decision'
+            state = 'blocked-candidate-exhausted'
+            next_action = 'await-owner-decision'
+        }
         retry = [pscustomobject][ordered]@{
             max_attempts = 3
             max_iteration_minutes = 180
@@ -265,6 +272,7 @@ function New-ValidAutonomousRefactorPolicy {
             'force-push-main'
             'delete-main'
             'ruleset-bypass'
+            'candidate-exhausted'
         )
         first_candidate = 'feature.session-data.token-usage-history'
     }
@@ -473,6 +481,29 @@ Invoke-ContractTest -Name '拒绝漂移的 upstream-sync stale 例外' -Body {
         -ExpectedCode 'UPSTREAM_SYNC_POLICY'
 }
 
+Invoke-ContractTest -Name '拒绝漂移的候选耗尽终态策略' -Body {
+    $cases = @(
+        [pscustomobject]@{ Name = 'kind'; Property = 'task_kind'; Value = 'refactor' }
+        [pscustomobject]@{ Name = 'marker'; Property = 'task_marker'; Value = '<!-- inputcodex:autonomous-refactor-task-kind:candidate-exhausted:v2 -->' }
+        [pscustomobject]@{ Name = 'label'; Property = 'required_label'; Value = 'status:blocked' }
+        [pscustomobject]@{ Name = 'state'; Property = 'state'; Value = 'blocked-hard-stop' }
+        [pscustomobject]@{ Name = 'action'; Property = 'next_action'; Value = 'stop' }
+    )
+    foreach ($case in $cases) {
+        $policy = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
+        $policy.candidate_exhaustion.($case.Property) = $case.Value
+        Assert-AutonomousPolicyFailure `
+            -Result (Invoke-AutonomousPolicyCase -Name "candidate-exhaustion-$($case.Name)" -Policy $policy) `
+            -ExpectedCode 'CANDIDATE_EXHAUSTION_POLICY'
+    }
+
+    $arrayValue = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
+    $arrayValue.candidate_exhaustion.task_kind = [object[]]@('candidate-exhausted')
+    Assert-AutonomousPolicyFailure `
+        -Result (Invoke-AutonomousPolicyCase -Name 'candidate-exhaustion-array' -Policy $arrayValue) `
+        -ExpectedCode 'CANDIDATE_EXHAUSTION_POLICY'
+}
+
 Invoke-ContractTest -Name '拒绝非 Gemini UI owner 或 UI fallback' -Body {
     $policy = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
     $policy.ui.owner = 'Codex'
@@ -484,6 +515,14 @@ Invoke-ContractTest -Name '拒绝缺失永久主干保护的硬停止集合' -Bo
     $policy = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
     $policy.hard_stops = @($policy.hard_stops | Where-Object { $_ -notin @('force-push-main', 'delete-main', 'ruleset-bypass') })
     Assert-AutonomousPolicyFailure -Result (Invoke-AutonomousPolicyCase -Name 'hard-stops' -Policy $policy) -ExpectedCode 'HARD_STOPS'
+}
+
+Invoke-ContractTest -Name '拒绝缺失候选耗尽硬停止' -Body {
+    $policy = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
+    $policy.hard_stops = @($policy.hard_stops | Where-Object { $_ -cne 'candidate-exhausted' })
+    Assert-AutonomousPolicyFailure `
+        -Result (Invoke-AutonomousPolicyCase -Name 'candidate-exhaustion-hard-stop' -Policy $policy) `
+        -ExpectedCode 'HARD_STOPS'
 }
 
 function New-ValidAutonomousStateSnapshot {
@@ -707,50 +746,137 @@ Invoke-ContractTest -Name '无人值守单一活动 Issue 恢复规划' -Body {
     Assert-Equal -Expected 111 -Actual $result.Json.active_issue.number -Message '活动 Issue 编号必须保留'
 }
 
-Invoke-ContractTest -Name '无人值守 live 仅接受精确 upstream-sync typed marker' -Body {
+Invoke-ContractTest -Name '无人值守候选耗尽进入所有者决策终态' -Body {
+    $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
+    $snapshot.branch = 'main'
+    $snapshot.actual_scope_count = 0L
+    $snapshot.actual_scope_hash = 'sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b'
+    $snapshot.active_issues = @([pscustomobject][ordered]@{
+        number = 900L
+        url = 'https://github.com/nonononull/inputcodex/issues/900'
+        author_login = 'nonononull'
+        task_kind = 'candidate-exhausted'
+        labels = [object[]]@('gate:5', 'status:needs-owner-decision')
+    })
+
+    $result = Invoke-AutonomousStateCase -Name 'candidate-exhausted' -Snapshot $snapshot
+    Assert-AutonomousState -Result $result `
+        -ExpectedState 'blocked-candidate-exhausted' `
+        -ExpectedAction 'await-owner-decision'
+    Assert-Equal -Expected 900 -Actual $result.Json.active_issue.number -Message '候选耗尽 Issue 必须保留'
+    Assert-Equal -Expected 0 -Actual @($result.Json.reason_codes).Count -Message '合法候选耗尽终态不得携带硬停止原因'
+}
+
+Invoke-ContractTest -Name '无人值守候选耗尽漂移必须 fail closed' -Body {
+    function New-CandidateExhaustedSnapshot {
+        $value = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
+        $value.branch = 'main'
+        $value.actual_scope_count = 0L
+        $value.actual_scope_hash = 'sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b'
+        $value.active_issues = @([pscustomobject][ordered]@{
+            number = 900L
+            url = 'https://github.com/nonononull/inputcodex/issues/900'
+            author_login = 'nonononull'
+            task_kind = 'candidate-exhausted'
+            labels = [object[]]@('gate:5', 'status:needs-owner-decision')
+        })
+        return $value
+    }
+
+    $missingLabel = New-CandidateExhaustedSnapshot
+    $missingLabel.active_issues[0].labels = [object[]]@('gate:5')
+    $missingLabelResult = Invoke-AutonomousStateCase -Name 'candidate-exhausted-label' -Snapshot $missingLabel
+    Assert-AutonomousState -Result $missingLabelResult -ExpectedState 'blocked-hard-stop' -ExpectedAction 'stop'
+    Assert-Contains -Collection @($missingLabelResult.Json.reason_codes) `
+        -Expected 'CANDIDATE_EXHAUSTED_LABEL_INVALID' `
+        -Message 'required label 缺失必须稳定阻断'
+
+    foreach ($case in @('branch', 'dirty', 'head', 'scope')) {
+        $snapshot = New-CandidateExhaustedSnapshot
+        switch ($case) {
+            'branch' { $snapshot.branch = 'codex/issue-900-invalid' }
+            'dirty' { $snapshot.worktree_clean = $false }
+            'head' { $snapshot.worktree_head = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' }
+            'scope' {
+                $snapshot.actual_scope_count = 1L
+                $snapshot.actual_scope_hash = 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+            }
+        }
+        $result = Invoke-AutonomousStateCase -Name "candidate-exhausted-$case" -Snapshot $snapshot
+        Assert-AutonomousState -Result $result -ExpectedState 'blocked-hard-stop' -ExpectedAction 'stop'
+        Assert-Contains -Collection @($result.Json.reason_codes) `
+            -Expected 'CANDIDATE_EXHAUSTED_REPOSITORY_STATE_INVALID' `
+            -Message "候选耗尽仓库漂移必须稳定阻断：$case"
+    }
+
+    $delivery = New-CandidateExhaustedSnapshot
+    $delivery.active_prs = @([pscustomobject][ordered]@{
+        number = 901L
+        url = 'https://github.com/nonononull/inputcodex/pull/901'
+        base_ref = 'main'
+        head_oid = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+        author_login = 'nonononull'
+        head_owner_login = 'nonononull'
+    })
+    $deliveryResult = Invoke-AutonomousStateCase -Name 'candidate-exhausted-delivery' -Snapshot $delivery
+    Assert-AutonomousState -Result $deliveryResult -ExpectedState 'blocked-hard-stop' -ExpectedAction 'stop'
+    Assert-Contains -Collection @($deliveryResult.Json.reason_codes) `
+        -Expected 'CANDIDATE_EXHAUSTED_DELIVERY_PRESENT' `
+        -Message '候选耗尽 Issue 不得绑定 PR'
+}
+
+Invoke-ContractTest -Name '无人值守 live 仅接受精确 typed marker' -Body {
     Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-AutonomousIssueTaskKind')
-    $marker = '<!-- inputcodex:autonomous-refactor-task-kind:upstream-sync:v1 -->'
+    $upstreamMarker = '<!-- inputcodex:autonomous-refactor-task-kind:upstream-sync:v1 -->'
+    $candidateMarker = '<!-- inputcodex:autonomous-refactor-task-kind:candidate-exhausted:v1 -->'
     $codeBlockBody = [string]::Join("`n", @(
         '<!-- inputcodex:autonomous-refactor-task:v1 -->',
         '```md',
-        $marker,
+        $candidateMarker,
         '```'
     ))
     $lateMarkerBody = [string]::Join("`n", @(
         '<!-- inputcodex:autonomous-refactor-task:v1 -->',
         '正文',
-        $marker
+        $candidateMarker
     ))
 
     Assert-Equal -Expected 'refactor' `
-        -Actual (Get-AutonomousIssueTaskKind -Body '<!-- inputcodex:autonomous-refactor-task:v1 -->' -UpstreamSyncTaskMarker $marker) `
+        -Actual (Get-AutonomousIssueTaskKind -Body '<!-- inputcodex:autonomous-refactor-task:v1 -->' -UpstreamSyncTaskMarker $upstreamMarker -CandidateExhaustedTaskMarker $candidateMarker) `
         -Message '普通自治 Issue 不得得到 upstream-sync task kind'
     Assert-Equal -Expected 'upstream-sync' `
-        -Actual (Get-AutonomousIssueTaskKind -Body "<!-- inputcodex:autonomous-refactor-task:v1 -->`n$marker" -UpstreamSyncTaskMarker $marker) `
-        -Message '精确 typed marker 必须得到 upstream-sync task kind'
+        -Actual (Get-AutonomousIssueTaskKind -Body "<!-- inputcodex:autonomous-refactor-task:v1 -->`n$upstreamMarker" -UpstreamSyncTaskMarker $upstreamMarker -CandidateExhaustedTaskMarker $candidateMarker) `
+        -Message '精确 upstream-sync marker 必须得到对应 task kind'
+    Assert-Equal -Expected 'candidate-exhausted' `
+        -Actual (Get-AutonomousIssueTaskKind -Body "<!-- inputcodex:autonomous-refactor-task:v1 -->`n$candidateMarker" -UpstreamSyncTaskMarker $upstreamMarker -CandidateExhaustedTaskMarker $candidateMarker) `
+        -Message '精确 candidate-exhausted marker 必须得到对应 task kind'
     Assert-Equal -Expected 'invalid' `
-        -Actual (Get-AutonomousIssueTaskKind -Body '<!-- inputcodex:autonomous-refactor-task-kind:unknown:v1 -->' -UpstreamSyncTaskMarker $marker) `
+        -Actual (Get-AutonomousIssueTaskKind -Body '<!-- inputcodex:autonomous-refactor-task-kind:unknown:v1 -->' -UpstreamSyncTaskMarker $upstreamMarker -CandidateExhaustedTaskMarker $candidateMarker) `
         -Message '未知 typed marker 必须 fail-closed'
     Assert-Equal -Expected 'invalid' `
-        -Actual (Get-AutonomousIssueTaskKind -Body '<!-- inputcodex:autonomous-refactor-task-kind:upstream-sync:v2 -->' -UpstreamSyncTaskMarker $marker) `
+        -Actual (Get-AutonomousIssueTaskKind -Body '<!-- inputcodex:autonomous-refactor-task-kind:candidate-exhausted:v2 -->' -UpstreamSyncTaskMarker $upstreamMarker -CandidateExhaustedTaskMarker $candidateMarker) `
         -Message '未知 marker 版本必须 fail-closed'
     Assert-Equal -Expected 'invalid' `
-        -Actual (Get-AutonomousIssueTaskKind -Body "$marker`n$marker" -UpstreamSyncTaskMarker $marker) `
+        -Actual (Get-AutonomousIssueTaskKind -Body "$candidateMarker`n$candidateMarker" -UpstreamSyncTaskMarker $upstreamMarker -CandidateExhaustedTaskMarker $candidateMarker) `
         -Message '重复 typed marker 必须 fail-closed'
     Assert-Equal -Expected 'invalid' `
         -Actual (Get-AutonomousIssueTaskKind `
             -Body $codeBlockBody `
-            -UpstreamSyncTaskMarker $marker) `
+            -UpstreamSyncTaskMarker $upstreamMarker `
+            -CandidateExhaustedTaskMarker $candidateMarker) `
         -Message 'Markdown 代码块中的 typed marker 必须 fail-closed'
     Assert-Equal -Expected 'invalid' `
         -Actual (Get-AutonomousIssueTaskKind `
             -Body $lateMarkerBody `
-            -UpstreamSyncTaskMarker $marker) `
+            -UpstreamSyncTaskMarker $upstreamMarker `
+            -CandidateExhaustedTaskMarker $candidateMarker) `
         -Message '非顶部 header 的 typed marker 必须 fail-closed'
 
     $liveSource = Get-AutonomousStateFunctionSource -Name 'Get-LiveSnapshot'
     Assert-True -Condition $liveSource.Contains('Get-AutonomousIssueTaskKind') `
         -Message 'live Issue 投影必须消费 typed task kind helper'
+    Assert-True -Condition $liveSource.Contains("Get-PropertyValue `$issue 'labels'") `
+        -Message 'live Issue 投影必须结构化读取 label'
 }
 
 Invoke-ContractTest -Name '无人值守 live Workflow Run 必须绑定强身份与关联 PR' -Body {

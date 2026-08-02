@@ -55,6 +55,9 @@ unsafe、FFI/VFS、网络、进程控制、签名、安装、付费资源、forc
 3. 证明未知、重复、伪装和位置漂移全部 fail-closed。
 4. 建立 policy-marker-green checkpoint。
 
+RED 状态：completed。完整合同保留原有 76 条通过，并稳定得到 5 个新失败面：策略漂移未拒绝、
+候选耗尽 hard stop 缺失、正确终态未分类、required label 无专用 reason，以及 parser 缺少新 marker 参数。
+
 ## Node 3：Terminal State TDD
 
 1. RED：正确候选耗尽 snapshot 当前仍落入 active issue planning。
@@ -62,6 +65,9 @@ unsafe、FFI/VFS、网络、进程控制、签名、安装、付费资源、forc
 3. GREEN：只在全部条件成立时输出 blocked-candidate-exhausted / await-owner-decision。
 4. 重跑现有状态矩阵，证明普通路径不回归。
 5. 建立 terminal-state-green checkpoint。
+
+RED 状态：completed。正确候选耗尽 snapshot 当前落入普通 blocked-hard-stop；label、仓库状态和 delivery
+负例尚无候选耗尽专用 reason code。
 
 ## Node 4：Local Closeout
 
