@@ -4598,6 +4598,100 @@ Write-Output "ISSUE128_LOCAL_VERIFY_OK scope_hash=$scopeHash paths=$($actual.Cou
 目录计数为 `135/45/45/12/11/3/0`；实际范围精确为 24 路径；生产实现只有固定标记的
 `symlink_metadata`，不读取内容、不返回路径、不写入、不控制进程且不新增依赖。
 
+## Issue #138：候选前沿耗尽自治终态本地轻量验证
+
+本任务只修改机器策略、PowerShell 状态解析与治理文档，不编译 Rust Workspace。完整 Windows/macOS
+验证继续交给标准 GitHub-hosted runners。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+function Assert-NativeSuccess {
+  param([Parameter(Mandatory)][string]$Label)
+  if ($LASTEXITCODE -ne 0) { throw "$Label 失败：$LASTEXITCODE" }
+}
+
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+$branch = git branch --show-current
+Assert-NativeSuccess 'Issue #138 分支读取'
+if ($branch -cne 'codex/issue-138-autonomous-candidate-exhaustion-state') {
+  throw "Issue #138 分支错误：$branch"
+}
+
+foreach ($scriptPath in @(
+  'scripts/automation/Get-AutonomousRefactorState.ps1',
+  'scripts/ci/Test-CiScripts.ps1',
+  'scripts/ci/Verify-AutonomousRefactorPolicy.ps1'
+)) {
+  $tokens = $null
+  $errors = $null
+  [void][Management.Automation.Language.Parser]::ParseFile(
+    (Resolve-Path -LiteralPath $scriptPath).Path,
+    [ref]$tokens,
+    [ref]$errors
+  )
+  if (@($errors).Count -ne 0) { throw "$scriptPath AST 失败：$($errors.Message -join '；')" }
+}
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+Assert-NativeSuccess 'Issue #138 CI 合同'
+
+pwsh -NoProfile -File scripts/ci/Verify-AutonomousRefactorPolicy.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #138 自治策略'
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #138 仓库政策'
+
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #138 Release Audit'
+
+$expected = [string[]]@(
+  '.github/autonomous-refactor-policy.json',
+  'AGENTS.md',
+  'build.md',
+  'docs/plans/2026-08-02-issue-138-autonomous-candidate-exhaustion-state.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-08-02-issue-138-autonomous-candidate-exhaustion-state.md',
+  'docs/reports/issue-138-autonomous-candidate-exhaustion-state.md',
+  'docs/workflows/2026-08-02-issue-138-autonomous-candidate-exhaustion-state-runtime.md',
+  'err.md',
+  'scripts/automation/Get-AutonomousRefactorState.ps1',
+  'scripts/ci/Test-CiScripts.ps1',
+  'scripts/ci/Verify-AutonomousRefactorPolicy.ps1'
+)
+$scope = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+foreach ($path in $expected) {
+  if (-not $scope.Add($path)) { throw "Issue #138 重复路径：$path" }
+}
+$payload = [string]::Join("`n", [string[]]$scope) + "`n"
+$scopeHash = 'sha256:' + [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData([Text.UTF8Encoding]::new($false).GetBytes($payload))
+).ToLowerInvariant()
+if ($scope.Count -ne 12 -or $scopeHash -cne 'sha256:aac82afc513192fa9adbe1ed6b85f81c56fa3bd8cd3ea20e718d1e31c794f417') {
+  throw "Issue #138 范围漂移：count=$($scope.Count) hash=$scopeHash"
+}
+
+$actual = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+@(
+  git -c core.quotePath=false diff --no-renames --name-only origin/main...HEAD
+  git -c core.quotePath=false diff --cached --no-renames --name-only
+  git -c core.quotePath=false diff --no-renames --name-only
+  git -c core.quotePath=false ls-files --others --exclude-standard
+) | Where-Object { $_ } | ForEach-Object { [void]$actual.Add($_) }
+if (-not [Linq.Enumerable]::SequenceEqual([string[]]$scope, [string[]]$actual, [StringComparer]::Ordinal)) {
+  throw "Issue #138 实际路径漂移：$([string]::Join(', ', [string[]]$actual))"
+}
+
+git diff --check origin/main
+Assert-NativeSuccess 'Issue #138 Git 空白检查'
+
+Write-Output "ISSUE138_LOCAL_VERIFY_OK scope_hash=$scopeHash paths=$($actual.Count)"
+```
+
+期望：策略与状态解析合同全部通过；精确 owner marker、label、main/Head/scope/PR 门形成
+`blocked-candidate-exhausted / await-owner-decision`，所有漂移均 fail-closed；实际范围精确为十二路径。
+
 ## 外部 AGOS 使用边界
 
 Issue `#17` 曾以 report-only 运行 AGOS 默认入口，结果为 `needs-input/unregistered`；已按项目规则记录并绕过。AGOS 不属于环境要求或合并门禁；不得在本规划 PR 中修改、修复或优化其 Registry、脚本、规则、Workflow 或 Vault。
