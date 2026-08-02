@@ -16,7 +16,7 @@
 - `worktree_ref`: `C:/Users/dashuai/.paseo/worktrees/1takg4n7/issue-132-gate-5-zed-remote-project-observation`
 - `planning_scope_hash`: `sha256:543b946874f01849a30f1098ab298cb86d7d24df9cc97b6c9082c27d71d27de5`
 - `candidate_scope_hash`: `sha256:7ee5d47dca72d0d2f1ec683cc45e4bbac0e3ce40af1e57417d39608c8c0c26bb`
-- `execution_state`: `PLANNING_COMPLETED`
+- `execution_state`: `LOCAL_VERIFIED`
 
 ## Mutation Intent
 
@@ -60,7 +60,7 @@ local_knowledge_lookup:
 - `adjacent_surfaces`: 平台路径 owner、SQLite WAL/SHM 只读定义、`LoadCoordinator`、旧 `feature.remote-install.zed-remote`、Cargo 许可证与锁文件。
 - `historical_state_refs`: Issue #128 的来源副作用误分类根因、Issue #104/#109 的 SQLite/NOFOLLOW/资源边界、Issue #131 决策。
 - `stale_verdict_invalidation_refs`: PROJECT-MASTER-PLAN 中尚未勾选的 Issue #128 和旧 active task。
-- `sibling_regression_guard`: `pending`，收口前必须由四 crate tests/Clippy、Parity 计数、依赖差异与禁止能力扫描转为 `passed`。
+- `sibling_regression_guard`: `passed`；四 crate tests/Clippy、Parity 计数、依赖差异、禁止能力、治理和精确范围聚合门禁全部通过。
 
 ## Review Evidence
 

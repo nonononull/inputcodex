@@ -9,7 +9,7 @@ GitHub Issue、PR 与 Actions。
 
 Gate 3 七成员 Rust Workspace、Gate 4 上游审计/功能目录/性能基线，以及 Gate 5 的平台路径、
 应用概览、版本与启动意图、运行时环境冲突、Relay 环境、设置、诊断日志、Relay 状态、上下文
-条目、本地会话目录、受控会话 Markdown 和 Watcher 偏好状态观察已经建立；Zed 远程项目只读观察正在 Issue `#132` 中实施。
+条目、本地会话目录、受控会话 Markdown、Watcher 偏好状态和 Zed 远程项目只读观察已经建立。
 该说明只用于选择正确命令，不能替代任务计划和 GitHub 新鲜证据。
 
 ## 文档变更轻量验证

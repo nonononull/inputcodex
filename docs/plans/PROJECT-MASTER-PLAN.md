@@ -2,9 +2,9 @@
 
 schema_version: inputcodex.master-plan.v1
 active_task: issue-132-gate-5-zed-remote-project-observation
-active_gate: Gate 5 前十二个产品切片、自治控制面、v1.2.44 重审与两项一致性例外已进入 main；当前迁移第十三个产品切片
+active_gate: Gate 5 前十二个产品切片、自治控制面、v1.2.44 重审与两项一致性例外已进入 main；第十三个产品切片已完成本地总验证并进入远端交付
 last_verified_gate: Issue #128 / PR #129 已以单父 Squash 提交 da035b3a6e8ddab9b7c6948ef115ed8b561aa1f4 完成 Watcher 偏好状态只读观察并通过主干双 Workflow
-next_legal_gate: Issue #132 仅在二十八路径内实现 Zed 远程项目只读观察；完整 Zed Remote 管理、会话索引清理预览、rollout Token 历史与 Sub2API 继续等待各自后续节点
+next_legal_gate: Issue #132 仅可进入非 Draft PR、独立 Final Head Review、Hosted CI 与精确 Squash；完整 Zed Remote 管理、会话索引清理预览、rollout Token 历史与 Sub2API 继续等待各自后续节点
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/132
 active_pr_ref: none
 gate_5_platform_paths_exception_ref: https://github.com/nonononull/inputcodex/issues/74

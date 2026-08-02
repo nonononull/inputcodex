@@ -10,7 +10,7 @@
 - `baseline_ref`: `da035b3a6e8ddab9b7c6948ef115ed8b561aa1f4`
 - `branch_ref`: `codex/issue-132-gate-5-zed-remote-project-observation`
 - `candidate_scope_hash`: `sha256:7ee5d47dca72d0d2f1ec683cc45e4bbac0e3ce40af1e57417d39608c8c0c26bb`
-- `runtime_state`: `domain-red-next`
+- `runtime_state`: `remote-delivery-ready`
 
 ## Current Gate
 
@@ -18,7 +18,9 @@
 Issue #130 performance-first defer completed
   -> Issue #131 ADOPT_B completed
   -> Issue #132 planning checkpoint completed
-  -> NEXT: Domain RED
+  -> Domain / Application / Platform / Parity RED-GREEN completed
+  -> Local verification completed
+  -> NEXT: Review / CI / exact-head Squash
 ```
 
 `ALLOWED_OPS`：二十八路径内计划、TDD、唯一依赖、Parity、稳定文档、验证、checkpoint、普通 push/PR、只读复审和精确门禁合并。
@@ -49,31 +51,31 @@ Issue #131 采用方案 B；两名 reviewer 均为 `ADOPT_B`，父线程采用�
 
 目标 API 缺失 RED -> 最小领域值 GREEN -> tests/Clippy/fmt -> domain checkpoint。
 
-状态：`pending`。
+状态：`completed`，checkpoint `d5f7b4f`。
 
 ### Node 4：Application TDD
 
 Request/Cancellation/Port/UseCase RED -> GREEN -> tests/Clippy/fmt -> application checkpoint。
 
-状态：`pending`。
+状态：`completed`，checkpoint `726d30b`。
 
 ### Node 5：Platform TDD
 
 稳定 ID、NOFOLLOW JSON、严格 SQLite、资源/错误/取消矩阵 RED -> GREEN -> 依赖/测试/Clippy/fmt -> platform checkpoint。
 
-状态：`pending`。
+状态：`completed`，checkpoint `2873f94`。
 
 ### Node 6：Parity TDD
 
 新 feature/contract/fixture 和单 command source RED -> GREEN -> 精确计数/Release Audit -> parity checkpoint。
 
-状态：`pending`。
+状态：`completed`，checkpoint `bda6a81`。
 
 ### Node 7：Local Closeout
 
 更新 README/报告，运行四 crate、治理、范围、依赖、隐私和 diff 门禁，建立 local-verified checkpoint。
 
-状态：`pending`。
+状态：`completed`；`ISSUE132_LOCAL_VERIFY_OK` 已绑定 28 路径与批准 hash。
 
 ### Node 8：Remote Delivery
 
