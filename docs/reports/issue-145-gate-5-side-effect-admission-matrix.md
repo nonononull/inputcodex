@@ -34,8 +34,8 @@
 ## 本地验证
 
 - Control Plane RED：`75 pass / 7 fail`。
-- 复审纠正 RED：owner/blocker 合法值漂移、model-catalog owner 缺项、#145 terminal 缺失、policy/snapshot 单元素数组穿透与 PR marker 缺失；修正 Head 复审继续命中 Workflow 名称、owner/base 身份数组和多 Issue hard-stop terminal 三个残余边界。
-- Control Plane GREEN：`CI_CONTRACT_GREEN passed=90`。
+- 复审纠正 RED：owner/blocker 合法值漂移、model-catalog owner 缺项、#145 terminal 缺失、policy/snapshot 单元素数组穿透与 PR marker 缺失；后续复审继续命中 Workflow/owner/base/issue number 类型、Workflow PR 关联、merged PR base、post-merge review evidence 与多 Issue hard-stop terminal 残余边界。
+- Control Plane GREEN：`CI_CONTRACT_GREEN passed=92`。
 - Parity RED：缺失 admission API 与验证码导致 9 个编译错误。
 - Parity GREEN：`admission_matrix 6/6`、`catalog_repository 33/33`、Parity all-targets、Clippy 与 rustfmt 通过。
 - 仓库政策 `0 violations`；Release Audit `current / requires_reaudit=false / errors=[]`。

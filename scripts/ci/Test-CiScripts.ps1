@@ -1141,6 +1141,7 @@ function New-PostMergeAutonomousStateSnapshot {
     $snapshot.merged_prs = @([pscustomobject][ordered]@{
         number = 112
         url = 'https://github.com/nonononull/inputcodex/pull/112'
+        base_ref = 'main'
         head_oid = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
         merge_commit_oid = 'cccccccccccccccccccccccccccccccccccccccc'
         author_login = 'nonononull'
@@ -1436,6 +1437,8 @@ Invoke-ContractTest -Name '无人值守 live 仅接受精确 typed marker' -Body
 
 Invoke-ContractTest -Name '无人值守 live Workflow Run 必须绑定强身份与关联 PR' -Body {
     Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyValue')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-ExactStringValue')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyProjection')
     Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-GitHubWorkflowPullRequestAssociation')
     Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-GitHubWorkflowRunIdentity')
 
@@ -1476,6 +1479,30 @@ Invoke-ContractTest -Name '无人值守 live Workflow Run 必须绑定强身份�
     Assert-Equal -Expected $false -Actual (Test-GitHubWorkflowRunIdentity `
         -Run $wrongPr -Expectation $expectation -HeadOid $run.head_sha -Event pull_request -PullRequestNumber 112) `
         -Message '错误关联 PR 必须被拒绝'
+
+    foreach ($case in @('head', 'base')) {
+        $arrayAssociation = $run | ConvertTo-Json -Depth 20 | ConvertFrom-Json -Depth 20
+        if ($case -ceq 'head') {
+            $arrayAssociation.pull_requests[0].head.sha =
+                [object[]]@($arrayAssociation.pull_requests[0].head.sha)
+        } else {
+            $arrayAssociation.pull_requests[0].base.ref =
+                [object[]]@($arrayAssociation.pull_requests[0].base.ref)
+        }
+        Assert-Equal -Expected $false -Actual (Test-GitHubWorkflowRunIdentity `
+            -Run $arrayAssociation -Expectation $expectation -HeadOid $run.head_sha `
+            -Event pull_request -PullRequestNumber 112) `
+            -Message "Workflow PR 关联数组必须被拒绝：$case"
+    }
+
+    foreach ($property in @('name', 'path', 'event', 'head_sha')) {
+        $arrayRun = $run | ConvertTo-Json -Depth 20 | ConvertFrom-Json -Depth 20
+        $arrayRun.($property) = [object[]]@($arrayRun.($property))
+        Assert-Equal -Expected $false -Actual (Test-GitHubWorkflowRunIdentity `
+            -Run $arrayRun -Expectation $expectation -HeadOid $run.head_sha `
+            -Event pull_request -PullRequestNumber 112) `
+            -Message "Workflow Run 标量数组必须被拒绝：$property"
+    }
 }
 
 Invoke-ContractTest -Name '无人值守 PR evidence 拒绝数组伪装 task kind' -Body {
@@ -1663,6 +1690,12 @@ Invoke-ContractTest -Name '无人值守 owner 与 base 身份数组不得进入�
             ExpectedState = 'blocked-hard-stop'
             ExpectedAction = 'stop'
             Reason = 'PR_BASE_INVALID'
+        },
+        [pscustomobject]@{
+            Name = 'issue-number'
+            ExpectedState = 'blocked-hard-stop'
+            ExpectedAction = 'stop'
+            Reason = 'ACTIVE_ISSUE_NUMBER_INVALID'
         }
     )) {
         $snapshot = New-MergeReadyAutonomousStateSnapshot
@@ -1682,6 +1715,10 @@ Invoke-ContractTest -Name '无人值守 owner 与 base 身份数组不得进入�
             'pr-base' {
                 $snapshot.active_prs[0].base_ref =
                     [object[]]@($snapshot.active_prs[0].base_ref)
+            }
+            'issue-number' {
+                $snapshot.active_issues[0].number =
+                    [object[]]@($snapshot.active_issues[0].number)
             }
         }
 
@@ -1706,6 +1743,30 @@ Invoke-ContractTest -Name '无人值守合并后 Workflow 名称数组不得通�
     Assert-Contains -Collection @($result.Json.post_merge_gate_pending) `
         -Expected 'POST_MERGE_WORKFLOW_CI' `
         -Message '主干 Workflow 名称单元素数组不得通过 post-merge 门'
+}
+
+Invoke-ContractTest -Name '无人值守合并后必须绑定标量 main base' -Body {
+    foreach ($value in @('release', [object[]]@('main'))) {
+        $snapshot = New-PostMergeAutonomousStateSnapshot
+        $snapshot.merged_prs[0].base_ref = $value
+        $result = Invoke-AutonomousStateCase -Name 'post-merge-base-invalid' -Snapshot $snapshot
+
+        Assert-AutonomousState -Result $result -ExpectedState 'post-merge-verification' `
+            -ExpectedAction 'verify-main'
+        Assert-Contains -Collection @($result.Json.post_merge_gate_pending) `
+            -Expected 'POST_MERGE_PR_BASE' -Message 'merged PR 必须绑定标量 main base'
+    }
+}
+
+Invoke-ContractTest -Name '无人值守合并后必须复核 PR evidence review 状态' -Body {
+    $snapshot = New-PostMergeAutonomousStateSnapshot
+    $snapshot.merged_prs[0].evidence.independent_review_status = 'failed'
+    $result = Invoke-AutonomousStateCase -Name 'post-merge-review-evidence-failed' -Snapshot $snapshot
+
+    Assert-AutonomousState -Result $result -ExpectedState 'post-merge-verification' `
+        -ExpectedAction 'verify-main'
+    Assert-Contains -Collection @($result.Json.post_merge_gate_pending) `
+        -Expected 'POST_MERGE_REVIEW' -Message 'post-merge 不得只相信 review attestation'
 }
 
 Invoke-ContractTest -Name '无人值守任一 Final Head 合并门失败均只恢复 PR' -Body {
