@@ -49,6 +49,10 @@ Parity、Workflow/Runner/Ruleset、Release/upstream、UI 与 AGOS 全部禁止�
   从生产 AST 提取的 helper 路径均完整列出 9 个被错误接受的单元素数组字符串字段。
 - iteration 2 GREEN：9 个字段改为直接读取原始 `PSPropertyInfo.Value`，逐项同时验证运行时类型和值；完整
   合同恢复 `82/82`，普通 refactor、upstream-sync、PR/merge/post-merge 与 candidate-exhausted 回归不退化。
+- iteration 3 RED：旧生产代码下仍仅两个 tranche contract test 失败，其余 80 个通过；真实策略验证器与
+  从生产 AST 提取的 helper 路径均完整列出 4 个被错误接受的单元素数组 Int64 字段。
+- iteration 3 GREEN：四个数值字段均直接复用原始 `PSPropertyInfo.Value` 做 `[long]` 与精确值验证，输出
+  projection 不再经 getter；tranche 全字段审计未发现第三类容器身份丢失，完整合同恢复 `82/82`。
 - live：真实 #141 返回 `active-worktree-execution / resume-worktree`，Planning Freeze 有效，reason 为空。
 - snapshot：洁净 main 空任务快照只返回 `select-fixed-file-mutation-candidate` 与唯一 Watcher 候选。
 
@@ -61,7 +65,8 @@ Parity、Workflow/Runner/Ruleset、Release/upstream、UI 与 AGOS 全部禁止�
 - [x] 维护 task-local 控制面、build 与 err。
 - [x] 执行十一路径最终本地门禁与自审。
 - [x] 形成首个普通提交并普通 push，创建关联 #141 的 non-Draft PR #142。
-- [ ] 形成 iteration 2 普通提交并普通 push，刷新 PR #142 Final Head 与验证证据。
+- [x] 形成 iteration 2 普通提交并普通 push，刷新 PR #142 Head 与验证证据。
+- [ ] 形成 iteration 3 普通提交并普通 push，再次刷新 PR #142 Final Head 与验证证据。
 - [ ] 停在 PR Final Head；禁止 auto-merge 与任何形式的合并。
 
 ## 完成标准

@@ -48,12 +48,15 @@ AGOS ReportOnly 返回 needs-input，已按项目规则绕过且没有创建 AGO
 状态：completed。bootstrap 首轮只修改测试后完整合同得到四个稳定失败：生产 tranche 缺失、真实策略变异
 无目标、生产 helper 缺失、空闲状态仍使用泛化候选动作。iteration 2 在旧生产代码下得到两个稳定失败：
 策略真实变异与生产 helper AST 路径都错误接受全部 9 个单元素数组字符串字段，其余 80 个合同通过。
+iteration 3 同样只让这两个合同失败，并在两条生产路径完整列出 4 个单元素数组 Int64 字段。
 
 ## Node 3：Minimal GREEN
 
 状态：completed。policy 删除旧 first candidate 并增加唯一版本化 tranche；验证器锁定 shape/type/value；
 live 状态在验证器边界后再次调用生产 helper。iteration 2 让验证器与 helper 对 9 个字段直接读取原始
-`PSPropertyInfo.Value`，同时检查 `-is [string]` 与 `-ceq`；合同恢复 `82/82`。
+`PSPropertyInfo.Value`，同时检查 `-is [string]` 与 `-ceq`。iteration 3 对四个数值做同样的原始读取，
+要求 `[long]` 与精确值，并让输出复用已验证变量；tranche 全字段审计确认两层 getter 调用均为零，合同恢复
+`82/82`。
 
 ## Node 4：Documentation
 
@@ -62,13 +65,13 @@ build 定向命令与 Paseo built-in loop 根因均落盘。产品计数和 Pari
 
 ## Node 5：Final Local Verification
 
-状态：completed。首轮已从 build.md 原文运行完整命令；iteration 2 修复后 CI 合同仍为 `82/82`，policy
+状态：completed。首轮已从 build.md 原文运行完整命令；iteration 3 修复后 CI 合同仍为 `82/82`，policy
 hash 仍为 `sha256:e19914...`，live 为 `active-worktree-execution / resume-worktree`，snapshot 仍只选择
 Watcher 候选，Release Audit、仓库政策、十一路径与 Git 空白均通过；main freshness 与 #132 指纹无漂移。
 
 ## Node 6：Remote Delivery
 
-状态：in-progress。non-Draft PR #142 已存在；iteration 2 只允许形成普通新提交并普通 push 到原分支，随后
+状态：in-progress。non-Draft PR #142 已存在；iteration 3 只允许形成普通新提交并普通 push 到原分支，随后
 绑定新 Final Head、scope/hash、policy hash、RED/GREEN 和 owner refs。不得 amend/force push、启用
 auto-merge、Resolve 或合并。
 

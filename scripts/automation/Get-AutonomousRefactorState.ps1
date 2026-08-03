@@ -675,6 +675,10 @@ function Get-FixedFileMutationTrancheProjection {
     $ownerDecisionRef = $Value.PSObject.Properties['owner_decision_ref'].Value
     $retryResumeRef = $Value.PSObject.Properties['retry_resume_ref'].Value
     $standingAuthorizationRef = $Value.PSObject.Properties['standing_authorization_ref'].Value
+    $repositoryBatchesMaxProperty = $Value.PSObject.Properties['repository_batches_max']
+    $repositoryBatchesMax = $repositoryBatchesMaxProperty.Value
+    $productDeliveriesMaxProperty = $Value.PSObject.Properties['product_deliveries_max']
+    $productDeliveriesMax = $productDeliveriesMaxProperty.Value
     $expectedSourceDelta = $Value.PSObject.Properties['expected_source_delta'].Value
     $terminal = $Value.PSObject.Properties['terminal'].Value
     if (-not $candidateFeaturesProjection.exists -or
@@ -717,21 +721,25 @@ function Get-FixedFileMutationTrancheProjection {
         $terminalState -ceq 'blocked-candidate-exhausted' -and
         $terminalNextAction -is [string] -and
         $terminalNextAction -ceq 'await-owner-decision'
+    $expectedImplementedProperty = $expectedSourceDelta.PSObject.Properties['implemented']
+    $expectedImplemented = $expectedImplementedProperty.Value
+    $expectedUnassessedProperty = $expectedSourceDelta.PSObject.Properties['unassessed']
+    $expectedUnassessed = $expectedUnassessedProperty.Value
     if (-not $reopenOnProjection.exists -or
         $reopenOn -isnot [System.Array] -or
         $reopenOn.Count -ne 2 -or
         $reopenOn[0] -isnot [string] -or
         $reopenOn[1] -isnot [string] -or
         -not $stringFieldsValid -or
-        (Get-PropertyValue $Value 'repository_batches_max') -isnot [long] -or
-        (Get-PropertyValue $Value 'repository_batches_max') -ne 2L -or
-        (Get-PropertyValue $Value 'product_deliveries_max') -isnot [long] -or
-        (Get-PropertyValue $Value 'product_deliveries_max') -ne 1L -or
+        $repositoryBatchesMax -isnot [long] -or
+        $repositoryBatchesMax -ne 2L -or
+        $productDeliveriesMax -isnot [long] -or
+        $productDeliveriesMax -ne 1L -or
         $candidateFeatures[0] -cne 'feature.foundation-platform.watcher-preference-mutation' -or
-        (Get-PropertyValue $expectedSourceDelta 'implemented') -isnot [long] -or
-        (Get-PropertyValue $expectedSourceDelta 'implemented') -ne 2L -or
-        (Get-PropertyValue $expectedSourceDelta 'unassessed') -isnot [long] -or
-        (Get-PropertyValue $expectedSourceDelta 'unassessed') -ne -2L -or
+        $expectedImplemented -isnot [long] -or
+        $expectedImplemented -ne 2L -or
+        $expectedUnassessed -isnot [long] -or
+        $expectedUnassessed -ne -2L -or
         $reopenOn[0] -cne 'completed' -or
         $reopenOn[1] -cne 'hard-stop') {
         return $invalid
@@ -744,12 +752,12 @@ function Get-FixedFileMutationTrancheProjection {
         owner_decision_ref = $ownerDecisionRef
         retry_resume_ref = $retryResumeRef
         standing_authorization_ref = $standingAuthorizationRef
-        repository_batches_max = Get-PropertyValue $Value 'repository_batches_max'
-        product_deliveries_max = Get-PropertyValue $Value 'product_deliveries_max'
+        repository_batches_max = $repositoryBatchesMax
+        product_deliveries_max = $productDeliveriesMax
         candidate = $candidateFeatures[0]
         expected_source_delta = [pscustomobject][ordered]@{
-            implemented = Get-PropertyValue $expectedSourceDelta 'implemented'
-            unassessed = Get-PropertyValue $expectedSourceDelta 'unassessed'
+            implemented = $expectedImplemented
+            unassessed = $expectedUnassessed
         }
         terminal = [pscustomobject][ordered]@{
             owner_issue_ref = $terminalOwnerIssueRef

@@ -355,12 +355,18 @@ $fixedFileMutationTerminalOwnerIssueRef = $null
 $fixedFileMutationTerminalAction = $null
 $fixedFileMutationTerminalState = $null
 $fixedFileMutationTerminalNextAction = $null
+$fixedFileMutationRepositoryBatchesMax = $null
+$fixedFileMutationProductDeliveriesMax = $null
+$fixedFileMutationExpectedImplemented = $null
+$fixedFileMutationExpectedUnassessed = $null
 if ($fixedFileMutationTrancheShapeValid) {
     $fixedFileMutationSchemaVersion = $fixedFileMutationTranche.PSObject.Properties['schema_version'].Value
     $fixedFileMutationDecisionId = $fixedFileMutationTranche.PSObject.Properties['decision_id'].Value
     $fixedFileMutationOwnerDecisionRef = $fixedFileMutationTranche.PSObject.Properties['owner_decision_ref'].Value
     $fixedFileMutationRetryResumeRef = $fixedFileMutationTranche.PSObject.Properties['retry_resume_ref'].Value
     $fixedFileMutationStandingAuthorizationRef = $fixedFileMutationTranche.PSObject.Properties['standing_authorization_ref'].Value
+    $fixedFileMutationRepositoryBatchesMax = $fixedFileMutationTranche.PSObject.Properties['repository_batches_max'].Value
+    $fixedFileMutationProductDeliveriesMax = $fixedFileMutationTranche.PSObject.Properties['product_deliveries_max'].Value
     $candidateFeaturesProperty = $fixedFileMutationTranche.PSObject.Properties['candidate_features']
     if ($null -ne $candidateFeaturesProperty -and $candidateFeaturesProperty.Value -is [System.Array]) {
         $candidateFeatures = [object[]]$candidateFeaturesProperty.Value
@@ -388,6 +394,10 @@ if ($terminalShapeValid) {
         $reopenOn = [object[]]$reopenOnProperty.Value
     }
 }
+if ($expectedSourceDeltaShapeValid) {
+    $fixedFileMutationExpectedImplemented = $expectedSourceDelta.PSObject.Properties['implemented'].Value
+    $fixedFileMutationExpectedUnassessed = $expectedSourceDelta.PSObject.Properties['unassessed'].Value
+}
 
 $fixedFileMutationStringFieldsValid =
     $fixedFileMutationSchemaVersion -is [string] -and
@@ -411,14 +421,14 @@ $fixedFileMutationStringFieldsValid =
 
 $fixedFileMutationTrancheValid = $fixedFileMutationTrancheShapeValid -and
     $fixedFileMutationStringFieldsValid -and
-    (Test-ExactJsonInt64 -Actual (Get-PropertyValue $fixedFileMutationTranche 'repository_batches_max') -Expected 2) -and
-    (Test-ExactJsonInt64 -Actual (Get-PropertyValue $fixedFileMutationTranche 'product_deliveries_max') -Expected 1) -and
+    (Test-ExactJsonInt64 -Actual $fixedFileMutationRepositoryBatchesMax -Expected 2) -and
+    (Test-ExactJsonInt64 -Actual $fixedFileMutationProductDeliveriesMax -Expected 1) -and
     (Test-ExactStringSequence `
         -Actual $candidateFeatures `
         -Expected @('feature.foundation-platform.watcher-preference-mutation')) -and
     $expectedSourceDeltaShapeValid -and
-    (Test-ExactJsonInt64 -Actual (Get-PropertyValue $expectedSourceDelta 'implemented') -Expected 2) -and
-    (Test-ExactJsonInt64 -Actual (Get-PropertyValue $expectedSourceDelta 'unassessed') -Expected -2) -and
+    (Test-ExactJsonInt64 -Actual $fixedFileMutationExpectedImplemented -Expected 2) -and
+    (Test-ExactJsonInt64 -Actual $fixedFileMutationExpectedUnassessed -Expected -2) -and
     $terminalShapeValid -and
     (Test-ExactStringSequence -Actual $reopenOn -Expected @('completed', 'hard-stop'))
 if (-not $fixedFileMutationTrancheValid) {
@@ -504,12 +514,12 @@ $result = [pscustomobject][ordered]@{
         owner_decision_ref = $fixedFileMutationOwnerDecisionRef
         retry_resume_ref = $fixedFileMutationRetryResumeRef
         standing_authorization_ref = $fixedFileMutationStandingAuthorizationRef
-        repository_batches_max = Get-PropertyValue $fixedFileMutationTranche 'repository_batches_max'
-        product_deliveries_max = Get-PropertyValue $fixedFileMutationTranche 'product_deliveries_max'
+        repository_batches_max = $fixedFileMutationRepositoryBatchesMax
+        product_deliveries_max = $fixedFileMutationProductDeliveriesMax
         candidate_features = @($candidateFeatures)
         expected_source_delta = [pscustomobject][ordered]@{
-            implemented = Get-PropertyValue $expectedSourceDelta 'implemented'
-            unassessed = Get-PropertyValue $expectedSourceDelta 'unassessed'
+            implemented = $fixedFileMutationExpectedImplemented
+            unassessed = $fixedFileMutationExpectedUnassessed
         }
         terminal = [pscustomobject][ordered]@{
             owner_issue_ref = $fixedFileMutationTerminalOwnerIssueRef

@@ -412,6 +412,25 @@ $fixedFileMutationStringArrayCases = [ordered]@{
     }
 }
 
+$fixedFileMutationInt64ArrayCases = [ordered]@{
+    'repository_batches_max' = {
+        param($tranche)
+        $tranche.repository_batches_max = [object[]]@($tranche.repository_batches_max)
+    }
+    'product_deliveries_max' = {
+        param($tranche)
+        $tranche.product_deliveries_max = [object[]]@($tranche.product_deliveries_max)
+    }
+    'expected_source_delta.implemented' = {
+        param($tranche)
+        $tranche.expected_source_delta.implemented = [object[]]@($tranche.expected_source_delta.implemented)
+    }
+    'expected_source_delta.unassessed' = {
+        param($tranche)
+        $tranche.expected_source_delta.unassessed = [object[]]@($tranche.expected_source_delta.unassessed)
+    }
+}
+
 Invoke-ContractTest -Name '固定文件 mutation tranche 生产策略真实变异必须 fail closed' -Body {
     $productionPolicy = [System.IO.File]::ReadAllText(
         $autonomousPolicyPath,
@@ -477,6 +496,22 @@ Invoke-ContractTest -Name '固定文件 mutation tranche 生产策略真实变�
     Assert-Equal -Expected 0 -Actual $unexpectedlyAcceptedArrayFields.Count `
         -Message "策略验证器不得把单元素数组展开为字符串；漏拒字段=$([string]::Join(',', $unexpectedlyAcceptedArrayFields))"
 
+    $unexpectedlyAcceptedInt64ArrayFields = [System.Collections.Generic.List[string]]::new()
+    foreach ($arrayCase in $fixedFileMutationInt64ArrayCases.GetEnumerator()) {
+        $policy = Copy-AutonomousRefactorPolicy $productionPolicy
+        & $arrayCase.Value $policy.fixed_file_mutation_tranche
+        $result = Invoke-AutonomousPolicyCase `
+            -Name "fixed-file-tranche-single-int64-array-$($arrayCase.Key)" `
+            -Policy $policy
+        if ($result.ExitCode -eq 0) {
+            $unexpectedlyAcceptedInt64ArrayFields.Add($arrayCase.Key)
+            continue
+        }
+        Assert-AutonomousPolicyFailure -Result $result -ExpectedCode 'FIXED_FILE_MUTATION_TRANCHE'
+    }
+    Assert-Equal -Expected 0 -Actual $unexpectedlyAcceptedInt64ArrayFields.Count `
+        -Message "策略验证器不得把单元素数组展开为 Int64；漏拒字段=$([string]::Join(',', $unexpectedlyAcceptedInt64ArrayFields))"
+
     $legacy = Copy-AutonomousRefactorPolicy $productionPolicy
     $legacy | Add-Member -NotePropertyName first_candidate -NotePropertyValue 'feature.session-data.token-usage-history'
     Assert-AutonomousPolicyFailure `
@@ -526,6 +561,18 @@ Invoke-ContractTest -Name '固定文件 mutation tranche 生产 helper 真实变
     }
     Assert-Equal -Expected 0 -Actual $unexpectedlyValidArrayFields.Count `
         -Message "生产 helper 不得把单元素数组展开为字符串；漏拒字段=$([string]::Join(',', $unexpectedlyValidArrayFields))"
+
+    $unexpectedlyValidInt64ArrayFields = [System.Collections.Generic.List[string]]::new()
+    foreach ($arrayCase in $fixedFileMutationInt64ArrayCases.GetEnumerator()) {
+        $policy = Copy-AutonomousRefactorPolicy $productionPolicy
+        & $arrayCase.Value $policy.fixed_file_mutation_tranche
+        $projection = Get-FixedFileMutationTrancheProjection $policy.fixed_file_mutation_tranche
+        if ($projection.valid) {
+            $unexpectedlyValidInt64ArrayFields.Add($arrayCase.Key)
+        }
+    }
+    Assert-Equal -Expected 0 -Actual $unexpectedlyValidInt64ArrayFields.Count `
+        -Message "生产 helper 不得把单元素数组展开为 Int64；漏拒字段=$([string]::Join(',', $unexpectedlyValidInt64ArrayFields))"
 }
 
 Invoke-ContractTest -Name '拒绝缺失的无人值守重构策略文件' -Body {
