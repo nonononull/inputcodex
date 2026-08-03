@@ -679,6 +679,9 @@ contracts:
       - code: WATCHER_PREFERENCE_MUTATION_CONTROL_FINISHED
         kind: invalid-state
         semantics: '同一 control 已完成后再次执行时返回 Failed，不复用旧 receipt 或重新提交。'
+      - code: WATCHER_PREFERENCE_MUTATION_CONTROL_IN_USE
+        kind: invalid-state
+        semantics: '同一 control 已被执行者占用或已到达提交点时，第二执行者返回 Failed，不进入 Port 且不终结首个执行者。'
       - code: WATCHER_PREFERENCE_MUTATION_INVALID_MARKER
         kind: invalid-input
         semantics: '固定 marker 为目录、链接、reparse 或其他非普通对象时失败，不跟随或删除该对象。'

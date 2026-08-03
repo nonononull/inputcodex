@@ -1152,6 +1152,10 @@
   已接受取消态，入口 CAS 只允许一个执行者占用，未占用 control 不能进入提交点，第二执行者返回稳定
   `WATCHER_PREFERENCE_MUTATION_CONTROL_IN_USE` 且不能终结首个执行者。Platform 脚本夹具同步改走真实 UseCase，
   Application 专项 `8/8`、Platform 全包 `85` 个单元测试及全部集成测试恢复通过。
+- 独立复审第三轮纠错：生产新增的 `WATCHER_PREFERENCE_MUTATION_CONTROL_IN_USE` 起初只存在于 Application
+  与 barrier 回归，Parity baseline 的错误表和显式诊断码清单均未登记，导致可达稳定错误不受目录合同约束。
+  先把该码加入目录测试取得唯一 RED，再将其固定为 `invalid-state`，明确第二执行者不得进入 Port 或终结首个
+  执行者；定向 Parity 与完整目录测试随后恢复通过。
 - 关联：Issue `#136`、Issue `#140`、Issue `#143`、`crates/inputcodex-application/src/watcher_preference_mutation.rs`、
   `crates/inputcodex-platform/src/watcher_preference_mutation.rs`、`parity/contracts/foundation-platform.yml`。
 

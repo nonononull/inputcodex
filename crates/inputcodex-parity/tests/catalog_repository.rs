@@ -2598,6 +2598,7 @@ fn gate5_watcher_偏好变更只移动两个固定文件入口而不接管完整
         "WATCHER_PREFERENCE_MUTATION_CANCELLED",
         "WATCHER_PREFERENCE_MUTATION_CONFLICT",
         "WATCHER_PREFERENCE_MUTATION_CONTROL_FINISHED",
+        "WATCHER_PREFERENCE_MUTATION_CONTROL_IN_USE",
         "WATCHER_PREFERENCE_MUTATION_INDETERMINATE",
         "WATCHER_PREFERENCE_MUTATION_INVALID_MARKER",
         "WATCHER_PREFERENCE_MUTATION_INVALID_PARENT",
@@ -2626,6 +2627,12 @@ fn gate5_watcher_偏好变更只移动两个固定文件入口而不接管完整
             "Watcher 偏好变更合同应包含：{expected}"
         );
     }
+    assert!(
+        contract.contains(
+            "      - code: WATCHER_PREFERENCE_MUTATION_CONTROL_IN_USE\n        kind: invalid-state\n        semantics: '同一 control 已被执行者占用或已到达提交点时，第二执行者返回 Failed，不进入 Port 且不终结首个执行者。'"
+        ),
+        "并发 control 复用必须以 invalid-state 建模且不得触碰首个执行者"
+    );
     assert_eq!(
         yaml_field_block(contract, "side_effects", "persistence"),
         "    side_effects:\n      - filesystem-read\n      - filesystem-write",
