@@ -1156,6 +1156,10 @@
   与 barrier 回归，Parity baseline 的错误表和显式诊断码清单均未登记，导致可达稳定错误不受目录合同约束。
   先把该码加入目录测试取得唯一 RED，再将其固定为 `invalid-state`，明确第二执行者不得进入 Port 或终结首个
   执行者；定向 Parity 与完整目录测试随后恢复通过。
+- Hosted Windows 纠错：新增合同断言直接匹配带 `\n` 的多行文本，本机 LF 工作树通过，但 fresh Windows
+  checkout 的 CRLF 使同一语义字符串不匹配；CI 仅 Windows `catalog_repository` 失败，Linux/macOS 与其他
+  Job 均通过。复用本文件既有 Git 换行根因，只在测试读取后把 `\r\n` 归一化为 `\n` 再验证完整错误块，
+  不修改合同、生产实现、Workflow 或 Runner。
 - 关联：Issue `#136`、Issue `#140`、Issue `#143`、`crates/inputcodex-application/src/watcher_preference_mutation.rs`、
   `crates/inputcodex-platform/src/watcher_preference_mutation.rs`、`parity/contracts/foundation-platform.yml`。
 

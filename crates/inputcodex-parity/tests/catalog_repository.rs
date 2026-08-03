@@ -2579,6 +2579,7 @@ fn gate5_watcher_偏好变更只移动两个固定文件入口而不接管完整
         &contract_text,
         "contract.feature.foundation-platform.watcher-preference-mutation.baseline",
     );
+    let normalized_contract = contract.replace("\r\n", "\n");
     for expected in [
         "feature_id: feature.foundation-platform.watcher-preference-mutation",
         "expected",
@@ -2628,7 +2629,7 @@ fn gate5_watcher_偏好变更只移动两个固定文件入口而不接管完整
         );
     }
     assert!(
-        contract.contains(
+        normalized_contract.contains(
             "      - code: WATCHER_PREFERENCE_MUTATION_CONTROL_IN_USE\n        kind: invalid-state\n        semantics: '同一 control 已被执行者占用或已到达提交点时，第二执行者返回 Failed，不进入 Port 且不终结首个执行者。'"
         ),
         "并发 control 复用必须以 invalid-state 建模且不得触碰首个执行者"
