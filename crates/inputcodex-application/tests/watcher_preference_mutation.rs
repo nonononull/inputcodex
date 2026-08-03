@@ -16,6 +16,7 @@ struct StubPort {
     receipt: WatcherPreferenceMutationReceipt,
     reach_commit: bool,
     cancel_at_commit: Option<Rc<Cell<Option<WatcherPreferenceCancellationOutcome>>>>,
+    cancel_before_return: Option<Rc<Cell<Option<WatcherPreferenceCancellationOutcome>>>>,
 }
 
 impl WatcherPreferenceMutationPort for StubPort {
@@ -30,6 +31,9 @@ impl WatcherPreferenceMutationPort for StubPort {
             if let Some(outcome) = &self.cancel_at_commit {
                 outcome.set(Some(control.cancel()));
             }
+        }
+        if let Some(outcome) = &self.cancel_before_return {
+            outcome.set(Some(control.cancel()));
         }
         self.receipt
     }
@@ -82,6 +86,7 @@ fn 提交前取消不调用_port_并返回_cancelled_收据() {
         receipt: receipt(WatcherPreferenceMutationOutcome::Applied),
         reach_commit: false,
         cancel_at_commit: None,
+        cancel_before_return: None,
     };
     let use_case = MutateWatcherPreference::new(port);
     let control = WatcherPreferenceMutationControl::new();
@@ -128,6 +133,7 @@ fn 提交点后的取消返回_too_late_但收据不丢弃() {
         receipt: expected,
         reach_commit: true,
         cancel_at_commit: Some(Rc::clone(&cancellation)),
+        cancel_before_return: None,
     };
     let use_case = MutateWatcherPreference::new(port);
     let control = WatcherPreferenceMutationControl::new();
@@ -156,6 +162,7 @@ fn 无提交结果也在交付后进入_finished() {
         receipt: expected,
         reach_commit: false,
         cancel_at_commit: None,
+        cancel_before_return: None,
     };
     let use_case = MutateWatcherPreference::new(port);
     let control = WatcherPreferenceMutationControl::new();
@@ -164,6 +171,62 @@ fn 无提交结果也在交付后进入_finished() {
 
     assert_eq!(calls.get(), 1);
     assert_eq!(result, expected);
+    assert_eq!(control.phase(), WatcherPreferenceMutationPhase::Finished);
+    assert_eq!(
+        control.cancel(),
+        WatcherPreferenceCancellationOutcome::Finished
+    );
+}
+
+#[test]
+fn 提交前端口返回时已接受取消必须交付_cancelled_收据() {
+    let calls = Rc::new(Cell::new(0));
+    let cancellation = Rc::new(Cell::new(None));
+    let final_observation =
+        WatcherPreferenceFinalObservation::Known(WatcherPreference::EnabledByDefault);
+    let port_receipt = WatcherPreferenceMutationReceipt::new(
+        WatcherPreferenceMutationId::new(143),
+        WatcherPreference::ExplicitlyDisabled,
+        WatcherPreferenceSetupCommit::NotRequired,
+        WatcherPreferenceMarkerCommit::NotAttempted,
+        final_observation,
+        WatcherPreferenceMutationOutcome::AlreadySatisfied,
+        DiagnosticCode::new("WATCHER_PREFERENCE_MUTATION_ALREADY_SATISFIED"),
+    );
+    let port = StubPort {
+        calls: Rc::clone(&calls),
+        receipt: port_receipt,
+        reach_commit: false,
+        cancel_at_commit: None,
+        cancel_before_return: Some(Rc::clone(&cancellation)),
+    };
+    let use_case = MutateWatcherPreference::new(port);
+    let control = WatcherPreferenceMutationControl::new();
+
+    let result = use_case.execute(&request(), &control);
+
+    assert_eq!(calls.get(), 1);
+    assert_eq!(
+        cancellation.get(),
+        Some(WatcherPreferenceCancellationOutcome::Accepted)
+    );
+    assert_eq!(
+        result.outcome(),
+        WatcherPreferenceMutationOutcome::Cancelled
+    );
+    assert_eq!(
+        result.setup_commit(),
+        WatcherPreferenceSetupCommit::NotRequired
+    );
+    assert_eq!(
+        result.marker_commit(),
+        WatcherPreferenceMarkerCommit::NotAttempted
+    );
+    assert_eq!(result.final_observation(), final_observation);
+    assert_eq!(
+        result.diagnostic_code().as_str(),
+        "WATCHER_PREFERENCE_MUTATION_CANCELLED"
+    );
     assert_eq!(control.phase(), WatcherPreferenceMutationPhase::Finished);
 }
 

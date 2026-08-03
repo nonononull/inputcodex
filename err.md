@@ -1130,7 +1130,7 @@
   `Pending / Cancelled / CommitReached / Finished` 状态机；提交后取消返回 `TooLate`，仍完成重观察并交付
   `setup_commit / marker_commit / final_observation / outcome / diagnostic_code`。RootCreated 后 marker 失败时
   空状态根合法保留，禁止歧义回滚。
-- 验证：Domain 专项 `4/4`、Application 专项 `5/5`、Platform 内部安全矩阵 `13/13`；Platform 全包
+- 验证：Domain 专项 `4/4`、Application 专项 `6/6`、Platform 内部安全矩阵 `13/13`；Platform 全包
   `85` 个单元测试及全部集成测试、Clippy 均通过。Parity RED 精确暴露新 feature 缺失与两个旧归属，
   GREEN 后完整目录测试为 `32/32`，目录终态为 source `19/83/30/3`、feature `13/22/11`、contract `46`、
   fixture manifest `12`。
@@ -1141,6 +1141,11 @@
   `fs` 只由真实 Windows/macOS 适配器使用却被 Linux test 导入，`Other` 文件类型只由真实平台分类构造、
   Linux 合成测试未构造；拆分 `fs` 导入条件，并把 `Other` 加入既有非法父对象矩阵，避免用 lint 例外掩盖
   缺失反例。
+- 独立复审纠错：Reviewer A 证明无提交路径在最后一次取消检查后仍可保持 `Pending`；取消线程先完成
+  `Pending -> Cancelled` 并返回 `Accepted` 后，旧 `finish()` 会无条件覆盖为 `Finished`，交付
+  `AlreadySatisfied / Conflict / Failed` 而不是 `Cancelled`。新增 Stub Port 确定性 RED；终结改为原子
+  `swap` 仲裁，若取消先赢则固定 `NotRequired / NotAttempted`、保留最终观察并交付 Cancelled receipt；
+  提交点先赢时继续交付原 receipt。
 - 关联：Issue `#136`、Issue `#140`、Issue `#143`、`crates/inputcodex-application/src/watcher_preference_mutation.rs`、
   `crates/inputcodex-platform/src/watcher_preference_mutation.rs`、`parity/contracts/foundation-platform.yml`。
 

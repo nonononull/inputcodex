@@ -158,8 +158,14 @@ impl WatcherPreferenceMutationControl {
         }
     }
 
-    fn finish(&self) {
-        self.phase.store(PHASE_FINISHED, Ordering::Release);
+    fn finish(&self) -> WatcherPreferenceMutationPhase {
+        match self.phase.swap(PHASE_FINISHED, Ordering::AcqRel) {
+            PHASE_PENDING => WatcherPreferenceMutationPhase::Pending,
+            PHASE_CANCELLED => WatcherPreferenceMutationPhase::Cancelled,
+            PHASE_COMMIT_REACHED => WatcherPreferenceMutationPhase::CommitReached,
+            PHASE_FINISHED => WatcherPreferenceMutationPhase::Finished,
+            _ => unreachable!("mutation phase 只由本类型写入"),
+        }
     }
 }
 
@@ -204,9 +210,27 @@ impl<P: WatcherPreferenceMutationPort> MutateWatcherPreference<P> {
             WatcherPreferenceMutationPhase::Pending
             | WatcherPreferenceMutationPhase::CommitReached => self.port.mutate(request, control),
         };
-        control.finish();
-        receipt
+        if control.finish() == WatcherPreferenceMutationPhase::Cancelled {
+            cancellation_won_receipt(request, receipt.final_observation())
+        } else {
+            receipt
+        }
     }
+}
+
+fn cancellation_won_receipt(
+    request: &WatcherPreferenceMutationRequest,
+    final_observation: WatcherPreferenceFinalObservation,
+) -> WatcherPreferenceMutationReceipt {
+    WatcherPreferenceMutationReceipt::new(
+        request.request_id(),
+        request.desired(),
+        WatcherPreferenceSetupCommit::NotRequired,
+        WatcherPreferenceMarkerCommit::NotAttempted,
+        final_observation,
+        WatcherPreferenceMutationOutcome::Cancelled,
+        DiagnosticCode::new("WATCHER_PREFERENCE_MUTATION_CANCELLED"),
+    )
 }
 
 fn terminal_receipt(

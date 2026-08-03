@@ -34,7 +34,7 @@
 ## 实施结果
 
 - Domain：六类 outcome、三类 setup commit、四类 marker commit、最终观察和脱敏 receipt 已建立；专项 `4/4`。
-- Application：请求强制 `expected + desired`，独立 mutation phase 保证提交前取消与提交后 `TooLate`，receipt 不走 `Stale`；专项 `5/5`。
+- Application：请求强制 `expected + desired`，独立 mutation phase 保证提交前取消与提交后 `TooLate`，receipt 不走 `Stale`；专项 `6/6`。
 - Platform：固定父目录/状态根/marker 分类、Windows reparse 拒绝、单层 root setup、`create_new`、条件删除、
   单航班、竞态与失败后重观察已建立；内部矩阵 `13/13`，全包 `85` 个单元测试及全部集成测试通过。
 - Parity：只移动 `enable_watcher` / `disable_watcher`，副作用精确为 `[filesystem-read, filesystem-write]`；
