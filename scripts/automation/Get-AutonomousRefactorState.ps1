@@ -948,7 +948,11 @@ function Test-AutonomousWorkflowRunEvidence {
         $expectedJobs -isnot [System.Array]) {
         return $false
     }
-    $matches = @($WorkflowRuns | Where-Object { (Get-PropertyValue $_ 'name') -ceq $WorkflowName })
+    $matches = @($WorkflowRuns | Where-Object {
+        $runName = Get-PropertyProjection $_ 'name'
+        $runName.exists -and
+            (Test-ExactStringValue -Actual $runName.value -Expected $WorkflowName)
+    })
     if ($matches.Count -ne 1) {
         return $false
     }
@@ -958,15 +962,22 @@ function Test-AutonomousWorkflowRunEvidence {
         return $false
     }
     $jobs = @($jobsProperty.Value)
-    if (-not (Test-ExactStringSet -Actual @($jobs | ForEach-Object { Get-PropertyValue $_ 'name' }) -Expected $ExpectedJobs)) {
-        return $false
-    }
+    $jobNames = [System.Collections.Generic.List[string]]::new()
     foreach ($job in $jobs) {
-        if (-not (Test-ExactStringValue -Actual (Get-PropertyValue $job 'status') -Expected 'completed') -or
-            -not (Test-ExactStringValue -Actual (Get-PropertyValue $job 'conclusion') -Expected 'success') -or
-            -not (Test-ExactStringValue -Actual (Get-PropertyValue $job 'head_oid') -Expected $HeadOid)) {
+        $jobName = Get-PropertyProjection $job 'name'
+        $jobStatus = Get-PropertyProjection $job 'status'
+        $jobConclusion = Get-PropertyProjection $job 'conclusion'
+        $jobHeadOid = Get-PropertyProjection $job 'head_oid'
+        if (-not $jobName.exists -or $jobName.value -isnot [string] -or
+            -not (Test-ExactStringValue -Actual $jobStatus.value -Expected 'completed') -or
+            -not (Test-ExactStringValue -Actual $jobConclusion.value -Expected 'success') -or
+            -not (Test-ExactStringValue -Actual $jobHeadOid.value -Expected $HeadOid)) {
             return $false
         }
+        $jobNames.Add($jobName.value) | Out-Null
+    }
+    if (-not (Test-ExactStringSet -Actual $jobNames.ToArray() -Expected $ExpectedJobs)) {
+        return $false
     }
     return ((Get-PropertyValue $run 'run_id') -is [long] -and
         (Get-PropertyValue $run 'run_id') -gt 0 -and
@@ -1867,15 +1878,22 @@ $markerIssues = @($activeIssuesValue)
 $markerPrs = @($activePrsValue)
 $markerMergedPrs = @($mergedPrsValue)
 $activeIssues = @($markerIssues | Where-Object {
-    (Get-PropertyValue $_ 'author_login') -ceq 'nonononull'
+    $author = Get-PropertyProjection $_ 'author_login'
+    $author.exists -and (Test-ExactStringValue -Actual $author.value -Expected 'nonononull')
 })
 $activePrs = @($markerPrs | Where-Object {
-    (Get-PropertyValue $_ 'author_login') -ceq 'nonononull' -and
-    (Get-PropertyValue $_ 'head_owner_login') -ceq 'nonononull'
+    $author = Get-PropertyProjection $_ 'author_login'
+    $headOwner = Get-PropertyProjection $_ 'head_owner_login'
+    $author.exists -and $headOwner.exists -and
+        (Test-ExactStringValue -Actual $author.value -Expected 'nonononull') -and
+        (Test-ExactStringValue -Actual $headOwner.value -Expected 'nonononull')
 })
 $trustedMergedPrs = @($markerMergedPrs | Where-Object {
-    (Get-PropertyValue $_ 'author_login') -ceq 'nonononull' -and
-    (Get-PropertyValue $_ 'head_owner_login') -ceq 'nonononull'
+    $author = Get-PropertyProjection $_ 'author_login'
+    $headOwner = Get-PropertyProjection $_ 'head_owner_login'
+    $author.exists -and $headOwner.exists -and
+        (Test-ExactStringValue -Actual $author.value -Expected 'nonononull') -and
+        (Test-ExactStringValue -Actual $headOwner.value -Expected 'nonononull')
 })
 $linkedMergedPrs = @()
 if ($activeIssues.Count -eq 1) {
@@ -1934,9 +1952,13 @@ $isPostMergeTransition = $linkedMergedPrs.Count -eq 1 -and
         (Get-PropertyValue $snapshot 'observed_remote_main')
 $sideEffectAdmissionTerminal = Get-PropertyValue $sideEffectAdmissionMatrix 'terminal'
 $sideEffectAdmissionTerminalAction = Get-PropertyValue $sideEffectAdmissionTerminal 'action'
-$isSideEffectAdmissionTask = $activeIssues.Count -eq 1 -and
-    (Get-PropertyValue $activeIssues[0] 'url') -ceq
-        (Get-PropertyValue $sideEffectAdmissionMatrix 'tracking_issue_ref')
+$sideEffectAdmissionTrackingIssueRef = Get-PropertyValue $sideEffectAdmissionMatrix 'tracking_issue_ref'
+$sideEffectAdmissionIssues = @($activeIssues | Where-Object {
+    $issueUrl = Get-PropertyProjection $_ 'url'
+    $issueUrl.exists -and
+        (Test-ExactStringValue -Actual $issueUrl.value -Expected $sideEffectAdmissionTrackingIssueRef)
+})
+$isSideEffectAdmissionTask = $sideEffectAdmissionIssues.Count -eq 1
 if ($linkedMergedPrs.Count -eq 1 -and -not $isPostMergeTransition) {
     $reasonCodes.Add('MERGED_PR_MAIN_DRIFT') | Out-Null
 }
@@ -1977,7 +1999,9 @@ if ($activePrs.Count -eq 1) {
     if ($branchValue -in @('main', 'master')) {
         $reasonCodes.Add('PR_BRANCH_INVALID') | Out-Null
     }
-    if ((Get-PropertyValue $activePrs[0] 'base_ref') -cne 'main') {
+    $prBaseRef = Get-PropertyProjection $activePrs[0] 'base_ref'
+    if (-not $prBaseRef.exists -or
+        -not (Test-ExactStringValue -Actual $prBaseRef.value -Expected 'main')) {
         $reasonCodes.Add('PR_BASE_INVALID') | Out-Null
     }
     if ((Get-PropertyValue $activePrs[0] 'head_oid') -cne (Get-PropertyValue $snapshot 'worktree_head')) {

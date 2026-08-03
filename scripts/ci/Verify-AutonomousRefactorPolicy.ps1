@@ -242,7 +242,11 @@ $workflowExpectations = [ordered]@{
 $workflowsValue = Get-PropertyValue $mergeGate 'required_workflows'
 $workflows = if ($workflowsValue -is [System.Array]) { [object[]]$workflowsValue } else { @() }
 foreach ($workflowName in $workflowExpectations.Keys) {
-    $matches = @($workflows | Where-Object { (Get-PropertyValue $_ 'name') -ceq $workflowName })
+    $matches = @($workflows | Where-Object {
+        $nameProperty = $_.PSObject.Properties['name']
+        $null -ne $nameProperty -and
+            (Test-ExactJsonString -Actual $nameProperty.Value -Expected $workflowName)
+    })
     if ($matches.Count -ne 1) {
         Add-Violation 'WORKFLOW_GATE' "Workflow Job 集合漂移：$workflowName"
         continue

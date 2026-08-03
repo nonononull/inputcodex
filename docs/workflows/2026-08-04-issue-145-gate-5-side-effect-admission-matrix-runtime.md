@@ -42,4 +42,4 @@ startup baseline
 
 ## Current Node
 
-首版 Final Head 的独立复审问题已完成 RED/GREEN：22-feature owner/blocker oracle、model-catalog credential profile、#145 复合 terminal、PowerShell 原始 JSON 类型边界与 PR marker 均已纳入修正。完整治理合同为 `88/88`，Parity admission 为 `6/6`，目录为 `33/33`；当前只允许普通 correction commit/push 和修正 Head 只读复审。未经修正 Head 独立复审和 Hosted 双 Workflow，不得创建完成结论或合并。
+两轮 Final Head 复审问题均已完成 RED/GREEN：22-feature owner/blocker oracle、model-catalog credential profile、#145 复合 terminal、PowerShell 原始 JSON 类型边界与 PR marker 均已纳入修正；Workflow 名称、owner/base 身份和多 Issue hard-stop 也使用原始类型与复合 terminal 约束。完整治理合同为 `90/90`，Parity admission 为 `6/6`，目录为 `33/33`；当前只允许普通 correction commit/push 和新 Head 只读复审。未经新 Head 独立复审和 Hosted 双 Workflow，不得创建完成结论或合并。

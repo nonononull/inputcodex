@@ -5090,7 +5090,7 @@ Assert-NativeSuccess 'Issue #145 Git 空白检查'
 Write-Output "ISSUE145_LOCAL_VERIFY_OK scope_hash=$scopeHash paths=$($actual.Count) policy_hash=$($policy.policy_sha256)"
 ```
 
-期望：治理合同 `88/88`、Parity `6/6 + 33/33` 及其余 all-targets、Clippy、rustfmt、仓库政策和 Release Audit
+期望：治理合同 `90/90`、Parity `6/6 + 33/33` 及其余 all-targets、Clippy、rustfmt、仓库政策和 Release Audit
 全部通过；范围精确为二十路径，矩阵为 `83 = write 70 + process 5 + network 8`，产品计数零变化。
 
 ## 外部 AGOS 使用边界

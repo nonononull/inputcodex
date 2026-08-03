@@ -901,6 +901,12 @@ Invoke-ContractTest -Name '拒绝漂移的 Workflow 强身份绑定' -Body {
             -Result (Invoke-AutonomousPolicyCase -Name "workflow-identity-$($case.Name)" -Policy $policy) `
             -ExpectedCode 'WORKFLOW_IDENTITY'
     }
+
+    $arrayName = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
+    $arrayName.merge_gate.required_workflows[0].name = [object[]]@('CI')
+    Assert-AutonomousPolicyFailure `
+        -Result (Invoke-AutonomousPolicyCase -Name 'workflow-name-array' -Policy $arrayName) `
+        -ExpectedCode 'WORKFLOW_GATE'
 }
 
 Invoke-ContractTest -Name '拒绝漂移的 upstream-sync stale 例外' -Body {
@@ -1562,6 +1568,7 @@ Invoke-ContractTest -Name '无人值守 Final Head 合并门拒绝单元素数�
         [pscustomobject]@{ Name = 'evidence-scope'; Code = 'EVIDENCE_SCOPE' },
         [pscustomobject]@{ Name = 'evidence-policy'; Code = 'EVIDENCE_POLICY' },
         [pscustomobject]@{ Name = 'review-status'; Code = 'INDEPENDENT_REVIEW' },
+        [pscustomobject]@{ Name = 'workflow-name'; Code = 'WORKFLOW_CI' },
         [pscustomobject]@{ Name = 'workflow-status'; Code = 'WORKFLOW_CI' },
         [pscustomobject]@{ Name = 'workflow-artifact'; Code = 'WORKFLOW_CI' }
     )) {
@@ -1595,6 +1602,10 @@ Invoke-ContractTest -Name '无人值守 Final Head 合并门拒绝单元素数�
                 $snapshot.active_prs[0].review_attestation.status =
                     [object[]]@($snapshot.active_prs[0].review_attestation.status)
             }
+            'workflow-name' {
+                $snapshot.active_prs[0].workflow_runs[0].name =
+                    [object[]]@($snapshot.active_prs[0].workflow_runs[0].name)
+            }
             'workflow-status' {
                 $snapshot.active_prs[0].workflow_runs[0].status =
                     [object[]]@($snapshot.active_prs[0].workflow_runs[0].status)
@@ -1625,6 +1636,76 @@ Invoke-ContractTest -Name '无人值守 Final Head 合并门拒绝单元素数�
     Assert-Equal -Expected 'AUTONOMOUS_STATE_INVALID_SNAPSHOT' `
         -Actual $rootArrayResult.Json.error_code `
         -Message '状态快照根数组必须返回稳定错误码'
+}
+
+Invoke-ContractTest -Name '无人值守 owner 与 base 身份数组不得进入合并就绪' -Body {
+    foreach ($case in @(
+        [pscustomobject]@{
+            Name = 'issue-author'
+            ExpectedState = 'blocked-hard-stop'
+            ExpectedAction = 'stop'
+            Reason = 'PR_WITHOUT_ISSUE'
+        },
+        [pscustomobject]@{
+            Name = 'pr-author'
+            ExpectedState = 'active-issue-planning'
+            ExpectedAction = 'resume-issue'
+            Reason = $null
+        },
+        [pscustomobject]@{
+            Name = 'pr-head-owner'
+            ExpectedState = 'active-issue-planning'
+            ExpectedAction = 'resume-issue'
+            Reason = $null
+        },
+        [pscustomobject]@{
+            Name = 'pr-base'
+            ExpectedState = 'blocked-hard-stop'
+            ExpectedAction = 'stop'
+            Reason = 'PR_BASE_INVALID'
+        }
+    )) {
+        $snapshot = New-MergeReadyAutonomousStateSnapshot
+        switch ($case.Name) {
+            'issue-author' {
+                $snapshot.active_issues[0].author_login =
+                    [object[]]@($snapshot.active_issues[0].author_login)
+            }
+            'pr-author' {
+                $snapshot.active_prs[0].author_login =
+                    [object[]]@($snapshot.active_prs[0].author_login)
+            }
+            'pr-head-owner' {
+                $snapshot.active_prs[0].head_owner_login =
+                    [object[]]@($snapshot.active_prs[0].head_owner_login)
+            }
+            'pr-base' {
+                $snapshot.active_prs[0].base_ref =
+                    [object[]]@($snapshot.active_prs[0].base_ref)
+            }
+        }
+
+        $result = Invoke-AutonomousStateCase -Name "identity-array-$($case.Name)" -Snapshot $snapshot
+        Assert-AutonomousState -Result $result -ExpectedState $case.ExpectedState `
+            -ExpectedAction $case.ExpectedAction
+        if ($null -ne $case.Reason) {
+            Assert-Contains -Collection @($result.Json.reason_codes) -Expected $case.Reason `
+                -Message "身份数组必须稳定 fail-closed：$($case.Name)"
+        }
+    }
+}
+
+Invoke-ContractTest -Name '无人值守合并后 Workflow 名称数组不得通过主干门' -Body {
+    $snapshot = New-PostMergeAutonomousStateSnapshot
+    $snapshot.merged_prs[0].workflow_runs[0].name =
+        [object[]]@($snapshot.merged_prs[0].workflow_runs[0].name)
+    $result = Invoke-AutonomousStateCase -Name 'post-merge-workflow-name-array' -Snapshot $snapshot
+
+    Assert-AutonomousState -Result $result -ExpectedState 'post-merge-verification' `
+        -ExpectedAction 'verify-main'
+    Assert-Contains -Collection @($result.Json.post_merge_gate_pending) `
+        -Expected 'POST_MERGE_WORKFLOW_CI' `
+        -Message '主干 Workflow 名称单元素数组不得通过 post-merge 门'
 }
 
 Invoke-ContractTest -Name '无人值守任一 Final Head 合并门失败均只恢复 PR' -Body {
@@ -1711,6 +1792,28 @@ Invoke-ContractTest -Name '副作用准入任务硬停止进入 owner terminal t
         -ExpectedAction 'close-task-and-reopen-owner-decision-issue'
     Assert-Contains -Collection @($result.Json.reason_codes) -Expected 'MULTIPLE_WRITERS' `
         -Message '原始 hard-stop 原因必须保留'
+
+    $multipleIssues = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
+    $multipleIssues.branch = 'codex/issue-145-gate-5-side-effect-admission-matrix'
+    $multipleIssues.active_issues = @(
+        [pscustomobject]@{
+            number = 145L
+            url = 'https://github.com/nonononull/inputcodex/issues/145'
+            author_login = 'nonononull'
+        },
+        [pscustomobject]@{
+            number = 999L
+            url = 'https://github.com/nonononull/inputcodex/issues/999'
+            author_login = 'nonononull'
+        }
+    )
+    $multipleIssueResult = Invoke-AutonomousStateCase `
+        -Name 'side-effect-admission-multiple-issues-hard-stop' -Snapshot $multipleIssues
+
+    Assert-AutonomousState -Result $multipleIssueResult -ExpectedState 'blocked-hard-stop' `
+        -ExpectedAction 'close-task-and-reopen-owner-decision-issue'
+    Assert-Contains -Collection @($multipleIssueResult.Json.reason_codes) `
+        -Expected 'MULTIPLE_ACTIVE_ISSUES' -Message '多 Issue hard-stop 原因必须保留'
 }
 
 Invoke-ContractTest -Name '副作用准入任务合并后进入 owner terminal transition' -Body {
