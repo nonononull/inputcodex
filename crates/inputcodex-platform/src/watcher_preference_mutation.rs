@@ -550,12 +550,13 @@ mod tests {
     };
 
     use inputcodex_application::{
-        WatcherPreferenceMutationControl, WatcherPreferenceMutationRequest,
+        MutateWatcherPreference, WatcherPreferenceMutationControl, WatcherPreferenceMutationPort,
+        WatcherPreferenceMutationRequest,
     };
     use inputcodex_domain::{
         WatcherPreference, WatcherPreferenceFinalObservation, WatcherPreferenceMarkerCommit,
         WatcherPreferenceMutationId, WatcherPreferenceMutationOutcome,
-        WatcherPreferenceSetupCommit,
+        WatcherPreferenceMutationReceipt, WatcherPreferenceSetupCommit,
     };
 
     use super::{
@@ -683,6 +684,39 @@ mod tests {
         Step::Metadata(path.to_path_buf(), result)
     }
 
+    struct TestMutationPort<'a, F> {
+        state_root: &'a Path,
+        file_system: &'a F,
+    }
+
+    impl<F: WatcherPreferenceFileSystem> WatcherPreferenceMutationPort for TestMutationPort<'_, F> {
+        fn mutate(
+            &self,
+            request: &WatcherPreferenceMutationRequest,
+            control: &WatcherPreferenceMutationControl,
+        ) -> WatcherPreferenceMutationReceipt {
+            mutate_watcher_preference_at_state_root(
+                self.state_root,
+                request,
+                control,
+                self.file_system,
+            )
+        }
+    }
+
+    fn execute_watcher_preference_at_state_root(
+        state_root: &Path,
+        request: &WatcherPreferenceMutationRequest,
+        control: &WatcherPreferenceMutationControl,
+        file_system: &impl WatcherPreferenceFileSystem,
+    ) -> WatcherPreferenceMutationReceipt {
+        MutateWatcherPreference::new(TestMutationPort {
+            state_root,
+            file_system,
+        })
+        .execute(request, control)
+    }
+
     #[test]
     fn 预先取消时不触碰文件系统() {
         let (_, root, _) = paths();
@@ -690,7 +724,7 @@ mod tests {
         let control = WatcherPreferenceMutationControl::new();
         let _ = control.cancel();
 
-        let receipt = mutate_watcher_preference_at_state_root(
+        let receipt = execute_watcher_preference_at_state_root(
             &root,
             &request(
                 WatcherPreference::EnabledByDefault,
@@ -725,7 +759,7 @@ mod tests {
             ),
         ] {
             let fs = ScriptedFileSystem::new(vec![metadata(&parent, result)]);
-            let receipt = mutate_watcher_preference_at_state_root(
+            let receipt = execute_watcher_preference_at_state_root(
                 &root,
                 &request(
                     WatcherPreference::EnabledByDefault,
@@ -752,7 +786,7 @@ mod tests {
             metadata(&root, MetadataResult::Error(io::ErrorKind::NotFound)),
         ]);
 
-        let receipt = mutate_watcher_preference_at_state_root(
+        let receipt = execute_watcher_preference_at_state_root(
             &root,
             &request(
                 WatcherPreference::ExplicitlyDisabled,
@@ -807,7 +841,7 @@ mod tests {
             ),
         ]);
 
-        let receipt = mutate_watcher_preference_at_state_root(
+        let receipt = execute_watcher_preference_at_state_root(
             &root,
             &request(
                 WatcherPreference::EnabledByDefault,
@@ -864,7 +898,7 @@ mod tests {
             metadata(&marker, MetadataResult::Error(io::ErrorKind::NotFound)),
         ]);
 
-        let receipt = mutate_watcher_preference_at_state_root(
+        let receipt = execute_watcher_preference_at_state_root(
             &root,
             &request(
                 WatcherPreference::EnabledByDefault,
@@ -907,7 +941,7 @@ mod tests {
             metadata(&root, MetadataResult::Error(io::ErrorKind::NotFound)),
         ]);
 
-        let receipt = mutate_watcher_preference_at_state_root(
+        let receipt = execute_watcher_preference_at_state_root(
             &root,
             &request(
                 WatcherPreference::EnabledByDefault,
@@ -980,7 +1014,7 @@ mod tests {
                 metadata(&marker, final_result),
             ]);
 
-            let receipt = mutate_watcher_preference_at_state_root(
+            let receipt = execute_watcher_preference_at_state_root(
                 &root,
                 &request(expected, desired),
                 &WatcherPreferenceMutationControl::new(),
@@ -1030,7 +1064,7 @@ mod tests {
                 metadata(&marker, actual),
             ]);
 
-            let receipt = mutate_watcher_preference_at_state_root(
+            let receipt = execute_watcher_preference_at_state_root(
                 &root,
                 &request,
                 &WatcherPreferenceMutationControl::new(),
@@ -1076,7 +1110,7 @@ mod tests {
             ],
         ] {
             let fs = ScriptedFileSystem::new(steps);
-            let receipt = mutate_watcher_preference_at_state_root(
+            let receipt = execute_watcher_preference_at_state_root(
                 &root,
                 &request(
                     WatcherPreference::EnabledByDefault,
@@ -1112,7 +1146,7 @@ mod tests {
         ])
         .cancelling_on_metadata_call(3, control.clone());
 
-        let receipt = mutate_watcher_preference_at_state_root(
+        let receipt = execute_watcher_preference_at_state_root(
             &root,
             &request(
                 WatcherPreference::EnabledByDefault,
@@ -1168,7 +1202,7 @@ mod tests {
                 metadata(&marker, final_result),
             ]);
 
-            let receipt = mutate_watcher_preference_at_state_root(
+            let receipt = execute_watcher_preference_at_state_root(
                 &root,
                 &request(
                     WatcherPreference::EnabledByDefault,
@@ -1217,7 +1251,7 @@ mod tests {
             ),
         ]);
 
-        let receipt = mutate_watcher_preference_at_state_root(
+        let receipt = execute_watcher_preference_at_state_root(
             &root,
             &request(
                 WatcherPreference::EnabledByDefault,
@@ -1255,7 +1289,7 @@ mod tests {
             ),
         ]);
 
-        let receipt = mutate_watcher_preference_at_state_root(
+        let receipt = execute_watcher_preference_at_state_root(
             &root,
             &request(
                 WatcherPreference::EnabledByDefault,

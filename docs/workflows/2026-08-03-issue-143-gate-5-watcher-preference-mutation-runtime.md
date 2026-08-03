@@ -54,7 +54,7 @@ Release Audit 基线为 `current`。Git snapshot governance 为 ready。
 ### Node 3：Application TDD
 
 状态：completed。已固定 expected/desired、提交前 Cancelled、提交后 TooLate、完成后 Finished 与 receipt 不丢失；
-独立 mutation control、Port 和 UseCase 专项 `6/6`、全目标与 Clippy 通过，未复用 `LoadCoordinator`。
+独立 mutation control、Port 和 UseCase 专项 `8/8`、全目标与 Clippy 通过；control 由单执行者原子占用，未复用 `LoadCoordinator`。
 
 ### Node 4：Platform TDD
 

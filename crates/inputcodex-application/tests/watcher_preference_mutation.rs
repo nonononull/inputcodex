@@ -1,4 +1,12 @@
-use std::{cell::Cell, rc::Rc};
+use std::{
+    cell::Cell,
+    rc::Rc,
+    sync::{
+        Arc, Barrier,
+        atomic::{AtomicUsize, Ordering},
+    },
+    thread,
+};
 
 use inputcodex_application::{
     MutateWatcherPreference, WatcherPreferenceCancellationOutcome,
@@ -36,6 +44,29 @@ impl WatcherPreferenceMutationPort for StubPort {
             outcome.set(Some(control.cancel()));
         }
         self.receipt
+    }
+}
+
+#[derive(Clone)]
+struct BlockingPort {
+    calls: Arc<AtomicUsize>,
+    first_call_entered: Arc<Barrier>,
+    release_first_call: Arc<Barrier>,
+}
+
+impl WatcherPreferenceMutationPort for BlockingPort {
+    fn mutate(
+        &self,
+        _request: &WatcherPreferenceMutationRequest,
+        control: &WatcherPreferenceMutationControl,
+    ) -> WatcherPreferenceMutationReceipt {
+        let call = self.calls.fetch_add(1, Ordering::SeqCst);
+        if call == 0 {
+            assert!(control.try_reach_commit());
+            self.first_call_entered.wait();
+            self.release_first_call.wait();
+        }
+        receipt(WatcherPreferenceMutationOutcome::Applied)
     }
 }
 
@@ -231,17 +262,72 @@ fn 提交前端口返回时已接受取消必须交付_cancelled_收据() {
 }
 
 #[test]
-fn control_clone_共享同一提交阶段() {
+fn 未被执行占用的_control_不能进入提交阶段() {
     let control = WatcherPreferenceMutationControl::new();
     let cloned = control.clone();
 
-    assert!(cloned.try_reach_commit());
-    assert_eq!(
-        control.phase(),
-        WatcherPreferenceMutationPhase::CommitReached
-    );
+    assert!(!cloned.try_reach_commit());
+    assert_eq!(control.phase(), WatcherPreferenceMutationPhase::Pending);
     assert_eq!(
         control.cancel(),
-        WatcherPreferenceCancellationOutcome::TooLate
+        WatcherPreferenceCancellationOutcome::Accepted
     );
+}
+
+#[test]
+fn 同一_control_到达提交点后并发执行仍只有首个执行者进入_port() {
+    let calls = Arc::new(AtomicUsize::new(0));
+    let first_call_entered = Arc::new(Barrier::new(2));
+    let release_first_call = Arc::new(Barrier::new(2));
+    let use_case = MutateWatcherPreference::new(BlockingPort {
+        calls: Arc::clone(&calls),
+        first_call_entered: Arc::clone(&first_call_entered),
+        release_first_call: Arc::clone(&release_first_call),
+    });
+    let control = WatcherPreferenceMutationControl::new();
+
+    let first = thread::spawn({
+        let use_case = use_case.clone();
+        let control = control.clone();
+        move || use_case.execute(&request(), &control)
+    });
+    first_call_entered.wait();
+
+    let second = use_case.execute(&request(), &control);
+    release_first_call.wait();
+    let first = first.join().expect("首个 mutation 线程必须完成");
+
+    assert_eq!(calls.load(Ordering::SeqCst), 1);
+    assert_eq!(first.outcome(), WatcherPreferenceMutationOutcome::Applied);
+    assert_eq!(second.outcome(), WatcherPreferenceMutationOutcome::Failed);
+    assert_eq!(
+        second.diagnostic_code().as_str(),
+        "WATCHER_PREFERENCE_MUTATION_CONTROL_IN_USE"
+    );
+    assert_eq!(control.phase(), WatcherPreferenceMutationPhase::Finished);
+}
+
+#[test]
+fn 已完成的_control_顺序复用不再调用_port() {
+    let calls = Rc::new(Cell::new(0));
+    let use_case = MutateWatcherPreference::new(StubPort {
+        calls: Rc::clone(&calls),
+        receipt: receipt(WatcherPreferenceMutationOutcome::Applied),
+        reach_commit: false,
+        cancel_at_commit: None,
+        cancel_before_return: None,
+    });
+    let control = WatcherPreferenceMutationControl::new();
+
+    let first = use_case.execute(&request(), &control);
+    let second = use_case.execute(&request(), &control);
+
+    assert_eq!(calls.get(), 1);
+    assert_eq!(first.outcome(), WatcherPreferenceMutationOutcome::Applied);
+    assert_eq!(second.outcome(), WatcherPreferenceMutationOutcome::Failed);
+    assert_eq!(
+        second.diagnostic_code().as_str(),
+        "WATCHER_PREFERENCE_MUTATION_CONTROL_FINISHED"
+    );
+    assert_eq!(control.phase(), WatcherPreferenceMutationPhase::Finished);
 }

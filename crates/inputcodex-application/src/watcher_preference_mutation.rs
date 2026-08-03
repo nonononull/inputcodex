@@ -13,9 +13,11 @@ use inputcodex_domain::{
 };
 
 const PHASE_PENDING: u8 = 0;
-const PHASE_CANCELLED: u8 = 1;
-const PHASE_COMMIT_REACHED: u8 = 2;
-const PHASE_FINISHED: u8 = 3;
+const PHASE_RUNNING: u8 = 1;
+const PHASE_CANCELLED: u8 = 2;
+const PHASE_CANCELLATION_ACCEPTED: u8 = 3;
+const PHASE_COMMIT_REACHED: u8 = 4;
+const PHASE_FINISHED: u8 = 5;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct WatcherPreferenceMutationRequest {
@@ -69,6 +71,20 @@ pub enum WatcherPreferenceCancellationOutcome {
     Finished,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum WatcherPreferenceExecutionClaim {
+    Claimed,
+    Cancelled,
+    InUse,
+    Finished,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum WatcherPreferenceFinishOutcome {
+    Completed,
+    CancellationWon,
+}
+
 #[derive(Clone)]
 pub struct WatcherPreferenceMutationControl {
     phase: Arc<AtomicU8>,
@@ -100,8 +116,10 @@ impl WatcherPreferenceMutationControl {
     #[must_use]
     pub fn phase(&self) -> WatcherPreferenceMutationPhase {
         match self.phase.load(Ordering::Acquire) {
-            PHASE_PENDING => WatcherPreferenceMutationPhase::Pending,
-            PHASE_CANCELLED => WatcherPreferenceMutationPhase::Cancelled,
+            PHASE_PENDING | PHASE_RUNNING => WatcherPreferenceMutationPhase::Pending,
+            PHASE_CANCELLED | PHASE_CANCELLATION_ACCEPTED => {
+                WatcherPreferenceMutationPhase::Cancelled
+            }
             PHASE_COMMIT_REACHED => WatcherPreferenceMutationPhase::CommitReached,
             PHASE_FINISHED => WatcherPreferenceMutationPhase::Finished,
             _ => unreachable!("mutation phase 只由本类型写入"),
@@ -125,7 +143,23 @@ impl WatcherPreferenceMutationControl {
                         return WatcherPreferenceCancellationOutcome::Accepted;
                     }
                 }
-                PHASE_CANCELLED => return WatcherPreferenceCancellationOutcome::Accepted,
+                PHASE_RUNNING => {
+                    if self
+                        .phase
+                        .compare_exchange_weak(
+                            PHASE_RUNNING,
+                            PHASE_CANCELLATION_ACCEPTED,
+                            Ordering::AcqRel,
+                            Ordering::Acquire,
+                        )
+                        .is_ok()
+                    {
+                        return WatcherPreferenceCancellationOutcome::Accepted;
+                    }
+                }
+                PHASE_CANCELLED | PHASE_CANCELLATION_ACCEPTED => {
+                    return WatcherPreferenceCancellationOutcome::Accepted;
+                }
                 PHASE_COMMIT_REACHED => return WatcherPreferenceCancellationOutcome::TooLate,
                 PHASE_FINISHED => return WatcherPreferenceCancellationOutcome::Finished,
                 _ => unreachable!("mutation phase 只由本类型写入"),
@@ -137,11 +171,11 @@ impl WatcherPreferenceMutationControl {
     pub fn try_reach_commit(&self) -> bool {
         loop {
             match self.phase.load(Ordering::Acquire) {
-                PHASE_PENDING => {
+                PHASE_RUNNING => {
                     if self
                         .phase
                         .compare_exchange_weak(
-                            PHASE_PENDING,
+                            PHASE_RUNNING,
                             PHASE_COMMIT_REACHED,
                             Ordering::AcqRel,
                             Ordering::Acquire,
@@ -151,20 +185,79 @@ impl WatcherPreferenceMutationControl {
                         return true;
                     }
                 }
-                PHASE_CANCELLED | PHASE_FINISHED => return false,
+                PHASE_PENDING | PHASE_CANCELLED | PHASE_CANCELLATION_ACCEPTED | PHASE_FINISHED => {
+                    return false;
+                }
                 PHASE_COMMIT_REACHED => return true,
                 _ => unreachable!("mutation phase 只由本类型写入"),
             }
         }
     }
 
-    fn finish(&self) -> WatcherPreferenceMutationPhase {
-        match self.phase.swap(PHASE_FINISHED, Ordering::AcqRel) {
-            PHASE_PENDING => WatcherPreferenceMutationPhase::Pending,
-            PHASE_CANCELLED => WatcherPreferenceMutationPhase::Cancelled,
-            PHASE_COMMIT_REACHED => WatcherPreferenceMutationPhase::CommitReached,
-            PHASE_FINISHED => WatcherPreferenceMutationPhase::Finished,
-            _ => unreachable!("mutation phase 只由本类型写入"),
+    fn claim_execution(&self) -> WatcherPreferenceExecutionClaim {
+        loop {
+            match self.phase.load(Ordering::Acquire) {
+                PHASE_PENDING => {
+                    if self
+                        .phase
+                        .compare_exchange_weak(
+                            PHASE_PENDING,
+                            PHASE_RUNNING,
+                            Ordering::AcqRel,
+                            Ordering::Acquire,
+                        )
+                        .is_ok()
+                    {
+                        return WatcherPreferenceExecutionClaim::Claimed;
+                    }
+                }
+                PHASE_CANCELLED => {
+                    if self
+                        .phase
+                        .compare_exchange_weak(
+                            PHASE_CANCELLED,
+                            PHASE_FINISHED,
+                            Ordering::AcqRel,
+                            Ordering::Acquire,
+                        )
+                        .is_ok()
+                    {
+                        return WatcherPreferenceExecutionClaim::Cancelled;
+                    }
+                }
+                PHASE_RUNNING | PHASE_CANCELLATION_ACCEPTED | PHASE_COMMIT_REACHED => {
+                    return WatcherPreferenceExecutionClaim::InUse;
+                }
+                PHASE_FINISHED => return WatcherPreferenceExecutionClaim::Finished,
+                _ => unreachable!("mutation phase 只由本类型写入"),
+            }
+        }
+    }
+
+    fn finish_claimed(&self) -> WatcherPreferenceFinishOutcome {
+        loop {
+            let (current, outcome) = match self.phase.load(Ordering::Acquire) {
+                PHASE_RUNNING => (PHASE_RUNNING, WatcherPreferenceFinishOutcome::Completed),
+                PHASE_CANCELLATION_ACCEPTED => (
+                    PHASE_CANCELLATION_ACCEPTED,
+                    WatcherPreferenceFinishOutcome::CancellationWon,
+                ),
+                PHASE_COMMIT_REACHED => (
+                    PHASE_COMMIT_REACHED,
+                    WatcherPreferenceFinishOutcome::Completed,
+                ),
+                PHASE_PENDING | PHASE_CANCELLED | PHASE_FINISHED => {
+                    unreachable!("只有占用 control 的执行者可以结束 mutation")
+                }
+                _ => unreachable!("mutation phase 只由本类型写入"),
+            };
+            if self
+                .phase
+                .compare_exchange_weak(current, PHASE_FINISHED, Ordering::AcqRel, Ordering::Acquire)
+                .is_ok()
+            {
+                return outcome;
+            }
         }
     }
 }
@@ -196,24 +289,30 @@ impl<P: WatcherPreferenceMutationPort> MutateWatcherPreference<P> {
         request: &WatcherPreferenceMutationRequest,
         control: &WatcherPreferenceMutationControl,
     ) -> WatcherPreferenceMutationReceipt {
-        let receipt = match control.phase() {
-            WatcherPreferenceMutationPhase::Cancelled => terminal_receipt(
+        match control.claim_execution() {
+            WatcherPreferenceExecutionClaim::Cancelled => terminal_receipt(
                 request,
                 WatcherPreferenceMutationOutcome::Cancelled,
                 "WATCHER_PREFERENCE_MUTATION_CANCELLED",
             ),
-            WatcherPreferenceMutationPhase::Finished => terminal_receipt(
+            WatcherPreferenceExecutionClaim::InUse => terminal_receipt(
+                request,
+                WatcherPreferenceMutationOutcome::Failed,
+                "WATCHER_PREFERENCE_MUTATION_CONTROL_IN_USE",
+            ),
+            WatcherPreferenceExecutionClaim::Finished => terminal_receipt(
                 request,
                 WatcherPreferenceMutationOutcome::Failed,
                 "WATCHER_PREFERENCE_MUTATION_CONTROL_FINISHED",
             ),
-            WatcherPreferenceMutationPhase::Pending
-            | WatcherPreferenceMutationPhase::CommitReached => self.port.mutate(request, control),
-        };
-        if control.finish() == WatcherPreferenceMutationPhase::Cancelled {
-            cancellation_won_receipt(request, receipt.final_observation())
-        } else {
-            receipt
+            WatcherPreferenceExecutionClaim::Claimed => {
+                let receipt = self.port.mutate(request, control);
+                if control.finish_claimed() == WatcherPreferenceFinishOutcome::CancellationWon {
+                    cancellation_won_receipt(request, receipt.final_observation())
+                } else {
+                    receipt
+                }
+            }
         }
     }
 }

@@ -1130,7 +1130,7 @@
   `Pending / Cancelled / CommitReached / Finished` 状态机；提交后取消返回 `TooLate`，仍完成重观察并交付
   `setup_commit / marker_commit / final_observation / outcome / diagnostic_code`。RootCreated 后 marker 失败时
   空状态根合法保留，禁止歧义回滚。
-- 验证：Domain 专项 `4/4`、Application 专项 `6/6`、Platform 内部安全矩阵 `13/13`；Platform 全包
+- 验证：Domain 专项 `4/4`、Application 专项 `8/8`、Platform 内部安全矩阵 `13/13`；Platform 全包
   `85` 个单元测试及全部集成测试、Clippy 均通过。Parity RED 精确暴露新 feature 缺失与两个旧归属，
   GREEN 后完整目录测试为 `32/32`，目录终态为 source `19/83/30/3`、feature `13/22/11`、contract `46`、
   fixture manifest `12`。
@@ -1141,11 +1141,17 @@
   `fs` 只由真实 Windows/macOS 适配器使用却被 Linux test 导入，`Other` 文件类型只由真实平台分类构造、
   Linux 合成测试未构造；拆分 `fs` 导入条件，并把 `Other` 加入既有非法父对象矩阵，避免用 lint 例外掩盖
   缺失反例。
-- 独立复审纠错：Reviewer A 证明无提交路径在最后一次取消检查后仍可保持 `Pending`；取消线程先完成
+- 独立复审第一轮纠错：Reviewer A 证明无提交路径在最后一次取消检查后仍可保持 `Pending`；取消线程先完成
   `Pending -> Cancelled` 并返回 `Accepted` 后，旧 `finish()` 会无条件覆盖为 `Finished`，交付
-  `AlreadySatisfied / Conflict / Failed` 而不是 `Cancelled`。新增 Stub Port 确定性 RED；终结改为原子
-  `swap` 仲裁，若取消先赢则固定 `NotRequired / NotAttempted`、保留最终观察并交付 Cancelled receipt；
+  `AlreadySatisfied / Conflict / Failed` 而不是 `Cancelled`。新增 Stub Port 确定性 RED；终结改为占用者原子
+  CAS 仲裁，若取消先赢则固定 `NotRequired / NotAttempted`、保留最终观察并交付 Cancelled receipt；
   提交点先赢时继续交付原 receipt。
+- 独立复审第二轮纠错：同一 control 原先没有执行占用态，两个并发 `execute` 都可进入 Port；首个执行者
+  到达提交点后，第二个执行者仍可复用 `CommitReached` 再次提交，或在首个执行者已结束时把未发生取消的
+  结果伪装为 `Cancelled`。barrier 双线程 RED 精确得到 Port 调用 `2` 次；修复增加私有 `Running` 与运行中
+  已接受取消态，入口 CAS 只允许一个执行者占用，未占用 control 不能进入提交点，第二执行者返回稳定
+  `WATCHER_PREFERENCE_MUTATION_CONTROL_IN_USE` 且不能终结首个执行者。Platform 脚本夹具同步改走真实 UseCase，
+  Application 专项 `8/8`、Platform 全包 `85` 个单元测试及全部集成测试恢复通过。
 - 关联：Issue `#136`、Issue `#140`、Issue `#143`、`crates/inputcodex-application/src/watcher_preference_mutation.rs`、
   `crates/inputcodex-platform/src/watcher_preference_mutation.rs`、`parity/contracts/foundation-platform.yml`。
 

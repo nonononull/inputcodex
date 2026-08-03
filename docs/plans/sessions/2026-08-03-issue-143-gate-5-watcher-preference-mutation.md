@@ -125,7 +125,7 @@ independent_verification_policy:
 
 ## Execution Evidence
 
-- test: 四 crate all-targets、Clippy 与 fmt 全绿；Domain `4/4`、Application `6/6`、Platform 内部 `13/13` 与全包、Parity `32/32` 已通过
+- test: 四 crate all-targets、Clippy 与 fmt 全绿；Domain `4/4`、Application `8/8`、Platform 内部 `13/13` 与全包、Parity `32/32` 已通过
 - build: standard GitHub-hosted Windows/macOS CI；result pending
 - review: two independent Final Head reviewers；result pending
 - verification: CI contract `82/82`、Repository Policy 0、Release Audit current、Cargo metadata、禁止能力与 `24 / sha256:f96f1a...` 全部通过
