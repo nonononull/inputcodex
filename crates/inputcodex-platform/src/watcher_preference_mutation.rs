@@ -19,7 +19,9 @@ use inputcodex_domain::{
 #[cfg(any(target_os = "windows", target_os = "macos"))]
 use crate::SystemPlatformPaths;
 
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 const WATCHER_DISABLED_MARKER: &str = "watcher.disabled";
+#[cfg(any(target_os = "windows", target_os = "macos", test))]
 const INPUTCODEX_STATE_ROOT_NAME: &str = "inputcodex";
 
 static WATCHER_PREFERENCE_MUTATION_LOCK: Mutex<()> = Mutex::new(());

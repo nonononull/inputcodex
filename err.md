@@ -1134,6 +1134,10 @@
   `85` 个单元测试及全部集成测试、Clippy 均通过。Parity RED 精确暴露新 feature 缺失与两个旧归属，
   GREEN 后完整目录测试为 `32/32`，目录终态为 source `19/83/30/3`、feature `13/22/11`、contract `46`、
   fixture manifest `12`。
+- Hosted Linux 纠错：首个 PR Head 的 library Clippy 发现两个固定名常量只由
+  `windows / macos / test` 实现使用却缺少同源 `cfg`。该根因与本文件“2026-07-27：首个 Gate 5
+  实现暴露 Linux test cfg 边界”相同；复用既有处理，仅给常量增加与唯一使用方一致的条件编译，
+  不增加 `allow/expect(dead_code)`，不修改 Workflow 或平台语义。
 - 关联：Issue `#136`、Issue `#140`、Issue `#143`、`crates/inputcodex-application/src/watcher_preference_mutation.rs`、
   `crates/inputcodex-platform/src/watcher_preference_mutation.rs`、`parity/contracts/foundation-platform.yml`。
 
