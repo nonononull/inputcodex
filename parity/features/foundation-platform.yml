@@ -279,6 +279,29 @@ features:
       - issue:26
       - issue:127
       - issue:128
+  - id: feature.foundation-platform.watcher-preference-mutation
+    name: 'Watcher 偏好固定文件变更'
+    status: implemented
+    evidence:
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: disable_watcher
+      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
+        symbol: enable_watcher
+    entry_points:
+      - tauri-command:disable_watcher
+      - tauri-command:enable_watcher
+    platforms:
+      windows:
+        applicability: supported
+        semantics: '在 cooperative-same-user-v1 下校验即时父目录、固定 inputcodex 状态根与 reparse 类型；按 expected/desired 单层创建状态根、原子创建或条件删除 watcher.disabled，提交后重观察并返回 receipt。'
+      macos:
+        applicability: supported
+        semantics: '在 cooperative-same-user-v1 下校验即时父目录、固定 inputcodex 状态根与 symlink 类型；按 expected/desired 单层创建状态根、原子创建或条件删除 watcher.disabled，提交后重观察并返回 receipt。'
+    decision_refs:
+      - issue:26
+      - issue:136
+      - issue:140
+      - issue:143
   - id: feature.foundation-platform.watcher
     name: 'Watcher 管理'
     status: unassessed
@@ -288,17 +311,11 @@ features:
       - path: upstream/CodexPlusPlus/crates/codex-plus-core/src/watcher.rs
         symbol: stop_codex_processes_for_debug_port_and_wait
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
-        symbol: disable_watcher
-      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
-        symbol: enable_watcher
-      - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: install_watcher
       - path: upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs
         symbol: uninstall_watcher
     entry_points:
       - core-module:watcher
-      - tauri-command:disable_watcher
-      - tauri-command:enable_watcher
       - tauri-command:install_watcher
       - tauri-command:uninstall_watcher
     platforms:
