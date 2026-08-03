@@ -646,6 +646,129 @@ function Test-ExactStringSet {
         [string]::Join([char]10, $actualSorted) -ceq [string]::Join([char]10, $expectedSorted))
 }
 
+function Get-FixedFileMutationTrancheProjection {
+    param([AllowNull()]$Value)
+
+    $invalid = [pscustomobject][ordered]@{ valid = $false }
+    if ($Value -isnot [pscustomobject] -or
+        -not (Test-ExactStringSet `
+            -Actual @($Value.PSObject.Properties.Name) `
+            -Expected @(
+                'schema_version',
+                'decision_id',
+                'owner_decision_ref',
+                'retry_resume_ref',
+                'standing_authorization_ref',
+                'repository_batches_max',
+                'product_deliveries_max',
+                'candidate_features',
+                'expected_source_delta',
+                'terminal'
+            ))) {
+        return $invalid
+    }
+
+    $candidateFeaturesProjection = Get-PropertyProjection $Value 'candidate_features'
+    $candidateFeatures = $candidateFeaturesProjection.value
+    $schemaVersion = $Value.PSObject.Properties['schema_version'].Value
+    $decisionId = $Value.PSObject.Properties['decision_id'].Value
+    $ownerDecisionRef = $Value.PSObject.Properties['owner_decision_ref'].Value
+    $retryResumeRef = $Value.PSObject.Properties['retry_resume_ref'].Value
+    $standingAuthorizationRef = $Value.PSObject.Properties['standing_authorization_ref'].Value
+    $repositoryBatchesMaxProperty = $Value.PSObject.Properties['repository_batches_max']
+    $repositoryBatchesMax = $repositoryBatchesMaxProperty.Value
+    $productDeliveriesMaxProperty = $Value.PSObject.Properties['product_deliveries_max']
+    $productDeliveriesMax = $productDeliveriesMaxProperty.Value
+    $expectedSourceDelta = $Value.PSObject.Properties['expected_source_delta'].Value
+    $terminal = $Value.PSObject.Properties['terminal'].Value
+    if (-not $candidateFeaturesProjection.exists -or
+        $candidateFeatures -isnot [System.Array] -or
+        $candidateFeatures.Count -ne 1 -or
+        $candidateFeatures[0] -isnot [string] -or
+        $expectedSourceDelta -isnot [pscustomobject] -or
+        -not (Test-ExactStringSet `
+            -Actual @($expectedSourceDelta.PSObject.Properties.Name) `
+            -Expected @('implemented', 'unassessed')) -or
+        $terminal -isnot [pscustomobject] -or
+        -not (Test-ExactStringSet `
+            -Actual @($terminal.PSObject.Properties.Name) `
+            -Expected @('owner_issue_ref', 'reopen_on', 'action', 'state', 'next_action'))) {
+        return $invalid
+    }
+
+    $terminalOwnerIssueRef = $terminal.PSObject.Properties['owner_issue_ref'].Value
+    $terminalAction = $terminal.PSObject.Properties['action'].Value
+    $terminalState = $terminal.PSObject.Properties['state'].Value
+    $terminalNextAction = $terminal.PSObject.Properties['next_action'].Value
+    $reopenOnProjection = Get-PropertyProjection $terminal 'reopen_on'
+    $reopenOn = $reopenOnProjection.value
+    $stringFieldsValid =
+        $schemaVersion -is [string] -and
+        $schemaVersion -ceq 'inputcodex.fixed-file-mutation-tranche.v1' -and
+        $decisionId -is [string] -and
+        $decisionId -ceq 'gate5-fixed-file-mutation-tranche-v1' -and
+        $ownerDecisionRef -is [string] -and
+        $ownerDecisionRef -ceq 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159072214' -and
+        $retryResumeRef -is [string] -and
+        $retryResumeRef -ceq 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159471091' -and
+        $standingAuthorizationRef -is [string] -and
+        $standingAuthorizationRef -ceq 'https://github.com/nonononull/inputcodex/issues/111' -and
+        $terminalOwnerIssueRef -is [string] -and
+        $terminalOwnerIssueRef -ceq 'https://github.com/nonononull/inputcodex/issues/140' -and
+        $terminalAction -is [string] -and
+        $terminalAction -ceq 'reopen-owner-decision-issue' -and
+        $terminalState -is [string] -and
+        $terminalState -ceq 'blocked-candidate-exhausted' -and
+        $terminalNextAction -is [string] -and
+        $terminalNextAction -ceq 'await-owner-decision'
+    $expectedImplementedProperty = $expectedSourceDelta.PSObject.Properties['implemented']
+    $expectedImplemented = $expectedImplementedProperty.Value
+    $expectedUnassessedProperty = $expectedSourceDelta.PSObject.Properties['unassessed']
+    $expectedUnassessed = $expectedUnassessedProperty.Value
+    if (-not $reopenOnProjection.exists -or
+        $reopenOn -isnot [System.Array] -or
+        $reopenOn.Count -ne 2 -or
+        $reopenOn[0] -isnot [string] -or
+        $reopenOn[1] -isnot [string] -or
+        -not $stringFieldsValid -or
+        $repositoryBatchesMax -isnot [long] -or
+        $repositoryBatchesMax -ne 2L -or
+        $productDeliveriesMax -isnot [long] -or
+        $productDeliveriesMax -ne 1L -or
+        $candidateFeatures[0] -cne 'feature.foundation-platform.watcher-preference-mutation' -or
+        $expectedImplemented -isnot [long] -or
+        $expectedImplemented -ne 2L -or
+        $expectedUnassessed -isnot [long] -or
+        $expectedUnassessed -ne -2L -or
+        $reopenOn[0] -cne 'completed' -or
+        $reopenOn[1] -cne 'hard-stop') {
+        return $invalid
+    }
+
+    return [pscustomobject][ordered]@{
+        valid = $true
+        schema_version = $schemaVersion
+        decision_id = $decisionId
+        owner_decision_ref = $ownerDecisionRef
+        retry_resume_ref = $retryResumeRef
+        standing_authorization_ref = $standingAuthorizationRef
+        repository_batches_max = $repositoryBatchesMax
+        product_deliveries_max = $productDeliveriesMax
+        candidate = $candidateFeatures[0]
+        expected_source_delta = [pscustomobject][ordered]@{
+            implemented = $expectedImplemented
+            unassessed = $expectedUnassessed
+        }
+        terminal = [pscustomobject][ordered]@{
+            owner_issue_ref = $terminalOwnerIssueRef
+            reopen_on = @($reopenOn)
+            action = $terminalAction
+            state = $terminalState
+            next_action = $terminalNextAction
+        }
+    }
+}
+
 function Test-AutonomousWorkflowRunEvidence {
     param(
         [Parameter(Mandatory)][AllowEmptyCollection()][System.Array]$WorkflowRuns,
@@ -1377,6 +1500,15 @@ if ($null -eq $requiredWorkflowsProperty -or $requiredWorkflowsProperty.Value -i
     })
 }
 $requiredWorkflows = @($requiredWorkflowsProperty.Value)
+$fixedFileMutationTranche = Get-FixedFileMutationTrancheProjection `
+    (Get-PropertyValue $policyResult 'fixed_file_mutation_tranche')
+if ((Get-PropertyValue $fixedFileMutationTranche 'valid') -ne $true) {
+    Write-Result -ExitCode 12 -Value ([pscustomobject][ordered]@{
+        schema_version = 1
+        ok = $false
+        error_code = 'AUTONOMOUS_STATE_POLICY_INVALID'
+    })
+}
 
 $snapshotSource = 'live'
 if (-not [string]::IsNullOrWhiteSpace($SnapshotPath)) {
@@ -1707,7 +1839,7 @@ if ($hardStopReasons.Count -ne 0) {
     $allReasons = @()
 } else {
     $state = 'idle-select-candidate'
-    $nextAction = 'select-candidate'
+    $nextAction = 'select-fixed-file-mutation-candidate'
     $allReasons = @()
 }
 
@@ -1722,6 +1854,12 @@ Write-Result -ExitCode 0 -Value ([pscustomobject][ordered]@{
     reason_codes = @($allReasons)
     merge_gate_pending = @($mergeGatePending)
     post_merge_gate_pending = @($postMergeGatePending)
+    selected_candidate = if ($state -ceq 'idle-select-candidate') {
+        Get-PropertyValue $fixedFileMutationTranche 'candidate'
+    } else {
+        $null
+    }
+    fixed_file_mutation_tranche = $fixedFileMutationTranche
     active_issue = if ($activeIssues.Count -eq 1) { $activeIssues[0] } else { $null }
     active_pr = if ($activePrs.Count -eq 1) { $activePrs[0] } else { $null }
     merged_pr = if ($linkedMergedPrs.Count -eq 1) { $linkedMergedPrs[0] } else { $null }

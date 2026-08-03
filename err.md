@@ -1097,6 +1097,23 @@
 - 关联：Issue `#111`、Issue `#137`、Issue `#138`、`.github/autonomous-refactor-policy.json`、
   `scripts/automation/Get-AutonomousRefactorState.ps1`、`scripts/ci/Test-CiScripts.ps1`。
 
+### 2026-08-03：Paseo built-in loop 丢失 archive RPC 且归档 agent 默认为 xhigh
+
+- 环境：Issue `#140` 批准固定文件 mutation 两批有限自动化后，通过 Paseo built-in loop 验证
+  `archive=true`、worker/verifier thinking 与失败恢复语义。
+- 现象：CLI 传入 `--archive` 后，loop record 仍为 `archive=false`；改用 raw protocol 后可以保存
+  `archive=true`，但归档 worker/verifier 的持久化快照均为 `xhigh`，不满足批准的 `max`。
+- 根因：当前 CLI 的 built-in loop client RPC 没有传输 archive 参数；raw protocol 虽支持该字段，
+  agent 创建路径仍使用默认 thinking，而不是调用方要求的 `max`。两处是执行控制面缺口，不是
+  inputcodex 仓库业务失败。
+- 处理：本 tranche 不复用 built-in loop，也不修改 Paseo 安装、全局 Codex 配置或 CC Switch；由父
+  coordinator 建立有限 worker/verifier 周期，逐 agent 显式绑定 `max / full-access`，完成后立即 archive，
+  总上限保持 `6` 次 worker iteration 或 `12h`，首次硬停止即重开 #140。
+- 验证：恢复评论记录诊断 loop `ceb2b186` 与 raw protocol loop `f4f35429`；fresh probe
+  `4ee164ad-bfb2-45c2-ba5a-97381a6da1f8` 返回 `gpt-5.6-sol / max / full-access`。Issue #141 的 AGOS
+  ReportOnly 返回 `needs-input / session-plan-bootstrap`，已按项目规则绕过且未修改 AGOS。
+- 关联：Issue `#140` owner/recovery 评论、Issue `#141`、Paseo 执行控制面。
+
 ## 记录模板
 
 ```text

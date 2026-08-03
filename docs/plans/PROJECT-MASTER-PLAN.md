@@ -1,12 +1,12 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-128-gate-5-watcher-preference-observation
-active_gate: Gate 5 前十一个产品切片、自治控制面、v1.2.44 重审与 Local Storage 例外已进入 main；当前迁移第十二个产品切片
-last_verified_gate: Issue #123 / PR #124 已以单父 Squash 提交 43ace17de1505f251812e4ead3035ef3274a8455 完成 Local Storage 模型后缀清理例外，主干 CI 与 Performance 全绿且 Artifact 为 0
-next_legal_gate: Issue #128 仅在二十四路径内实现 Watcher 偏好状态只读观察；完整 Watcher 管理、rollout Token 历史与 Sub2API 继续等待各自 typed owner
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/128
-active_pr_ref: none
+active_task: issue-141-gate-5-fixed-file-mutation-bootstrap
+active_gate: Gate 5 固定文件 mutation 两批有限 tranche 的批次 1 治理 bootstrap；本批不迁移产品功能
+last_verified_gate: Issue #138 / PR #139 已以单父 Squash 提交 42f12ead9209d6eceb7e355562fcd339f1daae81 建立候选耗尽自治终态，主干双 Workflow 全绿且 Artifact 为 0
+next_legal_gate: Issue #141 只在十一条治理路径内固定 Watcher preference mutation 单项 tranche；批次 1 进入 main 前禁止开始批次 2
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/141
+active_pr_ref: github-dynamic-see-issue-141
 gate_5_platform_paths_exception_ref: https://github.com/nonononull/inputcodex/issues/74
 gate_5_platform_paths_scope_hash: sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37
 gate_5_platform_paths_branch_ref: codex/issue-75-gate-5-platform-paths
@@ -125,25 +125,25 @@ gate_3_planning_issue_ref: https://github.com/nonononull/inputcodex/issues/17
 upstream_watch_issue_ref: https://github.com/nonononull/inputcodex/issues/14
 transition_issue_ref: https://github.com/nonononull/inputcodex/issues/8
 upstream_sync_issue_ref: https://github.com/nonononull/inputcodex/issues/9
-active_branch_ref: none
+active_branch_ref: codex/issue-141-gate-5-fixed-file-mutation-bootstrap
 transition_branch_ref: codex/issue-8-gate-2-transition
-active_plan_ref: none
-active_session_plan_ref: none
-active_runtime_workflow_ref: none
+active_plan_ref: docs/plans/2026-08-03-issue-141-gate-5-fixed-file-mutation-bootstrap.md
+active_session_plan_ref: docs/plans/sessions/2026-08-03-issue-141-gate-5-fixed-file-mutation-bootstrap.md
+active_runtime_workflow_ref: docs/workflows/2026-08-03-issue-141-gate-5-fixed-file-mutation-bootstrap-runtime.md
 gate_3_closeout_pr_ref: https://github.com/nonononull/inputcodex/pull/23
 gate_3_implementation_pr_ref: https://github.com/nonononull/inputcodex/pull/21
 gate_3_planning_pr_ref: https://github.com/nonononull/inputcodex/pull/18
 transition_pr_ref: https://github.com/nonononull/inputcodex/pull/10
 upstream_sync_pr_ref: https://github.com/nonononull/inputcodex/pull/11
 closed_delivery_ref: https://github.com/nonononull/inputcodex/pull/3, https://github.com/nonononull/inputcodex/pull/5, https://github.com/nonononull/inputcodex/pull/7, https://github.com/nonononull/inputcodex/pull/10, https://github.com/nonononull/inputcodex/pull/11, https://github.com/nonononull/inputcodex/pull/13, https://github.com/nonononull/inputcodex/pull/15, https://github.com/nonononull/inputcodex/pull/18, https://github.com/nonononull/inputcodex/pull/21, https://github.com/nonononull/inputcodex/pull/23, https://github.com/nonononull/inputcodex/pull/25, https://github.com/nonononull/inputcodex/pull/27, https://github.com/nonononull/inputcodex/pull/36, https://github.com/nonononull/inputcodex/pull/40, https://github.com/nonononull/inputcodex/pull/42, https://github.com/nonononull/inputcodex/pull/44, https://github.com/nonononull/inputcodex/pull/45
-active_report_ref: none
+active_report_ref: docs/reports/issue-141-gate-5-fixed-file-mutation-bootstrap.md
 gate_3_closeout_report_ref: docs/reports/issue-22-gate-3-closeout.md
 gate_3_implementation_report_ref: docs/reports/issue-19-gate-3-rust-workspace-ci.md
 gate_2_watch_report_ref: docs/reports/issue-14-gate-2-upstream-watch.md
 active_ruleset_ref: https://github.com/nonononull/inputcodex/rules/19395456
 active_ci_strategy_ref: docs/plans/2026-07-21-rust-ci-offload-strategy.md
 active_ci_implementation_plan_ref: docs/plans/2026-07-21-rust-ci-offload-implementation-plan.md
-decision_status: issue-123-local-storage-sanitization-exception-approved
+decision_status: issue-140-gate5-fixed-file-mutation-tranche-v1-approved
 
 ## 当前状态
 
@@ -318,6 +318,7 @@ decision_status: issue-123-local-storage-sanitization-exception-approved
 - [x] Issue `#128` / PR `#129` 已完成 `feature.foundation-platform.watcher-preference-observation`；只接管 `load_watcher_state`，完整 Watcher 管理继续 `unassessed`。
 - [x] Issue `#130` 至 `#137` 已完成剩余只读候选、SQLite 保证强度、Watcher typed owner 与候选前沿饱和决策；稳定结论是当前基线下只读前沿饱和，但 Gate 5 产品尚未完成且 Gate 6 不解锁。
 - [x] Issue `#138` 已修正自治状态机无法表达候选耗尽的控制面根因；只增加精确 typed marker、零 scope/无 PR 门和 `blocked-candidate-exhausted / await-owner-decision` 终态，不迁移产品功能。
+- [ ] Issue `#141` 正在执行固定文件 mutation 两批有限 tranche 的批次 1 治理 bootstrap；只允许唯一候选 `feature.foundation-platform.watcher-preference-mutation`，本批产品计数保持不变。
 
 ### Gate 6：首个正式版本（锁定）
 
