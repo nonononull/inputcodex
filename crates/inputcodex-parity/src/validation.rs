@@ -9,12 +9,14 @@ use serde::Deserialize;
 
 use crate::{
     FeatureDomain, ParityStatus, SourceDisposition, SourceKind, parse_contract_catalog,
-    parse_feature_catalog, parse_fixture_manifest, parse_source_index, validate_contract_catalog,
-    validate_contract_catalog_domain, validate_feature_catalog, validate_fixture_manifest,
-    validate_fixture_payload, validate_source_index,
+    parse_feature_catalog, parse_fixture_manifest, parse_side_effect_admission_matrix,
+    parse_source_index, validate_contract_catalog, validate_contract_catalog_domain,
+    validate_feature_catalog, validate_fixture_manifest, validate_fixture_payload,
+    validate_side_effect_admission_matrix, validate_source_index,
 };
 
 const SOURCE_INDEX_PATH: &str = "parity/features/source-index.yml";
+const ADMISSION_MATRIX_PATH: &str = "parity/admission/side-effect-admission-matrix.yml";
 const SOURCE_LOCK_PATH: &str = "upstream/source-lock.json";
 const COMMANDS_PATH: &str =
     "upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs";
@@ -73,6 +75,14 @@ pub enum ValidationCode {
     InvalidFixturePayload,
     PrivateAbsolutePath,
     SensitiveFixtureValue,
+    DuplicateAdmissionSource,
+    MissingAdmissionSource,
+    UnexpectedAdmissionSource,
+    AdmissionFeatureMismatch,
+    AdmissionBucketMismatch,
+    AdmissionTargetStatusMismatch,
+    AdmissionMetadataInvalid,
+    AdmissionUnauthorized,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -230,6 +240,8 @@ struct ExpectedSource {
 struct FeatureRepositoryState {
     summary: RepositorySummary,
     feature_ids: BTreeSet<String>,
+    feature_statuses: BTreeMap<String, ParityStatus>,
+    source_index: crate::SourceIndex,
 }
 
 struct FixtureRepositoryState {
@@ -253,6 +265,21 @@ pub fn validate_repository(
     let mut contract_ids = BTreeSet::new();
     let mut contracted_feature_ids = BTreeSet::new();
     let mut issues = Vec::new();
+
+    let admission_path = repository_root.join(ADMISSION_MATRIX_PATH);
+    let admission_text = read_utf8(&admission_path)?;
+    let admission_matrix =
+        parse_side_effect_admission_matrix(&admission_text).map_err(|error| {
+            RepositoryValidationError::message(format!(
+                "无法解析 {}：{error}",
+                admission_path.display()
+            ))
+        })?;
+    issues.extend(validate_side_effect_admission_matrix(
+        &admission_matrix,
+        &state.source_index,
+        &state.feature_statuses,
+    ));
 
     for (expected_domain, file_name) in DOMAIN_FILES {
         let contract_path = contracts_root.join(file_name);
@@ -861,6 +888,8 @@ fn load_feature_repository(
             requires_reaudit,
         },
         feature_ids,
+        feature_statuses,
+        source_index,
     })
 }
 

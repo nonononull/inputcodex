@@ -1163,6 +1163,15 @@
 - 关联：Issue `#136`、Issue `#140`、Issue `#143`、`crates/inputcodex-application/src/watcher_preference_mutation.rs`、
   `crates/inputcodex-platform/src/watcher_preference_mutation.rs`、`parity/contracts/foundation-platform.yml`。
 
+### 2026-08-04：有限 tranche 完成后仍被空闲状态重复选择
+
+- 环境：Issue `#141` / `#143` 已完成 fixed-file mutation 两批有限 tranche，main 已包含唯一 Watcher 偏好变更；Issue `#145` 负责下一批副作用准入 Discovery。
+- 现象：旧 policy 仍把 Watcher 放在 `candidate_features`，状态解析器在无活动 owner Issue/PR 时无条件进入 `idle-select-candidate`，导致已交付能力可被重复选择；剩余 83 个未评估 source 又没有机器可验证的副作用与 typed owner 事实层。
+- 根因：版本化 tranche 只有批次上限和终态动作，没有不可复活的消费生命周期；空闲分支把“存在历史候选证据”误当成“仍有 standing authorization”。Parity 完整仓库验证也只校验 feature/source/contract/fixture，没有接入准入事实。
+- 处理：tranche 升级为 `v2 / consumed` 并绑定完成评论与 main 提交，历史 candidate 不再进入选择器；无授权候选时固定返回 `blocked-hard-stop / stop / NO_AUTHORIZED_CANDIDATE` 和 `selected_candidate=null`。新增严格 side-effect admission policy 与 83 行矩阵，按 feature 聚合 `write > process > network`，所有条目固定 `blocked` 与 `implementation_authorized=false`，并接入 `validate_repository`。
+- 验证：Control Plane RED 为 `75 pass / 7 fail`；修复后 `CI_CONTRACT_GREEN passed=84`，policy 校验、生产 helper 和历史状态分支全部恢复通过。Parity RED 以 9 个缺失 API/验证码编译错误失败；GREEN 为 admission `5/5`、目录 `33/33`、all-targets 和 Clippy 通过，动态计数为 `22 feature / 83 source = 16/70 write + 2/5 process + 4/8 network`。
+- 关联：Issue `#140`、Issue `#145`、`.github/autonomous-refactor-policy.json`、`scripts/automation/Get-AutonomousRefactorState.ps1`、`parity/admission/side-effect-admission-matrix.yml`、`crates/inputcodex-parity/src/admission.rs`。
+
 ## 记录模板
 
 ```text

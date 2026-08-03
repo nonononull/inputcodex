@@ -6,8 +6,9 @@ use std::{
 };
 
 use inputcodex_parity::{
-    ParityStatus, ValidationCode, parse_feature_catalog, parse_source_index,
-    validate_feature_repository, validate_repository, validate_source_index,
+    ParityStatus, SideEffectBucket, ValidationCode, parse_feature_catalog,
+    parse_side_effect_admission_matrix, parse_source_index, validate_feature_repository,
+    validate_repository, validate_source_index,
 };
 
 const RELEASE_TAG: &str = "v1.2.44";
@@ -166,6 +167,18 @@ impl FeatureRepositoryFixture {
         );
 
         Self { root }
+    }
+
+    fn new_complete() -> Self {
+        let fixture = Self::new();
+        for directory in ["contracts", "fixtures", "admission"] {
+            copy_tree(
+                &repository_root().join("parity").join(directory),
+                &fixture.root.join("parity").join(directory),
+            );
+        }
+        fixture.write_current_source_lock();
+        fixture
     }
 
     fn root(&self) -> &Path {
@@ -2721,6 +2734,46 @@ fn 仓库功能目录通过完整引用与安全验证() {
     assert_eq!(summary.contract_count(), 46);
     assert_eq!(summary.fixture_count(), 12);
     assert_eq!(summary.coverage_gap_count(), 0);
+}
+
+#[test]
+fn 仓库验证接入_83_source_副作用准入矩阵() {
+    let matrix = parse_side_effect_admission_matrix(&read_repository_text(
+        "parity/admission/side-effect-admission-matrix.yml",
+    ))
+    .expect("副作用准入矩阵应可解析");
+    assert_eq!(matrix.sources().len(), 83);
+    for (bucket, expected_features, expected_sources) in [
+        (SideEffectBucket::Write, 16, 70),
+        (SideEffectBucket::Process, 2, 5),
+        (SideEffectBucket::Network, 4, 8),
+    ] {
+        let sources = matrix
+            .sources()
+            .iter()
+            .filter(|source| source.bucket() == bucket)
+            .collect::<Vec<_>>();
+        let features = sources
+            .iter()
+            .map(|source| source.feature_id())
+            .collect::<BTreeSet<_>>();
+        assert_eq!(sources.len(), expected_sources);
+        assert_eq!(features.len(), expected_features);
+    }
+
+    let fixture = FeatureRepositoryFixture::new_complete();
+    fixture.replace_text(
+        "parity/admission/side-effect-admission-matrix.yml",
+        "implementation_authorized: false",
+        "implementation_authorized: true",
+    );
+    let error = validate_repository(fixture.root()).expect_err("仓库验证必须拒绝矩阵中的产品授权");
+    assert!(
+        error
+            .issues()
+            .iter()
+            .any(|issue| issue.code() == ValidationCode::AdmissionUnauthorized)
+    );
 }
 
 #[test]

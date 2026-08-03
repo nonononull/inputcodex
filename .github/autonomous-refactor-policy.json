@@ -105,11 +105,14 @@
     "candidate-exhausted"
   ],
   "fixed_file_mutation_tranche": {
-    "schema_version": "inputcodex.fixed-file-mutation-tranche.v1",
+    "schema_version": "inputcodex.fixed-file-mutation-tranche.v2",
     "decision_id": "gate5-fixed-file-mutation-tranche-v1",
     "owner_decision_ref": "https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159072214",
     "retry_resume_ref": "https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159471091",
     "standing_authorization_ref": "https://github.com/nonononull/inputcodex/issues/111",
+    "lifecycle_state": "consumed",
+    "consumption_ref": "https://github.com/nonononull/inputcodex/issues/140#issuecomment-5166320854",
+    "consumption_main": "42c73f401e7a758cdc5eca374613625dad46340b",
     "repository_batches_max": 2,
     "product_deliveries_max": 1,
     "candidate_features": [
@@ -119,6 +122,30 @@
       "implemented": 2,
       "unassessed": -2
     },
+    "terminal": {
+      "owner_issue_ref": "https://github.com/nonononull/inputcodex/issues/140",
+      "reopen_on": [
+        "completed",
+        "hard-stop"
+      ],
+      "action": "reopen-owner-decision-issue",
+      "state": "blocked-candidate-exhausted",
+      "next_action": "await-owner-decision"
+    }
+  },
+  "side_effect_admission_matrix": {
+    "schema_version": "inputcodex.side-effect-admission-matrix-policy.v1",
+    "decision_id": "gate5-side-effect-admission-matrix-v1",
+    "owner_decision_ref": "https://github.com/nonononull/inputcodex/issues/140#issuecomment-5168939607",
+    "tracking_issue_ref": "https://github.com/nonononull/inputcodex/issues/145",
+    "standing_authorization_ref": "https://github.com/nonononull/inputcodex/issues/111",
+    "baseline_commit": "42c73f401e7a758cdc5eca374613625dad46340b",
+    "repository_batches_max": 1,
+    "product_deliveries_max": 0,
+    "expected_unassessed_sources": 83,
+    "product_count_delta": 0,
+    "implementation_authorized": false,
+    "matrix_path": "parity/admission/side-effect-admission-matrix.yml",
     "terminal": {
       "owner_issue_ref": "https://github.com/nonononull/inputcodex/issues/140",
       "reopen_on": [
