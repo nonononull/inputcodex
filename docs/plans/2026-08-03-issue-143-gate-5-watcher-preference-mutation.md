@@ -1,6 +1,6 @@
 # Issue #143 Watcher 偏好固定文件 mutation 实施计划
 
-> **状态：** `PLANNING_FREEZE_LOCAL_READY`
+> **状态：** `LOCAL_VERIFY_GREEN / PR_PENDING`
 >
 > **执行纪律：** 单 writer，按 Domain -> Application -> Platform -> Parity 的 RED -> GREEN -> VERIFY 顺序执行；Final Head 必须由独立只读 reviewer 复审。
 
@@ -59,6 +59,14 @@
 - contract：`46`；fixture manifest：`12`
 - `feature.foundation-platform.watcher` 继续 `unassessed`
 - `gate_5_product_complete=false`；`gate_6_unlocked=false`
+
+## 执行进度
+
+- Planning Freeze、Domain、Application、Platform 与 Parity 的 RED/GREEN checkpoint 已完成。
+- Domain 专项 `4/4`、Application 专项 `5/5`、Platform 内部矩阵 `13/13`、Platform 全包与集成测试、
+  Parity 完整目录测试 `32/32` 及各受影响 crate Clippy 已通过。
+- `build.md` Issue #143 二十四路径全门禁已返回 `ISSUE143_LOCAL_VERIFY_OK`；当前只允许形成 Final Head、
+  普通 push 与 non-Draft PR，独立复审和 Hosted 门通过前不得合并。
 
 ## 硬停止
 

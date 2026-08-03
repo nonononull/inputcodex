@@ -1114,6 +1114,29 @@
   ReportOnly 返回 `needs-input / session-plan-bootstrap`，已按项目规则绕过且未修改 AGOS。
 - 关联：Issue `#140` owner/recovery 评论、Issue `#141`、Paseo 执行控制面。
 
+### 2026-08-03：路径元数据检查无法绑定提交对象且读取协调器会丢弃提交后收据
+
+- 环境：Issue `#136` 审计 Watcher 偏好写入，Issue `#140` 随后只批准
+  `cooperative-same-user-v1` 下的固定 `inputcodex_state_root/watcher.disabled` mutation；Issue `#143`
+  负责实现该唯一产品候选。
+- 现象：`symlink_metadata` 后再执行创建或删除仍存在 TOCTOU，safe std 无法证明验证对象与提交对象身份相同；
+  全新状态根又要求先创建目录再提交 marker。既有读取型 `LoadCoordinator` 会把取消后的完成结果降为
+  `Stale`，若直接复用，会出现磁盘已经提交但调用方看不到最终收据。
+- 根因：路径 `PathBuf` 不是绑定目录或文件身份的句柄；setup 与 marker 是两个可独立失败的提交边界；
+  读取请求的“取消后丢弃结果”语义不适用于不可撤销副作用。
+- 处理：威胁模型明确排除同账号恶意进程在最终验证后的 ABA；调用方只提供 typed request ID、
+  `expected` 与 `desired`。平台层逐对象拒绝可见 symlink/junction/reparse，只允许单层 `create_dir`、
+  原子 `create_new` 和已观察普通 marker 的条件删除，并以进程内单航班串行。应用层使用独立
+  `Pending / Cancelled / CommitReached / Finished` 状态机；提交后取消返回 `TooLate`，仍完成重观察并交付
+  `setup_commit / marker_commit / final_observation / outcome / diagnostic_code`。RootCreated 后 marker 失败时
+  空状态根合法保留，禁止歧义回滚。
+- 验证：Domain 专项 `4/4`、Application 专项 `5/5`、Platform 内部安全矩阵 `13/13`；Platform 全包
+  `85` 个单元测试及全部集成测试、Clippy 均通过。Parity RED 精确暴露新 feature 缺失与两个旧归属，
+  GREEN 后完整目录测试为 `32/32`，目录终态为 source `19/83/30/3`、feature `13/22/11`、contract `46`、
+  fixture manifest `12`。
+- 关联：Issue `#136`、Issue `#140`、Issue `#143`、`crates/inputcodex-application/src/watcher_preference_mutation.rs`、
+  `crates/inputcodex-platform/src/watcher_preference_mutation.rs`、`parity/contracts/foundation-platform.yml`。
+
 ## 记录模板
 
 ```text

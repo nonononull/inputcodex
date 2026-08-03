@@ -10,7 +10,7 @@
 - branch_ref: codex/issue-143-gate-5-watcher-preference-mutation
 - candidate_scope: 24
 - candidate_scope_hash: sha256:f96f1a979eba89bc4de9744b3267bfd72fd81a828c9491cbfd3b95723b088ab9
-- runtime_state: planning-freeze-local-ready
+- runtime_state: local-verify-green-pr-pending
 
 ## Node Order
 
@@ -44,32 +44,32 @@ Release Audit 基线为 `current`。Git snapshot governance 为 ready。
 
 ### Node 1：Planning Freeze
 
-状态：in-progress。八路径与二十四路径 hash 已复算；Plan、Session、Runtime、Report 同批建立。下一步只允许
-验证八路径、形成 planning checkpoint 并在 #143 发布 Freeze。
+状态：completed。八路径与二十四路径 hash 已复算；Planning checkpoint 已形成并在 #143 发布 Freeze。
 
 ### Node 2：Domain TDD
 
-状态：pending。先以外部集成测试取得目标类型缺失 RED，再实现无路径字段的 receipt 领域模型。
+状态：completed。外部集成测试先取得类型缺失 RED；随后完成无路径字段的 receipt 领域模型，专项 `4/4`、
+全目标与 Clippy 通过。
 
 ### Node 3：Application TDD
 
-状态：pending。先固定 expected/desired、提交前 Cancelled、提交后 TooLate、完成后 Finished 与 receipt 不丢失，
-再实现独立 mutation control、Port 和 UseCase；禁止复用 `LoadCoordinator`。
+状态：completed。已固定 expected/desired、提交前 Cancelled、提交后 TooLate、完成后 Finished 与 receipt 不丢失；
+独立 mutation control、Port 和 UseCase 专项 `5/5`、全目标与 Clippy 通过，未复用 `LoadCoordinator`。
 
 ### Node 4：Platform TDD
 
-状态：pending。内存文件系统矩阵覆盖父目录、根、marker、create_dir、create_new、remove、竞态、取消和后置观察；
-GREEN 只使用 safe std 与平台 cfg。
+状态：completed。内存文件系统矩阵覆盖父目录、根、marker、create_dir、create_new、remove、竞态、取消和后置观察；
+内部矩阵 `13/13`、Platform 全包 `85` 个单元测试与全部集成测试、Clippy 通过，只使用 safe std 与平台 cfg。
 
 ### Node 5：Parity TDD
 
-状态：pending。新增一个 implemented feature/contract，只移动两个 command 并移除错误 `process-control`；
-`core-module:watcher` 与 install/uninstall 留在原 umbrella。
+状态：completed。先取得 feature 缺失与旧归属 RED；随后新增一个 implemented feature/contract，只移动两个
+command 并移除错误 `process-control`。完整目录测试 `32/32`，`core-module:watcher` 与 install/uninstall 留在原 umbrella。
 
 ### Node 6：Local And Remote Closeout
 
-状态：pending。执行 `build.md` Issue #143，Final Head 取得两个独立 `0/0` 复审和同 Head hosted 门后才允许
-owner exact-Head Squash；合并后重开 #140 并停止。
+状态：in-progress。本地 `build.md` Issue #143 已返回 `ISSUE143_LOCAL_VERIFY_OK`；下一步形成 Final Head、普通 push
+与 non-Draft PR。取得两个独立 `0/0` 复审和同 Head hosted 门后才允许 owner exact-Head Squash；合并后重开 #140 并停止。
 
 ## Error Watchlist
 

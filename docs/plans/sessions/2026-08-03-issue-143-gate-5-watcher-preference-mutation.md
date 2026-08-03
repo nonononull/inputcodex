@@ -85,7 +85,7 @@ change_contract:
       command_or_evidence_ref: cargo test -p inputcodex-parity
       expected_result: exact-counts-and-two-source-move
   sibling_regression_guard:
-    status: pending
+    status: passed-local
     closeout_rule: passed-or-blocked-before-done
 ```
 
@@ -114,21 +114,21 @@ independent_verification_policy:
 
 ## Execution Batches
 
-- Planning Freeze: in-progress
-- Domain TDD: pending
-- Application TDD: pending
-- Platform TDD: pending
-- Parity TDD: pending
-- Local closeout: pending
+- Planning Freeze: completed
+- Domain TDD: completed
+- Application TDD: completed
+- Platform TDD: completed
+- Parity TDD: completed
+- Local closeout: completed
 - Review / CI / exact Head Squash: pending
 - Reopen #140 and stop: pending
 
 ## Execution Evidence
 
-- test: `build.md` Issue #143；result pending
+- test: 四 crate all-targets、Clippy 与 fmt 全绿；Domain `4/4`、Application `5/5`、Platform 内部 `13/13` 与全包、Parity `32/32` 已通过
 - build: standard GitHub-hosted Windows/macOS CI；result pending
 - review: two independent Final Head reviewers；result pending
-- verification: Repository Policy、Release Audit、scope/hash、diff check；result pending
+- verification: CI contract `82/82`、Repository Policy 0、Release Audit current、Cargo metadata、禁止能力与 `24 / sha256:f96f1a...` 全部通过
 - closeout: exact Head Squash、main dual workflows、Artifact 0、reopen #140；result pending
 
 ## Stop Conditions

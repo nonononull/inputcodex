@@ -4,7 +4,7 @@ schema_version: inputcodex.master-plan.v1
 active_task: issue-143-gate-5-watcher-preference-mutation
 active_gate: Gate 5 固定文件 mutation 两批有限 tranche 的批次 2；只迁移 Watcher 偏好固定标记变更
 last_verified_gate: Issue #141 / PR #142 已以单父 Squash 提交 891866a914468d3979964a2fe89066a0bbb2fe53 建立单项 mutation tranche，主干双 Workflow 全绿且 Artifact 为 0
-next_legal_gate: Issue #143 在二十四路径内完成 Planning Freeze 后按 Domain、Application、Platform、Parity 顺序 TDD；完成或 hard-stop 后重开 #140
+next_legal_gate: Issue #143 本地实现完成后执行二十四路径全门禁、non-Draft PR、独立 Final Head 复审与 Hosted 验证；完成或 hard-stop 后重开 #140
 tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/143
 active_pr_ref: none
 gate_5_platform_paths_exception_ref: https://github.com/nonononull/inputcodex/issues/74
