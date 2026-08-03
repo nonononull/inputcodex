@@ -139,3 +139,6 @@
 - Issue `#127` 已批准只把 `tauri-command:load_watcher_state` 拆为 Watcher 偏好状态只读观察；Issue `#128` 固定二十四路径与 `sha256:0be3dd45ed7e91d1cb7f633da369bb2b9052cefc512852d80362775da7e81699`，只允许检查 `inputcodex_state_root/watcher.disabled` 的元数据，不得读取内容、回显路径、写文件、控制进程或冒充安装/运行状态。
 - Issue `#128` / PR `#129` 已以 Squash 提交 `da035b3a6e8ddab9b7c6948ef115ed8b561aa1f4` 完成 Watcher 偏好状态只读观察；目录计数为 `135/45/45/12/11/3/0`，完整 Watcher 管理继续 `unassessed`。
 - Issue `#137` 已确认当前正式 Release 与目录基线下的只读候选前沿饱和，但 `gate_5_product_complete=false`、`gate_6_unlocked=false`；Issue `#138` 固定 `candidate-exhausted` typed marker 与 `blocked-candidate-exhausted / await-owner-decision` 终态，只有 owner 单一 OPEN Issue、required label、clean main、三方 Head 一致、零范围、无交付且 Release Audit current 时成立，任何漂移均 fail-closed。
+- Issue `#140` 已批准 `gate5-fixed-file-mutation-tranche-v1` 与 `cooperative-same-user-v1` 威胁模型；只允许两批有限队列和固定 `inputcodex_state_root/watcher.disabled`，不防御同账号恶意进程在最终验证后的 ABA。
+- Issue `#141` / PR `#142` 已以 Squash 提交 `891866a914468d3979964a2fe89066a0bbb2fe53` 完成批次 1 治理 bootstrap；批次 2 的唯一候选固定为 `feature.foundation-platform.watcher-preference-mutation`。
+- Issue `#143` 是批次 `2/2`：只允许在二十四路径与 `sha256:f96f1a979eba89bc4de9744b3267bfd72fd81a828c9491cbfd3b95723b088ab9` 内接管 `enable_watcher` / `disable_watcher` 的固定标记变更。完整 Watcher、进程控制、任意路径、递归目录、Cargo 新依赖、`unsafe`、FFI/VFS、Workflow/Runner/Ruleset、Release、UI、网络、secret 与 #132/#133 均禁止。

@@ -6,8 +6,8 @@ use std::{
 };
 
 use inputcodex_parity::{
-    ValidationCode, parse_source_index, validate_feature_repository, validate_repository,
-    validate_source_index,
+    ParityStatus, ValidationCode, parse_feature_catalog, parse_source_index,
+    validate_feature_repository, validate_repository, validate_source_index,
 };
 
 const RELEASE_TAG: &str = "v1.2.44";
@@ -2088,8 +2088,8 @@ fn gate5_本地会话目录只读观察已实现但本地会话管理总功能�
     assert_repository_text_contains(
         "parity/README.md",
         &[
-            "当前共有 45 个 feature",
-            "`45` 份行为合同",
+            "当前共有 46 个 feature",
+            "`46` 份行为合同",
             "`12` 个 fixture manifest",
             "feature.session-data.local-session-directory-observation",
         ],
@@ -2454,8 +2454,6 @@ fn gate5_watcher_偏好观察只移动只读入口而管理总功能保持未评
     for expected in [
         "status: unassessed",
         "core-module:watcher",
-        "tauri-command:disable_watcher",
-        "tauri-command:enable_watcher",
         "tauri-command:install_watcher",
         "tauri-command:uninstall_watcher",
     ] {
@@ -2464,7 +2462,16 @@ fn gate5_watcher_偏好观察只移动只读入口而管理总功能保持未评
             "Watcher 管理应保留：{expected}"
         );
     }
-    assert!(!management.contains("tauri-command:load_watcher_state"));
+    for forbidden in [
+        "tauri-command:load_watcher_state",
+        "tauri-command:disable_watcher",
+        "tauri-command:enable_watcher",
+    ] {
+        assert!(
+            !management.contains(forbidden),
+            "Watcher 管理总功能不应继续持有已拆分入口：{forbidden}"
+        );
+    }
 
     let contract_text = read_repository_text("parity/contracts/foundation-platform.yml");
     let contract = yaml_list_item_block(
@@ -2509,8 +2516,6 @@ fn gate5_watcher_偏好观察只移动只读入口而管理总功能保持未评
 
     for source_id in [
         "core-module:watcher",
-        "tauri-command:disable_watcher",
-        "tauri-command:enable_watcher",
         "tauri-command:install_watcher",
         "tauri-command:uninstall_watcher",
     ] {
@@ -2523,9 +2528,174 @@ fn gate5_watcher_偏好观察只移动只读入口而管理总功能保持未评
     assert_repository_text_contains(
         "parity/README.md",
         &[
-            "当前共有 45 个 feature",
-            "`45` 份行为合同",
+            "当前共有 46 个 feature",
+            "`46` 份行为合同",
             "feature.foundation-platform.watcher-preference-observation",
+        ],
+    );
+}
+
+#[test]
+fn gate5_watcher_偏好变更只移动两个固定文件入口而不接管完整_watcher() {
+    let feature_text = read_repository_text("parity/features/foundation-platform.yml");
+    let mutation = yaml_list_item_block(
+        &feature_text,
+        "feature.foundation-platform.watcher-preference-mutation",
+    );
+    for expected in [
+        "name: 'Watcher 偏好固定文件变更'",
+        "status: implemented",
+        "symbol: disable_watcher",
+        "symbol: enable_watcher",
+        "tauri-command:disable_watcher",
+        "tauri-command:enable_watcher",
+        "watcher.disabled",
+        "cooperative-same-user-v1",
+        "- issue:136",
+        "- issue:140",
+        "- issue:143",
+    ] {
+        assert!(
+            mutation.contains(expected),
+            "Watcher 偏好变更应包含：{expected}"
+        );
+    }
+    for forbidden in [
+        "core-module:watcher",
+        "tauri-command:load_watcher_state",
+        "tauri-command:install_watcher",
+        "tauri-command:uninstall_watcher",
+        "process-control",
+        "network-read",
+    ] {
+        assert!(
+            !mutation.contains(forbidden),
+            "Watcher 偏好变更禁止能力：{forbidden}"
+        );
+    }
+
+    let contract_text = read_repository_text("parity/contracts/foundation-platform.yml");
+    let contract = yaml_list_item_block(
+        &contract_text,
+        "contract.feature.foundation-platform.watcher-preference-mutation.baseline",
+    );
+    let normalized_contract = contract.replace("\r\n", "\n");
+    for expected in [
+        "feature_id: feature.foundation-platform.watcher-preference-mutation",
+        "expected",
+        "desired",
+        "request_id",
+        "setup_commit",
+        "marker_commit",
+        "final_observation",
+        "Applied",
+        "AlreadySatisfied",
+        "Conflict",
+        "Cancelled",
+        "Failed",
+        "Indeterminate",
+        "WATCHER_PREFERENCE_MUTATION_APPLIED",
+        "WATCHER_PREFERENCE_MUTATION_ALREADY_SATISFIED",
+        "WATCHER_PREFERENCE_MUTATION_CANCELLED",
+        "WATCHER_PREFERENCE_MUTATION_CONFLICT",
+        "WATCHER_PREFERENCE_MUTATION_CONTROL_FINISHED",
+        "WATCHER_PREFERENCE_MUTATION_CONTROL_IN_USE",
+        "WATCHER_PREFERENCE_MUTATION_INDETERMINATE",
+        "WATCHER_PREFERENCE_MUTATION_INVALID_MARKER",
+        "WATCHER_PREFERENCE_MUTATION_INVALID_PARENT",
+        "WATCHER_PREFERENCE_MUTATION_INVALID_STATE_ROOT",
+        "WATCHER_PREFERENCE_MUTATION_LOCK_UNAVAILABLE",
+        "WATCHER_PREFERENCE_MUTATION_MARKER_FAILED",
+        "WATCHER_PREFERENCE_MUTATION_MARKER_UNAVAILABLE",
+        "WATCHER_PREFERENCE_MUTATION_PARENT_UNAVAILABLE",
+        "WATCHER_PREFERENCE_MUTATION_PATH_INVALID",
+        "WATCHER_PREFERENCE_MUTATION_PATH_UNAVAILABLE",
+        "WATCHER_PREFERENCE_MUTATION_SETUP_FAILED",
+        "WATCHER_PREFERENCE_MUTATION_STATE_ROOT_UNAVAILABLE",
+        "WATCHER_PREFERENCE_MUTATION_UNSUPPORTED",
+        "RootCreated",
+        "NotRequired",
+        "NotAttempted",
+        "Created",
+        "Removed",
+        "Known",
+        "Unknown",
+        "TooLate",
+        "mode: none",
+    ] {
+        assert!(
+            contract.contains(expected),
+            "Watcher 偏好变更合同应包含：{expected}"
+        );
+    }
+    assert!(
+        normalized_contract.contains(
+            "      - code: WATCHER_PREFERENCE_MUTATION_CONTROL_IN_USE\n        kind: invalid-state\n        semantics: '同一 control 已被执行者占用或已到达提交点时，第二执行者返回 Failed，不进入 Port 且不终结首个执行者。'"
+        ),
+        "并发 control 复用必须以 invalid-state 建模且不得触碰首个执行者"
+    );
+    assert_eq!(
+        yaml_field_block(contract, "side_effects", "persistence"),
+        "    side_effects:\n      - filesystem-read\n      - filesystem-write",
+        "Watcher 偏好变更合同副作用必须精确为文件读取与写入"
+    );
+    for forbidden in [
+        "process-control",
+        "network-read",
+        "create_dir_all",
+        "unsafe",
+    ] {
+        assert!(
+            !contract.contains(forbidden),
+            "Watcher 偏好变更合同禁止能力：{forbidden}"
+        );
+    }
+
+    let source_text = read_repository_text("parity/features/source-index.yml");
+    for source_id in [
+        "tauri-command:disable_watcher",
+        "tauri-command:enable_watcher",
+    ] {
+        let source = yaml_list_item_block(&source_text, source_id);
+        assert!(source.contains("side_effects: [filesystem-read, filesystem-write]"));
+        assert!(
+            source.contains("feature_id: feature.foundation-platform.watcher-preference-mutation")
+        );
+        assert!(!source.contains("process-control"));
+    }
+
+    let mut implemented = 0;
+    let mut unassessed = 0;
+    let mut exception_pending = 0;
+    for path in [
+        "parity/features/foundation-platform.yml",
+        "parity/features/provider-network.yml",
+        "parity/features/session-data.yml",
+        "parity/features/plugin-script.yml",
+        "parity/features/remote-install.yml",
+    ] {
+        let catalog = parse_feature_catalog(&read_repository_text(path))
+            .unwrap_or_else(|error| panic!("功能目录解析失败 {path}: {error}"));
+        for feature in catalog.features() {
+            match feature.status() {
+                ParityStatus::Implemented => implemented += 1,
+                ParityStatus::Unassessed => unassessed += 1,
+                ParityStatus::ExceptionPending => exception_pending += 1,
+                status => panic!("Gate 5 当前不应出现中间或其他终态：{status:?}"),
+            }
+        }
+    }
+    assert_eq!((implemented, unassessed, exception_pending), (13, 22, 11));
+
+    assert_repository_text_contains(
+        "parity/README.md",
+        &[
+            "当前共有 46 个 feature",
+            "13 个 `implemented`、22 个 `unassessed`、11 个 `exception-pending`",
+            "19 个 `implemented`、83 个 `unassessed`、30 个 `exception-pending`、3 个 `excluded`",
+            "feature.foundation-platform.watcher-preference-mutation",
+            "`46` 份行为合同",
+            "`12` 个 fixture manifest",
         ],
     );
 }
@@ -2536,7 +2706,7 @@ fn 仓库source_index_覆盖锁定上游公开入口() {
         validate_feature_repository(&repository_root()).expect("功能目录应通过仓库级验证");
 
     assert_eq!(summary.source_entry_count(), 135);
-    assert_eq!(summary.feature_count(), 45);
+    assert_eq!(summary.feature_count(), 46);
     assert_eq!(summary.excluded_entry_count(), 3);
     assert_eq!(summary.exception_pending_count(), 11);
     assert_eq!(summary.coverage_gap_count(), 0);
@@ -2547,8 +2717,8 @@ fn 仓库功能目录通过完整引用与安全验证() {
     let summary = validate_repository(&repository_root()).expect("仓库功能目录应通过验证");
 
     assert_eq!(summary.source_entry_count(), 135);
-    assert_eq!(summary.feature_count(), 45);
-    assert_eq!(summary.contract_count(), 45);
+    assert_eq!(summary.feature_count(), 46);
+    assert_eq!(summary.contract_count(), 46);
     assert_eq!(summary.fixture_count(), 12);
     assert_eq!(summary.coverage_gap_count(), 0);
 }

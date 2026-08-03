@@ -644,6 +644,112 @@ contracts:
       mode: none
       reason: '输入为固定元数据类型矩阵，合成单元测试已覆盖缺失、普通文件、链接、目录、其他类型和 I/O 错误，无需结构 fixture。'
     fixture_refs: []
+  - id: contract.feature.foundation-platform.watcher-preference-mutation.baseline
+    feature_id: feature.foundation-platform.watcher-preference-mutation
+    scenario: baseline
+    preconditions:
+      - '上游 Release v1.2.44 证据已锁定，Issue #140 已批准 cooperative-same-user-v1 固定单文件 mutation。'
+      - '调用方只能提供 typed request_id、expected 与 desired；路径、文件名和内容由平台能力固定。'
+    inputs:
+      - name: request
+        data_type: watcher-preference-mutation-request
+        required: true
+        description: '包含 request_id、expected 与 desired 偏好，不接受任意路径、文件名、内容、进程或 debug port。'
+    outputs:
+      - name: receipt
+        data_type: watcher-preference-mutation-receipt
+        description: '始终返回 request_id、requested_preference、setup_commit、marker_commit、final_observation、outcome 与 diagnostic_code；setup_commit 为 NotRequired、RootCreated 或 Failed，marker_commit 为 NotAttempted、Created、Removed 或 Failed，final_observation 为 Known(preference) 或 Unknown，outcome 为 Applied、AlreadySatisfied、Conflict、Cancelled、Failed 或 Indeterminate。'
+    side_effects:
+      - filesystem-read
+      - filesystem-write
+    persistence: '只允许在可信即时父目录下单层创建固定 inputcodex 状态根，并原子创建或条件删除空的 watcher.disabled；RootCreated 后 marker 失败时空根合法保留，不做歧义回滚。'
+    errors:
+      - code: WATCHER_PREFERENCE_MUTATION_APPLIED
+        kind: applied
+        semantics: 'marker 提交完成且最终重观察为 desired 时返回 Applied。'
+      - code: WATCHER_PREFERENCE_MUTATION_ALREADY_SATISFIED
+        kind: no-op
+        semantics: '初始实际偏好已经等于 desired 时不写入并返回 AlreadySatisfied。'
+      - code: WATCHER_PREFERENCE_MUTATION_CONFLICT
+        kind: conflict
+        semantics: '实际偏好不等于 expected，或普通竞态形成另一合法状态时返回 Conflict，不覆盖现有对象。'
+      - code: WATCHER_PREFERENCE_MUTATION_CANCELLED
+        kind: cancelled
+        semantics: '在任何 setup 或 marker 提交点前接受取消时零副作用返回 Cancelled。'
+      - code: WATCHER_PREFERENCE_MUTATION_CONTROL_FINISHED
+        kind: invalid-state
+        semantics: '同一 control 已完成后再次执行时返回 Failed，不复用旧 receipt 或重新提交。'
+      - code: WATCHER_PREFERENCE_MUTATION_CONTROL_IN_USE
+        kind: invalid-state
+        semantics: '同一 control 已被执行者占用或已到达提交点时，第二执行者返回 Failed，不进入 Port 且不终结首个执行者。'
+      - code: WATCHER_PREFERENCE_MUTATION_INVALID_MARKER
+        kind: invalid-input
+        semantics: '固定 marker 为目录、链接、reparse 或其他非普通对象时失败，不跟随或删除该对象。'
+      - code: WATCHER_PREFERENCE_MUTATION_INVALID_PARENT
+        kind: invalid-input
+        semantics: '即时父对象不是可信普通目录，或是可见链接/reparse 时失败。'
+      - code: WATCHER_PREFERENCE_MUTATION_INVALID_STATE_ROOT
+        kind: invalid-input
+        semantics: '既有 inputcodex 状态根不是可信普通目录，或是可见链接/reparse 时失败。'
+      - code: WATCHER_PREFERENCE_MUTATION_LOCK_UNAVAILABLE
+        kind: unavailable
+        semantics: '进程内单航班互斥锁中毒时失败，不执行文件系统提交。'
+      - code: WATCHER_PREFERENCE_MUTATION_SETUP_FAILED
+        kind: unavailable
+        semantics: '即时父目录、状态根分类或单层 setup 无法可信完成时返回 Failed，并保留精确 setup_commit。'
+      - code: WATCHER_PREFERENCE_MUTATION_MARKER_FAILED
+        kind: unavailable
+        semantics: '固定 marker 提交失败且最终观察仍为 expected 时返回 Failed；不得盲目反向回滚。'
+      - code: WATCHER_PREFERENCE_MUTATION_MARKER_UNAVAILABLE
+        kind: unavailable
+        semantics: '固定 marker 元数据发生 NotFound 之外的 I/O 错误时失败，不把不可读伪装成缺失。'
+      - code: WATCHER_PREFERENCE_MUTATION_PARENT_UNAVAILABLE
+        kind: unavailable
+        semantics: '即时父目录元数据不可读或不存在时失败，不递归创建父链。'
+      - code: WATCHER_PREFERENCE_MUTATION_PATH_INVALID
+        kind: invalid-input
+        semantics: '平台能力返回非绝对路径或状态根不以固定 inputcodex 单层命名时失败。'
+      - code: WATCHER_PREFERENCE_MUTATION_PATH_UNAVAILABLE
+        kind: unavailable
+        semantics: '平台路径能力无法解析固定状态根时失败，不回退到当前目录或调用方路径。'
+      - code: WATCHER_PREFERENCE_MUTATION_STATE_ROOT_UNAVAILABLE
+        kind: unavailable
+        semantics: '既有状态根元数据发生 NotFound 之外的 I/O 错误时失败。'
+      - code: WATCHER_PREFERENCE_MUTATION_INDETERMINATE
+        kind: indeterminate
+        semantics: '提交后无法可信重观察，或 setup 结果无法分类时返回 Indeterminate，不冒充成功或取消。'
+      - code: WATCHER_PREFERENCE_MUTATION_UNSUPPORTED
+        kind: unsupported
+        semantics: '非 Windows/macOS 系统入口明确失败，不回退到其他平台。'
+    loading:
+      states: [Idle, Loading, Ready, Empty, Failed, Cancelling]
+      request_identity: '每次 mutation 使用 typed request_id，并由独立提交状态机跟踪 Pending、Cancelled、CommitReached 与 Finished。'
+      stale_result_rule: '提交前取消返回 Cancelled；提交点后取消返回 TooLate，最终 receipt 必须继续交付，禁止降级为 Stale。'
+    timeout:
+      behavior: '同步固定文件操作不启动线程、真实 Watcher 或等待循环；外层超时在提交前可取消，提交后必须等待同步重观察完成。'
+      evidence: '只记录 request_id、提交类别、最终观察、outcome 与稳定 diagnostic_code，不记录实际路径或文件内容。'
+    cancellation:
+      behavior: 'Pending 可原子转为 Cancelled；RootCreated、Created 或 Removed 任一提交点后只能返回 TooLate，随后完成重观察和 receipt。'
+      evidence: '记录取消结果、mutation phase 与 receipt，不记录路径、内容、进程或运行状态。'
+    isolation: '同进程固定状态根使用单航班串行；可见 symlink、junction 或 reparse 必须失败，普通竞态返回 Conflict 或 Indeterminate；不宣称防御同账号恶意 ABA。'
+    observability:
+      - request_id
+      - requested_preference
+      - setup_commit
+      - marker_commit
+      - final_observation
+      - outcome
+      - diagnostic_code
+    platforms:
+      shared_semantics: 'Windows 与 macOS 使用相同 expected/desired、提交点、取消、幂等、冲突、最终观察和 receipt 语义；只改变 Watcher 偏好标记，不安装、卸载或控制 Watcher。'
+      windows: '使用 safe std 元数据与 file_attributes 拒绝 reparse；状态根缺失时仅执行单层 create_dir，Disable 使用 create_new，Enable 只删除已观察的普通 marker。'
+      macos: '使用不跟随元数据拒绝 symlink；状态根缺失时仅执行单层 create_dir，Disable 使用 create_new，Enable 只删除已观察的普通 marker。'
+      differences:
+        - '平台差异仅限 Windows reparse 属性与 macOS symlink 文件类型分类。'
+    fixture_policy:
+      mode: none
+      reason: '固定父目录、状态根、marker、竞态、取消和提交后观察矩阵由双平台等价的合成测试覆盖，无需结构 fixture。'
+    fixture_refs: []
   - id: contract.feature.foundation-platform.watcher.baseline
     feature_id: feature.foundation-platform.watcher
     scenario: baseline

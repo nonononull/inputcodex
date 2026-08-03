@@ -1114,6 +1114,55 @@
   ReportOnly 返回 `needs-input / session-plan-bootstrap`，已按项目规则绕过且未修改 AGOS。
 - 关联：Issue `#140` owner/recovery 评论、Issue `#141`、Paseo 执行控制面。
 
+### 2026-08-03：路径元数据检查无法绑定提交对象且读取协调器会丢弃提交后收据
+
+- 环境：Issue `#136` 审计 Watcher 偏好写入，Issue `#140` 随后只批准
+  `cooperative-same-user-v1` 下的固定 `inputcodex_state_root/watcher.disabled` mutation；Issue `#143`
+  负责实现该唯一产品候选。
+- 现象：`symlink_metadata` 后再执行创建或删除仍存在 TOCTOU，safe std 无法证明验证对象与提交对象身份相同；
+  全新状态根又要求先创建目录再提交 marker。既有读取型 `LoadCoordinator` 会把取消后的完成结果降为
+  `Stale`，若直接复用，会出现磁盘已经提交但调用方看不到最终收据。
+- 根因：路径 `PathBuf` 不是绑定目录或文件身份的句柄；setup 与 marker 是两个可独立失败的提交边界；
+  读取请求的“取消后丢弃结果”语义不适用于不可撤销副作用。
+- 处理：威胁模型明确排除同账号恶意进程在最终验证后的 ABA；调用方只提供 typed request ID、
+  `expected` 与 `desired`。平台层逐对象拒绝可见 symlink/junction/reparse，只允许单层 `create_dir`、
+  原子 `create_new` 和已观察普通 marker 的条件删除，并以进程内单航班串行。应用层使用独立
+  `Pending / Cancelled / CommitReached / Finished` 状态机；提交后取消返回 `TooLate`，仍完成重观察并交付
+  `setup_commit / marker_commit / final_observation / outcome / diagnostic_code`。RootCreated 后 marker 失败时
+  空状态根合法保留，禁止歧义回滚。
+- 验证：Domain 专项 `4/4`、Application 专项 `8/8`、Platform 内部安全矩阵 `13/13`；Platform 全包
+  `85` 个单元测试及全部集成测试、Clippy 均通过。Parity RED 精确暴露新 feature 缺失与两个旧归属，
+  GREEN 后完整目录测试为 `32/32`，目录终态为 source `19/83/30/3`、feature `13/22/11`、contract `46`、
+  fixture manifest `12`。
+- Hosted Linux 纠错：首个 PR Head 的 library Clippy 发现两个固定名常量只由
+  `windows / macos / test` 实现使用却缺少同源 `cfg`。该根因与本文件“2026-07-27：首个 Gate 5
+  实现暴露 Linux test cfg 边界”相同；复用既有处理，仅给常量增加与唯一使用方一致的条件编译，
+  不增加 `allow/expect(dead_code)`，不修改 Workflow 或平台语义。第二个 Head 继续暴露同族剩余面：
+  `fs` 只由真实 Windows/macOS 适配器使用却被 Linux test 导入，`Other` 文件类型只由真实平台分类构造、
+  Linux 合成测试未构造；拆分 `fs` 导入条件，并把 `Other` 加入既有非法父对象矩阵，避免用 lint 例外掩盖
+  缺失反例。
+- 独立复审第一轮纠错：Reviewer A 证明无提交路径在最后一次取消检查后仍可保持 `Pending`；取消线程先完成
+  `Pending -> Cancelled` 并返回 `Accepted` 后，旧 `finish()` 会无条件覆盖为 `Finished`，交付
+  `AlreadySatisfied / Conflict / Failed` 而不是 `Cancelled`。新增 Stub Port 确定性 RED；终结改为占用者原子
+  CAS 仲裁，若取消先赢则固定 `NotRequired / NotAttempted`、保留最终观察并交付 Cancelled receipt；
+  提交点先赢时继续交付原 receipt。
+- 独立复审第二轮纠错：同一 control 原先没有执行占用态，两个并发 `execute` 都可进入 Port；首个执行者
+  到达提交点后，第二个执行者仍可复用 `CommitReached` 再次提交，或在首个执行者已结束时把未发生取消的
+  结果伪装为 `Cancelled`。barrier 双线程 RED 精确得到 Port 调用 `2` 次；修复增加私有 `Running` 与运行中
+  已接受取消态，入口 CAS 只允许一个执行者占用，未占用 control 不能进入提交点，第二执行者返回稳定
+  `WATCHER_PREFERENCE_MUTATION_CONTROL_IN_USE` 且不能终结首个执行者。Platform 脚本夹具同步改走真实 UseCase，
+  Application 专项 `8/8`、Platform 全包 `85` 个单元测试及全部集成测试恢复通过。
+- 独立复审第三轮纠错：生产新增的 `WATCHER_PREFERENCE_MUTATION_CONTROL_IN_USE` 起初只存在于 Application
+  与 barrier 回归，Parity baseline 的错误表和显式诊断码清单均未登记，导致可达稳定错误不受目录合同约束。
+  先把该码加入目录测试取得唯一 RED，再将其固定为 `invalid-state`，明确第二执行者不得进入 Port 或终结首个
+  执行者；定向 Parity 与完整目录测试随后恢复通过。
+- Hosted Windows 纠错：新增合同断言直接匹配带 `\n` 的多行文本，本机 LF 工作树通过，但 fresh Windows
+  checkout 的 CRLF 使同一语义字符串不匹配；CI 仅 Windows `catalog_repository` 失败，Linux/macOS 与其他
+  Job 均通过。复用本文件既有 Git 换行根因，只在测试读取后把 `\r\n` 归一化为 `\n` 再验证完整错误块，
+  不修改合同、生产实现、Workflow 或 Runner。
+- 关联：Issue `#136`、Issue `#140`、Issue `#143`、`crates/inputcodex-application/src/watcher_preference_mutation.rs`、
+  `crates/inputcodex-platform/src/watcher_preference_mutation.rs`、`parity/contracts/foundation-platform.yml`。
+
 ## 记录模板
 
 ```text
