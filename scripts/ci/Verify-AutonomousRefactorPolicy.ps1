@@ -30,7 +30,7 @@ function Get-PropertyValue {
     if ($null -eq $property) {
         return $null
     }
-    return $property.Value
+    return ,$property.Value
 }
 
 function Test-ExactStringSet {
@@ -75,6 +75,15 @@ function Test-ExactJsonBoolean {
     return ($Actual -is [bool] -and $Actual -eq $Expected)
 }
 
+function Test-ExactJsonString {
+    param(
+        [AllowNull()]$Actual,
+        [AllowNull()]$Expected
+    )
+
+    return ($Actual -is [string] -and $Expected -is [string] -and $Actual -ceq $Expected)
+}
+
 function Test-ExactJsonInt64 {
     param(
         [AllowNull()]$Actual,
@@ -102,13 +111,26 @@ if (-not (Test-Path -LiteralPath $resolvedPolicyPath -PathType Leaf)) {
 
 try {
     $raw = [System.IO.File]::ReadAllText($resolvedPolicyPath, [Text.UTF8Encoding]::new($false))
-    $policy = $raw | ConvertFrom-Json -Depth 100
+    $policy = $raw | ConvertFrom-Json -Depth 100 -NoEnumerate
 } catch {
     Write-Result -ExitCode 11 -Value ([pscustomobject][ordered]@{
         schema_version = 1
         ok = $false
         error_code = 'AUTONOMOUS_POLICY_INVALID_JSON'
         policy_path = $resolvedPolicyPath
+    })
+}
+if ($null -eq $policy -or
+    $policy.GetType() -ne [System.Management.Automation.PSCustomObject]) {
+    Write-Result -ExitCode 12 -Value ([pscustomobject][ordered]@{
+        schema_version = 1
+        ok = $false
+        policy_path = $resolvedPolicyPath
+        violation_count = 1
+        violations = @([pscustomobject][ordered]@{
+            code = 'SCHEMA_VERSION'
+            message = '策略根必须为 JSON object'
+        })
     })
 }
 
@@ -125,7 +147,9 @@ function Add-Violation {
     }) | Out-Null
 }
 
-if ((Get-PropertyValue $policy 'schema_version') -cne 'inputcodex.autonomous-refactor-policy.v1') {
+if (-not (Test-ExactJsonString `
+    -Actual (Get-PropertyValue $policy 'schema_version') `
+    -Expected 'inputcodex.autonomous-refactor-policy.v1')) {
     Add-Violation 'SCHEMA_VERSION' 'schema_version 必须为 inputcodex.autonomous-refactor-policy.v1'
 }
 if (-not (Test-ExactJsonBoolean -Actual (Get-PropertyValue $policy 'enabled') -Expected $true)) {
@@ -133,10 +157,12 @@ if (-not (Test-ExactJsonBoolean -Actual (Get-PropertyValue $policy 'enabled') -E
 }
 
 $authorization = Get-PropertyValue $policy 'authorization'
-if ((Get-PropertyValue $authorization 'mode') -cne 'bounded-standing-v1') {
+if (-not (Test-ExactJsonString -Actual (Get-PropertyValue $authorization 'mode') -Expected 'bounded-standing-v1')) {
     Add-Violation 'AUTHORIZATION_MODE' '授权模式必须为 bounded-standing-v1'
 }
-if ((Get-PropertyValue $authorization 'owner_authorization_ref') -cne 'https://github.com/nonononull/inputcodex/issues/111') {
+if (-not (Test-ExactJsonString `
+    -Actual (Get-PropertyValue $authorization 'owner_authorization_ref') `
+    -Expected 'https://github.com/nonononull/inputcodex/issues/111')) {
     Add-Violation 'OWNER_AUTHORIZATION_REF' 'owner authorization 必须固定指向 Issue #111'
 }
 if (-not (Test-ExactJsonBoolean -Actual (Get-PropertyValue $authorization 'exact_head_binding') -Expected $true)) {
@@ -148,7 +174,7 @@ if (-not (Test-ExactJsonBoolean -Actual (Get-PropertyValue $authorization 'polic
 }
 
 $execution = Get-PropertyValue $policy 'execution'
-if ((Get-PropertyValue $execution 'base_ref') -cne 'origin/main') {
+if (-not (Test-ExactJsonString -Actual (Get-PropertyValue $execution 'base_ref') -Expected 'origin/main')) {
     Add-Violation 'BASE_REF' '自治任务必须从 origin/main 开始'
 }
 if (-not (Test-ExactJsonInt64 -Actual (Get-PropertyValue $execution 'max_active_writers') -Expected 1) -or
@@ -172,14 +198,16 @@ if (-not (Test-ExactStringSequence -Actual (Get-PropertyValue $execution 'decisi
 }
 
 $mergeGate = Get-PropertyValue $policy 'merge_gate'
-if ((Get-PropertyValue $mergeGate 'method') -cne 'squash') {
+if (-not (Test-ExactJsonString -Actual (Get-PropertyValue $mergeGate 'method') -Expected 'squash')) {
     Add-Violation 'MERGE_METHOD' 'main 只允许 Squash Merge'
 }
 if (-not (Test-ExactJsonBoolean -Actual (Get-PropertyValue $mergeGate 'github_native_auto_merge') -Expected $false)) {
     Add-Violation 'GITHUB_AUTO_MERGE' 'GitHub 原生 auto-merge 必须保持关闭'
 }
-if ((Get-PropertyValue $mergeGate 'required_mergeable_state') -cne 'CLEAN' -or
-    (Get-PropertyValue $mergeGate 'required_release_audit') -cne 'current' -or
+if (-not (Test-ExactJsonString `
+        -Actual (Get-PropertyValue $mergeGate 'required_mergeable_state') -Expected 'CLEAN') -or
+    -not (Test-ExactJsonString `
+        -Actual (Get-PropertyValue $mergeGate 'required_release_audit') -Expected 'current') -or
     -not (Test-ExactJsonInt64 -Actual (Get-PropertyValue $mergeGate 'required_review_threads') -Expected 0)) {
     Add-Violation 'REVIEW_GATE' 'mergeable、release audit 或 Review thread 门漂移'
 }
@@ -211,7 +239,8 @@ $workflowExpectations = [ordered]@{
         jobs = @('contract', 'windows', 'macos', 'required')
     }
 }
-$workflows = @(Get-PropertyValue $mergeGate 'required_workflows')
+$workflowsValue = Get-PropertyValue $mergeGate 'required_workflows'
+$workflows = if ($workflowsValue -is [System.Array]) { [object[]]$workflowsValue } else { @() }
 foreach ($workflowName in $workflowExpectations.Keys) {
     $matches = @($workflows | Where-Object { (Get-PropertyValue $_ 'name') -ceq $workflowName })
     if ($matches.Count -ne 1) {
@@ -223,7 +252,8 @@ foreach ($workflowName in $workflowExpectations.Keys) {
         Add-Violation 'WORKFLOW_GATE' "Workflow Job 集合漂移：$workflowName"
     }
     if (-not (Test-ExactJsonInt64 -Actual (Get-PropertyValue $matches[0] 'workflow_id') -Expected $expectation.workflow_id) -or
-        (Get-PropertyValue $matches[0] 'path') -cne $expectation.path -or
+        -not (Test-ExactJsonString `
+            -Actual (Get-PropertyValue $matches[0] 'path') -Expected $expectation.path) -or
         -not (Test-ExactStringSet -Actual (Get-PropertyValue $matches[0] 'events') -Expected $expectation.events)) {
         Add-Violation 'WORKFLOW_IDENTITY' "Workflow ID、path 或事件集合漂移：$workflowName"
     }
@@ -274,7 +304,7 @@ if (-not $upstreamSyncStringsValid -or
     $upstreamSyncRequiredWorkflow -cne 'CI' -or
     $upstreamSyncRequiredJob -cne 'release-audit' -or
     $upstreamSyncWorkflowMatches.Count -ne 1 -or
-    @(Get-PropertyValue $upstreamSyncWorkflowMatches[0] 'jobs') -cnotcontains $upstreamSyncRequiredJob) {
+    (Get-PropertyValue $upstreamSyncWorkflowMatches[0] 'jobs') -cnotcontains $upstreamSyncRequiredJob) {
     Add-Violation 'UPSTREAM_SYNC_POLICY' 'upstream-sync stale 例外必须绑定精确 marker、状态和成功 release-audit Job'
 }
 
@@ -542,7 +572,7 @@ $sideEffectAdmissionStringsValid =
     $sideEffectAdmissionTerminalOwnerIssueRef -is [string] -and
     $sideEffectAdmissionTerminalOwnerIssueRef -ceq 'https://github.com/nonononull/inputcodex/issues/140' -and
     $sideEffectAdmissionTerminalAction -is [string] -and
-    $sideEffectAdmissionTerminalAction -ceq 'reopen-owner-decision-issue' -and
+    $sideEffectAdmissionTerminalAction -ceq 'close-task-and-reopen-owner-decision-issue' -and
     $sideEffectAdmissionTerminalState -is [string] -and
     $sideEffectAdmissionTerminalState -ceq 'blocked-candidate-exhausted' -and
     $sideEffectAdmissionTerminalNextAction -is [string] -and
@@ -576,7 +606,7 @@ if ($maxAttempts -isnot [long] -or $maxAttempts -lt 1 -or $maxAttempts -gt 3 -or
 }
 
 $ui = Get-PropertyValue $policy 'ui'
-if ((Get-PropertyValue $ui 'owner') -cne 'Gemini' -or
+if (-not (Test-ExactJsonString -Actual (Get-PropertyValue $ui 'owner') -Expected 'Gemini') -or
     -not (Test-ExactJsonBoolean -Actual (Get-PropertyValue $ui 'fallback_allowed') -Expected $false)) {
     Add-Violation 'UI_OWNER' 'UI owner 必须为 Gemini 且不得静默 fallback'
 }

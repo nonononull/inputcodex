@@ -6,7 +6,7 @@ use std::{
 };
 
 use inputcodex_parity::{
-    ParityStatus, SideEffectBucket, ValidationCode, parse_feature_catalog,
+    ParityStatus, SideEffectBucket, TypedOwnerKind, ValidationCode, parse_feature_catalog,
     parse_side_effect_admission_matrix, parse_source_index, validate_feature_repository,
     validate_repository, validate_source_index,
 };
@@ -2759,6 +2759,20 @@ fn 仓库验证接入_83_source_副作用准入矩阵() {
             .collect::<BTreeSet<_>>();
         assert_eq!(sources.len(), expected_sources);
         assert_eq!(features.len(), expected_features);
+    }
+    for source in matrix
+        .sources()
+        .iter()
+        .filter(|source| source.feature_id() == "feature.provider-network.model-catalog")
+    {
+        assert!(
+            source
+                .typed_owner()
+                .kinds()
+                .contains(&TypedOwnerKind::CredentialProfile),
+            "model-catalog 必须绑定 credential profile owner：{}",
+            source.source_id()
+        );
     }
 
     let fixture = FeatureRepositoryFixture::new_complete();

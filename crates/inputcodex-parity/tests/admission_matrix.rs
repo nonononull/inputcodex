@@ -35,7 +35,7 @@ sources:
     feature_id: feature.foundation-platform.settings-management
     bucket: write
     typed_owner:
-      state: missing
+      state: partial
       kinds: [filesystem-mutation]
     blocker_refs: ['issue:94']
     admission: blocked
@@ -57,7 +57,7 @@ fn 合法矩阵解析为严格领域类型() {
     assert_eq!(matrix.sources().len(), 1);
     assert_eq!(source.source_id(), "tauri-command:save_settings");
     assert_eq!(source.bucket(), SideEffectBucket::Write);
-    assert_eq!(source.typed_owner().state(), TypedOwnerState::Missing);
+    assert_eq!(source.typed_owner().state(), TypedOwnerState::Partial);
     assert_eq!(source.admission(), AdmissionDecision::Blocked);
     assert!(!source.implementation_authorized());
 }
@@ -71,7 +71,7 @@ fn 矩阵拒绝未知字段和类型伪装() {
             "implementation_authorized: 'false'",
         ),
         VALID_MATRIX.replace("bucket: write", "bucket: Write"),
-        VALID_MATRIX.replace("state: missing", "state: [missing]"),
+        VALID_MATRIX.replace("state: partial", "state: [partial]"),
     ] {
         assert!(
             parse_side_effect_admission_matrix(&invalid).is_err(),
@@ -89,6 +89,33 @@ fn 矩阵与未评估_source_集合和能力桶一对一匹配() {
         validate_side_effect_admission_matrix(&matrix, &source_index, &feature_statuses())
             .is_empty()
     );
+}
+
+#[test]
+fn 矩阵拒绝_typed_owner_和_blocker_合法值漂移() {
+    let source_index = parse_source_index(VALID_SOURCE_INDEX).expect("测试 source index 应可解析");
+    for (input, expected_code) in [
+        (
+            VALID_MATRIX.replace("state: partial", "state: missing"),
+            ValidationCode::AdmissionOwnerMismatch,
+        ),
+        (
+            VALID_MATRIX.replace("filesystem-mutation", "clipboard-mutation"),
+            ValidationCode::AdmissionOwnerMismatch,
+        ),
+        (
+            VALID_MATRIX.replace("'issue:94'", "'issue:999'"),
+            ValidationCode::AdmissionBlockerMismatch,
+        ),
+    ] {
+        let matrix = parse_side_effect_admission_matrix(&input).expect("合法枚举值变异仍应可解析");
+        let issues =
+            validate_side_effect_admission_matrix(&matrix, &source_index, &feature_statuses());
+        assert!(
+            issues.iter().any(|issue| issue.code() == expected_code),
+            "owner/blocker 漂移必须报告 {expected_code:?}，实际={issues:?}"
+        );
+    }
 }
 
 #[test]

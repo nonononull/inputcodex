@@ -80,6 +80,8 @@ pub enum ValidationCode {
     UnexpectedAdmissionSource,
     AdmissionFeatureMismatch,
     AdmissionBucketMismatch,
+    AdmissionOwnerMismatch,
+    AdmissionBlockerMismatch,
     AdmissionTargetStatusMismatch,
     AdmissionMetadataInvalid,
     AdmissionUnauthorized,

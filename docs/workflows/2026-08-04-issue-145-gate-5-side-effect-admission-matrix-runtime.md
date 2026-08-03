@@ -10,7 +10,7 @@
 - branch_ref: codex/issue-145-gate-5-side-effect-admission-matrix
 - candidate_scope: 20
 - candidate_scope_hash: sha256:b7955bb33dac2a5f58990dfbe2aff22cc6145a2b60e601e6de255bc0a8f4360f
-- runtime_state: local-verification-green
+- runtime_state: correction-local-verification-green
 
 ## Node Order
 
@@ -42,4 +42,4 @@ startup baseline
 
 ## Current Node
 
-Control Plane 与 Parity admission 已完成本地 RED/GREEN，二十路径 scope/hash、仓库政策、Release Audit 与 diff check 均已通过；当前只允许 commit/push、non-Draft PR 和只读复审。未经 Final Head 独立复审和 Hosted 双 Workflow，不得创建完成结论或合并。
+首版 Final Head 的独立复审问题已完成 RED/GREEN：22-feature owner/blocker oracle、model-catalog credential profile、#145 复合 terminal、PowerShell 原始 JSON 类型边界与 PR marker 均已纳入修正。完整治理合同为 `88/88`，Parity admission 为 `6/6`，目录为 `33/33`；当前只允许普通 correction commit/push 和修正 Head 只读复审。未经修正 Head 独立复审和 Hosted 双 Workflow，不得创建完成结论或合并。

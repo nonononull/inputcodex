@@ -32,7 +32,25 @@ function Get-PropertyValue {
     if ($null -eq $property) {
         return $null
     }
-    return $property.Value
+    return ,$property.Value
+}
+
+function Test-ExactStringValue {
+    param(
+        [AllowNull()]$Actual,
+        [AllowNull()]$Expected
+    )
+
+    return ($Actual -is [string] -and $Expected -is [string] -and $Actual -ceq $Expected)
+}
+
+function Test-StringPatternValue {
+    param(
+        [AllowNull()]$Actual,
+        [Parameter(Mandatory)][string]$Pattern
+    )
+
+    return ($Actual -is [string] -and $Actual -cmatch $Pattern)
 }
 
 function Get-PropertyProjection {
@@ -212,14 +230,19 @@ function Get-AutonomousPrBodyEvidence {
         return $invalid
     }
     if ($evidence -isnot [pscustomobject] -or
-        (Get-PropertyValue $evidence 'schema_version') -cne 'inputcodex.autonomous-refactor-evidence.v1' -or
+        -not (Test-ExactStringValue `
+            -Actual (Get-PropertyValue $evidence 'schema_version') `
+            -Expected 'inputcodex.autonomous-refactor-evidence.v1') -or
         (Get-PropertyValue $evidence 'tracking_issue_ref') -isnot [string] -or
         (Get-PropertyValue $evidence 'standing_authorization_ref') -isnot [string] -or
-        [string](Get-PropertyValue $evidence 'policy_sha256') -cnotmatch '^sha256:[0-9a-f]{64}$' -or
+        -not (Test-StringPatternValue `
+            -Actual (Get-PropertyValue $evidence 'policy_sha256') -Pattern '^sha256:[0-9a-f]{64}$') -or
         (Get-PropertyValue $evidence 'scope_count') -isnot [long] -or
         (Get-PropertyValue $evidence 'scope_count') -lt 0 -or
-        [string](Get-PropertyValue $evidence 'scope_hash') -cnotmatch '^sha256:[0-9a-f]{64}$' -or
-        [string](Get-PropertyValue $evidence 'final_head') -cnotmatch '^[0-9a-f]{40}$' -or
+        -not (Test-StringPatternValue `
+            -Actual (Get-PropertyValue $evidence 'scope_hash') -Pattern '^sha256:[0-9a-f]{64}$') -or
+        -not (Test-StringPatternValue `
+            -Actual (Get-PropertyValue $evidence 'final_head') -Pattern '^[0-9a-f]{40}$') -or
         (Get-PropertyValue $evidence 'independent_review_status') -isnot [string] -or
         (Get-PropertyValue $evidence 'independent_review_ref') -isnot [string]) {
         return $invalid
@@ -372,7 +395,8 @@ query($owner:String!,$name:String!,$number:Int!,$endCursor:String){
         if ($pullRequest -isnot [pscustomobject] -or
             (Get-PropertyValue $pullRequest 'isDraft') -isnot [bool] -or
             (Get-PropertyValue $pullRequest 'mergeStateStatus') -isnot [string] -or
-            [string](Get-PropertyValue $pullRequest 'headRefOid') -cnotmatch '^[0-9a-f]{40}$' -or
+            -not (Test-StringPatternValue `
+                -Actual (Get-PropertyValue $pullRequest 'headRefOid') -Pattern '^[0-9a-f]{40}$') -or
             (Get-PropertyValue $pullRequest 'baseRefName') -isnot [string]) {
             throw 'gh pr review state schema invalid'
         }
@@ -484,7 +508,8 @@ function Get-GitHubWorkflowEvidence {
                 (Get-PropertyValue $run 'workflow_id') -isnot [long] -or
                 (Get-PropertyValue $run 'path') -isnot [string] -or
                 (Get-PropertyValue $run 'event') -isnot [string] -or
-                [string](Get-PropertyValue $run 'head_sha') -cnotmatch '^[0-9a-f]{40}$' -or
+                -not (Test-StringPatternValue `
+                    -Actual (Get-PropertyValue $run 'head_sha') -Pattern '^[0-9a-f]{40}$') -or
                 (Get-PropertyValue $run 'status') -isnot [string] -or
                 ($null -ne (Get-PropertyValue $run 'conclusion') -and
                     (Get-PropertyValue $run 'conclusion') -isnot [string])) {
@@ -499,7 +524,7 @@ function Get-GitHubWorkflowEvidence {
         $workflowName = Get-PropertyValue $expectation 'name'
         $workflowId = Get-PropertyValue $expectation 'workflow_id'
         $workflowPath = Get-PropertyValue $expectation 'path'
-        $expectedEvents = @(Get-PropertyValue $expectation 'events')
+        $expectedEvents = Get-PropertyValue $expectation 'events'
         if ($workflowName -isnot [string] -or
             $workflowId -isnot [long] -or
             $workflowPath -isnot [string] -or
@@ -549,7 +574,8 @@ function Get-GitHubWorkflowEvidence {
                     (Get-PropertyValue $job 'status') -isnot [string] -or
                     ($null -ne (Get-PropertyValue $job 'conclusion') -and
                         (Get-PropertyValue $job 'conclusion') -isnot [string]) -or
-                    [string](Get-PropertyValue $job 'head_sha') -cnotmatch '^[0-9a-f]{40}$') {
+                    -not (Test-StringPatternValue `
+                        -Actual (Get-PropertyValue $job 'head_sha') -Pattern '^[0-9a-f]{40}$')) {
                     throw 'gh workflow job item schema invalid'
                 }
                 $jobs.Add([pscustomobject][ordered]@{
@@ -853,7 +879,7 @@ function Get-SideEffectAdmissionMatrixProjection {
         $terminalOwnerIssueRef -is [string] -and
         $terminalOwnerIssueRef -ceq 'https://github.com/nonononull/inputcodex/issues/140' -and
         $terminalAction -is [string] -and
-        $terminalAction -ceq 'reopen-owner-decision-issue' -and
+        $terminalAction -ceq 'close-task-and-reopen-owner-decision-issue' -and
         $terminalState -is [string] -and
         $terminalState -ceq 'blocked-candidate-exhausted' -and
         $terminalNextAction -is [string] -and
@@ -915,7 +941,13 @@ function Test-AutonomousWorkflowRunEvidence {
     $workflowName = Get-PropertyValue $WorkflowExpectation 'name'
     $workflowId = Get-PropertyValue $WorkflowExpectation 'workflow_id'
     $workflowPath = Get-PropertyValue $WorkflowExpectation 'path'
-    $expectedJobs = @(Get-PropertyValue $WorkflowExpectation 'jobs')
+    $expectedJobs = Get-PropertyValue $WorkflowExpectation 'jobs'
+    if ($workflowName -isnot [string] -or
+        $workflowId -isnot [long] -or
+        $workflowPath -isnot [string] -or
+        $expectedJobs -isnot [System.Array]) {
+        return $false
+    }
     $matches = @($WorkflowRuns | Where-Object { (Get-PropertyValue $_ 'name') -ceq $WorkflowName })
     if ($matches.Count -ne 1) {
         return $false
@@ -930,9 +962,9 @@ function Test-AutonomousWorkflowRunEvidence {
         return $false
     }
     foreach ($job in $jobs) {
-        if ((Get-PropertyValue $job 'status') -cne 'completed' -or
-            (Get-PropertyValue $job 'conclusion') -cne 'success' -or
-            (Get-PropertyValue $job 'head_oid') -cne $HeadOid) {
+        if (-not (Test-ExactStringValue -Actual (Get-PropertyValue $job 'status') -Expected 'completed') -or
+            -not (Test-ExactStringValue -Actual (Get-PropertyValue $job 'conclusion') -Expected 'success') -or
+            -not (Test-ExactStringValue -Actual (Get-PropertyValue $job 'head_oid') -Expected $HeadOid)) {
             return $false
         }
     }
@@ -940,13 +972,13 @@ function Test-AutonomousWorkflowRunEvidence {
         (Get-PropertyValue $run 'run_id') -gt 0 -and
         (Get-PropertyValue $run 'workflow_id') -is [long] -and
         (Get-PropertyValue $run 'workflow_id') -eq $workflowId -and
-        (Get-PropertyValue $run 'workflow_path') -ceq $workflowPath -and
-        (Get-PropertyValue $run 'event') -ceq $ExpectedEvent -and
+        (Test-ExactStringValue -Actual (Get-PropertyValue $run 'workflow_path') -Expected $workflowPath) -and
+        (Test-ExactStringValue -Actual (Get-PropertyValue $run 'event') -Expected $ExpectedEvent) -and
         (Get-PropertyValue $run 'pull_request_number') -is [long] -and
         (Get-PropertyValue $run 'pull_request_number') -eq $PullRequestNumber -and
-        (Get-PropertyValue $run 'head_oid') -ceq $HeadOid -and
-        (Get-PropertyValue $run 'status') -ceq 'completed' -and
-        (Get-PropertyValue $run 'conclusion') -ceq 'success' -and
+        (Test-ExactStringValue -Actual (Get-PropertyValue $run 'head_oid') -Expected $HeadOid) -and
+        (Test-ExactStringValue -Actual (Get-PropertyValue $run 'status') -Expected 'completed') -and
+        (Test-ExactStringValue -Actual (Get-PropertyValue $run 'conclusion') -Expected 'success') -and
         (Get-PropertyValue $run 'artifact_count') -is [long] -and
         (Get-PropertyValue $run 'artifact_count') -eq 0)
 }
@@ -974,36 +1006,59 @@ function Get-AutonomousPostMergeGateEvaluation {
     $planningEvidence = Get-PropertyValue $Issue 'planning_evidence'
     $evidenceTaskKind = (Get-PropertyProjection $evidence 'task_kind').value
     $planningTaskKind = (Get-PropertyProjection $planningEvidence 'task_kind').value
-    if ([string]$mergeCommitOid -cnotmatch '^[0-9a-f]{40}$' -or
-        (Get-PropertyValue $Snapshot 'observed_remote_main') -cne $mergeCommitOid -or
+    $mergeCommitValid = Test-StringPatternValue -Actual $mergeCommitOid -Pattern '^[0-9a-f]{40}$'
+    if (-not $mergeCommitValid -or
+        -not (Test-ExactStringValue `
+            -Actual (Get-PropertyValue $Snapshot 'observed_remote_main') -Expected $mergeCommitOid) -or
         $null -eq $evidence -or
+        (Get-PropertyValue $evidence 'valid') -isnot [bool] -or
         (Get-PropertyValue $evidence 'valid') -ne $true -or
-        (Get-PropertyValue $evidence 'tracking_issue_ref') -cne (Get-PropertyValue $Issue 'url') -or
-        (Get-PropertyValue $evidence 'standing_authorization_ref') -cne 'https://github.com/nonononull/inputcodex/issues/111' -or
-        (Get-PropertyValue $evidence 'policy_sha256') -cne $PolicySha256 -or
-        (Get-PropertyValue $evidence 'final_head') -cne (Get-PropertyValue $MergedPullRequest 'head_oid') -or
+        -not (Test-ExactStringValue `
+            -Actual (Get-PropertyValue $evidence 'tracking_issue_ref') `
+            -Expected (Get-PropertyValue $Issue 'url')) -or
+        -not (Test-ExactStringValue `
+            -Actual (Get-PropertyValue $evidence 'standing_authorization_ref') `
+            -Expected 'https://github.com/nonononull/inputcodex/issues/111') -or
+        -not (Test-ExactStringValue `
+            -Actual (Get-PropertyValue $evidence 'policy_sha256') -Expected $PolicySha256) -or
+        -not (Test-ExactStringValue `
+            -Actual (Get-PropertyValue $evidence 'final_head') `
+            -Expected (Get-PropertyValue $MergedPullRequest 'head_oid')) -or
         $null -eq $planningEvidence -or
+        (Get-PropertyValue $planningEvidence 'valid') -isnot [bool] -or
         (Get-PropertyValue $planningEvidence 'valid') -ne $true -or
+        (Get-PropertyValue $planningEvidence 'scope_count') -isnot [long] -or
         (Get-PropertyValue $planningEvidence 'scope_count') -ne (Get-PropertyValue $Snapshot 'actual_scope_count') -or
-        (Get-PropertyValue $planningEvidence 'scope_hash') -cne (Get-PropertyValue $Snapshot 'actual_scope_hash') -or
+        -not (Test-ExactStringValue `
+            -Actual (Get-PropertyValue $planningEvidence 'scope_hash') `
+            -Expected (Get-PropertyValue $Snapshot 'actual_scope_hash')) -or
+        (Get-PropertyValue $evidence 'scope_count') -isnot [long] -or
         (Get-PropertyValue $evidence 'scope_count') -ne (Get-PropertyValue $Snapshot 'actual_scope_count') -or
-        (Get-PropertyValue $evidence 'scope_hash') -cne (Get-PropertyValue $Snapshot 'actual_scope_hash') -or
+        -not (Test-ExactStringValue `
+            -Actual (Get-PropertyValue $evidence 'scope_hash') `
+            -Expected (Get-PropertyValue $Snapshot 'actual_scope_hash')) -or
         $evidenceTaskKind -isnot [string] -or
         $evidenceTaskKind -cne $TaskKind -or
         $planningTaskKind -isnot [string] -or
         $planningTaskKind -cne $TaskKind) {
         Add-PostMergePendingCode 'POST_MERGE_EVIDENCE'
     }
-    if ((Get-PropertyValue $Snapshot 'observed_origin_main') -cne $mergeCommitOid) {
+    if (-not (Test-ExactStringValue `
+        -Actual (Get-PropertyValue $Snapshot 'observed_origin_main') -Expected $mergeCommitOid)) {
         Add-PostMergePendingCode 'POST_MERGE_ORIGIN_MAIN'
     }
 
     $review = Get-PropertyValue $MergedPullRequest 'review_attestation'
     if ($null -eq $review -or
+        (Get-PropertyValue $review 'valid') -isnot [bool] -or
         (Get-PropertyValue $review 'valid') -ne $true -or
-        (Get-PropertyValue $review 'final_head') -cne (Get-PropertyValue $MergedPullRequest 'head_oid') -or
-        (Get-PropertyValue $review 'status') -cne 'passed' -or
-        (Get-PropertyValue $review 'ref') -cne (Get-PropertyValue $evidence 'independent_review_ref')) {
+        -not (Test-ExactStringValue `
+            -Actual (Get-PropertyValue $review 'final_head') `
+            -Expected (Get-PropertyValue $MergedPullRequest 'head_oid')) -or
+        -not (Test-ExactStringValue -Actual (Get-PropertyValue $review 'status') -Expected 'passed') -or
+        -not (Test-ExactStringValue `
+            -Actual (Get-PropertyValue $review 'ref') `
+            -Expected (Get-PropertyValue $evidence 'independent_review_ref'))) {
         Add-PostMergePendingCode 'POST_MERGE_REVIEW'
     }
 
@@ -1011,19 +1066,27 @@ function Get-AutonomousPostMergeGateEvaluation {
     if ($null -eq $postMerge -or
         (Get-PropertyValue $postMerge 'parent_count') -isnot [long] -or
         (Get-PropertyValue $postMerge 'parent_count') -ne 1 -or
-        [string](Get-PropertyValue $postMerge 'merge_tree_oid') -cnotmatch '^[0-9a-f]{40}$' -or
-        (Get-PropertyValue $postMerge 'merge_tree_oid') -cne (Get-PropertyValue $postMerge 'head_tree_oid') -or
+        -not (Test-StringPatternValue `
+            -Actual (Get-PropertyValue $postMerge 'merge_tree_oid') -Pattern '^[0-9a-f]{40}$') -or
+        -not (Test-ExactStringValue `
+            -Actual (Get-PropertyValue $postMerge 'merge_tree_oid') `
+            -Expected (Get-PropertyValue $postMerge 'head_tree_oid')) -or
         (Get-PropertyValue $postMerge 'signature_valid') -isnot [bool] -or
         (Get-PropertyValue $postMerge 'signature_valid') -ne $true) {
         Add-PostMergePendingCode 'POST_MERGE_STRUCTURE'
     }
 
     $repositorySettings = Get-PropertyValue $Snapshot 'repository_settings'
-    if ((Get-PropertyValue $repositorySettings 'allow_auto_merge') -ne $false -or
+    if ((Get-PropertyValue $repositorySettings 'allow_auto_merge') -isnot [bool] -or
+        (Get-PropertyValue $repositorySettings 'allow_auto_merge') -ne $false -or
+        (Get-PropertyValue $repositorySettings 'allow_squash_merge') -isnot [bool] -or
         (Get-PropertyValue $repositorySettings 'allow_squash_merge') -ne $true -or
+        (Get-PropertyValue $repositorySettings 'allow_merge_commit') -isnot [bool] -or
         (Get-PropertyValue $repositorySettings 'allow_merge_commit') -ne $false -or
+        (Get-PropertyValue $repositorySettings 'allow_rebase_merge') -isnot [bool] -or
         (Get-PropertyValue $repositorySettings 'allow_rebase_merge') -ne $false -or
-        (Get-PropertyValue $repositorySettings 'default_branch') -cne 'main') {
+        -not (Test-ExactStringValue `
+            -Actual (Get-PropertyValue $repositorySettings 'default_branch') -Expected 'main')) {
         Add-PostMergePendingCode 'POST_MERGE_REPOSITORY_SETTINGS'
     }
 
@@ -1039,7 +1102,7 @@ function Get-AutonomousPostMergeGateEvaluation {
         } else {
             'POST_MERGE_WORKFLOW_PERFORMANCE_BASELINE'
         }
-        if (-not (Test-AutonomousWorkflowRunEvidence `
+        if (-not $mergeCommitValid -or -not (Test-AutonomousWorkflowRunEvidence `
             -WorkflowRuns $workflowRuns `
             -WorkflowExpectation $workflowExpectation `
             -HeadOid $mergeCommitOid `
@@ -1076,7 +1139,8 @@ function Get-AutonomousMergeGateEvaluation {
         (Get-PropertyValue $PullRequest 'is_draft') -ne $false) {
         Add-PendingCode 'PR_DRAFT'
     }
-    if ((Get-PropertyValue $PullRequest 'merge_state') -cne 'CLEAN') {
+    if (-not (Test-ExactStringValue `
+        -Actual (Get-PropertyValue $PullRequest 'merge_state') -Expected 'CLEAN')) {
         Add-PendingCode 'PR_MERGE_STATE'
     }
     $reviewThreadCount = Get-PropertyValue $PullRequest 'review_thread_count'
@@ -1094,7 +1158,8 @@ function Get-AutonomousMergeGateEvaluation {
         (Get-PropertyValue $repositorySettings 'allow_merge_commit') -ne $false -or
         (Get-PropertyValue $repositorySettings 'allow_rebase_merge') -isnot [bool] -or
         (Get-PropertyValue $repositorySettings 'allow_rebase_merge') -ne $false -or
-        (Get-PropertyValue $repositorySettings 'default_branch') -cne 'main') {
+        -not (Test-ExactStringValue `
+            -Actual (Get-PropertyValue $repositorySettings 'default_branch') -Expected 'main')) {
         Add-PendingCode 'REPOSITORY_MERGE_SETTINGS'
     }
 
@@ -1102,17 +1167,26 @@ function Get-AutonomousMergeGateEvaluation {
     if ($null -eq $evidence -or
         (Get-PropertyValue $evidence 'valid') -isnot [bool] -or
         (Get-PropertyValue $evidence 'valid') -ne $true -or
-        (Get-PropertyValue $evidence 'tracking_issue_ref') -cne (Get-PropertyValue $Issue 'url') -or
-        (Get-PropertyValue $evidence 'standing_authorization_ref') -cne 'https://github.com/nonononull/inputcodex/issues/111') {
+        -not (Test-ExactStringValue `
+            -Actual (Get-PropertyValue $evidence 'tracking_issue_ref') `
+            -Expected (Get-PropertyValue $Issue 'url')) -or
+        -not (Test-ExactStringValue `
+            -Actual (Get-PropertyValue $evidence 'standing_authorization_ref') `
+            -Expected 'https://github.com/nonononull/inputcodex/issues/111')) {
         Add-PendingCode 'EVIDENCE_AUTHORIZATION'
     }
     if ($null -eq $evidence -or
-        (Get-PropertyValue $evidence 'final_head') -cne (Get-PropertyValue $PullRequest 'head_oid') -or
-        (Get-PropertyValue $evidence 'final_head') -cne (Get-PropertyValue $Snapshot 'worktree_head')) {
+        -not (Test-ExactStringValue `
+            -Actual (Get-PropertyValue $evidence 'final_head') `
+            -Expected (Get-PropertyValue $PullRequest 'head_oid')) -or
+        -not (Test-ExactStringValue `
+            -Actual (Get-PropertyValue $evidence 'final_head') `
+            -Expected (Get-PropertyValue $Snapshot 'worktree_head'))) {
         Add-PendingCode 'EVIDENCE_HEAD'
     }
     if ($null -eq $evidence -or
-        (Get-PropertyValue $evidence 'policy_sha256') -cne $PolicySha256) {
+        -not (Test-ExactStringValue `
+            -Actual (Get-PropertyValue $evidence 'policy_sha256') -Expected $PolicySha256)) {
         Add-PendingCode 'EVIDENCE_POLICY'
     }
     $actualScopeCount = Get-PropertyValue $Snapshot 'actual_scope_count'
@@ -1124,13 +1198,16 @@ function Get-AutonomousMergeGateEvaluation {
         (Get-PropertyValue $planningEvidence 'valid') -ne $true -or
         (Get-PropertyValue $planningEvidence 'scope_count') -isnot [long] -or
         (Get-PropertyValue $planningEvidence 'scope_count') -ne $actualScopeCount -or
-        (Get-PropertyValue $planningEvidence 'scope_hash') -cne $actualScopeHash -or
-        [string](Get-PropertyValue $planningEvidence 'ref') -cnotmatch
-            '^https://github\.com/nonononull/inputcodex/issues/[0-9]+#issuecomment-[0-9]+$' -or
+        -not (Test-ExactStringValue `
+            -Actual (Get-PropertyValue $planningEvidence 'scope_hash') -Expected $actualScopeHash) -or
+        -not (Test-StringPatternValue `
+            -Actual (Get-PropertyValue $planningEvidence 'ref') `
+            -Pattern '^https://github\.com/nonononull/inputcodex/issues/[0-9]+#issuecomment-[0-9]+$') -or
         $actualScopeCount -isnot [long] -or
         (Get-PropertyValue $evidence 'scope_count') -isnot [long] -or
         (Get-PropertyValue $evidence 'scope_count') -ne $actualScopeCount -or
-        (Get-PropertyValue $evidence 'scope_hash') -cne $actualScopeHash) {
+        -not (Test-ExactStringValue `
+            -Actual (Get-PropertyValue $evidence 'scope_hash') -Expected $actualScopeHash)) {
         Add-PendingCode 'EVIDENCE_SCOPE'
     }
     $evidenceTaskKind = (Get-PropertyProjection $evidence 'task_kind').value
@@ -1146,12 +1223,19 @@ function Get-AutonomousMergeGateEvaluation {
         $null -eq $reviewAttestation -or
         (Get-PropertyValue $reviewAttestation 'valid') -isnot [bool] -or
         (Get-PropertyValue $reviewAttestation 'valid') -ne $true -or
-        (Get-PropertyValue $reviewAttestation 'final_head') -cne (Get-PropertyValue $PullRequest 'head_oid') -or
-        (Get-PropertyValue $reviewAttestation 'status') -cne 'passed' -or
-        (Get-PropertyValue $reviewAttestation 'ref') -cne (Get-PropertyValue $evidence 'independent_review_ref') -or
-        (Get-PropertyValue $evidence 'independent_review_status') -cne 'passed' -or
-        [string](Get-PropertyValue $evidence 'independent_review_ref') -cnotmatch
-            '^https://github\.com/nonononull/inputcodex/(pull|issues)/[0-9]+#issuecomment-[0-9]+$') {
+        -not (Test-ExactStringValue `
+            -Actual (Get-PropertyValue $reviewAttestation 'final_head') `
+            -Expected (Get-PropertyValue $PullRequest 'head_oid')) -or
+        -not (Test-ExactStringValue `
+            -Actual (Get-PropertyValue $reviewAttestation 'status') -Expected 'passed') -or
+        -not (Test-ExactStringValue `
+            -Actual (Get-PropertyValue $reviewAttestation 'ref') `
+            -Expected (Get-PropertyValue $evidence 'independent_review_ref')) -or
+        -not (Test-ExactStringValue `
+            -Actual (Get-PropertyValue $evidence 'independent_review_status') -Expected 'passed') -or
+        -not (Test-StringPatternValue `
+            -Actual (Get-PropertyValue $evidence 'independent_review_ref') `
+            -Pattern '^https://github\.com/nonononull/inputcodex/(pull|issues)/[0-9]+#issuecomment-[0-9]+$')) {
         Add-PendingCode 'INDEPENDENT_REVIEW'
     }
 
@@ -1160,15 +1244,20 @@ function Get-AutonomousMergeGateEvaluation {
     if ($null -ne $workflowProperty -and $workflowProperty.Value -is [System.Array]) {
         $workflowRuns = @($workflowProperty.Value)
     }
+    $pullRequestHeadOid = Get-PropertyValue $PullRequest 'head_oid'
+    $pullRequestNumber = Get-PropertyValue $PullRequest 'number'
+    $workflowIdentityValid = (Test-StringPatternValue `
+        -Actual $pullRequestHeadOid -Pattern '^[0-9a-f]{40}$') -and
+        $pullRequestNumber -is [long] -and $pullRequestNumber -gt 0
     foreach ($workflowExpectation in $RequiredWorkflows) {
         $workflowName = Get-PropertyValue $workflowExpectation 'name'
         $code = if ($workflowName -ceq 'CI') { 'WORKFLOW_CI' } else { 'WORKFLOW_PERFORMANCE_BASELINE' }
-        if (-not (Test-AutonomousWorkflowRunEvidence `
+        if (-not $workflowIdentityValid -or -not (Test-AutonomousWorkflowRunEvidence `
             -WorkflowRuns $workflowRuns `
             -WorkflowExpectation $workflowExpectation `
-            -HeadOid ([string](Get-PropertyValue $PullRequest 'head_oid')) `
+            -HeadOid $pullRequestHeadOid `
             -ExpectedEvent pull_request `
-            -PullRequestNumber ([long](Get-PropertyValue $PullRequest 'number')))) {
+            -PullRequestNumber $pullRequestNumber)) {
             Add-PendingCode $code
         }
     }
@@ -1303,7 +1392,7 @@ function Get-LiveSnapshot {
     if (Test-Path -LiteralPath $sourceLockPath -PathType Leaf) {
         try {
             $sourceLock = [System.IO.File]::ReadAllText($sourceLockPath, [Text.UTF8Encoding]::new($false)) |
-                ConvertFrom-Json -Depth 100
+                ConvertFrom-Json -Depth 100 -NoEnumerate
             $releaseAudit = [string](Get-PropertyValue (Get-PropertyValue $sourceLock 'release_audit') 'status')
         } catch {
             $releaseAudit = 'invalid'
@@ -1418,14 +1507,17 @@ function Get-LiveSnapshot {
                     (Get-PropertyValue $pr 'html_url') -isnot [string] -or
                     (Get-PropertyValue $prUser 'login') -isnot [string] -or
                     (Get-PropertyValue $prBase 'ref') -isnot [string] -or
-                    [string](Get-PropertyValue $prHead 'sha') -cnotmatch '^[0-9a-f]{40}$' -or
+                    -not (Test-StringPatternValue `
+                        -Actual (Get-PropertyValue $prHead 'sha') -Pattern '^[0-9a-f]{40}$') -or
                     (Get-PropertyValue $pr 'draft') -isnot [bool] -or
                     (Get-PropertyValue $pr 'state') -isnot [string] -or
                     ($null -ne (Get-PropertyValue $pr 'merged_at') -and
                         (Get-PropertyValue $pr 'merged_at') -isnot [string] -and
                         (Get-PropertyValue $pr 'merged_at') -isnot [datetime]) -or
                     ($null -ne (Get-PropertyValue $pr 'merge_commit_sha') -and
-                        [string](Get-PropertyValue $pr 'merge_commit_sha') -cnotmatch '^[0-9a-f]{40}$') -or
+                        -not (Test-StringPatternValue `
+                            -Actual (Get-PropertyValue $pr 'merge_commit_sha') `
+                            -Pattern '^[0-9a-f]{40}$')) -or
                     ($null -ne $prBody -and $prBody -isnot [string])) {
                     throw 'gh pr item schema invalid'
                 }
@@ -1614,7 +1706,7 @@ $policyOutput = @(
 )
 $policyExitCode = $LASTEXITCODE
 try {
-    $policyResult = ($policyOutput -join [Environment]::NewLine) | ConvertFrom-Json -Depth 100
+    $policyResult = ($policyOutput -join [Environment]::NewLine) | ConvertFrom-Json -Depth 100 -NoEnumerate
 } catch {
     $policyResult = $null
 }
@@ -1669,7 +1761,7 @@ if (-not [string]::IsNullOrWhiteSpace($SnapshotPath)) {
     }
     try {
         $snapshot = [System.IO.File]::ReadAllText($resolvedSnapshotPath, [Text.UTF8Encoding]::new($false)) |
-            ConvertFrom-Json -Depth 100
+            ConvertFrom-Json -Depth 100 -NoEnumerate
         $snapshotSource = 'file'
     } catch {
         Write-Result -ExitCode 11 -Value ([pscustomobject][ordered]@{
@@ -1717,6 +1809,11 @@ $shaPattern = '^[0-9a-f]{40}$'
 $githubAvailable = Get-PropertyValue $snapshot 'github_available'
 $paseoAvailable = Get-PropertyValue $snapshot 'paseo_available'
 $releaseAudit = Get-PropertyValue $snapshot 'release_audit'
+$snapshotSchemaVersion = Get-PropertyValue $snapshot 'schema_version'
+$observedOriginMain = Get-PropertyValue $snapshot 'observed_origin_main'
+$observedRemoteMain = Get-PropertyValue $snapshot 'observed_remote_main'
+$expectedBase = Get-PropertyValue $snapshot 'expected_base'
+$worktreeHead = Get-PropertyValue $snapshot 'worktree_head'
 $branchValue = Get-PropertyValue $snapshot 'branch'
 $worktreeClean = Get-PropertyValue $snapshot 'worktree_clean'
 $repositorySettingsValue = Get-PropertyValue $snapshot 'repository_settings'
@@ -1734,7 +1831,8 @@ if ($null -ne $snapshot.PSObject.Properties['active_prs']) {
 if ($null -ne $snapshot.PSObject.Properties['merged_prs']) {
     $mergedPrsValue = $snapshot.PSObject.Properties['merged_prs'].Value
 }
-if ((Get-PropertyValue $snapshot 'schema_version') -cne 'inputcodex.autonomous-refactor-state-snapshot.v1' -or
+if (-not (Test-ExactStringValue `
+        -Actual $snapshotSchemaVersion -Expected 'inputcodex.autonomous-refactor-state-snapshot.v1') -or
     $missingProperties.Count -ne 0 -or
     $githubAvailable -isnot [bool] -or
     $paseoAvailable -isnot [bool] -or
@@ -1750,14 +1848,14 @@ if ((Get-PropertyValue $snapshot 'schema_version') -cne 'inputcodex.autonomous-r
     (Get-PropertyValue $repositorySettingsValue 'default_branch') -isnot [string] -or
     $actualScopeCount -isnot [long] -or
     $actualScopeCount -lt 0 -or
-    [string]$actualScopeHash -cnotmatch '^sha256:[0-9a-f]{64}$' -or
+    -not (Test-StringPatternValue -Actual $actualScopeHash -Pattern '^sha256:[0-9a-f]{64}$') -or
     $activeIssuesValue -isnot [System.Array] -or
     $activePrsValue -isnot [System.Array] -or
     $mergedPrsValue -isnot [System.Array] -or
-    [string](Get-PropertyValue $snapshot 'observed_origin_main') -cnotmatch $shaPattern -or
-    [string](Get-PropertyValue $snapshot 'observed_remote_main') -cnotmatch $shaPattern -or
-    [string](Get-PropertyValue $snapshot 'expected_base') -cnotmatch $shaPattern -or
-    [string](Get-PropertyValue $snapshot 'worktree_head') -cnotmatch $shaPattern) {
+    -not (Test-StringPatternValue -Actual $observedOriginMain -Pattern $shaPattern) -or
+    -not (Test-StringPatternValue -Actual $observedRemoteMain -Pattern $shaPattern) -or
+    -not (Test-StringPatternValue -Actual $expectedBase -Pattern $shaPattern) -or
+    -not (Test-StringPatternValue -Actual $worktreeHead -Pattern $shaPattern)) {
     Write-Result -ExitCode 11 -Value ([pscustomobject][ordered]@{
         schema_version = 1
         ok = $false
@@ -1834,6 +1932,11 @@ $isPostMergeTransition = $linkedMergedPrs.Count -eq 1 -and
     $activePrs.Count -eq 0 -and
     (Get-PropertyValue $linkedMergedPrs[0] 'merge_commit_oid') -ceq
         (Get-PropertyValue $snapshot 'observed_remote_main')
+$sideEffectAdmissionTerminal = Get-PropertyValue $sideEffectAdmissionMatrix 'terminal'
+$sideEffectAdmissionTerminalAction = Get-PropertyValue $sideEffectAdmissionTerminal 'action'
+$isSideEffectAdmissionTask = $activeIssues.Count -eq 1 -and
+    (Get-PropertyValue $activeIssues[0] 'url') -ceq
+        (Get-PropertyValue $sideEffectAdmissionMatrix 'tracking_issue_ref')
 if ($linkedMergedPrs.Count -eq 1 -and -not $isPostMergeTransition) {
     $reasonCodes.Add('MERGED_PR_MAIN_DRIFT') | Out-Null
 }
@@ -1950,7 +2053,11 @@ if ($reasonCodes.Count -eq 0 -and $isPostMergeTransition) {
 $hardStopReasons = @($reasonCodes)
 if ($hardStopReasons.Count -ne 0) {
     $state = 'blocked-hard-stop'
-    $nextAction = 'stop'
+    $nextAction = if ($isSideEffectAdmissionTask) {
+        $sideEffectAdmissionTerminalAction
+    } else {
+        'stop'
+    }
     $allReasons = $hardStopReasons
 } elseif ($externalReasons.Count -ne 0) {
     $state = 'blocked-external-retry'
@@ -1966,7 +2073,13 @@ if ($hardStopReasons.Count -ne 0) {
     $allReasons = @()
 } elseif ($isPostMergeTransition) {
     $state = 'post-merge-verification'
-    $nextAction = if ($postMergeGatePending.Count -eq 0) { 'close-issue-and-archive' } else { 'verify-main' }
+    $nextAction = if ($postMergeGatePending.Count -ne 0) {
+        'verify-main'
+    } elseif ($isSideEffectAdmissionTask) {
+        $sideEffectAdmissionTerminalAction
+    } else {
+        'close-issue-and-archive'
+    }
     $allReasons = @()
 } elseif ($activePrs.Count -eq 1 -and $mergeGatePending.Count -eq 0) {
     $state = 'merge-ready-exact-head'

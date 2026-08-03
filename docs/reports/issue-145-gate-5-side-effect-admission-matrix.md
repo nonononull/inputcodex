@@ -24,23 +24,26 @@
 
 - fixed-file tranche 已绑定 `consumed`、完成引用与 main 提交；候选字段仅保留历史证据。
 - policy 与状态 helper 对 matrix 授权的字段、类型、大小写、集合、上限和 `implementation_authorized=false` 双重 fail-closed。
+- policy、PR evidence 与状态快照保留 JSON 原始类型；根数组和标量单元素数组不能再经 PowerShell 集合展开伪装成合法 object/string/bool/Int64。
 - 无活动 owner Issue/PR 时返回 `blocked-hard-stop / stop / NO_AUTHORIZED_CANDIDATE`，`selected_candidate=null`。
-- admission schema 使用严格未知字段拒绝；83 行直接记录 source/feature/bucket/typed owner/blocker/admission/authorization。
+- admission schema 使用严格未知字段拒绝；83 行直接记录 source/feature/bucket/typed owner/blocker/admission/authorization，并由 22-feature oracle 精确校验 owner state/kinds 与 blocker refs。
+- `model-catalog` 的四个 source 同时绑定 filesystem mutation、network transport 与 credential profile owner；#145 完成或 hard-stop 后进入关闭任务并重开 #140 的复合 terminal action。
 - `validate_repository` 已接入矩阵；变异 `implementation_authorized=true` 会由完整仓库验证报告 `AdmissionUnauthorized`。
 - 产品、Cargo、Workflow/Runner/Ruleset、Release/upstream、Parity disposition 与计数均未改变。
 
 ## 本地验证
 
 - Control Plane RED：`75 pass / 7 fail`。
-- Control Plane GREEN：`CI_CONTRACT_GREEN passed=84`。
+- 复审纠正 RED：owner/blocker 合法值漂移、model-catalog owner 缺项、#145 terminal 缺失、policy/snapshot 单元素数组穿透与 PR marker 缺失。
+- Control Plane GREEN：`CI_CONTRACT_GREEN passed=88`。
 - Parity RED：缺失 admission API 与验证码导致 9 个编译错误。
-- Parity GREEN：`admission_matrix 5/5`、`catalog_repository 33/33`、Parity all-targets、Clippy 与 rustfmt 通过。
+- Parity GREEN：`admission_matrix 6/6`、`catalog_repository 33/33`、Parity all-targets、Clippy 与 rustfmt 通过。
 - 仓库政策 `0 violations`；Release Audit `current / requires_reaudit=false / errors=[]`。
 - scope 精确 `20`，hash 为 `sha256:b7955bb33dac2a5f58990dfbe2aff22cc6145a2b60e601e6de255bc0a8f4360f`；`git diff --check` 通过。
-- policy hash 为 `sha256:81f2be3c85adafdd826633f0e30e9489f9670626e6776eb4235f01d25a7d82c5`。
+- policy hash 为 `sha256:39553c8e56ee8938eda39d7f760de2009d79a9b1f1109c1137d302f32cc14ae3`。
 
 ## 待完成
 
-1. 二十路径本地门禁与独立 Final Head 复审。
-2. non-Draft PR、CI 7/7、Performance 4/4、Artifact 0、Review thread 0。
+1. 修正 Head 的独立 Final Head 复审。
+2. 修正 Head 的 CI 7/7、Performance 4/4、Artifact 0、Review thread 0。
 3. 精确 Squash、主干复验、关闭 #145 并重开 #140。

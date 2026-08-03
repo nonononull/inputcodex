@@ -122,6 +122,12 @@ pub struct TypedOwner {
     kinds: Vec<TypedOwnerKind>,
 }
 
+struct AdmissionExpectation {
+    state: TypedOwnerState,
+    kinds: &'static [TypedOwnerKind],
+    blocker_refs: &'static [&'static str],
+}
+
 impl TypedOwner {
     #[must_use]
     pub const fn state(&self) -> TypedOwnerState {
@@ -230,6 +236,32 @@ pub fn validate_side_effect_admission_matrix(
                 format!("{}:{}", entry.source_id, entry.feature_id),
             ));
         }
+        if let Some(expectation) = admission_expectation(expected_feature_id) {
+            if entry.typed_owner.state != expectation.state
+                || entry.typed_owner.kinds.as_slice() != expectation.kinds
+            {
+                issues.push(ValidationIssue::new(
+                    ValidationCode::AdmissionOwnerMismatch,
+                    entry.source_id.clone(),
+                ));
+            }
+            if !entry
+                .blocker_refs
+                .iter()
+                .map(String::as_str)
+                .eq(expectation.blocker_refs.iter().copied())
+            {
+                issues.push(ValidationIssue::new(
+                    ValidationCode::AdmissionBlockerMismatch,
+                    entry.source_id.clone(),
+                ));
+            }
+        } else {
+            issues.push(ValidationIssue::new(
+                ValidationCode::AdmissionMetadataInvalid,
+                format!("{}:{}", entry.source_id, expected_feature_id),
+            ));
+        }
         if feature_statuses.get(entry.feature_id.as_str()) != Some(&ParityStatus::Unassessed) {
             issues.push(ValidationIssue::new(
                 ValidationCode::AdmissionTargetStatusMismatch,
@@ -255,6 +287,129 @@ pub fn validate_side_effect_admission_matrix(
     }
 
     issues
+}
+
+fn admission_expectation(feature_id: &str) -> Option<AdmissionExpectation> {
+    use TypedOwnerKind::{
+        ClipboardMutation, CredentialProfile, DatabaseMutation, EnvironmentMutation,
+        FilesystemMutation, NetworkTransport, ProcessController,
+    };
+    use TypedOwnerState::{Missing, Partial};
+
+    let expectation = match feature_id {
+        "feature.foundation-platform.application-lifecycle" => AdmissionExpectation {
+            state: Missing,
+            kinds: &[FilesystemMutation, ProcessController],
+            blocker_refs: &["issue:140"],
+        },
+        "feature.foundation-platform.diagnostics" => AdmissionExpectation {
+            state: Partial,
+            kinds: &[FilesystemMutation, ClipboardMutation],
+            blocker_refs: &["issue:95"],
+        },
+        "feature.foundation-platform.environment-conflicts" => AdmissionExpectation {
+            state: Partial,
+            kinds: &[EnvironmentMutation],
+            blocker_refs: &["issue:85"],
+        },
+        "feature.foundation-platform.settings-management" => AdmissionExpectation {
+            state: Partial,
+            kinds: &[FilesystemMutation],
+            blocker_refs: &["issue:94"],
+        },
+        "feature.foundation-platform.watcher" => AdmissionExpectation {
+            state: Partial,
+            kinds: &[FilesystemMutation, ProcessController],
+            blocker_refs: &["issue:136", "issue:140"],
+        },
+        "feature.plugin-script.dream-skin-library" => AdmissionExpectation {
+            state: Missing,
+            kinds: &[FilesystemMutation],
+            blocker_refs: &["issue:140"],
+        },
+        "feature.provider-network.aggregate-routing" => AdmissionExpectation {
+            state: Missing,
+            kinds: &[FilesystemMutation, CredentialProfile],
+            blocker_refs: &["issue:126"],
+        },
+        "feature.provider-network.context-entry-management" => AdmissionExpectation {
+            state: Partial,
+            kinds: &[FilesystemMutation, CredentialProfile],
+            blocker_refs: &["issue:100"],
+        },
+        "feature.provider-network.model-catalog" => AdmissionExpectation {
+            state: Missing,
+            kinds: &[FilesystemMutation, NetworkTransport, CredentialProfile],
+            blocker_refs: &["issue:126"],
+        },
+        "feature.provider-network.network-environment" => AdmissionExpectation {
+            state: Partial,
+            kinds: &[NetworkTransport],
+            blocker_refs: &["issue:88"],
+        },
+        "feature.provider-network.protocol-proxy" => AdmissionExpectation {
+            state: Missing,
+            kinds: &[NetworkTransport],
+            blocker_refs: &["issue:126"],
+        },
+        "feature.provider-network.provider-configuration-application" => AdmissionExpectation {
+            state: Missing,
+            kinds: &[FilesystemMutation, ProcessController, CredentialProfile],
+            blocker_refs: &["issue:126", "issue:140"],
+        },
+        "feature.provider-network.provider-diagnostics" => AdmissionExpectation {
+            state: Missing,
+            kinds: &[CredentialProfile, NetworkTransport],
+            blocker_refs: &["issue:126"],
+        },
+        "feature.provider-network.provider-import" => AdmissionExpectation {
+            state: Missing,
+            kinds: &[FilesystemMutation, CredentialProfile],
+            blocker_refs: &["issue:126"],
+        },
+        "feature.provider-network.relay-profile-management" => AdmissionExpectation {
+            state: Partial,
+            kinds: &[FilesystemMutation, CredentialProfile],
+            blocker_refs: &["issue:97", "issue:126"],
+        },
+        "feature.provider-network.sub2api-billing-observation" => AdmissionExpectation {
+            state: Missing,
+            kinds: &[CredentialProfile, NetworkTransport],
+            blocker_refs: &["issue:126"],
+        },
+        "feature.remote-install.application-update" => AdmissionExpectation {
+            state: Missing,
+            kinds: &[FilesystemMutation, ProcessController, NetworkTransport],
+            blocker_refs: &["issue:140"],
+        },
+        "feature.remote-install.entrypoint-installation" => AdmissionExpectation {
+            state: Missing,
+            kinds: &[FilesystemMutation, ProcessController],
+            blocker_refs: &["issue:140"],
+        },
+        "feature.remote-install.upstream-worktree" => AdmissionExpectation {
+            state: Missing,
+            kinds: &[ProcessController],
+            blocker_refs: &["issue:140"],
+        },
+        "feature.remote-install.zed-remote" => AdmissionExpectation {
+            state: Missing,
+            kinds: &[ProcessController],
+            blocker_refs: &["issue:132", "issue:134"],
+        },
+        "feature.session-data.local-session-management" => AdmissionExpectation {
+            state: Partial,
+            kinds: &[DatabaseMutation, FilesystemMutation],
+            blocker_refs: &["issue:134"],
+        },
+        "feature.session-data.provider-metadata-maintenance" => AdmissionExpectation {
+            state: Missing,
+            kinds: &[DatabaseMutation, FilesystemMutation],
+            blocker_refs: &["issue:130", "issue:134"],
+        },
+        _ => return None,
+    };
+    Some(expectation)
 }
 
 fn aggregate_feature_buckets<'a>(

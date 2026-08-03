@@ -152,7 +152,7 @@
         "completed",
         "hard-stop"
       ],
-      "action": "reopen-owner-decision-issue",
+      "action": "close-task-and-reopen-owner-decision-issue",
       "state": "blocked-candidate-exhausted",
       "next_action": "await-owner-decision"
     }

@@ -316,7 +316,7 @@ sources:
     bucket: write
     typed_owner:
       state: missing
-      kinds: [filesystem-mutation, network-transport]
+      kinds: [filesystem-mutation, network-transport, credential-profile]
     blocker_refs: ['issue:126']
     admission: blocked
     implementation_authorized: false
@@ -325,7 +325,7 @@ sources:
     bucket: write
     typed_owner:
       state: missing
-      kinds: [filesystem-mutation, network-transport]
+      kinds: [filesystem-mutation, network-transport, credential-profile]
     blocker_refs: ['issue:126']
     admission: blocked
     implementation_authorized: false
@@ -334,7 +334,7 @@ sources:
     bucket: write
     typed_owner:
       state: missing
-      kinds: [filesystem-mutation, network-transport]
+      kinds: [filesystem-mutation, network-transport, credential-profile]
     blocker_refs: ['issue:126']
     admission: blocked
     implementation_authorized: false
@@ -343,7 +343,7 @@ sources:
     bucket: write
     typed_owner:
       state: missing
-      kinds: [filesystem-mutation, network-transport]
+      kinds: [filesystem-mutation, network-transport, credential-profile]
     blocker_refs: ['issue:126']
     admission: blocked
     implementation_authorized: false
