@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-- state: LOCAL_VERIFIED_PENDING_REMOTE_DELIVERY
+- state: ITERATION_2_LOCAL_VERIFIED_PENDING_FINAL_HEAD_REFRESH
 - tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/141
 - owner_decision_ref: https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159072214
 - retry_resume_ref: https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159471091
@@ -22,16 +22,26 @@
 类型、值与数组顺序 fail-closed。空闲状态只投影 Watcher preference mutation，活动 #141 继续恢复当前
 worktree，不会提前创建批次 2。
 
+PR #142 复审进一步发现 `Get-PropertyValue` 的 PowerShell 输出管道会把单元素 `System.Object[]` 展开为
+标量，导致 9 个应为 JSON string 的 tranche 字段绕过仅有的 `-ceq`。本轮直接从原始
+`PSPropertyInfo.Value` 保留运行时类型，再逐项同时执行 `-is [string]` 与 `-ceq`；该根因复用 `err.md`
+2026-07-31 的集合返回值展开结论，不重复增加排错条目。
+
 ## TDD 与本地证据
 
 - Planning Freeze 在编辑前落盘：11 路径 / `sha256:9b0c24...`。
 - RED：4 个预期失败；生产 policy、真实变异目标、生产 helper 与固定候选动作均缺失。
 - GREEN：`CI_CONTRACT_GREEN passed=82`；策略 13 类真实变异与 helper 5 类真实变异全部拒绝。
+- iteration 2 RED：两个既有 contract test 失败并各自完整报告
+  `schema_version/decision_id/owner_decision_ref/retry_resume_ref/standing_authorization_ref/terminal.owner_issue_ref/terminal.action/terminal.state/terminal.next_action`；其余 80 个通过。
+- iteration 2 GREEN：两条生产路径的 9 个单元素数组反例全部拒绝，完整合同恢复
+  `CI_CONTRACT_GREEN passed=82`，既有自治状态回归全部通过。
 - 策略验证：`ok=true`、0 violations、policy hash `sha256:e19914...`。
 - live：`active-worktree-execution / resume-worktree`，active issue #141，Planning Freeze 有效，reason 为空。
 - `2026-08-03 03:12:42.129 +08:00` 从 build.md 原文完成 fresh 十一路径门禁：Release Audit
   `current`、Repository Policy `0`、live/snapshot、scope/hash 与 Git 空白全部通过。
-- 最新 diff 自审为 `0 Critical / 0 Important`；本地/远端/GitHub main 三方一致，开放 PR 为 `0`。
+- PR #142 旧 Head `34f3931...` 复审为 `0 Critical / 1 Important`，唯一 blocker 已在本轮修复；本地、
+  origin 与 GitHub main 仍精确为基线，既有 PR 保持 OPEN、non-Draft，auto-merge 未启用。
 
 ## 产品与隔离边界
 
@@ -44,5 +54,5 @@ behind `1`、8 dirty、`+691/-105`、binary diff git hash
 
 ## 待完成
 
-1. 普通 commit/push 与 non-Draft PR Final Head。
-2. 在 PR 留存验证证据后停止；auto-merge 和 merge 明确禁止。
+1. 形成 iteration 2 普通提交并普通 push，刷新既有 non-Draft PR #142 Final Head。
+2. 在 PR 留存新 Head 验证证据后等待独立复审/Hosted CI；不得 Resolve、auto-merge 或 merge。

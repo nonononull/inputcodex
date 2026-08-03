@@ -373,6 +373,45 @@ Invoke-ContractTest -Name '合法无人值守重构策略通过并输出规范�
         -Message 'tranche 必须投影单产品交付上限'
 }
 
+$fixedFileMutationStringArrayCases = [ordered]@{
+    'schema_version' = {
+        param($tranche)
+        $tranche.schema_version = [object[]]@($tranche.schema_version)
+    }
+    'decision_id' = {
+        param($tranche)
+        $tranche.decision_id = [object[]]@($tranche.decision_id)
+    }
+    'owner_decision_ref' = {
+        param($tranche)
+        $tranche.owner_decision_ref = [object[]]@($tranche.owner_decision_ref)
+    }
+    'retry_resume_ref' = {
+        param($tranche)
+        $tranche.retry_resume_ref = [object[]]@($tranche.retry_resume_ref)
+    }
+    'standing_authorization_ref' = {
+        param($tranche)
+        $tranche.standing_authorization_ref = [object[]]@($tranche.standing_authorization_ref)
+    }
+    'terminal.owner_issue_ref' = {
+        param($tranche)
+        $tranche.terminal.owner_issue_ref = [object[]]@($tranche.terminal.owner_issue_ref)
+    }
+    'terminal.action' = {
+        param($tranche)
+        $tranche.terminal.action = [object[]]@($tranche.terminal.action)
+    }
+    'terminal.state' = {
+        param($tranche)
+        $tranche.terminal.state = [object[]]@($tranche.terminal.state)
+    }
+    'terminal.next_action' = {
+        param($tranche)
+        $tranche.terminal.next_action = [object[]]@($tranche.terminal.next_action)
+    }
+}
+
 Invoke-ContractTest -Name '固定文件 mutation tranche 生产策略真实变异必须 fail closed' -Body {
     $productionPolicy = [System.IO.File]::ReadAllText(
         $autonomousPolicyPath,
@@ -422,6 +461,22 @@ Invoke-ContractTest -Name '固定文件 mutation tranche 生产策略真实变�
             -ExpectedCode 'FIXED_FILE_MUTATION_TRANCHE'
     }
 
+    $unexpectedlyAcceptedArrayFields = [System.Collections.Generic.List[string]]::new()
+    foreach ($arrayCase in $fixedFileMutationStringArrayCases.GetEnumerator()) {
+        $policy = Copy-AutonomousRefactorPolicy $productionPolicy
+        & $arrayCase.Value $policy.fixed_file_mutation_tranche
+        $result = Invoke-AutonomousPolicyCase `
+            -Name "fixed-file-tranche-single-array-$($arrayCase.Key)" `
+            -Policy $policy
+        if ($result.ExitCode -eq 0) {
+            $unexpectedlyAcceptedArrayFields.Add($arrayCase.Key)
+            continue
+        }
+        Assert-AutonomousPolicyFailure -Result $result -ExpectedCode 'FIXED_FILE_MUTATION_TRANCHE'
+    }
+    Assert-Equal -Expected 0 -Actual $unexpectedlyAcceptedArrayFields.Count `
+        -Message "策略验证器不得把单元素数组展开为字符串；漏拒字段=$([string]::Join(',', $unexpectedlyAcceptedArrayFields))"
+
     $legacy = Copy-AutonomousRefactorPolicy $productionPolicy
     $legacy | Add-Member -NotePropertyName first_candidate -NotePropertyValue 'feature.session-data.token-usage-history'
     Assert-AutonomousPolicyFailure `
@@ -459,6 +514,18 @@ Invoke-ContractTest -Name '固定文件 mutation tranche 生产 helper 真实变
         Assert-Equal -Expected $false -Actual $projection.valid `
             -Message "生产 helper 必须拒绝真实 tranche 变异：$case"
     }
+
+    $unexpectedlyValidArrayFields = [System.Collections.Generic.List[string]]::new()
+    foreach ($arrayCase in $fixedFileMutationStringArrayCases.GetEnumerator()) {
+        $policy = Copy-AutonomousRefactorPolicy $productionPolicy
+        & $arrayCase.Value $policy.fixed_file_mutation_tranche
+        $projection = Get-FixedFileMutationTrancheProjection $policy.fixed_file_mutation_tranche
+        if ($projection.valid) {
+            $unexpectedlyValidArrayFields.Add($arrayCase.Key)
+        }
+    }
+    Assert-Equal -Expected 0 -Actual $unexpectedlyValidArrayFields.Count `
+        -Message "生产 helper 不得把单元素数组展开为字符串；漏拒字段=$([string]::Join(',', $unexpectedlyValidArrayFields))"
 }
 
 Invoke-ContractTest -Name '拒绝缺失的无人值守重构策略文件' -Body {

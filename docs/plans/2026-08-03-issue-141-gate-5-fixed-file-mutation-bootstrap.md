@@ -27,7 +27,8 @@ Parity 或产品计数，也不合并 PR。
 - completed 或 hard-stop 后只允许重开同一个 #140，并恢复
   `blocked-candidate-exhausted / await-owner-decision`。
 
-验证器拒绝缺失、额外字段、类型、大小写、顺序或数值漂移，也拒绝重新出现旧 `first_candidate`。
+验证器拒绝缺失、额外字段、类型、大小写、顺序或数值漂移，也拒绝单元素数组伪装字符串以及重新出现旧
+`first_candidate`。
 状态解析器在消费验证器输出时再次由生产 helper 做精确投影；空闲态只返回固定候选，活动 #141 时继续
 恢复 worktree，不提前进入批次 2。
 
@@ -44,6 +45,10 @@ Parity、Workflow/Runner/Ruleset、Release/upstream、UI 与 AGOS 全部禁止�
 - RED：完整合同稳定得到 4 个失败，分别证明生产 policy 缺少 tranche、真实策略变异无目标、生产 helper
   不存在，以及空闲态仍返回泛化 `select-candidate`；其余既有合同保持通过。
 - GREEN：生产策略 13 类真实变异与生产 helper 5 类真实变异全部 fail-closed；完整合同为 `82/82`。
+- iteration 2 RED：旧生产代码下仅两个既有 tranche contract test 失败，其余 80 个通过；策略真实变异路径与
+  从生产 AST 提取的 helper 路径均完整列出 9 个被错误接受的单元素数组字符串字段。
+- iteration 2 GREEN：9 个字段改为直接读取原始 `PSPropertyInfo.Value`，逐项同时验证运行时类型和值；完整
+  合同恢复 `82/82`，普通 refactor、upstream-sync、PR/merge/post-merge 与 candidate-exhausted 回归不退化。
 - live：真实 #141 返回 `active-worktree-execution / resume-worktree`，Planning Freeze 有效，reason 为空。
 - snapshot：洁净 main 空任务快照只返回 `select-fixed-file-mutation-candidate` 与唯一 Watcher 候选。
 
@@ -55,8 +60,8 @@ Parity、Workflow/Runner/Ruleset、Release/upstream、UI 与 AGOS 全部禁止�
 - [x] 修正 Master Plan 陈旧 #128 active task。
 - [x] 维护 task-local 控制面、build 与 err。
 - [x] 执行十一路径最终本地门禁与自审。
-- [ ] 形成普通提交并普通 push。
-- [ ] 创建关联 #141 的 non-Draft PR，绑定 Final Head 与验证证据。
+- [x] 形成首个普通提交并普通 push，创建关联 #141 的 non-Draft PR #142。
+- [ ] 形成 iteration 2 普通提交并普通 push，刷新 PR #142 Final Head 与验证证据。
 - [ ] 停在 PR Final Head；禁止 auto-merge 与任何形式的合并。
 
 ## 完成标准

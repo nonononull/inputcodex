@@ -346,13 +346,27 @@ $fixedFileMutationTrancheShapeValid = $fixedFileMutationTranche -is [pscustomobj
 $candidateFeatures = @()
 $expectedSourceDelta = $null
 $terminal = $null
+$fixedFileMutationSchemaVersion = $null
+$fixedFileMutationDecisionId = $null
+$fixedFileMutationOwnerDecisionRef = $null
+$fixedFileMutationRetryResumeRef = $null
+$fixedFileMutationStandingAuthorizationRef = $null
+$fixedFileMutationTerminalOwnerIssueRef = $null
+$fixedFileMutationTerminalAction = $null
+$fixedFileMutationTerminalState = $null
+$fixedFileMutationTerminalNextAction = $null
 if ($fixedFileMutationTrancheShapeValid) {
+    $fixedFileMutationSchemaVersion = $fixedFileMutationTranche.PSObject.Properties['schema_version'].Value
+    $fixedFileMutationDecisionId = $fixedFileMutationTranche.PSObject.Properties['decision_id'].Value
+    $fixedFileMutationOwnerDecisionRef = $fixedFileMutationTranche.PSObject.Properties['owner_decision_ref'].Value
+    $fixedFileMutationRetryResumeRef = $fixedFileMutationTranche.PSObject.Properties['retry_resume_ref'].Value
+    $fixedFileMutationStandingAuthorizationRef = $fixedFileMutationTranche.PSObject.Properties['standing_authorization_ref'].Value
     $candidateFeaturesProperty = $fixedFileMutationTranche.PSObject.Properties['candidate_features']
     if ($null -ne $candidateFeaturesProperty -and $candidateFeaturesProperty.Value -is [System.Array]) {
         $candidateFeatures = [object[]]$candidateFeaturesProperty.Value
     }
-    $expectedSourceDelta = Get-PropertyValue $fixedFileMutationTranche 'expected_source_delta'
-    $terminal = Get-PropertyValue $fixedFileMutationTranche 'terminal'
+    $expectedSourceDelta = $fixedFileMutationTranche.PSObject.Properties['expected_source_delta'].Value
+    $terminal = $fixedFileMutationTranche.PSObject.Properties['terminal'].Value
 }
 
 $expectedSourceDeltaShapeValid = $expectedSourceDelta -is [pscustomobject] -and
@@ -365,18 +379,38 @@ $terminalShapeValid = $terminal -is [pscustomobject] -and
         -Expected @('owner_issue_ref', 'reopen_on', 'action', 'state', 'next_action'))
 $reopenOn = @()
 if ($terminalShapeValid) {
+    $fixedFileMutationTerminalOwnerIssueRef = $terminal.PSObject.Properties['owner_issue_ref'].Value
+    $fixedFileMutationTerminalAction = $terminal.PSObject.Properties['action'].Value
+    $fixedFileMutationTerminalState = $terminal.PSObject.Properties['state'].Value
+    $fixedFileMutationTerminalNextAction = $terminal.PSObject.Properties['next_action'].Value
     $reopenOnProperty = $terminal.PSObject.Properties['reopen_on']
     if ($null -ne $reopenOnProperty -and $reopenOnProperty.Value -is [System.Array]) {
         $reopenOn = [object[]]$reopenOnProperty.Value
     }
 }
 
+$fixedFileMutationStringFieldsValid =
+    $fixedFileMutationSchemaVersion -is [string] -and
+    $fixedFileMutationSchemaVersion -ceq 'inputcodex.fixed-file-mutation-tranche.v1' -and
+    $fixedFileMutationDecisionId -is [string] -and
+    $fixedFileMutationDecisionId -ceq 'gate5-fixed-file-mutation-tranche-v1' -and
+    $fixedFileMutationOwnerDecisionRef -is [string] -and
+    $fixedFileMutationOwnerDecisionRef -ceq 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159072214' -and
+    $fixedFileMutationRetryResumeRef -is [string] -and
+    $fixedFileMutationRetryResumeRef -ceq 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159471091' -and
+    $fixedFileMutationStandingAuthorizationRef -is [string] -and
+    $fixedFileMutationStandingAuthorizationRef -ceq 'https://github.com/nonononull/inputcodex/issues/111' -and
+    $fixedFileMutationTerminalOwnerIssueRef -is [string] -and
+    $fixedFileMutationTerminalOwnerIssueRef -ceq 'https://github.com/nonononull/inputcodex/issues/140' -and
+    $fixedFileMutationTerminalAction -is [string] -and
+    $fixedFileMutationTerminalAction -ceq 'reopen-owner-decision-issue' -and
+    $fixedFileMutationTerminalState -is [string] -and
+    $fixedFileMutationTerminalState -ceq 'blocked-candidate-exhausted' -and
+    $fixedFileMutationTerminalNextAction -is [string] -and
+    $fixedFileMutationTerminalNextAction -ceq 'await-owner-decision'
+
 $fixedFileMutationTrancheValid = $fixedFileMutationTrancheShapeValid -and
-    (Get-PropertyValue $fixedFileMutationTranche 'schema_version') -ceq 'inputcodex.fixed-file-mutation-tranche.v1' -and
-    (Get-PropertyValue $fixedFileMutationTranche 'decision_id') -ceq 'gate5-fixed-file-mutation-tranche-v1' -and
-    (Get-PropertyValue $fixedFileMutationTranche 'owner_decision_ref') -ceq 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159072214' -and
-    (Get-PropertyValue $fixedFileMutationTranche 'retry_resume_ref') -ceq 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159471091' -and
-    (Get-PropertyValue $fixedFileMutationTranche 'standing_authorization_ref') -ceq 'https://github.com/nonononull/inputcodex/issues/111' -and
+    $fixedFileMutationStringFieldsValid -and
     (Test-ExactJsonInt64 -Actual (Get-PropertyValue $fixedFileMutationTranche 'repository_batches_max') -Expected 2) -and
     (Test-ExactJsonInt64 -Actual (Get-PropertyValue $fixedFileMutationTranche 'product_deliveries_max') -Expected 1) -and
     (Test-ExactStringSequence `
@@ -386,11 +420,7 @@ $fixedFileMutationTrancheValid = $fixedFileMutationTrancheShapeValid -and
     (Test-ExactJsonInt64 -Actual (Get-PropertyValue $expectedSourceDelta 'implemented') -Expected 2) -and
     (Test-ExactJsonInt64 -Actual (Get-PropertyValue $expectedSourceDelta 'unassessed') -Expected -2) -and
     $terminalShapeValid -and
-    (Get-PropertyValue $terminal 'owner_issue_ref') -ceq 'https://github.com/nonononull/inputcodex/issues/140' -and
-    (Test-ExactStringSequence -Actual $reopenOn -Expected @('completed', 'hard-stop')) -and
-    (Get-PropertyValue $terminal 'action') -ceq 'reopen-owner-decision-issue' -and
-    (Get-PropertyValue $terminal 'state') -ceq 'blocked-candidate-exhausted' -and
-    (Get-PropertyValue $terminal 'next_action') -ceq 'await-owner-decision'
+    (Test-ExactStringSequence -Actual $reopenOn -Expected @('completed', 'hard-stop'))
 if (-not $fixedFileMutationTrancheValid) {
     Add-Violation 'FIXED_FILE_MUTATION_TRANCHE' '固定文件 mutation tranche 必须绑定批准的单一 Watcher 候选、有限批次、source delta 与 #140 终态'
 }
@@ -469,11 +499,11 @@ $result = [pscustomobject][ordered]@{
         next_action = $candidateExhaustionNextAction
     }
     fixed_file_mutation_tranche = [pscustomobject][ordered]@{
-        schema_version = Get-PropertyValue $fixedFileMutationTranche 'schema_version'
-        decision_id = Get-PropertyValue $fixedFileMutationTranche 'decision_id'
-        owner_decision_ref = Get-PropertyValue $fixedFileMutationTranche 'owner_decision_ref'
-        retry_resume_ref = Get-PropertyValue $fixedFileMutationTranche 'retry_resume_ref'
-        standing_authorization_ref = Get-PropertyValue $fixedFileMutationTranche 'standing_authorization_ref'
+        schema_version = $fixedFileMutationSchemaVersion
+        decision_id = $fixedFileMutationDecisionId
+        owner_decision_ref = $fixedFileMutationOwnerDecisionRef
+        retry_resume_ref = $fixedFileMutationRetryResumeRef
+        standing_authorization_ref = $fixedFileMutationStandingAuthorizationRef
         repository_batches_max = Get-PropertyValue $fixedFileMutationTranche 'repository_batches_max'
         product_deliveries_max = Get-PropertyValue $fixedFileMutationTranche 'product_deliveries_max'
         candidate_features = @($candidateFeatures)
@@ -482,11 +512,11 @@ $result = [pscustomobject][ordered]@{
             unassessed = Get-PropertyValue $expectedSourceDelta 'unassessed'
         }
         terminal = [pscustomobject][ordered]@{
-            owner_issue_ref = Get-PropertyValue $terminal 'owner_issue_ref'
+            owner_issue_ref = $fixedFileMutationTerminalOwnerIssueRef
             reopen_on = @($reopenOn)
-            action = Get-PropertyValue $terminal 'action'
-            state = Get-PropertyValue $terminal 'state'
-            next_action = Get-PropertyValue $terminal 'next_action'
+            action = $fixedFileMutationTerminalAction
+            state = $fixedFileMutationTerminalState
+            next_action = $fixedFileMutationTerminalNextAction
         }
     }
     required_workflows = @($workflows)

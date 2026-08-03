@@ -670,8 +670,13 @@ function Get-FixedFileMutationTrancheProjection {
 
     $candidateFeaturesProjection = Get-PropertyProjection $Value 'candidate_features'
     $candidateFeatures = $candidateFeaturesProjection.value
-    $expectedSourceDelta = Get-PropertyValue $Value 'expected_source_delta'
-    $terminal = Get-PropertyValue $Value 'terminal'
+    $schemaVersion = $Value.PSObject.Properties['schema_version'].Value
+    $decisionId = $Value.PSObject.Properties['decision_id'].Value
+    $ownerDecisionRef = $Value.PSObject.Properties['owner_decision_ref'].Value
+    $retryResumeRef = $Value.PSObject.Properties['retry_resume_ref'].Value
+    $standingAuthorizationRef = $Value.PSObject.Properties['standing_authorization_ref'].Value
+    $expectedSourceDelta = $Value.PSObject.Properties['expected_source_delta'].Value
+    $terminal = $Value.PSObject.Properties['terminal'].Value
     if (-not $candidateFeaturesProjection.exists -or
         $candidateFeatures -isnot [System.Array] -or
         $candidateFeatures.Count -ne 1 -or
@@ -687,18 +692,37 @@ function Get-FixedFileMutationTrancheProjection {
         return $invalid
     }
 
+    $terminalOwnerIssueRef = $terminal.PSObject.Properties['owner_issue_ref'].Value
+    $terminalAction = $terminal.PSObject.Properties['action'].Value
+    $terminalState = $terminal.PSObject.Properties['state'].Value
+    $terminalNextAction = $terminal.PSObject.Properties['next_action'].Value
     $reopenOnProjection = Get-PropertyProjection $terminal 'reopen_on'
     $reopenOn = $reopenOnProjection.value
+    $stringFieldsValid =
+        $schemaVersion -is [string] -and
+        $schemaVersion -ceq 'inputcodex.fixed-file-mutation-tranche.v1' -and
+        $decisionId -is [string] -and
+        $decisionId -ceq 'gate5-fixed-file-mutation-tranche-v1' -and
+        $ownerDecisionRef -is [string] -and
+        $ownerDecisionRef -ceq 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159072214' -and
+        $retryResumeRef -is [string] -and
+        $retryResumeRef -ceq 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159471091' -and
+        $standingAuthorizationRef -is [string] -and
+        $standingAuthorizationRef -ceq 'https://github.com/nonononull/inputcodex/issues/111' -and
+        $terminalOwnerIssueRef -is [string] -and
+        $terminalOwnerIssueRef -ceq 'https://github.com/nonononull/inputcodex/issues/140' -and
+        $terminalAction -is [string] -and
+        $terminalAction -ceq 'reopen-owner-decision-issue' -and
+        $terminalState -is [string] -and
+        $terminalState -ceq 'blocked-candidate-exhausted' -and
+        $terminalNextAction -is [string] -and
+        $terminalNextAction -ceq 'await-owner-decision'
     if (-not $reopenOnProjection.exists -or
         $reopenOn -isnot [System.Array] -or
         $reopenOn.Count -ne 2 -or
         $reopenOn[0] -isnot [string] -or
         $reopenOn[1] -isnot [string] -or
-        (Get-PropertyValue $Value 'schema_version') -cne 'inputcodex.fixed-file-mutation-tranche.v1' -or
-        (Get-PropertyValue $Value 'decision_id') -cne 'gate5-fixed-file-mutation-tranche-v1' -or
-        (Get-PropertyValue $Value 'owner_decision_ref') -cne 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159072214' -or
-        (Get-PropertyValue $Value 'retry_resume_ref') -cne 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159471091' -or
-        (Get-PropertyValue $Value 'standing_authorization_ref') -cne 'https://github.com/nonononull/inputcodex/issues/111' -or
+        -not $stringFieldsValid -or
         (Get-PropertyValue $Value 'repository_batches_max') -isnot [long] -or
         (Get-PropertyValue $Value 'repository_batches_max') -ne 2L -or
         (Get-PropertyValue $Value 'product_deliveries_max') -isnot [long] -or
@@ -708,22 +732,18 @@ function Get-FixedFileMutationTrancheProjection {
         (Get-PropertyValue $expectedSourceDelta 'implemented') -ne 2L -or
         (Get-PropertyValue $expectedSourceDelta 'unassessed') -isnot [long] -or
         (Get-PropertyValue $expectedSourceDelta 'unassessed') -ne -2L -or
-        (Get-PropertyValue $terminal 'owner_issue_ref') -cne 'https://github.com/nonononull/inputcodex/issues/140' -or
         $reopenOn[0] -cne 'completed' -or
-        $reopenOn[1] -cne 'hard-stop' -or
-        (Get-PropertyValue $terminal 'action') -cne 'reopen-owner-decision-issue' -or
-        (Get-PropertyValue $terminal 'state') -cne 'blocked-candidate-exhausted' -or
-        (Get-PropertyValue $terminal 'next_action') -cne 'await-owner-decision') {
+        $reopenOn[1] -cne 'hard-stop') {
         return $invalid
     }
 
     return [pscustomobject][ordered]@{
         valid = $true
-        schema_version = Get-PropertyValue $Value 'schema_version'
-        decision_id = Get-PropertyValue $Value 'decision_id'
-        owner_decision_ref = Get-PropertyValue $Value 'owner_decision_ref'
-        retry_resume_ref = Get-PropertyValue $Value 'retry_resume_ref'
-        standing_authorization_ref = Get-PropertyValue $Value 'standing_authorization_ref'
+        schema_version = $schemaVersion
+        decision_id = $decisionId
+        owner_decision_ref = $ownerDecisionRef
+        retry_resume_ref = $retryResumeRef
+        standing_authorization_ref = $standingAuthorizationRef
         repository_batches_max = Get-PropertyValue $Value 'repository_batches_max'
         product_deliveries_max = Get-PropertyValue $Value 'product_deliveries_max'
         candidate = $candidateFeatures[0]
@@ -732,11 +752,11 @@ function Get-FixedFileMutationTrancheProjection {
             unassessed = Get-PropertyValue $expectedSourceDelta 'unassessed'
         }
         terminal = [pscustomobject][ordered]@{
-            owner_issue_ref = Get-PropertyValue $terminal 'owner_issue_ref'
+            owner_issue_ref = $terminalOwnerIssueRef
             reopen_on = @($reopenOn)
-            action = Get-PropertyValue $terminal 'action'
-            state = Get-PropertyValue $terminal 'state'
-            next_action = Get-PropertyValue $terminal 'next_action'
+            action = $terminalAction
+            state = $terminalState
+            next_action = $terminalNextAction
         }
     }
 }
