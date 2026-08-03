@@ -1,6 +1,8 @@
+#[cfg(any(target_os = "windows", target_os = "macos"))]
+use std::fs;
 use std::sync::Mutex;
 #[cfg(any(target_os = "windows", target_os = "macos", test))]
-use std::{fs, io, path::Path};
+use std::{io, path::Path};
 
 #[cfg(any(target_os = "windows", target_os = "macos"))]
 use inputcodex_application::{PlatformPathsPort, PlatformPathsRequest};
@@ -706,7 +708,7 @@ mod tests {
     }
 
     #[test]
-    fn 父目录缺失或链接均在提交前失败() {
+    fn 父目录缺失链接或其他对象均在提交前失败() {
         let (parent, root, _) = paths();
         for (result, code) in [
             (
@@ -715,6 +717,10 @@ mod tests {
             ),
             (
                 MetadataResult::Kind(WatcherPreferenceEntryKind::LinkOrReparse),
+                "WATCHER_PREFERENCE_MUTATION_INVALID_PARENT",
+            ),
+            (
+                MetadataResult::Kind(WatcherPreferenceEntryKind::Other),
                 "WATCHER_PREFERENCE_MUTATION_INVALID_PARENT",
             ),
         ] {

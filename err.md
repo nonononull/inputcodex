@@ -1137,7 +1137,10 @@
 - Hosted Linux 纠错：首个 PR Head 的 library Clippy 发现两个固定名常量只由
   `windows / macos / test` 实现使用却缺少同源 `cfg`。该根因与本文件“2026-07-27：首个 Gate 5
   实现暴露 Linux test cfg 边界”相同；复用既有处理，仅给常量增加与唯一使用方一致的条件编译，
-  不增加 `allow/expect(dead_code)`，不修改 Workflow 或平台语义。
+  不增加 `allow/expect(dead_code)`，不修改 Workflow 或平台语义。第二个 Head 继续暴露同族剩余面：
+  `fs` 只由真实 Windows/macOS 适配器使用却被 Linux test 导入，`Other` 文件类型只由真实平台分类构造、
+  Linux 合成测试未构造；拆分 `fs` 导入条件，并把 `Other` 加入既有非法父对象矩阵，避免用 lint 例外掩盖
+  缺失反例。
 - 关联：Issue `#136`、Issue `#140`、Issue `#143`、`crates/inputcodex-application/src/watcher_preference_mutation.rs`、
   `crates/inputcodex-platform/src/watcher_preference_mutation.rs`、`parity/contracts/foundation-platform.yml`。
 
