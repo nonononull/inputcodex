@@ -63,6 +63,7 @@ mod relay_status_observation;
 mod runtime_environment_observation;
 mod settings_observation;
 mod version_startup;
+mod watcher_preference_mutation;
 mod watcher_preference_observation;
 
 pub use application_overview::SystemApplicationOverview;
@@ -79,6 +80,7 @@ pub use runtime_environment_observation::{
 };
 pub use settings_observation::SystemSettingsObservation;
 pub use version_startup::{SystemVersionStartup, resolve_version_startup};
+pub use watcher_preference_mutation::SystemWatcherPreferenceMutation;
 pub use watcher_preference_observation::SystemWatcherPreferenceObservation;
 
 #[derive(Debug, Clone, Copy, Default)]
