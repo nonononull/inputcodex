@@ -9,7 +9,8 @@ GitHub Issue、PR 与 Actions。
 
 Gate 3 七成员 Rust Workspace、Gate 4 上游审计/功能目录/性能基线，以及 Gate 5 的平台路径、
 应用概览、版本与启动意图、运行时环境冲突、Relay 环境、设置、诊断日志、Relay 状态、上下文
-条目、本地会话目录和受控会话 Markdown 能力已经建立；Watcher 偏好状态观察正在 Issue `#128` 中实施。
+条目、本地会话目录、受控会话 Markdown 和 Watcher 偏好状态观察已经建立；Issue `#143` 正在实施
+固定 Watcher 偏好标记 mutation。
 该说明只用于选择正确命令，不能替代任务计划和 GitHub 新鲜证据。
 
 ## 文档变更轻量验证
@@ -4857,6 +4858,119 @@ Write-Output "ISSUE141_LOCAL_VERIFY_OK scope_hash=$scopeHash paths=$($actual.Cou
 
 期望：CI 脚本合同为 `82/82`；策略真实变异、生产 helper 真实变异、live/snapshot 状态、仓库政策与
 Release Audit 全部通过；实际范围精确为十一路径。本批不修改产品、Cargo 或 Parity，产品计数保持不变。
+
+## Issue #143：Watcher 偏好固定文件 mutation 本地轻量验证
+
+在 `codex/issue-143-gate-5-watcher-preference-mutation` 分支运行。本机只验证四个受影响 crate、治理合同、
+精确范围和禁止能力；Windows/macOS 真实编译与 Performance Baseline 由标准 GitHub-hosted runners 完成。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+function Assert-NativeSuccess {
+  param([Parameter(Mandatory)][string]$Label)
+  if ($LASTEXITCODE -ne 0) { throw "$Label 失败：$LASTEXITCODE" }
+}
+
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+$branch = git branch --show-current
+Assert-NativeSuccess 'Issue #143 分支读取'
+if ($branch -cne 'codex/issue-143-gate-5-watcher-preference-mutation') {
+  throw "Issue #143 分支错误：$branch"
+}
+
+cargo test -p inputcodex-domain -p inputcodex-application -p inputcodex-platform -p inputcodex-parity --all-targets --offline
+Assert-NativeSuccess 'Issue #143 四 crate 测试'
+
+cargo clippy -p inputcodex-domain -p inputcodex-application -p inputcodex-platform -p inputcodex-parity --all-targets --offline -- -D warnings
+Assert-NativeSuccess 'Issue #143 四 crate Clippy'
+
+cargo fmt --all -- --check
+Assert-NativeSuccess 'Issue #143 rustfmt'
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+Assert-NativeSuccess 'Issue #143 CI 合同'
+
+pwsh -NoProfile -File scripts/ci/Verify-AutonomousRefactorPolicy.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #143 自治策略'
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #143 仓库政策'
+
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #143 Release Audit'
+
+cargo metadata --locked --offline --no-deps --format-version 1 | Out-Null
+Assert-NativeSuccess 'Issue #143 Cargo metadata'
+
+$expected = [string[]]@(
+  'AGENTS.md',
+  'CONTEXT.md',
+  'README.md',
+  'build.md',
+  'crates/inputcodex-application/src/lib.rs',
+  'crates/inputcodex-application/src/watcher_preference_mutation.rs',
+  'crates/inputcodex-application/tests/watcher_preference_mutation.rs',
+  'crates/inputcodex-domain/src/lib.rs',
+  'crates/inputcodex-domain/src/watcher_preference_mutation.rs',
+  'crates/inputcodex-domain/tests/watcher_preference_mutation.rs',
+  'crates/inputcodex-parity/tests/catalog_repository.rs',
+  'crates/inputcodex-platform/src/lib.rs',
+  'crates/inputcodex-platform/src/watcher_preference_mutation.rs',
+  'crates/inputcodex-platform/tests/watcher_preference_mutation.rs',
+  'docs/plans/2026-08-03-issue-143-gate-5-watcher-preference-mutation.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-08-03-issue-143-gate-5-watcher-preference-mutation.md',
+  'docs/reports/issue-143-gate-5-watcher-preference-mutation.md',
+  'docs/workflows/2026-08-03-issue-143-gate-5-watcher-preference-mutation-runtime.md',
+  'err.md',
+  'parity/README.md',
+  'parity/contracts/foundation-platform.yml',
+  'parity/features/foundation-platform.yml',
+  'parity/features/source-index.yml'
+)
+$scope = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+foreach ($path in $expected) {
+  if (-not $scope.Add($path)) { throw "Issue #143 重复路径：$path" }
+}
+$payload = [string]::Join("`n", [string[]]$scope) + "`n"
+$scopeHash = 'sha256:' + [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData([Text.UTF8Encoding]::new($false).GetBytes($payload))
+).ToLowerInvariant()
+if ($scope.Count -ne 24 -or $scopeHash -cne 'sha256:f96f1a979eba89bc4de9744b3267bfd72fd81a828c9491cbfd3b95723b088ab9') {
+  throw "Issue #143 范围漂移：count=$($scope.Count) hash=$scopeHash"
+}
+
+$actual = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+@(
+  git -c core.quotePath=false diff --no-renames --name-only origin/main...HEAD
+  git -c core.quotePath=false diff --cached --no-renames --name-only
+  git -c core.quotePath=false diff --no-renames --name-only
+  git -c core.quotePath=false ls-files --others --exclude-standard
+) | Where-Object { $_ } | ForEach-Object { [void]$actual.Add($_) }
+if (-not [Linq.Enumerable]::SequenceEqual([string[]]$scope, [string[]]$actual, [StringComparer]::Ordinal)) {
+  throw "Issue #143 实际路径漂移：$([string]::Join(', ', [string[]]$actual))"
+}
+
+$product = @(
+  'crates/inputcodex-domain/src/watcher_preference_mutation.rs',
+  'crates/inputcodex-application/src/watcher_preference_mutation.rs',
+  'crates/inputcodex-platform/src/watcher_preference_mutation.rs'
+)
+$forbidden = rg -n -i 'create_dir_all|std::fs::write|read_to_string|Command::new|TcpStream|UdpSocket|reqwest|tokio|iced|unsafe\s*\{' @product
+if ($LASTEXITCODE -eq 0) { throw "Issue #143 禁止能力命中：$($forbidden -join '; ')" }
+if ($LASTEXITCODE -ne 1) { throw "Issue #143 禁止能力扫描失败：$LASTEXITCODE" }
+
+git diff --check origin/main
+Assert-NativeSuccess 'Issue #143 Git 空白检查'
+
+Write-Output "ISSUE143_LOCAL_VERIFY_OK scope_hash=$scopeHash paths=$($actual.Count)"
+```
+
+期望：四 crate tests/Clippy、rustfmt、CI 合同、自治策略、仓库政策、Release Audit 与 Cargo metadata 全部通过；
+实际范围精确为二十四路径，Parity 终态为 source `19/83/30/3`、feature `13/22/11`、contract `46`、
+fixture manifest `12`，完整 Watcher 继续 `unassessed`。
 
 ## 外部 AGOS 使用边界
 

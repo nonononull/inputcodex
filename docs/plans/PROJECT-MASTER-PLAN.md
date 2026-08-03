@@ -1,12 +1,12 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-141-gate-5-fixed-file-mutation-bootstrap
-active_gate: Gate 5 固定文件 mutation 两批有限 tranche 的批次 1 治理 bootstrap；本批不迁移产品功能
-last_verified_gate: Issue #138 / PR #139 已以单父 Squash 提交 42f12ead9209d6eceb7e355562fcd339f1daae81 建立候选耗尽自治终态，主干双 Workflow 全绿且 Artifact 为 0
-next_legal_gate: Issue #141 只在十一条治理路径内固定 Watcher preference mutation 单项 tranche；批次 1 进入 main 前禁止开始批次 2
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/141
-active_pr_ref: github-dynamic-see-issue-141
+active_task: issue-143-gate-5-watcher-preference-mutation
+active_gate: Gate 5 固定文件 mutation 两批有限 tranche 的批次 2；只迁移 Watcher 偏好固定标记变更
+last_verified_gate: Issue #141 / PR #142 已以单父 Squash 提交 891866a914468d3979964a2fe89066a0bbb2fe53 建立单项 mutation tranche，主干双 Workflow 全绿且 Artifact 为 0
+next_legal_gate: Issue #143 在二十四路径内完成 Planning Freeze 后按 Domain、Application、Platform、Parity 顺序 TDD；完成或 hard-stop 后重开 #140
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/143
+active_pr_ref: none
 gate_5_platform_paths_exception_ref: https://github.com/nonononull/inputcodex/issues/74
 gate_5_platform_paths_scope_hash: sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37
 gate_5_platform_paths_branch_ref: codex/issue-75-gate-5-platform-paths
@@ -318,7 +318,8 @@ decision_status: issue-140-gate5-fixed-file-mutation-tranche-v1-approved
 - [x] Issue `#128` / PR `#129` 已完成 `feature.foundation-platform.watcher-preference-observation`；只接管 `load_watcher_state`，完整 Watcher 管理继续 `unassessed`。
 - [x] Issue `#130` 至 `#137` 已完成剩余只读候选、SQLite 保证强度、Watcher typed owner 与候选前沿饱和决策；稳定结论是当前基线下只读前沿饱和，但 Gate 5 产品尚未完成且 Gate 6 不解锁。
 - [x] Issue `#138` 已修正自治状态机无法表达候选耗尽的控制面根因；只增加精确 typed marker、零 scope/无 PR 门和 `blocked-candidate-exhausted / await-owner-decision` 终态，不迁移产品功能。
-- [ ] Issue `#141` 正在执行固定文件 mutation 两批有限 tranche 的批次 1 治理 bootstrap；只允许唯一候选 `feature.foundation-platform.watcher-preference-mutation`，本批产品计数保持不变。
+- [x] Issue `#141` / PR `#142` 已完成固定文件 mutation 两批有限 tranche 的批次 1 治理 bootstrap，唯一候选已机器固定。
+- [ ] Issue `#143` 正在执行批次 `2/2`；只接管 `enable_watcher` / `disable_watcher` 的固定 `watcher.disabled` 偏好变更，完整 Watcher 继续 `unassessed`。
 
 ### Gate 6：首个正式版本（锁定）
 
