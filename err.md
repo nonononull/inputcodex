@@ -1179,6 +1179,25 @@
 - 关联：Issue `#147`、`scripts/ci/Verify-ReleaseAuditGate.ps1`、
   `scripts/automation/Get-AutonomousRefactorState.ps1`、`scripts/ci/Test-CiScripts.ps1`。
 
+### 2026-08-04：分页身份与 JSON 标量投影不对称会放宽交付证据
+
+- 环境：Issue `#149` 从 Batch 1 合并后的 fresh `main@c26e97ee534b74ebe1252346477640dc196f89b9`
+  重建副作用准入矩阵 successor；关闭且未合并的 PR `#146` 只作为只读证据。
+- 现象：PR review 后续分页只绑定 Head，push Workflow 未锁定 `head_branch=main`；Issue、PR、Planning
+  Freeze 与 merged PR 的 number/URL/ref 对应关系不完整，post-merge commit/tree 又可把单元素数组投影为标量。
+- 根因：GitHub 分页 collector 只在首页验证完整身份，后续页复用了部分字段；多个 helper 读取 JSON
+  属性时混用了原始属性与会经 PowerShell 管道枚举的值，导致验证边界和最终 projection 不对称。
+- 处理：从 PR `#146` Final Head 只机械移植可证明的矩阵成果，不 cherry-pick 或恢复旧历史；保留 Issue
+  `#147` / PR `#148` 的 Release Audit 严格 JSON 修复。新增 PR review、Issue、PR、Planning ref 与 post-merge
+  commit 的 typed identity helper，对每页和每个终态重新绑定标量类型、number/URL、Head/Base、
+  `head_branch=main`、commit/tree，并为四类身份失败增加稳定 reason code。
+- 验证：四项真实变异先得到 `94 pass / 4 fail`，修复后治理合同为 `CI_CONTRACT_GREEN passed=98`；
+  Parity admission `6/6`、目录 `33/33`、all-targets、Clippy、rustfmt、策略、仓库政策、Release Audit、
+  二十路径和空白门全部通过。原 Planning Freeze 缺 typed marker 时 live 明确返回 `valid=false`；补充不可变
+  correction comment 后恢复 typed planning evidence，未改变 scope/hash 或授权。
+- 关联：Issue `#140`、Issue `#149`、PR `#146`、Issue `#147`、PR `#148`、
+  `scripts/automation/Get-AutonomousRefactorState.ps1`、`scripts/ci/Test-CiScripts.ps1`。
+
 ## 记录模板
 
 ```text

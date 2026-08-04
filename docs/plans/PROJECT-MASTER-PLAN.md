@@ -1,11 +1,11 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-143-gate-5-watcher-preference-mutation
-active_gate: Gate 5 固定文件 mutation 两批有限 tranche 的批次 2；只迁移 Watcher 偏好固定标记变更
-last_verified_gate: Issue #141 / PR #142 已以单父 Squash 提交 891866a914468d3979964a2fe89066a0bbb2fe53 建立单项 mutation tranche，主干双 Workflow 全绿且 Artifact 为 0
-next_legal_gate: Issue #143 本地实现完成后执行二十四路径全门禁、non-Draft PR、独立 Final Head 复审与 Hosted 验证；完成或 hard-stop 后重开 #140
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/143
+active_task: issue-149-gate-5-side-effect-admission-matrix-successor
+active_gate: gate5-governance-recovery-v1 的批次 2；从 fresh main 重建 83-source 副作用准入矩阵，不授权产品实现
+last_verified_gate: Issue #147 / PR #148 已以单父 Squash 提交 c26e97ee534b74ebe1252346477640dc196f89b9 修复 Release Audit 严格 JSON 边界，主干双 Workflow 全绿且 Artifact 为 0
+next_legal_gate: Issue #149 完成二十路径本地门禁、non-Draft PR、独立 Final Head 复审与 Hosted 验证后精确 Squash；随后重开 #140，禁止自动选择产品候选
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/149
 active_pr_ref: none
 gate_5_platform_paths_exception_ref: https://github.com/nonononull/inputcodex/issues/74
 gate_5_platform_paths_scope_hash: sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37
@@ -319,7 +319,10 @@ decision_status: issue-140-gate5-fixed-file-mutation-tranche-v1-approved
 - [x] Issue `#130` 至 `#137` 已完成剩余只读候选、SQLite 保证强度、Watcher typed owner 与候选前沿饱和决策；稳定结论是当前基线下只读前沿饱和，但 Gate 5 产品尚未完成且 Gate 6 不解锁。
 - [x] Issue `#138` 已修正自治状态机无法表达候选耗尽的控制面根因；只增加精确 typed marker、零 scope/无 PR 门和 `blocked-candidate-exhausted / await-owner-decision` 终态，不迁移产品功能。
 - [x] Issue `#141` / PR `#142` 已完成固定文件 mutation 两批有限 tranche 的批次 1 治理 bootstrap，唯一候选已机器固定。
-- [ ] Issue `#143` 正在执行批次 `2/2`；只接管 `enable_watcher` / `disable_watcher` 的固定 `watcher.disabled` 偏好变更，完整 Watcher 继续 `unassessed`。
+- [x] Issue `#143` / PR `#144` 已完成批次 `2/2`；只接管 `enable_watcher` / `disable_watcher` 的固定 `watcher.disabled` 偏好变更，完整 Watcher 继续 `unassessed`。
+- [x] Issue `#145` / PR `#146` 在独立复审发现五项 Important 后按第 21 路 hard-stop 关闭且未合并；旧 Head 只保留为失败证据，不得恢复或合并。
+- [x] Issue `#147` / PR `#148` 已完成 `gate5-governance-recovery-v1` 批次 1，从严格根对象、原始标量类型和 live projection 修复 Release Audit 边界。
+- [ ] Issue `#149` 正在执行批次 2 successor：从 Batch 1 合并后的 fresh main 重建 `83` 个 unassessed source 的 `write 16/70`、`process 2/5`、`network 4/8` 准入矩阵；全部条目保持 blocked 且 `implementation_authorized=false`。
 
 ### Gate 6：首个正式版本（锁定）
 
