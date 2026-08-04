@@ -52,6 +52,39 @@ function Get-PropertyProjection {
     return $projection
 }
 
+function Get-ReleaseAuditStatusProjection {
+    param([AllowNull()]$SourceLock)
+
+    if ($SourceLock -isnot [System.Management.Automation.PSCustomObject]) {
+        return 'invalid'
+    }
+    $audit = Get-PropertyProjection $SourceLock 'release_audit'
+    if (-not $audit.exists -or
+        $audit.value -isnot [System.Management.Automation.PSCustomObject]) {
+        return 'invalid'
+    }
+    $schema = Get-PropertyProjection $audit.value 'schema_version'
+    $status = Get-PropertyProjection $audit.value 'status'
+    if (-not $schema.exists -or
+        $schema.value -isnot [string] -or
+        -not [string]::Equals(
+            $schema.value,
+            'inputcodex.release-audit.v1',
+            [StringComparison]::Ordinal
+        ) -or
+        -not $status.exists -or
+        $status.value -isnot [string]) {
+        return 'invalid'
+    }
+    if ([string]::Equals($status.value, 'current', [StringComparison]::Ordinal)) {
+        return 'current'
+    }
+    if ([string]::Equals($status.value, 'stale-re-audit-required', [StringComparison]::Ordinal)) {
+        return 'stale-re-audit-required'
+    }
+    return 'invalid'
+}
+
 function ConvertFrom-StrictJsonArrayOutput {
     param(
         [AllowEmptyCollection()][object[]]$Output,
@@ -1169,8 +1202,8 @@ function Get-LiveSnapshot {
     if (Test-Path -LiteralPath $sourceLockPath -PathType Leaf) {
         try {
             $sourceLock = [System.IO.File]::ReadAllText($sourceLockPath, [Text.UTF8Encoding]::new($false)) |
-                ConvertFrom-Json -Depth 100
-            $releaseAudit = [string](Get-PropertyValue (Get-PropertyValue $sourceLock 'release_audit') 'status')
+                ConvertFrom-Json -Depth 100 -NoEnumerate
+            $releaseAudit = Get-ReleaseAuditStatusProjection -SourceLock $sourceLock
         } catch {
             $releaseAudit = 'invalid'
         }

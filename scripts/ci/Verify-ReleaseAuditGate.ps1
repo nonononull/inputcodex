@@ -51,10 +51,30 @@ function Get-ObjectPropertyValue {
         return $null
     }
 
-    $property.Value
+    return ,$property.Value
 }
 
-function Read-JsonObject {
+function Test-ExactJsonString {
+    param(
+        [AllowNull()]$Actual,
+        [AllowNull()]$Expected
+    )
+
+    return ($Actual -is [string] -and
+        $Expected -is [string] -and
+        [string]::Equals($Actual, $Expected, [StringComparison]::Ordinal))
+}
+
+function Test-JsonStringPattern {
+    param(
+        [AllowNull()]$Actual,
+        [Parameter(Mandatory)][string]$Pattern
+    )
+
+    return ($Actual -is [string] -and $Actual -cmatch $Pattern)
+}
+
+function Read-StrictJsonDocument {
     param(
         [Parameter(Mandatory)]
         [string]$Path,
@@ -63,7 +83,11 @@ function Read-JsonObject {
         [string]$ErrorCode,
 
         [Parameter(Mandatory)]
-        [string]$ErrorMessage
+        [string]$ErrorMessage,
+
+        [Parameter(Mandatory)]
+        [ValidateSet('object', 'array')]
+        [string]$ExpectedRoot
     )
 
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
@@ -73,7 +97,17 @@ function Read-JsonObject {
 
     try {
         $content = Get-Content -LiteralPath $Path -Raw -Encoding utf8
-        return $content | ConvertFrom-Json -Depth 100
+        $value = $content | ConvertFrom-Json -Depth 100 -NoEnumerate
+        $rootValid = if ($ExpectedRoot -ceq 'object') {
+            $value -is [System.Management.Automation.PSCustomObject]
+        } else {
+            $value -is [System.Array]
+        }
+        if (-not $rootValid) {
+            Add-ReleaseAuditError -Code $ErrorCode -Message "$ErrorMessage：JSON 根必须是 $ExpectedRoot。"
+            return $null
+        }
+        return ,$value
     }
     catch {
         Add-ReleaseAuditError -Code $ErrorCode -Message "$ErrorMessage：$($_.Exception.Message)"
@@ -103,11 +137,30 @@ function Get-ReleaseAuditState {
         [string]$Location
     )
 
+    $invalidState = [pscustomobject][ordered]@{
+        status = 'invalid'
+        requires_reaudit = $false
+        valid = $false
+    }
+    if ($SourceLock -isnot [System.Management.Automation.PSCustomObject]) {
+        Add-ReleaseAuditError -Code 'RELEASE_AUDIT_INVALID' -Message "$Location 的 JSON 根必须是 object。"
+        return $invalidState
+    }
+
     $snapshot = Get-ObjectPropertyValue -Object $SourceLock -Name 'snapshot'
     $audit = Get-ObjectPropertyValue -Object $SourceLock -Name 'release_audit'
+    if ($snapshot -isnot [System.Management.Automation.PSCustomObject] -or
+        $audit -isnot [System.Management.Automation.PSCustomObject]) {
+        Add-ReleaseAuditError -Code 'RELEASE_AUDIT_INVALID' -Message "$Location 缺少 object 类型的 snapshot 或 release_audit。"
+        return $invalidState
+    }
     $snapshotTag = Get-ObjectPropertyValue -Object $snapshot -Name 'release_tag'
     $snapshotCommit = Get-ObjectPropertyValue -Object $snapshot -Name 'commit'
     $catalogRelease = Get-ObjectPropertyValue -Object $audit -Name 'catalog_release'
+    if ($catalogRelease -isnot [System.Management.Automation.PSCustomObject]) {
+        Add-ReleaseAuditError -Code 'RELEASE_AUDIT_INVALID' -Message "$Location 缺少 object 类型的 catalog_release。"
+        return $invalidState
+    }
     $catalogTag = Get-ObjectPropertyValue -Object $catalogRelease -Name 'tag'
     $catalogCommit = Get-ObjectPropertyValue -Object $catalogRelease -Name 'commit'
     $schemaVersion = Get-ObjectPropertyValue -Object $audit -Name 'schema_version'
@@ -117,20 +170,21 @@ function Get-ReleaseAuditState {
     $valid = $true
 
     if ($snapshotTag -isnot [string] -or [string]::IsNullOrWhiteSpace($snapshotTag) -or
-        $snapshotCommit -isnot [string] -or [string]::IsNullOrWhiteSpace($snapshotCommit) -or
+        -not (Test-JsonStringPattern -Actual $snapshotCommit -Pattern '^[0-9a-f]{40}$') -or
         $catalogTag -isnot [string] -or [string]::IsNullOrWhiteSpace($catalogTag) -or
-        $catalogCommit -isnot [string] -or [string]::IsNullOrWhiteSpace($catalogCommit)) {
+        -not (Test-JsonStringPattern -Actual $catalogCommit -Pattern '^[0-9a-f]{40}$')) {
         $valid = $false
         Add-ReleaseAuditError -Code 'RELEASE_AUDIT_INVALID' -Message "$Location 缺少有效的快照或目录 Release。"
     }
 
-    if ($schemaVersion -ne $releaseAuditSchema) {
+    if (-not (Test-ExactJsonString -Actual $schemaVersion -Expected $releaseAuditSchema)) {
         $valid = $false
         Add-ReleaseAuditError -Code 'RELEASE_AUDIT_INVALID' -Message "$Location 的 schema_version 不受支持。"
     }
 
-    $snapshotMatchesCatalog = $snapshotTag -eq $catalogTag -and $snapshotCommit -eq $catalogCommit
-    if ($status -eq $currentStatus) {
+    $snapshotMatchesCatalog = (Test-ExactJsonString -Actual $snapshotTag -Expected $catalogTag) -and
+        (Test-ExactJsonString -Actual $snapshotCommit -Expected $catalogCommit)
+    if (Test-ExactJsonString -Actual $status -Expected $currentStatus) {
         if (-not $snapshotMatchesCatalog -or $null -ne $staleReason -or $null -ne $reAuditIssueRef) {
             $valid = $false
             Add-ReleaseAuditError -Code 'RELEASE_AUDIT_INVALID' -Message "$Location 的 current 状态必须与目录审计基线一致且没有 stale 说明。"
@@ -142,7 +196,7 @@ function Get-ReleaseAuditState {
         }
     }
 
-    if ($status -eq $staleStatus) {
+    if (Test-ExactJsonString -Actual $status -Expected $staleStatus) {
         if ($snapshotMatchesCatalog) {
             $valid = $false
             Add-ReleaseAuditError -Code 'RELEASE_AUDIT_INVALID' -Message "$Location 的 stale 状态必须对应不同的快照与目录审计基线。"
@@ -163,11 +217,7 @@ function Get-ReleaseAuditState {
     }
 
     Add-ReleaseAuditError -Code 'RELEASE_AUDIT_INVALID' -Message "$Location 包含未知状态。"
-    [pscustomobject][ordered]@{
-        status = 'invalid'
-        requires_reaudit = $false
-        valid = $false
-    }
+    $invalidState
 }
 
 function Get-ReleaseAuditFingerprint {
@@ -189,16 +239,21 @@ function Get-ChangedPaths {
     )
 
     $paths = [System.Collections.Generic.List[string]]::new()
-    if ($null -eq $Changes) {
+    if ($Changes -isnot [System.Array]) {
+        Add-ReleaseAuditError -Code 'RELEASE_AUDIT_INVALID_CHANGESET' -Message 'PR 变更集 JSON 根必须是 array。'
         return @($paths)
     }
 
-    foreach ($change in @($Changes)) {
+    foreach ($change in $Changes) {
+        if ($change -isnot [System.Management.Automation.PSCustomObject]) {
+            Add-ReleaseAuditError -Code 'RELEASE_AUDIT_INVALID_CHANGESET' -Message '变更集元素必须是 object。'
+            continue
+        }
         $status = Get-ObjectPropertyValue -Object $change -Name 'status'
         $path = Get-ObjectPropertyValue -Object $change -Name 'path'
         $oldPath = Get-ObjectPropertyValue -Object $change -Name 'old_path'
 
-        if ($status -isnot [string] -or $status -notin @('A', 'M', 'D', 'R', 'C') -or
+        if ($status -isnot [string] -or @('A', 'M', 'D', 'R', 'C') -cnotcontains $status -or
             $path -isnot [string] -or [string]::IsNullOrWhiteSpace($path)) {
             Add-ReleaseAuditError -Code 'RELEASE_AUDIT_INVALID_CHANGESET' -Message '变更集包含无效记录。'
             continue
@@ -331,9 +386,17 @@ function Test-UpstreamSnapshotIntegrity {
         }
     }
 
-    $snapshotPath = Get-ObjectPropertyValue -Object (Get-ObjectPropertyValue -Object $SourceLock -Name 'snapshot') -Name 'path'
-    if ((Get-ObjectPropertyValue -Object $SourceLock -Name 'schema_version') -cne 'inputcodex.source-lock.v1' -or
-        $snapshotPath -cne 'upstream/CodexPlusPlus') {
+    if ($SourceLock -isnot [System.Management.Automation.PSCustomObject]) {
+        Add-ReleaseAuditError -Code 'UPSTREAM_SNAPSHOT_INTEGRITY_INVALID' -Message 'source-lock JSON 根必须是 object。'
+        return
+    }
+    $snapshot = Get-ObjectPropertyValue -Object $SourceLock -Name 'snapshot'
+    $snapshotPath = Get-ObjectPropertyValue -Object $snapshot -Name 'path'
+    if ($snapshot -isnot [System.Management.Automation.PSCustomObject] -or
+        -not (Test-ExactJsonString `
+            -Actual (Get-ObjectPropertyValue -Object $SourceLock -Name 'schema_version') `
+            -Expected 'inputcodex.source-lock.v1') -or
+        -not (Test-ExactJsonString -Actual $snapshotPath -Expected 'upstream/CodexPlusPlus')) {
         Add-IntegrityProblem 'source-lock schema 或 snapshot.path 漂移'
     }
 
@@ -350,17 +413,21 @@ function Test-UpstreamSnapshotIntegrity {
     $expected = [Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)
     $previousPath = $null
     foreach ($file in $files) {
+        if ($file -isnot [System.Management.Automation.PSCustomObject]) {
+            Add-IntegrityProblem 'source-lock file 记录必须是 object'
+            continue
+        }
         $path = Get-ObjectPropertyValue -Object $file -Name 'path'
         $mode = Get-ObjectPropertyValue -Object $file -Name 'mode'
         $size = Get-ObjectPropertyValue -Object $file -Name 'size'
         $blob = Get-ObjectPropertyValue -Object $file -Name 'git_blob_sha1'
         $sha256 = Get-ObjectPropertyValue -Object $file -Name 'sha256'
         if (-not (Test-SafeSnapshotRelativePath $path) -or
-            $mode -isnot [string] -or $mode -notin @('100644', '100755') -or
+            $mode -isnot [string] -or @('100644', '100755') -cnotcontains $mode -or
             $size -isnot [long] -or $size -lt 0 -or
-            [string]$blob -cnotmatch '^[0-9a-f]{40}$' -or
-            [string]$sha256 -cnotmatch '^[0-9a-f]{64}$') {
-            Add-IntegrityProblem 'source-lock file 记录 schema 无效' ([string]$path)
+            -not (Test-JsonStringPattern -Actual $blob -Pattern '^[0-9a-f]{40}$') -or
+            -not (Test-JsonStringPattern -Actual $sha256 -Pattern '^[0-9a-f]{64}$')) {
+            Add-IntegrityProblem 'source-lock file 记录 schema 无效' $(if ($path -is [string]) { $path } else { $null })
             continue
         }
         if ($null -ne $previousPath -and [StringComparer]::Ordinal.Compare($previousPath, $path) -ge 0) {
@@ -408,10 +475,12 @@ function Test-UpstreamSnapshotIntegrity {
         $path = Get-ObjectPropertyValue -Object $file -Name 'path'
         if ($path -isnot [string] -or -not $expected.ContainsKey($path) -or -not $actual.ContainsKey($path)) { continue }
         $entry = $actual[$path]
-        if ($entry.mode -cne (Get-ObjectPropertyValue -Object $file -Name 'mode')) {
+        if (-not (Test-ExactJsonString `
+            -Actual (Get-ObjectPropertyValue -Object $file -Name 'mode') -Expected $entry.mode)) {
             Add-IntegrityProblem 'Git mode 与 source-lock 不一致' $path
         }
-        if ($entry.git_blob_sha1 -cne (Get-ObjectPropertyValue -Object $file -Name 'git_blob_sha1')) {
+        if (-not (Test-ExactJsonString `
+            -Actual (Get-ObjectPropertyValue -Object $file -Name 'git_blob_sha1') -Expected $entry.git_blob_sha1)) {
             Add-IntegrityProblem 'Git blob 与 source-lock 不一致' $path
         }
         try {
@@ -421,7 +490,8 @@ function Test-UpstreamSnapshotIntegrity {
             if ($actualSize -ne (Get-ObjectPropertyValue -Object $file -Name 'size')) {
                 Add-IntegrityProblem 'Git blob 字节数与 source-lock 不一致' $path
             }
-            if ($actualSha256 -cne (Get-ObjectPropertyValue -Object $file -Name 'sha256')) {
+            if (-not (Test-ExactJsonString `
+                -Actual (Get-ObjectPropertyValue -Object $file -Name 'sha256') -Expected $actualSha256)) {
                 Add-IntegrityProblem 'Git blob SHA-256 与 source-lock 不一致' $path
             }
             [void]$manifestBuilder.Append($actualSha256).Append('  ').Append($path).Append("`n")
@@ -451,9 +521,14 @@ function Test-UpstreamSnapshotIntegrity {
     $manifestHash = [Convert]::ToHexString(
         [Security.Cryptography.SHA256]::HashData([Text.UTF8Encoding]::new($false).GetBytes($manifestBuilder.ToString()))
     ).ToLowerInvariant()
-    if ((Get-ObjectPropertyValue -Object $manifest -Name 'algorithm') -cne 'sha256' -or
-        (Get-ObjectPropertyValue -Object $manifest -Name 'format') -cne '<sha256><two spaces><posix path><newline>' -or
-        (Get-ObjectPropertyValue -Object $manifest -Name 'sha256') -cne $manifestHash -or
+    if ($manifest -isnot [System.Management.Automation.PSCustomObject] -or
+        -not (Test-ExactJsonString `
+            -Actual (Get-ObjectPropertyValue -Object $manifest -Name 'algorithm') -Expected 'sha256') -or
+        -not (Test-ExactJsonString `
+            -Actual (Get-ObjectPropertyValue -Object $manifest -Name 'format') `
+            -Expected '<sha256><two spaces><posix path><newline>') -or
+        -not (Test-ExactJsonString `
+            -Actual (Get-ObjectPropertyValue -Object $manifest -Name 'sha256') -Expected $manifestHash) -or
         (Get-ObjectPropertyValue -Object $manifest -Name 'file_count') -isnot [long] -or
         (Get-ObjectPropertyValue -Object $manifest -Name 'file_count') -ne $files.Count -or
         (Get-ObjectPropertyValue -Object $manifest -Name 'total_bytes') -isnot [long] -or
@@ -461,20 +536,30 @@ function Test-UpstreamSnapshotIntegrity {
         Add-IntegrityProblem 'manifest hash、计数或总字节漂移'
     }
     $largestFile = Get-ObjectPropertyValue -Object $manifest -Name 'largest_file'
-    if ($null -eq $largest -or $null -eq $largestFile -or
-        (Get-ObjectPropertyValue -Object $largestFile -Name 'path') -cne $largest.path -or
-        (Get-ObjectPropertyValue -Object $largestFile -Name 'mode') -cne $largest.mode -or
+    if ($null -eq $largest -or
+        $largestFile -isnot [System.Management.Automation.PSCustomObject] -or
+        -not (Test-ExactJsonString `
+            -Actual (Get-ObjectPropertyValue -Object $largestFile -Name 'path') -Expected $largest.path) -or
+        -not (Test-ExactJsonString `
+            -Actual (Get-ObjectPropertyValue -Object $largestFile -Name 'mode') -Expected $largest.mode) -or
+        (Get-ObjectPropertyValue -Object $largestFile -Name 'size') -isnot [long] -or
         (Get-ObjectPropertyValue -Object $largestFile -Name 'size') -ne $largest.size -or
-        (Get-ObjectPropertyValue -Object $largestFile -Name 'git_blob_sha1') -cne $largest.git_blob_sha1 -or
-        (Get-ObjectPropertyValue -Object $largestFile -Name 'sha256') -cne $largest.sha256) {
+        -not (Test-ExactJsonString `
+            -Actual (Get-ObjectPropertyValue -Object $largestFile -Name 'git_blob_sha1') `
+            -Expected $largest.git_blob_sha1) -or
+        -not (Test-ExactJsonString `
+            -Actual (Get-ObjectPropertyValue -Object $largestFile -Name 'sha256') -Expected $largest.sha256)) {
         Add-IntegrityProblem 'manifest largest_file 漂移'
     }
 
     $tree = Get-ObjectPropertyValue -Object $SourceLock -Name 'tree'
-    $snapshot = Get-ObjectPropertyValue -Object $SourceLock -Name 'snapshot'
     if ($null -eq $projection -or
-        (Get-ObjectPropertyValue -Object $tree -Name 'sha') -cne $projection.tree_oid -or
-        (Get-ObjectPropertyValue -Object $snapshot -Name 'commit_tree') -cne $projection.tree_oid -or
+        $tree -isnot [System.Management.Automation.PSCustomObject] -or
+        $snapshot -isnot [System.Management.Automation.PSCustomObject] -or
+        -not (Test-ExactJsonString `
+            -Actual (Get-ObjectPropertyValue -Object $tree -Name 'sha') -Expected $projection.tree_oid) -or
+        -not (Test-ExactJsonString `
+            -Actual (Get-ObjectPropertyValue -Object $snapshot -Name 'commit_tree') -Expected $projection.tree_oid) -or
         (Get-ObjectPropertyValue -Object $tree -Name 'file_count') -isnot [long] -or
         (Get-ObjectPropertyValue -Object $tree -Name 'file_count') -ne $files.Count -or
         (Get-ObjectPropertyValue -Object $tree -Name 'directory_count') -isnot [long] -or
@@ -546,10 +631,11 @@ if ($hasInputFile -ne $hasBaseSourceLock) {
     Write-Result -Status 'invalid' -RequiresReaudit $false -ReleaseAuditChanged $false
 }
 
-$headSourceLock = Read-JsonObject `
+$headSourceLock = Read-StrictJsonDocument `
     -Path (Join-Path $resolvedRepositoryRoot 'upstream/source-lock.json') `
     -ErrorCode 'RELEASE_AUDIT_INVALID' `
-    -ErrorMessage '无法读取当前 source-lock'
+    -ErrorMessage '无法读取当前 source-lock' `
+    -ExpectedRoot object
 $headState = Get-ReleaseAuditState -SourceLock $headSourceLock -Location '当前 source-lock'
 Test-UpstreamSnapshotIntegrity -RepositoryRoot $resolvedRepositoryRoot -SourceLock $headSourceLock
 
@@ -560,14 +646,16 @@ if (-not $hasInputFile) {
         -ReleaseAuditChanged $false
 }
 
-$baseSourceLock = Read-JsonObject `
+$baseSourceLock = Read-StrictJsonDocument `
     -Path $BaseSourceLockPath `
     -ErrorCode 'RELEASE_AUDIT_INVALID' `
-    -ErrorMessage '无法读取基线 source-lock'
-$changes = Read-JsonObject `
+    -ErrorMessage '无法读取基线 source-lock' `
+    -ExpectedRoot object
+$changes = Read-StrictJsonDocument `
     -Path $InputFile `
     -ErrorCode 'RELEASE_AUDIT_INVALID_CHANGESET' `
-    -ErrorMessage '无法读取 PR 变更集'
+    -ErrorMessage '无法读取 PR 变更集' `
+    -ExpectedRoot array
 $changedPaths = Get-ChangedPaths -Changes $changes
 $blockedPaths = @($changedPaths | Where-Object { Test-BlockedProductPath -Path $_ })
 $releaseAuditChanged = (Get-ReleaseAuditFingerprint -SourceLock $baseSourceLock) -ne
