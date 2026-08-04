@@ -338,6 +338,24 @@ function Get-GitHubPlanningEvidence {
     return [pscustomobject][ordered]@{ valid = $false }
 }
 
+function Test-GitHubPullRequestCommentRef {
+    param(
+        [AllowNull()]$Ref,
+        [AllowNull()]$PullRequestNumber
+    )
+
+    if ($Ref -isnot [string] -or
+        $PullRequestNumber -isnot [long] -or
+        $PullRequestNumber -lt 1) {
+        return $false
+    }
+    return [regex]::IsMatch(
+        $Ref,
+        "^https://github\.com/nonononull/inputcodex/pull/$PullRequestNumber#issuecomment-[0-9]+$",
+        [Text.RegularExpressions.RegexOptions]::CultureInvariant
+    )
+}
+
 function Get-GitHubReviewAttestation {
     param(
         [Parameter(Mandatory)][string]$GhExecutable,
@@ -352,14 +370,17 @@ function Get-GitHubReviewAttestation {
     } | Sort-Object { Get-PropertyValue $_ 'id' } -Descending)
     foreach ($comment in $matches) {
         $body = [string](Get-PropertyValue $comment 'body')
+        $commentRef = (Get-PropertyProjection $comment 'html_url').value
         $headMatch = [regex]::Match($body, '(?m)^- final_head:\s*`?([0-9a-f]{40})`?\s*$')
         $statusMatch = [regex]::Match($body, '(?im)^- result:\s*(PASSED|FAILED)\s*$')
-        if ($headMatch.Success -and $statusMatch.Success) {
+        if ($headMatch.Success -and
+            $statusMatch.Success -and
+            (Test-GitHubPullRequestCommentRef -Ref $commentRef -PullRequestNumber $PullRequestNumber)) {
             return [pscustomobject][ordered]@{
                 valid = $true
                 final_head = $headMatch.Groups[1].Value
                 status = $statusMatch.Groups[1].Value.ToLowerInvariant()
-                ref = Get-PropertyValue $comment 'html_url'
+                ref = $commentRef
             }
         }
     }
@@ -654,8 +675,26 @@ function Get-GitHubPostMergeEvidence {
         (Get-PropertyValue $verification 'verified') -isnot [bool]) {
         throw 'gh post-merge commit schema invalid'
     }
+    $parentOids = [System.Collections.Generic.List[string]]::new()
+    foreach ($parent in $parentsProperty.Value) {
+        if ($parent -isnot [System.Management.Automation.PSCustomObject]) {
+            throw 'gh post-merge parent schema invalid'
+        }
+        $shaProperty = $parent.PSObject.Properties['sha']
+        if ($null -eq $shaProperty -or
+            $shaProperty.Value -isnot [string] -or
+            $shaProperty.Value -cnotmatch '^[0-9a-f]{40}$') {
+            throw 'gh post-merge parent schema invalid'
+        }
+        $parentOids.Add($shaProperty.Value) | Out-Null
+    }
+    $parentOid = $null
+    if ($parentOids.Count -eq 1) {
+        $parentOid = $parentOids[0]
+    }
     return [pscustomobject][ordered]@{
         parent_count = [long]$parentsProperty.Value.Count
+        parent_oid = $parentOid
         merge_tree_oid = $mergeTree
         head_tree_oid = $headTree
         signature_valid = Get-PropertyValue $verification 'verified'
@@ -868,6 +907,7 @@ function Get-AutonomousPostMergeGateEvaluation {
         }
     }
 
+    $pullRequestNumber = (Get-PropertyProjection $MergedPullRequest 'number').value
     $mergeCommitOid = Get-PropertyValue $MergedPullRequest 'merge_commit_oid'
     $evidence = Get-PropertyValue $MergedPullRequest 'evidence'
     $planningEvidence = Get-PropertyValue $Issue 'planning_evidence'
@@ -898,18 +938,28 @@ function Get-AutonomousPostMergeGateEvaluation {
     }
 
     $review = Get-PropertyValue $MergedPullRequest 'review_attestation'
+    $reviewRef = (Get-PropertyProjection $review 'ref').value
+    $evidenceReviewRef = (Get-PropertyProjection $evidence 'independent_review_ref').value
     if ($null -eq $review -or
         (Get-PropertyValue $review 'valid') -ne $true -or
         (Get-PropertyValue $review 'final_head') -cne (Get-PropertyValue $MergedPullRequest 'head_oid') -or
         (Get-PropertyValue $review 'status') -cne 'passed' -or
-        (Get-PropertyValue $review 'ref') -cne (Get-PropertyValue $evidence 'independent_review_ref')) {
+        $reviewRef -cne $evidenceReviewRef -or
+        -not (Test-GitHubPullRequestCommentRef `
+            -Ref $reviewRef -PullRequestNumber $pullRequestNumber) -or
+        -not (Test-GitHubPullRequestCommentRef `
+            -Ref $evidenceReviewRef -PullRequestNumber $pullRequestNumber)) {
         Add-PostMergePendingCode 'POST_MERGE_REVIEW'
     }
 
     $postMerge = Get-PropertyValue $MergedPullRequest 'post_merge'
+    $expectedBase = Get-PropertyValue $Snapshot 'expected_base'
+    $parentOid = (Get-PropertyProjection $postMerge 'parent_oid').value
     if ($null -eq $postMerge -or
         (Get-PropertyValue $postMerge 'parent_count') -isnot [long] -or
         (Get-PropertyValue $postMerge 'parent_count') -ne 1 -or
+        $parentOid -isnot [string] -or
+        $parentOid -cne $expectedBase -or
         [string](Get-PropertyValue $postMerge 'merge_tree_oid') -cnotmatch '^[0-9a-f]{40}$' -or
         (Get-PropertyValue $postMerge 'merge_tree_oid') -cne (Get-PropertyValue $postMerge 'head_tree_oid') -or
         (Get-PropertyValue $postMerge 'signature_valid') -isnot [bool] -or
@@ -1040,17 +1090,22 @@ function Get-AutonomousMergeGateEvaluation {
         $planningTaskKind -cne $TaskKind) {
         Add-PendingCode 'EVIDENCE_TASK_KIND'
     }
+    $pullRequestNumber = (Get-PropertyProjection $PullRequest 'number').value
     $reviewAttestation = Get-PropertyValue $PullRequest 'review_attestation'
+    $reviewRef = (Get-PropertyProjection $reviewAttestation 'ref').value
+    $evidenceReviewRef = (Get-PropertyProjection $evidence 'independent_review_ref').value
     if ($null -eq $evidence -or
         $null -eq $reviewAttestation -or
         (Get-PropertyValue $reviewAttestation 'valid') -isnot [bool] -or
         (Get-PropertyValue $reviewAttestation 'valid') -ne $true -or
         (Get-PropertyValue $reviewAttestation 'final_head') -cne (Get-PropertyValue $PullRequest 'head_oid') -or
         (Get-PropertyValue $reviewAttestation 'status') -cne 'passed' -or
-        (Get-PropertyValue $reviewAttestation 'ref') -cne (Get-PropertyValue $evidence 'independent_review_ref') -or
+        $reviewRef -cne $evidenceReviewRef -or
         (Get-PropertyValue $evidence 'independent_review_status') -cne 'passed' -or
-        [string](Get-PropertyValue $evidence 'independent_review_ref') -cnotmatch
-            '^https://github\.com/nonononull/inputcodex/(pull|issues)/[0-9]+#issuecomment-[0-9]+$') {
+        -not (Test-GitHubPullRequestCommentRef `
+            -Ref $reviewRef -PullRequestNumber $pullRequestNumber) -or
+        -not (Test-GitHubPullRequestCommentRef `
+            -Ref $evidenceReviewRef -PullRequestNumber $pullRequestNumber)) {
         Add-PendingCode 'INDEPENDENT_REVIEW'
     }
 

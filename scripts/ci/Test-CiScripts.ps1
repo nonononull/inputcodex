@@ -921,6 +921,7 @@ function New-PostMergeAutonomousStateSnapshot {
         review_attestation = $sourcePr.review_attestation
         post_merge = [pscustomobject][ordered]@{
             parent_count = 1
+            parent_oid = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
             merge_tree_oid = 'dddddddddddddddddddddddddddddddddddddddd'
             head_tree_oid = 'dddddddddddddddddddddddddddddddddddddddd'
             signature_valid = $true
@@ -1298,6 +1299,78 @@ Invoke-ContractTest -Name '无人值守完整 Final Head 证据进入精确合�
     Assert-Equal -Expected 0 -Actual @($result.Json.merge_gate_pending).Count -Message '精确合并就绪不得残留 pending gate'
 }
 
+Invoke-ContractTest -Name '无人值守 Review comment ref 必须精确绑定当前 PR' -Body {
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-GitHubPullRequestCommentRef')
+
+    Assert-True -Condition (Test-GitHubPullRequestCommentRef `
+        -Ref 'https://github.com/nonononull/inputcodex/pull/112#issuecomment-1' `
+        -PullRequestNumber 112L) -Message '当前 PR 的 owner review comment 必须通过'
+    foreach ($invalid in @(
+        'https://github.com/nonononull/inputcodex/pull/999#issuecomment-1',
+        'https://github.com/nonononull/inputcodex/issues/112#issuecomment-1',
+        'https://github.com/nonononull/inputcodex/pull/112#issuecomment-x'
+    )) {
+        Assert-Equal -Expected $false -Actual (Test-GitHubPullRequestCommentRef `
+            -Ref $invalid -PullRequestNumber 112L) -Message "Review ref 不得越过当前 PR：$invalid"
+    }
+    Assert-Equal -Expected $false -Actual (Test-GitHubPullRequestCommentRef `
+        -Ref ([object[]]@('https://github.com/nonononull/inputcodex/pull/112#issuecomment-1')) `
+        -PullRequestNumber 112L) -Message 'Review ref 单元素数组不得伪装字符串'
+}
+
+Invoke-ContractTest -Name '无人值守 post-merge collector 保留唯一父提交标量身份' -Body {
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyValue')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'ConvertFrom-StrictJsonObjectOutput')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-GitHubPostMergeEvidence')
+
+    $script:ParentShaShape = 'scalar'
+    function Invoke-TestPostMergeGh {
+        param([string]$Command, [string]$Endpoint)
+
+        $head = [pscustomobject][ordered]@{
+            sha = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+            commit = [pscustomobject][ordered]@{
+                tree = [pscustomobject][ordered]@{ sha = 'dddddddddddddddddddddddddddddddddddddddd' }
+            }
+        }
+        $parentSha = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+        if ($script:ParentShaShape -ceq 'array') {
+            $parentSha = [object[]]@('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+        }
+        $merge = [pscustomobject][ordered]@{
+            sha = 'cccccccccccccccccccccccccccccccccccccccc'
+            parents = [object[]]@([pscustomobject][ordered]@{ sha = $parentSha })
+            commit = [pscustomobject][ordered]@{
+                tree = [pscustomobject][ordered]@{ sha = 'dddddddddddddddddddddddddddddddddddddddd' }
+                verification = [pscustomobject][ordered]@{ verified = $true }
+            }
+        }
+        $value = if ($Endpoint.EndsWith('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')) { $head } else { $merge }
+        Write-Output (ConvertTo-Json -InputObject $value -Depth 10 -Compress)
+    }
+
+    $LASTEXITCODE = 0
+    $valid = Get-GitHubPostMergeEvidence -GhExecutable 'Invoke-TestPostMergeGh' `
+        -HeadOid 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' `
+        -MergeCommitOid 'cccccccccccccccccccccccccccccccccccccccc'
+    Assert-Equal -Expected 1L -Actual $valid.parent_count -Message 'Squash commit 必须保留单父计数'
+    Assert-Equal -Expected 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' -Actual $valid.parent_oid `
+        -Message '唯一父提交 SHA 必须保留原始标量'
+    Assert-True -Condition ($valid.parent_oid -is [string]) -Message '唯一父提交 SHA 必须保持字符串类型'
+
+    $script:ParentShaShape = 'array'
+    $threw = $false
+    try {
+        $LASTEXITCODE = 0
+        Get-GitHubPostMergeEvidence -GhExecutable 'Invoke-TestPostMergeGh' `
+            -HeadOid 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' `
+            -MergeCommitOid 'cccccccccccccccccccccccccccccccccccccccc' | Out-Null
+    } catch {
+        $threw = $true
+    }
+    Assert-True -Condition $threw -Message '父 SHA 单元素数组必须在 collector fail closed'
+}
+
 Invoke-ContractTest -Name '无人值守任一 Final Head 合并门失败均只恢复 PR' -Body {
     foreach ($case in @(
         [pscustomobject]@{ Name = 'draft'; Code = 'PR_DRAFT' },
@@ -1310,6 +1383,9 @@ Invoke-ContractTest -Name '无人值守任一 Final Head 合并门失败均只�
         [pscustomobject]@{ Name = 'approved-scope'; Code = 'EVIDENCE_SCOPE' },
         [pscustomobject]@{ Name = 'independent-review'; Code = 'INDEPENDENT_REVIEW' },
         [pscustomobject]@{ Name = 'review-attestation'; Code = 'INDEPENDENT_REVIEW' },
+        [pscustomobject]@{ Name = 'review-ref-other-pr'; Code = 'INDEPENDENT_REVIEW' },
+        [pscustomobject]@{ Name = 'review-ref-issue'; Code = 'INDEPENDENT_REVIEW' },
+        [pscustomobject]@{ Name = 'review-ref-array'; Code = 'INDEPENDENT_REVIEW' },
         [pscustomobject]@{ Name = 'ci-artifact'; Code = 'WORKFLOW_CI' },
         [pscustomobject]@{ Name = 'performance-job'; Code = 'WORKFLOW_PERFORMANCE_BASELINE' },
         [pscustomobject]@{ Name = 'ci-workflow-id'; Code = 'WORKFLOW_CI' },
@@ -1329,6 +1405,24 @@ Invoke-ContractTest -Name '无人值守任一 Final Head 合并门失败均只�
             'approved-scope' { $snapshot.active_issues[0].planning_evidence.scope_count = 11 }
             'independent-review' { $snapshot.active_prs[0].evidence.independent_review_status = 'failed' }
             'review-attestation' { $snapshot.active_prs[0].review_attestation.final_head = 'cccccccccccccccccccccccccccccccccccccccc' }
+            'review-ref-other-pr' {
+                $snapshot.active_prs[0].evidence.independent_review_ref =
+                    'https://github.com/nonononull/inputcodex/pull/999#issuecomment-1'
+                $snapshot.active_prs[0].review_attestation.ref =
+                    'https://github.com/nonononull/inputcodex/pull/999#issuecomment-1'
+            }
+            'review-ref-issue' {
+                $snapshot.active_prs[0].evidence.independent_review_ref =
+                    'https://github.com/nonononull/inputcodex/issues/112#issuecomment-1'
+                $snapshot.active_prs[0].review_attestation.ref =
+                    'https://github.com/nonononull/inputcodex/issues/112#issuecomment-1'
+            }
+            'review-ref-array' {
+                $snapshot.active_prs[0].evidence.independent_review_ref =
+                    [object[]]@('https://github.com/nonononull/inputcodex/pull/112#issuecomment-1')
+                $snapshot.active_prs[0].review_attestation.ref =
+                    [object[]]@('https://github.com/nonononull/inputcodex/pull/112#issuecomment-1')
+            }
             'ci-artifact' { $snapshot.active_prs[0].workflow_runs[0].artifact_count = 1 }
             'performance-job' { $snapshot.active_prs[0].workflow_runs[1].jobs[0].conclusion = 'failure' }
             'ci-workflow-id' { $snapshot.active_prs[0].workflow_runs[0].workflow_id = 999 }
@@ -1365,6 +1459,50 @@ Invoke-ContractTest -Name '无人值守识别合并后主干验证与收口就�
     $originPending = Invoke-AutonomousStateCase -Name 'post-merge-origin-pending' -Snapshot $originPendingSnapshot
     Assert-AutonomousState -Result $originPending -ExpectedState 'post-merge-verification' -ExpectedAction 'verify-main'
     Assert-Contains -Collection @($originPending.Json.post_merge_gate_pending) -Expected 'POST_MERGE_ORIGIN_MAIN' -Message '合并后 origin/main 未刷新不得关闭 Issue'
+
+    $reviewRefPendingSnapshot = New-PostMergeAutonomousStateSnapshot
+    $reviewRefPendingSnapshot.merged_prs[0].evidence.independent_review_ref =
+        'https://github.com/nonononull/inputcodex/pull/999#issuecomment-1'
+    $reviewRefPendingSnapshot.merged_prs[0].review_attestation.ref =
+        'https://github.com/nonononull/inputcodex/pull/999#issuecomment-1'
+    $reviewRefPending = Invoke-AutonomousStateCase -Name 'post-merge-review-ref-pending' `
+        -Snapshot $reviewRefPendingSnapshot
+    Assert-AutonomousState -Result $reviewRefPending -ExpectedState 'post-merge-verification' -ExpectedAction 'verify-main'
+    Assert-Contains -Collection @($reviewRefPending.Json.post_merge_gate_pending) -Expected 'POST_MERGE_REVIEW' `
+        -Message '合并后 Review ref 必须绑定原 PR'
+
+    $reviewArrayPendingSnapshot = New-PostMergeAutonomousStateSnapshot
+    $reviewArrayPendingSnapshot.merged_prs[0].evidence.independent_review_ref =
+        [object[]]@('https://github.com/nonononull/inputcodex/pull/112#issuecomment-1')
+    $reviewArrayPendingSnapshot.merged_prs[0].review_attestation.ref =
+        [object[]]@('https://github.com/nonononull/inputcodex/pull/112#issuecomment-1')
+    $reviewArrayPending = Invoke-AutonomousStateCase -Name 'post-merge-review-array-pending' `
+        -Snapshot $reviewArrayPendingSnapshot
+    Assert-AutonomousState -Result $reviewArrayPending -ExpectedState 'post-merge-verification' -ExpectedAction 'verify-main'
+    Assert-Contains -Collection @($reviewArrayPending.Json.post_merge_gate_pending) -Expected 'POST_MERGE_REVIEW' `
+        -Message '合并后 Review ref 单元素数组不得伪装字符串'
+
+    foreach ($parentCase in @('wrong', 'array', 'missing')) {
+        $parentPendingSnapshot = New-PostMergeAutonomousStateSnapshot
+        switch ($parentCase) {
+            'wrong' {
+                $parentPendingSnapshot.merged_prs[0].post_merge.parent_oid =
+                    'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+            }
+            'array' {
+                $parentPendingSnapshot.merged_prs[0].post_merge.parent_oid =
+                    [object[]]@('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+            }
+            'missing' {
+                $parentPendingSnapshot.merged_prs[0].post_merge.PSObject.Properties.Remove('parent_oid')
+            }
+        }
+        $parentPending = Invoke-AutonomousStateCase -Name "post-merge-parent-$parentCase" `
+            -Snapshot $parentPendingSnapshot
+        Assert-AutonomousState -Result $parentPending -ExpectedState 'post-merge-verification' -ExpectedAction 'verify-main'
+        Assert-Contains -Collection @($parentPending.Json.post_merge_gate_pending) -Expected 'POST_MERGE_STRUCTURE' `
+            -Message "合并后 parent SHA 必须绑定 expected_base：$parentCase"
+    }
 }
 
 Invoke-ContractTest -Name '无人值守 PR 存在时脏工作树优先恢复执行' -Body {

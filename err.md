@@ -1183,6 +1183,22 @@
 - 关联：Issue `#147`、Issue `#149`、PR `#150`、Issue `#151`、`scripts/ci/Verify-ReleaseAuditGate.ps1`、
   `scripts/automation/Get-AutonomousRefactorState.ps1`、`scripts/ci/Test-CiScripts.ps1`。
 
+### 2026-08-05：Review 评论与 Squash 父提交只校验形状而未绑定对象身份
+
+- 环境：PR `#154` 的独立 Final Head 复审检查自治 merge/post-merge gate。
+- 现象：当前 PR `#112` 可配合 PR `#999` 或 Issue 评论 URL 通过 Review gate；post-merge 只要父提交数量为
+  `1` 即可通过，即使唯一父 SHA 与冻结 `expected_base` 不同。单元素数组还可经属性 getter 展开成标量。
+- 根因：Review ref 只使用仓库级 URL 正则并检查两份 ref 相等，没有加入当前 PR 编号；commit collector 只
+  投影 `parent_count`，丢失 `parents[0].sha`。gate 再经会枚举输出的 getter 读取新增标量，会复发既有数组
+  展开问题。
+- 处理：新增严格当前 PR comment ref helper，并在 collector、merge gate 与 post-merge gate 复用；commit
+  collector 从原始 `PSPropertyInfo.Value` 验证每个 parent SHA，单父时投影 `parent_oid`；post-merge gate 要求
+  其为原始字符串且精确等于 `expected_base`。所有新 gate 字段通过 property projection 保留原始类型。
+- 验证：RED 为既有 `81` 项通过、四个新增合同失败；中间态剩余两个数组展开反例；最终
+  `CI_CONTRACT_GREEN passed=87`。错误 PR/Issue ref、Review ref 数组、错误/缺失/数组 parent SHA 均 fail closed。
+- 关联：Issue `#155`、PR `#154` finding、`scripts/automation/Get-AutonomousRefactorState.ps1`、
+  `scripts/ci/Test-CiScripts.ps1`。
+
 ## 记录模板
 
 ```text

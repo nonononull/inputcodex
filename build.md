@@ -5174,6 +5174,104 @@ Write-Output "ISSUE151_LOCAL_VERIFY_OK scope_hash=$scopeHash paths=$($actual.Cou
 期望：两份 PowerShell AST 为零错误，CI 合同为 `85/85`，Release Audit 为 `current / errors=[]`，自治策略与
 仓库政策零违规；实际范围精确为九路径，产品、Parity、Cargo、Workflow、Release 与上游快照零变化。
 
+## Issue #155：Review ref 与 post-merge 父提交绑定本地验证
+
+本任务只修改自治交付控制面，不运行 Rust Workspace。测试会在系统临时目录建立并清理隔离 Git 夹具。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+function Assert-NativeSuccess {
+  param([Parameter(Mandatory)][string]$Label)
+  if ($LASTEXITCODE -ne 0) { throw "$Label 失败：$LASTEXITCODE" }
+}
+
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+$branch = git branch --show-current
+Assert-NativeSuccess 'Issue #155 分支读取'
+if ($branch -cne 'codex/issue-155-gate-5-review-parent-binding-recovery') {
+  throw "Issue #155 分支错误：$branch"
+}
+
+foreach ($scriptPath in @(
+  'scripts/automation/Get-AutonomousRefactorState.ps1',
+  'scripts/ci/Test-CiScripts.ps1'
+)) {
+  $tokens = $null
+  $errors = $null
+  [void][Management.Automation.Language.Parser]::ParseFile(
+    (Resolve-Path $scriptPath), [ref]$tokens, [ref]$errors
+  )
+  if (@($errors).Count -ne 0) { throw "Issue #155 PowerShell AST 失败：$scriptPath" }
+}
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+Assert-NativeSuccess 'Issue #155 CI 合同'
+
+pwsh -NoProfile -File scripts/ci/Verify-AutonomousRefactorPolicy.ps1 `
+  -RepositoryRoot . -PolicyPath .github/autonomous-refactor-policy.json
+Assert-NativeSuccess 'Issue #155 自治策略'
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #155 仓库政策'
+
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #155 Release Audit'
+
+$liveOutput = @(
+  pwsh -NoProfile -File scripts/automation/Get-AutonomousRefactorState.ps1 `
+    -RepositoryRoot . -PolicyPath .github/autonomous-refactor-policy.json -ReportOnly
+)
+Assert-NativeSuccess 'Issue #155 live 状态'
+$live = ($liveOutput -join [Environment]::NewLine) | ConvertFrom-Json -Depth 100
+if ($live.ok -ne $true -or $live.active_issue.number -ne 155 -or $null -ne $live.selected_candidate) {
+  throw 'Issue #155 live 状态漂移'
+}
+
+$expected = [string[]]@(
+  'build.md',
+  'docs/plans/2026-08-05-issue-155-gate-5-review-parent-binding-recovery.md',
+  'docs/plans/sessions/2026-08-05-issue-155-gate-5-review-parent-binding-recovery.md',
+  'docs/reports/issue-155-gate-5-review-parent-binding-recovery.md',
+  'docs/workflows/2026-08-05-issue-155-gate-5-review-parent-binding-recovery-runtime.md',
+  'err.md',
+  'scripts/automation/Get-AutonomousRefactorState.ps1',
+  'scripts/ci/Test-CiScripts.ps1'
+)
+$scope = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+foreach ($path in $expected) {
+  if (-not $scope.Add($path)) { throw "Issue #155 重复路径：$path" }
+}
+$payload = [string]::Join("`n", [string[]]$scope) + "`n"
+$scopeHash = 'sha256:' + [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData([Text.UTF8Encoding]::new($false).GetBytes($payload))
+).ToLowerInvariant()
+if ($scope.Count -ne 8 -or
+    $scopeHash -cne 'sha256:16fed02331530651a28e824c1ff1382478511945b4efc6892f4da7b23914247e') {
+  throw "Issue #155 范围漂移：count=$($scope.Count) hash=$scopeHash"
+}
+
+$actual = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+@(
+  git -c core.quotePath=false diff --no-renames --name-only origin/main...HEAD
+  git -c core.quotePath=false diff --cached --no-renames --name-only
+  git -c core.quotePath=false diff --no-renames --name-only
+  git -c core.quotePath=false ls-files --others --exclude-standard
+) | Where-Object { $_ } | ForEach-Object { [void]$actual.Add($_) }
+if (-not [Linq.Enumerable]::SequenceEqual([string[]]$scope, [string[]]$actual, [StringComparer]::Ordinal)) {
+  throw "Issue #155 实际路径漂移：$([string]::Join(', ', [string[]]$actual))"
+}
+
+git diff --check origin/main
+Assert-NativeSuccess 'Issue #155 Git 空白检查'
+
+Write-Output "ISSUE155_LOCAL_VERIFY_OK scope_hash=$scopeHash paths=$($actual.Count)"
+```
+
+期望：两份 PowerShell AST 为零错误，CI 合同为 `87/87`，Policy 与 Repository Policy 零违规，Release Audit
+为 `current / errors=[]`，live 精确恢复 Issue `#155`，实际范围精确八路径且受保护表面零变化。
+
 ## 外部 AGOS 使用边界
 
 Issue `#17` 曾以 report-only 运行 AGOS 默认入口，结果为 `needs-input/unregistered`；已按项目规则记录并绕过。AGOS 不属于环境要求或合并门禁；不得在本规划 PR 中修改、修复或优化其 Registry、脚本、规则、Workflow 或 Vault。
