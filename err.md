@@ -1176,7 +1176,11 @@
   测试夹具改为直接赋值保留空数组，不经 `switch` 输出管道。
 - 验证：RED 为历史合同全绿且新增 `2` 个合同失败；修复后 `CI_CONTRACT_GREEN passed=84`，真实仓库
   Release Audit 返回 `current / requires_reaudit=false / errors=[]`，三份 PowerShell AST 零错误。
-- 关联：Issue `#147`、`scripts/ci/Verify-ReleaseAuditGate.ps1`、
+- 后续复发与处理：PR `#150` 的独立复审发现自治脚本中另一个 `ConvertFrom-StrictJsonObjectOutput`
+  仍使用 `[pscustomobject]` 判断根对象，导致 `[]`、`[{}]`、`[{},{}]` 均可通过。该 PR 按治理停止门关闭且
+  未合并；Issue `#151` 从 clean main 新建真实生产 helper 变异合同，RED 为既有 `84` 项通过、唯一新增合同
+  失败，再仅改用具体 `System.Management.Automation.PSCustomObject`，GREEN 为 `85/85`。
+- 关联：Issue `#147`、Issue `#149`、PR `#150`、Issue `#151`、`scripts/ci/Verify-ReleaseAuditGate.ps1`、
   `scripts/automation/Get-AutonomousRefactorState.ps1`、`scripts/ci/Test-CiScripts.ps1`。
 
 ## 记录模板
