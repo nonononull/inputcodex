@@ -1163,6 +1163,22 @@
 - 关联：Issue `#136`、Issue `#140`、Issue `#143`、`crates/inputcodex-application/src/watcher_preference_mutation.rs`、
   `crates/inputcodex-platform/src/watcher_preference_mutation.rs`、`parity/contracts/foundation-platform.yml`。
 
+### 2026-08-04：PowerShell `[pscustomobject]` 加速器与管道展开共同放宽 JSON 类型
+
+- 环境：Issue `#147` 修复 Release Audit 与自治 live 状态的严格 JSON 边界。
+- 现象：`status: ["current"]`、单元素根数组及 SHA/统计字段数组可被投影为合法标量；测试夹具最初还因
+  `switch` 管道吞掉空 changes 数组而产生两个假失败。
+- 根因：属性 getter 直接输出 `.Value` 会枚举单元素数组；`ConvertFrom-Json` 未使用 `-NoEnumerate`；此外
+  `[pscustomobject]` 类型加速器实际指向宽泛的 `PSObject`，`Object[] -is [pscustomobject]` 也为真。
+- 处理：JSON 文档按 source-lock object、changes array 分别解析；getter 使用一元逗号保留原始集合；
+  外部对象使用具体 `System.Management.Automation.PSCustomObject`，字符串/SHA/Int64 逐项精确验证。自治
+  live 状态使用独立 typed projection，只接受规范 schema 下的 `current` 或 `stale-re-audit-required`。
+  测试夹具改为直接赋值保留空数组，不经 `switch` 输出管道。
+- 验证：RED 为历史合同全绿且新增 `2` 个合同失败；修复后 `CI_CONTRACT_GREEN passed=84`，真实仓库
+  Release Audit 返回 `current / requires_reaudit=false / errors=[]`，三份 PowerShell AST 零错误。
+- 关联：Issue `#147`、`scripts/ci/Verify-ReleaseAuditGate.ps1`、
+  `scripts/automation/Get-AutonomousRefactorState.ps1`、`scripts/ci/Test-CiScripts.ps1`。
+
 ## 记录模板
 
 ```text

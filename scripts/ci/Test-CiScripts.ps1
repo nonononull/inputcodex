@@ -1574,6 +1574,47 @@ Invoke-ContractTest -Name '无人值守 live 外部列表使用全量分页和�
     Assert-True -Condition (-not $source.Contains('--limit 100')) -Message 'live 外部列表不得截断前 100 项'
 }
 
+Invoke-ContractTest -Name '无人值守 live Release Audit 保留 JSON 根与标量类型' -Body {
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyProjection')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-ReleaseAuditStatusProjection')
+
+    $valid = [pscustomobject][ordered]@{
+        release_audit = [pscustomobject][ordered]@{
+            schema_version = 'inputcodex.release-audit.v1'
+            status = 'current'
+        }
+    }
+    Assert-Equal -Expected 'current' -Actual (Get-ReleaseAuditStatusProjection -SourceLock $valid) `
+        -Message 'live Release Audit 必须接受规范 current'
+
+    $stale = $valid | ConvertTo-Json -Depth 10 | ConvertFrom-Json -Depth 10
+    $stale.release_audit.status = 'stale-re-audit-required'
+    Assert-Equal -Expected 'stale-re-audit-required' -Actual (Get-ReleaseAuditStatusProjection -SourceLock $stale) `
+        -Message 'live Release Audit 必须接受规范 stale'
+
+    $invalidDocuments = @(
+        [object[]]@($valid),
+        'invalid-root',
+        [pscustomobject]@{ release_audit = [object[]]@($valid.release_audit) },
+        [pscustomobject]@{ release_audit = [pscustomobject]@{
+            schema_version = [object[]]@('inputcodex.release-audit.v1')
+            status = 'current'
+        } },
+        [pscustomobject]@{ release_audit = [pscustomobject]@{
+            schema_version = 'inputcodex.release-audit.v1'
+            status = [object[]]@('current')
+        } },
+        [pscustomobject]@{ release_audit = [pscustomobject]@{
+            schema_version = 'inputcodex.release-audit.v1'
+            status = 'CURRENT'
+        } }
+    )
+    foreach ($invalid in $invalidDocuments) {
+        Assert-Equal -Expected 'invalid' -Actual (Get-ReleaseAuditStatusProjection -SourceLock $invalid) `
+            -Message 'live Release Audit 不得把非法根、数组或大小写漂移投影为合法状态'
+    }
+}
+
 Invoke-ContractTest -Name '无人值守 live 空范围保持数组身份与确定哈希' -Body {
     Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-AutonomousScopeProjection')
 
@@ -1849,7 +1890,16 @@ function Invoke-ReleaseAuditGateCase {
         [AllowEmptyCollection()]
         [object[]]$Changes,
 
-        [scriptblock]$MutateFixture
+        [scriptblock]$MutateFixture,
+
+        [ValidateSet('object', 'single-array', 'scalar')]
+        [string]$HeadRoot = 'object',
+
+        [ValidateSet('object', 'single-array', 'scalar')]
+        [string]$BaseRoot = 'object',
+
+        [ValidateSet('array', 'object', 'scalar')]
+        [string]$ChangesRoot = 'array'
     )
 
     $caseRoot = Join-Path $testRoot ("release-audit-{0}" -f $Name)
@@ -1924,9 +1974,34 @@ function Invoke-ReleaseAuditGateCase {
     $baseSourceLockPath = Join-Path $caseRoot 'base-source-lock.json'
     $headSourceLockPath = Join-Path $upstreamRoot 'source-lock.json'
     $changesPath = Join-Path $caseRoot 'changes.json'
-    Write-JsonFile -Path $baseSourceLockPath -Value $BaseSourceLock
-    Write-JsonFile -Path $headSourceLockPath -Value $headFixture
-    Write-JsonFile -Path $changesPath -Value $Changes
+    $baseDocument = $BaseSourceLock
+    if ($BaseRoot -ceq 'single-array') {
+        $baseDocument = [object[]]@($BaseSourceLock)
+    } elseif ($BaseRoot -ceq 'scalar') {
+        $baseDocument = 'invalid-base-source-lock'
+    }
+
+    $headDocument = $headFixture
+    if ($HeadRoot -ceq 'single-array') {
+        $headDocument = [object[]]@($headFixture)
+    } elseif ($HeadRoot -ceq 'scalar') {
+        $headDocument = 'invalid-head-source-lock'
+    }
+
+    $changesDocument = [object[]]$Changes
+    if ($ChangesRoot -ceq 'object') {
+        $changesDocument = if ($Changes.Count -eq 0) {
+            [pscustomobject][ordered]@{ status = 'M'; path = 'README.md' }
+        } else {
+            $Changes[0]
+        }
+    } elseif ($ChangesRoot -ceq 'scalar') {
+        $changesDocument = 'invalid-changes'
+    }
+
+    Write-JsonFile -Path $baseSourceLockPath -Value $baseDocument
+    Write-JsonFile -Path $headSourceLockPath -Value $headDocument
+    Write-JsonFile -Path $changesPath -Value $changesDocument
 
     Invoke-ChildScript -Path $releaseAuditGateScript -Arguments @(
         '-RepositoryRoot', $caseRoot,
@@ -2189,6 +2264,100 @@ Invoke-ContractTest -Name 'Release 审计门区分 current 与 stale 并阻断�
         -HeadSourceLock $invalidStale `
         -Changes @([pscustomobject]@{ status = 'M'; path = 'parity/features/source-index.yml' })
     Assert-ReleaseAuditFailureCode -Result $result -Code 'RELEASE_AUDIT_INVALID'
+}
+
+Invoke-ContractTest -Name 'Release Audit JSON 根与受信标量必须 fail closed' -Body {
+    $current = New-ReleaseAuditSourceLock `
+        -SnapshotTag 'v1.2.41' `
+        -SnapshotCommit '3dafffcafb2566a1e8bce4b35671656d6adb3eda' `
+        -CatalogTag 'v1.2.41' `
+        -CatalogCommit '3dafffcafb2566a1e8bce4b35671656d6adb3eda' `
+        -Status 'current' `
+        -StaleReason $null `
+        -ReAuditIssueRef $null
+
+    foreach ($rootCase in @(
+        [pscustomobject]@{ Name = 'head-array'; HeadRoot = 'single-array'; BaseRoot = 'object'; ChangesRoot = 'array'; Code = 'RELEASE_AUDIT_INVALID' },
+        [pscustomobject]@{ Name = 'base-array'; HeadRoot = 'object'; BaseRoot = 'single-array'; ChangesRoot = 'array'; Code = 'RELEASE_AUDIT_INVALID' },
+        [pscustomobject]@{ Name = 'changes-object'; HeadRoot = 'object'; BaseRoot = 'object'; ChangesRoot = 'object'; Code = 'RELEASE_AUDIT_INVALID_CHANGESET' }
+    )) {
+        $result = Invoke-ReleaseAuditGateCase `
+            -Name "strict-root-$($rootCase.Name)" `
+            -BaseSourceLock $current `
+            -HeadSourceLock $current `
+            -Changes @([pscustomobject]@{ status = 'M'; path = 'README.md' }) `
+            -HeadRoot $rootCase.HeadRoot `
+            -BaseRoot $rootCase.BaseRoot `
+            -ChangesRoot $rootCase.ChangesRoot
+        Assert-True -Condition ($result.ExitCode -ne 0) `
+            -Message "Release Audit 根形状不得通过：$($rootCase.Name)，输出=$($result.Output)"
+        Assert-ReleaseAuditFailureCode -Result $result -Code $rootCase.Code
+    }
+
+    $scalarCases = @(
+        [pscustomobject]@{
+            Name = 'audit-schema-array'; Code = 'RELEASE_AUDIT_INVALID'; Mutate = {
+                param($root, $lock)
+                $lock.release_audit.schema_version = [object[]]@('inputcodex.release-audit.v1')
+            }
+        },
+        [pscustomobject]@{
+            Name = 'audit-status-array'; Code = 'RELEASE_AUDIT_INVALID'; Mutate = {
+                param($root, $lock)
+                $lock.release_audit.status = [object[]]@('current')
+            }
+        },
+        [pscustomobject]@{
+            Name = 'snapshot-tag-array'; Code = 'RELEASE_AUDIT_INVALID'; Mutate = {
+                param($root, $lock)
+                $lock.snapshot.release_tag = [object[]]@('v1.2.41')
+            }
+        },
+        [pscustomobject]@{
+            Name = 'catalog-commit-array'; Code = 'RELEASE_AUDIT_INVALID'; Mutate = {
+                param($root, $lock)
+                $lock.release_audit.catalog_release.commit = [object[]]@('3dafffcafb2566a1e8bce4b35671656d6adb3eda')
+            }
+        },
+        [pscustomobject]@{
+            Name = 'file-blob-array'; Code = 'UPSTREAM_SNAPSHOT_INTEGRITY_INVALID'; Mutate = {
+                param($root, $lock)
+                $lock.files[0].git_blob_sha1 = [object[]]@($lock.files[0].git_blob_sha1)
+            }
+        },
+        [pscustomobject]@{
+            Name = 'manifest-count-array'; Code = 'UPSTREAM_SNAPSHOT_INTEGRITY_INVALID'; Mutate = {
+                param($root, $lock)
+                $lock.manifest.file_count = [object[]]@(1L)
+            }
+        },
+        [pscustomobject]@{
+            Name = 'tree-sha-array'; Code = 'UPSTREAM_SNAPSHOT_INTEGRITY_INVALID'; Mutate = {
+                param($root, $lock)
+                $lock.tree.sha = [object[]]@($lock.tree.sha)
+            }
+        }
+    )
+    foreach ($case in $scalarCases) {
+        $result = Invoke-ReleaseAuditGateCase `
+            -Name "strict-scalar-$($case.Name)" `
+            -BaseSourceLock $current `
+            -HeadSourceLock $current `
+            -Changes @() `
+            -MutateFixture $case.Mutate
+        Assert-True -Condition ($result.ExitCode -ne 0) `
+            -Message "Release Audit 标量数组不得通过：$($case.Name)，输出=$($result.Output)"
+        Assert-ReleaseAuditFailureCode -Result $result -Code $case.Code
+    }
+
+    $arrayChange = Invoke-ReleaseAuditGateCase `
+        -Name 'strict-change-status-array' `
+        -BaseSourceLock $current `
+        -HeadSourceLock $current `
+        -Changes @([pscustomobject]@{ status = [object[]]@('M'); path = 'README.md' })
+    Assert-True -Condition ($arrayChange.ExitCode -ne 0) `
+        -Message "Release Audit changes 标量数组不得通过，输出=$($arrayChange.Output)"
+    Assert-ReleaseAuditFailureCode -Result $arrayChange -Code 'RELEASE_AUDIT_INVALID_CHANGESET'
 }
 
 Invoke-ContractTest -Name 'Release 审计门验证完整上游快照' -Body {
