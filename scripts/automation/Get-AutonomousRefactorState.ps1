@@ -121,7 +121,7 @@ function ConvertFrom-StrictJsonObjectOutput {
     } catch {
         throw "$Label returned invalid JSON"
     }
-    if ($value -isnot [pscustomobject]) {
+    if ($value -isnot [System.Management.Automation.PSCustomObject]) {
         throw "$Label must return a JSON object"
     }
     return [pscustomobject]@{ Value = $value }

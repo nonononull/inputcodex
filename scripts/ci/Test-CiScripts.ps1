@@ -1574,6 +1574,26 @@ Invoke-ContractTest -Name '无人值守 live 外部列表使用全量分页和�
     Assert-True -Condition (-not $source.Contains('--limit 100')) -Message 'live 外部列表不得截断前 100 项'
 }
 
+Invoke-ContractTest -Name '无人值守严格 JSON object helper 拒绝数组根' -Body {
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'ConvertFrom-StrictJsonObjectOutput')
+
+    $valid = ConvertFrom-StrictJsonObjectOutput -Output @('{}') -Label 'valid object'
+    Assert-True `
+        -Condition ($valid.Value -is [System.Management.Automation.PSCustomObject]) `
+        -Message '严格 object helper 必须接受 JSON object 根'
+
+    foreach ($invalidRoot in @('[]', '[{}]', '[{},{}]')) {
+        $rejected = $false
+        try {
+            ConvertFrom-StrictJsonObjectOutput -Output @($invalidRoot) -Label 'invalid array root' | Out-Null
+        }
+        catch {
+            $rejected = $true
+        }
+        Assert-True -Condition $rejected -Message "严格 object helper 必须拒绝数组根：$invalidRoot"
+    }
+}
+
 Invoke-ContractTest -Name '无人值守 live Release Audit 保留 JSON 根与标量类型' -Body {
     Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyProjection')
     Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-ReleaseAuditStatusProjection')
