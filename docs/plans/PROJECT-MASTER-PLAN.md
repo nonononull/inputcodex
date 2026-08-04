@@ -1,11 +1,11 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-151-strict-json-object-root-boundary
-active_gate: Gate 5 治理恢复；零产品交付，先修 StrictJsonObject 根类型，再从 fresh main 重建副作用准入矩阵 successor
-last_verified_gate: Issue #143 / PR #144 已交付固定 Watcher 偏好标记 mutation；Issue #147 / PR #148 已收紧 Release Audit JSON 边界并进入 main
-next_legal_gate: Issue #151 独立复审与合并后完成 fresh-main 复验；随后才能新建 admission matrix successor，任一范围漂移或 Critical/Important finding 立即停止
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/151
+active_task: issue-153-gate-5-side-effect-admission-matrix-successor-v2
+active_gate: gate5-strict-json-object-recovery-v1 批次 2；从 fresh main 重建 83-source 副作用准入矩阵，不授权产品实现
+last_verified_gate: Issue #151 / PR #152 已以单父 Squash 提交 f3e7d6f873f59399e71b602e1a9fbdee71760d64 修复 StrictJsonObject 根类型，fresh-main 双 Workflow 全绿且 Artifact 为 0
+next_legal_gate: Issue #153 完成二十路径全门、独立 Final Head 复审和 Hosted 验证；完成或任一 hard-stop 后回到 #140，禁止第三个治理 PR
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/153
 active_pr_ref: none
 gate_5_platform_paths_exception_ref: https://github.com/nonononull/inputcodex/issues/74
 gate_5_platform_paths_scope_hash: sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37
@@ -321,7 +321,8 @@ decision_status: issue-140-gate5-fixed-file-mutation-tranche-v1-approved
 - [x] Issue `#141` / PR `#142` 已完成固定文件 mutation 两批有限 tranche 的批次 1 治理 bootstrap，唯一候选已机器固定。
 - [x] Issue `#143` / PR `#144` 已完成批次 `2/2`；只接管 `enable_watcher` / `disable_watcher` 的固定 `watcher.disabled` 偏好变更，完整 Watcher 继续 `unassessed`。
 - [x] Issue `#147` / PR `#148` 已收紧 Release Audit 与自治 live 状态的 JSON 根和受信标量类型；产品交付为零。
-- [ ] `gate5-strict-json-object-recovery-v1` 最多交付两个治理 PR、零产品；Issue `#151` 先修复 StrictJsonObject 根类型，合并并完成 fresh-main 复验后才能重建 admission matrix successor。
+- [x] Issue `#151` / PR `#152` 已完成 `gate5-strict-json-object-recovery-v1` 批次 1：StrictJsonObject 只接受具体 PSCustomObject，fresh main 本地与 Hosted 双门通过。
+- [ ] Issue `#153` 正在执行第二个且最后一个治理 PR：机器化覆盖 83 个 `unassessed` source 的副作用桶、typed owner 与阻断事实；全部保持 `blocked` 且 `implementation_authorized=false`。
 
 ### Gate 6：首个正式版本（锁定）
 

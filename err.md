@@ -1183,6 +1183,29 @@
 - 关联：Issue `#147`、Issue `#149`、PR `#150`、Issue `#151`、`scripts/ci/Verify-ReleaseAuditGate.ps1`、
   `scripts/automation/Get-AutonomousRefactorState.ps1`、`scripts/ci/Test-CiScripts.ps1`。
 
+### 2026-08-04：分页身份与 JSON 标量投影不对称会放宽治理交付证据
+
+- 环境：Issue `#153` 从 Batch 1 合并后的 fresh `main@f3e7d6f873f59399e71b602e1a9fbdee71760d64`
+  重建副作用准入矩阵 successor；关闭且未合并的 PR `#150` 只作为只读失败证据。
+- 现象：旧证据中的 PR review 后续分页只绑定 Head，push Workflow 未锁定 `head_branch=main`；Issue、PR、
+  Planning Freeze 与 merged PR 的 number/URL/ref 对应关系不完整，post-merge commit/tree 又可把单元素数组
+  投影为标量。
+- 根因：GitHub 分页 collector 只在首页验证完整身份，后续页复用了部分字段；多个 helper 读取 JSON 属性时
+  混用了原始属性与会经 PowerShell 管道枚举的值，导致验证边界和最终 projection 不对称。
+- 处理：从 PR `#150@20d68bf12e1b5d5948feba2b38c79086d5130872` 只机械移植可证明的矩阵成果，
+  不 cherry-pick、merge 或恢复旧历史；保留 Issue `#151` 的具体 PSCustomObject 根类型修复。新增 PR review、
+  Issue、PR、Planning ref 与 post-merge commit 的 typed identity helper，对每页和每个终态重新绑定标量类型、
+  number/URL、Head/Base、`head_branch=main`、commit/tree，并让无授权候选固定 fail closed。
+- 验证：Parity RED 为 12 个缺失 admission 符号/错误码，GREEN 为 admission `6/6` 与目录接入定向通过；
+  automation RED 为 `76 pass / 23 fail`，生产落盘后为 `98 pass / 1 fail`，唯一剩余是旧 #149/#150
+  正向 fixture 身份。重绑为 #153/预期 PR #154 后得到 `CI_CONTRACT_GREEN passed=99`。
+- Intake 纠正：#153 初始 body 遗漏 `<!-- inputcodex:autonomous-refactor-task:v1 -->`，即使 typed Planning
+  Freeze 完整，live 仍正确返回 `ORPHANED_TASK_BRANCH / ORPHANED_DIRTY_WORKTREE`。只在 Issue body 顶部补
+  通用 task marker 后恢复 `active-worktree-execution / resume-worktree`；仓库 scope/hash 与授权未改变。
+- 关联：Issue `#140`、PR `#150`、Issue `#151`、PR `#152`、Issue `#153`、
+  `crates/inputcodex-parity/src/admission.rs`、`scripts/automation/Get-AutonomousRefactorState.ps1`、
+  `scripts/ci/Test-CiScripts.ps1`。
+
 ## 记录模板
 
 ```text

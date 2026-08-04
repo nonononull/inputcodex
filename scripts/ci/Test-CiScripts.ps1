@@ -275,11 +275,14 @@ function New-ValidAutonomousRefactorPolicy {
             'candidate-exhausted'
         )
         fixed_file_mutation_tranche = [pscustomobject][ordered]@{
-            schema_version = 'inputcodex.fixed-file-mutation-tranche.v1'
+            schema_version = 'inputcodex.fixed-file-mutation-tranche.v2'
             decision_id = 'gate5-fixed-file-mutation-tranche-v1'
             owner_decision_ref = 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159072214'
             retry_resume_ref = 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159471091'
             standing_authorization_ref = 'https://github.com/nonononull/inputcodex/issues/111'
+            lifecycle_state = 'consumed'
+            consumption_ref = 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5166320854'
+            consumption_main = '42c73f401e7a758cdc5eca374613625dad46340b'
             repository_batches_max = 2
             product_deliveries_max = 1
             candidate_features = @('feature.foundation-platform.watcher-preference-mutation')
@@ -291,6 +294,27 @@ function New-ValidAutonomousRefactorPolicy {
                 owner_issue_ref = 'https://github.com/nonononull/inputcodex/issues/140'
                 reopen_on = @('completed', 'hard-stop')
                 action = 'reopen-owner-decision-issue'
+                state = 'blocked-candidate-exhausted'
+                next_action = 'await-owner-decision'
+            }
+        }
+        side_effect_admission_matrix = [pscustomobject][ordered]@{
+            schema_version = 'inputcodex.side-effect-admission-matrix-policy.v1'
+            decision_id = 'gate5-strict-json-object-recovery-v1/batch-2'
+            owner_decision_ref = 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5180271732'
+            tracking_issue_ref = 'https://github.com/nonononull/inputcodex/issues/153'
+            standing_authorization_ref = 'https://github.com/nonononull/inputcodex/issues/111'
+            baseline_commit = 'f3e7d6f873f59399e71b602e1a9fbdee71760d64'
+            repository_batches_max = 1
+            product_deliveries_max = 0
+            expected_unassessed_sources = 83
+            product_count_delta = 0
+            implementation_authorized = $false
+            matrix_path = 'parity/admission/side-effect-admission-matrix.yml'
+            terminal = [pscustomobject][ordered]@{
+                owner_issue_ref = 'https://github.com/nonononull/inputcodex/issues/140'
+                reopen_on = @('completed', 'hard-stop')
+                action = 'close-task-and-reopen-owner-decision-issue'
                 state = 'blocked-candidate-exhausted'
                 next_action = 'await-owner-decision'
             }
@@ -361,16 +385,67 @@ Invoke-ContractTest -Name '合法无人值守重构策略通过并输出规范�
     Assert-Equal -Expected ([string]::Join([char]10, @('pull_request', 'push'))) `
         -Actual ([string]::Join([char]10, @($result.Json.required_workflows[0].events))) `
         -Message '策略输出必须投影 CI 的 PR/push 事件集合'
-    Assert-Equal -Expected 'inputcodex.fixed-file-mutation-tranche.v1' `
+    Assert-Equal -Expected 'inputcodex.fixed-file-mutation-tranche.v2' `
         -Actual $result.Json.fixed_file_mutation_tranche.schema_version `
         -Message '策略输出必须投影版本化 fixed-file mutation tranche'
+    Assert-Equal -Expected 'consumed' `
+        -Actual $result.Json.fixed_file_mutation_tranche.lifecycle_state `
+        -Message '已交付 fixed-file tranche 必须不可复活'
     Assert-Equal -Expected 'feature.foundation-platform.watcher-preference-mutation' `
         -Actual $result.Json.fixed_file_mutation_tranche.candidate_features[0] `
-        -Message 'tranche 只能投影 Watcher preference mutation'
+        -Message 'tranche 只能把 Watcher preference mutation 保留为历史证据'
     Assert-Equal -Expected 2 -Actual $result.Json.fixed_file_mutation_tranche.repository_batches_max `
         -Message 'tranche 必须投影两批上限'
     Assert-Equal -Expected 1 -Actual $result.Json.fixed_file_mutation_tranche.product_deliveries_max `
         -Message 'tranche 必须投影单产品交付上限'
+    Assert-Equal -Expected 'inputcodex.side-effect-admission-matrix-policy.v1' `
+        -Actual $result.Json.side_effect_admission_matrix.schema_version `
+        -Message '策略输出必须投影副作用准入矩阵授权'
+    Assert-Equal -Expected 83 -Actual $result.Json.side_effect_admission_matrix.expected_unassessed_sources `
+        -Message '准入矩阵授权必须锁定 83 个未评估 source'
+    Assert-Equal -Expected $false -Actual $result.Json.side_effect_admission_matrix.implementation_authorized `
+        -Message '准入矩阵不得授权产品实现'
+    Assert-Equal -Expected 'close-task-and-reopen-owner-decision-issue' `
+        -Actual $result.Json.side_effect_admission_matrix.terminal.action `
+        -Message '准入矩阵完成或硬停止后必须进入复合 terminal transition'
+}
+
+Invoke-ContractTest -Name '无人值守策略根与全局标量数组伪装必须 fail closed' -Body {
+    $baseline = New-ValidAutonomousRefactorPolicy
+    foreach ($case in @(
+        [pscustomobject]@{ Name = 'schema'; Code = 'SCHEMA_VERSION' },
+        [pscustomobject]@{ Name = 'enabled'; Code = 'POLICY_ENABLED' },
+        [pscustomobject]@{ Name = 'exact-head'; Code = 'EXACT_HEAD_BINDING' },
+        [pscustomobject]@{ Name = 'writer-cap'; Code = 'SINGLE_WRITER' },
+        [pscustomobject]@{ Name = 'merge-method'; Code = 'MERGE_METHOD' },
+        [pscustomobject]@{ Name = 'review-threads'; Code = 'REVIEW_GATE' }
+    )) {
+        $policy = Copy-AutonomousRefactorPolicy $baseline
+        switch ($case.Name) {
+            'schema' { $policy.schema_version = [object[]]@($policy.schema_version) }
+            'enabled' { $policy.enabled = [object[]]@($policy.enabled) }
+            'exact-head' {
+                $policy.authorization.exact_head_binding =
+                    [object[]]@($policy.authorization.exact_head_binding)
+            }
+            'writer-cap' {
+                $policy.execution.max_active_writers =
+                    [object[]]@($policy.execution.max_active_writers)
+            }
+            'merge-method' { $policy.merge_gate.method = [object[]]@($policy.merge_gate.method) }
+            'review-threads' {
+                $policy.merge_gate.required_review_threads =
+                    [object[]]@($policy.merge_gate.required_review_threads)
+            }
+        }
+        Assert-AutonomousPolicyFailure `
+            -Result (Invoke-AutonomousPolicyCase -Name "global-array-$($case.Name)" -Policy $policy) `
+            -ExpectedCode $case.Code
+    }
+
+    Assert-AutonomousPolicyFailure `
+        -Result (Invoke-AutonomousPolicyCase -Name 'root-single-element-array' -Policy ([object[]]@($baseline))) `
+        -ExpectedCode 'SCHEMA_VERSION'
 }
 
 $fixedFileMutationStringArrayCases = [ordered]@{
@@ -393,6 +468,18 @@ $fixedFileMutationStringArrayCases = [ordered]@{
     'standing_authorization_ref' = {
         param($tranche)
         $tranche.standing_authorization_ref = [object[]]@($tranche.standing_authorization_ref)
+    }
+    'lifecycle_state' = {
+        param($tranche)
+        $tranche.lifecycle_state = [object[]]@($tranche.lifecycle_state)
+    }
+    'consumption_ref' = {
+        param($tranche)
+        $tranche.consumption_ref = [object[]]@($tranche.consumption_ref)
+    }
+    'consumption_main' = {
+        param($tranche)
+        $tranche.consumption_main = [object[]]@($tranche.consumption_main)
     }
     'terminal.owner_issue_ref' = {
         param($tranche)
@@ -450,11 +537,14 @@ Invoke-ContractTest -Name '固定文件 mutation tranche 生产策略真实变�
         'terminal-issue',
         'terminal-trigger',
         'terminal-action',
+        'lifecycle',
+        'consumption-ref',
+        'consumption-main',
         'extra-field'
     )) {
         $policy = Copy-AutonomousRefactorPolicy $productionPolicy
         switch ($case) {
-            'schema' { $policy.fixed_file_mutation_tranche.schema_version = 'inputcodex.fixed-file-mutation-tranche.v2' }
+            'schema' { $policy.fixed_file_mutation_tranche.schema_version = 'inputcodex.fixed-file-mutation-tranche.v1' }
             'decision' { $policy.fixed_file_mutation_tranche.decision_id = 'other-decision' }
             'owner' { $policy.fixed_file_mutation_tranche.owner_decision_ref = 'https://github.com/nonononull/inputcodex/issues/140' }
             'batch-cap' { $policy.fixed_file_mutation_tranche.repository_batches_max = 3 }
@@ -470,6 +560,9 @@ Invoke-ContractTest -Name '固定文件 mutation tranche 生产策略真实变�
             'terminal-issue' { $policy.fixed_file_mutation_tranche.terminal.owner_issue_ref = 'https://github.com/nonononull/inputcodex/issues/141' }
             'terminal-trigger' { $policy.fixed_file_mutation_tranche.terminal.reopen_on = @('completed') }
             'terminal-action' { $policy.fixed_file_mutation_tranche.terminal.action = 'create-new-owner-issue' }
+            'lifecycle' { $policy.fixed_file_mutation_tranche.lifecycle_state = 'active' }
+            'consumption-ref' { $policy.fixed_file_mutation_tranche.consumption_ref = 'https://github.com/nonononull/inputcodex/issues/140' }
+            'consumption-main' { $policy.fixed_file_mutation_tranche.consumption_main = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' }
             'extra-field' {
                 $policy.fixed_file_mutation_tranche | Add-Member -NotePropertyName fallback_candidate -NotePropertyValue 'forbidden'
             }
@@ -531,16 +624,19 @@ Invoke-ContractTest -Name '固定文件 mutation tranche 生产 helper 真实变
     ) | ConvertFrom-Json -Depth 100
     $valid = Get-FixedFileMutationTrancheProjection $productionPolicy.fixed_file_mutation_tranche
     Assert-Equal -Expected $true -Actual $valid.valid -Message '生产 tranche 必须通过生产 helper'
+    Assert-Equal -Expected 'consumed' -Actual $valid.lifecycle_state -Message '生产 helper 必须投影 consumed 生命周期'
     Assert-Equal -Expected 'feature.foundation-platform.watcher-preference-mutation' `
-        -Actual $valid.candidate -Message '生产 helper 必须只返回固定 Watcher mutation 候选'
+        -Actual $valid.candidate_features[0] -Message '生产 helper 只能保留固定 Watcher mutation 历史证据'
 
-    foreach ($case in @('candidate', 'batch-cap', 'source-delta', 'terminal-trigger', 'extra-field')) {
+    foreach ($case in @('candidate', 'batch-cap', 'source-delta', 'terminal-trigger', 'lifecycle', 'consumption-main', 'extra-field')) {
         $policy = Copy-AutonomousRefactorPolicy $productionPolicy
         switch ($case) {
             'candidate' { $policy.fixed_file_mutation_tranche.candidate_features[0] = 'feature.session-data.token-usage-history' }
             'batch-cap' { $policy.fixed_file_mutation_tranche.repository_batches_max = 3 }
             'source-delta' { $policy.fixed_file_mutation_tranche.expected_source_delta.unassessed = -1 }
             'terminal-trigger' { $policy.fixed_file_mutation_tranche.terminal.reopen_on = @('hard-stop', 'completed') }
+            'lifecycle' { $policy.fixed_file_mutation_tranche.lifecycle_state = 'active' }
+            'consumption-main' { $policy.fixed_file_mutation_tranche.consumption_main = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' }
             'extra-field' {
                 $policy.fixed_file_mutation_tranche.terminal | Add-Member -NotePropertyName fallback -NotePropertyValue $true
             }
@@ -573,6 +669,132 @@ Invoke-ContractTest -Name '固定文件 mutation tranche 生产 helper 真实变
     }
     Assert-Equal -Expected 0 -Actual $unexpectedlyValidInt64ArrayFields.Count `
         -Message "生产 helper 不得把单元素数组展开为 Int64；漏拒字段=$([string]::Join(',', $unexpectedlyValidInt64ArrayFields))"
+}
+
+$sideEffectAdmissionStringArrayCases = [ordered]@{
+    'schema_version' = { param($matrix) $matrix.schema_version = [object[]]@($matrix.schema_version) }
+    'decision_id' = { param($matrix) $matrix.decision_id = [object[]]@($matrix.decision_id) }
+    'owner_decision_ref' = { param($matrix) $matrix.owner_decision_ref = [object[]]@($matrix.owner_decision_ref) }
+    'tracking_issue_ref' = { param($matrix) $matrix.tracking_issue_ref = [object[]]@($matrix.tracking_issue_ref) }
+    'standing_authorization_ref' = { param($matrix) $matrix.standing_authorization_ref = [object[]]@($matrix.standing_authorization_ref) }
+    'baseline_commit' = { param($matrix) $matrix.baseline_commit = [object[]]@($matrix.baseline_commit) }
+    'matrix_path' = { param($matrix) $matrix.matrix_path = [object[]]@($matrix.matrix_path) }
+    'terminal.owner_issue_ref' = { param($matrix) $matrix.terminal.owner_issue_ref = [object[]]@($matrix.terminal.owner_issue_ref) }
+    'terminal.action' = { param($matrix) $matrix.terminal.action = [object[]]@($matrix.terminal.action) }
+    'terminal.state' = { param($matrix) $matrix.terminal.state = [object[]]@($matrix.terminal.state) }
+    'terminal.next_action' = { param($matrix) $matrix.terminal.next_action = [object[]]@($matrix.terminal.next_action) }
+}
+
+$sideEffectAdmissionInt64ArrayCases = [ordered]@{
+    'repository_batches_max' = { param($matrix) $matrix.repository_batches_max = [object[]]@($matrix.repository_batches_max) }
+    'product_deliveries_max' = { param($matrix) $matrix.product_deliveries_max = [object[]]@($matrix.product_deliveries_max) }
+    'expected_unassessed_sources' = { param($matrix) $matrix.expected_unassessed_sources = [object[]]@($matrix.expected_unassessed_sources) }
+    'product_count_delta' = { param($matrix) $matrix.product_count_delta = [object[]]@($matrix.product_count_delta) }
+}
+
+Invoke-ContractTest -Name '副作用准入矩阵策略真实变异必须 fail closed' -Body {
+    $baseline = New-ValidAutonomousRefactorPolicy
+
+    foreach ($case in @(
+        'schema',
+        'decision',
+        'owner',
+        'tracking',
+        'standing',
+        'baseline',
+        'batch-cap',
+        'delivery-cap',
+        'source-count',
+        'product-delta',
+        'authorized',
+        'matrix-path',
+        'terminal-trigger',
+        'terminal-action',
+        'extra-field',
+        'terminal-extra-field'
+    )) {
+        $policy = Copy-AutonomousRefactorPolicy $baseline
+        switch ($case) {
+            'schema' { $policy.side_effect_admission_matrix.schema_version = 'inputcodex.side-effect-admission-matrix-policy.v2' }
+            'decision' { $policy.side_effect_admission_matrix.decision_id = 'other-decision' }
+            'owner' { $policy.side_effect_admission_matrix.owner_decision_ref = 'https://github.com/nonononull/inputcodex/issues/140' }
+            'tracking' { $policy.side_effect_admission_matrix.tracking_issue_ref = 'https://github.com/nonononull/inputcodex/issues/144' }
+            'standing' { $policy.side_effect_admission_matrix.standing_authorization_ref = 'https://github.com/nonononull/inputcodex/issues/140' }
+            'baseline' { $policy.side_effect_admission_matrix.baseline_commit = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' }
+            'batch-cap' { $policy.side_effect_admission_matrix.repository_batches_max = 2 }
+            'delivery-cap' { $policy.side_effect_admission_matrix.product_deliveries_max = 1 }
+            'source-count' { $policy.side_effect_admission_matrix.expected_unassessed_sources = 82 }
+            'product-delta' { $policy.side_effect_admission_matrix.product_count_delta = 1 }
+            'authorized' { $policy.side_effect_admission_matrix.implementation_authorized = $true }
+            'matrix-path' { $policy.side_effect_admission_matrix.matrix_path = 'parity/features/source-index.yml' }
+            'terminal-trigger' { $policy.side_effect_admission_matrix.terminal.reopen_on = @('hard-stop', 'completed') }
+            'terminal-action' { $policy.side_effect_admission_matrix.terminal.action = 'reopen-owner-decision-issue' }
+            'extra-field' { $policy.side_effect_admission_matrix | Add-Member -NotePropertyName candidates -NotePropertyValue @() }
+            'terminal-extra-field' { $policy.side_effect_admission_matrix.terminal | Add-Member -NotePropertyName fallback -NotePropertyValue $true }
+        }
+        Assert-AutonomousPolicyFailure `
+            -Result (Invoke-AutonomousPolicyCase -Name "side-effect-admission-$case" -Policy $policy) `
+            -ExpectedCode 'SIDE_EFFECT_ADMISSION_MATRIX'
+    }
+
+    foreach ($arrayCase in $sideEffectAdmissionStringArrayCases.GetEnumerator()) {
+        $policy = Copy-AutonomousRefactorPolicy $baseline
+        & $arrayCase.Value $policy.side_effect_admission_matrix
+        Assert-AutonomousPolicyFailure `
+            -Result (Invoke-AutonomousPolicyCase -Name "side-effect-admission-array-$($arrayCase.Key)" -Policy $policy) `
+            -ExpectedCode 'SIDE_EFFECT_ADMISSION_MATRIX'
+    }
+    foreach ($arrayCase in $sideEffectAdmissionInt64ArrayCases.GetEnumerator()) {
+        $policy = Copy-AutonomousRefactorPolicy $baseline
+        & $arrayCase.Value $policy.side_effect_admission_matrix
+        Assert-AutonomousPolicyFailure `
+            -Result (Invoke-AutonomousPolicyCase -Name "side-effect-admission-int-array-$($arrayCase.Key)" -Policy $policy) `
+            -ExpectedCode 'SIDE_EFFECT_ADMISSION_MATRIX'
+    }
+    $booleanArray = Copy-AutonomousRefactorPolicy $baseline
+    $booleanArray.side_effect_admission_matrix.implementation_authorized = [object[]]@($false)
+    Assert-AutonomousPolicyFailure `
+        -Result (Invoke-AutonomousPolicyCase -Name 'side-effect-admission-bool-array' -Policy $booleanArray) `
+        -ExpectedCode 'SIDE_EFFECT_ADMISSION_MATRIX'
+}
+
+Invoke-ContractTest -Name '副作用准入矩阵生产 helper 真实变异必须 fail closed' -Body {
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyValue')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyProjection')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-ExactStringSet')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-SideEffectAdmissionMatrixProjection')
+
+    $baseline = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
+    $valid = Get-SideEffectAdmissionMatrixProjection $baseline.side_effect_admission_matrix
+    Assert-Equal -Expected $true -Actual $valid.valid -Message '生产 helper 必须接受精确矩阵授权'
+    Assert-Equal -Expected 83 -Actual $valid.expected_unassessed_sources -Message '生产 helper 必须锁定 83 个 source'
+    Assert-Equal -Expected $false -Actual $valid.implementation_authorized -Message '生产 helper 不得授权实现'
+
+    foreach ($case in @('source-count', 'authorized', 'terminal-trigger', 'extra-field')) {
+        $policy = Copy-AutonomousRefactorPolicy $baseline
+        switch ($case) {
+            'source-count' { $policy.side_effect_admission_matrix.expected_unassessed_sources = 82 }
+            'authorized' { $policy.side_effect_admission_matrix.implementation_authorized = $true }
+            'terminal-trigger' { $policy.side_effect_admission_matrix.terminal.reopen_on = @('hard-stop', 'completed') }
+            'extra-field' { $policy.side_effect_admission_matrix | Add-Member -NotePropertyName candidate -NotePropertyValue 'forbidden' }
+        }
+        $projection = Get-SideEffectAdmissionMatrixProjection $policy.side_effect_admission_matrix
+        Assert-Equal -Expected $false -Actual $projection.valid -Message "生产 helper 必须拒绝矩阵变异：$case"
+    }
+    foreach ($arrayCase in $sideEffectAdmissionStringArrayCases.GetEnumerator()) {
+        $policy = Copy-AutonomousRefactorPolicy $baseline
+        & $arrayCase.Value $policy.side_effect_admission_matrix
+        Assert-Equal -Expected $false `
+            -Actual (Get-SideEffectAdmissionMatrixProjection $policy.side_effect_admission_matrix).valid `
+            -Message "生产 helper 必须拒绝字符串数组：$($arrayCase.Key)"
+    }
+    foreach ($arrayCase in $sideEffectAdmissionInt64ArrayCases.GetEnumerator()) {
+        $policy = Copy-AutonomousRefactorPolicy $baseline
+        & $arrayCase.Value $policy.side_effect_admission_matrix
+        Assert-Equal -Expected $false `
+            -Actual (Get-SideEffectAdmissionMatrixProjection $policy.side_effect_admission_matrix).valid `
+            -Message "生产 helper 必须拒绝整数数组：$($arrayCase.Key)"
+    }
 }
 
 Invoke-ContractTest -Name '拒绝缺失的无人值守重构策略文件' -Body {
@@ -679,6 +901,12 @@ Invoke-ContractTest -Name '拒绝漂移的 Workflow 强身份绑定' -Body {
             -Result (Invoke-AutonomousPolicyCase -Name "workflow-identity-$($case.Name)" -Policy $policy) `
             -ExpectedCode 'WORKFLOW_IDENTITY'
     }
+
+    $arrayName = Copy-AutonomousRefactorPolicy (New-ValidAutonomousRefactorPolicy)
+    $arrayName.merge_gate.required_workflows[0].name = [object[]]@('CI')
+    Assert-AutonomousPolicyFailure `
+        -Result (Invoke-AutonomousPolicyCase -Name 'workflow-name-array' -Policy $arrayName) `
+        -ExpectedCode 'WORKFLOW_GATE'
 }
 
 Invoke-ContractTest -Name '拒绝漂移的 upstream-sync stale 例外' -Body {
@@ -827,6 +1055,11 @@ function New-SuccessfulAutonomousWorkflowEvidence {
     } else {
         '.github/workflows/performance-baseline.yml'
     }
+    $headBranch = if ($Event -ceq 'push') {
+        'main'
+    } else {
+        'codex/issue-111-autonomous-refactor-control-plane'
+    }
 
     [pscustomobject][ordered]@{
         name = $Name
@@ -836,6 +1069,7 @@ function New-SuccessfulAutonomousWorkflowEvidence {
         pull_request_number = $PullRequestNumber
         run_id = $RunId
         head_oid = $HeadOid
+        head_branch = $headBranch
         status = 'completed'
         conclusion = 'success'
         artifact_count = 0
@@ -913,6 +1147,7 @@ function New-PostMergeAutonomousStateSnapshot {
     $snapshot.merged_prs = @([pscustomobject][ordered]@{
         number = 112
         url = 'https://github.com/nonononull/inputcodex/pull/112'
+        base_ref = 'main'
         head_oid = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
         merge_commit_oid = 'cccccccccccccccccccccccccccccccccccccccc'
         author_login = 'nonononull'
@@ -973,11 +1208,21 @@ function Assert-AutonomousState {
 
 Invoke-ContractTest -Name '无人值守拒绝伪装或缺失类型的状态快照字段' -Body {
     foreach ($case in @(
+        [pscustomobject]@{
+            Name = 'schema-array'
+            Property = 'schema_version'
+            Value = [object[]]@('inputcodex.autonomous-refactor-state-snapshot.v1')
+        },
         [pscustomobject]@{ Name = 'github-bool'; Property = 'github_available'; Value = 'true' },
         [pscustomobject]@{ Name = 'paseo-bool'; Property = 'paseo_available'; Value = 'true' },
         [pscustomobject]@{ Name = 'worktree-bool'; Property = 'worktree_clean'; Value = 'true' },
         [pscustomobject]@{ Name = 'release-audit-string'; Property = 'release_audit'; Value = 1 },
         [pscustomobject]@{ Name = 'branch-string'; Property = 'branch'; Value = $null },
+        [pscustomobject]@{
+            Name = 'scope-hash-array'
+            Property = 'actual_scope_hash'
+            Value = [object[]]@('sha256:5d1f609ca2a5913e4e5df21f0fd04d6de2c6731cdd71d641812fbee80b5ad713')
+        },
         [pscustomobject]@{ Name = 'issues-array'; Property = 'active_issues'; Value = $null },
         [pscustomobject]@{ Name = 'prs-array'; Property = 'active_prs'; Value = $null }
     )) {
@@ -989,17 +1234,18 @@ Invoke-ContractTest -Name '无人值守拒绝伪装或缺失类型的状态快�
     }
 }
 
-Invoke-ContractTest -Name '无人值守空闲状态选择下一候选' -Body {
+Invoke-ContractTest -Name '无人值守无授权候选时 fail closed' -Body {
     $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
     $snapshot.branch = 'main'
     $result = Invoke-AutonomousStateCase -Name 'idle' -Snapshot $snapshot
     Assert-AutonomousState `
         -Result $result `
-        -ExpectedState 'idle-select-candidate' `
-        -ExpectedAction 'select-fixed-file-mutation-candidate'
-    Assert-Equal -Expected 'feature.foundation-platform.watcher-preference-mutation' `
-        -Actual $result.Json.selected_candidate `
-        -Message '空闲状态只能选择 tranche 中的 Watcher preference mutation'
+        -ExpectedState 'blocked-hard-stop' `
+        -ExpectedAction 'stop'
+    Assert-Contains -Collection @($result.Json.reason_codes) -Expected 'NO_AUTHORIZED_CANDIDATE' `
+        -Message '已消费 tranche 后必须以稳定原因码停止'
+    Assert-True -Condition ($null -eq $result.Json.selected_candidate) `
+        -Message '已交付 Watcher 绝不得再次成为候选'
     Assert-Equal -Expected 'https://github.com/nonononull/inputcodex/issues/140' `
         -Actual $result.Json.fixed_file_mutation_tranche.terminal.owner_issue_ref `
         -Message 'live 状态必须投影完成或硬停止后重开的 owner Issue'
@@ -1197,6 +1443,8 @@ Invoke-ContractTest -Name '无人值守 live 仅接受精确 typed marker' -Body
 
 Invoke-ContractTest -Name '无人值守 live Workflow Run 必须绑定强身份与关联 PR' -Body {
     Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyValue')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-ExactStringValue')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyProjection')
     Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-GitHubWorkflowPullRequestAssociation')
     Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-GitHubWorkflowRunIdentity')
 
@@ -1211,6 +1459,7 @@ Invoke-ContractTest -Name '无人值守 live Workflow Run 必须绑定强身份�
         path = '.github/workflows/ci.yml'
         event = 'pull_request'
         head_sha = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+        head_branch = 'codex/issue-112-test'
         pull_requests = @([pscustomobject][ordered]@{
             number = 112L
             head = [pscustomobject]@{ sha = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' }
@@ -1237,10 +1486,107 @@ Invoke-ContractTest -Name '无人值守 live Workflow Run 必须绑定强身份�
     Assert-Equal -Expected $false -Actual (Test-GitHubWorkflowRunIdentity `
         -Run $wrongPr -Expectation $expectation -HeadOid $run.head_sha -Event pull_request -PullRequestNumber 112) `
         -Message '错误关联 PR 必须被拒绝'
+
+    foreach ($case in @('head', 'base')) {
+        $arrayAssociation = $run | ConvertTo-Json -Depth 20 | ConvertFrom-Json -Depth 20
+        if ($case -ceq 'head') {
+            $arrayAssociation.pull_requests[0].head.sha =
+                [object[]]@($arrayAssociation.pull_requests[0].head.sha)
+        } else {
+            $arrayAssociation.pull_requests[0].base.ref =
+                [object[]]@($arrayAssociation.pull_requests[0].base.ref)
+        }
+        Assert-Equal -Expected $false -Actual (Test-GitHubWorkflowRunIdentity `
+            -Run $arrayAssociation -Expectation $expectation -HeadOid $run.head_sha `
+            -Event pull_request -PullRequestNumber 112) `
+            -Message "Workflow PR 关联数组必须被拒绝：$case"
+    }
+
+    foreach ($property in @('name', 'path', 'event', 'head_sha')) {
+        $arrayRun = $run | ConvertTo-Json -Depth 20 | ConvertFrom-Json -Depth 20
+        $arrayRun.($property) = [object[]]@($arrayRun.($property))
+        Assert-Equal -Expected $false -Actual (Test-GitHubWorkflowRunIdentity `
+            -Run $arrayRun -Expectation $expectation -HeadOid $run.head_sha `
+            -Event pull_request -PullRequestNumber 112) `
+            -Message "Workflow Run 标量数组必须被拒绝：$property"
+    }
+}
+
+Invoke-ContractTest -Name '无人值守 PR review 分页必须绑定完整身份' -Body {
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyValue')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-ExactStringValue')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-StringPatternValue')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyProjection')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-GitHubPullRequestReviewIdentity')
+
+    $identity = [pscustomobject][ordered]@{
+        isDraft = $false
+        mergeStateStatus = 'CLEAN'
+        headRefOid = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+        baseRefName = 'main'
+    }
+    Assert-Equal -Expected $true `
+        -Actual (Test-GitHubPullRequestReviewIdentity -Actual $identity -Expected $identity) `
+        -Message '同一分页 PR 身份必须通过'
+
+    foreach ($case in @(
+        [pscustomobject]@{ Property = 'isDraft'; Value = $true },
+        [pscustomobject]@{ Property = 'mergeStateStatus'; Value = 'BLOCKED' },
+        [pscustomobject]@{ Property = 'headRefOid'; Value = ('c' * 40) },
+        [pscustomobject]@{ Property = 'baseRefName'; Value = 'release' }
+    )) {
+        $mutant = $identity | ConvertTo-Json -Depth 10 | ConvertFrom-Json -Depth 10
+        $mutant.($case.Property) = $case.Value
+        Assert-Equal -Expected $false `
+            -Actual (Test-GitHubPullRequestReviewIdentity -Actual $mutant -Expected $identity) `
+            -Message "后续分页 PR 身份漂移必须拒绝：$($case.Property)"
+
+        $arrayMutant = $identity | ConvertTo-Json -Depth 10 | ConvertFrom-Json -Depth 10
+        $arrayMutant.($case.Property) = [object[]]@($arrayMutant.($case.Property))
+        Assert-Equal -Expected $false `
+            -Actual (Test-GitHubPullRequestReviewIdentity -Actual $arrayMutant -Expected $identity) `
+            -Message "后续分页 PR 身份数组必须拒绝：$($case.Property)"
+    }
+}
+
+Invoke-ContractTest -Name '无人值守 push Workflow 必须绑定标量 main 分支' -Body {
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyValue')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-ExactStringValue')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyProjection')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-GitHubWorkflowPullRequestAssociation')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-GitHubWorkflowRunIdentity')
+
+    $expectation = [pscustomobject][ordered]@{
+        name = 'CI'
+        workflow_id = 318067078L
+        path = '.github/workflows/ci.yml'
+    }
+    $run = [pscustomobject][ordered]@{
+        name = 'CI'
+        workflow_id = 318067078L
+        path = '.github/workflows/ci.yml'
+        event = 'push'
+        head_sha = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+        head_branch = 'main'
+        pull_requests = @()
+    }
+    Assert-Equal -Expected $true -Actual (Test-GitHubWorkflowRunIdentity `
+        -Run $run -Expectation $expectation -HeadOid $run.head_sha -Event push -PullRequestNumber 0) `
+        -Message 'main push Workflow 身份必须通过'
+
+    foreach ($value in @('release', [object[]]@('main'))) {
+        $mutant = $run | ConvertTo-Json -Depth 20 | ConvertFrom-Json -Depth 20
+        $mutant.head_branch = $value
+        Assert-Equal -Expected $false -Actual (Test-GitHubWorkflowRunIdentity `
+            -Run $mutant -Expectation $expectation -HeadOid $run.head_sha -Event push -PullRequestNumber 0) `
+            -Message 'push Workflow 不得接受非标量 main 分支'
+    }
 }
 
 Invoke-ContractTest -Name '无人值守 PR evidence 拒绝数组伪装 task kind' -Body {
     Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyValue')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-ExactStringValue')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-StringPatternValue')
     Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyProjection')
     Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-AutonomousPrBodyEvidence')
 
@@ -1262,6 +1608,22 @@ Invoke-ContractTest -Name '无人值守 PR evidence 拒绝数组伪装 task kind
         -Message 'PR evidence 的单元素数组不得伪装 task kind 字符串'
 
     $evidence.task_kind = 'upstream-sync'
+    foreach ($property in @(
+        'schema_version',
+        'policy_sha256',
+        'scope_hash',
+        'final_head',
+        'independent_review_status',
+        'independent_review_ref'
+    )) {
+        $mutant = $evidence | ConvertTo-Json -Depth 10 | ConvertFrom-Json -Depth 10
+        $mutant.($property) = [object[]]@($mutant.($property))
+        $mutantJson = ConvertTo-Json -InputObject $mutant -Depth 10 -Compress
+        $mutantBody = "<!-- inputcodex:autonomous-refactor-evidence:v1 $mutantJson -->"
+        Assert-Equal -Expected $false -Actual (Get-AutonomousPrBodyEvidence -Body $mutantBody).valid `
+            -Message "PR evidence 的单元素数组不得伪装标量：$property"
+    }
+
     $json = $evidence | ConvertTo-Json -Depth 10 -Compress
     $body = "<!-- inputcodex:autonomous-refactor-evidence:v1 $json -->"
     $valid = Get-AutonomousPrBodyEvidence -Body $body
@@ -1296,6 +1658,278 @@ Invoke-ContractTest -Name '无人值守完整 Final Head 证据进入精确合�
     $result = Invoke-AutonomousStateCase -Name 'merge-ready' -Snapshot (New-MergeReadyAutonomousStateSnapshot)
     Assert-AutonomousState -Result $result -ExpectedState 'merge-ready-exact-head' -ExpectedAction 'squash-merge-exact-head'
     Assert-Equal -Expected 0 -Actual @($result.Json.merge_gate_pending).Count -Message '精确合并就绪不得残留 pending gate'
+}
+
+Invoke-ContractTest -Name '无人值守 Final Head 合并门拒绝单元素数组伪装' -Body {
+    foreach ($case in @(
+        [pscustomobject]@{ Name = 'draft'; Code = 'PR_DRAFT' },
+        [pscustomobject]@{ Name = 'merge-state'; Code = 'PR_MERGE_STATE' },
+        [pscustomobject]@{ Name = 'review-thread'; Code = 'REVIEW_THREADS' },
+        [pscustomobject]@{
+            Name = 'repository-settings'
+            Code = 'AUTONOMOUS_STATE_INVALID_SNAPSHOT'
+            InvalidSnapshot = $true
+        },
+        [pscustomobject]@{ Name = 'evidence-scope'; Code = 'EVIDENCE_SCOPE' },
+        [pscustomobject]@{ Name = 'evidence-policy'; Code = 'EVIDENCE_POLICY' },
+        [pscustomobject]@{ Name = 'review-status'; Code = 'INDEPENDENT_REVIEW' },
+        [pscustomobject]@{ Name = 'workflow-name'; Code = 'WORKFLOW_CI' },
+        [pscustomobject]@{ Name = 'workflow-status'; Code = 'WORKFLOW_CI' },
+        [pscustomobject]@{ Name = 'workflow-artifact'; Code = 'WORKFLOW_CI' }
+    )) {
+        $snapshot = New-MergeReadyAutonomousStateSnapshot
+        switch ($case.Name) {
+            'draft' {
+                $snapshot.active_prs[0].is_draft =
+                    [object[]]@($snapshot.active_prs[0].is_draft)
+            }
+            'merge-state' {
+                $snapshot.active_prs[0].merge_state =
+                    [object[]]@($snapshot.active_prs[0].merge_state)
+            }
+            'review-thread' {
+                $snapshot.active_prs[0].review_thread_count =
+                    [object[]]@($snapshot.active_prs[0].review_thread_count)
+            }
+            'repository-settings' {
+                $snapshot.repository_settings.allow_auto_merge =
+                    [object[]]@($snapshot.repository_settings.allow_auto_merge)
+            }
+            'evidence-scope' {
+                $snapshot.active_prs[0].evidence.scope_count =
+                    [object[]]@($snapshot.active_prs[0].evidence.scope_count)
+            }
+            'evidence-policy' {
+                $snapshot.active_prs[0].evidence.policy_sha256 =
+                    [object[]]@($snapshot.active_prs[0].evidence.policy_sha256)
+            }
+            'review-status' {
+                $snapshot.active_prs[0].review_attestation.status =
+                    [object[]]@($snapshot.active_prs[0].review_attestation.status)
+            }
+            'workflow-name' {
+                $snapshot.active_prs[0].workflow_runs[0].name =
+                    [object[]]@($snapshot.active_prs[0].workflow_runs[0].name)
+            }
+            'workflow-status' {
+                $snapshot.active_prs[0].workflow_runs[0].status =
+                    [object[]]@($snapshot.active_prs[0].workflow_runs[0].status)
+            }
+            'workflow-artifact' {
+                $snapshot.active_prs[0].workflow_runs[0].artifact_count =
+                    [object[]]@($snapshot.active_prs[0].workflow_runs[0].artifact_count)
+            }
+        }
+        $result = Invoke-AutonomousStateCase -Name "merge-array-$($case.Name)" -Snapshot $snapshot
+        if ($case.PSObject.Properties['InvalidSnapshot'] -and $case.InvalidSnapshot) {
+            Assert-Equal -Expected 11 -Actual $result.ExitCode `
+                -Message "快照 schema 数组漂移必须拒绝：$($case.Name)，输出=$($result.Output)"
+            Assert-Equal -Expected $case.Code -Actual $result.Json.error_code `
+                -Message "快照 schema 数组漂移必须返回稳定错误码：$($case.Name)"
+            continue
+        }
+        Assert-AutonomousState -Result $result -ExpectedState 'active-pr-review-ci' -ExpectedAction 'resume-pr'
+        Assert-Contains -Collection @($result.Json.merge_gate_pending) -Expected $case.Code `
+            -Message "单元素数组不得通过 Final Head 合并门：$($case.Name)"
+    }
+
+    $rootArrayResult = Invoke-AutonomousStateCase `
+        -Name 'snapshot-root-single-element-array' `
+        -Snapshot ([object[]]@((New-MergeReadyAutonomousStateSnapshot)))
+    Assert-Equal -Expected 11 -Actual $rootArrayResult.ExitCode `
+        -Message "状态快照根数组必须拒绝，输出=$($rootArrayResult.Output)"
+    Assert-Equal -Expected 'AUTONOMOUS_STATE_INVALID_SNAPSHOT' `
+        -Actual $rootArrayResult.Json.error_code `
+        -Message '状态快照根数组必须返回稳定错误码'
+}
+
+Invoke-ContractTest -Name '无人值守 owner 与 base 身份数组不得进入合并就绪' -Body {
+    foreach ($case in @(
+        [pscustomobject]@{
+            Name = 'issue-author'
+            ExpectedState = 'blocked-hard-stop'
+            ExpectedAction = 'stop'
+            Reason = 'PR_WITHOUT_ISSUE'
+        },
+        [pscustomobject]@{
+            Name = 'pr-author'
+            ExpectedState = 'active-issue-planning'
+            ExpectedAction = 'resume-issue'
+            Reason = $null
+        },
+        [pscustomobject]@{
+            Name = 'pr-head-owner'
+            ExpectedState = 'active-issue-planning'
+            ExpectedAction = 'resume-issue'
+            Reason = $null
+        },
+        [pscustomobject]@{
+            Name = 'pr-base'
+            ExpectedState = 'blocked-hard-stop'
+            ExpectedAction = 'stop'
+            Reason = 'PR_BASE_INVALID'
+        },
+        [pscustomobject]@{
+            Name = 'issue-number'
+            ExpectedState = 'blocked-hard-stop'
+            ExpectedAction = 'stop'
+            Reason = 'ACTIVE_ISSUE_NUMBER_INVALID'
+        }
+    )) {
+        $snapshot = New-MergeReadyAutonomousStateSnapshot
+        switch ($case.Name) {
+            'issue-author' {
+                $snapshot.active_issues[0].author_login =
+                    [object[]]@($snapshot.active_issues[0].author_login)
+            }
+            'pr-author' {
+                $snapshot.active_prs[0].author_login =
+                    [object[]]@($snapshot.active_prs[0].author_login)
+            }
+            'pr-head-owner' {
+                $snapshot.active_prs[0].head_owner_login =
+                    [object[]]@($snapshot.active_prs[0].head_owner_login)
+            }
+            'pr-base' {
+                $snapshot.active_prs[0].base_ref =
+                    [object[]]@($snapshot.active_prs[0].base_ref)
+            }
+            'issue-number' {
+                $snapshot.active_issues[0].number =
+                    [object[]]@($snapshot.active_issues[0].number)
+            }
+        }
+
+        $result = Invoke-AutonomousStateCase -Name "identity-array-$($case.Name)" -Snapshot $snapshot
+        Assert-AutonomousState -Result $result -ExpectedState $case.ExpectedState `
+            -ExpectedAction $case.ExpectedAction
+        if ($null -ne $case.Reason) {
+            Assert-Contains -Collection @($result.Json.reason_codes) -Expected $case.Reason `
+                -Message "身份数组必须稳定 fail-closed：$($case.Name)"
+        }
+    }
+}
+
+Invoke-ContractTest -Name '无人值守 snapshot 必须绑定 GitHub number URL 与 planning ref' -Body {
+    foreach ($case in @(
+        [pscustomobject]@{ Name = 'issue-url'; Reason = 'ISSUE_IDENTITY_INVALID' },
+        [pscustomobject]@{ Name = 'pr-url'; Reason = 'PR_IDENTITY_INVALID' },
+        [pscustomobject]@{ Name = 'planning-ref'; Reason = 'PLANNING_EVIDENCE_REF_INVALID' },
+        [pscustomobject]@{ Name = 'merged-pr-url'; Reason = 'MERGED_PR_IDENTITY_INVALID'; PostMerge = $true }
+    )) {
+        $snapshot = if ($case.PSObject.Properties['PostMerge']) {
+            New-PostMergeAutonomousStateSnapshot
+        } else {
+            New-MergeReadyAutonomousStateSnapshot
+        }
+        switch ($case.Name) {
+            'issue-url' {
+                $snapshot.active_issues[0].number = 999L
+                $snapshot.branch = 'codex/issue-999-identity-probe'
+            }
+            'pr-url' {
+                $snapshot.active_prs[0].url = 'https://github.com/nonononull/inputcodex/pull/999'
+            }
+            'planning-ref' {
+                $snapshot.active_issues[0].planning_evidence.ref =
+                    'https://github.com/nonononull/inputcodex/issues/999#issuecomment-1'
+            }
+            'merged-pr-url' {
+                $snapshot.merged_prs[0].number = 999L
+            }
+        }
+
+        $result = Invoke-AutonomousStateCase -Name "snapshot-identity-$($case.Name)" -Snapshot $snapshot
+        Assert-AutonomousState -Result $result -ExpectedState 'blocked-hard-stop' -ExpectedAction 'stop'
+        Assert-Contains -Collection @($result.Json.reason_codes) -Expected $case.Reason `
+            -Message "snapshot GitHub 身份漂移必须 hard-stop：$($case.Name)"
+    }
+}
+
+Invoke-ContractTest -Name '无人值守合并后 Workflow 名称数组不得通过主干门' -Body {
+    $snapshot = New-PostMergeAutonomousStateSnapshot
+    $snapshot.merged_prs[0].workflow_runs[0].name =
+        [object[]]@($snapshot.merged_prs[0].workflow_runs[0].name)
+    $result = Invoke-AutonomousStateCase -Name 'post-merge-workflow-name-array' -Snapshot $snapshot
+
+    Assert-AutonomousState -Result $result -ExpectedState 'post-merge-verification' `
+        -ExpectedAction 'verify-main'
+    Assert-Contains -Collection @($result.Json.post_merge_gate_pending) `
+        -Expected 'POST_MERGE_WORKFLOW_CI' `
+        -Message '主干 Workflow 名称单元素数组不得通过 post-merge 门'
+}
+
+Invoke-ContractTest -Name '无人值守合并后必须绑定标量 main base' -Body {
+    foreach ($value in @('release', [object[]]@('main'))) {
+        $snapshot = New-PostMergeAutonomousStateSnapshot
+        $snapshot.merged_prs[0].base_ref = $value
+        $result = Invoke-AutonomousStateCase -Name 'post-merge-base-invalid' -Snapshot $snapshot
+
+        Assert-AutonomousState -Result $result -ExpectedState 'post-merge-verification' `
+            -ExpectedAction 'verify-main'
+        Assert-Contains -Collection @($result.Json.post_merge_gate_pending) `
+            -Expected 'POST_MERGE_PR_BASE' -Message 'merged PR 必须绑定标量 main base'
+    }
+}
+
+Invoke-ContractTest -Name '无人值守合并后必须复核 PR evidence review 状态' -Body {
+    $snapshot = New-PostMergeAutonomousStateSnapshot
+    $snapshot.merged_prs[0].evidence.independent_review_status = 'failed'
+    $result = Invoke-AutonomousStateCase -Name 'post-merge-review-evidence-failed' -Snapshot $snapshot
+
+    Assert-AutonomousState -Result $result -ExpectedState 'post-merge-verification' `
+        -ExpectedAction 'verify-main'
+    Assert-Contains -Collection @($result.Json.post_merge_gate_pending) `
+        -Expected 'POST_MERGE_REVIEW' -Message 'post-merge 不得只相信 review attestation'
+}
+
+Invoke-ContractTest -Name '无人值守 post-merge commit 与 tree 必须保留原始标量类型' -Body {
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyValue')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-ExactStringValue')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyProjection')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-StringPatternValue')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-GitHubPostMergeCommitProjection')
+
+    $headOid = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+    $mergeOid = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+    $head = [pscustomobject][ordered]@{
+        sha = $headOid
+        commit = [pscustomobject]@{
+            tree = [pscustomobject]@{ sha = 'cccccccccccccccccccccccccccccccccccccccc' }
+        }
+    }
+    $merge = [pscustomobject][ordered]@{
+        sha = $mergeOid
+        commit = [pscustomobject]@{
+            tree = [pscustomobject]@{ sha = 'cccccccccccccccccccccccccccccccccccccccc' }
+            verification = [pscustomobject]@{ verified = $true }
+        }
+        parents = @([pscustomobject]@{ sha = 'dddddddddddddddddddddddddddddddddddddddd' })
+    }
+    $projection = Get-GitHubPostMergeCommitProjection `
+        -HeadCommit $head -MergeCommit $merge -HeadOid $headOid -MergeCommitOid $mergeOid
+    Assert-Equal -Expected 1 -Actual $projection.parent_count -Message '合法 post-merge projection 必须保留单父'
+
+    foreach ($case in @('head-sha', 'merge-sha', 'head-tree', 'merge-tree')) {
+        $headMutant = $head | ConvertTo-Json -Depth 20 | ConvertFrom-Json -Depth 20
+        $mergeMutant = $merge | ConvertTo-Json -Depth 20 | ConvertFrom-Json -Depth 20
+        switch ($case) {
+            'head-sha' { $headMutant.sha = [object[]]@($headMutant.sha) }
+            'merge-sha' { $mergeMutant.sha = [object[]]@($mergeMutant.sha) }
+            'head-tree' { $headMutant.commit.tree.sha = [object[]]@($headMutant.commit.tree.sha) }
+            'merge-tree' { $mergeMutant.commit.tree.sha = [object[]]@($mergeMutant.commit.tree.sha) }
+        }
+        $threw = $false
+        try {
+            Get-GitHubPostMergeCommitProjection `
+                -HeadCommit $headMutant -MergeCommit $mergeMutant `
+                -HeadOid $headOid -MergeCommitOid $mergeOid | Out-Null
+        } catch {
+            $threw = $true
+        }
+        Assert-Equal -Expected $true -Actual $threw `
+            -Message "post-merge commit 标量数组必须拒绝：$case"
+    }
 }
 
 Invoke-ContractTest -Name '无人值守任一 Final Head 合并门失败均只恢复 PR' -Body {
@@ -1365,6 +1999,69 @@ Invoke-ContractTest -Name '无人值守识别合并后主干验证与收口就�
     $originPending = Invoke-AutonomousStateCase -Name 'post-merge-origin-pending' -Snapshot $originPendingSnapshot
     Assert-AutonomousState -Result $originPending -ExpectedState 'post-merge-verification' -ExpectedAction 'verify-main'
     Assert-Contains -Collection @($originPending.Json.post_merge_gate_pending) -Expected 'POST_MERGE_ORIGIN_MAIN' -Message '合并后 origin/main 未刷新不得关闭 Issue'
+}
+
+Invoke-ContractTest -Name '副作用准入任务硬停止进入 owner terminal transition' -Body {
+    $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
+    $snapshot.branch = 'codex/issue-153-gate-5-side-effect-admission-matrix-successor-v2'
+    $snapshot.active_writer_count = 2L
+    $snapshot.active_issues = @([pscustomobject]@{
+        number = 153L
+        url = 'https://github.com/nonononull/inputcodex/issues/153'
+        author_login = 'nonononull'
+    })
+    $result = Invoke-AutonomousStateCase -Name 'side-effect-admission-hard-stop' -Snapshot $snapshot
+
+    Assert-AutonomousState -Result $result -ExpectedState 'blocked-hard-stop' `
+        -ExpectedAction 'close-task-and-reopen-owner-decision-issue'
+    Assert-Contains -Collection @($result.Json.reason_codes) -Expected 'MULTIPLE_WRITERS' `
+        -Message '原始 hard-stop 原因必须保留'
+
+    $multipleIssues = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
+    $multipleIssues.branch = 'codex/issue-153-gate-5-side-effect-admission-matrix-successor-v2'
+    $multipleIssues.active_issues = @(
+        [pscustomobject]@{
+            number = 153L
+            url = 'https://github.com/nonononull/inputcodex/issues/153'
+            author_login = 'nonononull'
+        },
+        [pscustomobject]@{
+            number = 999L
+            url = 'https://github.com/nonononull/inputcodex/issues/999'
+            author_login = 'nonononull'
+        }
+    )
+    $multipleIssueResult = Invoke-AutonomousStateCase `
+        -Name 'side-effect-admission-multiple-issues-hard-stop' -Snapshot $multipleIssues
+
+    Assert-AutonomousState -Result $multipleIssueResult -ExpectedState 'blocked-hard-stop' `
+        -ExpectedAction 'close-task-and-reopen-owner-decision-issue'
+    Assert-Contains -Collection @($multipleIssueResult.Json.reason_codes) `
+        -Expected 'MULTIPLE_ACTIVE_ISSUES' -Message '多 Issue hard-stop 原因必须保留'
+}
+
+Invoke-ContractTest -Name '副作用准入任务合并后进入 owner terminal transition' -Body {
+    $scopeHash = 'sha256:3af2f96a103a3fefeba17ae18147156b3a6fd1df4054182b11455a460b7935dd'
+    $snapshot = New-PostMergeAutonomousStateSnapshot
+    $snapshot.branch = 'codex/issue-153-gate-5-side-effect-admission-matrix-successor-v2'
+    $snapshot.actual_scope_count = 20L
+    $snapshot.actual_scope_hash = $scopeHash
+    $snapshot.active_issues[0].number = 153L
+    $snapshot.active_issues[0].url = 'https://github.com/nonononull/inputcodex/issues/153'
+    $snapshot.active_issues[0].planning_evidence.scope_count = 20L
+    $snapshot.active_issues[0].planning_evidence.scope_hash = $scopeHash
+    $snapshot.active_issues[0].planning_evidence.ref = 'https://github.com/nonononull/inputcodex/issues/153#issuecomment-5181349910'
+    $snapshot.merged_prs[0].number = 154L
+    $snapshot.merged_prs[0].url = 'https://github.com/nonononull/inputcodex/pull/154'
+    $snapshot.merged_prs[0].evidence.tracking_issue_ref = 'https://github.com/nonononull/inputcodex/issues/153'
+    $snapshot.merged_prs[0].evidence.scope_count = 20L
+    $snapshot.merged_prs[0].evidence.scope_hash = $scopeHash
+    $result = Invoke-AutonomousStateCase -Name 'side-effect-admission-post-merge' -Snapshot $snapshot
+
+    Assert-AutonomousState -Result $result -ExpectedState 'post-merge-verification' `
+        -ExpectedAction 'close-task-and-reopen-owner-decision-issue'
+    Assert-Equal -Expected 0 -Actual @($result.Json.post_merge_gate_pending).Count `
+        -Message 'terminal transition 前必须完成全部主干门'
 }
 
 Invoke-ContractTest -Name '无人值守 PR 存在时脏工作树优先恢复执行' -Body {
@@ -1560,8 +2257,10 @@ Invoke-ContractTest -Name '无人值守安全忽略非 owner marker Issue 与 PR
     $result = Invoke-AutonomousStateCase -Name 'untrusted-marker' -Snapshot $snapshot
     Assert-AutonomousState `
         -Result $result `
-        -ExpectedState 'idle-select-candidate' `
-        -ExpectedAction 'select-fixed-file-mutation-candidate'
+        -ExpectedState 'blocked-hard-stop' `
+        -ExpectedAction 'stop'
+    Assert-Contains -Collection @($result.Json.reason_codes) -Expected 'NO_AUTHORIZED_CANDIDATE' `
+        -Message '忽略非 owner marker 后仍不得复活已消费候选'
     Assert-Equal -Expected 1 -Actual $result.Json.ignored_untrusted_issue_markers -Message '非 owner Issue marker 必须被计数并忽略'
     Assert-Equal -Expected 1 -Actual $result.Json.ignored_untrusted_pr_markers -Message '非 owner PR marker 必须被计数并忽略'
 }

@@ -276,6 +276,10 @@ impl SourceEntry {
         &self.evidence
     }
 
+    pub(crate) fn side_effects(&self) -> &[String] {
+        &self.side_effects
+    }
+
     pub(crate) fn disposition(&self) -> Option<&SourceDisposition> {
         self.disposition.as_ref()
     }

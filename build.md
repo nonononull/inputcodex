@@ -5174,6 +5174,147 @@ Write-Output "ISSUE151_LOCAL_VERIFY_OK scope_hash=$scopeHash paths=$($actual.Cou
 期望：两份 PowerShell AST 为零错误，CI 合同为 `85/85`，Release Audit 为 `current / errors=[]`，自治策略与
 仓库政策零违规；实际范围精确为九路径，产品、Parity、Cargo、Workflow、Release 与上游快照零变化。
 
+## Issue #153：Gate 5 副作用准入矩阵 successor 本地轻量验证
+
+本任务只验证自治控制面和 Parity 静态事实层；不编译桌面产品、不执行任何副作用，也不修改 Cargo、
+Workflow、Runner、Ruleset、Release、上游快照或 AGOS。Windows/macOS Hosted 证明继续由标准
+GitHub-hosted runners 完成。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+function Assert-NativeSuccess {
+  param([Parameter(Mandatory)][string]$Label)
+  if ($LASTEXITCODE -ne 0) { throw "$Label 失败：$LASTEXITCODE" }
+}
+
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+$branch = git branch --show-current
+Assert-NativeSuccess 'Issue #153 分支读取'
+if ($branch -cne 'codex/issue-153-gate-5-side-effect-admission-matrix-successor-v2') {
+  throw "Issue #153 分支错误：$branch"
+}
+
+foreach ($scriptPath in @(
+  'scripts/automation/Get-AutonomousRefactorState.ps1',
+  'scripts/ci/Test-CiScripts.ps1',
+  'scripts/ci/Verify-AutonomousRefactorPolicy.ps1',
+  'scripts/ci/Verify-ReleaseAuditGate.ps1'
+)) {
+  $tokens = $null
+  $errors = $null
+  [void][Management.Automation.Language.Parser]::ParseFile(
+    (Resolve-Path $scriptPath), [ref]$tokens, [ref]$errors
+  )
+  if (@($errors).Count -ne 0) { throw "Issue #153 PowerShell AST 失败：$scriptPath" }
+}
+
+cargo test -p inputcodex-parity --all-targets --offline
+Assert-NativeSuccess 'Issue #153 Parity 测试'
+
+cargo clippy -p inputcodex-parity --all-targets --offline -- -D warnings
+Assert-NativeSuccess 'Issue #153 Parity Clippy'
+
+cargo fmt --all -- --check
+Assert-NativeSuccess 'Issue #153 rustfmt'
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+Assert-NativeSuccess 'Issue #153 CI 合同'
+
+$policyOutput = @(
+  pwsh -NoProfile -File scripts/ci/Verify-AutonomousRefactorPolicy.ps1 `
+    -RepositoryRoot . -PolicyPath .github/autonomous-refactor-policy.json
+)
+Assert-NativeSuccess 'Issue #153 自治策略'
+$policy = ($policyOutput -join [Environment]::NewLine) | ConvertFrom-Json -Depth 100
+if ($policy.ok -ne $true -or
+    $policy.fixed_file_mutation_tranche.lifecycle_state -cne 'consumed' -or
+    $policy.fixed_file_mutation_tranche.consumption_main -cne '42c73f401e7a758cdc5eca374613625dad46340b' -or
+    $policy.side_effect_admission_matrix.decision_id -cne 'gate5-strict-json-object-recovery-v1/batch-2' -or
+    $policy.side_effect_admission_matrix.tracking_issue_ref -cne 'https://github.com/nonononull/inputcodex/issues/153' -or
+    $policy.side_effect_admission_matrix.baseline_commit -cne 'f3e7d6f873f59399e71b602e1a9fbdee71760d64' -or
+    $policy.side_effect_admission_matrix.expected_unassessed_sources -ne 83 -or
+    $policy.side_effect_admission_matrix.product_deliveries_max -ne 0 -or
+    $policy.side_effect_admission_matrix.implementation_authorized -ne $false) {
+  throw 'Issue #153 自治策略投影漂移'
+}
+
+$liveOutput = @(
+  pwsh -NoProfile -File scripts/automation/Get-AutonomousRefactorState.ps1 `
+    -RepositoryRoot . -PolicyPath .github/autonomous-refactor-policy.json -ReportOnly
+)
+Assert-NativeSuccess 'Issue #153 live 状态'
+$live = ($liveOutput -join [Environment]::NewLine) | ConvertFrom-Json -Depth 100
+if ($live.ok -ne $true -or $live.active_issue.number -ne 149 -or
+    $null -ne $live.selected_candidate -or
+    $live.fixed_file_mutation_tranche.lifecycle_state -cne 'consumed' -or
+    $live.side_effect_admission_matrix.valid -ne $true) {
+  throw 'Issue #153 live 状态漂移'
+}
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #153 仓库政策'
+
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #153 Release Audit'
+
+$expected = [string[]]@(
+  '.github/autonomous-refactor-policy.json',
+  'CONTEXT.md',
+  'build.md',
+  'crates/inputcodex-parity/src/admission.rs',
+  'crates/inputcodex-parity/src/catalog.rs',
+  'crates/inputcodex-parity/src/lib.rs',
+  'crates/inputcodex-parity/src/validation.rs',
+  'crates/inputcodex-parity/tests/admission_matrix.rs',
+  'crates/inputcodex-parity/tests/catalog_repository.rs',
+  'docs/plans/2026-08-04-issue-153-gate-5-side-effect-admission-matrix-successor-v2.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-08-04-issue-153-gate-5-side-effect-admission-matrix-successor-v2.md',
+  'docs/reports/issue-153-gate-5-side-effect-admission-matrix-successor-v2.md',
+  'docs/workflows/2026-08-04-issue-153-gate-5-side-effect-admission-matrix-successor-v2-runtime.md',
+  'err.md',
+  'parity/README.md',
+  'parity/admission/side-effect-admission-matrix.yml',
+  'scripts/automation/Get-AutonomousRefactorState.ps1',
+  'scripts/ci/Test-CiScripts.ps1',
+  'scripts/ci/Verify-AutonomousRefactorPolicy.ps1'
+)
+$scope = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+foreach ($path in $expected) {
+  if (-not $scope.Add($path)) { throw "Issue #153 重复路径：$path" }
+}
+$payload = [string]::Join("`n", [string[]]$scope) + "`n"
+$scopeHash = 'sha256:' + [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData([Text.UTF8Encoding]::new($false).GetBytes($payload))
+).ToLowerInvariant()
+if ($scope.Count -ne 20 -or
+    $scopeHash -cne 'sha256:3af2f96a103a3fefeba17ae18147156b3a6fd1df4054182b11455a460b7935dd') {
+  throw "Issue #153 范围漂移：count=$($scope.Count) hash=$scopeHash"
+}
+
+$actual = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+@(
+  git -c core.quotePath=false diff --no-renames --name-only origin/main...HEAD
+  git -c core.quotePath=false diff --cached --no-renames --name-only
+  git -c core.quotePath=false diff --no-renames --name-only
+  git -c core.quotePath=false ls-files --others --exclude-standard
+) | Where-Object { $_ } | ForEach-Object { [void]$actual.Add($_) }
+if (-not [Linq.Enumerable]::SequenceEqual([string[]]$scope, [string[]]$actual, [StringComparer]::Ordinal)) {
+  throw "Issue #153 实际路径漂移：$([string]::Join(', ', [string[]]$actual))"
+}
+
+git diff --check origin/main
+Assert-NativeSuccess 'Issue #153 Git 空白检查'
+
+Write-Output "ISSUE153_LOCAL_VERIFY_OK scope_hash=$scopeHash paths=$($actual.Count) policy_hash=$($policy.policy_sha256)"
+```
+
+期望：四份 PowerShell AST 零错误，治理合同 `99/99`、Parity admission `6/6`、目录 `33/33`、
+all-targets、Clippy、rustfmt、仓库政策和 Release Audit 全部通过；范围精确为二十路径，矩阵为
+`83 = write 70 + process 5 + network 8`，产品计数零变化。
+
 ## 外部 AGOS 使用边界
 
 Issue `#17` 曾以 report-only 运行 AGOS 默认入口，结果为 `needs-input/unregistered`；已按项目规则记录并绕过。AGOS 不属于环境要求或合并门禁；不得在本规划 PR 中修改、修复或优化其 Registry、脚本、规则、Workflow 或 Vault。
