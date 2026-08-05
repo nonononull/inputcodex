@@ -9,8 +9,8 @@ GitHub Issue、PR 与 Actions。
 
 Gate 3 七成员 Rust Workspace、Gate 4 上游审计/功能目录/性能基线，以及 Gate 5 的平台路径、
 应用概览、版本与启动意图、运行时环境冲突、Relay 环境、设置、诊断日志、Relay 状态、上下文
-条目、本地会话目录、受控会话 Markdown 和 Watcher 偏好状态观察已经建立；Issue `#143` 正在实施
-固定 Watcher 偏好标记 mutation。
+条目、本地会话目录、受控会话 Markdown、Watcher 偏好状态观察和固定标记 mutation 已经建立；
+Issue `#165` 正在从 fresh main 建立 83-source 副作用准入矩阵治理合同，不迁移产品功能。
 该说明只用于选择正确命令，不能替代任务计划和 GitHub 新鲜证据。
 
 ## 文档变更轻量验证
@@ -26,6 +26,115 @@ git diff --check
 ```
 
 路径范围、Markdown 链接和任务特有内容守卫由对应 Session Plan 与 Runtime Workflow 定义。
+
+## Issue #165 副作用准入矩阵 successor v4 本地验证
+
+本任务从固定 `main@5a7465252b56f7e90673e72d3e02881ac9238141` 独立重建治理矩阵，禁止复用
+`#163/#164` 分支。完整 PowerShell 合同包含真实 verifier 变异，单次约需 4 分钟，调用 timeout
+不得低于 300 秒。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+function Assert-NativeSuccess {
+  param([Parameter(Mandatory)][string]$Label)
+  if ($LASTEXITCODE -ne 0) { throw "$Label 失败：$LASTEXITCODE" }
+}
+
+$baseline = '5a7465252b56f7e90673e72d3e02881ac9238141'
+$branch = (git branch --show-current).Trim()
+Assert-NativeSuccess 'Issue #165 分支读取'
+if ($branch -cne 'codex/issue-165-gate-5-side-effect-admission-matrix-successor-v4') {
+  throw "Issue #165 分支错误：$branch"
+}
+if ((git merge-base HEAD origin/main).Trim() -cne $baseline) {
+  throw 'Issue #165 不再绑定 fresh-main 基线'
+}
+
+foreach ($scriptPath in @(
+  'scripts/automation/Get-AutonomousRefactorState.ps1',
+  'scripts/ci/Test-CiScripts.ps1',
+  'scripts/ci/Verify-AutonomousRefactorPolicy.ps1'
+)) {
+  $tokens = $null
+  $errors = $null
+  [void][Management.Automation.Language.Parser]::ParseFile(
+    (Resolve-Path -LiteralPath $scriptPath),
+    [ref]$tokens,
+    [ref]$errors
+  )
+  if (@($errors).Count -ne 0) { throw "$scriptPath AST 解析失败" }
+}
+
+cargo fmt --all -- --check
+Assert-NativeSuccess 'Issue #165 rustfmt'
+cargo test -p inputcodex-parity --all-targets --offline
+Assert-NativeSuccess 'Issue #165 parity tests'
+cargo clippy --locked --offline -p inputcodex-parity --all-targets -- -D warnings
+Assert-NativeSuccess 'Issue #165 parity clippy'
+
+pwsh -NoLogo -NoProfile -File scripts/ci/Test-CiScripts.ps1
+Assert-NativeSuccess 'Issue #165 CI 合同'
+pwsh -NoLogo -NoProfile -File scripts/ci/Verify-AutonomousRefactorPolicy.ps1 `
+  -RepositoryRoot . -PolicyPath .github/autonomous-refactor-policy.json
+Assert-NativeSuccess 'Issue #165 自治策略'
+pwsh -NoLogo -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #165 Release Audit'
+pwsh -NoLogo -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #165 仓库政策'
+
+$approved = [string[]]@(
+  '.github/autonomous-refactor-policy.json',
+  'CONTEXT.md',
+  'build.md',
+  'crates/inputcodex-parity/src/admission.rs',
+  'crates/inputcodex-parity/src/catalog.rs',
+  'crates/inputcodex-parity/src/lib.rs',
+  'crates/inputcodex-parity/src/validation.rs',
+  'crates/inputcodex-parity/tests/admission_matrix.rs',
+  'crates/inputcodex-parity/tests/catalog_repository.rs',
+  'docs/plans/2026-08-05-issue-165-gate-5-side-effect-admission-matrix-successor-v4.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-08-05-issue-165-gate-5-side-effect-admission-matrix-successor-v4.md',
+  'docs/reports/issue-165-gate-5-side-effect-admission-matrix-successor-v4.md',
+  'docs/workflows/2026-08-05-issue-165-gate-5-side-effect-admission-matrix-successor-v4-runtime.md',
+  'err.md',
+  'parity/README.md',
+  'parity/admission/side-effect-admission-matrix.yml',
+  'scripts/automation/Get-AutonomousRefactorState.ps1',
+  'scripts/ci/Test-CiScripts.ps1',
+  'scripts/ci/Verify-AutonomousRefactorPolicy.ps1'
+)
+[Array]::Sort($approved, [StringComparer]::Ordinal)
+$actualPaths = [string[]]@(
+  git diff --name-only origin/main...HEAD
+  git diff --cached --name-only
+  git diff --name-only
+  git ls-files --others --exclude-standard
+) | Where-Object { $_ }
+$actualSet = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+foreach ($path in $actualPaths) { [void]$actualSet.Add($path) }
+$actual = [string[]]@($actualSet)
+[Array]::Sort($actual, [StringComparer]::Ordinal)
+if ([string]::Join("`n", $actual) -cne [string]::Join("`n", $approved)) {
+  throw "Issue #165 路径范围漂移：$($actual -join ', ')"
+}
+$payload = [Text.UTF8Encoding]::new($false).GetBytes(($approved -join "`n") + "`n")
+$scopeHash = [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData($payload)
+).ToLowerInvariant()
+if ($scopeHash -cne '26a9f85b8a24ccde06dfe407c84c2fe05b3b8c28d2ad0b80cee071f697954cb4') {
+  throw "Issue #165 scope hash 漂移：$scopeHash"
+}
+
+git diff --check origin/main --
+Assert-NativeSuccess 'Issue #165 空白检查'
+Write-Output "ISSUE_165_LOCAL_VERIFY_OK scope_hash=sha256:$scopeHash"
+```
+
+预期治理合同为 `CI_CONTRACT_GREEN passed=99`；矩阵统计固定为 83 个 source，其中 write `70`、
+process `5`、network `8`，全部 `blocked` 且 `implementation_authorized=false`。Final Head 还必须通过独立只读复审、
+Hosted CI/Performance 与 Artifact 零门，才能执行精确 Squash。
 
 ## Issue #161 嵌套 snapshot 对象边界本地验证
 

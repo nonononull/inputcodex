@@ -162,6 +162,17 @@ Watcher 偏好变更完成后必须交付的最小事实，包含请求标识、
 上游 `codex-plus-data` 从受控 SQLite 定位 rollout，再解析 `token_count` 事件形成逐轮用量历史的另一项能力；它不属于 `core-module:codex_local_storage`，必须独立评估会话标识、路径、资源上限和最小披露后才能迁移。
 避免用语：已实现 Token 历史、Local Storage Token 读取、完整用量导出
 
+**副作用准入矩阵**：
+对当前 `unassessed` source 的治理投影；按 `write -> process -> network` 优先级记录能力桶、typed owner
+状态、owner kind 与稳定 blocker ref。矩阵只证明来源仍被阻断，不授予实现权限，也不改变 feature/source
+disposition 或产品完成度。
+避免用语：实现队列、已批准候选、产品路线图
+
+**已消费有限 tranche**：
+已完成其全部批准批次且不得再次选择候选的自治授权记录。`consumed` 只终止该 tranche 的候选投影，
+不会把剩余 Gate 5 来源标记为完成，也不会自动扩大到新的文件、网络、进程或凭据副作用。
+避免用语：持续授权、自动续批、Gate 5 已完成
+
 ## 版本与发布
 
 **上游基础版本**：

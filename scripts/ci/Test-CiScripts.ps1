@@ -276,11 +276,14 @@ function New-ValidAutonomousRefactorPolicy {
             'candidate-exhausted'
         )
         fixed_file_mutation_tranche = [pscustomobject][ordered]@{
-            schema_version = 'inputcodex.fixed-file-mutation-tranche.v1'
+            schema_version = 'inputcodex.fixed-file-mutation-tranche.v2'
             decision_id = 'gate5-fixed-file-mutation-tranche-v1'
             owner_decision_ref = 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159072214'
             retry_resume_ref = 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159471091'
             standing_authorization_ref = 'https://github.com/nonononull/inputcodex/issues/111'
+            lifecycle_state = 'consumed'
+            consumption_ref = 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5166320854'
+            consumption_main = '42c73f401e7a758cdc5eca374613625dad46340b'
             repository_batches_max = 2
             product_deliveries_max = 1
             candidate_features = @('feature.foundation-platform.watcher-preference-mutation')
@@ -292,6 +295,27 @@ function New-ValidAutonomousRefactorPolicy {
                 owner_issue_ref = 'https://github.com/nonononull/inputcodex/issues/140'
                 reopen_on = @('completed', 'hard-stop')
                 action = 'reopen-owner-decision-issue'
+                state = 'blocked-candidate-exhausted'
+                next_action = 'await-owner-decision'
+            }
+        }
+        side_effect_admission_matrix = [pscustomobject][ordered]@{
+            schema_version = 'inputcodex.side-effect-admission-matrix-policy.v1'
+            decision_id = 'gate5-side-effect-admission-matrix-successor-v4'
+            owner_decision_ref = 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5193014446'
+            tracking_issue_ref = 'https://github.com/nonononull/inputcodex/issues/165'
+            standing_authorization_ref = 'https://github.com/nonononull/inputcodex/issues/111'
+            baseline_commit = '5a7465252b56f7e90673e72d3e02881ac9238141'
+            repository_prs_max = 1
+            product_deliveries_max = 0
+            expected_unassessed_sources = 83
+            product_count_delta = 0
+            implementation_authorized = $false
+            matrix_path = 'parity/admission/side-effect-admission-matrix.yml'
+            terminal = [pscustomobject][ordered]@{
+                owner_issue_ref = 'https://github.com/nonononull/inputcodex/issues/140'
+                reopen_on = @('completed', 'hard-stop')
+                action = 'close-task-and-reopen-owner-decision-issue'
                 state = 'blocked-candidate-exhausted'
                 next_action = 'await-owner-decision'
             }
@@ -362,9 +386,11 @@ Invoke-ContractTest -Name '合法无人值守重构策略通过并输出规范�
     Assert-Equal -Expected ([string]::Join([char]10, @('pull_request', 'push'))) `
         -Actual ([string]::Join([char]10, @($result.Json.required_workflows[0].events))) `
         -Message '策略输出必须投影 CI 的 PR/push 事件集合'
-    Assert-Equal -Expected 'inputcodex.fixed-file-mutation-tranche.v1' `
+    Assert-Equal -Expected 'inputcodex.fixed-file-mutation-tranche.v2' `
         -Actual $result.Json.fixed_file_mutation_tranche.schema_version `
         -Message '策略输出必须投影版本化 fixed-file mutation tranche'
+    Assert-Equal -Expected 'consumed' -Actual $result.Json.fixed_file_mutation_tranche.lifecycle_state `
+        -Message 'fixed-file mutation tranche 必须投影已消费状态'
     Assert-Equal -Expected 'feature.foundation-platform.watcher-preference-mutation' `
         -Actual $result.Json.fixed_file_mutation_tranche.candidate_features[0] `
         -Message 'tranche 只能投影 Watcher preference mutation'
@@ -372,6 +398,11 @@ Invoke-ContractTest -Name '合法无人值守重构策略通过并输出规范�
         -Message 'tranche 必须投影两批上限'
     Assert-Equal -Expected 1 -Actual $result.Json.fixed_file_mutation_tranche.product_deliveries_max `
         -Message 'tranche 必须投影单产品交付上限'
+    Assert-Equal -Expected 'gate5-side-effect-admission-matrix-successor-v4' `
+        -Actual $result.Json.side_effect_admission_matrix.decision_id `
+        -Message '策略输出必须投影 #165 successor v4'
+    Assert-Equal -Expected $false -Actual $result.Json.side_effect_admission_matrix.implementation_authorized `
+        -Message '副作用准入矩阵不得授权产品实现'
 }
 
 $fixedFileMutationStringArrayCases = [ordered]@{
@@ -394,6 +425,18 @@ $fixedFileMutationStringArrayCases = [ordered]@{
     'standing_authorization_ref' = {
         param($tranche)
         $tranche.standing_authorization_ref = [object[]]@($tranche.standing_authorization_ref)
+    }
+    'lifecycle_state' = {
+        param($tranche)
+        $tranche.lifecycle_state = [object[]]@($tranche.lifecycle_state)
+    }
+    'consumption_ref' = {
+        param($tranche)
+        $tranche.consumption_ref = [object[]]@($tranche.consumption_ref)
+    }
+    'consumption_main' = {
+        param($tranche)
+        $tranche.consumption_main = [object[]]@($tranche.consumption_main)
     }
     'terminal.owner_issue_ref' = {
         param($tranche)
@@ -432,6 +475,27 @@ $fixedFileMutationInt64ArrayCases = [ordered]@{
     }
 }
 
+$sideEffectAdmissionStringArrayCases = [ordered]@{
+    'schema_version' = { param($matrix) $matrix.schema_version = [object[]]@($matrix.schema_version) }
+    'decision_id' = { param($matrix) $matrix.decision_id = [object[]]@($matrix.decision_id) }
+    'owner_decision_ref' = { param($matrix) $matrix.owner_decision_ref = [object[]]@($matrix.owner_decision_ref) }
+    'tracking_issue_ref' = { param($matrix) $matrix.tracking_issue_ref = [object[]]@($matrix.tracking_issue_ref) }
+    'standing_authorization_ref' = { param($matrix) $matrix.standing_authorization_ref = [object[]]@($matrix.standing_authorization_ref) }
+    'baseline_commit' = { param($matrix) $matrix.baseline_commit = [object[]]@($matrix.baseline_commit) }
+    'matrix_path' = { param($matrix) $matrix.matrix_path = [object[]]@($matrix.matrix_path) }
+    'terminal.owner_issue_ref' = { param($matrix) $matrix.terminal.owner_issue_ref = [object[]]@($matrix.terminal.owner_issue_ref) }
+    'terminal.action' = { param($matrix) $matrix.terminal.action = [object[]]@($matrix.terminal.action) }
+    'terminal.state' = { param($matrix) $matrix.terminal.state = [object[]]@($matrix.terminal.state) }
+    'terminal.next_action' = { param($matrix) $matrix.terminal.next_action = [object[]]@($matrix.terminal.next_action) }
+}
+
+$sideEffectAdmissionInt64ArrayCases = [ordered]@{
+    'repository_prs_max' = { param($matrix) $matrix.repository_prs_max = [object[]]@($matrix.repository_prs_max) }
+    'product_deliveries_max' = { param($matrix) $matrix.product_deliveries_max = [object[]]@($matrix.product_deliveries_max) }
+    'expected_unassessed_sources' = { param($matrix) $matrix.expected_unassessed_sources = [object[]]@($matrix.expected_unassessed_sources) }
+    'product_count_delta' = { param($matrix) $matrix.product_count_delta = [object[]]@($matrix.product_count_delta) }
+}
+
 Invoke-ContractTest -Name '固定文件 mutation tranche 生产策略真实变异必须 fail closed' -Body {
     $productionPolicy = [System.IO.File]::ReadAllText(
         $autonomousPolicyPath,
@@ -455,7 +519,7 @@ Invoke-ContractTest -Name '固定文件 mutation tranche 生产策略真实变�
     )) {
         $policy = Copy-AutonomousRefactorPolicy $productionPolicy
         switch ($case) {
-            'schema' { $policy.fixed_file_mutation_tranche.schema_version = 'inputcodex.fixed-file-mutation-tranche.v2' }
+            'schema' { $policy.fixed_file_mutation_tranche.schema_version = 'inputcodex.fixed-file-mutation-tranche.v1' }
             'decision' { $policy.fixed_file_mutation_tranche.decision_id = 'other-decision' }
             'owner' { $policy.fixed_file_mutation_tranche.owner_decision_ref = 'https://github.com/nonononull/inputcodex/issues/140' }
             'batch-cap' { $policy.fixed_file_mutation_tranche.repository_batches_max = 3 }
@@ -574,6 +638,117 @@ Invoke-ContractTest -Name '固定文件 mutation tranche 生产 helper 真实变
     }
     Assert-Equal -Expected 0 -Actual $unexpectedlyValidInt64ArrayFields.Count `
         -Message "生产 helper 不得把单元素数组展开为 Int64；漏拒字段=$([string]::Join(',', $unexpectedlyValidInt64ArrayFields))"
+}
+
+Invoke-ContractTest -Name '副作用准入矩阵生产策略类型与形状变异必须 fail closed' -Body {
+    $productionPolicy = [System.IO.File]::ReadAllText(
+        $autonomousPolicyPath,
+        [Text.UTF8Encoding]::new($false)
+    ) | ConvertFrom-Json -Depth 100
+
+    foreach ($arrayCase in $sideEffectAdmissionStringArrayCases.GetEnumerator()) {
+        $policy = Copy-AutonomousRefactorPolicy $productionPolicy
+        & $arrayCase.Value $policy.side_effect_admission_matrix
+        Assert-AutonomousPolicyFailure `
+            -Result (Invoke-AutonomousPolicyCase -Name "side-effect-string-array-$($arrayCase.Key)" -Policy $policy) `
+            -ExpectedCode 'SIDE_EFFECT_ADMISSION_MATRIX_POLICY'
+    }
+    foreach ($arrayCase in $sideEffectAdmissionInt64ArrayCases.GetEnumerator()) {
+        $policy = Copy-AutonomousRefactorPolicy $productionPolicy
+        & $arrayCase.Value $policy.side_effect_admission_matrix
+        Assert-AutonomousPolicyFailure `
+            -Result (Invoke-AutonomousPolicyCase -Name "side-effect-int64-array-$($arrayCase.Key)" -Policy $policy) `
+            -ExpectedCode 'SIDE_EFFECT_ADMISSION_MATRIX_POLICY'
+    }
+
+    $booleanArray = Copy-AutonomousRefactorPolicy $productionPolicy
+    $booleanArray.side_effect_admission_matrix.implementation_authorized = [object[]]@($false)
+    Assert-AutonomousPolicyFailure `
+        -Result (Invoke-AutonomousPolicyCase -Name 'side-effect-boolean-array' -Policy $booleanArray) `
+        -ExpectedCode 'SIDE_EFFECT_ADMISSION_MATRIX_POLICY'
+
+    $outerArray = Copy-AutonomousRefactorPolicy $productionPolicy
+    $outerArray.side_effect_admission_matrix = [object[]]@($outerArray.side_effect_admission_matrix)
+    Assert-AutonomousPolicyFailure `
+        -Result (Invoke-AutonomousPolicyCase -Name 'side-effect-object-array' -Policy $outerArray) `
+        -ExpectedCode 'SIDE_EFFECT_ADMISSION_MATRIX_POLICY'
+
+    $terminalArray = Copy-AutonomousRefactorPolicy $productionPolicy
+    $terminalArray.side_effect_admission_matrix.terminal = [object[]]@($terminalArray.side_effect_admission_matrix.terminal)
+    Assert-AutonomousPolicyFailure `
+        -Result (Invoke-AutonomousPolicyCase -Name 'side-effect-terminal-object-array' -Policy $terminalArray) `
+        -ExpectedCode 'SIDE_EFFECT_ADMISSION_MATRIX_POLICY'
+
+    $extraOuter = Copy-AutonomousRefactorPolicy $productionPolicy
+    $extraOuter.side_effect_admission_matrix | Add-Member -NotePropertyName fallback -NotePropertyValue $true
+    Assert-AutonomousPolicyFailure `
+        -Result (Invoke-AutonomousPolicyCase -Name 'side-effect-extra-outer' -Policy $extraOuter) `
+        -ExpectedCode 'SIDE_EFFECT_ADMISSION_MATRIX_POLICY'
+
+    $extraTerminal = Copy-AutonomousRefactorPolicy $productionPolicy
+    $extraTerminal.side_effect_admission_matrix.terminal | Add-Member -NotePropertyName fallback -NotePropertyValue $true
+    Assert-AutonomousPolicyFailure `
+        -Result (Invoke-AutonomousPolicyCase -Name 'side-effect-extra-terminal' -Policy $extraTerminal) `
+        -ExpectedCode 'SIDE_EFFECT_ADMISSION_MATRIX_POLICY'
+
+    $orderDrift = Copy-AutonomousRefactorPolicy $productionPolicy
+    $orderDrift.side_effect_admission_matrix.terminal.reopen_on = @('hard-stop', 'completed')
+    Assert-AutonomousPolicyFailure `
+        -Result (Invoke-AutonomousPolicyCase -Name 'side-effect-terminal-order' -Policy $orderDrift) `
+        -ExpectedCode 'SIDE_EFFECT_ADMISSION_MATRIX_POLICY'
+
+    $authorizationDrift = Copy-AutonomousRefactorPolicy $productionPolicy
+    $authorizationDrift.side_effect_admission_matrix.implementation_authorized = $true
+    Assert-AutonomousPolicyFailure `
+        -Result (Invoke-AutonomousPolicyCase -Name 'side-effect-authorization' -Policy $authorizationDrift) `
+        -ExpectedCode 'SIDE_EFFECT_ADMISSION_MATRIX_POLICY'
+}
+
+Invoke-ContractTest -Name '副作用准入矩阵生产 helper 类型与形状变异必须 fail closed' -Body {
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyValue')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyProjection')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-ExactStringSet')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-SideEffectAdmissionMatrixProjection')
+
+    $productionPolicy = [System.IO.File]::ReadAllText(
+        $autonomousPolicyPath,
+        [Text.UTF8Encoding]::new($false)
+    ) | ConvertFrom-Json -Depth 100
+    $valid = Get-SideEffectAdmissionMatrixProjection $productionPolicy.side_effect_admission_matrix
+    Assert-Equal -Expected $true -Actual $valid.valid -Message '生产 side-effect policy 必须通过生产 helper'
+    Assert-Equal -Expected 83 -Actual $valid.expected_unassessed_sources -Message '生产 helper 必须投影 83 个 source'
+    Assert-Equal -Expected $false -Actual $valid.implementation_authorized -Message '生产 helper 不得授权实现'
+
+    foreach ($arrayCase in $sideEffectAdmissionStringArrayCases.GetEnumerator()) {
+        $policy = Copy-AutonomousRefactorPolicy $productionPolicy
+        & $arrayCase.Value $policy.side_effect_admission_matrix
+        $projection = Get-SideEffectAdmissionMatrixProjection $policy.side_effect_admission_matrix
+        Assert-Equal -Expected $false -Actual $projection.valid `
+            -Message "生产 helper 不得接受字符串数组：$($arrayCase.Key)"
+    }
+    foreach ($arrayCase in $sideEffectAdmissionInt64ArrayCases.GetEnumerator()) {
+        $policy = Copy-AutonomousRefactorPolicy $productionPolicy
+        & $arrayCase.Value $policy.side_effect_admission_matrix
+        $projection = Get-SideEffectAdmissionMatrixProjection $policy.side_effect_admission_matrix
+        Assert-Equal -Expected $false -Actual $projection.valid `
+            -Message "生产 helper 不得接受 Int64 数组：$($arrayCase.Key)"
+    }
+
+    foreach ($case in @('boolean-array', 'outer-array', 'terminal-array', 'extra-outer', 'extra-terminal', 'order')) {
+        $policy = Copy-AutonomousRefactorPolicy $productionPolicy
+        switch ($case) {
+            'boolean-array' { $policy.side_effect_admission_matrix.implementation_authorized = [object[]]@($false) }
+            'outer-array' { $policy.side_effect_admission_matrix = [object[]]@($policy.side_effect_admission_matrix) }
+            'terminal-array' { $policy.side_effect_admission_matrix.terminal = [object[]]@($policy.side_effect_admission_matrix.terminal) }
+            'extra-outer' { $policy.side_effect_admission_matrix | Add-Member -NotePropertyName fallback -NotePropertyValue $true }
+            'extra-terminal' { $policy.side_effect_admission_matrix.terminal | Add-Member -NotePropertyName fallback -NotePropertyValue $true }
+            'order' { $policy.side_effect_admission_matrix.terminal.reopen_on = @('hard-stop', 'completed') }
+        }
+        $rawMatrix = $policy.PSObject.Properties['side_effect_admission_matrix'].Value
+        $projection = Get-SideEffectAdmissionMatrixProjection -Value $rawMatrix
+        Assert-Equal -Expected $false -Actual $projection.valid `
+            -Message "生产 helper 必须拒绝 side-effect 形状变异：$case"
+    }
 }
 
 Invoke-ContractTest -Name '拒绝缺失的无人值守重构策略文件' -Body {
@@ -934,6 +1109,39 @@ function New-PostMergeAutonomousStateSnapshot {
     return $snapshot
 }
 
+function New-SideEffectAdmissionIssue {
+    [pscustomobject][ordered]@{
+        number = 165
+        url = 'https://github.com/nonononull/inputcodex/issues/165'
+        author_login = 'nonononull'
+        planning_evidence = [pscustomobject][ordered]@{
+            valid = $true
+            task_kind = 'refactor'
+            scope_count = 20
+            scope_hash = 'sha256:26a9f85b8a24ccde06dfe407c84c2fe05b3b8c28d2ad0b80cee071f697954cb4'
+            ref = 'https://github.com/nonononull/inputcodex/issues/165#issuecomment-5193029156'
+        }
+    }
+}
+
+function New-SideEffectAdmissionPostMergeSnapshot {
+    $snapshot = New-PostMergeAutonomousStateSnapshot
+    $snapshot.branch = 'codex/issue-165-gate-5-side-effect-admission-matrix-successor-v4'
+    $snapshot.actual_scope_count = 20
+    $snapshot.actual_scope_hash = 'sha256:26a9f85b8a24ccde06dfe407c84c2fe05b3b8c28d2ad0b80cee071f697954cb4'
+    $snapshot.active_issues = @(New-SideEffectAdmissionIssue)
+
+    $mergedPr = $snapshot.merged_prs[0]
+    $mergedPr.number = 166
+    $mergedPr.url = 'https://github.com/nonononull/inputcodex/pull/166'
+    $mergedPr.evidence.tracking_issue_ref = 'https://github.com/nonononull/inputcodex/issues/165'
+    $mergedPr.evidence.scope_count = 20
+    $mergedPr.evidence.scope_hash = 'sha256:26a9f85b8a24ccde06dfe407c84c2fe05b3b8c28d2ad0b80cee071f697954cb4'
+    $mergedPr.evidence.independent_review_ref = 'https://github.com/nonononull/inputcodex/pull/166#issuecomment-1'
+    $mergedPr.review_attestation.ref = 'https://github.com/nonononull/inputcodex/pull/166#issuecomment-1'
+    return $snapshot
+}
+
 function Copy-AutonomousStateSnapshot {
     param([Parameter(Mandatory)]$Snapshot)
 
@@ -1015,7 +1223,7 @@ Invoke-ContractTest -Name '无人值守拒绝伪装或缺失类型的状态快�
     }
 }
 
-Invoke-ContractTest -Name '无人值守空闲状态选择下一候选' -Body {
+Invoke-ContractTest -Name '已消费 fixed-file tranche 的空闲状态不得再选择候选' -Body {
     $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
     $snapshot.branch = 'main'
     $result = Invoke-AutonomousStateCase -Name 'idle' -Snapshot $snapshot
@@ -1023,9 +1231,10 @@ Invoke-ContractTest -Name '无人值守空闲状态选择下一候选' -Body {
         -Result $result `
         -ExpectedState 'idle-select-candidate' `
         -ExpectedAction 'select-fixed-file-mutation-candidate'
-    Assert-Equal -Expected 'feature.foundation-platform.watcher-preference-mutation' `
-        -Actual $result.Json.selected_candidate `
-        -Message '空闲状态只能选择 tranche 中的 Watcher preference mutation'
+    Assert-True -Condition ($null -eq $result.Json.selected_candidate) `
+        -Message '已消费 tranche 不得再次选择 Watcher preference mutation'
+    Assert-Equal -Expected 'consumed' -Actual $result.Json.fixed_file_mutation_tranche.lifecycle_state `
+        -Message 'live 状态必须投影 fixed-file tranche 已消费状态'
     Assert-Equal -Expected 'https://github.com/nonononull/inputcodex/issues/140' `
         -Actual $result.Json.fixed_file_mutation_tranche.terminal.owner_issue_ref `
         -Message 'live 状态必须投影完成或硬停止后重开的 owner Issue'
@@ -1453,6 +1662,49 @@ Invoke-ContractTest -Name '无人值守识别合并后主干验证与收口就�
     $originPending = Invoke-AutonomousStateCase -Name 'post-merge-origin-pending' -Snapshot $originPendingSnapshot
     Assert-AutonomousState -Result $originPending -ExpectedState 'post-merge-verification' -ExpectedAction 'verify-main'
     Assert-Contains -Collection @($originPending.Json.post_merge_gate_pending) -Expected 'POST_MERGE_ORIGIN_MAIN' -Message '合并后 origin/main 未刷新不得关闭 Issue'
+}
+
+Invoke-ContractTest -Name '副作用准入 successor hard-stop 使用专用终态动作' -Body {
+    $hardStopSnapshot = New-ValidAutonomousStateSnapshot
+    $hardStopSnapshot.branch = 'codex/issue-165-gate-5-side-effect-admission-matrix-successor-v4'
+    $hardStopSnapshot.actual_scope_count = 20
+    $hardStopSnapshot.actual_scope_hash = 'sha256:26a9f85b8a24ccde06dfe407c84c2fe05b3b8c28d2ad0b80cee071f697954cb4'
+    $hardStopSnapshot.active_writer_count = 2
+    $hardStopSnapshot.active_issues = @(
+        (New-SideEffectAdmissionIssue),
+        [pscustomobject]@{
+            number = 999
+            url = 'https://github.com/nonononull/inputcodex/issues/999'
+            author_login = 'nonononull'
+        }
+    )
+    $hardStop = Invoke-AutonomousStateCase -Name 'side-effect-admission-hard-stop' -Snapshot $hardStopSnapshot
+    Assert-AutonomousState `
+        -Result $hardStop `
+        -ExpectedState 'blocked-hard-stop' `
+        -ExpectedAction 'close-task-and-reopen-owner-decision-issue'
+}
+
+Invoke-ContractTest -Name '副作用准入 successor 成功 post-merge 使用专用终态动作' -Body {
+    $successful = Invoke-AutonomousStateCase `
+        -Name 'side-effect-admission-post-merge-success' `
+        -Snapshot (New-SideEffectAdmissionPostMergeSnapshot)
+    Assert-AutonomousState `
+        -Result $successful `
+        -ExpectedState 'post-merge-verification' `
+        -ExpectedAction 'close-task-and-reopen-owner-decision-issue'
+}
+
+Invoke-ContractTest -Name '副作用准入 successor pending post-merge 不得提前终态' -Body {
+    $pendingSnapshot = New-SideEffectAdmissionPostMergeSnapshot
+    $pendingSnapshot.merged_prs[0].workflow_runs[0].jobs[0].conclusion = 'failure'
+    $pending = Invoke-AutonomousStateCase `
+        -Name 'side-effect-admission-post-merge-pending' `
+        -Snapshot $pendingSnapshot
+    Assert-AutonomousState `
+        -Result $pending `
+        -ExpectedState 'post-merge-verification' `
+        -ExpectedAction 'verify-main'
 }
 
 Invoke-ContractTest -Name '无人值守 post-merge gate 拒绝 evidence 单元素对象数组' -Body {

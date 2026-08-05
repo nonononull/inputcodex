@@ -1201,6 +1201,26 @@
 - 关联：Issue `#161`、PR `#160` 复审评论、`scripts/automation/Get-AutonomousRefactorState.ps1`、
   `scripts/ci/Test-CiScripts.ps1`。
 
+### 2026-08-05：专用自治终态只有实现分支而没有生产状态机回归
+
+- 环境：PR `#164` 的 Final Head 独立复审，以及从 `main@5a7465252b56f7e90673e72d3e02881ac9238141`
+  fresh 重建的 successor Issue `#165`。
+- 现象：前置实现包含副作用准入任务的 hard-stop 与 post-merge 专用动作，但既有合同只验证 policy/helper
+  投影；删除或反转两处生产路由后，合同仍可全绿。
+- 根因：测试冻结了策略形状，却没有通过 `Invoke-AutonomousStateCase` 覆盖专用任务的 hard-stop、成功
+  post-merge 和 pending post-merge 三种真实尾段。实现存在不等于状态转换已被机器合同永久锁定。
+- 处理：按停止门废弃 predecessor PR，不在原 PR 修补；Issue `#165` 从 fresh main 独立重建，并先建立
+  三类可信 RED。GREEN 后 hard-stop 与成功 post-merge 都返回
+  `close-task-and-reopen-owner-decision-issue`，pending post-merge 保持 `verify-main`。同时把 fixed-file
+  tranche 固定为 `v2 / consumed`，新增 side-effect policy 的字符串、Int64、Boolean、嵌套对象、额外字段
+  与数组顺序真实变异。
+- 验证：完整 PowerShell 合同为 `CI_CONTRACT_GREEN passed=99`；三类状态测试均调用生产脚本，Rust
+  admission 测试与完整 parity 仓库测试全绿，Clippy `-D warnings` 通过，矩阵精确覆盖
+  `83 = 70 write + 5 process + 8 network` 且实现授权为零。
+- 关联：Issue `#165`、PR `#164` 复审评论、`.github/autonomous-refactor-policy.json`、
+  `scripts/automation/Get-AutonomousRefactorState.ps1`、`scripts/ci/Test-CiScripts.ps1`、
+  `parity/admission/side-effect-admission-matrix.yml`。
+
 ## 记录模板
 
 ```text

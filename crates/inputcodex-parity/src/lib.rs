@@ -1,5 +1,6 @@
 #![forbid(unsafe_code)]
 
+mod admission;
 mod catalog;
 mod contract;
 mod fixture;
@@ -8,6 +9,11 @@ mod validation;
 use inputcodex_application::{ApplicationError, ErrorKind};
 use inputcodex_domain::DiagnosticCode;
 
+pub use admission::{
+    AdmissionDecision, SideEffectAdmissionEntry, SideEffectAdmissionMatrix, SideEffectBucket,
+    TypedOwner, TypedOwnerKind, TypedOwnerState, parse_side_effect_admission_matrix,
+    validate_side_effect_admission_matrix,
+};
 pub use catalog::{
     FeatureCatalog, FeatureDefinition, FeatureDomain, ParityStatus, SourceDisposition, SourceEntry,
     SourceIndex, SourceKind, SourcePlatform, parse_feature_catalog, parse_source_index,
