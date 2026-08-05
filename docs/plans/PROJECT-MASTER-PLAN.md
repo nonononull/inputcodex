@@ -321,7 +321,8 @@ decision_status: issue-140-gate5-fixed-file-mutation-tranche-v1-approved
 - [x] Issue `#141` / PR `#142` 已完成固定文件 mutation 两批有限 tranche 的批次 1 治理 bootstrap，唯一候选已机器固定。
 - [x] Issue `#143` / PR `#144` 已完成批次 `2/2`；只接管 `enable_watcher` / `disable_watcher` 的固定 `watcher.disabled` 偏好变更，完整 Watcher 继续 `unassessed`。
 - [x] Issue `#147` / PR `#148` 已收紧 Release Audit 与自治 live 状态的 JSON 根和受信标量类型；产品交付为零。
-- [ ] `gate5-strict-json-object-recovery-v1` 最多交付两个治理 PR、零产品；Issue `#151` 先修复 StrictJsonObject 根类型，合并并完成 fresh-main 复验后才能重建 admission matrix successor。
+- [x] Issue `#151` 与 Issue `#161` 已分别收紧 StrictJsonObject 根类型和四个嵌套 snapshot 对象边界；两项均为治理修复，产品计数未改变。
+- [ ] Issue `#169` 只从 fresh `main@5a7465252b56f7e90673e72d3e02881ac9238141` 重建 83-source 副作用准入矩阵、严格 Issue 身份和 consumed 终态；全部条目保持 blocked、零实现授权，Gate 5 仍未完成。
 
 ### Gate 6：首个正式版本（锁定）
 

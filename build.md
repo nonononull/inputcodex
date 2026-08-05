@@ -9,8 +9,8 @@ GitHub Issue、PR 与 Actions。
 
 Gate 3 七成员 Rust Workspace、Gate 4 上游审计/功能目录/性能基线，以及 Gate 5 的平台路径、
 应用概览、版本与启动意图、运行时环境冲突、Relay 环境、设置、诊断日志、Relay 状态、上下文
-条目、本地会话目录、受控会话 Markdown 和 Watcher 偏好状态观察已经建立；Issue `#143` 正在实施
-固定 Watcher 偏好标记 mutation。
+条目、本地会话目录、受控会话 Markdown、Watcher 偏好观察与固定标记变更已经建立。Issue `#169`
+只重建剩余 83 个来源的副作用准入矩阵和治理状态机，不迁移产品功能。
 该说明只用于选择正确命令，不能替代任务计划和 GitHub 新鲜证据。
 
 ## 文档变更轻量验证
@@ -27,10 +27,10 @@ git diff --check
 
 路径范围、Markdown 链接和任务特有内容守卫由对应 Session Plan 与 Runtime Workflow 定义。
 
-## Issue #161 嵌套 snapshot 对象边界本地验证
+## Issue #169 副作用准入矩阵 successor v6 本地验证
 
-本任务只修改自治治理脚本，不编译 Rust Workspace。必须从
-`codex/issue-161-gate-5-nested-snapshot-object-boundary-recovery` 执行：
+本任务只修改 Parity 静态事实层、自治治理脚本和任务文档，产品交付为零。必须从
+`codex/issue-169-gate-5-side-effect-admission-matrix-successor-v6` 执行：
 
 ```powershell
 $ErrorActionPreference = 'Stop'
@@ -43,14 +43,27 @@ function Assert-NativeSuccess {
 Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
 
 $branch = (git branch --show-current).Trim()
-Assert-NativeSuccess 'Issue #161 分支读取'
-if ($branch -cne 'codex/issue-161-gate-5-nested-snapshot-object-boundary-recovery') {
-  throw "Issue #161 分支错误：$branch"
+Assert-NativeSuccess 'Issue #169 分支读取'
+if ($branch -cne 'codex/issue-169-gate-5-side-effect-admission-matrix-successor-v6') {
+  throw "Issue #169 分支错误：$branch"
+}
+
+$baseline = '5a7465252b56f7e90673e72d3e02881ac9238141'
+$originMain = (git rev-parse origin/main).Trim()
+Assert-NativeSuccess 'Issue #169 origin/main 读取'
+if ($originMain -cne $baseline) {
+  throw "Issue #169 origin/main 漂移：$originMain"
+}
+$mergeBase = (git merge-base HEAD origin/main).Trim()
+Assert-NativeSuccess 'Issue #169 merge-base 读取'
+if ($mergeBase -cne $baseline) {
+  throw "Issue #169 merge-base 漂移：$mergeBase"
 }
 
 foreach ($scriptPath in @(
   'scripts/automation/Get-AutonomousRefactorState.ps1',
-  'scripts/ci/Test-CiScripts.ps1'
+  'scripts/ci/Test-CiScripts.ps1',
+  'scripts/ci/Verify-AutonomousRefactorPolicy.ps1'
 )) {
   $tokens = $null
   $errors = $null
@@ -62,50 +75,71 @@ foreach ($scriptPath in @(
   if (@($errors).Count -ne 0) { throw "$scriptPath AST 解析失败" }
 }
 
+cargo fmt --all -- --check
+Assert-NativeSuccess 'Issue #169 Rust 格式'
+cargo test -p inputcodex-parity --all-targets --locked --offline
+Assert-NativeSuccess 'Issue #169 Parity 测试'
+cargo clippy -p inputcodex-parity --all-targets --locked --offline -- -D warnings
+Assert-NativeSuccess 'Issue #169 Parity Clippy'
 pwsh -NoLogo -NoProfile -File scripts/ci/Test-CiScripts.ps1
-Assert-NativeSuccess 'Issue #161 CI 合同'
+Assert-NativeSuccess 'Issue #169 CI 合同'
 pwsh -NoLogo -NoProfile -File scripts/ci/Verify-AutonomousRefactorPolicy.ps1 `
   -RepositoryRoot . -PolicyPath .github/autonomous-refactor-policy.json
-Assert-NativeSuccess 'Issue #161 自治策略'
+Assert-NativeSuccess 'Issue #169 自治策略'
 pwsh -NoLogo -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
-Assert-NativeSuccess 'Issue #161 Release Audit'
+Assert-NativeSuccess 'Issue #169 Release Audit'
 pwsh -NoLogo -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
-Assert-NativeSuccess 'Issue #161 仓库政策'
+Assert-NativeSuccess 'Issue #169 仓库政策'
 
 $approved = [string[]]@(
+  '.github/autonomous-refactor-policy.json',
   'build.md',
-  'docs/plans/2026-08-05-issue-161-gate-5-nested-snapshot-object-boundary-recovery.md',
-  'docs/plans/sessions/2026-08-05-issue-161-gate-5-nested-snapshot-object-boundary-recovery.md',
-  'docs/reports/issue-161-gate-5-nested-snapshot-object-boundary-recovery.md',
-  'docs/workflows/2026-08-05-issue-161-gate-5-nested-snapshot-object-boundary-recovery-runtime.md',
+  'CONTEXT.md',
+  'crates/inputcodex-parity/src/admission.rs',
+  'crates/inputcodex-parity/src/catalog.rs',
+  'crates/inputcodex-parity/src/lib.rs',
+  'crates/inputcodex-parity/src/validation.rs',
+  'crates/inputcodex-parity/tests/admission_matrix.rs',
+  'crates/inputcodex-parity/tests/catalog_repository.rs',
+  'docs/plans/2026-08-06-issue-169-gate-5-side-effect-admission-matrix-successor-v6.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-08-06-issue-169-gate-5-side-effect-admission-matrix-successor-v6.md',
+  'docs/reports/issue-169-gate-5-side-effect-admission-matrix-successor-v6.md',
+  'docs/workflows/2026-08-06-issue-169-gate-5-side-effect-admission-matrix-successor-v6-runtime.md',
   'err.md',
+  'parity/admission/side-effect-admission-matrix.yml',
+  'parity/README.md',
   'scripts/automation/Get-AutonomousRefactorState.ps1',
-  'scripts/ci/Test-CiScripts.ps1'
+  'scripts/ci/Test-CiScripts.ps1',
+  'scripts/ci/Verify-AutonomousRefactorPolicy.ps1'
 )
-[Array]::Sort($approved, [StringComparer]::Ordinal)
-$actual = [string[]]@(
+$actualSet = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+@(
   git diff --name-only origin/main...HEAD
   git diff --cached --name-only
   git diff --name-only
   git ls-files --others --exclude-standard
-) | Where-Object { $_ } | Sort-Object -Unique
+) | Where-Object { $_ } | ForEach-Object { [void]$actualSet.Add($_) }
+$actual = [string[]]@($actualSet)
+[Array]::Sort($actual, [StringComparer]::OrdinalIgnoreCase)
 if ([string]::Join("`n", $actual) -cne [string]::Join("`n", $approved)) {
-  throw "Issue #161 路径范围漂移：$($actual -join ', ')"
+  throw "Issue #169 路径范围漂移：$($actual -join ', ')"
 }
 $payload = [Text.UTF8Encoding]::new($false).GetBytes(($approved -join "`n") + "`n")
 $scopeHash = [Convert]::ToHexString(
   [Security.Cryptography.SHA256]::HashData($payload)
 ).ToLowerInvariant()
-if ($scopeHash -cne '8f336603e25d05f96a45c9e57e0adb4724ebbfe19e6194097cc780d036d1ce40') {
-  throw "Issue #161 scope hash 漂移：$scopeHash"
+if ($scopeHash -cne '6d07b55562096afa10d3fa804dbb7d1c462fb1e21f09e499e7f655a527866baa') {
+  throw "Issue #169 scope hash 漂移：$scopeHash"
 }
 
 git diff --check origin/main --
-Assert-NativeSuccess 'Issue #161 空白检查'
-Write-Output "ISSUE_161_LOCAL_VERIFY_OK scope_hash=sha256:$scopeHash"
+Assert-NativeSuccess 'Issue #169 空白检查'
+Write-Output "ISSUE_169_LOCAL_VERIFY_OK scope_hash=sha256:$scopeHash"
 ```
 
-预期治理合同输出 `CI_CONTRACT_GREEN passed=94`，两份 PowerShell AST 零错误，实际范围精确为八路径。
+预期治理合同输出 `CI_CONTRACT_GREEN passed=99`，三份 PowerShell AST 零错误，实际范围精确为二十路径；
+Parity 仍为 source `19/83/30/3`、feature `13/22/11`、contract `46`、fixture `12`，产品交付为零。
 
 仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供三十六个检查点：
 

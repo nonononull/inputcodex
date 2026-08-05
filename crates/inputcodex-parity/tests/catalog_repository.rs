@@ -87,6 +87,18 @@ fn yaml_list_item_block<'a>(text: &'a str, id: &str) -> &'a str {
     &tail[..end]
 }
 
+fn admission_entry_range(text: &str, source_id: &str) -> std::ops::Range<usize> {
+    let marker = format!("  - source_id: {source_id}");
+    let start = text
+        .find(&marker)
+        .unwrap_or_else(|| panic!("准入矩阵应包含来源：{source_id}"));
+    let tail = &text[start..];
+    let end = tail[marker.len()..]
+        .find("\n  - source_id: ")
+        .map_or(text.len(), |offset| start + marker.len() + offset + 1);
+    start..end
+}
+
 #[test]
 fn yaml_id_helper_只接受完整顶层行() {
     for text in [
@@ -159,6 +171,10 @@ impl FeatureRepositoryFixture {
         copy_tree(
             &repository_root().join("parity/features"),
             &root.join("parity/features"),
+        );
+        copy_tree(
+            &repository_root().join("parity/admission"),
+            &root.join("parity/admission"),
         );
         copy_tree(
             &repository_root().join("upstream/CodexPlusPlus"),
@@ -252,6 +268,18 @@ impl FeatureRepositoryFixture {
                 );
             fs::write(path, updated).expect("应能更新临时功能目录 Release");
         }
+
+        let admission_path = self
+            .root
+            .join("parity/admission/side-effect-admission-matrix.yml");
+        let admission_text = fs::read_to_string(&admission_path).expect("应能读取临时准入矩阵");
+        let updated_admission = admission_text
+            .replace(&format!("  tag: {RELEASE_TAG}"), &format!("  tag: {tag}"))
+            .replace(
+                &format!("  tag_commit: {RELEASE_COMMIT}"),
+                &format!("  tag_commit: {commit}"),
+            );
+        fs::write(admission_path, updated_admission).expect("应能更新临时准入矩阵 Release");
     }
 
     fn append_text(&self, relative_path: &str, suffix: &str) {
@@ -272,6 +300,43 @@ impl FeatureRepositoryFixture {
 
     fn remove_file(&self, relative_path: &str) {
         fs::remove_file(self.root.join(relative_path)).expect("应能删除临时证据文件");
+    }
+
+    fn replace_admission_entry_text(&self, source_id: &str, expected: &str, replacement: &str) {
+        let path = self
+            .root
+            .join("parity/admission/side-effect-admission-matrix.yml");
+        let mut text = fs::read_to_string(&path)
+            .expect("应能读取临时准入矩阵")
+            .replace("\r\n", "\n");
+        let range = admission_entry_range(&text, source_id);
+        let block = &text[range.clone()];
+        assert!(block.contains(expected), "准入条目必须包含待替换片段");
+        let replacement_block = block.replacen(expected, replacement, 1);
+        text.replace_range(range, &replacement_block);
+        fs::write(path, text).expect("应能变异临时准入矩阵条目");
+    }
+
+    fn swap_admission_entries(&self, first_source_id: &str, second_source_id: &str) {
+        let path = self
+            .root
+            .join("parity/admission/side-effect-admission-matrix.yml");
+        let text = fs::read_to_string(&path)
+            .expect("应能读取临时准入矩阵")
+            .replace("\r\n", "\n");
+        let first = admission_entry_range(&text, first_source_id);
+        let second = admission_entry_range(&text, second_source_id);
+        assert!(first.end <= second.start, "测试条目必须按原始顺序出现");
+
+        let swapped = format!(
+            "{}{}{}{}{}",
+            &text[..first.start],
+            &text[second.clone()],
+            &text[first.end..second.start],
+            &text[first.clone()],
+            &text[second.end..],
+        );
+        fs::write(path, swapped).expect("应能交换临时准入矩阵条目");
     }
 }
 
@@ -2698,6 +2763,133 @@ fn gate5_watcher_偏好变更只移动两个固定文件入口而不接管完整
             "`12` 个 fixture manifest",
         ],
     );
+}
+
+#[test]
+fn 副作用准入矩阵拒绝唯一但乱序的来源() {
+    let fixture = FeatureRepositoryFixture::new();
+    fixture.write_current_source_lock();
+    fixture.swap_admission_entries("core-module:ccs_import", "core-module:codex_app_state");
+
+    let error = validate_feature_repository(fixture.root()).expect_err("唯一但乱序的矩阵必须失败");
+    assert!(
+        error
+            .issues()
+            .iter()
+            .any(|issue| issue.code() == ValidationCode::AdmissionEntryOrderMismatch),
+        "实际错误：{error:?}"
+    );
+}
+
+#[test]
+fn 副作用准入矩阵拒绝只存在于矩阵的多余来源() {
+    let fixture = FeatureRepositoryFixture::new();
+    fixture.write_current_source_lock();
+    fixture.append_text(
+        "parity/admission/side-effect-admission-matrix.yml",
+        r#"  - source_id: zzzz:matrix-only
+    feature_id: feature.foundation-platform.watcher
+    bucket: write
+    required_owner_kinds: [filesystem, process-controller]
+    owner_state: missing
+    blocker_refs: [issue:136]
+    admission: blocked
+    implementation_authorized: false
+"#,
+    );
+
+    let error = validate_feature_repository(fixture.root()).expect_err("矩阵多余来源必须失败");
+    assert!(
+        error
+            .issues()
+            .iter()
+            .any(|issue| issue.code() == ValidationCode::AdmissionSourceClosureMismatch),
+        "实际错误：{error:?}"
+    );
+}
+
+#[test]
+fn 副作用准入矩阵拒绝替代_release() {
+    let fixture = FeatureRepositoryFixture::new();
+    fixture.write_current_source_lock();
+    fixture.replace_text(
+        "parity/admission/side-effect-admission-matrix.yml",
+        "  tag: v1.2.44\n  tag_commit: 77091ccaee4423f35a1b2c51c4ecd703e6201092",
+        "  tag: v1.2.43\n  tag_commit: 5036ff056b5c629f19356396b17d6eeb70da664c",
+    );
+
+    let error = validate_feature_repository(fixture.root()).expect_err("替代 Release 必须失败");
+    assert!(
+        error
+            .issues()
+            .iter()
+            .any(|issue| issue.code() == ValidationCode::AdmissionReleaseMismatch),
+        "实际错误：{error:?}"
+    );
+}
+
+#[test]
+fn 副作用准入矩阵精确字段漂移全部_fail_closed() {
+    let cases = [
+        (
+            "feature",
+            "    feature_id: feature.plugin-script.dream-skin-library",
+            "    feature_id: feature.provider-network.context-entry-management",
+            ValidationCode::AdmissionFeatureMismatch,
+        ),
+        (
+            "bucket",
+            "    bucket: write",
+            "    bucket: network",
+            ValidationCode::AdmissionBucketMismatch,
+        ),
+        (
+            "owner-kind",
+            "    required_owner_kinds: [filesystem]",
+            "    required_owner_kinds: [network-transport]",
+            ValidationCode::AdmissionOwnerMismatch,
+        ),
+        (
+            "owner-state",
+            "    owner_state: missing",
+            "    owner_state: present",
+            ValidationCode::AdmissionOwnerMismatch,
+        ),
+        (
+            "blocker",
+            "    blocker_refs: [issue:140]",
+            "    blocker_refs: [issue:126]",
+            ValidationCode::AdmissionBlockerMismatch,
+        ),
+        (
+            "admission",
+            "    admission: blocked",
+            "    admission: admitted",
+            ValidationCode::AdmissionStateMismatch,
+        ),
+        (
+            "authorization",
+            "    implementation_authorized: false",
+            "    implementation_authorized: true",
+            ValidationCode::AdmissionStateMismatch,
+        ),
+    ];
+
+    for (name, expected, replacement, expected_code) in cases {
+        let fixture = FeatureRepositoryFixture::new();
+        fixture.write_current_source_lock();
+        fixture.replace_admission_entry_text("core-module:dream_skin", expected, replacement);
+
+        let error =
+            validate_feature_repository(fixture.root()).expect_err(&format!("{name} 漂移必须失败"));
+        assert!(
+            error
+                .issues()
+                .iter()
+                .any(|issue| issue.code() == expected_code),
+            "{name} 漂移必须报告 {expected_code:?}，实际错误：{error:?}"
+        );
+    }
 }
 
 #[test]

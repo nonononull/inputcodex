@@ -1201,6 +1201,28 @@
 - 关联：Issue `#161`、PR `#160` 复审评论、`scripts/automation/Get-AutonomousRefactorState.ps1`、
   `scripts/ci/Test-CiScripts.ps1`。
 
+### 2026-08-06：治理身份与矩阵闭包必须由生产负例双向锁定
+
+- 环境：Issue `#169` 从 fresh `main@5a7465252b56f7e90673e72d3e02881ac9238141` 重建 83-source
+  side-effect admission matrix；历史失败分支只提供 finding，不得复用实现。
+- 现象：只验证 successor 的规范标量身份会漏掉通用 `author_login` 数组被 getter 展开的路径；控制策略
+  若通过 `if { .Value }` 取值，还会把 `side_effect_admission_matrix: [{...}]` 降为合法对象。只验证重复、
+  遗漏和 entry 字段漂移，也无法证明根/Release 未知字段、唯一乱序、matrix-only 多余 source 与替代
+  Release 一定失败。
+- 根因：PowerShell 集合展开沿用本文件 2026-08-04 与 2026-08-05 的既有根因；矩阵侧则是测试只固定
+  正向集合或单向闭包，没有让每个生产拒绝分支具备可杀死删除/反转变异的永久反例。
+- 处理：Issue 身份、通用 owner 信任和 admission 控制对象直接检查原始 `PSPropertyInfo.Value`，禁止通过
+  `if` 输出表达式返回 `.Value`，并要求具体 `System.Management.Automation.PSCustomObject`；consumed
+  tranche 的所有无任务路径只返回 `blocked-candidate-exhausted / await-owner-decision`。
+  Rust schema 对根、Release 和 entry 使用 `deny_unknown_fields`，仓库验证对 83 个 unassessed source 执行
+  双向闭包、Ordinal 严格顺序、精确 Release、feature、bucket、owner、blocker 和零授权校验。
+- 验证：可信 RED 保留原有合同并使新增 9 组冻结合同失败；提交前控制对象数组探针另取得唯一 RED，
+  从 `ok=true` 修复为 `exit 12 / SIDE_EFFECT_ADMISSION_MATRIX`。GREEN 为 `CI_CONTRACT_GREEN passed=99`，
+  Parity 全目标测试与 Clippy 通过。永久负例覆盖三类 #169 终态、严格/矛盾身份、通用 owner 数组、
+  控制对象数组、consumed idle、根/Release 未知字段、唯一乱序、多余 source 和替代 Release。
+- 关联：Issue `#169`、Issue `#140` owner 决策 `5196105071`、`crates/inputcodex-parity/src/admission.rs`、
+  `scripts/automation/Get-AutonomousRefactorState.ps1`、`scripts/ci/Test-CiScripts.ps1`。
+
 ## 记录模板
 
 ```text
