@@ -1201,6 +1201,25 @@
 - 关联：Issue `#161`、PR `#160` 复审评论、`scripts/automation/Get-AutonomousRefactorState.ps1`、
   `scripts/ci/Test-CiScripts.ps1`。
 
+### 2026-08-06：Issue 身份经输出管道展开，consumed tranche 仍返回选择动作
+
+- 环境：副作用准入矩阵 predecessor 的独立复审，以及 fresh-main successor Issue `#167`。
+- 现象：Issue 的 `url`、`author_login` 或 `number` 被替换为含合法值的单元素/多元素数组后，旧状态机仍可把
+  该对象识别为目标 successor；同时 fixed-file tranche 已为 `consumed` 且 `selected_candidate=null`，空闲路径的
+  `next_action` 却仍为 `select-fixed-file-mutation-candidate`。
+- 根因：通用属性 getter 与 `if`/函数脚本块的输出都经过 PowerShell pipeline，直接输出
+  `PSPropertyInfo.Value` 时会枚举集合并把单元素数组折叠为标量；候选动作又在 tranche 生命周期判断前写死，
+  最终只清空结果字段，没有消除执行命令。
+- 处理：#167 专用身份投影直接读取三个属性的原始 `.Value`，要求 `number` 为精确 Int64、URL/author 为
+  精确字符串且 number/URL 同时一致；任何数组、错误类型或矛盾身份均 fail closed。无活动任务时先判断
+  `lifecycle_state=consumed`，统一返回 `blocked-candidate-exhausted / await-owner-decision`，包括仅有不可信
+  marker 的 live 路径。
+- 验证：生产脚本合同直接覆盖 hard-stop、成功 post-merge、pending post-merge、身份数组/类型/矛盾值、
+  consumed idle 与不可信 marker；完整治理合同为 `CI_CONTRACT_GREEN passed=97`，Parity 全目标测试与
+  Clippy 通过，三份 PowerShell AST 零错误。
+- 关联：Issue `#167`、PR `#166` 独立复审 finding、`scripts/automation/Get-AutonomousRefactorState.ps1`、
+  `scripts/ci/Test-CiScripts.ps1`。
+
 ## 记录模板
 
 ```text

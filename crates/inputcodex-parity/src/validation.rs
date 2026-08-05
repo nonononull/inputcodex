@@ -7,14 +7,17 @@ use std::{
 
 use serde::Deserialize;
 
+use crate::admission::{classify_admission_bucket, required_blocker_refs, required_owner_kinds};
 use crate::{
-    FeatureDomain, ParityStatus, SourceDisposition, SourceKind, parse_contract_catalog,
-    parse_feature_catalog, parse_fixture_manifest, parse_source_index, validate_contract_catalog,
+    AdmissionBucket, FeatureDomain, ParityStatus, SourceDisposition, SourceKind,
+    parse_contract_catalog, parse_feature_catalog, parse_fixture_manifest,
+    parse_side_effect_admission_matrix, parse_source_index, validate_contract_catalog,
     validate_contract_catalog_domain, validate_feature_catalog, validate_fixture_manifest,
-    validate_fixture_payload, validate_source_index,
+    validate_fixture_payload, validate_side_effect_admission_matrix, validate_source_index,
 };
 
 const SOURCE_INDEX_PATH: &str = "parity/features/source-index.yml";
+const ADMISSION_MATRIX_PATH: &str = "parity/admission/side-effect-admission-matrix.yml";
 const SOURCE_LOCK_PATH: &str = "upstream/source-lock.json";
 const COMMANDS_PATH: &str =
     "upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs";
@@ -73,6 +76,15 @@ pub enum ValidationCode {
     InvalidFixturePayload,
     PrivateAbsolutePath,
     SensitiveFixtureValue,
+    InvalidAdmissionMetadata,
+    DuplicateAdmissionSource,
+    AdmissionOrderMismatch,
+    AdmissionAuthorizationMismatch,
+    AdmissionSourceCoverageMismatch,
+    AdmissionFeatureMismatch,
+    AdmissionBucketMismatch,
+    AdmissionOwnerMismatch,
+    AdmissionBlockerMismatch,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -230,6 +242,14 @@ struct ExpectedSource {
 struct FeatureRepositoryState {
     summary: RepositorySummary,
     feature_ids: BTreeSet<String>,
+    admission_sources: BTreeMap<String, ExpectedAdmissionSource>,
+}
+
+struct ExpectedAdmissionSource {
+    feature_id: String,
+    bucket: AdmissionBucket,
+    owner_kinds: Vec<String>,
+    blocker_refs: Vec<String>,
 }
 
 struct FixtureRepositoryState {
@@ -253,6 +273,74 @@ pub fn validate_repository(
     let mut contract_ids = BTreeSet::new();
     let mut contracted_feature_ids = BTreeSet::new();
     let mut issues = Vec::new();
+
+    let admission_matrix_path = repository_root.join(ADMISSION_MATRIX_PATH);
+    let admission_matrix_text = read_utf8(&admission_matrix_path)?;
+    let admission_matrix =
+        parse_side_effect_admission_matrix(&admission_matrix_text).map_err(|error| {
+            RepositoryValidationError::message(format!(
+                "无法解析 {}：{error}",
+                admission_matrix_path.display()
+            ))
+        })?;
+    issues.extend(validate_side_effect_admission_matrix(&admission_matrix));
+
+    if admission_matrix.release_tag() != "v1.2.44"
+        || admission_matrix.release_commit() != "77091ccaee4423f35a1b2c51c4ecd703e6201092"
+    {
+        issues.push(ValidationIssue::new(
+            ValidationCode::ReleaseMismatch,
+            ADMISSION_MATRIX_PATH,
+        ));
+    }
+
+    let matrix_entries = admission_matrix
+        .entries()
+        .iter()
+        .map(|entry| (entry.source_id(), entry))
+        .collect::<BTreeMap<_, _>>();
+    for (source_id, expected) in &state.admission_sources {
+        match matrix_entries.get(source_id.as_str()) {
+            Some(entry) => {
+                if entry.feature_id() != expected.feature_id {
+                    issues.push(ValidationIssue::new(
+                        ValidationCode::AdmissionFeatureMismatch,
+                        source_id,
+                    ));
+                }
+                if entry.primary_bucket() != expected.bucket {
+                    issues.push(ValidationIssue::new(
+                        ValidationCode::AdmissionBucketMismatch,
+                        source_id,
+                    ));
+                }
+                if entry.required_owner_kinds() != expected.owner_kinds {
+                    issues.push(ValidationIssue::new(
+                        ValidationCode::AdmissionOwnerMismatch,
+                        source_id,
+                    ));
+                }
+                if entry.blocker_refs() != expected.blocker_refs {
+                    issues.push(ValidationIssue::new(
+                        ValidationCode::AdmissionBlockerMismatch,
+                        source_id,
+                    ));
+                }
+            }
+            None => issues.push(ValidationIssue::new(
+                ValidationCode::AdmissionSourceCoverageMismatch,
+                source_id,
+            )),
+        }
+    }
+    for source_id in matrix_entries.keys() {
+        if !state.admission_sources.contains_key(*source_id) {
+            issues.push(ValidationIssue::new(
+                ValidationCode::AdmissionSourceCoverageMismatch,
+                *source_id,
+            ));
+        }
+    }
 
     for (expected_domain, file_name) in DOMAIN_FILES {
         let contract_path = contracts_root.join(file_name);
@@ -848,6 +936,53 @@ fn load_feature_repository(
         .values()
         .filter(|status| **status == ParityStatus::ExceptionPending)
         .count();
+    let mut feature_side_effects = BTreeMap::<String, BTreeSet<String>>::new();
+    for source in source_index.sources() {
+        let Some(feature_id) = source.disposition().and_then(SourceDisposition::feature_id) else {
+            continue;
+        };
+        if feature_statuses.get(feature_id) != Some(&ParityStatus::Unassessed) {
+            continue;
+        }
+        feature_side_effects
+            .entry(feature_id.to_owned())
+            .or_default()
+            .extend(source.side_effects().iter().cloned());
+    }
+    let feature_profiles = feature_side_effects
+        .into_iter()
+        .filter_map(|(feature_id, effects)| {
+            let effects = effects.into_iter().collect::<Vec<_>>();
+            classify_admission_bucket(&effects).map(|bucket| {
+                let owner_kinds = required_owner_kinds(&feature_id, &effects);
+                let blocker_refs = required_blocker_refs(&feature_id);
+                (feature_id, (bucket, owner_kinds, blocker_refs))
+            })
+        })
+        .collect::<BTreeMap<_, _>>();
+    let admission_sources = source_index
+        .sources()
+        .iter()
+        .filter_map(|source| {
+            let feature_id = source.disposition()?.feature_id()?;
+            if feature_statuses.get(feature_id) != Some(&ParityStatus::Unassessed) {
+                return None;
+            }
+            feature_profiles
+                .get(feature_id)
+                .map(|(bucket, owner_kinds, blocker_refs)| {
+                    (
+                        source.id().to_owned(),
+                        ExpectedAdmissionSource {
+                            feature_id: feature_id.to_owned(),
+                            bucket: *bucket,
+                            owner_kinds: owner_kinds.clone(),
+                            blocker_refs: blocker_refs.clone(),
+                        },
+                    )
+                })
+        })
+        .collect();
 
     Ok(FeatureRepositoryState {
         summary: RepositorySummary {
@@ -861,6 +996,7 @@ fn load_feature_repository(
             requires_reaudit,
         },
         feature_ids,
+        admission_sources,
     })
 }
 

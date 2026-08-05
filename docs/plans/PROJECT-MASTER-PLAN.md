@@ -1,11 +1,11 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-151-strict-json-object-root-boundary
-active_gate: Gate 5 治理恢复；零产品交付，先修 StrictJsonObject 根类型，再从 fresh main 重建副作用准入矩阵 successor
-last_verified_gate: Issue #143 / PR #144 已交付固定 Watcher 偏好标记 mutation；Issue #147 / PR #148 已收紧 Release Audit JSON 边界并进入 main
-next_legal_gate: Issue #151 独立复审与合并后完成 fresh-main 复验；随后才能新建 admission matrix successor，任一范围漂移或 Critical/Important finding 立即停止
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/151
+active_task: issue-167-gate-5-side-effect-admission-matrix-successor-v5
+active_gate: Gate 5 治理恢复；零产品交付，从 fresh main 重建 83-source 副作用准入矩阵与严格终态
+last_verified_gate: Issue #161 / PR #162 已以 Squash 提交 5a7465252b56f7e90673e72d3e02881ac9238141 收紧嵌套 snapshot 对象边界并完成 fresh-main 复验
+next_legal_gate: Issue #167 仅完成冻结 20 路本地验证、Final Head 双独立复审、Hosted CI 与精确 Squash；任一范围漂移或 Critical/Important finding 立即停止并重开 #140
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/167
 active_pr_ref: none
 gate_5_platform_paths_exception_ref: https://github.com/nonononull/inputcodex/issues/74
 gate_5_platform_paths_scope_hash: sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37
@@ -321,7 +321,9 @@ decision_status: issue-140-gate5-fixed-file-mutation-tranche-v1-approved
 - [x] Issue `#141` / PR `#142` 已完成固定文件 mutation 两批有限 tranche 的批次 1 治理 bootstrap，唯一候选已机器固定。
 - [x] Issue `#143` / PR `#144` 已完成批次 `2/2`；只接管 `enable_watcher` / `disable_watcher` 的固定 `watcher.disabled` 偏好变更，完整 Watcher 继续 `unassessed`。
 - [x] Issue `#147` / PR `#148` 已收紧 Release Audit 与自治 live 状态的 JSON 根和受信标量类型；产品交付为零。
-- [ ] `gate5-strict-json-object-recovery-v1` 最多交付两个治理 PR、零产品；Issue `#151` 先修复 StrictJsonObject 根类型，合并并完成 fresh-main 复验后才能重建 admission matrix successor。
+- [x] Issue `#151` 已收紧 StrictJsonObject 根类型边界并进入 `main`；失败 predecessor 不复用。
+- [x] Issue `#161` / PR `#162` 已收紧四个嵌套 snapshot 对象边界并以提交 `5a7465252b56f7e90673e72d3e02881ac9238141` 进入 `main`。
+- [ ] Issue `#167` 在 frozen 20 路内重建 83-source 副作用准入矩阵；当前只允许治理分类与严格终态，全部 source 必须保持 blocked、零实现授权，Gate 5 尚未完成且 Gate 6 不解锁。
 
 ### Gate 6：首个正式版本（锁定）
 

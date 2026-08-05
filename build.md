@@ -9,8 +9,7 @@ GitHub Issue、PR 与 Actions。
 
 Gate 3 七成员 Rust Workspace、Gate 4 上游审计/功能目录/性能基线，以及 Gate 5 的平台路径、
 应用概览、版本与启动意图、运行时环境冲突、Relay 环境、设置、诊断日志、Relay 状态、上下文
-条目、本地会话目录、受控会话 Markdown 和 Watcher 偏好状态观察已经建立；Issue `#143` 正在实施
-固定 Watcher 偏好标记 mutation。
+条目、本地会话目录、受控会话 Markdown、Watcher 偏好观察与固定标记 mutation 已经建立。
 该说明只用于选择正确命令，不能替代任务计划和 GitHub 新鲜证据。
 
 ## 文档变更轻量验证
@@ -26,6 +25,134 @@ git diff --check
 ```
 
 路径范围、Markdown 链接和任务特有内容守卫由对应 Session Plan 与 Runtime Workflow 定义。
+
+## Issue #167 副作用准入矩阵 successor v5 本地验证
+
+本任务只交付治理矩阵、严格自治状态和对应文档/测试，产品交付为零。必须从 fresh
+`main@5a7465252b56f7e90673e72d3e02881ac9238141` 创建的
+`codex/issue-167-gate-5-side-effect-admission-matrix-successor-v5` 执行；禁止复用或修补历史失败分支。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+function Assert-NativeSuccess {
+  param([Parameter(Mandatory)][string]$Label)
+  if ($LASTEXITCODE -ne 0) { throw "$Label 失败：$LASTEXITCODE" }
+}
+
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+$baseline = '5a7465252b56f7e90673e72d3e02881ac9238141'
+$branch = (git branch --show-current).Trim()
+Assert-NativeSuccess 'Issue #167 分支读取'
+if ($branch -cne 'codex/issue-167-gate-5-side-effect-admission-matrix-successor-v5') {
+  throw "Issue #167 分支错误：$branch"
+}
+$mergeBase = (git merge-base HEAD origin/main).Trim()
+Assert-NativeSuccess 'Issue #167 merge-base'
+$originMain = (git rev-parse origin/main).Trim()
+Assert-NativeSuccess 'Issue #167 origin/main'
+if ($mergeBase -cne $baseline -or $originMain -cne $baseline) {
+  throw "Issue #167 fresh main 漂移：merge_base=$mergeBase origin_main=$originMain"
+}
+
+foreach ($scriptPath in @(
+  'scripts/automation/Get-AutonomousRefactorState.ps1',
+  'scripts/ci/Test-CiScripts.ps1',
+  'scripts/ci/Verify-AutonomousRefactorPolicy.ps1'
+)) {
+  $tokens = $null
+  $errors = $null
+  [void][Management.Automation.Language.Parser]::ParseFile(
+    (Resolve-Path -LiteralPath $scriptPath),
+    [ref]$tokens,
+    [ref]$errors
+  )
+  if (@($errors).Count -ne 0) { throw "$scriptPath AST 解析失败" }
+}
+
+cargo fmt --all -- --check
+Assert-NativeSuccess 'Issue #167 rustfmt'
+cargo test -p inputcodex-parity --all-targets --offline
+Assert-NativeSuccess 'Issue #167 Parity tests'
+cargo clippy -p inputcodex-parity --all-targets --offline -- -D warnings
+Assert-NativeSuccess 'Issue #167 Parity Clippy'
+
+pwsh -NoLogo -NoProfile -File scripts/ci/Test-CiScripts.ps1
+Assert-NativeSuccess 'Issue #167 CI 合同'
+$policyOutput = @(
+  pwsh -NoLogo -NoProfile -File scripts/ci/Verify-AutonomousRefactorPolicy.ps1 `
+    -RepositoryRoot . -PolicyPath .github/autonomous-refactor-policy.json
+)
+Assert-NativeSuccess 'Issue #167 自治策略'
+$policy = ($policyOutput -join [Environment]::NewLine) | ConvertFrom-Json -Depth 100
+if ($policy.ok -ne $true -or
+    $policy.policy_sha256 -cne 'sha256:744d60d64d4ff9b27387558ce9a0bebf3205bdac8b17826c4cd3abcecb1a1b55' -or
+    $policy.fixed_file_mutation_tranche.lifecycle_state -cne 'consumed' -or
+    $policy.side_effect_admission_matrix.expected_unassessed_sources -ne 83L -or
+    $policy.side_effect_admission_matrix.implementation_authorized -ne $false) {
+  throw 'Issue #167 自治策略投影漂移'
+}
+pwsh -NoLogo -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #167 Release Audit'
+pwsh -NoLogo -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #167 仓库政策'
+
+$expected = [string[]]@(
+  '.github/autonomous-refactor-policy.json',
+  'CONTEXT.md',
+  'build.md',
+  'crates/inputcodex-parity/src/admission.rs',
+  'crates/inputcodex-parity/src/catalog.rs',
+  'crates/inputcodex-parity/src/lib.rs',
+  'crates/inputcodex-parity/src/validation.rs',
+  'crates/inputcodex-parity/tests/admission_matrix.rs',
+  'crates/inputcodex-parity/tests/catalog_repository.rs',
+  'docs/plans/2026-08-06-issue-167-gate-5-side-effect-admission-matrix-successor-v5.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-08-06-issue-167-gate-5-side-effect-admission-matrix-successor-v5.md',
+  'docs/reports/issue-167-gate-5-side-effect-admission-matrix-successor-v5.md',
+  'docs/workflows/2026-08-06-issue-167-gate-5-side-effect-admission-matrix-successor-v5-runtime.md',
+  'err.md',
+  'parity/README.md',
+  'parity/admission/side-effect-admission-matrix.yml',
+  'scripts/automation/Get-AutonomousRefactorState.ps1',
+  'scripts/ci/Test-CiScripts.ps1',
+  'scripts/ci/Verify-AutonomousRefactorPolicy.ps1'
+)
+$scope = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+foreach ($path in $expected) {
+  if (-not $scope.Add($path)) { throw "Issue #167 重复路径：$path" }
+}
+$payload = [string]::Join("`n", [string[]]$scope) + "`n"
+$scopeHash = 'sha256:' + [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData([Text.UTF8Encoding]::new($false).GetBytes($payload))
+).ToLowerInvariant()
+if ($scope.Count -ne 20 -or
+    $scopeHash -cne 'sha256:2a86b376612663f38302cc9c95cd32a25dfd5f0c9d2b24d770cdcd6d95e70113') {
+  throw "Issue #167 范围漂移：count=$($scope.Count) hash=$scopeHash"
+}
+
+$actual = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+@(
+  git -c core.quotePath=false diff --no-renames --name-only origin/main...HEAD
+  git -c core.quotePath=false diff --cached --no-renames --name-only
+  git -c core.quotePath=false diff --no-renames --name-only
+  git -c core.quotePath=false ls-files --others --exclude-standard
+) | Where-Object { $_ } | ForEach-Object { [void]$actual.Add($_) }
+if (-not [Linq.Enumerable]::SequenceEqual([string[]]$scope, [string[]]$actual, [StringComparer]::Ordinal)) {
+  throw "Issue #167 实际路径漂移：$([string]::Join(', ', [string[]]$actual))"
+}
+
+git diff --check origin/main --
+Assert-NativeSuccess 'Issue #167 空白检查'
+Write-Output "ISSUE_167_LOCAL_VERIFY_OK scope_hash=$scopeHash paths=$($actual.Count)"
+```
+
+期望：Parity 全目标 tests/Clippy 与 rustfmt 通过，治理合同输出 `CI_CONTRACT_GREEN passed=97`，三份
+PowerShell AST 零错误，Policy/Release Audit/Repository Policy 全绿；矩阵精确覆盖 83 个 source，
+write/process/network 为 `16/70`、`2/5`、`4/8`，全部 blocked 且零实现授权。实际范围必须精确为
+二十路径，产品、Parity disposition/count、Cargo、Workflow、Release 与上游快照零变化。
 
 ## Issue #161 嵌套 snapshot 对象边界本地验证
 

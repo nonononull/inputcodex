@@ -200,7 +200,8 @@ pub enum SourceDisposition {
 }
 
 impl SourceDisposition {
-    pub(crate) fn feature_id(&self) -> Option<&str> {
+    #[must_use]
+    pub fn feature_id(&self) -> Option<&str> {
         match self {
             Self::Feature { feature_id } | Self::ExceptionPending { feature_id, .. } => {
                 Some(feature_id)
@@ -276,8 +277,14 @@ impl SourceEntry {
         &self.evidence
     }
 
-    pub(crate) fn disposition(&self) -> Option<&SourceDisposition> {
+    #[must_use]
+    pub fn disposition(&self) -> Option<&SourceDisposition> {
         self.disposition.as_ref()
+    }
+
+    #[must_use]
+    pub fn side_effects(&self) -> &[String] {
+        &self.side_effects
     }
 
     fn has_required_metadata(&self) -> bool {

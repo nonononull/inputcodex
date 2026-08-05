@@ -105,11 +105,12 @@
     "candidate-exhausted"
   ],
   "fixed_file_mutation_tranche": {
-    "schema_version": "inputcodex.fixed-file-mutation-tranche.v1",
+    "schema_version": "inputcodex.fixed-file-mutation-tranche.v2",
     "decision_id": "gate5-fixed-file-mutation-tranche-v1",
     "owner_decision_ref": "https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159072214",
     "retry_resume_ref": "https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159471091",
     "standing_authorization_ref": "https://github.com/nonononull/inputcodex/issues/111",
+    "lifecycle_state": "consumed",
     "repository_batches_max": 2,
     "product_deliveries_max": 1,
     "candidate_features": [
@@ -126,6 +127,25 @@
         "hard-stop"
       ],
       "action": "reopen-owner-decision-issue",
+      "state": "blocked-candidate-exhausted",
+      "next_action": "await-owner-decision"
+    }
+  },
+  "side_effect_admission_matrix": {
+    "schema_version": "inputcodex.side-effect-admission-matrix-policy.v1",
+    "decision_id": "gate5-side-effect-admission-matrix-successor-v5",
+    "owner_decision_ref": "https://github.com/nonononull/inputcodex/issues/140#issuecomment-5194288107",
+    "tracking_issue_number": 167,
+    "tracking_issue_ref": "https://github.com/nonononull/inputcodex/issues/167",
+    "issue_author_login": "nonononull",
+    "baseline_head": "5a7465252b56f7e90673e72d3e02881ac9238141",
+    "repository_prs_max": 1,
+    "product_deliveries_max": 0,
+    "expected_unassessed_sources": 83,
+    "implementation_authorized": false,
+    "terminal": {
+      "owner_issue_ref": "https://github.com/nonononull/inputcodex/issues/140",
+      "action": "close-task-and-reopen-owner-decision-issue",
       "state": "blocked-candidate-exhausted",
       "next_action": "await-owner-decision"
     }

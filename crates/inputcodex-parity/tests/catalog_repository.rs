@@ -6,8 +6,10 @@ use std::{
 };
 
 use inputcodex_parity::{
-    ParityStatus, ValidationCode, parse_feature_catalog, parse_source_index,
-    validate_feature_repository, validate_repository, validate_source_index,
+    AdmissionBucket, AdmissionState, OwnerState, ParityStatus, ValidationCode,
+    parse_feature_catalog, parse_side_effect_admission_matrix, parse_source_index,
+    validate_feature_repository, validate_repository, validate_side_effect_admission_matrix,
+    validate_source_index,
 };
 
 const RELEASE_TAG: &str = "v1.2.44";
@@ -2696,6 +2698,64 @@ fn gate5_watcher_偏好变更只移动两个固定文件入口而不接管完整
             "feature.foundation-platform.watcher-preference-mutation",
             "`46` 份行为合同",
             "`12` 个 fixture manifest",
+        ],
+    );
+}
+
+#[test]
+fn gate5_副作用准入矩阵锁定当前未评估来源且不授权实现() {
+    let text = read_repository_text("parity/admission/side-effect-admission-matrix.yml");
+    let matrix = parse_side_effect_admission_matrix(&text).expect("副作用准入矩阵应可解析");
+    assert!(validate_side_effect_admission_matrix(&matrix).is_empty());
+    assert_eq!(matrix.entries().len(), 83);
+
+    let mut write_features = BTreeSet::new();
+    let mut process_features = BTreeSet::new();
+    let mut network_features = BTreeSet::new();
+    let mut source_counts = [0usize; 3];
+    for entry in matrix.entries() {
+        assert_eq!(entry.owner_state(), OwnerState::Missing);
+        assert_eq!(entry.admission(), AdmissionState::Blocked);
+        assert!(!entry.implementation_authorized());
+        assert!(
+            entry
+                .blocker_refs()
+                .iter()
+                .any(|value| value == "issue:140")
+        );
+        match entry.primary_bucket() {
+            AdmissionBucket::Write => {
+                write_features.insert(entry.feature_id());
+                source_counts[0] += 1;
+            }
+            AdmissionBucket::Process => {
+                process_features.insert(entry.feature_id());
+                source_counts[1] += 1;
+            }
+            AdmissionBucket::Network => {
+                network_features.insert(entry.feature_id());
+                source_counts[2] += 1;
+            }
+        }
+    }
+    assert_eq!((write_features.len(), source_counts[0]), (16, 70));
+    assert_eq!((process_features.len(), source_counts[1]), (2, 5));
+    assert_eq!((network_features.len(), source_counts[2]), (4, 8));
+
+    let summary = validate_repository(&repository_root()).expect("矩阵与现有目录应保持完整闭包");
+    assert_eq!(summary.source_entry_count(), 135);
+    assert_eq!(summary.feature_count(), 46);
+    assert_eq!(summary.contract_count(), 46);
+    assert_eq!(summary.fixture_count(), 12);
+    assert_eq!(summary.coverage_gap_count(), 0);
+
+    assert_repository_text_contains(
+        "parity/README.md",
+        &[
+            "22 个 `unassessed` feature 的 83 个 source",
+            "write 为 16 个 feature /",
+            "70 个 source，process 为 2 个 feature / 5 个 source，network 为 4 个 feature / 8 个 source",
+            "`implementation_authorized=false`",
         ],
     );
 }

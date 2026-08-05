@@ -1,0 +1,669 @@
+schema_version: inputcodex.side-effect-admission-matrix.v1
+release:
+  tag: v1.2.44
+  tag_commit: 77091ccaee4423f35a1b2c51c4ecd703e6201092
+entries:
+  - source_id: core-module:ccs_import
+    feature_id: feature.provider-network.provider-import
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, credential-profile]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:codex_app_state
+    feature_id: feature.provider-network.provider-configuration-application
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, credential-profile, process-controller]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:codex_sqlite
+    feature_id: feature.session-data.local-session-management
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, database-transaction]
+    blocker_refs: [issue:125, issue:134, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:diagnostic_log
+    feature_id: feature.foundation-platform.diagnostics
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, clipboard-mutation]
+    blocker_refs: [issue:140, issue:95]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:dream_skin
+    feature_id: feature.plugin-script.dream-skin-library
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:dream_skin_library
+    feature_id: feature.plugin-script.dream-skin-library
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:env_conflicts
+    feature_id: feature.foundation-platform.environment-conflicts
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [environment-mutation]
+    blocker_refs: [issue:140, issue:85]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:http_client
+    feature_id: feature.provider-network.provider-diagnostics
+    primary_bucket: network
+    owner_state: missing
+    required_owner_kinds: [bounded-network-transport, credential-profile]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:install
+    feature_id: feature.remote-install.entrypoint-installation
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, process-controller]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:model_catalog
+    feature_id: feature.provider-network.model-catalog
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, bounded-network-transport, credential-profile]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:model_suffix
+    feature_id: feature.provider-network.model-catalog
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, bounded-network-transport, credential-profile]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:models
+    feature_id: feature.provider-network.model-catalog
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, bounded-network-transport, credential-profile]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:ports
+    feature_id: feature.provider-network.protocol-proxy
+    primary_bucket: network
+    owner_state: missing
+    required_owner_kinds: [bounded-network-transport, network-listener]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:protocol_proxy
+    feature_id: feature.provider-network.protocol-proxy
+    primary_bucket: network
+    owner_state: missing
+    required_owner_kinds: [bounded-network-transport, network-listener]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:provider_import
+    feature_id: feature.provider-network.provider-import
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, credential-profile]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:proxy
+    feature_id: feature.provider-network.network-environment
+    primary_bucket: network
+    owner_state: missing
+    required_owner_kinds: [bounded-network-transport]
+    blocker_refs: [issue:140, issue:88]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:relay_config
+    feature_id: feature.provider-network.relay-profile-management
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, credential-profile]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:relay_rotation
+    feature_id: feature.provider-network.aggregate-routing
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:relay_switch
+    feature_id: feature.provider-network.provider-configuration-application
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, credential-profile, process-controller]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:settings
+    feature_id: feature.foundation-platform.settings-management
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, settings-document]
+    blocker_refs: [issue:140, issue:94]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:status
+    feature_id: feature.foundation-platform.application-lifecycle
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, process-controller]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:sub2api
+    feature_id: feature.provider-network.sub2api-billing-observation
+    primary_bucket: network
+    owner_state: missing
+    required_owner_kinds: [bounded-network-transport, credential-profile]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:update
+    feature_id: feature.remote-install.application-update
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, bounded-network-transport, process-controller]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:upstream_worktree
+    feature_id: feature.remote-install.upstream-worktree
+    primary_bucket: process
+    owner_state: missing
+    required_owner_kinds: [process-controller]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:watcher
+    feature_id: feature.foundation-platform.watcher
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, process-controller]
+    blocker_refs: [issue:136, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: core-module:zed_remote
+    feature_id: feature.remote-install.zed-remote
+    primary_bucket: process
+    owner_state: missing
+    required_owner_kinds: [process-controller]
+    blocker_refs: [issue:132, issue:134, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: data-module:backup
+    feature_id: feature.session-data.provider-metadata-maintenance
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, database-transaction]
+    blocker_refs: [issue:130, issue:134, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: data-module:provider_sync
+    feature_id: feature.session-data.provider-metadata-maintenance
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, database-transaction]
+    blocker_refs: [issue:130, issue:134, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: data-module:storage
+    feature_id: feature.session-data.local-session-management
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, database-transaction]
+    blocker_refs: [issue:125, issue:134, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:activate_dream_skin_theme
+    feature_id: feature.plugin-script.dream-skin-library
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:apply_pure_api_injection
+    feature_id: feature.provider-network.provider-configuration-application
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, credential-profile, process-controller]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:apply_relay_injection
+    feature_id: feature.provider-network.provider-configuration-application
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, credential-profile, process-controller]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:apply_session_index_cleanup
+    feature_id: feature.session-data.provider-metadata-maintenance
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, database-transaction]
+    blocker_refs: [issue:130, issue:134, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:backfill_relay_profile_from_live
+    feature_id: feature.provider-network.relay-profile-management
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, credential-profile]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:check_update
+    feature_id: feature.remote-install.application-update
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, bounded-network-transport, process-controller]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:clear_logs
+    feature_id: feature.foundation-platform.diagnostics
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, clipboard-mutation]
+    blocker_refs: [issue:140, issue:95]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:clear_relay_injection
+    feature_id: feature.provider-network.provider-configuration-application
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, credential-profile, process-controller]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:confirm_pending_provider_import
+    feature_id: feature.provider-network.provider-import
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, credential-profile]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:copy_diagnostics
+    feature_id: feature.foundation-platform.diagnostics
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, clipboard-mutation]
+    blocker_refs: [issue:140, issue:95]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:create_dream_skin_theme
+    feature_id: feature.plugin-script.dream-skin-library
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:delete_context_entry
+    feature_id: feature.provider-network.context-entry-management
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, credential-profile]
+    blocker_refs: [issue:100, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:delete_dream_skin_theme
+    feature_id: feature.plugin-script.dream-skin-library
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:delete_local_session
+    feature_id: feature.session-data.local-session-management
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, database-transaction]
+    blocker_refs: [issue:125, issue:134, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:diagnose_relay_profile
+    feature_id: feature.provider-network.provider-diagnostics
+    primary_bucket: network
+    owner_state: missing
+    required_owner_kinds: [bounded-network-transport, credential-profile]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:dismiss_pending_provider_import
+    feature_id: feature.provider-network.provider-import
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, credential-profile]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:extract_relay_common_config
+    feature_id: feature.provider-network.context-entry-management
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, credential-profile]
+    blocker_refs: [issue:100, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:fetch_relay_profile_models
+    feature_id: feature.provider-network.model-catalog
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, bounded-network-transport, credential-profile]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:fetch_sub2api_billing
+    feature_id: feature.provider-network.sub2api-billing-observation
+    primary_bucket: network
+    owner_state: missing
+    required_owner_kinds: [bounded-network-transport, credential-profile]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:forget_zed_remote_project
+    feature_id: feature.remote-install.zed-remote
+    primary_bucket: process
+    owner_state: missing
+    required_owner_kinds: [process-controller]
+    blocker_refs: [issue:132, issue:134, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:import_ccs_providers
+    feature_id: feature.provider-network.provider-import
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, credential-profile]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:import_dream_skin_image
+    feature_id: feature.plugin-script.dream-skin-library
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:install_entrypoints
+    feature_id: feature.remote-install.entrypoint-installation
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, process-controller]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:install_watcher
+    feature_id: feature.foundation-platform.watcher
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, process-controller]
+    blocker_refs: [issue:136, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:launch_codex_plus
+    feature_id: feature.foundation-platform.application-lifecycle
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, process-controller]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:list_context_entries
+    feature_id: feature.provider-network.context-entry-management
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, credential-profile]
+    blocker_refs: [issue:100, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:list_dream_skin_themes
+    feature_id: feature.plugin-script.dream-skin-library
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:list_zed_remote_projects
+    feature_id: feature.remote-install.zed-remote
+    primary_bucket: process
+    owner_state: missing
+    required_owner_kinds: [process-controller]
+    blocker_refs: [issue:132, issue:134, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:load_ccs_providers
+    feature_id: feature.provider-network.provider-import
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, credential-profile]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:load_dream_skin_theme
+    feature_id: feature.plugin-script.dream-skin-library
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:load_pending_provider_import
+    feature_id: feature.provider-network.provider-import
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, credential-profile]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:load_provider_sync_targets
+    feature_id: feature.session-data.provider-metadata-maintenance
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, database-transaction]
+    blocker_refs: [issue:130, issue:134, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:open_zed_remote
+    feature_id: feature.remote-install.zed-remote
+    primary_bucket: process
+    owner_state: missing
+    required_owner_kinds: [process-controller]
+    blocker_refs: [issue:132, issue:134, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:perform_update
+    feature_id: feature.remote-install.application-update
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, bounded-network-transport, process-controller]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:preview_session_index_cleanup
+    feature_id: feature.session-data.provider-metadata-maintenance
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, database-transaction]
+    blocker_refs: [issue:130, issue:134, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:read_relay_files
+    feature_id: feature.provider-network.relay-profile-management
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, credential-profile]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:remove_env_conflicts
+    feature_id: feature.foundation-platform.environment-conflicts
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [environment-mutation]
+    blocker_refs: [issue:140, issue:85]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:rename_dream_skin_theme
+    feature_id: feature.plugin-script.dream-skin-library
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:repair_shortcuts
+    feature_id: feature.remote-install.entrypoint-installation
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, process-controller]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:reset_dream_skin_image
+    feature_id: feature.plugin-script.dream-skin-library
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:reset_dream_skin_theme
+    feature_id: feature.plugin-script.dream-skin-library
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:reset_settings
+    feature_id: feature.foundation-platform.settings-management
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, settings-document]
+    blocker_refs: [issue:140, issue:94]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:restart_codex_plus
+    feature_id: feature.foundation-platform.application-lifecycle
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, process-controller]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:save_dream_skin_theme
+    feature_id: feature.plugin-script.dream-skin-library
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:save_relay_file
+    feature_id: feature.provider-network.relay-profile-management
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, credential-profile]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:save_settings
+    feature_id: feature.foundation-platform.settings-management
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, settings-document]
+    blocker_refs: [issue:140, issue:94]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:switch_relay_profile
+    feature_id: feature.provider-network.relay-profile-management
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, credential-profile]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:sync_live_context_entries
+    feature_id: feature.provider-network.context-entry-management
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, credential-profile]
+    blocker_refs: [issue:100, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:sync_providers_now
+    feature_id: feature.session-data.provider-metadata-maintenance
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, database-transaction]
+    blocker_refs: [issue:130, issue:134, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:test_relay_profile
+    feature_id: feature.provider-network.provider-diagnostics
+    primary_bucket: network
+    owner_state: missing
+    required_owner_kinds: [bounded-network-transport, credential-profile]
+    blocker_refs: [issue:126, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:uninstall_entrypoints
+    feature_id: feature.remote-install.entrypoint-installation
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, process-controller]
+    blocker_refs: [issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:uninstall_watcher
+    feature_id: feature.foundation-platform.watcher
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, process-controller]
+    blocker_refs: [issue:136, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:upsert_context_entry
+    feature_id: feature.provider-network.context-entry-management
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, credential-profile]
+    blocker_refs: [issue:100, issue:140]
+    admission: blocked
+    implementation_authorized: false
+  - source_id: tauri-command:write_diagnostic_event
+    feature_id: feature.foundation-platform.diagnostics
+    primary_bucket: write
+    owner_state: missing
+    required_owner_kinds: [application-file-mutation, clipboard-mutation]
+    blocker_refs: [issue:140, issue:95]
+    admission: blocked
+    implementation_authorized: false
