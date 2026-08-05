@@ -1183,6 +1183,16 @@
 - 关联：Issue `#147`、Issue `#149`、PR `#150`、Issue `#151`、`scripts/ci/Verify-ReleaseAuditGate.ps1`、
   `scripts/automation/Get-AutonomousRefactorState.ps1`、`scripts/ci/Test-CiScripts.ps1`。
 
+### 2026-08-05：规范 SHA 使用 `$` 结尾仍可接受尾随 LF
+
+- 环境：Issue `#157` 从 fresh main 修复 Review ref 绝对终止与 snapshot/post-merge 原始标量，PR `#158` 本地和 Hosted 全绿后接受独立 Final Head 复审。
+- 现象：`expected_base` 与 parent SHA 同时追加单个 LF 时，顶层 snapshot、collector 与 post-merge gate 均可通过；精确字符串比较无法识别双方共同携带的非法尾随字符。
+- 根因：原始类型校验只能防数组伪装，不能证明字符串词法规范；.NET 正则 `$` 又允许在最终单个 LF 前匹配。Review URL 已使用 `\z`，但 SHA 边界仍残留旧锚点。
+- 处理：只在 `expected_base` 顶层 schema、parent collector 和 post-merge gate 三个批准边界使用 `\A[0-9a-f]{40}\z`；继续保留原始 property projection、当前 PR 编号、单父 `parent_oid` 与 `expected_base` 精确绑定。
+- 测试纠错：direct gate RED 首先漏提取生产依赖 `Test-ExactStringSet`，随后又因夹具 `parent_count` 为 Int32 提前触发 `POST_MERGE_STRUCTURE`；补齐真实 helper 并固定为 `1L` 后，联合尾随 SHA 才形成独立、可信的 RED。
+- 验证：最终 RED 为 `9` 个精确失败，其中新增三项分别命中 snapshot、collector 与 gate；最小修复后完整治理合同为 `CI_CONTRACT_GREEN passed=93`，两份 PowerShell AST 零错误。Final Head 独立复审与 Hosted 门禁仍由交付阶段形成。
+- 关联：Issue `#157`、PR `#158`、Issue `#159`、`scripts/automation/Get-AutonomousRefactorState.ps1`、`scripts/ci/Test-CiScripts.ps1`。
+
 ## 记录模板
 
 ```text
