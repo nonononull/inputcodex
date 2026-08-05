@@ -1201,6 +1201,23 @@
 - 关联：Issue `#161`、PR `#160` 复审评论、`scripts/automation/Get-AutonomousRefactorState.ps1`、
   `scripts/ci/Test-CiScripts.ps1`。
 
+### 2026-08-05：已消费候选与外部不可用优先级混淆
+
+- 环境：Issue `#163` 从 fresh `main@5a7465252b56f7e90673e72d3e02881ac9238141` 重建
+  `83-source` 副作用准入矩阵，并把固定文件 mutation tranche 标记为 consumed。
+- 现象：既有自治合同仍期待空闲状态选择 Watcher mutation；改为无候选硬停止后，GitHub 不可用夹具又被
+  `NO_AUTHORIZED_CANDIDATE` 抢先分类，遮蔽原有 `blocked-external-retry`。
+- 根因：旧 tranche 只记录静态候选，没有消费生命周期；新增“无授权候选”判断又在确认 GitHub/Paseo
+  快照可用前执行，无法区分真实空集合与外部列表未知。
+- 处理：fixed-file tranche 升级为 `v2 / consumed`，副作用矩阵固定
+  `implementation_authorized=false`，live 永远投影 `selected_candidate=null`。仅当 GitHub 与 Paseo 都明确
+  可用且活动 Issue/PR/merged PR 为空时加入 `NO_AUTHORIZED_CANDIDATE`；外部不可用继续走有限重试。
+- 验证：三条旧期待先稳定失败；更新候选耗尽合同并修正外部优先级后，完整治理套件输出
+  `CI_CONTRACT_GREEN passed=96`。矩阵策略与生产 helper 的字符串、Int64、布尔和嵌套对象数组变异均
+  fail closed。
+- 关联：Issue `#140`、Issue `#163`、`.github/autonomous-refactor-policy.json`、
+  `scripts/automation/Get-AutonomousRefactorState.ps1`、`scripts/ci/Test-CiScripts.ps1`。
+
 ## 记录模板
 
 ```text

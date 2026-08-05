@@ -9,8 +9,8 @@ GitHub Issue、PR 与 Actions。
 
 Gate 3 七成员 Rust Workspace、Gate 4 上游审计/功能目录/性能基线，以及 Gate 5 的平台路径、
 应用概览、版本与启动意图、运行时环境冲突、Relay 环境、设置、诊断日志、Relay 状态、上下文
-条目、本地会话目录、受控会话 Markdown 和 Watcher 偏好状态观察已经建立；Issue `#143` 正在实施
-固定 Watcher 偏好标记 mutation。
+条目、本地会话目录、受控会话 Markdown 和 Watcher 偏好状态观察已经建立；Issue `#143` 已完成固定
+Watcher 偏好标记 mutation，Issue `#163` 正在建立副作用准入矩阵治理控制面。
 该说明只用于选择正确命令，不能替代任务计划和 GitHub 新鲜证据。
 
 ## 文档变更轻量验证
@@ -26,6 +26,126 @@ git diff --check
 ```
 
 路径范围、Markdown 链接和任务特有内容守卫由对应 Session Plan 与 Runtime Workflow 定义。
+
+## Issue #163：83-source 副作用准入矩阵本地验证
+
+本任务必须在 fresh 分支
+`codex/issue-163-gate-5-side-effect-admission-matrix-successor-v3` 执行，基线固定为
+`main@5a7465252b56f7e90673e72d3e02881ac9238141`，产品交付为 `0`。先读取本机时间，再按以下顺序
+执行；任一步失败即停止，不在同一 PR 继续扩大范围。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+function Assert-NativeSuccess {
+  param([Parameter(Mandatory)][string]$Label)
+  if ($LASTEXITCODE -ne 0) { throw "$Label 失败：$LASTEXITCODE" }
+}
+
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+$branch = (git branch --show-current).Trim()
+if ($branch -cne 'codex/issue-163-gate-5-side-effect-admission-matrix-successor-v3') {
+  throw "Issue #163 分支错误：$branch"
+}
+$main = (git rev-parse main).Trim()
+$origin = (git rev-parse origin/main).Trim()
+$base = (git merge-base HEAD main).Trim()
+if ($main -cne '5a7465252b56f7e90673e72d3e02881ac9238141' -or
+    $origin -cne $main -or $base -cne $main) {
+  throw "Issue #163 基线漂移：main=$main origin=$origin base=$base"
+}
+
+foreach ($scriptPath in @(
+  'scripts/automation/Get-AutonomousRefactorState.ps1',
+  'scripts/ci/Test-CiScripts.ps1',
+  'scripts/ci/Verify-AutonomousRefactorPolicy.ps1'
+)) {
+  $tokens = $null
+  $errors = $null
+  [void][Management.Automation.Language.Parser]::ParseFile(
+    (Resolve-Path -LiteralPath $scriptPath), [ref]$tokens, [ref]$errors
+  )
+  if (@($errors).Count -ne 0) { throw "PowerShell AST 失败：$scriptPath" }
+}
+
+cargo test -p inputcodex-parity --all-targets --offline
+Assert-NativeSuccess 'Issue #163 Parity 测试'
+cargo clippy --locked --offline -p inputcodex-parity --all-targets -- -D warnings
+Assert-NativeSuccess 'Issue #163 Clippy'
+cargo fmt --all -- --check
+Assert-NativeSuccess 'Issue #163 rustfmt'
+
+pwsh -NoLogo -NoProfile -File scripts/ci/Test-CiScripts.ps1
+Assert-NativeSuccess 'Issue #163 CI 合同'
+pwsh -NoProfile -File scripts/ci/Verify-AutonomousRefactorPolicy.ps1 `
+  -RepositoryRoot . -PolicyPath .github/autonomous-refactor-policy.json
+Assert-NativeSuccess 'Issue #163 自治策略'
+pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #163 Release Audit'
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #163 仓库政策'
+
+$liveOutput = @(
+  pwsh -NoProfile -File scripts/automation/Get-AutonomousRefactorState.ps1 `
+    -RepositoryRoot . -PolicyPath .github/autonomous-refactor-policy.json -ReportOnly
+)
+Assert-NativeSuccess 'Issue #163 live 状态'
+$live = ($liveOutput -join [Environment]::NewLine) | ConvertFrom-Json -Depth 100
+if ($live.ok -ne $true -or $null -ne $live.selected_candidate) {
+  throw 'Issue #163 live 必须保持零产品候选'
+}
+
+$approved = [string[]]@(
+  '.github/autonomous-refactor-policy.json',
+  'CONTEXT.md',
+  'build.md',
+  'crates/inputcodex-parity/src/admission.rs',
+  'crates/inputcodex-parity/src/catalog.rs',
+  'crates/inputcodex-parity/src/lib.rs',
+  'crates/inputcodex-parity/src/validation.rs',
+  'crates/inputcodex-parity/tests/admission_matrix.rs',
+  'crates/inputcodex-parity/tests/catalog_repository.rs',
+  'docs/plans/2026-08-05-issue-163-gate-5-side-effect-admission-matrix-successor-v3.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-08-05-issue-163-gate-5-side-effect-admission-matrix-successor-v3.md',
+  'docs/reports/issue-163-gate-5-side-effect-admission-matrix-successor-v3.md',
+  'docs/workflows/2026-08-05-issue-163-gate-5-side-effect-admission-matrix-successor-v3-runtime.md',
+  'err.md',
+  'parity/README.md',
+  'parity/admission/side-effect-admission-matrix.yml',
+  'scripts/automation/Get-AutonomousRefactorState.ps1',
+  'scripts/ci/Test-CiScripts.ps1',
+  'scripts/ci/Verify-AutonomousRefactorPolicy.ps1'
+)
+[Array]::Sort($approved, [StringComparer]::Ordinal)
+$payload = [Text.UTF8Encoding]::new($false).GetBytes(($approved -join "`n") + "`n")
+$scopeHash = 'sha256:' + [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData($payload)
+).ToLowerInvariant()
+if ($approved.Count -ne 20 -or
+    $scopeHash -cne 'sha256:02b2827a2bddd2f22fe41ea5b16ea2b2d3ba4dd672dda88e9f91b18b342907cc') {
+  throw "Issue #163 scope hash 漂移：$scopeHash"
+}
+$actual = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+@(
+  git -c core.quotePath=false diff --no-renames --name-only origin/main...HEAD
+  git -c core.quotePath=false diff --cached --no-renames --name-only
+  git -c core.quotePath=false diff --no-renames --name-only
+  git -c core.quotePath=false ls-files --others --exclude-standard
+) | Where-Object { $_ } | ForEach-Object { [void]$actual.Add($_) }
+if (-not [Linq.Enumerable]::SequenceEqual([string[]]$approved, [string[]]$actual, [StringComparer]::Ordinal)) {
+  throw "Issue #163 实际路径漂移：$([string]::Join(', ', [string[]]$actual))"
+}
+
+git diff --check origin/main --
+Assert-NativeSuccess 'Issue #163 Git 空白检查'
+Write-Output "ISSUE_163_LOCAL_VERIFY_OK scope_hash=$scopeHash paths=$($actual.Count)"
+```
+
+预期：Parity 全目标、Clippy、rustfmt、三份 PowerShell AST、`CI_CONTRACT_GREEN passed=96`、自治策略、
+Release Audit、仓库政策与 live 全部通过；Release Audit 为 `current / errors=[]`，live 的
+`selected_candidate` 为 `null`，实际范围精确为 20 路，产品与目录计数保持不变。Hosted CI、Performance、
+独立复审、Squash 和 fresh-main 复验仍是 GitHub 交付门，不由本地结果替代。
 
 ## Issue #161 嵌套 snapshot 对象边界本地验证
 
