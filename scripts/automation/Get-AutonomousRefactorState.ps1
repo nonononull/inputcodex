@@ -869,19 +869,33 @@ function Get-AutonomousPostMergeGateEvaluation {
     }
 
     $mergeCommitOid = Get-PropertyValue $MergedPullRequest 'merge_commit_oid'
-    $evidence = Get-PropertyValue $MergedPullRequest 'evidence'
-    $planningEvidence = Get-PropertyValue $Issue 'planning_evidence'
-    $evidenceTaskKind = (Get-PropertyProjection $evidence 'task_kind').value
-    $planningTaskKind = (Get-PropertyProjection $planningEvidence 'task_kind').value
+    $evidenceProjection = Get-PropertyProjection $MergedPullRequest 'evidence'
+    $evidence = $evidenceProjection.value
+    $evidenceIsObject = $evidenceProjection.exists -and
+        $evidence -is [System.Management.Automation.PSCustomObject]
+    $planningEvidenceProjection = Get-PropertyProjection $Issue 'planning_evidence'
+    $planningEvidence = $planningEvidenceProjection.value
+    $planningEvidenceIsObject = $planningEvidenceProjection.exists -and
+        $planningEvidence -is [System.Management.Automation.PSCustomObject]
+    $evidenceTaskKind = $null
+    if ($evidenceIsObject) {
+        $evidenceTaskKindProjection = Get-PropertyProjection $evidence 'task_kind'
+        $evidenceTaskKind = $evidenceTaskKindProjection.value
+    }
+    $planningTaskKind = $null
+    if ($planningEvidenceIsObject) {
+        $planningTaskKindProjection = Get-PropertyProjection $planningEvidence 'task_kind'
+        $planningTaskKind = $planningTaskKindProjection.value
+    }
     if ([string]$mergeCommitOid -cnotmatch '^[0-9a-f]{40}$' -or
         (Get-PropertyValue $Snapshot 'observed_remote_main') -cne $mergeCommitOid -or
-        $null -eq $evidence -or
+        -not $evidenceIsObject -or
         (Get-PropertyValue $evidence 'valid') -ne $true -or
         (Get-PropertyValue $evidence 'tracking_issue_ref') -cne (Get-PropertyValue $Issue 'url') -or
         (Get-PropertyValue $evidence 'standing_authorization_ref') -cne 'https://github.com/nonononull/inputcodex/issues/111' -or
         (Get-PropertyValue $evidence 'policy_sha256') -cne $PolicySha256 -or
         (Get-PropertyValue $evidence 'final_head') -cne (Get-PropertyValue $MergedPullRequest 'head_oid') -or
-        $null -eq $planningEvidence -or
+        -not $planningEvidenceIsObject -or
         (Get-PropertyValue $planningEvidence 'valid') -ne $true -or
         (Get-PropertyValue $planningEvidence 'scope_count') -ne (Get-PropertyValue $Snapshot 'actual_scope_count') -or
         (Get-PropertyValue $planningEvidence 'scope_hash') -cne (Get-PropertyValue $Snapshot 'actual_scope_hash') -or
@@ -897,8 +911,11 @@ function Get-AutonomousPostMergeGateEvaluation {
         Add-PostMergePendingCode 'POST_MERGE_ORIGIN_MAIN'
     }
 
-    $review = Get-PropertyValue $MergedPullRequest 'review_attestation'
-    if ($null -eq $review -or
+    $reviewProjection = Get-PropertyProjection $MergedPullRequest 'review_attestation'
+    $review = $reviewProjection.value
+    $reviewIsObject = $reviewProjection.exists -and
+        $review -is [System.Management.Automation.PSCustomObject]
+    if (-not $reviewIsObject -or
         (Get-PropertyValue $review 'valid') -ne $true -or
         (Get-PropertyValue $review 'final_head') -cne (Get-PropertyValue $MergedPullRequest 'head_oid') -or
         (Get-PropertyValue $review 'status') -cne 'passed' -or
@@ -906,8 +923,11 @@ function Get-AutonomousPostMergeGateEvaluation {
         Add-PostMergePendingCode 'POST_MERGE_REVIEW'
     }
 
-    $postMerge = Get-PropertyValue $MergedPullRequest 'post_merge'
-    if ($null -eq $postMerge -or
+    $postMergeProjection = Get-PropertyProjection $MergedPullRequest 'post_merge'
+    $postMerge = $postMergeProjection.value
+    $postMergeIsObject = $postMergeProjection.exists -and
+        $postMerge -is [System.Management.Automation.PSCustomObject]
+    if (-not $postMergeIsObject -or
         (Get-PropertyValue $postMerge 'parent_count') -isnot [long] -or
         (Get-PropertyValue $postMerge 'parent_count') -ne 1 -or
         [string](Get-PropertyValue $postMerge 'merge_tree_oid') -cnotmatch '^[0-9a-f]{40}$' -or
@@ -997,28 +1017,34 @@ function Get-AutonomousMergeGateEvaluation {
         Add-PendingCode 'REPOSITORY_MERGE_SETTINGS'
     }
 
-    $evidence = Get-PropertyValue $PullRequest 'evidence'
-    if ($null -eq $evidence -or
+    $evidenceProjection = Get-PropertyProjection $PullRequest 'evidence'
+    $evidence = $evidenceProjection.value
+    $evidenceIsObject = $evidenceProjection.exists -and
+        $evidence -is [System.Management.Automation.PSCustomObject]
+    if (-not $evidenceIsObject -or
         (Get-PropertyValue $evidence 'valid') -isnot [bool] -or
         (Get-PropertyValue $evidence 'valid') -ne $true -or
         (Get-PropertyValue $evidence 'tracking_issue_ref') -cne (Get-PropertyValue $Issue 'url') -or
         (Get-PropertyValue $evidence 'standing_authorization_ref') -cne 'https://github.com/nonononull/inputcodex/issues/111') {
         Add-PendingCode 'EVIDENCE_AUTHORIZATION'
     }
-    if ($null -eq $evidence -or
+    if (-not $evidenceIsObject -or
         (Get-PropertyValue $evidence 'final_head') -cne (Get-PropertyValue $PullRequest 'head_oid') -or
         (Get-PropertyValue $evidence 'final_head') -cne (Get-PropertyValue $Snapshot 'worktree_head')) {
         Add-PendingCode 'EVIDENCE_HEAD'
     }
-    if ($null -eq $evidence -or
+    if (-not $evidenceIsObject -or
         (Get-PropertyValue $evidence 'policy_sha256') -cne $PolicySha256) {
         Add-PendingCode 'EVIDENCE_POLICY'
     }
     $actualScopeCount = Get-PropertyValue $Snapshot 'actual_scope_count'
     $actualScopeHash = Get-PropertyValue $Snapshot 'actual_scope_hash'
-    $planningEvidence = Get-PropertyValue $Issue 'planning_evidence'
-    if ($null -eq $evidence -or
-        $null -eq $planningEvidence -or
+    $planningEvidenceProjection = Get-PropertyProjection $Issue 'planning_evidence'
+    $planningEvidence = $planningEvidenceProjection.value
+    $planningEvidenceIsObject = $planningEvidenceProjection.exists -and
+        $planningEvidence -is [System.Management.Automation.PSCustomObject]
+    if (-not $evidenceIsObject -or
+        -not $planningEvidenceIsObject -or
         (Get-PropertyValue $planningEvidence 'valid') -isnot [bool] -or
         (Get-PropertyValue $planningEvidence 'valid') -ne $true -or
         (Get-PropertyValue $planningEvidence 'scope_count') -isnot [long] -or
@@ -1032,17 +1058,28 @@ function Get-AutonomousMergeGateEvaluation {
         (Get-PropertyValue $evidence 'scope_hash') -cne $actualScopeHash) {
         Add-PendingCode 'EVIDENCE_SCOPE'
     }
-    $evidenceTaskKind = (Get-PropertyProjection $evidence 'task_kind').value
-    $planningTaskKind = (Get-PropertyProjection $planningEvidence 'task_kind').value
+    $evidenceTaskKind = $null
+    if ($evidenceIsObject) {
+        $evidenceTaskKindProjection = Get-PropertyProjection $evidence 'task_kind'
+        $evidenceTaskKind = $evidenceTaskKindProjection.value
+    }
+    $planningTaskKind = $null
+    if ($planningEvidenceIsObject) {
+        $planningTaskKindProjection = Get-PropertyProjection $planningEvidence 'task_kind'
+        $planningTaskKind = $planningTaskKindProjection.value
+    }
     if ($evidenceTaskKind -isnot [string] -or
         $evidenceTaskKind -cne $TaskKind -or
         $planningTaskKind -isnot [string] -or
         $planningTaskKind -cne $TaskKind) {
         Add-PendingCode 'EVIDENCE_TASK_KIND'
     }
-    $reviewAttestation = Get-PropertyValue $PullRequest 'review_attestation'
-    if ($null -eq $evidence -or
-        $null -eq $reviewAttestation -or
+    $reviewAttestationProjection = Get-PropertyProjection $PullRequest 'review_attestation'
+    $reviewAttestation = $reviewAttestationProjection.value
+    $reviewAttestationIsObject = $reviewAttestationProjection.exists -and
+        $reviewAttestation -is [System.Management.Automation.PSCustomObject]
+    if (-not $evidenceIsObject -or
+        -not $reviewAttestationIsObject -or
         (Get-PropertyValue $reviewAttestation 'valid') -isnot [bool] -or
         (Get-PropertyValue $reviewAttestation 'valid') -ne $true -or
         (Get-PropertyValue $reviewAttestation 'final_head') -cne (Get-PropertyValue $PullRequest 'head_oid') -or

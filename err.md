@@ -1183,6 +1183,24 @@
 - 关联：Issue `#147`、Issue `#149`、PR `#150`、Issue `#151`、`scripts/ci/Verify-ReleaseAuditGate.ps1`、
   `scripts/automation/Get-AutonomousRefactorState.ps1`、`scripts/ci/Test-CiScripts.ps1`。
 
+### 2026-08-05：嵌套对象经 PowerShell 管道展开后穿透 merge gate
+
+- 环境：PR `#160` 的独立 Final Head 复审与其 fresh-main successor Issue `#161`。
+- 现象：snapshot 中 `evidence`、`planning_evidence`、`review_attestation` 或 `post_merge` 为单元素
+  `System.Object[]` 时，merge gate 仍可进入 `squash-merge-exact-head`，post-merge gate 仍可进入
+  `close-issue-and-archive`。
+- 根因：gate 先经 `Get-PropertyValue` 读取嵌套容器；函数输出管道把单元素数组展开为内部对象，调用方
+  因而无法再验证原始 JSON 形状。首次修复又把 `task_kind` 放进 `if` 输出表达式，短暂复发同类展开并被
+  既有 upstream-sync 数组负例捕获。
+- 处理：只在 merge/post-merge gate 对四个命名属性使用 `Get-PropertyProjection`，要求原始值为具体
+  `System.Management.Automation.PSCustomObject`；不修改共享 getter。task kind 使用先初始化、再直接属性
+  赋值，禁止通过语句输出管道返回集合。
+- 验证：纠正测试夹具后，可信 RED 为既有 `85` 项通过、新增 `9` 项精确失败；首轮 GREEN 暴露一个旧
+  upstream-sync 回归，纠正后完整合同为 `CI_CONTRACT_GREEN passed=94`。形状矩阵覆盖规范对象、单元素、
+  空、多元素数组与缺失属性，并直接调用两个生产 gate。
+- 关联：Issue `#161`、PR `#160` 复审评论、`scripts/automation/Get-AutonomousRefactorState.ps1`、
+  `scripts/ci/Test-CiScripts.ps1`。
+
 ## 记录模板
 
 ```text

@@ -100,6 +100,7 @@ function Assert-True {
 function Assert-Contains {
     param(
         [Parameter(Mandatory)]
+        [AllowEmptyCollection()]
         [object[]]$Collection,
 
         [Parameter(Mandatory)]
@@ -939,6 +940,31 @@ function Copy-AutonomousStateSnapshot {
     return ($Snapshot | ConvertTo-Json -Depth 30 | ConvertFrom-Json -Depth 30)
 }
 
+function Set-AutonomousNestedObjectShape {
+    param(
+        [Parameter(Mandatory)]$Owner,
+        [Parameter(Mandatory)][string]$PropertyName,
+        [Parameter(Mandatory)]
+        [ValidateSet('valid', 'single-array', 'empty-array', 'multiple-array', 'missing')]
+        [string]$Shape
+    )
+
+    $property = $Owner.PSObject.Properties[$PropertyName]
+    Assert-True -Condition ($null -ne $property) -Message "测试夹具缺少嵌套属性：$PropertyName"
+    if ($Shape -ceq 'missing') {
+        $Owner.PSObject.Properties.Remove($PropertyName)
+        return
+    }
+
+    $original = $property.Value
+    switch ($Shape) {
+        'valid' { return }
+        'single-array' { $property.Value = [object[]]@($original) }
+        'empty-array' { $property.Value = [object[]]@() }
+        'multiple-array' { $property.Value = [object[]]@($original, $original) }
+    }
+}
+
 function Invoke-AutonomousStateCase {
     param(
         [Parameter(Mandatory)][string]$Name,
@@ -1298,6 +1324,68 @@ Invoke-ContractTest -Name '无人值守完整 Final Head 证据进入精确合�
     Assert-Equal -Expected 0 -Actual @($result.Json.merge_gate_pending).Count -Message '精确合并就绪不得残留 pending gate'
 }
 
+Invoke-ContractTest -Name '无人值守 merge gate 拒绝 evidence 单元素对象数组' -Body {
+    $snapshot = New-MergeReadyAutonomousStateSnapshot
+    Set-AutonomousNestedObjectShape -Owner $snapshot.active_prs[0] -PropertyName 'evidence' -Shape 'single-array'
+    $result = Invoke-AutonomousStateCase -Name 'merge-evidence-object-array' -Snapshot $snapshot
+    Assert-AutonomousState -Result $result -ExpectedState 'active-pr-review-ci' -ExpectedAction 'resume-pr'
+    Assert-Contains -Collection @($result.Json.merge_gate_pending) -Expected 'EVIDENCE_AUTHORIZATION' `
+        -Message 'PR evidence 单元素对象数组不得进入精确合并'
+}
+
+Invoke-ContractTest -Name '无人值守 merge gate 拒绝 planning evidence 单元素对象数组' -Body {
+    $snapshot = New-MergeReadyAutonomousStateSnapshot
+    Set-AutonomousNestedObjectShape -Owner $snapshot.active_issues[0] -PropertyName 'planning_evidence' -Shape 'single-array'
+    $result = Invoke-AutonomousStateCase -Name 'merge-planning-object-array' -Snapshot $snapshot
+    Assert-AutonomousState -Result $result -ExpectedState 'active-pr-review-ci' -ExpectedAction 'resume-pr'
+    Assert-Contains -Collection @($result.Json.merge_gate_pending) -Expected 'EVIDENCE_SCOPE' `
+        -Message 'Planning evidence 单元素对象数组不得进入精确合并'
+}
+
+Invoke-ContractTest -Name '无人值守 merge gate 拒绝 review attestation 单元素对象数组' -Body {
+    $snapshot = New-MergeReadyAutonomousStateSnapshot
+    Set-AutonomousNestedObjectShape -Owner $snapshot.active_prs[0] -PropertyName 'review_attestation' -Shape 'single-array'
+    $result = Invoke-AutonomousStateCase -Name 'merge-review-object-array' -Snapshot $snapshot
+    Assert-AutonomousState -Result $result -ExpectedState 'active-pr-review-ci' -ExpectedAction 'resume-pr'
+    Assert-Contains -Collection @($result.Json.merge_gate_pending) -Expected 'INDEPENDENT_REVIEW' `
+        -Message 'Review attestation 单元素对象数组不得进入精确合并'
+}
+
+Invoke-ContractTest -Name '无人值守 merge gate 嵌套对象形状矩阵直接命中生产 gate' -Body {
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyValue')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyProjection')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-ExactStringSet')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-AutonomousWorkflowRunEvidence')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-AutonomousMergeGateEvaluation')
+
+    $requiredWorkflows = [object[]]@((New-ValidAutonomousRefactorPolicy).merge_gate.required_workflows)
+    foreach ($case in @(
+        [pscustomobject]@{ Owner = 'pr'; Property = 'evidence'; Code = 'EVIDENCE_AUTHORIZATION' },
+        [pscustomobject]@{ Owner = 'issue'; Property = 'planning_evidence'; Code = 'EVIDENCE_SCOPE' },
+        [pscustomobject]@{ Owner = 'pr'; Property = 'review_attestation'; Code = 'INDEPENDENT_REVIEW' }
+    )) {
+        foreach ($shape in @('valid', 'single-array', 'empty-array', 'multiple-array', 'missing')) {
+            $snapshot = Copy-AutonomousStateSnapshot (New-MergeReadyAutonomousStateSnapshot)
+            $owner = if ($case.Owner -ceq 'pr') { $snapshot.active_prs[0] } else { $snapshot.active_issues[0] }
+            Set-AutonomousNestedObjectShape -Owner $owner -PropertyName $case.Property -Shape $shape
+            $evaluation = Get-AutonomousMergeGateEvaluation `
+                -PullRequest $snapshot.active_prs[0] `
+                -Issue $snapshot.active_issues[0] `
+                -Snapshot $snapshot `
+                -PolicySha256 $script:AutonomousPolicySha256 `
+                -TaskKind 'refactor' `
+                -RequiredWorkflows $requiredWorkflows
+            if ($shape -ceq 'valid') {
+                Assert-Equal -Expected 0 -Actual @($evaluation.Pending).Count `
+                    -Message "规范嵌套对象不得产生 pending：$($case.Property)"
+            } else {
+                Assert-Contains -Collection @($evaluation.Pending) -Expected $case.Code `
+                    -Message "merge gate 必须拒绝嵌套对象形状：$($case.Property)/$shape"
+            }
+        }
+    }
+}
+
 Invoke-ContractTest -Name '无人值守任一 Final Head 合并门失败均只恢复 PR' -Body {
     foreach ($case in @(
         [pscustomobject]@{ Name = 'draft'; Code = 'PR_DRAFT' },
@@ -1365,6 +1453,78 @@ Invoke-ContractTest -Name '无人值守识别合并后主干验证与收口就�
     $originPending = Invoke-AutonomousStateCase -Name 'post-merge-origin-pending' -Snapshot $originPendingSnapshot
     Assert-AutonomousState -Result $originPending -ExpectedState 'post-merge-verification' -ExpectedAction 'verify-main'
     Assert-Contains -Collection @($originPending.Json.post_merge_gate_pending) -Expected 'POST_MERGE_ORIGIN_MAIN' -Message '合并后 origin/main 未刷新不得关闭 Issue'
+}
+
+Invoke-ContractTest -Name '无人值守 post-merge gate 拒绝 evidence 单元素对象数组' -Body {
+    $snapshot = New-PostMergeAutonomousStateSnapshot
+    Set-AutonomousNestedObjectShape -Owner $snapshot.merged_prs[0] -PropertyName 'evidence' -Shape 'single-array'
+    $result = Invoke-AutonomousStateCase -Name 'post-merge-evidence-object-array' -Snapshot $snapshot
+    Assert-AutonomousState -Result $result -ExpectedState 'post-merge-verification' -ExpectedAction 'verify-main'
+    Assert-Contains -Collection @($result.Json.post_merge_gate_pending) -Expected 'POST_MERGE_EVIDENCE' `
+        -Message '合并后 evidence 单元素对象数组不得关闭 Issue'
+}
+
+Invoke-ContractTest -Name '无人值守 post-merge gate 拒绝 planning evidence 单元素对象数组' -Body {
+    $snapshot = New-PostMergeAutonomousStateSnapshot
+    Set-AutonomousNestedObjectShape -Owner $snapshot.active_issues[0] -PropertyName 'planning_evidence' -Shape 'single-array'
+    $result = Invoke-AutonomousStateCase -Name 'post-merge-planning-object-array' -Snapshot $snapshot
+    Assert-AutonomousState -Result $result -ExpectedState 'post-merge-verification' -ExpectedAction 'verify-main'
+    Assert-Contains -Collection @($result.Json.post_merge_gate_pending) -Expected 'POST_MERGE_EVIDENCE' `
+        -Message '合并后 Planning evidence 单元素对象数组不得关闭 Issue'
+}
+
+Invoke-ContractTest -Name '无人值守 post-merge gate 拒绝 review attestation 单元素对象数组' -Body {
+    $snapshot = New-PostMergeAutonomousStateSnapshot
+    Set-AutonomousNestedObjectShape -Owner $snapshot.merged_prs[0] -PropertyName 'review_attestation' -Shape 'single-array'
+    $result = Invoke-AutonomousStateCase -Name 'post-merge-review-object-array' -Snapshot $snapshot
+    Assert-AutonomousState -Result $result -ExpectedState 'post-merge-verification' -ExpectedAction 'verify-main'
+    Assert-Contains -Collection @($result.Json.post_merge_gate_pending) -Expected 'POST_MERGE_REVIEW' `
+        -Message '合并后 Review attestation 单元素对象数组不得关闭 Issue'
+}
+
+Invoke-ContractTest -Name '无人值守 post-merge gate 拒绝 post_merge 单元素对象数组' -Body {
+    $snapshot = New-PostMergeAutonomousStateSnapshot
+    Set-AutonomousNestedObjectShape -Owner $snapshot.merged_prs[0] -PropertyName 'post_merge' -Shape 'single-array'
+    $result = Invoke-AutonomousStateCase -Name 'post-merge-receipt-object-array' -Snapshot $snapshot
+    Assert-AutonomousState -Result $result -ExpectedState 'post-merge-verification' -ExpectedAction 'verify-main'
+    Assert-Contains -Collection @($result.Json.post_merge_gate_pending) -Expected 'POST_MERGE_STRUCTURE' `
+        -Message 'post_merge 单元素对象数组不得关闭 Issue'
+}
+
+Invoke-ContractTest -Name '无人值守 post-merge gate 嵌套对象形状矩阵直接命中生产 gate' -Body {
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyValue')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyProjection')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-ExactStringSet')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-AutonomousWorkflowRunEvidence')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-AutonomousPostMergeGateEvaluation')
+
+    $requiredWorkflows = [object[]]@((New-ValidAutonomousRefactorPolicy).merge_gate.required_workflows)
+    foreach ($case in @(
+        [pscustomobject]@{ Owner = 'pr'; Property = 'evidence'; Code = 'POST_MERGE_EVIDENCE' },
+        [pscustomobject]@{ Owner = 'issue'; Property = 'planning_evidence'; Code = 'POST_MERGE_EVIDENCE' },
+        [pscustomobject]@{ Owner = 'pr'; Property = 'review_attestation'; Code = 'POST_MERGE_REVIEW' },
+        [pscustomobject]@{ Owner = 'pr'; Property = 'post_merge'; Code = 'POST_MERGE_STRUCTURE' }
+    )) {
+        foreach ($shape in @('valid', 'single-array', 'empty-array', 'multiple-array', 'missing')) {
+            $snapshot = Copy-AutonomousStateSnapshot (New-PostMergeAutonomousStateSnapshot)
+            $owner = if ($case.Owner -ceq 'pr') { $snapshot.merged_prs[0] } else { $snapshot.active_issues[0] }
+            Set-AutonomousNestedObjectShape -Owner $owner -PropertyName $case.Property -Shape $shape
+            $evaluation = Get-AutonomousPostMergeGateEvaluation `
+                -MergedPullRequest $snapshot.merged_prs[0] `
+                -Issue $snapshot.active_issues[0] `
+                -Snapshot $snapshot `
+                -PolicySha256 $script:AutonomousPolicySha256 `
+                -TaskKind 'refactor' `
+                -RequiredWorkflows $requiredWorkflows
+            if ($shape -ceq 'valid') {
+                Assert-Equal -Expected 0 -Actual @($evaluation.Pending).Count `
+                    -Message "规范合并后嵌套对象不得产生 pending：$($case.Property)"
+            } else {
+                Assert-Contains -Collection @($evaluation.Pending) -Expected $case.Code `
+                    -Message "post-merge gate 必须拒绝嵌套对象形状：$($case.Property)/$shape"
+            }
+        }
+    }
 }
 
 Invoke-ContractTest -Name '无人值守 PR 存在时脏工作树优先恢复执行' -Body {

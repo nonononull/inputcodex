@@ -27,6 +27,86 @@ git diff --check
 
 路径范围、Markdown 链接和任务特有内容守卫由对应 Session Plan 与 Runtime Workflow 定义。
 
+## Issue #161 嵌套 snapshot 对象边界本地验证
+
+本任务只修改自治治理脚本，不编译 Rust Workspace。必须从
+`codex/issue-161-gate-5-nested-snapshot-object-boundary-recovery` 执行：
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+function Assert-NativeSuccess {
+  param([Parameter(Mandatory)][string]$Label)
+  if ($LASTEXITCODE -ne 0) { throw "$Label 失败：$LASTEXITCODE" }
+}
+
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+$branch = (git branch --show-current).Trim()
+Assert-NativeSuccess 'Issue #161 分支读取'
+if ($branch -cne 'codex/issue-161-gate-5-nested-snapshot-object-boundary-recovery') {
+  throw "Issue #161 分支错误：$branch"
+}
+
+foreach ($scriptPath in @(
+  'scripts/automation/Get-AutonomousRefactorState.ps1',
+  'scripts/ci/Test-CiScripts.ps1'
+)) {
+  $tokens = $null
+  $errors = $null
+  [void][Management.Automation.Language.Parser]::ParseFile(
+    (Resolve-Path -LiteralPath $scriptPath),
+    [ref]$tokens,
+    [ref]$errors
+  )
+  if (@($errors).Count -ne 0) { throw "$scriptPath AST 解析失败" }
+}
+
+pwsh -NoLogo -NoProfile -File scripts/ci/Test-CiScripts.ps1
+Assert-NativeSuccess 'Issue #161 CI 合同'
+pwsh -NoLogo -NoProfile -File scripts/ci/Verify-AutonomousRefactorPolicy.ps1 `
+  -RepositoryRoot . -PolicyPath .github/autonomous-refactor-policy.json
+Assert-NativeSuccess 'Issue #161 自治策略'
+pwsh -NoLogo -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #161 Release Audit'
+pwsh -NoLogo -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #161 仓库政策'
+
+$approved = [string[]]@(
+  'build.md',
+  'docs/plans/2026-08-05-issue-161-gate-5-nested-snapshot-object-boundary-recovery.md',
+  'docs/plans/sessions/2026-08-05-issue-161-gate-5-nested-snapshot-object-boundary-recovery.md',
+  'docs/reports/issue-161-gate-5-nested-snapshot-object-boundary-recovery.md',
+  'docs/workflows/2026-08-05-issue-161-gate-5-nested-snapshot-object-boundary-recovery-runtime.md',
+  'err.md',
+  'scripts/automation/Get-AutonomousRefactorState.ps1',
+  'scripts/ci/Test-CiScripts.ps1'
+)
+[Array]::Sort($approved, [StringComparer]::Ordinal)
+$actual = [string[]]@(
+  git diff --name-only origin/main...HEAD
+  git diff --cached --name-only
+  git diff --name-only
+  git ls-files --others --exclude-standard
+) | Where-Object { $_ } | Sort-Object -Unique
+if ([string]::Join("`n", $actual) -cne [string]::Join("`n", $approved)) {
+  throw "Issue #161 路径范围漂移：$($actual -join ', ')"
+}
+$payload = [Text.UTF8Encoding]::new($false).GetBytes(($approved -join "`n") + "`n")
+$scopeHash = [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData($payload)
+).ToLowerInvariant()
+if ($scopeHash -cne '8f336603e25d05f96a45c9e57e0adb4724ebbfe19e6194097cc780d036d1ce40') {
+  throw "Issue #161 scope hash 漂移：$scopeHash"
+}
+
+git diff --check origin/main --
+Assert-NativeSuccess 'Issue #161 空白检查'
+Write-Output "ISSUE_161_LOCAL_VERIFY_OK scope_hash=sha256:$scopeHash"
+```
+
+预期治理合同输出 `CI_CONTRACT_GREEN passed=94`，两份 PowerShell AST 零错误，实际范围精确为八路径。
+
 仓库当前有 `upstream/CodexPlusPlus/` 审计快照、七成员纯 Rust Workspace 和首版无缓存三平台 `CI` Workflow。本文件当前提供三十六个检查点：
 
 1. 上游快照、manifest、许可证与提交 blob/mode 验证。
