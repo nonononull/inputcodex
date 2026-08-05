@@ -338,6 +338,24 @@ function Get-GitHubPlanningEvidence {
     return [pscustomobject][ordered]@{ valid = $false }
 }
 
+function Test-GitHubPullRequestCommentRef {
+    param(
+        [AllowNull()]$Ref,
+        [AllowNull()]$PullRequestNumber
+    )
+
+    if ($Ref -isnot [string] -or
+        $PullRequestNumber -isnot [long] -or
+        $PullRequestNumber -lt 1) {
+        return $false
+    }
+    return [regex]::IsMatch(
+        $Ref,
+        "\Ahttps://github\.com/nonononull/inputcodex/pull/$PullRequestNumber#issuecomment-[0-9]+\z",
+        [Text.RegularExpressions.RegexOptions]::CultureInvariant
+    )
+}
+
 function Get-GitHubReviewAttestation {
     param(
         [Parameter(Mandatory)][string]$GhExecutable,
@@ -352,14 +370,17 @@ function Get-GitHubReviewAttestation {
     } | Sort-Object { Get-PropertyValue $_ 'id' } -Descending)
     foreach ($comment in $matches) {
         $body = [string](Get-PropertyValue $comment 'body')
+        $commentRef = (Get-PropertyProjection $comment 'html_url').value
         $headMatch = [regex]::Match($body, '(?m)^- final_head:\s*`?([0-9a-f]{40})`?\s*$')
         $statusMatch = [regex]::Match($body, '(?im)^- result:\s*(PASSED|FAILED)\s*$')
-        if ($headMatch.Success -and $statusMatch.Success) {
+        if ($headMatch.Success -and
+            $statusMatch.Success -and
+            (Test-GitHubPullRequestCommentRef -Ref $commentRef -PullRequestNumber $PullRequestNumber)) {
             return [pscustomobject][ordered]@{
                 valid = $true
                 final_head = $headMatch.Groups[1].Value
                 status = $statusMatch.Groups[1].Value.ToLowerInvariant()
-                ref = Get-PropertyValue $comment 'html_url'
+                ref = $commentRef
             }
         }
     }
@@ -654,8 +675,26 @@ function Get-GitHubPostMergeEvidence {
         (Get-PropertyValue $verification 'verified') -isnot [bool]) {
         throw 'gh post-merge commit schema invalid'
     }
+    $parentOids = [System.Collections.Generic.List[string]]::new()
+    foreach ($parent in $parentsProperty.Value) {
+        if ($parent -isnot [System.Management.Automation.PSCustomObject]) {
+            throw 'gh post-merge parent schema invalid'
+        }
+        $shaProperty = $parent.PSObject.Properties['sha']
+        if ($null -eq $shaProperty -or
+            $shaProperty.Value -isnot [string] -or
+            $shaProperty.Value -cnotmatch '^[0-9a-f]{40}$') {
+            throw 'gh post-merge parent schema invalid'
+        }
+        $parentOids.Add($shaProperty.Value) | Out-Null
+    }
+    $parentOid = $null
+    if ($parentOids.Count -eq 1) {
+        $parentOid = $parentOids[0]
+    }
     return [pscustomobject][ordered]@{
         parent_count = [long]$parentsProperty.Value.Count
+        parent_oid = $parentOid
         merge_tree_oid = $mergeTree
         head_tree_oid = $headTree
         signature_valid = Get-PropertyValue $verification 'verified'
@@ -868,6 +907,7 @@ function Get-AutonomousPostMergeGateEvaluation {
         }
     }
 
+    $pullRequestNumber = (Get-PropertyProjection $MergedPullRequest 'number').value
     $mergeCommitOid = Get-PropertyValue $MergedPullRequest 'merge_commit_oid'
     $evidence = Get-PropertyValue $MergedPullRequest 'evidence'
     $planningEvidence = Get-PropertyValue $Issue 'planning_evidence'
@@ -898,18 +938,29 @@ function Get-AutonomousPostMergeGateEvaluation {
     }
 
     $review = Get-PropertyValue $MergedPullRequest 'review_attestation'
+    $reviewRef = (Get-PropertyProjection $review 'ref').value
+    $evidenceReviewRef = (Get-PropertyProjection $evidence 'independent_review_ref').value
     if ($null -eq $review -or
         (Get-PropertyValue $review 'valid') -ne $true -or
         (Get-PropertyValue $review 'final_head') -cne (Get-PropertyValue $MergedPullRequest 'head_oid') -or
         (Get-PropertyValue $review 'status') -cne 'passed' -or
-        (Get-PropertyValue $review 'ref') -cne (Get-PropertyValue $evidence 'independent_review_ref')) {
+        $reviewRef -cne $evidenceReviewRef -or
+        -not (Test-GitHubPullRequestCommentRef `
+            -Ref $reviewRef -PullRequestNumber $pullRequestNumber) -or
+        -not (Test-GitHubPullRequestCommentRef `
+            -Ref $evidenceReviewRef -PullRequestNumber $pullRequestNumber)) {
         Add-PostMergePendingCode 'POST_MERGE_REVIEW'
     }
 
     $postMerge = Get-PropertyValue $MergedPullRequest 'post_merge'
+    $expectedBase = (Get-PropertyProjection $Snapshot 'expected_base').value
+    $parentCount = (Get-PropertyProjection $postMerge 'parent_count').value
+    $parentOid = (Get-PropertyProjection $postMerge 'parent_oid').value
     if ($null -eq $postMerge -or
-        (Get-PropertyValue $postMerge 'parent_count') -isnot [long] -or
-        (Get-PropertyValue $postMerge 'parent_count') -ne 1 -or
+        $parentCount -isnot [long] -or
+        $parentCount -ne 1 -or
+        $parentOid -isnot [string] -or
+        $parentOid -cne $expectedBase -or
         [string](Get-PropertyValue $postMerge 'merge_tree_oid') -cnotmatch '^[0-9a-f]{40}$' -or
         (Get-PropertyValue $postMerge 'merge_tree_oid') -cne (Get-PropertyValue $postMerge 'head_tree_oid') -or
         (Get-PropertyValue $postMerge 'signature_valid') -isnot [bool] -or
@@ -1040,17 +1091,22 @@ function Get-AutonomousMergeGateEvaluation {
         $planningTaskKind -cne $TaskKind) {
         Add-PendingCode 'EVIDENCE_TASK_KIND'
     }
+    $pullRequestNumber = (Get-PropertyProjection $PullRequest 'number').value
     $reviewAttestation = Get-PropertyValue $PullRequest 'review_attestation'
+    $reviewRef = (Get-PropertyProjection $reviewAttestation 'ref').value
+    $evidenceReviewRef = (Get-PropertyProjection $evidence 'independent_review_ref').value
     if ($null -eq $evidence -or
         $null -eq $reviewAttestation -or
         (Get-PropertyValue $reviewAttestation 'valid') -isnot [bool] -or
         (Get-PropertyValue $reviewAttestation 'valid') -ne $true -or
         (Get-PropertyValue $reviewAttestation 'final_head') -cne (Get-PropertyValue $PullRequest 'head_oid') -or
         (Get-PropertyValue $reviewAttestation 'status') -cne 'passed' -or
-        (Get-PropertyValue $reviewAttestation 'ref') -cne (Get-PropertyValue $evidence 'independent_review_ref') -or
+        $reviewRef -cne $evidenceReviewRef -or
         (Get-PropertyValue $evidence 'independent_review_status') -cne 'passed' -or
-        [string](Get-PropertyValue $evidence 'independent_review_ref') -cnotmatch
-            '^https://github\.com/nonononull/inputcodex/(pull|issues)/[0-9]+#issuecomment-[0-9]+$') {
+        -not (Test-GitHubPullRequestCommentRef `
+            -Ref $reviewRef -PullRequestNumber $pullRequestNumber) -or
+        -not (Test-GitHubPullRequestCommentRef `
+            -Ref $evidenceReviewRef -PullRequestNumber $pullRequestNumber)) {
         Add-PendingCode 'INDEPENDENT_REVIEW'
     }
 
@@ -1612,6 +1668,7 @@ $worktreeClean = Get-PropertyValue $snapshot 'worktree_clean'
 $repositorySettingsValue = Get-PropertyValue $snapshot 'repository_settings'
 $actualScopeCount = Get-PropertyValue $snapshot 'actual_scope_count'
 $actualScopeHash = Get-PropertyValue $snapshot 'actual_scope_hash'
+$expectedBaseValue = (Get-PropertyProjection $snapshot 'expected_base').value
 $activeIssuesValue = $null
 $activePrsValue = $null
 $mergedPrsValue = $null
@@ -1646,7 +1703,8 @@ if ((Get-PropertyValue $snapshot 'schema_version') -cne 'inputcodex.autonomous-r
     $mergedPrsValue -isnot [System.Array] -or
     [string](Get-PropertyValue $snapshot 'observed_origin_main') -cnotmatch $shaPattern -or
     [string](Get-PropertyValue $snapshot 'observed_remote_main') -cnotmatch $shaPattern -or
-    [string](Get-PropertyValue $snapshot 'expected_base') -cnotmatch $shaPattern -or
+    $expectedBaseValue -isnot [string] -or
+    $expectedBaseValue -cnotmatch $shaPattern -or
     [string](Get-PropertyValue $snapshot 'worktree_head') -cnotmatch $shaPattern) {
     Write-Result -ExitCode 11 -Value ([pscustomobject][ordered]@{
         schema_version = 1
@@ -1737,12 +1795,12 @@ if ((Get-PropertyValue $snapshot 'release_audit') -cne 'current' -and
     $reasonCodes.Add('RELEASE_AUDIT_STALE') | Out-Null
 }
 if (-not $isPostMergeTransition -and
-    (Get-PropertyValue $snapshot 'expected_base') -cne (Get-PropertyValue $snapshot 'observed_origin_main')) {
+    $expectedBaseValue -cne (Get-PropertyValue $snapshot 'observed_origin_main')) {
     $reasonCodes.Add('ORIGIN_MAIN_DRIFT') | Out-Null
 }
 if (-not $isPostMergeTransition -and (
     (Get-PropertyValue $snapshot 'observed_origin_main') -cne (Get-PropertyValue $snapshot 'observed_remote_main') -or
-    (Get-PropertyValue $snapshot 'expected_base') -cne (Get-PropertyValue $snapshot 'observed_remote_main'))) {
+    $expectedBaseValue -cne (Get-PropertyValue $snapshot 'observed_remote_main'))) {
     $reasonCodes.Add('REMOTE_MAIN_DRIFT') | Out-Null
 }
 if ($branchValue -in @('main', 'master') -and $worktreeClean -ne $true) {
@@ -1795,7 +1853,7 @@ if ($isCandidateExhaustedTask) {
         $worktreeClean -ne $true -or
         (Get-PropertyValue $snapshot 'worktree_head') -cne (Get-PropertyValue $snapshot 'observed_origin_main') -or
         (Get-PropertyValue $snapshot 'worktree_head') -cne (Get-PropertyValue $snapshot 'observed_remote_main') -or
-        (Get-PropertyValue $snapshot 'worktree_head') -cne (Get-PropertyValue $snapshot 'expected_base') -or
+        (Get-PropertyValue $snapshot 'worktree_head') -cne $expectedBaseValue -or
         $actualScopeCount -ne 0L -or
         $actualScopeHash -cne $emptyScopeHash -or
         $releaseAudit -cne 'current') {
@@ -1896,7 +1954,7 @@ Write-Result -ExitCode 0 -Value ([pscustomobject][ordered]@{
     active_issue = if ($activeIssues.Count -eq 1) { $activeIssues[0] } else { $null }
     active_pr = if ($activePrs.Count -eq 1) { $activePrs[0] } else { $null }
     merged_pr = if ($linkedMergedPrs.Count -eq 1) { $linkedMergedPrs[0] } else { $null }
-    expected_base = Get-PropertyValue $snapshot 'expected_base'
+    expected_base = $expectedBaseValue
     observed_origin_main = Get-PropertyValue $snapshot 'observed_origin_main'
     observed_remote_main = Get-PropertyValue $snapshot 'observed_remote_main'
     observed_head = Get-PropertyValue $snapshot 'worktree_head'

@@ -1183,6 +1183,15 @@
 - 关联：Issue `#147`、Issue `#149`、PR `#150`、Issue `#151`、`scripts/ci/Verify-ReleaseAuditGate.ps1`、
   `scripts/automation/Get-AutonomousRefactorState.ps1`、`scripts/ci/Test-CiScripts.ps1`。
 
+### 2026-08-05：正则 `$` 与属性 getter 再次放宽自治交付身份
+
+- 环境：PR `#156` 从 clean main 修复 Review ref 当前 PR 绑定与 post-merge 父提交绑定，Hosted 门禁全绿后接受独立 Final Head 复审。
+- 现象：Review comment ref 追加单个 LF 后仍能通过 helper、collector、merge 与 post-merge gate；`expected_base: [sha]` 与 `parent_count: [1]` 也可被当作合法标量，最终进入 closeout。
+- 根因：.NET 正则 `$` 允许在字符串末尾单个 LF 前匹配；同时 `Get-PropertyValue` 经 PowerShell 输出管道枚举单元素数组，调用方再做字符串转换或 Int64 检查时已经丢失原始 JSON 形状。该集合展开根因与本文件 2026-08-04 的严格 JSON 条目相同，但本次复发位于 snapshot 与 post-merge 新边界。
+- 处理：Review ref 使用 `\A...\z` 且绑定当前 PR 编号，collector 与两个 gate 共用同一 helper；`expected_base`、`parent_count`、Review ref 与 `parent_oid` 均从 `PSPropertyInfo.Value` 投影后验证原始类型；post-merge collector 逐父对象验证 SHA 并只在单父时交付 `parent_oid`。
+- 验证：新增生产 helper、collector、merge/post-merge 与顶层 snapshot 反例先形成 `6` 个精确 RED，既有失败面之外无漂移；最小修复后完整治理合同为 `CI_CONTRACT_GREEN passed=90`，两份 PowerShell AST 零错误。Final Head 独立复审与 Hosted 门禁仍由交付阶段另行形成。
+- 关联：Issue `#155`、PR `#156`、Issue `#157`、`scripts/automation/Get-AutonomousRefactorState.ps1`、`scripts/ci/Test-CiScripts.ps1`。
+
 ## 记录模板
 
 ```text
