@@ -688,6 +688,7 @@ function Get-FixedFileMutationTrancheProjection {
             -Actual @($Value.PSObject.Properties.Name) `
             -Expected @(
                 'schema_version',
+                'lifecycle_state',
                 'decision_id',
                 'owner_decision_ref',
                 'retry_resume_ref',
@@ -704,6 +705,7 @@ function Get-FixedFileMutationTrancheProjection {
     $candidateFeaturesProjection = Get-PropertyProjection $Value 'candidate_features'
     $candidateFeatures = $candidateFeaturesProjection.value
     $schemaVersion = $Value.PSObject.Properties['schema_version'].Value
+    $lifecycleState = $Value.PSObject.Properties['lifecycle_state'].Value
     $decisionId = $Value.PSObject.Properties['decision_id'].Value
     $ownerDecisionRef = $Value.PSObject.Properties['owner_decision_ref'].Value
     $retryResumeRef = $Value.PSObject.Properties['retry_resume_ref'].Value
@@ -737,7 +739,9 @@ function Get-FixedFileMutationTrancheProjection {
     $reopenOn = $reopenOnProjection.value
     $stringFieldsValid =
         $schemaVersion -is [string] -and
-        $schemaVersion -ceq 'inputcodex.fixed-file-mutation-tranche.v1' -and
+        $schemaVersion -ceq 'inputcodex.fixed-file-mutation-tranche.v2' -and
+        $lifecycleState -is [string] -and
+        $lifecycleState -ceq 'consumed' -and
         $decisionId -is [string] -and
         $decisionId -ceq 'gate5-fixed-file-mutation-tranche-v1' -and
         $ownerDecisionRef -is [string] -and
@@ -781,6 +785,7 @@ function Get-FixedFileMutationTrancheProjection {
     return [pscustomobject][ordered]@{
         valid = $true
         schema_version = $schemaVersion
+        lifecycle_state = $lifecycleState
         decision_id = $decisionId
         owner_decision_ref = $ownerDecisionRef
         retry_resume_ref = $retryResumeRef
@@ -800,6 +805,220 @@ function Get-FixedFileMutationTrancheProjection {
             next_action = $terminalNextAction
         }
     }
+}
+
+function Get-SideEffectAdmissionMatrixProjection {
+    param([AllowNull()]$Value)
+
+    $invalid = [pscustomobject][ordered]@{ valid = $false }
+    if ($Value -isnot [pscustomobject] -or
+        -not (Test-ExactStringSet -Actual @($Value.PSObject.Properties.Name) -Expected @(
+            'schema_version',
+            'decision_id',
+            'owner_decision_ref',
+            'planning_freeze_ref',
+            'standing_authorization_ref',
+            'baseline',
+            'successor_issue',
+            'repository_prs_max',
+            'product_deliveries_max',
+            'unassessed_source_count',
+            'implementation_authorized',
+            'terminal'
+        ))) {
+        return $invalid
+    }
+
+    $schemaVersion = $Value.PSObject.Properties['schema_version'].Value
+    $decisionId = $Value.PSObject.Properties['decision_id'].Value
+    $ownerDecisionRef = $Value.PSObject.Properties['owner_decision_ref'].Value
+    $planningFreezeRef = $Value.PSObject.Properties['planning_freeze_ref'].Value
+    $standingAuthorizationRef = $Value.PSObject.Properties['standing_authorization_ref'].Value
+    $baseline = $Value.PSObject.Properties['baseline'].Value
+    $successorIssue = $Value.PSObject.Properties['successor_issue'].Value
+    $repositoryPrsMax = $Value.PSObject.Properties['repository_prs_max'].Value
+    $productDeliveriesMax = $Value.PSObject.Properties['product_deliveries_max'].Value
+    $unassessedSourceCount = $Value.PSObject.Properties['unassessed_source_count'].Value
+    $implementationAuthorized = $Value.PSObject.Properties['implementation_authorized'].Value
+    $terminal = $Value.PSObject.Properties['terminal'].Value
+
+    if ($baseline -isnot [pscustomobject] -or
+        -not (Test-ExactStringSet -Actual @($baseline.PSObject.Properties.Name) -Expected @('commit', 'tree')) -or
+        $successorIssue -isnot [pscustomobject] -or
+        -not (Test-ExactStringSet -Actual @($successorIssue.PSObject.Properties.Name) -Expected @('number', 'url', 'author_login')) -or
+        $terminal -isnot [pscustomobject] -or
+        -not (Test-ExactStringSet -Actual @($terminal.PSObject.Properties.Name) -Expected @(
+            'owner_issue_ref',
+            'hard_stop_action',
+            'completed_action',
+            'pending_action',
+            'state',
+            'next_action'
+        ))) {
+        return $invalid
+    }
+
+    $baselineCommit = $baseline.PSObject.Properties['commit'].Value
+    $baselineTree = $baseline.PSObject.Properties['tree'].Value
+    $successorNumber = $successorIssue.PSObject.Properties['number'].Value
+    $successorUrl = $successorIssue.PSObject.Properties['url'].Value
+    $successorAuthor = $successorIssue.PSObject.Properties['author_login'].Value
+    $terminalOwnerIssueRef = $terminal.PSObject.Properties['owner_issue_ref'].Value
+    $terminalHardStopAction = $terminal.PSObject.Properties['hard_stop_action'].Value
+    $terminalCompletedAction = $terminal.PSObject.Properties['completed_action'].Value
+    $terminalPendingAction = $terminal.PSObject.Properties['pending_action'].Value
+    $terminalState = $terminal.PSObject.Properties['state'].Value
+    $terminalNextAction = $terminal.PSObject.Properties['next_action'].Value
+
+    if ($schemaVersion -isnot [string] -or
+        $schemaVersion -cne 'inputcodex.side-effect-admission-matrix-policy.v1' -or
+        $decisionId -isnot [string] -or
+        $decisionId -cne 'gate5-side-effect-admission-matrix-successor-v7' -or
+        $ownerDecisionRef -isnot [string] -or
+        $ownerDecisionRef -cne 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5201101496' -or
+        $planningFreezeRef -isnot [string] -or
+        $planningFreezeRef -cne 'https://github.com/nonononull/inputcodex/issues/171#issuecomment-5201183608' -or
+        $standingAuthorizationRef -isnot [string] -or
+        $standingAuthorizationRef -cne 'https://github.com/nonononull/inputcodex/issues/111' -or
+        $baselineCommit -isnot [string] -or
+        $baselineCommit -cne '5a7465252b56f7e90673e72d3e02881ac9238141' -or
+        $baselineTree -isnot [string] -or
+        $baselineTree -cne '348a55ce78d1c9da408238b6d9b63cb2e49e32ba' -or
+        $successorNumber -isnot [long] -or
+        $successorNumber -ne 171L -or
+        $successorUrl -isnot [string] -or
+        $successorUrl -cne 'https://github.com/nonononull/inputcodex/issues/171' -or
+        $successorAuthor -isnot [string] -or
+        $successorAuthor -cne 'nonononull' -or
+        $repositoryPrsMax -isnot [long] -or
+        $repositoryPrsMax -ne 1L -or
+        $productDeliveriesMax -isnot [long] -or
+        $productDeliveriesMax -ne 0L -or
+        $unassessedSourceCount -isnot [long] -or
+        $unassessedSourceCount -ne 83L -or
+        $implementationAuthorized -isnot [bool] -or
+        $implementationAuthorized -ne $false -or
+        $terminalOwnerIssueRef -isnot [string] -or
+        $terminalOwnerIssueRef -cne 'https://github.com/nonononull/inputcodex/issues/140' -or
+        $terminalHardStopAction -isnot [string] -or
+        $terminalHardStopAction -cne 'close-task-and-reopen-owner-decision-issue' -or
+        $terminalCompletedAction -isnot [string] -or
+        $terminalCompletedAction -cne 'close-task-and-reopen-owner-decision-issue' -or
+        $terminalPendingAction -isnot [string] -or
+        $terminalPendingAction -cne 'verify-main' -or
+        $terminalState -isnot [string] -or
+        $terminalState -cne 'blocked-candidate-exhausted' -or
+        $terminalNextAction -isnot [string] -or
+        $terminalNextAction -cne 'await-owner-decision') {
+        return $invalid
+    }
+
+    return [pscustomobject][ordered]@{
+        valid = $true
+        schema_version = $schemaVersion
+        decision_id = $decisionId
+        owner_decision_ref = $ownerDecisionRef
+        planning_freeze_ref = $planningFreezeRef
+        standing_authorization_ref = $standingAuthorizationRef
+        baseline = [pscustomobject][ordered]@{
+            commit = $baselineCommit
+            tree = $baselineTree
+        }
+        successor_issue = [pscustomobject][ordered]@{
+            number = $successorNumber
+            url = $successorUrl
+            author_login = $successorAuthor
+        }
+        repository_prs_max = $repositoryPrsMax
+        product_deliveries_max = $productDeliveriesMax
+        unassessed_source_count = $unassessedSourceCount
+        implementation_authorized = $implementationAuthorized
+        terminal = [pscustomobject][ordered]@{
+            owner_issue_ref = $terminalOwnerIssueRef
+            hard_stop_action = $terminalHardStopAction
+            completed_action = $terminalCompletedAction
+            pending_action = $terminalPendingAction
+            state = $terminalState
+            next_action = $terminalNextAction
+        }
+    }
+}
+
+function Test-ExactRawStringProperty {
+    param(
+        [AllowNull()]$Value,
+        [Parameter(Mandatory)][string]$Name,
+        [Parameter(Mandatory)][string]$Expected
+    )
+
+    if ($Value -isnot [pscustomobject]) {
+        return $false
+    }
+    $property = $Value.PSObject.Properties[$Name]
+    return ($null -ne $property -and
+        $property.Value -is [string] -and
+        $property.Value -ceq $Expected)
+}
+
+function Test-SideEffectSuccessorIssueClaim {
+    param(
+        [AllowNull()]$Issue,
+        [Parameter(Mandatory)][long]$ExpectedNumber,
+        [Parameter(Mandatory)][string]$ExpectedUrl
+    )
+
+    if ($Issue -isnot [pscustomobject]) {
+        return $false
+    }
+    $numberProperty = $Issue.PSObject.Properties['number']
+    $urlProperty = $Issue.PSObject.Properties['url']
+    $numberValues = if ($null -eq $numberProperty) { @() } else { @($numberProperty.Value) }
+    $urlValues = if ($null -eq $urlProperty) { @() } else { @($urlProperty.Value) }
+    $numberClaim = @($numberValues | Where-Object {
+        ($_ -is [long] -and $_ -eq $ExpectedNumber) -or
+        ($_ -is [string] -and $_ -ceq [string]$ExpectedNumber) -or
+        ($_ -is [double] -and $_ -eq [double]$ExpectedNumber)
+    }).Count -gt 0
+    $urlClaim = @($urlValues | Where-Object {
+        $_ -is [string] -and $_ -ceq $ExpectedUrl
+    }).Count -gt 0
+    return ($numberClaim -or $urlClaim)
+}
+
+function Test-SideEffectSuccessorIssueIdentity {
+    param(
+        [AllowNull()]$Issue,
+        [Parameter(Mandatory)]$ExpectedIssue
+    )
+
+    if ($Issue -isnot [pscustomobject] -or $ExpectedIssue -isnot [pscustomobject]) {
+        return $false
+    }
+    $numberProperty = $Issue.PSObject.Properties['number']
+    $expectedNumberProperty = $ExpectedIssue.PSObject.Properties['number']
+    $expectedUrlProperty = $ExpectedIssue.PSObject.Properties['url']
+    $expectedAuthorProperty = $ExpectedIssue.PSObject.Properties['author_login']
+    return ($null -ne $numberProperty -and
+        $null -ne $expectedNumberProperty -and
+        $numberProperty.Value -is [long] -and
+        $numberProperty.Value -eq $expectedNumberProperty.Value -and
+        (Test-ExactRawStringProperty -Value $Issue -Name 'url' -Expected $expectedUrlProperty.Value) -and
+        (Test-ExactRawStringProperty -Value $Issue -Name 'author_login' -Expected $expectedAuthorProperty.Value))
+}
+
+function Test-SideEffectSuccessorPrClaim {
+    param(
+        [AllowNull()]$PullRequest,
+        [Parameter(Mandatory)][string]$ExpectedIssueUrl
+    )
+
+    if ($PullRequest -isnot [pscustomobject]) {
+        return $false
+    }
+    $evidenceProperty = $PullRequest.PSObject.Properties['evidence']
+    return ($null -ne $evidenceProperty -and
+        $evidenceProperty.Value -is [pscustomobject] -and
+        (Test-ExactRawStringProperty -Value $evidenceProperty.Value -Name 'tracking_issue_ref' -Expected $ExpectedIssueUrl))
 }
 
 function Test-AutonomousWorkflowRunEvidence {
@@ -1579,6 +1798,19 @@ if ((Get-PropertyValue $fixedFileMutationTranche 'valid') -ne $true) {
         error_code = 'AUTONOMOUS_STATE_POLICY_INVALID'
     })
 }
+$sideEffectAdmissionProperty = $policyResult.PSObject.Properties['side_effect_admission_matrix']
+$sideEffectAdmissionMatrix = if ($null -eq $sideEffectAdmissionProperty) {
+    [pscustomobject][ordered]@{ valid = $false }
+} else {
+    Get-SideEffectAdmissionMatrixProjection $sideEffectAdmissionProperty.Value
+}
+if ((Get-PropertyValue $sideEffectAdmissionMatrix 'valid') -ne $true) {
+    Write-Result -ExitCode 12 -Value ([pscustomobject][ordered]@{
+        schema_version = 1
+        ok = $false
+        error_code = 'AUTONOMOUS_STATE_POLICY_INVALID'
+    })
+}
 
 $snapshotSource = 'live'
 if (-not [string]::IsNullOrWhiteSpace($SnapshotPath)) {
@@ -1695,16 +1927,50 @@ if ((Get-PropertyValue $snapshot 'schema_version') -cne 'inputcodex.autonomous-r
 $markerIssues = @($activeIssuesValue)
 $markerPrs = @($activePrsValue)
 $markerMergedPrs = @($mergedPrsValue)
+$expectedSuccessorIssue = $sideEffectAdmissionMatrix.PSObject.Properties['successor_issue'].Value
+$expectedSuccessorNumber = $expectedSuccessorIssue.PSObject.Properties['number'].Value
+$expectedSuccessorUrl = $expectedSuccessorIssue.PSObject.Properties['url'].Value
+$expectedSuccessorAuthor = $expectedSuccessorIssue.PSObject.Properties['author_login'].Value
+$isSideEffectSuccessorBranch = $branchValue.StartsWith(
+    "codex/issue-$expectedSuccessorNumber-",
+    [StringComparison]::Ordinal
+)
+$successorIssueClaims = @($markerIssues | Where-Object {
+    Test-SideEffectSuccessorIssueClaim -Issue $_ -ExpectedNumber $expectedSuccessorNumber -ExpectedUrl $expectedSuccessorUrl
+})
+$successorPrClaims = @($markerPrs | Where-Object {
+    Test-SideEffectSuccessorPrClaim -PullRequest $_ -ExpectedIssueUrl $expectedSuccessorUrl
+})
+$successorMergedPrClaims = @($markerMergedPrs | Where-Object {
+    Test-SideEffectSuccessorPrClaim -PullRequest $_ -ExpectedIssueUrl $expectedSuccessorUrl
+})
+$isSideEffectSuccessorWorkflow = $isSideEffectSuccessorBranch -or
+    $successorIssueClaims.Count -gt 0 -or
+    $successorPrClaims.Count -gt 0 -or
+    $successorMergedPrClaims.Count -gt 0
+$sideEffectSuccessorIdentityValid = $true
+if ($isSideEffectSuccessorWorkflow) {
+    $exactSuccessorIssues = @($markerIssues | Where-Object {
+        Test-SideEffectSuccessorIssueIdentity -Issue $_ -ExpectedIssue $expectedSuccessorIssue
+    })
+    $sideEffectSuccessorIdentityValid = $exactSuccessorIssues.Count -eq 1
+    foreach ($pullRequest in @($markerPrs) + @($markerMergedPrs)) {
+        if (-not (Test-ExactRawStringProperty -Value $pullRequest -Name 'author_login' -Expected $expectedSuccessorAuthor) -or
+            -not (Test-ExactRawStringProperty -Value $pullRequest -Name 'head_owner_login' -Expected $expectedSuccessorAuthor)) {
+            $sideEffectSuccessorIdentityValid = $false
+        }
+    }
+}
 $activeIssues = @($markerIssues | Where-Object {
-    (Get-PropertyValue $_ 'author_login') -ceq 'nonononull'
+    Test-ExactRawStringProperty -Value $_ -Name 'author_login' -Expected 'nonononull'
 })
 $activePrs = @($markerPrs | Where-Object {
-    (Get-PropertyValue $_ 'author_login') -ceq 'nonononull' -and
-    (Get-PropertyValue $_ 'head_owner_login') -ceq 'nonononull'
+    (Test-ExactRawStringProperty -Value $_ -Name 'author_login' -Expected 'nonononull') -and
+    (Test-ExactRawStringProperty -Value $_ -Name 'head_owner_login' -Expected 'nonononull')
 })
 $trustedMergedPrs = @($markerMergedPrs | Where-Object {
-    (Get-PropertyValue $_ 'author_login') -ceq 'nonononull' -and
-    (Get-PropertyValue $_ 'head_owner_login') -ceq 'nonononull'
+    (Test-ExactRawStringProperty -Value $_ -Name 'author_login' -Expected 'nonononull') -and
+    (Test-ExactRawStringProperty -Value $_ -Name 'head_owner_login' -Expected 'nonononull')
 })
 $linkedMergedPrs = @()
 if ($activeIssues.Count -eq 1) {
@@ -1720,6 +1986,9 @@ $ignoredUntrustedPrMarkers = $markerPrs.Count - $activePrs.Count
 $ignoredUntrustedMergedPrMarkers = $markerMergedPrs.Count - $trustedMergedPrs.Count
 $activeWriterCount = Get-PropertyValue $snapshot 'active_writer_count'
 $reasonCodes = [System.Collections.Generic.List[string]]::new()
+if ($isSideEffectSuccessorWorkflow -and -not $sideEffectSuccessorIdentityValid) {
+    $reasonCodes.Add('SIDE_EFFECT_SUCCESSOR_IDENTITY_INVALID') | Out-Null
+}
 $activeTaskKind = $null
 if ($activeIssues.Count -eq 1) {
     $activeTaskKindProjection = Get-PropertyProjection $activeIssues[0] 'task_kind'
@@ -1875,9 +2144,14 @@ if ($reasonCodes.Count -eq 0 -and $isPostMergeTransition) {
 }
 
 $hardStopReasons = @($reasonCodes)
+$sideEffectTerminal = $sideEffectAdmissionMatrix.PSObject.Properties['terminal'].Value
 if ($hardStopReasons.Count -ne 0) {
     $state = 'blocked-hard-stop'
-    $nextAction = 'stop'
+    $nextAction = if ($isSideEffectSuccessorWorkflow) {
+        $sideEffectTerminal.PSObject.Properties['hard_stop_action'].Value
+    } else {
+        'stop'
+    }
     $allReasons = $hardStopReasons
 } elseif ($externalReasons.Count -ne 0) {
     $state = 'blocked-external-retry'
@@ -1893,7 +2167,17 @@ if ($hardStopReasons.Count -ne 0) {
     $allReasons = @()
 } elseif ($isPostMergeTransition) {
     $state = 'post-merge-verification'
-    $nextAction = if ($postMergeGatePending.Count -eq 0) { 'close-issue-and-archive' } else { 'verify-main' }
+    $nextAction = if ($postMergeGatePending.Count -ne 0) {
+        if ($isSideEffectSuccessorWorkflow) {
+            $sideEffectTerminal.PSObject.Properties['pending_action'].Value
+        } else {
+            'verify-main'
+        }
+    } elseif ($isSideEffectSuccessorWorkflow) {
+        $sideEffectTerminal.PSObject.Properties['completed_action'].Value
+    } else {
+        'close-issue-and-archive'
+    }
     $allReasons = @()
 } elseif ($activePrs.Count -eq 1 -and $mergeGatePending.Count -eq 0) {
     $state = 'merge-ready-exact-head'
@@ -1908,8 +2192,8 @@ if ($hardStopReasons.Count -ne 0) {
     $nextAction = 'resume-issue'
     $allReasons = @()
 } else {
-    $state = 'idle-select-candidate'
-    $nextAction = 'select-fixed-file-mutation-candidate'
+    $state = $fixedFileMutationTranche.terminal.state
+    $nextAction = $fixedFileMutationTranche.terminal.next_action
     $allReasons = @()
 }
 
@@ -1924,12 +2208,14 @@ Write-Result -ExitCode 0 -Value ([pscustomobject][ordered]@{
     reason_codes = @($allReasons)
     merge_gate_pending = @($mergeGatePending)
     post_merge_gate_pending = @($postMergeGatePending)
-    selected_candidate = if ($state -ceq 'idle-select-candidate') {
+    selected_candidate = if ($fixedFileMutationTranche.lifecycle_state -cne 'consumed' -and
+        $state -ceq 'idle-select-candidate') {
         Get-PropertyValue $fixedFileMutationTranche 'candidate'
     } else {
         $null
     }
     fixed_file_mutation_tranche = $fixedFileMutationTranche
+    side_effect_admission_matrix = $sideEffectAdmissionMatrix
     active_issue = if ($activeIssues.Count -eq 1) { $activeIssues[0] } else { $null }
     active_pr = if ($activePrs.Count -eq 1) { $activePrs[0] } else { $null }
     merged_pr = if ($linkedMergedPrs.Count -eq 1) { $linkedMergedPrs[0] } else { $null }

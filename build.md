@@ -9,8 +9,8 @@ GitHub Issue、PR 与 Actions。
 
 Gate 3 七成员 Rust Workspace、Gate 4 上游审计/功能目录/性能基线，以及 Gate 5 的平台路径、
 应用概览、版本与启动意图、运行时环境冲突、Relay 环境、设置、诊断日志、Relay 状态、上下文
-条目、本地会话目录、受控会话 Markdown 和 Watcher 偏好状态观察已经建立；Issue `#143` 正在实施
-固定 Watcher 偏好标记 mutation。
+条目、本地会话目录、受控会话 Markdown、Watcher 偏好状态观察和固定标记 mutation 已经建立；
+Issue `#171` 正在建立剩余 83 个未评估来源的副作用准入矩阵，不交付产品能力。
 该说明只用于选择正确命令，不能替代任务计划和 GitHub 新鲜证据。
 
 ## 文档变更轻量验证
@@ -5253,6 +5253,129 @@ Write-Output "ISSUE151_LOCAL_VERIFY_OK scope_hash=$scopeHash paths=$($actual.Cou
 
 期望：两份 PowerShell AST 为零错误，CI 合同为 `85/85`，Release Audit 为 `current / errors=[]`，自治策略与
 仓库政策零违规；实际范围精确为九路径，产品、Parity、Cargo、Workflow、Release 与上游快照零变化。
+
+## Issue #171：Gate 5 副作用准入矩阵 successor v7 本地验证
+
+本任务只建立 Parity 治理矩阵、严格策略投影和 successor 状态机，不交付产品能力。必须从 fresh
+`main@5a7465252b56f7e90673e72d3e02881ac9238141` 创建的冻结分支运行；禁止读取实现后复用历史失败分支。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+function Assert-NativeSuccess {
+  param([Parameter(Mandatory)][string]$Label)
+  if ($LASTEXITCODE -ne 0) { throw "$Label 失败：$LASTEXITCODE" }
+}
+
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+$branch = (git branch --show-current).Trim()
+Assert-NativeSuccess 'Issue #171 分支读取'
+if ($branch -cne 'codex/issue-171-gate-5-side-effect-admission-matrix-successor-v7') {
+  throw "Issue #171 分支错误：$branch"
+}
+
+foreach ($scriptPath in @(
+  'scripts/automation/Get-AutonomousRefactorState.ps1',
+  'scripts/ci/Test-CiScripts.ps1',
+  'scripts/ci/Verify-AutonomousRefactorPolicy.ps1'
+)) {
+  $tokens = $null
+  $errors = $null
+  [void][Management.Automation.Language.Parser]::ParseFile(
+    (Resolve-Path -LiteralPath $scriptPath).Path,
+    [ref]$tokens,
+    [ref]$errors
+  )
+  if (@($errors).Count -ne 0) { throw "$scriptPath AST 失败：$($errors.Message -join '；')" }
+}
+
+cargo fmt --all --check
+Assert-NativeSuccess 'Issue #171 rustfmt'
+cargo test -p inputcodex-parity
+Assert-NativeSuccess 'Issue #171 Parity 测试'
+pwsh -NoLogo -NoProfile -File scripts/ci/Test-CiScripts.ps1
+Assert-NativeSuccess 'Issue #171 CI 合同'
+
+$policyOutput = @(
+  pwsh -NoLogo -NoProfile -File scripts/ci/Verify-AutonomousRefactorPolicy.ps1 `
+    -RepositoryRoot . -PolicyPath .github/autonomous-refactor-policy.json
+)
+Assert-NativeSuccess 'Issue #171 自治策略'
+$policy = ($policyOutput -join [Environment]::NewLine) | ConvertFrom-Json -Depth 100
+$matrixPolicy = $policy.side_effect_admission_matrix
+if ($policy.policy_sha256 -cne 'sha256:cc14052a74407914e683072eed92bf048934451f324d9ee800b69cf7e4d72681' -or
+    $matrixPolicy.decision_id -cne 'gate5-side-effect-admission-matrix-successor-v7' -or
+    $matrixPolicy.successor_issue.number -ne 171 -or
+    $matrixPolicy.unassessed_source_count -ne 83 -or
+    $matrixPolicy.implementation_authorized -ne $false) {
+  throw 'Issue #171 自治策略投影漂移'
+}
+
+pwsh -NoLogo -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #171 Release Audit'
+pwsh -NoLogo -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #171 仓库政策'
+
+$expected = [string[]]@(
+  '.github/autonomous-refactor-policy.json',
+  'build.md',
+  'crates/inputcodex-parity/src/admission.rs',
+  'crates/inputcodex-parity/src/catalog.rs',
+  'crates/inputcodex-parity/src/lib.rs',
+  'crates/inputcodex-parity/src/validation.rs',
+  'crates/inputcodex-parity/tests/admission_matrix.rs',
+  'crates/inputcodex-parity/tests/catalog_repository.rs',
+  'docs/plans/2026-08-06-issue-171-gate-5-side-effect-admission-matrix-successor-v7.md',
+  'docs/plans/PROJECT-MASTER-PLAN.md',
+  'docs/plans/sessions/2026-08-06-issue-171-gate-5-side-effect-admission-matrix-successor-v7.md',
+  'docs/reports/issue-171-gate-5-side-effect-admission-matrix-successor-v7.md',
+  'docs/workflows/2026-08-06-issue-171-gate-5-side-effect-admission-matrix-successor-v7-runtime.md',
+  'err.md',
+  'parity/README.md',
+  'parity/admission/side-effect-admission-matrix.yml',
+  'scripts/automation/Get-AutonomousRefactorState.ps1',
+  'scripts/ci/Test-CiScripts.ps1',
+  'scripts/ci/Verify-AutonomousRefactorPolicy.ps1'
+)
+$scope = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+foreach ($path in $expected) {
+  if (-not $scope.Add($path)) { throw "Issue #171 重复路径：$path" }
+}
+$payload = [string]::Join("`n", [string[]]$scope) + "`n"
+$scopeHash = 'sha256:' + [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData([Text.UTF8Encoding]::new($false).GetBytes($payload))
+).ToLowerInvariant()
+if ($scope.Count -ne 19 -or
+    $scopeHash -cne 'sha256:653c4c927c77de1673a1cc1a21db68a262bf08325cd59a941962a66c88d2ea7d') {
+  throw "Issue #171 范围漂移：count=$($scope.Count) hash=$scopeHash"
+}
+
+$actual = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+@(
+  git -c core.quotePath=false diff --no-renames --name-only origin/main...HEAD
+  git -c core.quotePath=false diff --cached --no-renames --name-only
+  git -c core.quotePath=false diff --no-renames --name-only
+  git -c core.quotePath=false ls-files --others --exclude-standard
+) | Where-Object { $_ } | ForEach-Object { [void]$actual.Add($_) }
+if (-not [Linq.Enumerable]::SequenceEqual([string[]]$scope, [string[]]$actual, [StringComparer]::Ordinal)) {
+  throw "Issue #171 实际路径漂移：$([string]::Join(', ', [string[]]$actual))"
+}
+
+$forbidden = @(git -c core.quotePath=false diff --name-only origin/main -- `
+  .github/workflows Cargo.lock Cargo.toml apps upstream parity/contracts parity/features parity/fixtures `
+  crates/inputcodex-application crates/inputcodex-domain crates/inputcodex-infrastructure `
+  crates/inputcodex-platform crates/inputcodex-presentation)
+Assert-NativeSuccess 'Issue #171 禁止面读取'
+if (@($forbidden).Count -ne 0) { throw "Issue #171 禁止面漂移：$($forbidden -join ', ')" }
+
+git diff --check origin/main
+Assert-NativeSuccess 'Issue #171 Git 空白检查'
+Write-Output "ISSUE171_LOCAL_VERIFY_OK scope_hash=$scopeHash paths=$($actual.Count) policy_hash=$($policy.policy_sha256)"
+```
+
+期望：PowerShell AST 零错误、CI 合同 `100/100`、Parity 全包、rustfmt、自治策略、Release Audit 与
+仓库政策全部通过；矩阵精确覆盖 `83` 个未评估来源且全部保持 `blocked / false`，产品交付为零。
 
 ## 外部 AGOS 使用边界
 

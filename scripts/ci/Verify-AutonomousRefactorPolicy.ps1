@@ -332,6 +332,7 @@ $fixedFileMutationTrancheShapeValid = $fixedFileMutationTranche -is [pscustomobj
         -Actual @($fixedFileMutationTranche.PSObject.Properties.Name) `
         -Expected @(
             'schema_version',
+            'lifecycle_state',
             'decision_id',
             'owner_decision_ref',
             'retry_resume_ref',
@@ -347,6 +348,7 @@ $candidateFeatures = @()
 $expectedSourceDelta = $null
 $terminal = $null
 $fixedFileMutationSchemaVersion = $null
+$fixedFileMutationLifecycleState = $null
 $fixedFileMutationDecisionId = $null
 $fixedFileMutationOwnerDecisionRef = $null
 $fixedFileMutationRetryResumeRef = $null
@@ -361,6 +363,7 @@ $fixedFileMutationExpectedImplemented = $null
 $fixedFileMutationExpectedUnassessed = $null
 if ($fixedFileMutationTrancheShapeValid) {
     $fixedFileMutationSchemaVersion = $fixedFileMutationTranche.PSObject.Properties['schema_version'].Value
+    $fixedFileMutationLifecycleState = $fixedFileMutationTranche.PSObject.Properties['lifecycle_state'].Value
     $fixedFileMutationDecisionId = $fixedFileMutationTranche.PSObject.Properties['decision_id'].Value
     $fixedFileMutationOwnerDecisionRef = $fixedFileMutationTranche.PSObject.Properties['owner_decision_ref'].Value
     $fixedFileMutationRetryResumeRef = $fixedFileMutationTranche.PSObject.Properties['retry_resume_ref'].Value
@@ -401,7 +404,9 @@ if ($expectedSourceDeltaShapeValid) {
 
 $fixedFileMutationStringFieldsValid =
     $fixedFileMutationSchemaVersion -is [string] -and
-    $fixedFileMutationSchemaVersion -ceq 'inputcodex.fixed-file-mutation-tranche.v1' -and
+    $fixedFileMutationSchemaVersion -ceq 'inputcodex.fixed-file-mutation-tranche.v2' -and
+    $fixedFileMutationLifecycleState -is [string] -and
+    $fixedFileMutationLifecycleState -ceq 'consumed' -and
     $fixedFileMutationDecisionId -is [string] -and
     $fixedFileMutationDecisionId -ceq 'gate5-fixed-file-mutation-tranche-v1' -and
     $fixedFileMutationOwnerDecisionRef -is [string] -and
@@ -434,6 +439,141 @@ $fixedFileMutationTrancheValid = $fixedFileMutationTrancheShapeValid -and
 if (-not $fixedFileMutationTrancheValid) {
     Add-Violation 'FIXED_FILE_MUTATION_TRANCHE' '固定文件 mutation tranche 必须绑定批准的单一 Watcher 候选、有限批次、source delta 与 #140 终态'
 }
+
+$sideEffectAdmissionProperty = $policy.PSObject.Properties['side_effect_admission_matrix']
+$sideEffectAdmission = $null
+if ($null -ne $sideEffectAdmissionProperty) {
+    $sideEffectAdmission = $sideEffectAdmissionProperty.Value
+}
+$sideEffectAdmissionShapeValid = $sideEffectAdmission -is [pscustomobject] -and
+    (Test-ExactStringSet -Actual @($sideEffectAdmission.PSObject.Properties.Name) -Expected @(
+        'schema_version',
+        'decision_id',
+        'owner_decision_ref',
+        'planning_freeze_ref',
+        'standing_authorization_ref',
+        'baseline',
+        'successor_issue',
+        'repository_prs_max',
+        'product_deliveries_max',
+        'unassessed_source_count',
+        'implementation_authorized',
+        'terminal'
+    ))
+
+$sideEffectSchemaVersion = $null
+$sideEffectDecisionId = $null
+$sideEffectOwnerDecisionRef = $null
+$sideEffectPlanningFreezeRef = $null
+$sideEffectStandingAuthorizationRef = $null
+$sideEffectBaseline = $null
+$sideEffectSuccessorIssue = $null
+$sideEffectRepositoryPrsMax = $null
+$sideEffectProductDeliveriesMax = $null
+$sideEffectUnassessedSourceCount = $null
+$sideEffectImplementationAuthorized = $null
+$sideEffectTerminal = $null
+if ($sideEffectAdmissionShapeValid) {
+    $sideEffectSchemaVersion = $sideEffectAdmission.PSObject.Properties['schema_version'].Value
+    $sideEffectDecisionId = $sideEffectAdmission.PSObject.Properties['decision_id'].Value
+    $sideEffectOwnerDecisionRef = $sideEffectAdmission.PSObject.Properties['owner_decision_ref'].Value
+    $sideEffectPlanningFreezeRef = $sideEffectAdmission.PSObject.Properties['planning_freeze_ref'].Value
+    $sideEffectStandingAuthorizationRef = $sideEffectAdmission.PSObject.Properties['standing_authorization_ref'].Value
+    $sideEffectBaseline = $sideEffectAdmission.PSObject.Properties['baseline'].Value
+    $sideEffectSuccessorIssue = $sideEffectAdmission.PSObject.Properties['successor_issue'].Value
+    $sideEffectRepositoryPrsMax = $sideEffectAdmission.PSObject.Properties['repository_prs_max'].Value
+    $sideEffectProductDeliveriesMax = $sideEffectAdmission.PSObject.Properties['product_deliveries_max'].Value
+    $sideEffectUnassessedSourceCount = $sideEffectAdmission.PSObject.Properties['unassessed_source_count'].Value
+    $sideEffectImplementationAuthorized = $sideEffectAdmission.PSObject.Properties['implementation_authorized'].Value
+    $sideEffectTerminal = $sideEffectAdmission.PSObject.Properties['terminal'].Value
+}
+
+$sideEffectBaselineShapeValid = $sideEffectBaseline -is [pscustomobject] -and
+    (Test-ExactStringSet -Actual @($sideEffectBaseline.PSObject.Properties.Name) -Expected @('commit', 'tree'))
+$sideEffectSuccessorShapeValid = $sideEffectSuccessorIssue -is [pscustomobject] -and
+    (Test-ExactStringSet -Actual @($sideEffectSuccessorIssue.PSObject.Properties.Name) -Expected @('number', 'url', 'author_login'))
+$sideEffectTerminalShapeValid = $sideEffectTerminal -is [pscustomobject] -and
+    (Test-ExactStringSet -Actual @($sideEffectTerminal.PSObject.Properties.Name) -Expected @(
+        'owner_issue_ref',
+        'hard_stop_action',
+        'completed_action',
+        'pending_action',
+        'state',
+        'next_action'
+    ))
+
+$sideEffectBaselineCommit = $null
+$sideEffectBaselineTree = $null
+$sideEffectSuccessorNumber = $null
+$sideEffectSuccessorUrl = $null
+$sideEffectSuccessorAuthor = $null
+$sideEffectTerminalOwnerIssueRef = $null
+$sideEffectTerminalHardStopAction = $null
+$sideEffectTerminalCompletedAction = $null
+$sideEffectTerminalPendingAction = $null
+$sideEffectTerminalState = $null
+$sideEffectTerminalNextAction = $null
+if ($sideEffectBaselineShapeValid) {
+    $sideEffectBaselineCommit = $sideEffectBaseline.PSObject.Properties['commit'].Value
+    $sideEffectBaselineTree = $sideEffectBaseline.PSObject.Properties['tree'].Value
+}
+if ($sideEffectSuccessorShapeValid) {
+    $sideEffectSuccessorNumber = $sideEffectSuccessorIssue.PSObject.Properties['number'].Value
+    $sideEffectSuccessorUrl = $sideEffectSuccessorIssue.PSObject.Properties['url'].Value
+    $sideEffectSuccessorAuthor = $sideEffectSuccessorIssue.PSObject.Properties['author_login'].Value
+}
+if ($sideEffectTerminalShapeValid) {
+    $sideEffectTerminalOwnerIssueRef = $sideEffectTerminal.PSObject.Properties['owner_issue_ref'].Value
+    $sideEffectTerminalHardStopAction = $sideEffectTerminal.PSObject.Properties['hard_stop_action'].Value
+    $sideEffectTerminalCompletedAction = $sideEffectTerminal.PSObject.Properties['completed_action'].Value
+    $sideEffectTerminalPendingAction = $sideEffectTerminal.PSObject.Properties['pending_action'].Value
+    $sideEffectTerminalState = $sideEffectTerminal.PSObject.Properties['state'].Value
+    $sideEffectTerminalNextAction = $sideEffectTerminal.PSObject.Properties['next_action'].Value
+}
+
+$sideEffectAdmissionValid = $sideEffectAdmissionShapeValid -and
+    $sideEffectBaselineShapeValid -and
+    $sideEffectSuccessorShapeValid -and
+    $sideEffectTerminalShapeValid -and
+    $sideEffectSchemaVersion -is [string] -and
+    $sideEffectSchemaVersion -ceq 'inputcodex.side-effect-admission-matrix-policy.v1' -and
+    $sideEffectDecisionId -is [string] -and
+    $sideEffectDecisionId -ceq 'gate5-side-effect-admission-matrix-successor-v7' -and
+    $sideEffectOwnerDecisionRef -is [string] -and
+    $sideEffectOwnerDecisionRef -ceq 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5201101496' -and
+    $sideEffectPlanningFreezeRef -is [string] -and
+    $sideEffectPlanningFreezeRef -ceq 'https://github.com/nonononull/inputcodex/issues/171#issuecomment-5201183608' -and
+    $sideEffectStandingAuthorizationRef -is [string] -and
+    $sideEffectStandingAuthorizationRef -ceq 'https://github.com/nonononull/inputcodex/issues/111' -and
+    $sideEffectBaselineCommit -is [string] -and
+    $sideEffectBaselineCommit -ceq '5a7465252b56f7e90673e72d3e02881ac9238141' -and
+    $sideEffectBaselineTree -is [string] -and
+    $sideEffectBaselineTree -ceq '348a55ce78d1c9da408238b6d9b63cb2e49e32ba' -and
+    (Test-ExactJsonInt64 -Actual $sideEffectSuccessorNumber -Expected 171) -and
+    $sideEffectSuccessorUrl -is [string] -and
+    $sideEffectSuccessorUrl -ceq 'https://github.com/nonononull/inputcodex/issues/171' -and
+    $sideEffectSuccessorAuthor -is [string] -and
+    $sideEffectSuccessorAuthor -ceq 'nonononull' -and
+    (Test-ExactJsonInt64 -Actual $sideEffectRepositoryPrsMax -Expected 1) -and
+    (Test-ExactJsonInt64 -Actual $sideEffectProductDeliveriesMax -Expected 0) -and
+    (Test-ExactJsonInt64 -Actual $sideEffectUnassessedSourceCount -Expected 83) -and
+    (Test-ExactJsonBoolean -Actual $sideEffectImplementationAuthorized -Expected $false) -and
+    $sideEffectTerminalOwnerIssueRef -is [string] -and
+    $sideEffectTerminalOwnerIssueRef -ceq 'https://github.com/nonononull/inputcodex/issues/140' -and
+    $sideEffectTerminalHardStopAction -is [string] -and
+    $sideEffectTerminalHardStopAction -ceq 'close-task-and-reopen-owner-decision-issue' -and
+    $sideEffectTerminalCompletedAction -is [string] -and
+    $sideEffectTerminalCompletedAction -ceq 'close-task-and-reopen-owner-decision-issue' -and
+    $sideEffectTerminalPendingAction -is [string] -and
+    $sideEffectTerminalPendingAction -ceq 'verify-main' -and
+    $sideEffectTerminalState -is [string] -and
+    $sideEffectTerminalState -ceq 'blocked-candidate-exhausted' -and
+    $sideEffectTerminalNextAction -is [string] -and
+    $sideEffectTerminalNextAction -ceq 'await-owner-decision'
+if (-not $sideEffectAdmissionValid) {
+    Add-Violation 'SIDE_EFFECT_ADMISSION_MATRIX' '副作用准入矩阵必须绑定 #171、fresh main、零产品授权和精确终态'
+}
+
 if ($null -ne $policy.PSObject.Properties['first_candidate']) {
     Add-Violation 'LEGACY_FIRST_CANDIDATE' '失效的 first_candidate 字段必须删除'
 }
@@ -510,6 +650,7 @@ $result = [pscustomobject][ordered]@{
     }
     fixed_file_mutation_tranche = [pscustomobject][ordered]@{
         schema_version = $fixedFileMutationSchemaVersion
+        lifecycle_state = $fixedFileMutationLifecycleState
         decision_id = $fixedFileMutationDecisionId
         owner_decision_ref = $fixedFileMutationOwnerDecisionRef
         retry_resume_ref = $fixedFileMutationRetryResumeRef
@@ -527,6 +668,34 @@ $result = [pscustomobject][ordered]@{
             action = $fixedFileMutationTerminalAction
             state = $fixedFileMutationTerminalState
             next_action = $fixedFileMutationTerminalNextAction
+        }
+    }
+    side_effect_admission_matrix = [pscustomobject][ordered]@{
+        schema_version = $sideEffectSchemaVersion
+        decision_id = $sideEffectDecisionId
+        owner_decision_ref = $sideEffectOwnerDecisionRef
+        planning_freeze_ref = $sideEffectPlanningFreezeRef
+        standing_authorization_ref = $sideEffectStandingAuthorizationRef
+        baseline = [pscustomobject][ordered]@{
+            commit = $sideEffectBaselineCommit
+            tree = $sideEffectBaselineTree
+        }
+        successor_issue = [pscustomobject][ordered]@{
+            number = $sideEffectSuccessorNumber
+            url = $sideEffectSuccessorUrl
+            author_login = $sideEffectSuccessorAuthor
+        }
+        repository_prs_max = $sideEffectRepositoryPrsMax
+        product_deliveries_max = $sideEffectProductDeliveriesMax
+        unassessed_source_count = $sideEffectUnassessedSourceCount
+        implementation_authorized = $sideEffectImplementationAuthorized
+        terminal = [pscustomobject][ordered]@{
+            owner_issue_ref = $sideEffectTerminalOwnerIssueRef
+            hard_stop_action = $sideEffectTerminalHardStopAction
+            completed_action = $sideEffectTerminalCompletedAction
+            pending_action = $sideEffectTerminalPendingAction
+            state = $sideEffectTerminalState
+            next_action = $sideEffectTerminalNextAction
         }
     }
     required_workflows = @($workflows)

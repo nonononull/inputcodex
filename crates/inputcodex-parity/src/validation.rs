@@ -9,12 +9,14 @@ use serde::Deserialize;
 
 use crate::{
     FeatureDomain, ParityStatus, SourceDisposition, SourceKind, parse_contract_catalog,
-    parse_feature_catalog, parse_fixture_manifest, parse_source_index, validate_contract_catalog,
-    validate_contract_catalog_domain, validate_feature_catalog, validate_fixture_manifest,
-    validate_fixture_payload, validate_source_index,
+    parse_feature_catalog, parse_fixture_manifest, parse_side_effect_admission_matrix,
+    parse_source_index, validate_contract_catalog, validate_contract_catalog_domain,
+    validate_feature_catalog, validate_fixture_manifest, validate_fixture_payload,
+    validate_source_index,
 };
 
 const SOURCE_INDEX_PATH: &str = "parity/features/source-index.yml";
+const ADMISSION_MATRIX_PATH: &str = "parity/admission/side-effect-admission-matrix.yml";
 const SOURCE_LOCK_PATH: &str = "upstream/source-lock.json";
 const COMMANDS_PATH: &str =
     "upstream/CodexPlusPlus/apps/codex-plus-manager/src-tauri/src/commands.rs";
@@ -73,6 +75,13 @@ pub enum ValidationCode {
     InvalidFixturePayload,
     PrivateAbsolutePath,
     SensitiveFixtureValue,
+    AdmissionMatrixSchemaMismatch,
+    AdmissionMatrixReleaseMismatch,
+    DuplicateAdmissionSource,
+    MissingAdmissionSource,
+    UnexpectedAdmissionSource,
+    AdmissionMatrixOrderMismatch,
+    AdmissionMatrixEntryMismatch,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -738,6 +747,21 @@ fn load_feature_repository(
         &source_lock.release_audit.catalog_release.tag,
         &source_lock.release_audit.catalog_release.commit,
     ));
+    let admission_matrix_path = repository_root.join(ADMISSION_MATRIX_PATH);
+    let admission_matrix_text = read_utf8(&admission_matrix_path)?;
+    match parse_side_effect_admission_matrix(&admission_matrix_text) {
+        Ok(matrix) => issues.extend(crate::admission::validate_side_effect_admission_matrix(
+            &matrix,
+            &source_index,
+            &feature_statuses,
+            &source_lock.release_audit.catalog_release.tag,
+            &source_lock.release_audit.catalog_release.commit,
+        )),
+        Err(_) => issues.push(ValidationIssue::new(
+            ValidationCode::AdmissionMatrixSchemaMismatch,
+            ADMISSION_MATRIX_PATH,
+        )),
+    }
 
     let expected_sources = if requires_reaudit {
         None

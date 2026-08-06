@@ -21,6 +21,17 @@
 - Source disposition 为 19 个 `implemented`、83 个 `unassessed`、30 个 `exception-pending`、3 个 `excluded`。
 - 这 135 条覆盖只证明上述三类公开入口已枚举，不等于所有私有函数、React 交互或隐式副作用已经完成审计。
 
+## 副作用准入矩阵
+
+- `admission/side-effect-admission-matrix.yml` 精确覆盖当前 83 个 `unassessed` source，并绑定目录审计基线
+  `v1.2.44 @ 77091ccaee4423f35a1b2c51c4ecd703e6201092`。
+- bucket 按所属 feature 的聚合副作用计算：write 为 `16 feature / 70 source`，process-control 为 `2/5`，
+  network 为 `4/8`；写入优先于进程控制，进程控制优先于纯网络副作用。
+- 83 条全部为 `owner_state=missing`、`admission=blocked`、`implementation_authorized=false`；矩阵只记录
+  缺失 owner 与 blocker，不批准任何产品实现，也不改变 feature/source disposition。
+- 仓库验证器严格拒绝未知字段、schema/Release 漂移、重复、遗漏、唯一条目乱序、矩阵多余来源以及
+  feature、bucket、owner kind、blocker 或授权状态漂移。
+
 ## `v1.2.44` 定向复审结论
 
 - 新增 `feature.provider-network.sub2api-billing-observation`，只登记 `core-module:sub2api` 与 `tauri-command:fetch_sub2api_billing` 的有凭据网络读取、倍率校验、超时/取消和最小披露合同；初始状态为 `unassessed`，不并入供应商诊断或 Relay 配置管理。

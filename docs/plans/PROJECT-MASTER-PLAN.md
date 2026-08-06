@@ -1,12 +1,14 @@
 # inputcodex 项目总计划
 
 schema_version: inputcodex.master-plan.v1
-active_task: issue-151-strict-json-object-root-boundary
-active_gate: Gate 5 治理恢复；零产品交付，先修 StrictJsonObject 根类型，再从 fresh main 重建副作用准入矩阵 successor
-last_verified_gate: Issue #143 / PR #144 已交付固定 Watcher 偏好标记 mutation；Issue #147 / PR #148 已收紧 Release Audit JSON 边界并进入 main
-next_legal_gate: Issue #151 独立复审与合并后完成 fresh-main 复验；随后才能新建 admission matrix successor，任一范围漂移或 Critical/Important finding 立即停止
-tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/151
+active_task: issue-171-gate-5-side-effect-admission-matrix-successor-v7
+active_gate: Gate 5 副作用准入治理；零产品交付，建立当前 83 个未评估来源的 fail-closed admission matrix
+last_verified_gate: Issue #143 / PR #144 已交付固定 Watcher 偏好标记 mutation；Issue #147、#151、#161 的严格 JSON 与嵌套对象边界已进入 main
+next_legal_gate: Issue #171 完成本地门禁、唯一 PR、双独立 Final Head 复审与 Hosted 门禁；任一范围漂移或 Critical/Important finding 立即停止
+tracking_issue_ref: https://github.com/nonononull/inputcodex/issues/171
 active_pr_ref: none
+gate_5_side_effect_admission_owner_ref: https://github.com/nonononull/inputcodex/issues/140#issuecomment-5201101496
+gate_5_side_effect_admission_scope_hash: sha256:653c4c927c77de1673a1cc1a21db68a262bf08325cd59a941962a66c88d2ea7d
 gate_5_platform_paths_exception_ref: https://github.com/nonononull/inputcodex/issues/74
 gate_5_platform_paths_scope_hash: sha256:ae5e0f5143355feee9b280da7c44fdd5cdf759ec2ae71fc69167040bf302cb37
 gate_5_platform_paths_branch_ref: codex/issue-75-gate-5-platform-paths
@@ -321,7 +323,8 @@ decision_status: issue-140-gate5-fixed-file-mutation-tranche-v1-approved
 - [x] Issue `#141` / PR `#142` 已完成固定文件 mutation 两批有限 tranche 的批次 1 治理 bootstrap，唯一候选已机器固定。
 - [x] Issue `#143` / PR `#144` 已完成批次 `2/2`；只接管 `enable_watcher` / `disable_watcher` 的固定 `watcher.disabled` 偏好变更，完整 Watcher 继续 `unassessed`。
 - [x] Issue `#147` / PR `#148` 已收紧 Release Audit 与自治 live 状态的 JSON 根和受信标量类型；产品交付为零。
-- [ ] `gate5-strict-json-object-recovery-v1` 最多交付两个治理 PR、零产品；Issue `#151` 先修复 StrictJsonObject 根类型，合并并完成 fresh-main 复验后才能重建 admission matrix successor。
+- [x] Issue `#151` 与 Issue `#161` 已分别收紧 StrictJsonObject 根类型和四个嵌套 snapshot 对象边界；两项均为零产品治理修复并已进入 `main`。
+- [ ] Issue `#171` 正在从 fresh `main@5a746525` 建立 83-source admission matrix；所有条目必须保持 `blocked`、`implementation_authorized=false`，不得把矩阵解释为产品实现授权。
 
 ### Gate 6：首个正式版本（锁定）
 

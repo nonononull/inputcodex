@@ -276,7 +276,8 @@ function New-ValidAutonomousRefactorPolicy {
             'candidate-exhausted'
         )
         fixed_file_mutation_tranche = [pscustomobject][ordered]@{
-            schema_version = 'inputcodex.fixed-file-mutation-tranche.v1'
+            schema_version = 'inputcodex.fixed-file-mutation-tranche.v2'
+            lifecycle_state = 'consumed'
             decision_id = 'gate5-fixed-file-mutation-tranche-v1'
             owner_decision_ref = 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159072214'
             retry_resume_ref = 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5159471091'
@@ -292,6 +293,34 @@ function New-ValidAutonomousRefactorPolicy {
                 owner_issue_ref = 'https://github.com/nonononull/inputcodex/issues/140'
                 reopen_on = @('completed', 'hard-stop')
                 action = 'reopen-owner-decision-issue'
+                state = 'blocked-candidate-exhausted'
+                next_action = 'await-owner-decision'
+            }
+        }
+        side_effect_admission_matrix = [pscustomobject][ordered]@{
+            schema_version = 'inputcodex.side-effect-admission-matrix-policy.v1'
+            decision_id = 'gate5-side-effect-admission-matrix-successor-v7'
+            owner_decision_ref = 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-5201101496'
+            planning_freeze_ref = 'https://github.com/nonononull/inputcodex/issues/171#issuecomment-5201183608'
+            standing_authorization_ref = 'https://github.com/nonononull/inputcodex/issues/111'
+            baseline = [pscustomobject][ordered]@{
+                commit = '5a7465252b56f7e90673e72d3e02881ac9238141'
+                tree = '348a55ce78d1c9da408238b6d9b63cb2e49e32ba'
+            }
+            successor_issue = [pscustomobject][ordered]@{
+                number = 171
+                url = 'https://github.com/nonononull/inputcodex/issues/171'
+                author_login = 'nonononull'
+            }
+            repository_prs_max = 1
+            product_deliveries_max = 0
+            unassessed_source_count = 83
+            implementation_authorized = $false
+            terminal = [pscustomobject][ordered]@{
+                owner_issue_ref = 'https://github.com/nonononull/inputcodex/issues/140'
+                hard_stop_action = 'close-task-and-reopen-owner-decision-issue'
+                completed_action = 'close-task-and-reopen-owner-decision-issue'
+                pending_action = 'verify-main'
                 state = 'blocked-candidate-exhausted'
                 next_action = 'await-owner-decision'
             }
@@ -362,9 +391,11 @@ Invoke-ContractTest -Name '合法无人值守重构策略通过并输出规范�
     Assert-Equal -Expected ([string]::Join([char]10, @('pull_request', 'push'))) `
         -Actual ([string]::Join([char]10, @($result.Json.required_workflows[0].events))) `
         -Message '策略输出必须投影 CI 的 PR/push 事件集合'
-    Assert-Equal -Expected 'inputcodex.fixed-file-mutation-tranche.v1' `
+    Assert-Equal -Expected 'inputcodex.fixed-file-mutation-tranche.v2' `
         -Actual $result.Json.fixed_file_mutation_tranche.schema_version `
         -Message '策略输出必须投影版本化 fixed-file mutation tranche'
+    Assert-Equal -Expected 'consumed' -Actual $result.Json.fixed_file_mutation_tranche.lifecycle_state `
+        -Message '策略输出必须标记 fixed-file mutation tranche 已消费'
     Assert-Equal -Expected 'feature.foundation-platform.watcher-preference-mutation' `
         -Actual $result.Json.fixed_file_mutation_tranche.candidate_features[0] `
         -Message 'tranche 只能投影 Watcher preference mutation'
@@ -378,6 +409,10 @@ $fixedFileMutationStringArrayCases = [ordered]@{
     'schema_version' = {
         param($tranche)
         $tranche.schema_version = [object[]]@($tranche.schema_version)
+    }
+    'lifecycle_state' = {
+        param($tranche)
+        $tranche.lifecycle_state = [object[]]@($tranche.lifecycle_state)
     }
     'decision_id' = {
         param($tranche)
@@ -440,6 +475,7 @@ Invoke-ContractTest -Name '固定文件 mutation tranche 生产策略真实变�
 
     foreach ($case in @(
         'schema',
+        'lifecycle',
         'decision',
         'owner',
         'batch-cap',
@@ -455,7 +491,8 @@ Invoke-ContractTest -Name '固定文件 mutation tranche 生产策略真实变�
     )) {
         $policy = Copy-AutonomousRefactorPolicy $productionPolicy
         switch ($case) {
-            'schema' { $policy.fixed_file_mutation_tranche.schema_version = 'inputcodex.fixed-file-mutation-tranche.v2' }
+            'schema' { $policy.fixed_file_mutation_tranche.schema_version = 'inputcodex.fixed-file-mutation-tranche.v1' }
+            'lifecycle' { $policy.fixed_file_mutation_tranche.lifecycle_state = 'active' }
             'decision' { $policy.fixed_file_mutation_tranche.decision_id = 'other-decision' }
             'owner' { $policy.fixed_file_mutation_tranche.owner_decision_ref = 'https://github.com/nonononull/inputcodex/issues/140' }
             'batch-cap' { $policy.fixed_file_mutation_tranche.repository_batches_max = 3 }
@@ -532,12 +569,14 @@ Invoke-ContractTest -Name '固定文件 mutation tranche 生产 helper 真实变
     ) | ConvertFrom-Json -Depth 100
     $valid = Get-FixedFileMutationTrancheProjection $productionPolicy.fixed_file_mutation_tranche
     Assert-Equal -Expected $true -Actual $valid.valid -Message '生产 tranche 必须通过生产 helper'
+    Assert-Equal -Expected 'consumed' -Actual $valid.lifecycle_state -Message '生产 helper 必须保留 consumed 状态'
     Assert-Equal -Expected 'feature.foundation-platform.watcher-preference-mutation' `
         -Actual $valid.candidate -Message '生产 helper 必须只返回固定 Watcher mutation 候选'
 
-    foreach ($case in @('candidate', 'batch-cap', 'source-delta', 'terminal-trigger', 'extra-field')) {
+    foreach ($case in @('lifecycle', 'candidate', 'batch-cap', 'source-delta', 'terminal-trigger', 'extra-field')) {
         $policy = Copy-AutonomousRefactorPolicy $productionPolicy
         switch ($case) {
+            'lifecycle' { $policy.fixed_file_mutation_tranche.lifecycle_state = 'active' }
             'candidate' { $policy.fixed_file_mutation_tranche.candidate_features[0] = 'feature.session-data.token-usage-history' }
             'batch-cap' { $policy.fixed_file_mutation_tranche.repository_batches_max = 3 }
             'source-delta' { $policy.fixed_file_mutation_tranche.expected_source_delta.unassessed = -1 }
@@ -997,6 +1036,406 @@ function Assert-AutonomousState {
     Assert-Equal -Expected $ExpectedAction -Actual $Result.Json.next_action -Message '自治下一动作漂移'
 }
 
+function Set-SideEffectSuccessorIssue {
+    param([Parameter(Mandatory)]$Snapshot)
+
+    $Snapshot.branch = 'codex/issue-171-gate-5-side-effect-admission-matrix-successor-v7'
+    $Snapshot.actual_scope_count = 19L
+    $Snapshot.actual_scope_hash = 'sha256:653c4c927c77de1673a1cc1a21db68a262bf08325cd59a941962a66c88d2ea7d'
+    $Snapshot.active_issues = @([pscustomobject][ordered]@{
+        number = 171L
+        url = 'https://github.com/nonononull/inputcodex/issues/171'
+        author_login = 'nonononull'
+        planning_evidence = [pscustomobject][ordered]@{
+            valid = $true
+            task_kind = 'refactor'
+            scope_count = 19L
+            scope_hash = 'sha256:653c4c927c77de1673a1cc1a21db68a262bf08325cd59a941962a66c88d2ea7d'
+            ref = 'https://github.com/nonononull/inputcodex/issues/171#issuecomment-5201183608'
+        }
+    })
+    return $Snapshot
+}
+
+function New-SideEffectSuccessorPostMergeSnapshot {
+    $snapshot = Set-SideEffectSuccessorIssue (New-PostMergeAutonomousStateSnapshot)
+    $snapshot.merged_prs[0].number = 172L
+    $snapshot.merged_prs[0].url = 'https://github.com/nonononull/inputcodex/pull/172'
+    $snapshot.merged_prs[0].evidence.tracking_issue_ref = 'https://github.com/nonononull/inputcodex/issues/171'
+    $snapshot.merged_prs[0].evidence.scope_count = 19L
+    $snapshot.merged_prs[0].evidence.scope_hash = 'sha256:653c4c927c77de1673a1cc1a21db68a262bf08325cd59a941962a66c88d2ea7d'
+    return $snapshot
+}
+
+Invoke-ContractTest -Name '副作用矩阵策略必须投影 consumed tranche 与 successor v7' -Body {
+    $result = Invoke-ChildScript -Path $autonomousPolicyScript -Arguments @('-RepositoryRoot', $repositoryRoot, '-PolicyPath', $autonomousPolicyPath)
+    Assert-Equal -Expected 0 -Actual $result.ExitCode -Message "生产策略必须可验证，输出=$($result.Output)"
+    Assert-Equal -Expected 'inputcodex.fixed-file-mutation-tranche.v2' -Actual $result.Json.fixed_file_mutation_tranche.schema_version -Message 'fixed-file tranche 必须升级为 v2'
+    Assert-Equal -Expected 'consumed' -Actual $result.Json.fixed_file_mutation_tranche.lifecycle_state -Message 'fixed-file tranche 必须永久标记 consumed'
+    Assert-Equal -Expected 'gate5-side-effect-admission-matrix-successor-v7' -Actual $result.Json.side_effect_admission_matrix.decision_id -Message '策略必须投影 successor v7'
+    Assert-Equal -Expected 171L -Actual $result.Json.side_effect_admission_matrix.successor_issue.number -Message '策略必须投影精确 successor Issue number'
+    Assert-Equal -Expected $false -Actual $result.Json.side_effect_admission_matrix.implementation_authorized -Message '治理矩阵不得授予产品实现'
+}
+
+Invoke-ContractTest -Name '副作用矩阵生产 policy helper 必须严格拒绝嵌套与标量数组' -Body {
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-PropertyProjection')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Test-ExactStringSet')
+    Invoke-Expression (Get-AutonomousStateFunctionSource -Name 'Get-SideEffectAdmissionMatrixProjection')
+
+    $productionPolicy = [System.IO.File]::ReadAllText($autonomousPolicyPath, [Text.UTF8Encoding]::new($false)) | ConvertFrom-Json -Depth 100
+    $valid = Get-SideEffectAdmissionMatrixProjection $productionPolicy.side_effect_admission_matrix
+    Assert-Equal -Expected $true -Actual $valid.valid -Message '生产 admission policy 必须通过生产 helper'
+
+    foreach ($case in @(
+        'root-array',
+        'schema-array',
+        'schema-value',
+        'decision-array',
+        'decision-value',
+        'owner-ref-array',
+        'owner-ref-value',
+        'freeze-ref-array',
+        'freeze-ref-value',
+        'standing-ref-array',
+        'standing-ref-value',
+        'baseline-array',
+        'baseline-commit-array',
+        'baseline-commit-value',
+        'baseline-tree-array',
+        'baseline-tree-value',
+        'successor-array',
+        'number-array',
+        'number-value',
+        'url-array',
+        'url-value',
+        'owner-array',
+        'owner-value',
+        'pr-cap-array',
+        'pr-cap-value',
+        'delivery-cap-array',
+        'delivery-cap-value',
+        'source-count-array',
+        'source-count-value',
+        'authorization-array',
+        'authorization-value',
+        'terminal-array',
+        'terminal-owner-array',
+        'terminal-owner-value',
+        'terminal-hard-stop-array',
+        'terminal-hard-stop-value',
+        'terminal-completed-array',
+        'terminal-completed-value',
+        'terminal-pending-array',
+        'terminal-pending-value',
+        'terminal-state-array',
+        'terminal-state-value',
+        'terminal-next-action-array',
+        'terminal-next-action-value',
+        'baseline-extra',
+        'successor-extra',
+        'terminal-extra',
+        'extra-field'
+    )) {
+        $policy = $productionPolicy | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 100
+        switch ($case) {
+            'root-array' {
+                $policy.side_effect_admission_matrix = [object[]]@($policy.side_effect_admission_matrix)
+                $value = $policy.side_effect_admission_matrix
+            }
+            'schema-array' {
+                $policy.side_effect_admission_matrix.schema_version = [object[]]@('inputcodex.side-effect-admission-matrix-policy.v1')
+                $value = $policy.side_effect_admission_matrix
+            }
+            'schema-value' {
+                $policy.side_effect_admission_matrix.schema_version = 'inputcodex.side-effect-admission-matrix-policy.v2'
+                $value = $policy.side_effect_admission_matrix
+            }
+            'decision-array' {
+                $policy.side_effect_admission_matrix.decision_id = [object[]]@('gate5-side-effect-admission-matrix-successor-v7')
+                $value = $policy.side_effect_admission_matrix
+            }
+            'decision-value' {
+                $policy.side_effect_admission_matrix.decision_id = 'gate5-side-effect-admission-matrix-successor-v8'
+                $value = $policy.side_effect_admission_matrix
+            }
+            'owner-ref-array' {
+                $policy.side_effect_admission_matrix.owner_decision_ref = [object[]]@('https://github.com/nonononull/inputcodex/issues/140#issuecomment-5201101496')
+                $value = $policy.side_effect_admission_matrix
+            }
+            'owner-ref-value' {
+                $policy.side_effect_admission_matrix.owner_decision_ref = 'https://github.com/nonononull/inputcodex/issues/140#issuecomment-1'
+                $value = $policy.side_effect_admission_matrix
+            }
+            'freeze-ref-array' {
+                $policy.side_effect_admission_matrix.planning_freeze_ref = [object[]]@('https://github.com/nonononull/inputcodex/issues/171#issuecomment-5201183608')
+                $value = $policy.side_effect_admission_matrix
+            }
+            'freeze-ref-value' {
+                $policy.side_effect_admission_matrix.planning_freeze_ref = 'https://github.com/nonononull/inputcodex/issues/171#issuecomment-1'
+                $value = $policy.side_effect_admission_matrix
+            }
+            'standing-ref-array' {
+                $policy.side_effect_admission_matrix.standing_authorization_ref = [object[]]@('https://github.com/nonononull/inputcodex/issues/111')
+                $value = $policy.side_effect_admission_matrix
+            }
+            'standing-ref-value' {
+                $policy.side_effect_admission_matrix.standing_authorization_ref = 'https://github.com/nonononull/inputcodex/issues/999'
+                $value = $policy.side_effect_admission_matrix
+            }
+            'baseline-array' {
+                $policy.side_effect_admission_matrix.baseline = [object[]]@($policy.side_effect_admission_matrix.baseline)
+                $value = $policy.side_effect_admission_matrix
+            }
+            'baseline-commit-array' {
+                $policy.side_effect_admission_matrix.baseline.commit = [object[]]@('5a7465252b56f7e90673e72d3e02881ac9238141')
+                $value = $policy.side_effect_admission_matrix
+            }
+            'baseline-commit-value' {
+                $policy.side_effect_admission_matrix.baseline.commit = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+                $value = $policy.side_effect_admission_matrix
+            }
+            'baseline-tree-array' {
+                $policy.side_effect_admission_matrix.baseline.tree = [object[]]@('348a55ce78d1c9da408238b6d9b63cb2e49e32ba')
+                $value = $policy.side_effect_admission_matrix
+            }
+            'baseline-tree-value' {
+                $policy.side_effect_admission_matrix.baseline.tree = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+                $value = $policy.side_effect_admission_matrix
+            }
+            'successor-array' {
+                $policy.side_effect_admission_matrix.successor_issue = [object[]]@($policy.side_effect_admission_matrix.successor_issue)
+                $value = $policy.side_effect_admission_matrix
+            }
+            'terminal-array' {
+                $policy.side_effect_admission_matrix.terminal = [object[]]@($policy.side_effect_admission_matrix.terminal)
+                $value = $policy.side_effect_admission_matrix
+            }
+            'number-array' {
+                $policy.side_effect_admission_matrix.successor_issue.number = [object[]]@(171L)
+                $value = $policy.side_effect_admission_matrix
+            }
+            'number-value' {
+                $policy.side_effect_admission_matrix.successor_issue.number = 172L
+                $value = $policy.side_effect_admission_matrix
+            }
+            'url-array' {
+                $policy.side_effect_admission_matrix.successor_issue.url = [object[]]@('https://github.com/nonononull/inputcodex/issues/171')
+                $value = $policy.side_effect_admission_matrix
+            }
+            'url-value' {
+                $policy.side_effect_admission_matrix.successor_issue.url = 'https://github.com/nonononull/inputcodex/issues/172'
+                $value = $policy.side_effect_admission_matrix
+            }
+            'owner-array' {
+                $policy.side_effect_admission_matrix.successor_issue.author_login = [object[]]@('nonononull')
+                $value = $policy.side_effect_admission_matrix
+            }
+            'owner-value' {
+                $policy.side_effect_admission_matrix.successor_issue.author_login = 'external-user'
+                $value = $policy.side_effect_admission_matrix
+            }
+            'pr-cap-array' {
+                $policy.side_effect_admission_matrix.repository_prs_max = [object[]]@(1L)
+                $value = $policy.side_effect_admission_matrix
+            }
+            'pr-cap-value' {
+                $policy.side_effect_admission_matrix.repository_prs_max = 2L
+                $value = $policy.side_effect_admission_matrix
+            }
+            'delivery-cap-array' {
+                $policy.side_effect_admission_matrix.product_deliveries_max = [object[]]@(0L)
+                $value = $policy.side_effect_admission_matrix
+            }
+            'delivery-cap-value' {
+                $policy.side_effect_admission_matrix.product_deliveries_max = 1L
+                $value = $policy.side_effect_admission_matrix
+            }
+            'source-count-array' {
+                $policy.side_effect_admission_matrix.unassessed_source_count = [object[]]@(83L)
+                $value = $policy.side_effect_admission_matrix
+            }
+            'source-count-value' {
+                $policy.side_effect_admission_matrix.unassessed_source_count = 82L
+                $value = $policy.side_effect_admission_matrix
+            }
+            'authorization-array' {
+                $policy.side_effect_admission_matrix.implementation_authorized = [object[]]@($false)
+                $value = $policy.side_effect_admission_matrix
+            }
+            'authorization-value' {
+                $policy.side_effect_admission_matrix.implementation_authorized = $true
+                $value = $policy.side_effect_admission_matrix
+            }
+            'terminal-owner-array' {
+                $policy.side_effect_admission_matrix.terminal.owner_issue_ref = [object[]]@('https://github.com/nonononull/inputcodex/issues/140')
+                $value = $policy.side_effect_admission_matrix
+            }
+            'terminal-owner-value' {
+                $policy.side_effect_admission_matrix.terminal.owner_issue_ref = 'https://github.com/nonononull/inputcodex/issues/141'
+                $value = $policy.side_effect_admission_matrix
+            }
+            'terminal-hard-stop-array' {
+                $policy.side_effect_admission_matrix.terminal.hard_stop_action = [object[]]@('close-task-and-reopen-owner-decision-issue')
+                $value = $policy.side_effect_admission_matrix
+            }
+            'terminal-hard-stop-value' {
+                $policy.side_effect_admission_matrix.terminal.hard_stop_action = 'stop'
+                $value = $policy.side_effect_admission_matrix
+            }
+            'terminal-completed-array' {
+                $policy.side_effect_admission_matrix.terminal.completed_action = [object[]]@('close-task-and-reopen-owner-decision-issue')
+                $value = $policy.side_effect_admission_matrix
+            }
+            'terminal-completed-value' {
+                $policy.side_effect_admission_matrix.terminal.completed_action = 'close-issue-and-archive'
+                $value = $policy.side_effect_admission_matrix
+            }
+            'terminal-pending-array' {
+                $policy.side_effect_admission_matrix.terminal.pending_action = [object[]]@('verify-main')
+                $value = $policy.side_effect_admission_matrix
+            }
+            'terminal-pending-value' {
+                $policy.side_effect_admission_matrix.terminal.pending_action = 'resume-pr'
+                $value = $policy.side_effect_admission_matrix
+            }
+            'terminal-state-array' {
+                $policy.side_effect_admission_matrix.terminal.state = [object[]]@('blocked-candidate-exhausted')
+                $value = $policy.side_effect_admission_matrix
+            }
+            'terminal-state-value' {
+                $policy.side_effect_admission_matrix.terminal.state = 'idle-select-candidate'
+                $value = $policy.side_effect_admission_matrix
+            }
+            'terminal-next-action-array' {
+                $policy.side_effect_admission_matrix.terminal.next_action = [object[]]@('await-owner-decision')
+                $value = $policy.side_effect_admission_matrix
+            }
+            'terminal-next-action-value' {
+                $policy.side_effect_admission_matrix.terminal.next_action = 'select-fixed-file-mutation-candidate'
+                $value = $policy.side_effect_admission_matrix
+            }
+            'baseline-extra' {
+                $policy.side_effect_admission_matrix.baseline | Add-Member -NotePropertyName fallback -NotePropertyValue $true
+                $value = $policy.side_effect_admission_matrix
+            }
+            'successor-extra' {
+                $policy.side_effect_admission_matrix.successor_issue | Add-Member -NotePropertyName fallback -NotePropertyValue $true
+                $value = $policy.side_effect_admission_matrix
+            }
+            'terminal-extra' {
+                $policy.side_effect_admission_matrix.terminal | Add-Member -NotePropertyName fallback -NotePropertyValue $true
+                $value = $policy.side_effect_admission_matrix
+            }
+            'extra-field' {
+                $policy.side_effect_admission_matrix | Add-Member -NotePropertyName fallback -NotePropertyValue $true
+                $value = $policy.side_effect_admission_matrix
+            }
+        }
+        $projection = Get-SideEffectAdmissionMatrixProjection $value
+        Assert-Equal -Expected $false -Actual $projection.valid -Message "生产 helper 必须拒绝 admission policy 形状漂移：$case"
+        Assert-AutonomousPolicyFailure -Result (Invoke-AutonomousPolicyCase -Name "side-effect-policy-$case" -Policy $policy) -ExpectedCode 'SIDE_EFFECT_ADMISSION_MATRIX'
+    }
+}
+
+Invoke-ContractTest -Name 'consumed tranche 空闲与不可信 marker 不得重新选择产品' -Body {
+    $idle = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
+    $idle.branch = 'main'
+    $idle.worktree_head = $idle.expected_base
+    $idle.actual_scope_count = 0L
+    $idle.actual_scope_hash = 'sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b'
+    Assert-AutonomousState -Result (Invoke-AutonomousStateCase -Name 'consumed-idle' -Snapshot $idle) -ExpectedState 'blocked-candidate-exhausted' -ExpectedAction 'await-owner-decision'
+
+    $index = 0
+    foreach ($author in @([object[]]@('nonononull'), [object[]]@('external-user', 'nonononull'), 42L)) {
+        $snapshot = Copy-AutonomousStateSnapshot $idle
+        $snapshot.active_issues = @([pscustomobject][ordered]@{
+            number = 900L
+            url = 'https://github.com/nonononull/inputcodex/issues/900'
+            author_login = $author
+        })
+        Assert-AutonomousState -Result (Invoke-AutonomousStateCase -Name "consumed-untrusted-$index" -Snapshot $snapshot) -ExpectedState 'blocked-candidate-exhausted' -ExpectedAction 'await-owner-decision'
+        $index += 1
+    }
+}
+
+Invoke-ContractTest -Name 'successor Issue 错误标量缺字段与 number URL 冲突必须 hard stop' -Body {
+    foreach ($case in @(
+        'number-string',
+        'number-decimal',
+        'number-array',
+        'missing-number',
+        'wrong-number',
+        'missing-url',
+        'url-array',
+        'wrong-url',
+        'missing-owner',
+        'owner-array'
+    )) {
+        $snapshot = Set-SideEffectSuccessorIssue (New-ValidAutonomousStateSnapshot)
+        switch ($case) {
+            'number-string' { $snapshot.active_issues[0].number = '171' }
+            'number-decimal' { $snapshot.active_issues[0].number = 171.0 }
+            'number-array' { $snapshot.active_issues[0].number = [object[]]@(171L) }
+            'missing-number' { $snapshot.active_issues[0].PSObject.Properties.Remove('number') }
+            'wrong-number' { $snapshot.active_issues[0].number = 999L }
+            'missing-url' { $snapshot.active_issues[0].PSObject.Properties.Remove('url') }
+            'url-array' { $snapshot.active_issues[0].url = [object[]]@('https://github.com/nonononull/inputcodex/issues/171') }
+            'wrong-url' { $snapshot.active_issues[0].url = 'https://github.com/nonononull/inputcodex/issues/999' }
+            'missing-owner' { $snapshot.active_issues[0].PSObject.Properties.Remove('author_login') }
+            'owner-array' { $snapshot.active_issues[0].author_login = [object[]]@('nonononull') }
+        }
+        $result = Invoke-AutonomousStateCase -Name "successor-identity-$case" -Snapshot $snapshot
+        Assert-AutonomousState -Result $result -ExpectedState 'blocked-hard-stop' -ExpectedAction 'close-task-and-reopen-owner-decision-issue'
+        Assert-Contains -Collection @($result.Json.reason_codes) -Expected 'SIDE_EFFECT_SUCCESSOR_IDENTITY_INVALID' -Message "非法 successor 身份必须给出稳定原因：$case"
+    }
+}
+
+Invoke-ContractTest -Name 'successor active 与 merged PR owner 必须是精确字符串' -Body {
+    foreach ($property in @('author_login', 'head_owner_login')) {
+        foreach ($mutation in @('single-array', 'multi-array', 'wrong-scalar', 'missing')) {
+            $snapshot = Set-SideEffectSuccessorIssue (New-MergeReadyAutonomousStateSnapshot)
+            $snapshot.active_prs[0].number = 172L
+            $snapshot.active_prs[0].url = 'https://github.com/nonononull/inputcodex/pull/172'
+            $snapshot.active_prs[0].evidence.tracking_issue_ref = 'https://github.com/nonononull/inputcodex/issues/171'
+            $snapshot.active_prs[0].evidence.scope_count = 19L
+            $snapshot.active_prs[0].evidence.scope_hash = 'sha256:653c4c927c77de1673a1cc1a21db68a262bf08325cd59a941962a66c88d2ea7d'
+            switch ($mutation) {
+                'single-array' { $snapshot.active_prs[0].$property = [object[]]@('nonononull') }
+                'multi-array' { $snapshot.active_prs[0].$property = [object[]]@('external-user', 'nonononull') }
+                'wrong-scalar' { $snapshot.active_prs[0].$property = 'external-user' }
+                'missing' { $snapshot.active_prs[0].PSObject.Properties.Remove($property) }
+            }
+            $result = Invoke-AutonomousStateCase -Name "successor-active-pr-$property-$mutation" -Snapshot $snapshot
+            Assert-AutonomousState -Result $result -ExpectedState 'blocked-hard-stop' -ExpectedAction 'close-task-and-reopen-owner-decision-issue'
+            Assert-Contains -Collection @($result.Json.reason_codes) -Expected 'SIDE_EFFECT_SUCCESSOR_IDENTITY_INVALID' -Message "active PR owner 必须为精确字符串：$property/$mutation"
+
+            $postMerge = New-SideEffectSuccessorPostMergeSnapshot
+            switch ($mutation) {
+                'single-array' { $postMerge.merged_prs[0].$property = [object[]]@('nonononull') }
+                'multi-array' { $postMerge.merged_prs[0].$property = [object[]]@('external-user', 'nonononull') }
+                'wrong-scalar' { $postMerge.merged_prs[0].$property = 'external-user' }
+                'missing' { $postMerge.merged_prs[0].PSObject.Properties.Remove($property) }
+            }
+            $postResult = Invoke-AutonomousStateCase -Name "successor-merged-pr-$property-$mutation" -Snapshot $postMerge
+            Assert-AutonomousState -Result $postResult -ExpectedState 'blocked-hard-stop' -ExpectedAction 'close-task-and-reopen-owner-decision-issue'
+            Assert-Contains -Collection @($postResult.Json.reason_codes) -Expected 'SIDE_EFFECT_SUCCESSOR_IDENTITY_INVALID' -Message "merged PR owner 必须为精确字符串：$property/$mutation"
+        }
+    }
+}
+
+Invoke-ContractTest -Name 'successor hard stop 与 post merge 三类终态永久固定' -Body {
+    $hardStop = Set-SideEffectSuccessorIssue (New-ValidAutonomousStateSnapshot)
+    $hardStop.active_writer_count = 2L
+    Assert-AutonomousState -Result (Invoke-AutonomousStateCase -Name 'successor-hard-stop' -Snapshot $hardStop) -ExpectedState 'blocked-hard-stop' -ExpectedAction 'close-task-and-reopen-owner-decision-issue'
+
+    $complete = New-SideEffectSuccessorPostMergeSnapshot
+    Assert-AutonomousState -Result (Invoke-AutonomousStateCase -Name 'successor-post-merge-complete' -Snapshot $complete) -ExpectedState 'post-merge-verification' -ExpectedAction 'close-task-and-reopen-owner-decision-issue'
+
+    $pending = New-SideEffectSuccessorPostMergeSnapshot
+    $pending.merged_prs[0].post_merge.signature_valid = $false
+    Assert-AutonomousState -Result (Invoke-AutonomousStateCase -Name 'successor-post-merge-pending' -Snapshot $pending) -ExpectedState 'post-merge-verification' -ExpectedAction 'verify-main'
+}
+
 Invoke-ContractTest -Name '无人值守拒绝伪装或缺失类型的状态快照字段' -Body {
     foreach ($case in @(
         [pscustomobject]@{ Name = 'github-bool'; Property = 'github_available'; Value = 'true' },
@@ -1015,17 +1454,16 @@ Invoke-ContractTest -Name '无人值守拒绝伪装或缺失类型的状态快�
     }
 }
 
-Invoke-ContractTest -Name '无人值守空闲状态选择下一候选' -Body {
+Invoke-ContractTest -Name '无人值守已消费 tranche 空闲时等待 owner' -Body {
     $snapshot = Copy-AutonomousStateSnapshot (New-ValidAutonomousStateSnapshot)
     $snapshot.branch = 'main'
     $result = Invoke-AutonomousStateCase -Name 'idle' -Snapshot $snapshot
     Assert-AutonomousState `
         -Result $result `
-        -ExpectedState 'idle-select-candidate' `
-        -ExpectedAction 'select-fixed-file-mutation-candidate'
-    Assert-Equal -Expected 'feature.foundation-platform.watcher-preference-mutation' `
-        -Actual $result.Json.selected_candidate `
-        -Message '空闲状态只能选择 tranche 中的 Watcher preference mutation'
+        -ExpectedState 'blocked-candidate-exhausted' `
+        -ExpectedAction 'await-owner-decision'
+    Assert-True -Condition ($null -eq $result.Json.selected_candidate) `
+        -Message '已消费 tranche 不得重新投影历史候选'
     Assert-Equal -Expected 'https://github.com/nonononull/inputcodex/issues/140' `
         -Actual $result.Json.fixed_file_mutation_tranche.terminal.owner_issue_ref `
         -Message 'live 状态必须投影完成或硬停止后重开的 owner Issue'
@@ -1720,8 +2158,8 @@ Invoke-ContractTest -Name '无人值守安全忽略非 owner marker Issue 与 PR
     $result = Invoke-AutonomousStateCase -Name 'untrusted-marker' -Snapshot $snapshot
     Assert-AutonomousState `
         -Result $result `
-        -ExpectedState 'idle-select-candidate' `
-        -ExpectedAction 'select-fixed-file-mutation-candidate'
+        -ExpectedState 'blocked-candidate-exhausted' `
+        -ExpectedAction 'await-owner-decision'
     Assert-Equal -Expected 1 -Actual $result.Json.ignored_untrusted_issue_markers -Message '非 owner Issue marker 必须被计数并忽略'
     Assert-Equal -Expected 1 -Actual $result.Json.ignored_untrusted_pr_markers -Message '非 owner PR marker 必须被计数并忽略'
 }

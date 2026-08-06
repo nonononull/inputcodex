@@ -1201,6 +1201,22 @@
 - 关联：Issue `#161`、PR `#160` 复审评论、`scripts/automation/Get-AutonomousRefactorState.ps1`、
   `scripts/ci/Test-CiScripts.ps1`。
 
+### 2026-08-06：stale 目录夹具未同步新增 admission matrix Release
+
+- 环境：Issue `#171` 把副作用准入矩阵接入 `inputcodex-parity` 完整仓库验证，并继续保留既有
+  `current / stale-re-audit-required` Release Audit 状态机合同。
+- 现象：新增 parser 和定向矩阵测试通过，但完整 `cargo test -p inputcodex-parity` 的两个合法 stale
+  场景仅报告 `AdmissionMatrixReleaseMismatch`，分别指向矩阵的 tag 与 commit。
+- 根因：测试夹具 `write_catalog_release()` 会同步 feature catalog 与 `source-index` 的目录审计版本，
+  新复制的 admission matrix 却仍保留仓库 current Release；夹具因此构造了互相矛盾的目录基线。
+- 处理：保持生产验证器在 current/stale 两种状态下都严格要求矩阵绑定 `catalog_release`；只扩展测试
+  夹具，让其在切换目录 Release 时同步矩阵 tag/commit。禁止通过 stale 分支跳过矩阵 Release 校验。
+- 验证：首次全包稳定得到 `37 passed / 2 failed`；修正后 `inputcodex-parity` 全部测试组通过，其中
+  `admission_matrix 3/3`、`catalog_repository 40/40`，两个 stale 场景与 tag-only/commit-only 隔离负例同时为绿；
+  `cargo fmt --all --check` 通过，PowerShell 合同为 `CI_CONTRACT_GREEN passed=100`。
+- 关联：Issue `#171`、`crates/inputcodex-parity/src/admission.rs`、
+  `crates/inputcodex-parity/tests/catalog_repository.rs`。
+
 ## 记录模板
 
 ```text

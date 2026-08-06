@@ -161,6 +161,10 @@ impl FeatureRepositoryFixture {
             &root.join("parity/features"),
         );
         copy_tree(
+            &repository_root().join("parity/admission"),
+            &root.join("parity/admission"),
+        );
+        copy_tree(
             &repository_root().join("upstream/CodexPlusPlus"),
             &root.join("upstream/CodexPlusPlus"),
         );
@@ -252,6 +256,28 @@ impl FeatureRepositoryFixture {
                 );
             fs::write(path, updated).expect("应能更新临时功能目录 Release");
         }
+
+        let admission_matrix_path = self
+            .root
+            .join("parity/admission/side-effect-admission-matrix.yml");
+        let matrix_text = fs::read_to_string(&admission_matrix_path)
+            .expect("应能读取临时 admission matrix Release");
+        let updated_matrix = matrix_text
+            .replace(&format!("  tag: {RELEASE_TAG}"), &format!("  tag: {tag}"))
+            .replace(
+                &format!("  tag: {PREVIOUS_RELEASE_TAG}"),
+                &format!("  tag: {tag}"),
+            )
+            .replace(
+                &format!("  commit: {RELEASE_COMMIT}"),
+                &format!("  commit: {commit}"),
+            )
+            .replace(
+                &format!("  commit: {PREVIOUS_RELEASE_COMMIT}"),
+                &format!("  commit: {commit}"),
+            );
+        fs::write(admission_matrix_path, updated_matrix)
+            .expect("应能更新临时 admission matrix Release");
     }
 
     fn append_text(&self, relative_path: &str, suffix: &str) {
@@ -272,6 +298,24 @@ impl FeatureRepositoryFixture {
 
     fn remove_file(&self, relative_path: &str) {
         fs::remove_file(self.root.join(relative_path)).expect("应能删除临时证据文件");
+    }
+
+    fn read_admission_matrix(&self) -> String {
+        fs::read_to_string(
+            self.root
+                .join("parity/admission/side-effect-admission-matrix.yml"),
+        )
+        .expect("应能读取临时 admission matrix")
+        .replace("\r\n", "\n")
+    }
+
+    fn write_admission_matrix(&self, text: &str) {
+        fs::write(
+            self.root
+                .join("parity/admission/side-effect-admission-matrix.yml"),
+            text,
+        )
+        .expect("应能写入临时 admission matrix");
     }
 }
 
@@ -295,6 +339,41 @@ fn copy_tree(source: &Path, destination: &Path) {
             fs::copy(entry.path(), destination_path).expect("应能复制临时夹具文件");
         }
     }
+}
+
+fn admission_entry_ranges(text: &str) -> Vec<std::ops::Range<usize>> {
+    let marker = "  - source_id: ";
+    let starts = text
+        .match_indices(marker)
+        .filter_map(|(index, _)| {
+            (index == 0 || text.as_bytes()[index - 1] == b'\n').then_some(index)
+        })
+        .collect::<Vec<_>>();
+    starts
+        .iter()
+        .enumerate()
+        .map(|(index, start)| *start..starts.get(index + 1).copied().unwrap_or(text.len()))
+        .collect()
+}
+
+fn assert_single_admission_issue(
+    fixture: &FeatureRepositoryFixture,
+    expected_code: ValidationCode,
+    expected_location: &str,
+) {
+    let error = validate_feature_repository(fixture.root())
+        .expect_err("变异 admission matrix 必须被仓库验证拒绝");
+    let matching = error
+        .issues()
+        .iter()
+        .filter(|issue| issue.code() == expected_code)
+        .collect::<Vec<_>>();
+    assert_eq!(
+        matching.len(),
+        1,
+        "应只报告一个目标 admission 错误：{error}"
+    );
+    assert_eq!(matching[0].location(), expected_location);
 }
 
 #[test]
@@ -2721,6 +2800,175 @@ fn 仓库功能目录通过完整引用与安全验证() {
     assert_eq!(summary.contract_count(), 46);
     assert_eq!(summary.fixture_count(), 12);
     assert_eq!(summary.coverage_gap_count(), 0);
+}
+
+#[test]
+fn admission_schema_漂移被生产仓库验证拒绝() {
+    let fixture = FeatureRepositoryFixture::new();
+    fixture.write_current_source_lock();
+    let text = fixture.read_admission_matrix().replacen(
+        "schema_version: inputcodex.side-effect-admission-matrix.v1",
+        "schema_version: inputcodex.side-effect-admission-matrix.v2",
+        1,
+    );
+    fixture.write_admission_matrix(&text);
+
+    assert_single_admission_issue(
+        &fixture,
+        ValidationCode::AdmissionMatrixSchemaMismatch,
+        "parity/admission/side-effect-admission-matrix.yml.schema_version",
+    );
+}
+
+#[test]
+fn admission_重复来源被独立错误码拒绝() {
+    let fixture = FeatureRepositoryFixture::new();
+    fixture.write_current_source_lock();
+    let mut text = fixture.read_admission_matrix();
+    let ranges = admission_entry_ranges(&text);
+    let duplicate = text[ranges[0].clone()].to_owned();
+    text.insert_str(ranges[0].end, &duplicate);
+    fixture.write_admission_matrix(&text);
+
+    assert_single_admission_issue(
+        &fixture,
+        ValidationCode::DuplicateAdmissionSource,
+        "core-module:ccs_import",
+    );
+}
+
+#[test]
+fn admission_遗漏合法来源被反向闭包拒绝() {
+    let fixture = FeatureRepositoryFixture::new();
+    fixture.write_current_source_lock();
+    let mut text = fixture.read_admission_matrix();
+    let ranges = admission_entry_ranges(&text);
+    text.replace_range(ranges[0].clone(), "");
+    fixture.write_admission_matrix(&text);
+
+    assert_single_admission_issue(
+        &fixture,
+        ValidationCode::MissingAdmissionSource,
+        "core-module:ccs_import",
+    );
+}
+
+#[test]
+fn admission_唯一来源乱序被顺序合同拒绝() {
+    let fixture = FeatureRepositoryFixture::new();
+    fixture.write_current_source_lock();
+    let mut text = fixture.read_admission_matrix();
+    let ranges = admission_entry_ranges(&text);
+    let first = text[ranges[0].clone()].to_owned();
+    let second = text[ranges[1].clone()].to_owned();
+    text.replace_range(ranges[0].start..ranges[1].end, &(second + &first));
+    fixture.write_admission_matrix(&text);
+
+    assert_single_admission_issue(
+        &fixture,
+        ValidationCode::AdmissionMatrixOrderMismatch,
+        "core-module:codex_app_state:core-module:ccs_import",
+    );
+}
+
+#[test]
+fn admission_entry_语义字段漂移被生产闭包逐项拒绝() {
+    let mutations = [
+        (
+            "    feature_id: feature.provider-network.provider-import",
+            "    feature_id: feature.foundation-platform.settings-management",
+        ),
+        ("    bucket: write", "    bucket: network"),
+        (
+            "    owner_kinds: [credential-profile, typed-mutation]",
+            "    owner_kinds: [typed-mutation]",
+        ),
+        (
+            "    owner_kinds: [credential-profile, typed-mutation]",
+            "    owner_kinds: [typed-mutation, credential-profile]",
+        ),
+        (
+            "    blocker_refs: [https://github.com/nonononull/inputcodex/issues/140]",
+            "    blocker_refs: [https://github.com/nonononull/inputcodex/issues/171]",
+        ),
+        (
+            "    implementation_authorized: false",
+            "    implementation_authorized: true",
+        ),
+    ];
+
+    for (expected, replacement) in mutations {
+        let fixture = FeatureRepositoryFixture::new();
+        fixture.write_current_source_lock();
+        let text = fixture
+            .read_admission_matrix()
+            .replacen(expected, replacement, 1);
+        fixture.write_admission_matrix(&text);
+
+        assert_single_admission_issue(
+            &fixture,
+            ValidationCode::AdmissionMatrixEntryMismatch,
+            "core-module:ccs_import",
+        );
+    }
+}
+
+#[test]
+fn admission_matrix_only_多余来源被正向闭包拒绝() {
+    let fixture = FeatureRepositoryFixture::new();
+    fixture.write_current_source_lock();
+    let mut text = fixture.read_admission_matrix();
+    text.push_str(
+        "  - source_id: zzzz:matrix-only\n\
+         \x20   feature_id: feature.foundation-platform.settings-management\n\
+         \x20   bucket: write\n\
+         \x20   owner_state: missing\n\
+         \x20   owner_kinds: [typed-mutation]\n\
+         \x20   blocker_refs: [https://github.com/nonononull/inputcodex/issues/140]\n\
+         \x20   admission: blocked\n\
+         \x20   implementation_authorized: false\n",
+    );
+    fixture.write_admission_matrix(&text);
+
+    assert_single_admission_issue(
+        &fixture,
+        ValidationCode::UnexpectedAdmissionSource,
+        "zzzz:matrix-only",
+    );
+}
+
+#[test]
+fn admission_release_tag_only_漂移被精确拒绝() {
+    let fixture = FeatureRepositoryFixture::new();
+    fixture.write_current_source_lock();
+    let text = fixture
+        .read_admission_matrix()
+        .replacen("  tag: v1.2.44", "  tag: v1.2.43", 1);
+    fixture.write_admission_matrix(&text);
+
+    assert_single_admission_issue(
+        &fixture,
+        ValidationCode::AdmissionMatrixReleaseMismatch,
+        "parity/admission/side-effect-admission-matrix.yml.release.tag",
+    );
+}
+
+#[test]
+fn admission_release_commit_only_漂移被精确拒绝() {
+    let fixture = FeatureRepositoryFixture::new();
+    fixture.write_current_source_lock();
+    let text = fixture.read_admission_matrix().replacen(
+        "  commit: 77091ccaee4423f35a1b2c51c4ecd703e6201092",
+        "  commit: 5036ff056b5c629f19356396b17d6eeb70da664c",
+        1,
+    );
+    fixture.write_admission_matrix(&text);
+
+    assert_single_admission_issue(
+        &fixture,
+        ValidationCode::AdmissionMatrixReleaseMismatch,
+        "parity/admission/side-effect-admission-matrix.yml.release.commit",
+    );
 }
 
 #[test]

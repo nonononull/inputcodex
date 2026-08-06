@@ -280,6 +280,10 @@ impl SourceEntry {
         self.disposition.as_ref()
     }
 
+    pub(crate) fn side_effects(&self) -> &[String] {
+        &self.side_effects
+    }
+
     fn has_required_metadata(&self) -> bool {
         !self.platforms.is_empty()
             && !self.side_effects.is_empty()
