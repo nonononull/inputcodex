@@ -1,16 +1,16 @@
 {
   "schema_version": "inputcodex.source-lock.v1",
-  "generated_at": "2026-07-31T09:55:41Z",
+  "generated_at": "2026-08-08T10:59:37Z",
   "snapshot": {
     "path": "upstream/CodexPlusPlus",
     "repository": "BigPizzaV3/CodexPlusPlus",
     "repository_url": "https://github.com/BigPizzaV3/CodexPlusPlus",
-    "release_tag": "v1.2.44",
-    "release_url": "https://github.com/BigPizzaV3/CodexPlusPlus/releases/tag/v1.2.44",
-    "release_published_at": "2026-07-30T17:00:29Z",
-    "commit": "77091ccaee4423f35a1b2c51c4ecd703e6201092",
-    "commit_message": "Release v1.2.44",
-    "commit_tree": "d417f2775adfe61798c6676024edce1a236e576f",
+    "release_tag": "v1.2.45",
+    "release_url": "https://github.com/BigPizzaV3/CodexPlusPlus/releases/tag/v1.2.45",
+    "release_published_at": "2026-08-07T10:17:05Z",
+    "commit": "055302664af09e6e3bb76a00b36d318132094ee3",
+    "commit_message": "chore: prepare v1.2.45",
+    "commit_tree": "a1fa32b1fc1461bdb3dc87ccad0e35c9965e09ec",
     "commit_verification": {
       "verified": false,
       "reason": "unsigned"
@@ -22,18 +22,18 @@
       "tag": "v1.2.44",
       "commit": "77091ccaee4423f35a1b2c51c4ecd703e6201092"
     },
-    "status": "current",
-    "stale_reason": null,
-    "re_audit_issue_ref": null
+    "status": "stale-re-audit-required",
+    "stale_reason": "活动上游快照已推进到 v1.2.45 @ 055302664af09e6e3bb76a00b36d318132094ee3，功能目录仍固定在 v1.2.44 @ 77091ccaee4423f35a1b2c51c4ecd703e6201092；必须由 Issue #173 完成独立重新审计后才能恢复为 current。",
+    "re_audit_issue_ref": "https://github.com/nonononull/inputcodex/issues/173"
   },
   "archive": {
     "format": "tar.gz",
-    "url": "https://codeload.github.com/BigPizzaV3/CodexPlusPlus/tar.gz/refs/tags/v1.2.44",
-    "sha256": "2c9a1900b24e838ed7b9405534be15efc81a670636cd97d4de8a16cab17a73cb",
-    "bytes": 18987824
+    "url": "https://codeload.github.com/BigPizzaV3/CodexPlusPlus/tar.gz/refs/tags/v1.2.45",
+    "sha256": "b2e636df4627e8d23a17b9de7d7f21056642285eed3f4bd2c5bcd7c14c78fc08",
+    "bytes": 18985527
   },
   "tree": {
-    "sha": "d417f2775adfe61798c6676024edce1a236e576f",
+    "sha": "a1fa32b1fc1461bdb3dc87ccad0e35c9965e09ec",
     "entry_count": 351,
     "directory_count": 70,
     "file_count": 281,
@@ -42,9 +42,9 @@
   "manifest": {
     "algorithm": "sha256",
     "format": "<sha256><two spaces><posix path><newline>",
-    "sha256": "a9d0cb6b35dfd47899ae9a7ca66e1ac1ba43bfbc7ccf1c3137695f4366f2a8a0",
+    "sha256": "cfd19085547f95b1769afdf20b852ddf05ffdae06e350c5030de5173a7058ae1",
     "file_count": 281,
-    "total_bytes": 24481110,
+    "total_bytes": 24460446,
     "largest_file": {
       "path": "assets/plugin-marketplaces/openai-curated-remote.zip",
       "mode": "100644",
@@ -224,15 +224,15 @@
       "path": "Cargo.lock",
       "mode": "100644",
       "size": 140675,
-      "git_blob_sha1": "c7bc80953817f41ba4f0fa74fec9df3a3eb11dac",
-      "sha256": "3f84e847ccd10bee5c2f12a5f2a72f0ec3cacae901e7b69589326ff5fc040d6b"
+      "git_blob_sha1": "db8eadb83d80747f878d7535b4827489ace730a8",
+      "sha256": "a2c4229b2cd3ed4d8b4e22db16a22077a7a3e91abe14652bdb66655abfa4772c"
     },
     {
       "path": "Cargo.toml",
       "mode": "100644",
       "size": 1078,
-      "git_blob_sha1": "97b678945a919e47585b7f00e31564733c92c802",
-      "sha256": "17303e8b69630a2ddbfe5b1da13aca8783ff038d496a06db515bf350bd4b1ec2"
+      "git_blob_sha1": "571070190cd53cf493c99123ac3caa61fbbe3e01",
+      "sha256": "47b260ec0ebfbf0cde8ab4adcf79863210017d580616d17b7ee9b2cf9251eb8c"
     },
     {
       "path": "HANDOVER.md",
@@ -251,16 +251,16 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "size": 19776,
-      "git_blob_sha1": "e9299b1130d032a2419acc9138e4937a3f516814",
-      "sha256": "8cb87a0f0a573d5ca2a1346116d79a7e0fde5ecf8ebb4ef94e9b0c2a1b789355"
+      "size": 19367,
+      "git_blob_sha1": "7ae697c312c3deaacf38a34bbe2c784dd70f8540",
+      "sha256": "a0a5141c57b2c8764460198a1bdec06047d53b4525a6d794ceda4e02685feeec"
     },
     {
       "path": "README_EN.md",
       "mode": "100644",
-      "size": 18854,
-      "git_blob_sha1": "477ba0487fa2c6cd6caedc63dfaeae7e7ae32144",
-      "sha256": "6415ba7edc3e5bba0c130ddcfc15d89566e7a0d115e6fe5a23aa5a3e9eaba0d6"
+      "size": 18472,
+      "git_blob_sha1": "6dc81ac4d267dda596700b88e3219948f20abd8a",
+      "sha256": "f55455267ae2dc6b0cd5a1ae232d53b6ac00199eaac1aa8a72d5e714fea5a4f8"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -286,9 +286,9 @@
     {
       "path": "apps/codex-plus-launcher/src/main.rs",
       "mode": "100644",
-      "size": 31686,
-      "git_blob_sha1": "b02808701aa04c1edbc5d8c1fb21e6a27d25809b",
-      "sha256": "7da5103ed0294530e0ebd1c43cf2eaec0f92760dd79a163c19131890cfeb82c1"
+      "size": 32088,
+      "git_blob_sha1": "af73c506770c834aa6db74c9436b8fe1487a3cbf",
+      "sha256": "6e119a56fed7628c828b9dec015a3ce67910547b5d2425cb236291eaa3f5dc84"
     },
     {
       "path": "apps/codex-plus-manager/components.json",
@@ -308,15 +308,15 @@
       "path": "apps/codex-plus-manager/package-lock.json",
       "mode": "100644",
       "size": 95442,
-      "git_blob_sha1": "2cd3bf1d77910c49e9712b16e8d6b7493b123b8a",
-      "sha256": "b07afe34645e0de5607546cf8ce57448ac99fc30d50812e683a572270e176176"
+      "git_blob_sha1": "fb6c54d4ac7deb7b5f854bdf6aaf9055ba1b844e",
+      "sha256": "6bc4b9fa97e5aa3f5b298b8b90ca2ab6d637815774475a4a7e8d5cb8525e6e66"
     },
     {
       "path": "apps/codex-plus-manager/package.json",
       "mode": "100644",
       "size": 1231,
-      "git_blob_sha1": "948143208b5cdb275064a03a624d09406f017021",
-      "sha256": "b14fbd6b726929476475209d599b94d6cfba5aee87523f575f1f61d2d7007bd3"
+      "git_blob_sha1": "3f7d37f19d92858946ac61087243f7a3d37f2ae6",
+      "sha256": "c46374204fbd2f3e0344d355b99f6cdbff90b8f5c8e663441ed3366540ad2069"
     },
     {
       "path": "apps/codex-plus-manager/src-tauri/Cargo.toml",
@@ -370,9 +370,9 @@
     {
       "path": "apps/codex-plus-manager/src-tauri/src/lib.rs",
       "mode": "100644",
-      "size": 15803,
-      "git_blob_sha1": "65caed17bebd9b744da68b17be62002f33feaf72",
-      "sha256": "9b1b426232331cc6f744196ab52b6a511843783a8218925ff3b7f069fbce2f84"
+      "size": 16174,
+      "git_blob_sha1": "d881bbe77fe2ac937d49ff8a7ec7998e131d11dd",
+      "sha256": "25689ccaea6f8ac71950658bf953e477c9b38cc9356ba0208d4e7cdc8fdcde36"
     },
     {
       "path": "apps/codex-plus-manager/src-tauri/src/main.rs",
@@ -385,15 +385,15 @@
       "path": "apps/codex-plus-manager/src-tauri/tauri.conf.json",
       "mode": "100644",
       "size": 878,
-      "git_blob_sha1": "ec0f016345439b82a94d992ebebb0d5ccab8edfb",
-      "sha256": "e7a812ce410d471e6f295933619743a39f5a2e7539f7c2e2c853a0682aa5cf61"
+      "git_blob_sha1": "e66fb096552835d3faa42d879f4a453e3ccfc8a9",
+      "sha256": "2876f9fe1a8ef957d4f5d403955e454b578021b4c5b641b08e24a8a1d5e87efa"
     },
     {
       "path": "apps/codex-plus-manager/src-tauri/tests/windows_subsystem.rs",
       "mode": "100644",
-      "size": 16813,
-      "git_blob_sha1": "51fe563a7f1b6b17dfc2c4f56803bd928c1233fb",
-      "sha256": "90a9791423808d089037348aa629642f72bb30034ca71efc03452f84488d5a9e"
+      "size": 17043,
+      "git_blob_sha1": "7f37e9652826930f71d4be99d5dc081df9134cb0",
+      "sha256": "6924dea8276f8e765da124a4d4810a75ce0d2eadb688190cc671219394696c09"
     },
     {
       "path": "apps/codex-plus-manager/src-tauri/windows-app-manifest.xml",
@@ -405,9 +405,9 @@
     {
       "path": "apps/codex-plus-manager/src/App.tsx",
       "mode": "100644",
-      "size": 352458,
-      "git_blob_sha1": "b41a66b3107e2dd11305378b349bc8f6d41f76b3",
-      "sha256": "4d3ee8e8b4dd57c59fbb0a557ad9f1d755ff6da8a416fa6286bdc9b9d7935a2f"
+      "size": 356988,
+      "git_blob_sha1": "5c3b32c4e9a8c56a0ca19ca2ae5b7ebd3eebd279",
+      "sha256": "25b117c4d294172d7cc339b6d86aa7bb0d73a0f944c1759727140fca01a3988d"
     },
     {
       "path": "apps/codex-plus-manager/src/components/ProviderPresetSelector.tsx",
@@ -461,9 +461,9 @@
     {
       "path": "apps/codex-plus-manager/src/dream-skin.test.ts",
       "mode": "100644",
-      "size": 14363,
-      "git_blob_sha1": "32c119cf79e44e85e8a3954b77522d5f3eff4b6c",
-      "sha256": "6e0862e64151bfae2c2a8b1e035166cbb2ea7fefb2cdb8846319fa02e77d6971"
+      "size": 15021,
+      "git_blob_sha1": "b994a9f0f57a550324a7beeca601caeee36e1163",
+      "sha256": "df91e70be9cc1b4e9e747a463f5b84a78553b0c6e9a8d442c45a2da92ff98679"
     },
     {
       "path": "apps/codex-plus-manager/src/dream-skin.ts",
@@ -489,9 +489,9 @@
     {
       "path": "apps/codex-plus-manager/src/i18n-en.ts",
       "mode": "100644",
-      "size": 74357,
-      "git_blob_sha1": "4199b9e9151dcec94d8f3ae7cce6b96d30d26f73",
-      "sha256": "04a0667ea6c923084782cdec026e546a6c968b501dddc5f653e00419f0df16e4"
+      "size": 74632,
+      "git_blob_sha1": "f58b1f38211fcebf521339f4e1cc29be9d0ab414",
+      "sha256": "47925d5a6515db2ec0ab0bcfef0095a89df1295a7de6388e40a34e93c25c5d8a"
     },
     {
       "path": "apps/codex-plus-manager/src/i18n.ts",
@@ -552,9 +552,9 @@
     {
       "path": "apps/codex-plus-manager/src/styles.css",
       "mode": "100644",
-      "size": 105160,
-      "git_blob_sha1": "97f6c6975fbe6c8b4b77519076ec64402bdf3f55",
-      "sha256": "d747dfcfe52946a78eb98772f228d0b69c55df2fbe9b9414597aec6c2671b946"
+      "size": 108492,
+      "git_blob_sha1": "7a5261deadc004e6fdb3ccf6bdd1d4a2044fe3d1",
+      "sha256": "99139eb4ef2e185303f4f56943d258641becbf56783859d816422dc3207914a1"
     },
     {
       "path": "apps/codex-plus-manager/tsconfig.json",
@@ -650,16 +650,16 @@
     {
       "path": "assets/inject/renderer-inject.js",
       "mode": "100644",
-      "size": 482673,
-      "git_blob_sha1": "fda3287e990b6f5b48933a3fc61b2fd0c3e9e5fb",
-      "sha256": "c2a277e85fa39d3a1cb3eea701dc533139534900d72fade2a9c1e567e0d882ed"
+      "size": 453158,
+      "git_blob_sha1": "c4c64767f93f983556454379519917234cf869f6",
+      "sha256": "e14e52165c8bda1f6e8629afd8882798620be4300c40a27f9308357947822633"
     },
     {
       "path": "assets/inject/stepwise-inject.js",
       "mode": "100644",
-      "size": 74354,
-      "git_blob_sha1": "dda71b68bef2a380fdb10f5b55b590f8b6d45ffc",
-      "sha256": "5ac90df1aff1329caad74b932bdb7d6ed736d2a705d8b2898ea7f4a53cf0a522"
+      "size": 74364,
+      "git_blob_sha1": "0b4e0015a9b0a935afe6eb703edf7c54c7f1056d",
+      "sha256": "597f0684712cbf783203d20013baa2b26fff7fecb1bcb9e120662a99315cd4b6"
     },
     {
       "path": "assets/inject/upstream/cidala-tiger/LICENSE",
@@ -902,9 +902,9 @@
     {
       "path": "crates/codex-plus-core/src/ads.rs",
       "mode": "100644",
-      "size": 10085,
-      "git_blob_sha1": "39c41052d7093492d330fb69d160f3f2db568d8e",
-      "sha256": "c3745d171ea901d79282ab1a520c09577a0bfc20d706b79325accc5d65e7bd8b"
+      "size": 9083,
+      "git_blob_sha1": "0199ab5a74a892e910fff20b19bb633f1abd206f",
+      "sha256": "badf07c6e9f8a7190c9f1b6cd217905f0128432ed13a3e6ef871b569c9df6d4f"
     },
     {
       "path": "crates/codex-plus-core/src/app_paths.rs",
@@ -916,9 +916,9 @@
     {
       "path": "crates/codex-plus-core/src/assets.rs",
       "mode": "100644",
-      "size": 29630,
-      "git_blob_sha1": "daa7397247cb4c2cdec7abe498d9f818099cb64a",
-      "sha256": "934e3df879cb0d686d5d597566653d663be6cf9f83da3c4b9529157080838ab0"
+      "size": 29068,
+      "git_blob_sha1": "71d969119703ee90f8996d65a95b24bc03525ec8",
+      "sha256": "4644a6f530b92751952b3bdedfaabee16a8a572ccdb41af70b8274397b93f40a"
     },
     {
       "path": "crates/codex-plus-core/src/bridge.rs",
@@ -944,9 +944,9 @@
     {
       "path": "crates/codex-plus-core/src/codex_app_state.rs",
       "mode": "100644",
-      "size": 22971,
-      "git_blob_sha1": "0ab3a0f7de93c9d72cdd69a62a25b014e78a6b5e",
-      "sha256": "10929b44bcf40c50bfa0fd4100161fd0ebca93c61331a7147f90c75a050a97f6"
+      "size": 19199,
+      "git_blob_sha1": "db28589cc1b99aaf5dafe0c9fc000a292e43c472",
+      "sha256": "9c025cc718f43caf44fd596162110a5246cf00fa822d5808b21cec3f29d2690f"
     },
     {
       "path": "crates/codex-plus-core/src/codex_home.rs",
@@ -993,9 +993,9 @@
     {
       "path": "crates/codex-plus-core/src/dream_skin_library.rs",
       "mode": "100644",
-      "size": 19028,
-      "git_blob_sha1": "1fb7eb79c76c820259abc234414d6c71db1b8d90",
-      "sha256": "3711c663b6657611f25225f95b8321b489ffe18b03cf9a24664102e7c8b39234"
+      "size": 20401,
+      "git_blob_sha1": "fd47457c67c349e8dd029c52bbc0160615fa52f6",
+      "sha256": "5a9bcde4a74d64ac81f5d70aa3a74a282c89e08184adb21d09f8f5b48151bac3"
     },
     {
       "path": "crates/codex-plus-core/src/dream_skin_market.rs",
@@ -1049,9 +1049,9 @@
     {
       "path": "crates/codex-plus-core/src/launcher.rs",
       "mode": "100644",
-      "size": 127773,
-      "git_blob_sha1": "a2c941b35c998778b0e888ce5a6aa5872fc85d8a",
-      "sha256": "c3ced5b92de24cea06b7199039477f4fe2378cc7d7f18ec6783a643ad47a0d2a"
+      "size": 127496,
+      "git_blob_sha1": "ace35fb927327af34c1a6e3615124b55c906c856",
+      "sha256": "5ed7751df27c3a7842b6dc6aff0806ea3e1b4276b8a661979e49e49ed392e22d"
     },
     {
       "path": "crates/codex-plus-core/src/lib.rs",
@@ -1112,9 +1112,9 @@
     {
       "path": "crates/codex-plus-core/src/protocol_proxy.rs",
       "mode": "100644",
-      "size": 142977,
-      "git_blob_sha1": "ee01e3e3da95418fb552b516bffdcec908bf78e7",
-      "sha256": "13abc9d283edec123234894392ec43dd925ae9dbef98340fdeeaa83cd20aa32d"
+      "size": 142955,
+      "git_blob_sha1": "543da9524cae080b171ce0b65c8a4631f94013cc",
+      "sha256": "8901a627966efcf54c3c81272cfd5d07ec250d62e1c8f67835a77e7af7bf9b86"
     },
     {
       "path": "crates/codex-plus-core/src/provider_import.rs",
@@ -1133,9 +1133,9 @@
     {
       "path": "crates/codex-plus-core/src/relay_config.rs",
       "mode": "100644",
-      "size": 98652,
-      "git_blob_sha1": "77409d0b1ebd7b46512a99965b8112b1434daf38",
-      "sha256": "2735c3351849617dfa85a122cf70b1d3ae6acb3f7cd8d3fae7a15a0f7d657b4e"
+      "size": 98770,
+      "git_blob_sha1": "9e9e3de63814c96d25302e18083a14ecdf179f87",
+      "sha256": "12ec30744e57e44a669536cd9c1d27cea78ad17fbdc38ce34ff91eb04f3ff31f"
     },
     {
       "path": "crates/codex-plus-core/src/relay_environment.rs",
@@ -1161,9 +1161,9 @@
     {
       "path": "crates/codex-plus-core/src/routes.rs",
       "mode": "100644",
-      "size": 26203,
-      "git_blob_sha1": "6790d1f07c39433c8c2f90b4ea6feb7a6a73e6ed",
-      "sha256": "eec0daeccb88df0a4f41b53f594d12bce29fb46f35a56dbd6db45f39ec5cc1f8"
+      "size": 31936,
+      "git_blob_sha1": "5c53085104e5ce11149409c111eb17e8d9d6c601",
+      "sha256": "0818b1ef171f4222f6b3928ee3fbe2d37c297d73080f7a8c2399f3de0f0542e5"
     },
     {
       "path": "crates/codex-plus-core/src/script_market.rs",
@@ -1203,9 +1203,9 @@
     {
       "path": "crates/codex-plus-core/src/update.rs",
       "mode": "100644",
-      "size": 10816,
-      "git_blob_sha1": "2f9fb00c72688b150e867732d456f6e8ff905b8e",
-      "sha256": "078bf7086bccc0be9a4984368be1c8b3ae5af5db70e2127b4821a6d4348d127b"
+      "size": 14356,
+      "git_blob_sha1": "54490832eb8948d07a4216eb7d333ea6e1f2ded5",
+      "sha256": "4411e0f2b779215908e8a299b37efcf6d202f0db7ca70ed319a2baae8af1c1d9"
     },
     {
       "path": "crates/codex-plus-core/src/upstream_worktree.rs",
@@ -1273,9 +1273,9 @@
     {
       "path": "crates/codex-plus-core/src/vision.rs",
       "mode": "100644",
-      "size": 74077,
-      "git_blob_sha1": "6bdafaee664d5960ba77f1835f6dc4153956d4ce",
-      "sha256": "a3feeaa367f42949835980fd438ec5b678076540578e2b5282d1966eb8d60619"
+      "size": 76978,
+      "git_blob_sha1": "85b536386495f4dbc12808d76898c3df65aedd93",
+      "sha256": "caeb1feb723d353635dbbbadd2a630b6ba881ce1d6dfe9ae3eb66c6cd9e83f59"
     },
     {
       "path": "crates/codex-plus-core/src/watcher.rs",
@@ -1329,23 +1329,23 @@
     {
       "path": "crates/codex-plus-core/tests/bridge_routes.rs",
       "mode": "100644",
-      "size": 50045,
-      "git_blob_sha1": "f298777d6dab71d44c0c1a74d532381be90657b7",
-      "sha256": "5139b9b66151769c1b070bfb1f9b28b3717e8b0ccdecfd2d029c45da4031df2c"
+      "size": 51979,
+      "git_blob_sha1": "9427b4dd5f77b5dd3ca7fd5721e31794aa83c2ff",
+      "sha256": "0ad7f0977d6aa72a168473af4975b060eefe4a4c33cf394d966bff9e9825dc5b"
     },
     {
       "path": "crates/codex-plus-core/tests/cdp_bridge.rs",
       "mode": "100644",
-      "size": 124529,
-      "git_blob_sha1": "18b9230cac34df9af377e8fcbb28b3b0669fc66f",
-      "sha256": "935b4416ef76ef02006595a1a7a7b413adac8a5c9c72d39944637ec05d4e728b"
+      "size": 115133,
+      "git_blob_sha1": "b3616a93c591b8de3b7eaa9d7facf06791047b72",
+      "sha256": "c1bba48877a69939b7366b1c44963ab4307a2c519a3d5e92d43f0bbbaf3e901d"
     },
     {
       "path": "crates/codex-plus-core/tests/codex_app_state.rs",
       "mode": "100644",
-      "size": 10328,
-      "git_blob_sha1": "5f09fae5366f60edee42e3ffe4f2d5612c3f57ac",
-      "sha256": "6cca1b1e3ab006e928a24edc0f3c1919329325079dfc9b0e88ecef3a35ff1469"
+      "size": 8070,
+      "git_blob_sha1": "c3a31477ab2936dca0321fec93d9a028f8695f54",
+      "sha256": "a6763fa9f80dbf3a769acc7d8719fad11f70ae7de8ed985a10afcbb0804d4bf2"
     },
     {
       "path": "crates/codex-plus-core/tests/codex_sqlite.rs",
@@ -1357,9 +1357,9 @@
     {
       "path": "crates/codex-plus-core/tests/dream_skin.rs",
       "mode": "100644",
-      "size": 17107,
-      "git_blob_sha1": "0356d1c63f559b0141ce75642973b40eb8b49759",
-      "sha256": "8371c83f715380b5c722857e1666011d8ed27498f115ad3e17fcef901d60f4e7"
+      "size": 17437,
+      "git_blob_sha1": "c1ec5f4d8ab8b709b552168c3f28cb854640943d",
+      "sha256": "d64067582c2c6fb5495d2c89ffc676a73c93bc329f0ee43fae28b0eef25a8a87"
     },
     {
       "path": "crates/codex-plus-core/tests/dream_skin_library.rs",
@@ -1371,9 +1371,9 @@
     {
       "path": "crates/codex-plus-core/tests/dream_skin_market.rs",
       "mode": "100644",
-      "size": 4674,
-      "git_blob_sha1": "5536ba12eb77ebc433ecc4ee3364035bbce171ed",
-      "sha256": "a0b2374e83656142f4a389e90e428bce5ba10f112adafebc257b9a6ae9a2c2d6"
+      "size": 4837,
+      "git_blob_sha1": "f601049839fc025f48acc80ca71296f227f43859",
+      "sha256": "fb1cdbe84252c9b0015e8f9711157cf83a82d0578077785603dc1abbe7d282a5"
     },
     {
       "path": "crates/codex-plus-core/tests/dream_skin_runtime.rs",
@@ -1399,9 +1399,9 @@
     {
       "path": "crates/codex-plus-core/tests/launcher.rs",
       "mode": "100644",
-      "size": 62992,
-      "git_blob_sha1": "2a08440fd95a7168ea36e2667ab4a308165a1355",
-      "sha256": "deb3f508259c1178b5ee9243dc819f5efbfdb210da911f1cae00924c001e2989"
+      "size": 62906,
+      "git_blob_sha1": "6ab0729740a705306f41503947ddb997941ef70e",
+      "sha256": "32675def929e69157c5abee0f00e733ed4fbea3558b408c98f7d447fe37a8d0d"
     },
     {
       "path": "crates/codex-plus-core/tests/model_catalog.rs",
@@ -1427,16 +1427,16 @@
     {
       "path": "crates/codex-plus-core/tests/protocol_proxy.rs",
       "mode": "100644",
-      "size": 63065,
-      "git_blob_sha1": "c277976f1c25c65275b24086a704ffe6474923f2",
-      "sha256": "19077d84207f218a044ec39d2a30fd327b1fa1fd9592c5cfeee6e3f365edc51a"
+      "size": 64110,
+      "git_blob_sha1": "40ca2a4f4030e88de5d7309f7443fd0ed2354aa7",
+      "sha256": "f2346bd3b65fe05edfe5915f2e0b0836e0c1f6d28249267df2f747c3bafda7b7"
     },
     {
       "path": "crates/codex-plus-core/tests/relay_config.rs",
       "mode": "100644",
-      "size": 121018,
-      "git_blob_sha1": "22c9194b3f75f06c8bf651ac8f9ea17638984ce4",
-      "sha256": "0d770f2a4461763e43236f6af086cf9d481097035503435a4590485ce7a9052a"
+      "size": 121217,
+      "git_blob_sha1": "5cb0d3edf0eca74d113e78d91387f67920d611eb",
+      "sha256": "a835498b9878456725f10c7ae35813f7c9e50068be916db65b2d0fc269042f85"
     },
     {
       "path": "crates/codex-plus-core/tests/relay_rotation.rs",
@@ -1728,9 +1728,9 @@
     {
       "path": "docs/images/sponsor-jojocode.svg",
       "mode": "100644",
-      "size": 809,
-      "git_blob_sha1": "b92d11bb3aa6750699fcab2d6d5256b6447198f1",
-      "sha256": "f58b5e837d2dd68c0bb79bde5123cafa93d7e0bd290f36befbacf644d000dcce"
+      "size": 684,
+      "git_blob_sha1": "cf4b4cfe0dbe1838d0ff59bcc20295875c9f7749",
+      "sha256": "397b7925cb7207dd4054398d348cf6da9b7a95061f4df0aefd47a2015d6bf8fc"
     },
     {
       "path": "docs/images/sponsor-maolao-api.jpg",
@@ -2078,9 +2078,9 @@
     {
       "path": "tools/i18n-keys.json",
       "mode": "100644",
-      "size": 23293,
-      "git_blob_sha1": "e5f5a1d6f6e575f6eacbc450ee3bfb54c7e632a0",
-      "sha256": "7a40b0bf023cc592e5c3e87d2c7efa060157c689be6f4bf2f22a56f65537d687"
+      "size": 23291,
+      "git_blob_sha1": "ace04afe898a139dbb5dc87a43c98eb4bcc1b715",
+      "sha256": "0bfbf59c6253e579a7c5cb3063b9c0bc46549916dda2977d531fe46a4c47b586"
     },
     {
       "path": "tools/i18n-verify.mjs",

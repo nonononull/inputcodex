@@ -31,9 +31,14 @@ async fn bridge_routes_cover_all_current_paths() {
         ("/user-scripts/reload", json!({})),
         ("/devtools/open", json!({})),
         ("/manager/open", json!({})),
+        ("/manager/open-transient", json!({})),
         ("/backend/status", json!({})),
         ("/codex-model-catalog", json!({})),
         ("/codex-config-model", json!({})),
+        (
+            "/llm-proxy",
+            json!({"url": "http://example.com", "method": "POST"}),
+        ),
         ("/ads", json!({})),
         ("/zed-remote/status", json!({})),
         (
@@ -105,6 +110,64 @@ async fn bridge_routes_cover_all_current_paths() {
             "{path} should be routed"
         );
     }
+}
+
+#[tokio::test]
+async fn llm_proxy_rejects_local_addresses() {
+    let ctx = test_context();
+
+    let result = handle_bridge_request(
+        ctx,
+        "/llm-proxy",
+        json!({
+            "url": "https://127.0.0.1/v1/chat/completions",
+            "method": "POST",
+            "headers": {"Authorization": "Bearer sk-test"},
+            "body": "{}"
+        }),
+    )
+    .await;
+
+    assert_eq!(result["status"], json!("failed"));
+    assert_eq!(result["message"], json!("Base URL 不得指向本机或私有网络"));
+}
+
+#[tokio::test]
+async fn llm_proxy_requires_https() {
+    let ctx = test_context();
+
+    let result = handle_bridge_request(
+        ctx,
+        "/llm-proxy",
+        json!({
+            "url": "http://api.example.com/v1/chat/completions",
+            "method": "POST",
+            "body": "{}"
+        }),
+    )
+    .await;
+
+    assert_eq!(result["status"], json!("failed"));
+    assert_eq!(result["message"], json!("Base URL 必须使用 HTTPS"));
+}
+
+#[tokio::test]
+async fn llm_proxy_rejects_non_post_methods() {
+    let ctx = test_context();
+
+    let result = handle_bridge_request(
+        ctx,
+        "/llm-proxy",
+        json!({
+            "url": "https://api.example.com/v1/chat/completions",
+            "method": "GET",
+            "body": "{}"
+        }),
+    )
+    .await;
+
+    assert_eq!(result["status"], json!("failed"));
+    assert_eq!(result["message"], json!("LLM Bridge 仅支持 POST 请求"));
 }
 
 #[tokio::test]
@@ -365,6 +428,10 @@ async fn runtime_status_devtools_repair_and_ads_routes_are_dispatched() {
     assert_eq!(
         handle_bridge_request(ctx.clone(), "/manager/open", json!({})).await,
         json!({"status": "ok", "opened": "manager"})
+    );
+    assert_eq!(
+        handle_bridge_request(ctx.clone(), "/manager/open-transient", json!({})).await,
+        json!({"status": "ok", "opened": "manager-transient"})
     );
     assert_eq!(
         handle_bridge_request(ctx.clone(), "/backend/status", json!({})).await,
@@ -1145,6 +1212,10 @@ impl BridgeRuntimeService for FakeRuntime {
 
     async fn open_manager(&self) -> anyhow::Result<Value> {
         Ok(json!({"status": "ok", "opened": "manager"}))
+    }
+
+    async fn open_transient_manager(&self) -> anyhow::Result<Value> {
+        Ok(json!({"status": "ok", "opened": "manager-transient"}))
     }
 
     async fn backend_status(&self) -> anyhow::Result<Value> {
