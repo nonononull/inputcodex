@@ -865,9 +865,17 @@ fn load_feature_repository(
 ) -> Result<FeatureRepositoryState, RepositoryValidationError> {
     let source_lock_path = repository_root.join(SOURCE_LOCK_PATH);
     let source_lock_text = read_utf8(&source_lock_path)?;
-    let source_lock: SourceLock = yaml_serde::from_str(&source_lock_text).map_err(|error| {
+    let source_lock_value: yaml_serde::Value =
+        yaml_serde::from_str(&source_lock_text).map_err(|error| {
+            RepositoryValidationError::message(format!(
+                "无法解析 {}：{error}",
+                source_lock_path.display()
+            ))
+        })?;
+    // Value 反序列化保留标量类型，避免 YAML 文本路径把 JSON 数字宽化为字符串。
+    let source_lock: SourceLock = yaml_serde::from_value(source_lock_value).map_err(|error| {
         RepositoryValidationError::message(format!(
-            "无法解析 {}：{error}",
+            "无法按严格字段类型解析 {}：{error}",
             source_lock_path.display()
         ))
     })?;

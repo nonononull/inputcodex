@@ -1249,6 +1249,24 @@
 - 关联：Issue `#176`、PR `#177`、`crates/inputcodex-parity/src/validation.rs`、
   `crates/inputcodex-parity/tests/catalog_repository.rs`。
 
+### 2026-08-08：YAML 文本反序列化把 JSON 数字宽化为字符串
+
+- 环境：PR `#177` 修正 Head `1f383c60ec75a3cd4e2f1f3dd3a8c4531fcb0d47` 的 CI Run
+  `31265470890`；Linux、Windows、macOS 均执行 Workspace 全目标测试。
+- 现象：前一轮 `required-null-missing` 与 `required-null-type-drift` 已被拒绝，但把
+  `snapshot.repository` 从字符串改为数字 `1` 后，`validate_feature_repository` 仍返回成功；三平台均只在
+  `source_lock_拒绝未知字段与必填字段缺失` 的 `string-type-drift` 反例失败。
+- 根因：`upstream/source-lock.json` 虽是 JSON，Rust 仓库验证却直接使用 `yaml_serde::from_str` 投影到
+  `SourceLock`。该 YAML 文本反序列化器的字符串路径接受任意 scalar，因而把 JSON number `1` 送入
+  `String`；fixture 替换和 serde 错误传播本身均正确。
+- 处理：不扩大冻结范围、不新增依赖；先把文本解析为 `yaml_serde::Value`，再用
+  `yaml_serde::from_value` 投影到 `SourceLock`。Value 反序列化只允许 `Value::String` 进入 `String`，同时
+  保留既有缺失字段、重复字段、未知字段、数组、整数和布尔类型门。
+- 验证：本地执行格式、PowerShell 合同、Release Audit、仓库政策和精确范围门；Rust 定向与 Workspace
+  全目标测试继续由修正 Final Head 的 Linux、Windows、macOS Hosted CI 证明。
+- 关联：Issue `#176`、PR `#177`、CI Run `31265470890`、
+  `crates/inputcodex-parity/src/validation.rs`、`crates/inputcodex-parity/tests/catalog_repository.rs`。
+
 ## 记录模板
 
 ```text
