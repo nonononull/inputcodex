@@ -1232,6 +1232,23 @@
 - 关联：Issue `#176`、`crates/inputcodex-parity/tests/catalog_repository.rs`、
   `scripts/ci/Verify-RepositoryPolicy.ps1`。
 
+### 2026-08-08：透明 `Option` 新类型把必填 nullable 字段缺失解释为 null
+
+- 环境：PR `#177` Final Head `e9da5690d0e57340e1587b2dcc6eea45da816818` 的 Linux、Windows、macOS
+  Workspace 全目标测试；本机因缺少 MSVC linker 未能预先运行 Rust 测试。
+- 现象：三平台均只有 `source_lock_拒绝未知字段与必填字段缺失` 失败，精确反例为删除必填
+  `stale_reason` 后仓库验证仍成功；其他 `33` 个 `catalog_repository` 测试通过。
+- 根因：`#[serde(transparent)] RequiredNullableString(Option<String>)` 最终调用
+  `Option::deserialize`；serde 的 missing-field deserializer 会把缺失字段送入 `deserialize_option` 并产生
+  `None`，因此无法区分“显式 JSON null”和“字段不存在”。
+- 处理：改成 untagged `Value(String) | Null` enum。该 enum 只接受字符串或显式 null，且缺失字段仍由
+  struct 派生反序列化器报错；生产状态检查通过 `is_null/as_deref` 消费，不引入默认值。新增
+  `null -> number` 负例，避免修复必填语义时放宽原始类型。
+- 验证：`cargo fmt`、PowerShell 合同与仓库政策本地重跑；Rust 必填缺失、nullable 类型及完整 Workspace
+  由修正 Final Head 的三平台 Hosted CI 重跑证明。
+- 关联：Issue `#176`、PR `#177`、`crates/inputcodex-parity/src/validation.rs`、
+  `crates/inputcodex-parity/tests/catalog_repository.rs`。
+
 ## 记录模板
 
 ```text

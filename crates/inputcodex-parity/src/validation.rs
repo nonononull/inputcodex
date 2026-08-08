@@ -270,8 +270,24 @@ struct SourceLockCatalogRelease {
 }
 
 #[derive(Debug, Deserialize)]
-#[serde(transparent)]
-struct RequiredNullableString(Option<String>);
+#[serde(untagged)]
+enum RequiredNullableString {
+    Value(String),
+    Null,
+}
+
+impl RequiredNullableString {
+    fn is_null(&self) -> bool {
+        matches!(self, Self::Null)
+    }
+
+    fn as_deref(&self) -> Option<&str> {
+        match self {
+            Self::Value(value) => Some(value),
+            Self::Null => None,
+        }
+    }
+}
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -781,8 +797,8 @@ fn validate_release_audit(source_lock: &SourceLock, issues: &mut Vec<ValidationI
     match audit.status.as_str() {
         RELEASE_AUDIT_CURRENT => {
             if !snapshot_matches_catalog
-                || audit.stale_reason.0.is_some()
-                || audit.re_audit_issue_ref.0.is_some()
+                || !audit.stale_reason.is_null()
+                || !audit.re_audit_issue_ref.is_null()
             {
                 issues.push(ValidationIssue::new(
                     ValidationCode::ReleaseMismatch,
@@ -801,7 +817,6 @@ fn validate_release_audit(source_lock: &SourceLock, issues: &mut Vec<ValidationI
             }
             if !audit
                 .stale_reason
-                .0
                 .as_deref()
                 .is_some_and(|reason| !reason.trim().is_empty())
             {
@@ -811,7 +826,7 @@ fn validate_release_audit(source_lock: &SourceLock, issues: &mut Vec<ValidationI
                     location,
                 ));
             }
-            if !is_valid_reaudit_issue_ref(audit.re_audit_issue_ref.0.as_deref()) {
+            if !is_valid_reaudit_issue_ref(audit.re_audit_issue_ref.as_deref()) {
                 valid = false;
                 issues.push(ValidationIssue::new(
                     ValidationCode::ReleaseMismatch,

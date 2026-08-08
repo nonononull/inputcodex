@@ -630,6 +630,11 @@ fn source_lock_拒绝未知字段与必填字段缺失() {
         ),
         ("required-null-missing", "    \"stale_reason\": null,\n", ""),
         (
+            "required-null-type-drift",
+            "\"stale_reason\": null",
+            "\"stale_reason\": 1",
+        ),
+        (
             "nested-required-missing",
             "\"commit_verification\": { \"verified\": false, \"reason\": \"unsigned\" }",
             "\"commit_verification\": { \"verified\": false }",
