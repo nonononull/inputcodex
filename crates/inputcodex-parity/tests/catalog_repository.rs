@@ -181,9 +181,19 @@ impl FeatureRepositoryFixture {
             .map_or_else(|| "null".to_owned(), |value| format!("\"{value}\""));
         let source_lock = format!(
             r#"{{
+  "schema_version": "inputcodex.source-lock.v1",
+  "generated_at": "2026-07-31T09:55:41Z",
   "snapshot": {{
+    "path": "upstream/CodexPlusPlus",
+    "repository": "BigPizzaV3/CodexPlusPlus",
+    "repository_url": "https://github.com/BigPizzaV3/CodexPlusPlus",
     "release_tag": "{}",
-    "commit": "{}"
+    "release_url": "https://example.invalid/upstream-release/{}",
+    "release_published_at": "2026-07-30T17:00:29Z",
+    "commit": "{}",
+    "commit_message": "Release fixture",
+    "commit_tree": "1111111111111111111111111111111111111111",
+    "commit_verification": {{ "verified": false, "reason": "unsigned" }}
   }},
   "release_audit": {{
     "schema_version": "inputcodex.release-audit.v1",
@@ -194,8 +204,17 @@ impl FeatureRepositoryFixture {
     "status": "{}",
     "stale_reason": {},
     "re_audit_issue_ref": {}
-  }}
+  }},
+  "archive": {{ "format": "tar.gz", "url": "https://codeload.github.com/BigPizzaV3/CodexPlusPlus/tar.gz/refs/tags/{}", "sha256": "2222222222222222222222222222222222222222222222222222222222222222", "bytes": 1 }},
+  "tree": {{ "sha": "1111111111111111111111111111111111111111", "entry_count": 1, "directory_count": 0, "file_count": 1, "submodule_count": 0 }},
+  "manifest": {{ "algorithm": "sha256", "format": "<sha256><two spaces><posix path><newline>", "sha256": "3333333333333333333333333333333333333333333333333333333333333333", "file_count": 1, "total_bytes": 1, "largest_file": {{ "path": "LICENSE", "mode": "100644", "size": 1, "git_blob_sha1": "4444444444444444444444444444444444444444", "sha256": "5555555555555555555555555555555555555555555555555555555555555555" }} }},
+  "license": {{ "repository_license_key": "agpl-3.0", "repository_license_name": "GNU Affero General Public License v3.0", "repository_license_spdx_id": "AGPL-3.0", "preserved_files": [{{ "path": "LICENSE", "kind": "repository-license", "size": 1, "sha256": "5555555555555555555555555555555555555555555555555555555555555555" }}] }},
+  "scope": {{ "audit_only": true, "participates_in_product_build": false, "imports_git_history": false, "excluded_runtime_material": ["fixture"], "source_lock_is_not_part_of_snapshot_manifest": true }},
+  "verification": {{ "archive_path_safety": "passed", "archive_utf8_filename_handling": "python-tarfile", "git_blob_sha1_per_file": "passed", "tree_completeness": "passed", "staging_and_workspace_copy": "passed" }},
+  "files": [{{ "path": "LICENSE", "mode": "100644", "size": 1, "git_blob_sha1": "4444444444444444444444444444444444444444", "sha256": "5555555555555555555555555555555555555555555555555555555555555555" }}],
+  "generator": {{ "name": "inputcodex-upstream-snapshot-lock", "version": "1", "method": "fixture", "host": {{ "os": "fixture", "powershell": "fixture" }}, "tools": {{ "python": {{ "version": "fixture", "purpose": "fixture" }}, "git": {{ "version": "fixture", "purpose": "fixture" }}, "github_cli": {{ "version": "fixture", "purpose": "fixture" }} }} }}
 }}"#,
+            state.snapshot_tag,
             state.snapshot_tag,
             state.snapshot_commit,
             state.catalog_tag,
@@ -203,6 +222,7 @@ impl FeatureRepositoryFixture {
             state.status,
             stale_reason,
             re_audit_issue_ref,
+            state.snapshot_tag,
         );
 
         let source_lock_path = self.root.join("upstream/source-lock.json");
@@ -477,6 +497,182 @@ fn release_audit_显式解耦快照与功能目录审计基线() {
             .issues()
             .iter()
             .any(|issue| issue.code() == ValidationCode::ReleaseMismatch)
+    );
+}
+
+#[test]
+fn source_lock_拒绝未知字段与必填字段缺失() {
+    let cases = [
+        (
+            "schema-version-drift",
+            "\"schema_version\": \"inputcodex.source-lock.v1\"",
+            "\"schema_version\": \"inputcodex.source-lock.v0\"",
+        ),
+        (
+            "root-unknown",
+            "  \"schema_version\": \"inputcodex.source-lock.v1\",",
+            "  \"schema_version\": \"inputcodex.source-lock.v1\",\n  \"unexpected\": true,",
+        ),
+        (
+            "nested-unknown",
+            "    \"path\": \"upstream/CodexPlusPlus\",",
+            "    \"path\": \"upstream/CodexPlusPlus\",\n    \"unexpected\": true,",
+        ),
+        (
+            "commit-verification-unknown",
+            "\"commit_verification\": { \"verified\": false, \"reason\": \"unsigned\" }",
+            "\"commit_verification\": { \"verified\": false, \"reason\": \"unsigned\", \"unexpected\": true }",
+        ),
+        (
+            "release-audit-unknown",
+            "    \"schema_version\": \"inputcodex.release-audit.v1\",",
+            "    \"schema_version\": \"inputcodex.release-audit.v1\",\n    \"unexpected\": true,",
+        ),
+        (
+            "catalog-release-unknown",
+            "      \"tag\": \"v1.2.44\",",
+            "      \"tag\": \"v1.2.44\",\n      \"unexpected\": true,",
+        ),
+        (
+            "archive-unknown",
+            "\"bytes\": 1 },\n  \"tree\"",
+            "\"bytes\": 1, \"unexpected\": true },\n  \"tree\"",
+        ),
+        (
+            "tree-unknown",
+            "\"submodule_count\": 0 },\n  \"manifest\"",
+            "\"submodule_count\": 0, \"unexpected\": true },\n  \"manifest\"",
+        ),
+        (
+            "manifest-unknown",
+            "\"total_bytes\": 1, \"largest_file\"",
+            "\"total_bytes\": 1, \"unexpected\": true, \"largest_file\"",
+        ),
+        (
+            "largest-file-unknown",
+            "\"path\": \"LICENSE\", \"mode\": \"100644\"",
+            "\"path\": \"LICENSE\", \"unexpected\": true, \"mode\": \"100644\"",
+        ),
+        (
+            "license-unknown",
+            "\"repository_license_spdx_id\": \"AGPL-3.0\", \"preserved_files\"",
+            "\"repository_license_spdx_id\": \"AGPL-3.0\", \"unexpected\": true, \"preserved_files\"",
+        ),
+        (
+            "preserved-file-unknown",
+            "\"kind\": \"repository-license\", \"size\": 1",
+            "\"kind\": \"repository-license\", \"unexpected\": true, \"size\": 1",
+        ),
+        (
+            "scope-unknown",
+            "\"source_lock_is_not_part_of_snapshot_manifest\": true }",
+            "\"source_lock_is_not_part_of_snapshot_manifest\": true, \"unexpected\": true }",
+        ),
+        (
+            "verification-unknown",
+            "\"staging_and_workspace_copy\": \"passed\" }",
+            "\"staging_and_workspace_copy\": \"passed\", \"unexpected\": true }",
+        ),
+        (
+            "file-unknown",
+            "\"files\": [{ \"path\": \"LICENSE\",",
+            "\"files\": [{ \"path\": \"LICENSE\", \"unexpected\": true,",
+        ),
+        (
+            "generator-unknown",
+            "\"method\": \"fixture\", \"host\"",
+            "\"method\": \"fixture\", \"unexpected\": true, \"host\"",
+        ),
+        (
+            "host-unknown",
+            "\"host\": { \"os\": \"fixture\", \"powershell\": \"fixture\" }",
+            "\"host\": { \"os\": \"fixture\", \"powershell\": \"fixture\", \"unexpected\": true }",
+        ),
+        (
+            "tools-unknown",
+            "\"tools\": { \"python\"",
+            "\"tools\": { \"unexpected\": true, \"python\"",
+        ),
+        (
+            "deep-tool-unknown",
+            "\"python\": { \"version\": \"fixture\", \"purpose\": \"fixture\" }",
+            "\"python\": { \"version\": \"fixture\", \"purpose\": \"fixture\", \"unexpected\": true }",
+        ),
+        (
+            "root-duplicate",
+            "  \"schema_version\": \"inputcodex.source-lock.v1\",",
+            "  \"schema_version\": \"inputcodex.source-lock.v1\",\n  \"schema_version\": \"inputcodex.source-lock.v1\",",
+        ),
+        (
+            "nested-duplicate",
+            "    \"status\": \"current\",",
+            "    \"status\": \"current\",\n    \"status\": \"current\",",
+        ),
+        (
+            "field-case-drift",
+            "    \"repository\": \"BigPizzaV3/CodexPlusPlus\",",
+            "    \"Repository\": \"BigPizzaV3/CodexPlusPlus\",",
+        ),
+        (
+            "schema-case-drift",
+            "\"schema_version\": \"inputcodex.source-lock.v1\"",
+            "\"schema_version\": \"INPUTCODEX.SOURCE-LOCK.V1\"",
+        ),
+        (
+            "object-array-drift",
+            "\"commit_verification\": { \"verified\": false, \"reason\": \"unsigned\" }",
+            "\"commit_verification\": [{ \"verified\": false, \"reason\": \"unsigned\" }]",
+        ),
+        (
+            "required-archive-missing",
+            "  \"archive\": { \"format\": \"tar.gz\", \"url\": \"https://codeload.github.com/BigPizzaV3/CodexPlusPlus/tar.gz/refs/tags/v1.2.44\", \"sha256\": \"2222222222222222222222222222222222222222222222222222222222222222\", \"bytes\": 1 },\n",
+            "",
+        ),
+        ("required-null-missing", "    \"stale_reason\": null,\n", ""),
+        (
+            "nested-required-missing",
+            "\"commit_verification\": { \"verified\": false, \"reason\": \"unsigned\" }",
+            "\"commit_verification\": { \"verified\": false }",
+        ),
+        (
+            "string-type-drift",
+            "\"repository\": \"BigPizzaV3/CodexPlusPlus\"",
+            "\"repository\": 1",
+        ),
+        ("int64-type-drift", "\"bytes\": 1", "\"bytes\": \"1\""),
+        (
+            "boolean-type-drift",
+            "\"audit_only\": true",
+            "\"audit_only\": \"true\"",
+        ),
+        (
+            "array-type-drift",
+            "\"excluded_runtime_material\": [\"fixture\"]",
+            "\"excluded_runtime_material\": \"fixture\"",
+        ),
+    ];
+
+    for (name, expected, replacement) in cases {
+        let fixture = FeatureRepositoryFixture::new();
+        fixture.write_current_source_lock();
+        fixture.replace_text("upstream/source-lock.json", expected, replacement);
+        assert!(
+            validate_feature_repository(fixture.root()).is_err(),
+            "source-lock {name} 必须 fail closed"
+        );
+    }
+}
+
+#[test]
+fn source_lock_拒绝根数组() {
+    let fixture = FeatureRepositoryFixture::new();
+    fixture.write_current_source_lock();
+    let path = fixture.root().join("upstream/source-lock.json");
+    let text = fs::read_to_string(&path).expect("应能读取 source-lock 根数组夹具");
+    fs::write(path, format!("[{text}]")).expect("应能写入 source-lock 根数组夹具");
+    assert!(
+        validate_feature_repository(fixture.root()).is_err(),
+        "source-lock 根数组必须 fail closed"
     );
 }
 

@@ -24,6 +24,7 @@ const FEATURE_CATALOG_SCHEMA: &str = "inputcodex.feature-catalog.v1";
 const SOURCE_INDEX_SCHEMA: &str = "inputcodex.source-index.v1";
 const CONTRACT_CATALOG_SCHEMA: &str = "inputcodex.behavior-contract.v1";
 const FIXTURE_MANIFEST_SCHEMA: &str = "inputcodex.fixture-manifest.v1";
+const SOURCE_LOCK_SCHEMA: &str = "inputcodex.source-lock.v1";
 const RELEASE_AUDIT_SCHEMA: &str = "inputcodex.release-audit.v1";
 const RELEASE_AUDIT_CURRENT: &str = "current";
 const RELEASE_AUDIT_STALE: &str = "stale-re-audit-required";
@@ -194,30 +195,242 @@ impl fmt::Display for RepositoryValidationError {
 impl Error for RepositoryValidationError {}
 
 #[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
 struct SourceLock {
+    schema_version: String,
+    #[serde(rename = "generated_at")]
+    _generated_at: String,
     snapshot: SourceLockSnapshot,
     release_audit: SourceLockReleaseAudit,
+    #[serde(rename = "archive")]
+    _archive: SourceLockArchive,
+    #[serde(rename = "tree")]
+    _tree: SourceLockTree,
+    #[serde(rename = "manifest")]
+    _manifest: SourceLockManifest,
+    #[serde(rename = "license")]
+    _license: SourceLockLicense,
+    #[serde(rename = "scope")]
+    _scope: SourceLockScope,
+    #[serde(rename = "verification")]
+    _verification: SourceLockVerification,
+    #[serde(rename = "files")]
+    _files: Vec<SourceLockFile>,
+    #[serde(rename = "generator")]
+    _generator: SourceLockGenerator,
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
 struct SourceLockSnapshot {
+    #[serde(rename = "path")]
+    _path: String,
+    #[serde(rename = "repository")]
+    _repository: String,
+    #[serde(rename = "repository_url")]
+    _repository_url: String,
     release_tag: String,
+    #[serde(rename = "release_url")]
+    _release_url: String,
+    #[serde(rename = "release_published_at")]
+    _release_published_at: String,
     commit: String,
+    #[serde(rename = "commit_message")]
+    _commit_message: String,
+    #[serde(rename = "commit_tree")]
+    _commit_tree: String,
+    #[serde(rename = "commit_verification")]
+    _commit_verification: SourceLockCommitVerification,
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SourceLockCommitVerification {
+    #[serde(rename = "verified")]
+    _verified: bool,
+    #[serde(rename = "reason")]
+    _reason: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
 struct SourceLockReleaseAudit {
     schema_version: String,
     catalog_release: SourceLockCatalogRelease,
     status: String,
-    stale_reason: Option<String>,
-    re_audit_issue_ref: Option<String>,
+    stale_reason: RequiredNullableString,
+    re_audit_issue_ref: RequiredNullableString,
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
 struct SourceLockCatalogRelease {
     tag: String,
     commit: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(transparent)]
+struct RequiredNullableString(Option<String>);
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SourceLockArchive {
+    #[serde(rename = "format")]
+    _format: String,
+    #[serde(rename = "url")]
+    _url: String,
+    #[serde(rename = "sha256")]
+    _sha256: String,
+    #[serde(rename = "bytes")]
+    _bytes: i64,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SourceLockTree {
+    #[serde(rename = "sha")]
+    _sha: String,
+    #[serde(rename = "entry_count")]
+    _entry_count: i64,
+    #[serde(rename = "directory_count")]
+    _directory_count: i64,
+    #[serde(rename = "file_count")]
+    _file_count: i64,
+    #[serde(rename = "submodule_count")]
+    _submodule_count: i64,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SourceLockManifest {
+    #[serde(rename = "algorithm")]
+    _algorithm: String,
+    #[serde(rename = "format")]
+    _format: String,
+    #[serde(rename = "sha256")]
+    _sha256: String,
+    #[serde(rename = "file_count")]
+    _file_count: i64,
+    #[serde(rename = "total_bytes")]
+    _total_bytes: i64,
+    #[serde(rename = "largest_file")]
+    _largest_file: SourceLockFile,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SourceLockFile {
+    #[serde(rename = "path")]
+    _path: String,
+    #[serde(rename = "mode")]
+    _mode: String,
+    #[serde(rename = "size")]
+    _size: i64,
+    #[serde(rename = "git_blob_sha1")]
+    _git_blob_sha1: String,
+    #[serde(rename = "sha256")]
+    _sha256: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SourceLockLicense {
+    #[serde(rename = "repository_license_key")]
+    _repository_license_key: String,
+    #[serde(rename = "repository_license_name")]
+    _repository_license_name: String,
+    #[serde(rename = "repository_license_spdx_id")]
+    _repository_license_spdx_id: String,
+    #[serde(rename = "preserved_files")]
+    _preserved_files: Vec<SourceLockPreservedLicenseFile>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SourceLockPreservedLicenseFile {
+    #[serde(rename = "path")]
+    _path: String,
+    #[serde(rename = "kind")]
+    _kind: String,
+    #[serde(rename = "size")]
+    _size: i64,
+    #[serde(rename = "sha256")]
+    _sha256: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SourceLockScope {
+    #[serde(rename = "audit_only")]
+    _audit_only: bool,
+    #[serde(rename = "participates_in_product_build")]
+    _participates_in_product_build: bool,
+    #[serde(rename = "imports_git_history")]
+    _imports_git_history: bool,
+    #[serde(rename = "excluded_runtime_material")]
+    _excluded_runtime_material: Vec<String>,
+    #[serde(rename = "source_lock_is_not_part_of_snapshot_manifest")]
+    _source_lock_is_not_part_of_snapshot_manifest: bool,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SourceLockVerification {
+    #[serde(rename = "archive_path_safety")]
+    _archive_path_safety: String,
+    #[serde(rename = "archive_utf8_filename_handling")]
+    _archive_utf8_filename_handling: String,
+    #[serde(rename = "git_blob_sha1_per_file")]
+    _git_blob_sha1_per_file: String,
+    #[serde(rename = "tree_completeness")]
+    _tree_completeness: String,
+    #[serde(rename = "staging_and_workspace_copy")]
+    _staging_and_workspace_copy: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SourceLockGenerator {
+    #[serde(rename = "name")]
+    _name: String,
+    #[serde(rename = "version")]
+    _version: String,
+    #[serde(rename = "method")]
+    _method: String,
+    #[serde(rename = "host")]
+    _host: SourceLockGeneratorHost,
+    #[serde(rename = "tools")]
+    _tools: SourceLockGeneratorTools,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SourceLockGeneratorHost {
+    #[serde(rename = "os")]
+    _os: String,
+    #[serde(rename = "powershell")]
+    _powershell: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SourceLockGeneratorTools {
+    #[serde(rename = "python")]
+    _python: SourceLockGeneratorTool,
+    #[serde(rename = "git")]
+    _git: SourceLockGeneratorTool,
+    #[serde(rename = "github_cli")]
+    _github_cli: SourceLockGeneratorTool,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SourceLockGeneratorTool {
+    #[serde(rename = "version")]
+    _version: String,
+    #[serde(rename = "purpose")]
+    _purpose: String,
 }
 
 #[derive(Debug)]
@@ -546,6 +759,14 @@ fn validate_release_audit(source_lock: &SourceLock, issues: &mut Vec<ValidationI
     let location = "upstream/source-lock.json.release_audit";
     let mut valid = true;
 
+    if source_lock.schema_version != SOURCE_LOCK_SCHEMA {
+        valid = false;
+        issues.push(ValidationIssue::new(
+            ValidationCode::SchemaVersionMismatch,
+            SOURCE_LOCK_PATH,
+        ));
+    }
+
     if audit.schema_version != RELEASE_AUDIT_SCHEMA {
         valid = false;
         issues.push(ValidationIssue::new(
@@ -560,8 +781,8 @@ fn validate_release_audit(source_lock: &SourceLock, issues: &mut Vec<ValidationI
     match audit.status.as_str() {
         RELEASE_AUDIT_CURRENT => {
             if !snapshot_matches_catalog
-                || audit.stale_reason.is_some()
-                || audit.re_audit_issue_ref.is_some()
+                || audit.stale_reason.0.is_some()
+                || audit.re_audit_issue_ref.0.is_some()
             {
                 issues.push(ValidationIssue::new(
                     ValidationCode::ReleaseMismatch,
@@ -580,6 +801,7 @@ fn validate_release_audit(source_lock: &SourceLock, issues: &mut Vec<ValidationI
             }
             if !audit
                 .stale_reason
+                .0
                 .as_deref()
                 .is_some_and(|reason| !reason.trim().is_empty())
             {
@@ -589,7 +811,7 @@ fn validate_release_audit(source_lock: &SourceLock, issues: &mut Vec<ValidationI
                     location,
                 ));
             }
-            if !is_valid_reaudit_issue_ref(audit.re_audit_issue_ref.as_deref()) {
+            if !is_valid_reaudit_issue_ref(audit.re_audit_issue_ref.0.as_deref()) {
                 valid = false;
                 issues.push(ValidationIssue::new(
                     ValidationCode::ReleaseMismatch,

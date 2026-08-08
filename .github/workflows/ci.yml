@@ -155,13 +155,19 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          GH_TOKEN: ${{ github.token }}
+          REMOTE_VALIDATION_MODE: live
           REPORT_DIR: ${{ runner.temp }}/inputcodex-ci/release-audit
         run: |
           Set-StrictMode -Version Latest
           $ErrorActionPreference = 'Stop'
           New-Item -ItemType Directory -Path $env:REPORT_DIR -Force | Out-Null
           $powerShellExecutable = (Get-Process -Id $PID).Path
-          $gateArguments = @('-RepositoryRoot', '.')
+          $gateArguments = @(
+            '-RepositoryRoot', '.',
+            '-RemoteValidationMode', $env:REMOTE_VALIDATION_MODE,
+            '-TemporaryDirectory', $env:REPORT_DIR
+          )
 
           if ($env:EVENT_NAME -eq 'pull_request') {
             if ($env:BASE_SHA -notmatch '^[0-9a-fA-F]{40}$' -or $env:HEAD_SHA -notmatch '^[0-9a-fA-F]{40}$') {
@@ -226,19 +232,6 @@ jobs:
           }
           "Release 审计状态：$($gate.status)；requires_reaudit=$($gate.requires_reaudit)" |
             Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Encoding utf8
-
-      - name: 上传 Release 审计失败证据
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: release-audit-failure-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            ${{ runner.temp }}/inputcodex-ci/release-audit/collector.log
-            ${{ runner.temp }}/inputcodex-ci/release-audit/changes.json
-            ${{ runner.temp }}/inputcodex-ci/release-audit/base-source-lock.json
-            ${{ runner.temp }}/inputcodex-ci/release-audit/release-audit.json
-          if-no-files-found: ignore
-          retention-days: 7
 
   governance:
     name: governance

@@ -1,5 +1,7 @@
 [CmdletBinding()]
-param()
+param(
+    [string]$NameFilter
+)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -53,6 +55,11 @@ function Invoke-ContractTest {
         [Parameter(Mandatory)]
         [scriptblock]$Body
     )
+
+    if (-not [string]::IsNullOrWhiteSpace($NameFilter) -and
+        -not $Name.Contains($NameFilter, [StringComparison]::Ordinal)) {
+        return
+    }
 
     try {
         & $Body
@@ -2020,10 +2027,29 @@ function New-ReleaseAuditSourceLock {
         [object]$ReAuditIssueRef
     )
 
+    $treeSha = '1' * 40
+    $archiveSha = '2' * 64
+    $manifestSha = '3' * 64
+    $blobSha = '4' * 40
+    $fileSha = '5' * 64
+
     [pscustomobject][ordered]@{
+        schema_version = 'inputcodex.source-lock.v1'
+        generated_at = '2026-07-31T09:55:41Z'
         snapshot = [pscustomobject][ordered]@{
+            path = 'upstream/CodexPlusPlus'
+            repository = 'BigPizzaV3/CodexPlusPlus'
+            repository_url = 'https://github.com/BigPizzaV3/CodexPlusPlus'
             release_tag = $SnapshotTag
+            release_url = "https://github.com/BigPizzaV3/CodexPlusPlus/releases/tag/$SnapshotTag"
+            release_published_at = '2026-07-30T17:00:29Z'
             commit = $SnapshotCommit
+            commit_message = "Release $SnapshotTag"
+            commit_tree = $treeSha
+            commit_verification = [pscustomobject][ordered]@{
+                verified = $false
+                reason = 'unsigned'
+            }
         }
         release_audit = [pscustomobject][ordered]@{
             schema_version = 'inputcodex.release-audit.v1'
@@ -2034,6 +2060,76 @@ function New-ReleaseAuditSourceLock {
             status = $Status
             stale_reason = $StaleReason
             re_audit_issue_ref = $ReAuditIssueRef
+        }
+        archive = [pscustomobject][ordered]@{
+            format = 'tar.gz'
+            url = "https://codeload.github.com/BigPizzaV3/CodexPlusPlus/tar.gz/refs/tags/$SnapshotTag"
+            sha256 = $archiveSha
+            bytes = 1L
+        }
+        tree = [pscustomobject][ordered]@{
+            sha = $treeSha
+            entry_count = 1L
+            directory_count = 0L
+            file_count = 1L
+            submodule_count = 0L
+        }
+        manifest = [pscustomobject][ordered]@{
+            algorithm = 'sha256'
+            format = '<sha256><two spaces><posix path><newline>'
+            sha256 = $manifestSha
+            file_count = 1L
+            total_bytes = 1L
+            largest_file = [pscustomobject][ordered]@{
+                path = 'LICENSE'
+                mode = '100644'
+                size = 1L
+                git_blob_sha1 = $blobSha
+                sha256 = $fileSha
+            }
+        }
+        license = [pscustomobject][ordered]@{
+            repository_license_key = 'agpl-3.0'
+            repository_license_name = 'GNU Affero General Public License v3.0'
+            repository_license_spdx_id = 'AGPL-3.0'
+            preserved_files = [object[]]@([pscustomobject][ordered]@{
+                path = 'LICENSE'
+                kind = 'repository-license'
+                size = 1L
+                sha256 = $fileSha
+            })
+        }
+        scope = [pscustomobject][ordered]@{
+            audit_only = $true
+            participates_in_product_build = $false
+            imports_git_history = $false
+            excluded_runtime_material = [object[]]@('fixture')
+            source_lock_is_not_part_of_snapshot_manifest = $true
+        }
+        verification = [pscustomobject][ordered]@{
+            archive_path_safety = 'passed'
+            archive_utf8_filename_handling = 'python-tarfile'
+            git_blob_sha1_per_file = 'passed'
+            tree_completeness = 'passed'
+            staging_and_workspace_copy = 'passed'
+        }
+        files = [object[]]@([pscustomobject][ordered]@{
+            path = 'LICENSE'
+            mode = '100644'
+            size = 1L
+            git_blob_sha1 = $blobSha
+            sha256 = $fileSha
+        })
+        generator = [pscustomobject][ordered]@{
+            name = 'inputcodex-upstream-snapshot-lock'
+            version = '1'
+            method = 'synthetic fixture'
+            host = [pscustomobject][ordered]@{ os = 'fixture'; powershell = 'fixture' }
+            tools = [pscustomobject][ordered]@{
+                python = [pscustomobject][ordered]@{ version = 'fixture'; purpose = 'fixture' }
+                git = [pscustomobject][ordered]@{ version = 'fixture'; purpose = 'fixture' }
+                github_cli = [pscustomobject][ordered]@{ version = 'fixture'; purpose = 'fixture' }
+            }
         }
     }
 }
@@ -2055,6 +2151,50 @@ function New-LegacySourceLock {
     }
 }
 
+function New-ReleaseAuditRemoteEvidence {
+    param(
+        [Parameter(Mandatory)]
+        $SourceLock
+    )
+
+    $licenseFile = @($SourceLock.files | Where-Object { $_.path -ceq 'LICENSE' })
+    if ($licenseFile.Count -ne 1) { throw '远端 evidence 夹具必须有唯一 LICENSE file' }
+    [pscustomobject][ordered]@{
+        schema_version = 'inputcodex.release-audit-remote-evidence.v1'
+        release = [pscustomobject][ordered]@{
+            tag_name = $SourceLock.snapshot.release_tag
+            html_url = $SourceLock.snapshot.release_url
+            published_at = $SourceLock.snapshot.release_published_at
+            draft = $false
+            prerelease = $false
+        }
+        tag_ref = [pscustomobject][ordered]@{
+            ref = "refs/tags/$($SourceLock.snapshot.release_tag)"
+            object_type = 'commit'
+            commit = $SourceLock.snapshot.commit
+        }
+        commit = [pscustomobject][ordered]@{
+            sha = $SourceLock.snapshot.commit
+            message = $SourceLock.snapshot.commit_message
+            tree = $SourceLock.snapshot.commit_tree
+            verification = [pscustomobject][ordered]@{
+                verified = $SourceLock.snapshot.commit_verification.verified
+                reason = $SourceLock.snapshot.commit_verification.reason
+            }
+        }
+        license = [pscustomobject][ordered]@{
+            key = $SourceLock.license.repository_license_key
+            name = $SourceLock.license.repository_license_name
+            spdx_id = $SourceLock.license.repository_license_spdx_id
+            path = 'LICENSE'
+            git_blob_sha1 = $licenseFile[0].git_blob_sha1
+        }
+        archive = [pscustomobject][ordered]@{
+            url = $SourceLock.archive.url
+        }
+    }
+}
+
 function Invoke-ReleaseAuditGateCase {
     param(
         [Parameter(Mandatory)]
@@ -2072,6 +2212,14 @@ function Invoke-ReleaseAuditGateCase {
 
         [scriptblock]$MutateFixture,
 
+        [scriptblock]$MutateHeadJsonText,
+
+        [switch]$WithRemoteEvidence,
+
+        [scriptblock]$MutateRemoteEvidence,
+
+        [byte[]]$InjectedArchiveBytes,
+
         [ValidateSet('object', 'single-array', 'scalar')]
         [string]$HeadRoot = 'object',
 
@@ -2088,56 +2236,136 @@ function Invoke-ReleaseAuditGateCase {
     New-Item -ItemType Directory -Path $snapshotRoot -Force | Out-Null
 
     $fixturePath = Join-Path $snapshotRoot 'README.md'
+    $licensePath = Join-Path $snapshotRoot 'LICENSE'
+    $noticePath = Join-Path $snapshotRoot 'NOTICE'
     [System.IO.File]::WriteAllText($fixturePath, "fixture`n", [Text.UTF8Encoding]::new($false))
+    [System.IO.File]::WriteAllText($licensePath, "synthetic license`n", [Text.UTF8Encoding]::new($false))
+    [System.IO.File]::WriteAllText($noticePath, "synthetic notice`n", [Text.UTF8Encoding]::new($false))
     $gitOutput = @(& git -C $caseRoot init --quiet 2>&1 | ForEach-Object { $_.ToString() })
     if ($LASTEXITCODE -ne 0) { throw "Release Audit 夹具 git init 失败：$($gitOutput -join [Environment]::NewLine)" }
-    $gitOutput = @(& git -C $caseRoot add -- 'upstream/CodexPlusPlus/README.md' 2>&1 | ForEach-Object { $_.ToString() })
+    $gitOutput = @(& git -C $caseRoot add -- 'upstream/CodexPlusPlus/LICENSE' 'upstream/CodexPlusPlus/NOTICE' 'upstream/CodexPlusPlus/README.md' 2>&1 | ForEach-Object { $_.ToString() })
     if ($LASTEXITCODE -ne 0) { throw "Release Audit 夹具 git add 失败：$($gitOutput -join [Environment]::NewLine)" }
     & git -C $caseRoot -c user.name=inputcodex-ci -c user.email=ci@inputcodex.invalid commit --quiet -m fixture
     if ($LASTEXITCODE -ne 0) { throw 'Release Audit 夹具初始提交失败' }
 
     $headFixture = $HeadSourceLock | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 100
-    $fixtureBytes = [System.IO.File]::ReadAllBytes($fixturePath)
-    $fixtureSha256 = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($fixtureBytes)).ToLowerInvariant()
-    $fixtureBlob = (& git -C $caseRoot hash-object -- 'upstream/CodexPlusPlus/README.md').Trim()
-    if ($LASTEXITCODE -ne 0 -or $fixtureBlob -notmatch '^[0-9a-f]{40}$') { throw 'Release Audit 夹具 blob 计算失败' }
+    $fileRecords = [Collections.Generic.List[object]]::new()
+    $manifestBuilder = [Text.StringBuilder]::new()
+    $totalBytes = 0L
+    $largestFile = $null
+    foreach ($relativePath in [string[]]@('LICENSE', 'NOTICE', 'README.md')) {
+        $absolutePath = Join-Path $snapshotRoot $relativePath
+        [byte[]]$fileBytes = [System.IO.File]::ReadAllBytes($absolutePath)
+        $fileSha256 = [Convert]::ToHexString(
+            [Security.Cryptography.SHA256]::HashData($fileBytes)
+        ).ToLowerInvariant()
+        $fileBlob = (& git -C $caseRoot hash-object -- "upstream/CodexPlusPlus/$relativePath").Trim()
+        if ($LASTEXITCODE -ne 0 -or $fileBlob -notmatch '^[0-9a-f]{40}$') {
+            throw "Release Audit 夹具 blob 计算失败：$relativePath"
+        }
+        $record = [pscustomobject][ordered]@{
+            path = $relativePath
+            mode = '100644'
+            size = [long]$fileBytes.Length
+            git_blob_sha1 = $fileBlob
+            sha256 = $fileSha256
+        }
+        $fileRecords.Add($record) | Out-Null
+        [void]$manifestBuilder.Append($fileSha256).Append('  ').Append($relativePath).Append("`n")
+        $totalBytes += [long]$fileBytes.Length
+        if ($null -eq $largestFile -or $record.size -gt $largestFile.size) {
+            $largestFile = $record
+        }
+    }
     $fixtureTree = (& git -C $caseRoot rev-parse 'HEAD:upstream/CodexPlusPlus').Trim()
     if ($LASTEXITCODE -ne 0 -or $fixtureTree -notmatch '^[0-9a-f]{40}$') { throw 'Release Audit 夹具 tree 计算失败' }
-    $manifestPayload = "$fixtureSha256  README.md`n"
     $manifestSha256 = [Convert]::ToHexString(
-        [Security.Cryptography.SHA256]::HashData([Text.UTF8Encoding]::new($false).GetBytes($manifestPayload))
+        [Security.Cryptography.SHA256]::HashData(
+            [Text.UTF8Encoding]::new($false).GetBytes($manifestBuilder.ToString())
+        )
     ).ToLowerInvariant()
     $headFixture.snapshot | Add-Member -NotePropertyName path -NotePropertyValue 'upstream/CodexPlusPlus' -Force
+    $headFixture.snapshot | Add-Member -NotePropertyName repository -NotePropertyValue 'BigPizzaV3/CodexPlusPlus' -Force
+    $headFixture.snapshot | Add-Member -NotePropertyName repository_url -NotePropertyValue 'https://github.com/BigPizzaV3/CodexPlusPlus' -Force
+    $headFixture.snapshot | Add-Member -NotePropertyName release_url `
+        -NotePropertyValue "https://github.com/BigPizzaV3/CodexPlusPlus/releases/tag/$($headFixture.snapshot.release_tag)" -Force
+    $headFixture.snapshot | Add-Member -NotePropertyName release_published_at `
+        -NotePropertyValue '2026-07-30T17:00:29Z' -Force
+    $headFixture.snapshot | Add-Member -NotePropertyName commit_message `
+        -NotePropertyValue "Release $($headFixture.snapshot.release_tag)" -Force
     $headFixture.snapshot | Add-Member -NotePropertyName commit_tree -NotePropertyValue $fixtureTree -Force
+    $headFixture.snapshot | Add-Member -NotePropertyName commit_verification `
+        -NotePropertyValue ([pscustomobject][ordered]@{ verified = $false; reason = 'unsigned' }) -Force
     $headFixture | Add-Member -NotePropertyName schema_version -NotePropertyValue 'inputcodex.source-lock.v1' -Force
+    $headFixture | Add-Member -NotePropertyName generated_at -NotePropertyValue '2026-07-31T09:55:41Z' -Force
+    $archiveBytes = [Text.UTF8Encoding]::new($false).GetBytes("synthetic archive`n")
+    $archiveSha256 = [Convert]::ToHexString(
+        [Security.Cryptography.SHA256]::HashData($archiveBytes)
+    ).ToLowerInvariant()
+    $headFixture | Add-Member -NotePropertyName archive -NotePropertyValue ([pscustomobject][ordered]@{
+        format = 'tar.gz'
+        url = "https://codeload.github.com/BigPizzaV3/CodexPlusPlus/tar.gz/refs/tags/$($headFixture.snapshot.release_tag)"
+        sha256 = $archiveSha256
+        bytes = [long]$archiveBytes.Length
+    }) -Force
     $headFixture | Add-Member -NotePropertyName manifest -NotePropertyValue ([pscustomobject][ordered]@{
         algorithm = 'sha256'
         format = '<sha256><two spaces><posix path><newline>'
         sha256 = $manifestSha256
-        file_count = 1
-        total_bytes = [long]$fixtureBytes.Length
-        largest_file = [pscustomobject][ordered]@{
-            path = 'README.md'
-            mode = '100644'
-            size = [long]$fixtureBytes.Length
-            git_blob_sha1 = $fixtureBlob
-            sha256 = $fixtureSha256
-        }
+        file_count = [long]$fileRecords.Count
+        total_bytes = $totalBytes
+        largest_file = $largestFile
     }) -Force
     $headFixture | Add-Member -NotePropertyName tree -NotePropertyValue ([pscustomobject][ordered]@{
         sha = $fixtureTree
-        entry_count = 1
+        entry_count = [long]$fileRecords.Count
         directory_count = 0
-        file_count = 1
+        file_count = [long]$fileRecords.Count
         submodule_count = 0
     }) -Force
-    $headFixture | Add-Member -NotePropertyName files -NotePropertyValue @([pscustomobject][ordered]@{
-        path = 'README.md'
-        mode = '100644'
-        size = [long]$fixtureBytes.Length
-        git_blob_sha1 = $fixtureBlob
-        sha256 = $fixtureSha256
+    $headFixture | Add-Member -NotePropertyName license -NotePropertyValue ([pscustomobject][ordered]@{
+        repository_license_key = 'agpl-3.0'
+        repository_license_name = 'GNU Affero General Public License v3.0'
+        repository_license_spdx_id = 'AGPL-3.0'
+        preserved_files = @([pscustomobject][ordered]@{
+            path = 'LICENSE'
+            kind = 'repository-license'
+            size = $fileRecords[0].size
+            sha256 = $fileRecords[0].sha256
+        }, [pscustomobject][ordered]@{
+            path = 'NOTICE'
+            kind = 'third-party-notice'
+            size = $fileRecords[1].size
+            sha256 = $fileRecords[1].sha256
+        })
     }) -Force
+    $headFixture | Add-Member -NotePropertyName scope -NotePropertyValue ([pscustomobject][ordered]@{
+        audit_only = $true
+        participates_in_product_build = $false
+        imports_git_history = $false
+        excluded_runtime_material = [object[]]@('Tauri/React 管理界面')
+        source_lock_is_not_part_of_snapshot_manifest = $true
+    }) -Force
+    $headFixture | Add-Member -NotePropertyName verification -NotePropertyValue ([pscustomobject][ordered]@{
+        archive_path_safety = 'passed'
+        archive_utf8_filename_handling = 'python-tarfile'
+        git_blob_sha1_per_file = 'passed'
+        tree_completeness = 'passed'
+        staging_and_workspace_copy = 'passed'
+    }) -Force
+    $headFixture | Add-Member -NotePropertyName files -NotePropertyValue $fileRecords.ToArray() -Force
+    $headFixture | Add-Member -NotePropertyName generator -NotePropertyValue ([pscustomobject][ordered]@{
+        name = 'inputcodex-upstream-snapshot-lock'
+        version = '1'
+        method = 'synthetic fixture'
+        host = [pscustomobject][ordered]@{ os = 'fixture'; powershell = 'fixture' }
+        tools = [pscustomobject][ordered]@{
+            python = [pscustomobject][ordered]@{ version = 'fixture'; purpose = 'fixture' }
+            git = [pscustomobject][ordered]@{ version = 'fixture'; purpose = 'fixture' }
+            github_cli = [pscustomobject][ordered]@{ version = 'fixture'; purpose = 'fixture' }
+        }
+    }) -Force
+    $unmutatedHeadFixture = $headFixture | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 100
 
     if ($null -ne $MutateFixture) {
         & $MutateFixture $caseRoot $headFixture
@@ -2154,7 +2382,11 @@ function Invoke-ReleaseAuditGateCase {
     $baseSourceLockPath = Join-Path $caseRoot 'base-source-lock.json'
     $headSourceLockPath = Join-Path $upstreamRoot 'source-lock.json'
     $changesPath = Join-Path $caseRoot 'changes.json'
-    $baseDocument = $BaseSourceLock
+    $baseDocument = if ([object]::ReferenceEquals($BaseSourceLock, $HeadSourceLock)) {
+        $unmutatedHeadFixture
+    } else {
+        $BaseSourceLock
+    }
     if ($BaseRoot -ceq 'single-array') {
         $baseDocument = [object[]]@($BaseSourceLock)
     } elseif ($BaseRoot -ceq 'scalar') {
@@ -2181,13 +2413,45 @@ function Invoke-ReleaseAuditGateCase {
 
     Write-JsonFile -Path $baseSourceLockPath -Value $baseDocument
     Write-JsonFile -Path $headSourceLockPath -Value $headDocument
+    if ($null -ne $MutateHeadJsonText) {
+        $headJson = Get-Content -LiteralPath $headSourceLockPath -Raw -Encoding utf8
+        $mutatedHeadJson = & $MutateHeadJsonText $headJson
+        if ($mutatedHeadJson -isnot [string]) { throw 'Release Audit 原始 JSON 变异必须返回字符串' }
+        [System.IO.File]::WriteAllText(
+            $headSourceLockPath,
+            $mutatedHeadJson,
+            [Text.UTF8Encoding]::new($false)
+        )
+    }
     Write-JsonFile -Path $changesPath -Value $changesDocument
 
-    Invoke-ChildScript -Path $releaseAuditGateScript -Arguments @(
+    $gateArguments = @(
         '-RepositoryRoot', $caseRoot,
         '-InputFile', $changesPath,
         '-BaseSourceLockPath', $baseSourceLockPath
     )
+    if ($WithRemoteEvidence -or $null -ne $MutateRemoteEvidence -or $null -ne $InjectedArchiveBytes) {
+        $remoteEvidence = New-ReleaseAuditRemoteEvidence -SourceLock $headFixture
+        if ($null -ne $MutateRemoteEvidence) {
+            & $MutateRemoteEvidence $remoteEvidence
+        }
+        $remoteEvidencePath = Join-Path $caseRoot 'remote-evidence.json'
+        $archiveFixturePath = Join-Path $caseRoot 'remote-archive.tar.gz'
+        Write-JsonFile -Path $remoteEvidencePath -Value $remoteEvidence
+        $bytesToWrite = if ($null -ne $InjectedArchiveBytes) {
+            $InjectedArchiveBytes
+        } else {
+            $archiveBytes
+        }
+        [IO.File]::WriteAllBytes($archiveFixturePath, [byte[]]$bytesToWrite)
+        $gateArguments += @(
+            '-RemoteValidationMode', 'fixture',
+            '-RemoteEvidencePath', $remoteEvidencePath,
+            '-ArchivePath', $archiveFixturePath
+        )
+    }
+
+    Invoke-ChildScript -Path $releaseAuditGateScript -Arguments $gateArguments
 }
 
 function Assert-ReleaseAuditSuccess {
@@ -2220,7 +2484,10 @@ function Assert-ReleaseAuditFailureCode {
 
     Assert-True -Condition ($Result.ExitCode -ne 0) -Message 'Release 审计门拒绝路径时必须返回非零退出码'
     Assert-True -Condition ($null -ne $Result.Json) -Message "Release 审计门失败时必须输出 JSON，输出=$($Result.Output)"
-    Assert-Contains -Collection @($Result.Json.errors.code) -Expected $Code -Message 'Release 审计门必须返回稳定错误码'
+    Assert-Contains `
+        -Collection @($Result.Json.errors.code) `
+        -Expected $Code `
+        -Message "Release 审计门必须返回稳定错误码，实际=$(@($Result.Json.errors.code) -join ',')，输出=$($Result.Output)"
 }
 
 function Invoke-ClassifierCase {
@@ -2430,6 +2697,20 @@ Invoke-ContractTest -Name 'Release 审计门区分 current 与 stale 并阻断�
         )
     Assert-ReleaseAuditFailureCode -Result $result -Code 'RELEASE_AUDIT_CHANGED_WITH_BLOCKED_PATH'
 
+    $result = Invoke-ReleaseAuditGateCase `
+        -Name 'full-source-lock-fingerprint-with-product' `
+        -BaseSourceLock $current `
+        -HeadSourceLock $current `
+        -Changes @(
+            [pscustomobject]@{ status = 'M'; path = 'upstream/source-lock.json' }
+            [pscustomobject]@{ status = 'M'; path = 'apps/inputcodex-desktop/src/main.rs' }
+        ) `
+        -MutateFixture {
+            param($root, $lock)
+            $lock.generated_at = '2026-08-01T00:00:00Z'
+        }
+    Assert-ReleaseAuditFailureCode -Result $result -Code 'RELEASE_AUDIT_CHANGED_WITH_BLOCKED_PATH'
+
     $invalidStale = New-ReleaseAuditSourceLock `
         -SnapshotTag 'v1.2.42' `
         -SnapshotCommit '657cd33e009ad02515d30db6492cd4e669b06318' `
@@ -2500,19 +2781,19 @@ Invoke-ContractTest -Name 'Release Audit JSON 根与受信标量必须 fail clos
             }
         },
         [pscustomobject]@{
-            Name = 'file-blob-array'; Code = 'UPSTREAM_SNAPSHOT_INTEGRITY_INVALID'; Mutate = {
+            Name = 'file-blob-array'; Code = 'RELEASE_AUDIT_INVALID'; Mutate = {
                 param($root, $lock)
                 $lock.files[0].git_blob_sha1 = [object[]]@($lock.files[0].git_blob_sha1)
             }
         },
         [pscustomobject]@{
-            Name = 'manifest-count-array'; Code = 'UPSTREAM_SNAPSHOT_INTEGRITY_INVALID'; Mutate = {
+            Name = 'manifest-count-array'; Code = 'RELEASE_AUDIT_INVALID'; Mutate = {
                 param($root, $lock)
                 $lock.manifest.file_count = [object[]]@(1L)
             }
         },
         [pscustomobject]@{
-            Name = 'tree-sha-array'; Code = 'UPSTREAM_SNAPSHOT_INTEGRITY_INVALID'; Mutate = {
+            Name = 'tree-sha-array'; Code = 'RELEASE_AUDIT_INVALID'; Mutate = {
                 param($root, $lock)
                 $lock.tree.sha = [object[]]@($lock.tree.sha)
             }
@@ -2538,6 +2819,304 @@ Invoke-ContractTest -Name 'Release Audit JSON 根与受信标量必须 fail clos
     Assert-True -Condition ($arrayChange.ExitCode -ne 0) `
         -Message "Release Audit changes 标量数组不得通过，输出=$($arrayChange.Output)"
     Assert-ReleaseAuditFailureCode -Result $arrayChange -Code 'RELEASE_AUDIT_INVALID_CHANGESET'
+}
+
+Invoke-ContractTest -Name 'Release Audit 原始 JSON 每层拒绝重复 key' -Body {
+    $current = New-ReleaseAuditSourceLock `
+        -SnapshotTag 'v1.2.41' `
+        -SnapshotCommit '3dafffcafb2566a1e8bce4b35671656d6adb3eda' `
+        -CatalogTag 'v1.2.41' `
+        -CatalogCommit '3dafffcafb2566a1e8bce4b35671656d6adb3eda' `
+        -Status 'current' `
+        -StaleReason $null `
+        -ReAuditIssueRef $null
+
+    $duplicateCases = @(
+        [pscustomobject]@{
+            Name = 'root'
+            Mutate = {
+                param($json)
+                $needle = '  "schema_version": "inputcodex.source-lock.v1",'
+                $index = $json.IndexOf($needle, [StringComparison]::Ordinal)
+                if ($index -lt 0) { throw '重复 root key 夹具找不到 schema_version' }
+                $json.Insert($index, "  `"schema_version`": `"inputcodex.source-lock.v0`",`n")
+            }
+        },
+        [pscustomobject]@{
+            Name = 'nested'
+            Mutate = {
+                param($json)
+                $needle = '    "status": "current",'
+                $index = $json.IndexOf($needle, [StringComparison]::Ordinal)
+                if ($index -lt 0) { throw '重复 nested key 夹具找不到 status' }
+                $json.Insert($index, "    `"status`": `"stale-re-audit-required`",`n")
+            }
+        }
+    )
+    foreach ($case in $duplicateCases) {
+        $result = Invoke-ReleaseAuditGateCase `
+            -Name "duplicate-key-$($case.Name)" `
+            -BaseSourceLock $current `
+            -HeadSourceLock $current `
+            -Changes @() `
+            -MutateHeadJsonText $case.Mutate
+        Assert-ReleaseAuditFailureCode -Result $result -Code 'RELEASE_AUDIT_INVALID'
+    }
+}
+
+Invoke-ContractTest -Name 'Release Audit source-lock 精确 schema 拒绝 unknown missing 与类型漂移' -Body {
+    $current = New-ReleaseAuditSourceLock `
+        -SnapshotTag 'v1.2.41' `
+        -SnapshotCommit '3dafffcafb2566a1e8bce4b35671656d6adb3eda' `
+        -CatalogTag 'v1.2.41' `
+        -CatalogCommit '3dafffcafb2566a1e8bce4b35671656d6adb3eda' `
+        -Status 'current' `
+        -StaleReason $null `
+        -ReAuditIssueRef $null
+
+    $unknownCases = @(
+        @{ Name = 'root'; Mutate = { param($root, $lock) $lock | Add-Member unexpected $true } },
+        @{ Name = 'snapshot'; Mutate = { param($root, $lock) $lock.snapshot | Add-Member unexpected $true } },
+        @{ Name = 'commit-verification'; Mutate = { param($root, $lock) $lock.snapshot.commit_verification | Add-Member unexpected $true } },
+        @{ Name = 'release-audit'; Mutate = { param($root, $lock) $lock.release_audit | Add-Member unexpected $true } },
+        @{ Name = 'catalog-release'; Mutate = { param($root, $lock) $lock.release_audit.catalog_release | Add-Member unexpected $true } },
+        @{ Name = 'archive'; Mutate = { param($root, $lock) $lock.archive | Add-Member unexpected $true } },
+        @{ Name = 'tree'; Mutate = { param($root, $lock) $lock.tree | Add-Member unexpected $true } },
+        @{ Name = 'manifest'; Mutate = { param($root, $lock) $lock.manifest | Add-Member unexpected $true } },
+        @{ Name = 'largest-file'; Mutate = { param($root, $lock) $lock.manifest.largest_file | Add-Member unexpected $true } },
+        @{ Name = 'license'; Mutate = { param($root, $lock) $lock.license | Add-Member unexpected $true } },
+        @{ Name = 'preserved-file'; Mutate = { param($root, $lock) $lock.license.preserved_files[0] | Add-Member unexpected $true } },
+        @{ Name = 'scope'; Mutate = { param($root, $lock) $lock.scope | Add-Member unexpected $true } },
+        @{ Name = 'verification'; Mutate = { param($root, $lock) $lock.verification | Add-Member unexpected $true } },
+        @{ Name = 'file'; Mutate = { param($root, $lock) $lock.files[0] | Add-Member unexpected $true } },
+        @{ Name = 'generator'; Mutate = { param($root, $lock) $lock.generator | Add-Member unexpected $true } },
+        @{ Name = 'host'; Mutate = { param($root, $lock) $lock.generator.host | Add-Member unexpected $true } },
+        @{ Name = 'tools'; Mutate = { param($root, $lock) $lock.generator.tools | Add-Member unexpected $true } },
+        @{ Name = 'tool-python'; Mutate = { param($root, $lock) $lock.generator.tools.python | Add-Member unexpected $true } },
+        @{ Name = 'tool-git'; Mutate = { param($root, $lock) $lock.generator.tools.git | Add-Member unexpected $true } },
+        @{ Name = 'tool-github-cli'; Mutate = { param($root, $lock) $lock.generator.tools.github_cli | Add-Member unexpected $true } }
+    )
+    foreach ($case in $unknownCases) {
+        $result = Invoke-ReleaseAuditGateCase `
+            -Name "schema-unknown-$($case.Name)" `
+            -BaseSourceLock $current `
+            -HeadSourceLock $current `
+            -Changes @() `
+            -MutateFixture $case.Mutate
+        Assert-ReleaseAuditFailureCode -Result $result -Code 'RELEASE_AUDIT_INVALID'
+    }
+
+    $missingCases = @(
+        @{ Name = 'root'; Mutate = { param($root, $lock) $lock.PSObject.Properties.Remove('generated_at') } },
+        @{ Name = 'snapshot'; Mutate = { param($root, $lock) $lock.snapshot.PSObject.Properties.Remove('repository') } },
+        @{ Name = 'commit-verification'; Mutate = { param($root, $lock) $lock.snapshot.commit_verification.PSObject.Properties.Remove('reason') } },
+        @{ Name = 'release-audit'; Mutate = { param($root, $lock) $lock.release_audit.PSObject.Properties.Remove('stale_reason') } },
+        @{ Name = 'catalog-release'; Mutate = { param($root, $lock) $lock.release_audit.catalog_release.PSObject.Properties.Remove('commit') } },
+        @{ Name = 'archive'; Mutate = { param($root, $lock) $lock.archive.PSObject.Properties.Remove('bytes') } },
+        @{ Name = 'tree'; Mutate = { param($root, $lock) $lock.tree.PSObject.Properties.Remove('entry_count') } },
+        @{ Name = 'manifest'; Mutate = { param($root, $lock) $lock.manifest.PSObject.Properties.Remove('total_bytes') } },
+        @{ Name = 'largest-file'; Mutate = { param($root, $lock) $lock.manifest.largest_file.PSObject.Properties.Remove('mode') } },
+        @{ Name = 'license'; Mutate = { param($root, $lock) $lock.license.PSObject.Properties.Remove('repository_license_key') } },
+        @{ Name = 'preserved-file'; Mutate = { param($root, $lock) $lock.license.preserved_files[0].PSObject.Properties.Remove('kind') } },
+        @{ Name = 'scope'; Mutate = { param($root, $lock) $lock.scope.PSObject.Properties.Remove('audit_only') } },
+        @{ Name = 'verification'; Mutate = { param($root, $lock) $lock.verification.PSObject.Properties.Remove('tree_completeness') } },
+        @{ Name = 'file'; Mutate = { param($root, $lock) $lock.files[0].PSObject.Properties.Remove('sha256') } },
+        @{ Name = 'generator'; Mutate = { param($root, $lock) $lock.generator.PSObject.Properties.Remove('method') } },
+        @{ Name = 'host'; Mutate = { param($root, $lock) $lock.generator.host.PSObject.Properties.Remove('os') } },
+        @{ Name = 'tools'; Mutate = { param($root, $lock) $lock.generator.tools.PSObject.Properties.Remove('github_cli') } },
+        @{ Name = 'tool'; Mutate = { param($root, $lock) $lock.generator.tools.python.PSObject.Properties.Remove('purpose') } }
+    )
+    foreach ($case in $missingCases) {
+        $result = Invoke-ReleaseAuditGateCase `
+            -Name "schema-missing-$($case.Name)" `
+            -BaseSourceLock $current `
+            -HeadSourceLock $current `
+            -Changes @() `
+            -MutateFixture $case.Mutate
+        Assert-ReleaseAuditFailureCode -Result $result -Code 'RELEASE_AUDIT_INVALID'
+    }
+
+    $typeCases = @(
+        @{ Name = 'object-array'; Mutate = { param($root, $lock) $lock.snapshot = [object[]]@($lock.snapshot) } },
+        @{ Name = 'array-object'; Mutate = { param($root, $lock) $lock.files = $lock.files[0] } },
+        @{ Name = 'string-int64'; Mutate = { param($root, $lock) $lock.snapshot.repository = 1L } },
+        @{ Name = 'int64-string'; Mutate = { param($root, $lock) $lock.archive.bytes = '18' } },
+        @{ Name = 'boolean-string'; Mutate = { param($root, $lock) $lock.scope.audit_only = 'true' } },
+        @{ Name = 'string-array'; Mutate = { param($root, $lock) $lock.snapshot.release_tag = [object[]]@($lock.snapshot.release_tag) } }
+    )
+    foreach ($case in $typeCases) {
+        $result = Invoke-ReleaseAuditGateCase `
+            -Name "schema-type-$($case.Name)" `
+            -BaseSourceLock $current `
+            -HeadSourceLock $current `
+            -Changes @() `
+            -MutateFixture $case.Mutate
+        Assert-ReleaseAuditFailureCode -Result $result -Code 'RELEASE_AUDIT_INVALID'
+    }
+}
+
+Invoke-ContractTest -Name 'Release Audit source-lock 身份值必须由固定上游唯一派生' -Body {
+    $current = New-ReleaseAuditSourceLock `
+        -SnapshotTag 'v1.2.41' `
+        -SnapshotCommit '3dafffcafb2566a1e8bce4b35671656d6adb3eda' `
+        -CatalogTag 'v1.2.41' `
+        -CatalogCommit '3dafffcafb2566a1e8bce4b35671656d6adb3eda' `
+        -Status 'current' `
+        -StaleReason $null `
+        -ReAuditIssueRef $null
+
+    $cases = @(
+        @{ Name = 'repository'; Code = 'RELEASE_AUDIT_INVALID'; Mutate = { param($root, $lock) $lock.snapshot.repository = 'forged/repository' } },
+        @{ Name = 'repository-url'; Code = 'RELEASE_AUDIT_INVALID'; Mutate = { param($root, $lock) $lock.snapshot.repository_url = 'https://example.invalid/repository' } },
+        @{ Name = 'release-url'; Code = 'RELEASE_AUDIT_INVALID'; Mutate = { param($root, $lock) $lock.snapshot.release_url = 'https://example.invalid/release' } },
+        @{ Name = 'release-tag-only'; Code = 'RELEASE_AUDIT_INVALID'; Mutate = { param($root, $lock) $lock.snapshot.release_tag = 'v9.9.9' } },
+        @{ Name = 'snapshot-commit-only'; Code = 'RELEASE_AUDIT_INVALID'; Mutate = { param($root, $lock) $lock.snapshot.commit = '6' * 40 } },
+        @{ Name = 'archive-format'; Code = 'RELEASE_AUDIT_INVALID'; Mutate = { param($root, $lock) $lock.archive.format = 'zip' } },
+        @{ Name = 'archive-url'; Code = 'RELEASE_AUDIT_INVALID'; Mutate = { param($root, $lock) $lock.archive.url = 'https://example.invalid/archive.tar.gz' } },
+        @{ Name = 'commit-tree-only'; Code = 'RELEASE_AUDIT_INVALID'; Mutate = { param($root, $lock) $lock.snapshot.commit_tree = '6' * 40 } },
+        @{ Name = 'tree-sha-only'; Code = 'RELEASE_AUDIT_INVALID'; Mutate = { param($root, $lock) $lock.tree.sha = '6' * 40 } },
+        @{ Name = 'generated-at'; Code = 'RELEASE_AUDIT_INVALID'; Mutate = { param($root, $lock) $lock.generated_at = '2026-07-31' } },
+        @{ Name = 'published-at'; Code = 'RELEASE_AUDIT_INVALID'; Mutate = { param($root, $lock) $lock.snapshot.release_published_at = '2026-07-30' } },
+        @{ Name = 'commit-message-empty'; Code = 'RELEASE_AUDIT_INVALID'; Mutate = { param($root, $lock) $lock.snapshot.commit_message = '' } },
+        @{ Name = 'verification-reason-empty'; Code = 'RELEASE_AUDIT_INVALID'; Mutate = { param($root, $lock) $lock.snapshot.commit_verification.reason = '' } },
+        @{ Name = 'archive-sha-case'; Code = 'RELEASE_AUDIT_INVALID'; Mutate = { param($root, $lock) $lock.archive.sha256 = 'A' * 64 } },
+        @{ Name = 'archive-bytes-zero'; Code = 'RELEASE_AUDIT_INVALID'; Mutate = { param($root, $lock) $lock.archive.bytes = 0L } },
+        @{ Name = 'license-key-empty'; Code = 'UPSTREAM_SNAPSHOT_INTEGRITY_INVALID'; Mutate = { param($root, $lock) $lock.license.repository_license_key = '' } },
+        @{ Name = 'license-name-empty'; Code = 'UPSTREAM_SNAPSHOT_INTEGRITY_INVALID'; Mutate = { param($root, $lock) $lock.license.repository_license_name = '' } },
+        @{ Name = 'license-spdx-empty'; Code = 'UPSTREAM_SNAPSHOT_INTEGRITY_INVALID'; Mutate = { param($root, $lock) $lock.license.repository_license_spdx_id = '' } }
+    )
+    foreach ($case in $cases) {
+        $result = Invoke-ReleaseAuditGateCase `
+            -Name "identity-$($case.Name)" `
+            -BaseSourceLock $current `
+            -HeadSourceLock $current `
+            -Changes @() `
+            -MutateFixture $case.Mutate
+        Assert-ReleaseAuditFailureCode -Result $result -Code $case.Code
+    }
+}
+
+Invoke-ContractTest -Name 'Release Audit 许可证证据必须与快照双向闭包' -Body {
+    $current = New-ReleaseAuditSourceLock `
+        -SnapshotTag 'v1.2.41' `
+        -SnapshotCommit '3dafffcafb2566a1e8bce4b35671656d6adb3eda' `
+        -CatalogTag 'v1.2.41' `
+        -CatalogCommit '3dafffcafb2566a1e8bce4b35671656d6adb3eda' `
+        -Status 'current' `
+        -StaleReason $null `
+        -ReAuditIssueRef $null
+
+    $cases = @(
+        @{ Name = 'preserved-empty'; Code = 'RELEASE_AUDIT_INVALID'; Mutate = { param($root, $lock) $lock.license.preserved_files = [object[]]@() } },
+        @{ Name = 'preserved-missing'; Code = 'UPSTREAM_SNAPSHOT_INTEGRITY_INVALID'; Mutate = { param($root, $lock) $lock.license.preserved_files = [object[]]@($lock.license.preserved_files[0]) } },
+        @{ Name = 'preserved-duplicate'; Code = 'UPSTREAM_SNAPSHOT_INTEGRITY_INVALID'; Mutate = { param($root, $lock) $lock.license.preserved_files = [object[]]@($lock.license.preserved_files[0], $lock.license.preserved_files[0], $lock.license.preserved_files[1]) } },
+        @{ Name = 'preserved-order'; Code = 'UPSTREAM_SNAPSHOT_INTEGRITY_INVALID'; Mutate = { param($root, $lock) $lock.license.preserved_files = [object[]]@($lock.license.preserved_files[1], $lock.license.preserved_files[0]) } },
+        @{ Name = 'preserved-extra'; Code = 'UPSTREAM_SNAPSHOT_INTEGRITY_INVALID'; Mutate = {
+                param($root, $lock)
+                $readme = @($lock.files | Where-Object { $_.path -ceq 'README.md' })[0]
+                $lock.license.preserved_files = [object[]]@(
+                    $lock.license.preserved_files[0]
+                    $lock.license.preserved_files[1]
+                    [pscustomobject][ordered]@{ path = 'README.md'; kind = 'embedded-third-party-license'; size = $readme.size; sha256 = $readme.sha256 }
+                )
+            }
+        },
+        @{ Name = 'preserved-kind'; Code = 'UPSTREAM_SNAPSHOT_INTEGRITY_INVALID'; Mutate = { param($root, $lock) $lock.license.preserved_files[0].kind = 'third-party-notice' } },
+        @{ Name = 'preserved-size'; Code = 'UPSTREAM_SNAPSHOT_INTEGRITY_INVALID'; Mutate = { param($root, $lock) $lock.license.preserved_files[0].size += 1L } },
+        @{ Name = 'preserved-sha'; Code = 'UPSTREAM_SNAPSHOT_INTEGRITY_INVALID'; Mutate = { param($root, $lock) $lock.license.preserved_files[0].sha256 = '6' * 64 } },
+        @{ Name = 'files-empty'; Code = 'RELEASE_AUDIT_INVALID'; Mutate = { param($root, $lock) $lock.files = [object[]]@() } },
+        @{ Name = 'files-duplicate'; Code = 'UPSTREAM_SNAPSHOT_INTEGRITY_INVALID'; Mutate = { param($root, $lock) $lock.files = [object[]]@($lock.files[0], $lock.files[0], $lock.files[1], $lock.files[2]) } },
+        @{ Name = 'files-missing'; Code = 'UPSTREAM_SNAPSHOT_INTEGRITY_INVALID'; Mutate = { param($root, $lock) $lock.files = [object[]]@($lock.files | Where-Object { $_.path -cne 'README.md' }) } },
+        @{ Name = 'files-order'; Code = 'UPSTREAM_SNAPSHOT_INTEGRITY_INVALID'; Mutate = {
+                param($root, $lock)
+                $reversed = [object[]]@($lock.files)
+                [array]::Reverse($reversed)
+                $lock.files = $reversed
+            }
+        },
+        @{ Name = 'files-extra'; Code = 'UPSTREAM_SNAPSHOT_INTEGRITY_INVALID'; Mutate = {
+                param($root, $lock)
+                $lock.files = [object[]]@(
+                    [pscustomobject][ordered]@{ path = 'ABSENT.txt'; mode = '100644'; size = 1L; git_blob_sha1 = '6' * 40; sha256 = '7' * 64 }
+                    $lock.files[0]
+                    $lock.files[1]
+                    $lock.files[2]
+                )
+            }
+        }
+    )
+    foreach ($case in $cases) {
+        $result = Invoke-ReleaseAuditGateCase `
+            -Name "closure-$($case.Name)" `
+            -BaseSourceLock $current `
+            -HeadSourceLock $current `
+            -Changes @() `
+            -MutateFixture $case.Mutate
+        Assert-ReleaseAuditFailureCode -Result $result -Code $case.Code
+    }
+}
+
+Invoke-ContractTest -Name 'Release Audit 远端 evidence 与 archive 必须精确匹配' -Body {
+    $current = New-ReleaseAuditSourceLock `
+        -SnapshotTag 'v1.2.41' `
+        -SnapshotCommit '3dafffcafb2566a1e8bce4b35671656d6adb3eda' `
+        -CatalogTag 'v1.2.41' `
+        -CatalogCommit '3dafffcafb2566a1e8bce4b35671656d6adb3eda' `
+        -Status 'current' `
+        -StaleReason $null `
+        -ReAuditIssueRef $null
+
+    $valid = Invoke-ReleaseAuditGateCase `
+        -Name 'remote-evidence-valid' `
+        -BaseSourceLock $current `
+        -HeadSourceLock $current `
+        -Changes @() `
+        -WithRemoteEvidence
+    Assert-ReleaseAuditSuccess -Result $valid -ExpectedStatus 'current' -ExpectedReaudit $false
+
+    $remoteMismatchCases = @(
+        @{ Name = 'root-unknown'; Mutate = { param($e) $e | Add-Member unexpected $true } },
+        @{ Name = 'release-unknown'; Mutate = { param($e) $e.release | Add-Member unexpected $true } },
+        @{ Name = 'release-tag-missing'; Mutate = { param($e) $e.release.PSObject.Properties.Remove('tag_name') } },
+        @{ Name = 'release-array'; Mutate = { param($e) $e.release = [object[]]@($e.release) } },
+        @{ Name = 'release-draft-type'; Mutate = { param($e) $e.release.draft = 'false' } },
+        @{ Name = 'tag-only'; Mutate = { param($e) $e.release.tag_name = 'v9.9.9' } },
+        @{ Name = 'release-url'; Mutate = { param($e) $e.release.html_url = 'https://example.invalid/release' } },
+        @{ Name = 'published-at'; Mutate = { param($e) $e.release.published_at = '2026-01-01T00:00:00Z' } },
+        @{ Name = 'tag-ref'; Mutate = { param($e) $e.tag_ref.ref = 'refs/tags/v9.9.9' } },
+        @{ Name = 'tag-commit'; Mutate = { param($e) $e.tag_ref.commit = '6' * 40 } },
+        @{ Name = 'commit-only'; Mutate = { param($e) $e.commit.sha = '6' * 40 } },
+        @{ Name = 'commit-message'; Mutate = { param($e) $e.commit.message = 'forged' } },
+        @{ Name = 'tree-only'; Mutate = { param($e) $e.commit.tree = '7' * 40 } },
+        @{ Name = 'verification-bool'; Mutate = { param($e) $e.commit.verification.verified = $true } },
+        @{ Name = 'verification-reason'; Mutate = { param($e) $e.commit.verification.reason = 'valid' } },
+        @{ Name = 'license-key'; Mutate = { param($e) $e.license.key = 'mit' } },
+        @{ Name = 'license-name'; Mutate = { param($e) $e.license.name = 'MIT License' } },
+        @{ Name = 'license-spdx'; Mutate = { param($e) $e.license.spdx_id = 'MIT' } },
+        @{ Name = 'license-blob'; Mutate = { param($e) $e.license.git_blob_sha1 = '8' * 40 } },
+        @{ Name = 'archive-url'; Mutate = { param($e) $e.archive.url = 'https://example.invalid/archive.tar.gz' } }
+    )
+    foreach ($case in $remoteMismatchCases) {
+        $result = Invoke-ReleaseAuditGateCase `
+            -Name "remote-$($case.Name)" `
+            -BaseSourceLock $current `
+            -HeadSourceLock $current `
+            -Changes @() `
+            -MutateRemoteEvidence $case.Mutate
+        Assert-ReleaseAuditFailureCode `
+            -Result $result `
+            -Code 'RELEASE_AUDIT_REMOTE_EVIDENCE_INVALID'
+    }
+
+    $archiveMismatch = Invoke-ReleaseAuditGateCase `
+        -Name 'remote-archive-bytes' `
+        -BaseSourceLock $current `
+        -HeadSourceLock $current `
+        -Changes @() `
+        -InjectedArchiveBytes ([Text.UTF8Encoding]::new($false).GetBytes("tampered archive`n"))
+    Assert-ReleaseAuditFailureCode `
+        -Result $archiveMismatch `
+        -Code 'RELEASE_AUDIT_REMOTE_EVIDENCE_INVALID'
 }
 
 Invoke-ContractTest -Name 'Release 审计门验证完整上游快照' -Body {
@@ -2614,6 +3193,18 @@ Invoke-ContractTest -Name 'Release 审计门接入 PR 与 required 汇总' -Body
         Assert-True -Condition ($variant.Value -match '(?ms)^  release-audit:.*?ref: \$\{\{ github\.event\.pull_request\.head\.sha \|\| github\.sha \}\}.*?^  governance:') `
             -Message "$($variant.Key) release-audit Job 必须检出精确 PR Head 或 main push SHA"
         Assert-True -Condition ($variant.Value -match 'Verify-ReleaseAuditGate\.ps1') -Message "$($variant.Key) release-audit Job 必须执行审计门脚本"
+        $releaseAuditBlock = [regex]::Match(
+            $variant.Value,
+            '(?ms)^  release-audit:.*?(?=^  governance:)'
+        ).Value
+        Assert-True -Condition ($releaseAuditBlock.Contains('GH_TOKEN: ${{ github.token }}')) `
+            -Message "$($variant.Key) release-audit 必须只读注入 github.token"
+        Assert-True -Condition ($releaseAuditBlock.Contains('REMOTE_VALIDATION_MODE: live')) `
+            -Message "$($variant.Key) release-audit 必须固定启用 live 远端验证"
+        Assert-True -Condition ($releaseAuditBlock.Contains("'-TemporaryDirectory', `$env:REPORT_DIR")) `
+            -Message "$($variant.Key) release-audit 必须把 runner.temp 子目录传给门禁"
+        Assert-True -Condition (-not $releaseAuditBlock.Contains('actions/upload-artifact')) `
+            -Message "$($variant.Key) release-audit 成败均不得上传 Artifact"
         Assert-True -Condition ($variant.Value -match '(?s)required:.*?needs:.*?- release-audit') -Message "$($variant.Key) required Job 必须依赖 release-audit Job"
     }
 }

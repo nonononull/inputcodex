@@ -5254,6 +5254,158 @@ Write-Output "ISSUE151_LOCAL_VERIFY_OK scope_hash=$scopeHash paths=$($actual.Cou
 期望：两份 PowerShell AST 为零错误，CI 合同为 `85/85`，Release Audit 为 `current / errors=[]`，自治策略与
 仓库政策零违规；实际范围精确为九路径，产品、Parity、Cargo、Workflow、Release 与上游快照零变化。
 
+## Issue #176：source-lock 与 Release 身份完整性本地验证
+
+本任务只允许冻结的十一路径。Rust 定向测试需要 Windows MSVC linker；若 `link.exe` 不可用，必须在
+`err.md` 记录环境缺口，并由 exact-head GitHub-hosted CI 提供 Rust 运行证据，禁止把未启动的测试写成通过。
+live Release 验证只访问固定的 `BigPizzaV3/CodexPlusPlus` GitHub API 与 codeload archive，临时文件必须
+位于仓库外并在命令结束后清理。
+
+```powershell
+$ErrorActionPreference = 'Stop'
+
+function Assert-NativeSuccess {
+  param([Parameter(Mandatory)][string]$Label)
+  if ($LASTEXITCODE -ne 0) { throw "$Label 失败：$LASTEXITCODE" }
+}
+
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff zzz'
+
+$branch = (git branch --show-current).Trim()
+Assert-NativeSuccess 'Issue #176 分支读取'
+if ($branch -cne 'codex/issue-176-source-lock-release-integrity') {
+  throw "Issue #176 分支错误：$branch"
+}
+
+foreach ($scriptPath in @(
+  'scripts/ci/Test-CiScripts.ps1',
+  'scripts/ci/Verify-ReleaseAuditGate.ps1'
+)) {
+  $tokens = $null
+  $errors = $null
+  [void][Management.Automation.Language.Parser]::ParseFile(
+    (Resolve-Path -LiteralPath $scriptPath),
+    [ref]$tokens,
+    [ref]$errors
+  )
+  if (@($errors).Count -ne 0) { throw "Issue #176 PowerShell AST 失败：$scriptPath" }
+}
+
+cargo fmt --all -- --check
+Assert-NativeSuccess 'Issue #176 Rust 格式检查'
+
+$rustLocalStatus = 'passed'
+if ($null -eq (Get-Command link.exe -ErrorAction SilentlyContinue)) {
+  $rustLocalStatus = 'blocked-linker-missing'
+  Write-Warning 'Issue #176 本机缺少 MSVC link.exe；Rust 运行证据必须由 exact-head Hosted CI 提供。'
+}
+else {
+  cargo test -p inputcodex-parity --test catalog_repository --offline source_lock_
+  Assert-NativeSuccess 'Issue #176 source-lock Rust 定向测试'
+}
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1 -NameFilter 'Release Audit'
+Assert-NativeSuccess 'Issue #176 Release Audit 定向合同'
+
+pwsh -NoProfile -File scripts/ci/Test-CiScripts.ps1
+Assert-NativeSuccess 'Issue #176 完整 CI 合同'
+
+$offlineText = @(
+  pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 -RepositoryRoot .
+) -join [Environment]::NewLine
+Assert-NativeSuccess 'Issue #176 离线 Release Audit'
+$offline = $offlineText | ConvertFrom-Json -Depth 30
+if ($offline.ok -ne $true -or $offline.status -cne 'current' -or
+    $offline.requires_reaudit -ne $false -or @($offline.errors).Count -ne 0) {
+  throw 'Issue #176 离线 Release Audit 状态漂移'
+}
+
+$env:GH_TOKEN = (gh auth token).Trim()
+Assert-NativeSuccess 'Issue #176 只读 GitHub token'
+$liveTemp = Join-Path ([IO.Path]::GetTempPath()) (
+  'inputcodex-issue-176-release-audit-' + [guid]::NewGuid().ToString('N')
+)
+New-Item -ItemType Directory -Path $liveTemp -Force | Out-Null
+try {
+  $liveText = @(
+    pwsh -NoProfile -File scripts/ci/Verify-ReleaseAuditGate.ps1 `
+      -RepositoryRoot . `
+      -RemoteValidationMode live `
+      -TemporaryDirectory $liveTemp
+  ) -join [Environment]::NewLine
+  Assert-NativeSuccess 'Issue #176 live Release Audit'
+  $live = $liveText | ConvertFrom-Json -Depth 30
+  if ($live.ok -ne $true -or $live.status -cne 'current' -or
+      $live.requires_reaudit -ne $false -or @($live.errors).Count -ne 0) {
+    throw 'Issue #176 live Release Audit 状态漂移'
+  }
+}
+finally {
+  Remove-Item -LiteralPath $liveTemp -Recurse -Force -ErrorAction SilentlyContinue
+  Remove-Item Env:GH_TOKEN -ErrorAction SilentlyContinue
+}
+
+pwsh -NoProfile -File scripts/ci/Verify-AutonomousRefactorPolicy.ps1 `
+  -RepositoryRoot . -PolicyPath .github/autonomous-refactor-policy.json
+Assert-NativeSuccess 'Issue #176 自治策略'
+
+pwsh -NoProfile -File scripts/ci/Verify-RepositoryPolicy.ps1 -RepositoryRoot .
+Assert-NativeSuccess 'Issue #176 仓库政策'
+
+$expected = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+@(
+  '.github/workflows/ci.yml',
+  'build.md',
+  'crates/inputcodex-parity/src/validation.rs',
+  'crates/inputcodex-parity/tests/catalog_repository.rs',
+  'docs/plans/2026-08-08-issue-176-source-lock-release-integrity.md',
+  'docs/plans/sessions/2026-08-08-issue-176-source-lock-release-integrity.md',
+  'docs/reports/issue-176-source-lock-release-integrity.md',
+  'docs/workflows/2026-08-08-issue-176-source-lock-release-integrity-runtime.md',
+  'err.md',
+  'scripts/ci/Test-CiScripts.ps1',
+  'scripts/ci/Verify-ReleaseAuditGate.ps1'
+) | ForEach-Object {
+  if (-not $expected.Add($_)) { throw "Issue #176 重复冻结路径：$_" }
+}
+$payload = [string]::Join("`n", [string[]]$expected) + "`n"
+$scopeHash = 'sha256:' + [Convert]::ToHexString(
+  [Security.Cryptography.SHA256]::HashData(
+    [Text.UTF8Encoding]::new($false).GetBytes($payload)
+  )
+).ToLowerInvariant()
+if ($expected.Count -ne 11 -or
+    $scopeHash -cne 'sha256:973cd1dd29f70ab6cf3f8bd2c82f61c1673adf09eec7f15db3c76dbd93e97001') {
+  throw "Issue #176 冻结范围漂移：count=$($expected.Count) hash=$scopeHash"
+}
+
+$actual = [Collections.Generic.SortedSet[string]]::new([StringComparer]::Ordinal)
+@(
+  git -c core.quotePath=false diff --no-renames --name-only origin/main...HEAD
+  git -c core.quotePath=false diff --cached --no-renames --name-only
+  git -c core.quotePath=false diff --no-renames --name-only
+  git -c core.quotePath=false ls-files --others --exclude-standard
+) | Where-Object { $_ } | ForEach-Object { [void]$actual.Add($_) }
+if (-not [Linq.Enumerable]::SequenceEqual(
+    [string[]]$expected,
+    [string[]]$actual,
+    [StringComparer]::Ordinal
+  )) {
+  throw "Issue #176 实际路径漂移：$([string]::Join(', ', [string[]]$actual))"
+}
+
+git diff --check origin/main --
+Assert-NativeSuccess 'Issue #176 Git 空白检查'
+
+Write-Output (
+  "ISSUE176_LOCAL_VERIFY_OK scope_hash=$scopeHash paths=$($actual.Count) rust=$rustLocalStatus"
+)
+```
+
+预期：两份 PowerShell AST 零错误；Release Audit 定向与完整 CI 合同为 `99/99`；离线及 live Release Audit 均为
+`current / requires_reaudit=false / errors=[]`；自治策略与仓库政策零违规；实际范围精确为十一路径。完整
+Workspace、Windows/macOS/Linux Rust 运行和产品零漂移继续由 exact-head GitHub-hosted CI 证明。
+
 ## 外部 AGOS 使用边界
 
 Issue `#17` 曾以 report-only 运行 AGOS 默认入口，结果为 `needs-input/unregistered`；已按项目规则记录并绕过。AGOS 不属于环境要求或合并门禁；不得在本规划 PR 中修改、修复或优化其 Registry、脚本、规则、Workflow 或 Vault。

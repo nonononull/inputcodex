@@ -1201,6 +1201,37 @@
 - 关联：Issue `#161`、PR `#160` 复审评论、`scripts/automation/Get-AutonomousRefactorState.ps1`、
   `scripts/ci/Test-CiScripts.ps1`。
 
+### 2026-08-08：Windows MSVC linker 缺失使 Rust 定向测试未启动
+
+- 环境：Issue `#176` 在 Windows 本地 worktree 执行
+  `cargo test -p inputcodex-parity --test catalog_repository --offline source_lock_`；工具链为
+  `rustc 1.97.1`、host `x86_64-pc-windows-msvc`。
+- 现象：Cargo 在依赖 build script 的链接阶段报告 `error: linker 'link.exe' not found`，尚未进入
+  `catalog_repository` 测试二进制，也没有形成测试通过或测试失败结论；`Get-Command link.exe` 与
+  `where.exe link.exe` 均确认当前进程环境找不到 linker。
+- 根因：本机当前 PowerShell 环境未安装或未加载 Visual Studio C++ Build Tools 的 MSVC linker；这不是
+  source-lock 生产实现或 Rust 测试断言失败。
+- 处理：不修改仓库工具链、不下载替代 linker，也不把未运行结果冒充 GREEN。本地继续执行 PowerShell、
+  格式、策略、范围与 Release Audit 门禁；Rust 定向及完整 Workspace 运行证据由 exact-head 标准
+  GitHub-hosted CI 提供。
+- 验证：`rustc -Vv` 明确 host 为 `x86_64-pc-windows-msvc`，本轮 `LINK_EXE=missing`；PR 合并前必须绑定
+  exact Final Head 的 Windows/macOS/Linux Hosted 结果，若 Hosted Rust 测试失败则按真实产品/合同失败处理。
+- 关联：Issue `#176`、`crates/inputcodex-parity/tests/catalog_repository.rs`、`.github/workflows/ci.yml`。
+
+### 2026-08-08：上游 Release 测试夹具字面量触发产品更新源政策
+
+- 环境：Issue `#176` 为 Rust source-lock 严格反序列化测试补齐嵌套字段，夹具最初写入真实上游
+  `https://github.com/BigPizzaV3/CodexPlusPlus/releases/tag/...`。
+- 现象：完整 PowerShell 合同 `99/99` 通过，但 `Verify-RepositoryPolicy.ps1` 返回
+  `UPDATE_SOURCE_FORBIDDEN`，把测试源码中的上游 Release 字面量视为产品更新源。
+- 根因：仓库政策有意扫描 Rust 源码中的 GitHub Release URL；该 Rust 夹具只验证 JSON 结构和 Release Audit
+  状态，不验证远端 URL 身份，真实上游身份由 `Verify-ReleaseAuditGate.ps1` 的固定值与负例独立覆盖。
+- 处理：仅把 Rust 结构夹具的 `release_url` 改为明确不可联网的 `https://example.invalid/upstream-release/...`；
+  保留 `repository`、archive 结构与所有严格字段类型，不放宽生产政策或 Release Audit 身份验证。
+- 验证：仓库政策必须恢复零违规，完整 CI 合同与 source-lock Rust 定向测试必须继续覆盖结构语义。
+- 关联：Issue `#176`、`crates/inputcodex-parity/tests/catalog_repository.rs`、
+  `scripts/ci/Verify-RepositoryPolicy.ps1`。
+
 ## 记录模板
 
 ```text
